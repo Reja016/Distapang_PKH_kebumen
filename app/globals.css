@@ -1,0 +1,71 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --canvas: #FFFFFF;
+    --canvas-subtle: #F8FAFC;
+    --paper: #FFFFFF;
+    --paper-soft: #F1F5F9;
+    --ink: #0B0F19;
+    --ink-soft: #334155;
+    --ink-faint: #64748B;
+    --line: #E2E8F0;
+    --line-strong: #CBD5E1;
+  }
+
+  .dark {
+    --canvas: #090A0F;
+    --canvas-subtle: #0E1118;
+    --paper: #12151E;
+    --paper-soft: #181C28;
+    --ink: #F8FAFC;
+    --ink-soft: #CBD5E1;
+    --ink-faint: #94A3B8;
+    --line: #262C3D;
+    --line-strong: #384157;
+  }
+}
+
+html, body {
+  overflow-y: scroll !important;
+  scrollbar-gutter: stable !important;
+  overflow-x: hidden !important;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Custom minimal tactile scrollbars */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(148, 163, 184, 0.3);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(148, 163, 184, 0.6);
+}
+
+/* Focus styles for keyboard accessibility */
+:focus-visible {
+  outline: 2px solid #2192FF;
+  outline-offset: 2px;
+}
+
+/* Horizontal tab scroll helper */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
