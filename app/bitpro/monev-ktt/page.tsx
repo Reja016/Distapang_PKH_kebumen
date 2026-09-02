@@ -3,6 +3,7 @@
 import { useState, useRef, useEffect, useMemo } from 'react';
 import Link from 'next/link';
 import * as XLSX from 'xlsx';
+import { usePageAuth } from '@/hooks/usePageAuth';
 import {
   ArrowLeft,
   Download,
@@ -21,6 +22,7 @@ import {
   Filter,
   Calendar,
   Layers,
+  Search,
 } from 'lucide-react';
 
 // --- DATA & TIPE ---
@@ -253,11 +255,18 @@ function KondisiSection({ nomor, title, total, totalLabel, children }: any) {
 }
 
 export default function MonevKTT() {
+  const { isReady, canEdit } = usePageAuth('bitpro', 'monev-ktt');
   const [isClient, setIsClient] = useState(false);
   const [leafletLoaded, setLeafletLoaded] = useState(false);
   
   // TABS: 'form' (Input Pendataan) & 'dashboard' (Peta & Laporan)
-  const [activeTab, setActiveTab] = useState<'form' | 'dashboard'>('form');
+  const [activeTab, setActiveTab] = useState<'form' | 'dashboard'>('dashboard');
+
+  useEffect(() => {
+    if (isReady && canEdit) {
+      setActiveTab('form');
+    }
+  }, [isReady, canEdit]);
 
   // Filter Tahun Bantuan (Untuk mengorganisir input & database)
   const [daftarTahun, setDaftarTahun] = useState<string[]>(DAFTAR_TAHUN);
@@ -284,6 +293,11 @@ export default function MonevKTT() {
   const [formLng, setFormLng] = useState<number | null>(FORM_KOSONG.lng);
   const [formCatatan, setFormCatatan] = useState(FORM_KOSONG.catatan);
   const [isGettingLocation, setIsGettingLocation] = useState(false);
+
+  // Master Data KTT untuk Fitur Live Search
+  const [kttMasterList, setKttMasterList] = useState<Array<{ id: any; namaKelompok: string; kecamatan: string; desa: string; ketua?: string }>>([]);
+  const [showKttSuggestions, setShowKttSuggestions] = useState(false);
+  const kttInputRef = useRef<HTMLDivElement>(null);
 
   const [formKondisi, setFormKondisi] = useState<KondisiTernak>({ ...KONDISI_KOSONG });
   const updateKondisi = (field: keyof KondisiTernak, value: any) => {
@@ -363,9 +377,70 @@ export default function MonevKTT() {
     }
   };
 
+  const fetchKttMaster = async () => {
+    try {
+      const res = await fetch('/api/ktt');
+      const data = await res.json();
+      if (Array.isArray(data)) {
+        setKttMasterList(
+          data.map((k: any) => ({
+            id: k.id,
+            namaKelompok: k.namaKelompok || k.nama_kelompok || '',
+            kecamatan: (k.kecamatan || '').toUpperCase(),
+            desa: (k.desa || '').toUpperCase(),
+            ketua: k.namaKetuaKelompok || k.nama_ketua || '',
+          }))
+        );
+      }
+    } catch (err) {
+      console.error('Gagal mengambil master data KTT untuk live search:', err);
+    }
+  };
+
+  // Filter Live Search KTT
+  const filteredKttSuggestions = useMemo(() => {
+    const q = (formKtt || '').trim().toLowerCase();
+    if (!q) {
+      if (formKec) {
+        return kttMasterList.filter((k) => k.kecamatan === formKec.toUpperCase()).slice(0, 8);
+      }
+      return kttMasterList.slice(0, 8);
+    }
+    return kttMasterList
+      .filter(
+        (k) =>
+          k.namaKelompok.toLowerCase().includes(q) ||
+          k.desa.toLowerCase().includes(q) ||
+          k.kecamatan.toLowerCase().includes(q)
+      )
+      .slice(0, 10);
+  }, [kttMasterList, formKtt, formKec]);
+
+  const handleSelectKtt = (ktt: { namaKelompok: string; kecamatan: string; desa: string }) => {
+    setFormKtt(ktt.namaKelompok);
+    if (ktt.kecamatan && (DATA_WILAYAH as any)[ktt.kecamatan]) {
+      setFormKec(ktt.kecamatan);
+    }
+    if (ktt.desa) {
+      setFormDesa(ktt.desa);
+    }
+    setShowKttSuggestions(false);
+  };
+
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (kttInputRef.current && !kttInputRef.current.contains(e.target as Node)) {
+        setShowKttSuggestions(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
   useEffect(() => {
     setIsClient(true);
     fetchDatabase();
+    fetchKttMaster();
 
     // Muat daftar tahun kustom dari localStorage jika ada
     try {
@@ -697,7 +772,7 @@ export default function MonevKTT() {
     return dbLapangan.filter((d) => d.tahun === tahunBantuanFilter);
   }, [dbLapangan, tahunBantuanFilter]);
 
-  if (!isClient) return null;
+  if (!isClient || !isReady) return null;
   const kecamatanTerpakai = Array.from(new Set(dbLapangan.map((d) => d.kec))).sort();
 
   return (
@@ -810,7 +885,7 @@ export default function MonevKTT() {
         {/* ── 2 VIEW TABS: INPUT PENDATAAN (TAB 1) & PETA LAPORAN (TAB 2) ── */}
         <div className="flex gap-2 border-b border-slate-200 pb-px overflow-x-auto no-scrollbar scroll-smooth -mx-4 px-4 sm:mx-0 sm:px-0">
           {[
-            { key: 'form', label: editingId ? 'Edit Data Lapangan ✏️' : 'Input Pendataan Lapangan', icon: Plus },
+            ...(canEdit ? [{ key: 'form', label: editingId ? 'Edit Data Lapangan ✏️' : 'Input Pendataan Lapangan', icon: Plus }] : []),
             { key: 'dashboard', label: 'Peta & Laporan Lapangan', icon: MapIcon },
           ].map((tab) => {
             const Icon = tab.icon;
@@ -965,17 +1040,80 @@ export default function MonevKTT() {
                   </div>
 
                   <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                    <div>
-                      <label className="block text-xs font-sans font-bold uppercase tracking-wider text-slate-600 mb-1">
-                        Nama KTT <span className="text-red-500">*</span>
-                      </label>
-                      <input
-                        type="text"
-                        placeholder="Contoh: KTT Lembu Sejahtera"
-                        value={formKtt}
-                        onChange={(e) => setFormKtt(e.target.value)}
-                        className="w-full min-h-touch h-10 px-3 rounded-xl border border-slate-200 bg-white text-xs font-bold focus:border-emerald-500 outline-none"
-                      />
+                    <div className="relative" ref={kttInputRef}>
+                      <div className="flex items-center justify-between mb-1">
+                        <label className="block text-xs font-sans font-bold uppercase tracking-wider text-slate-600">
+                          Nama KTT <span className="text-red-500">*</span>
+                        </label>
+                        {formKtt && (
+                          <span className="text-[10px] text-emerald-600 font-bold">
+                            Live Search
+                          </span>
+                        )}
+                      </div>
+                      <div className="relative">
+                        <input
+                          type="text"
+                          placeholder="Cari / ketik nama KTT..."
+                          value={formKtt}
+                          onFocus={() => setShowKttSuggestions(true)}
+                          onChange={(e) => {
+                            setFormKtt(e.target.value);
+                            setShowKttSuggestions(true);
+                          }}
+                          className="w-full min-h-touch h-10 pl-3.5 pr-8 rounded-xl border border-slate-200 bg-white text-xs font-bold focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100 outline-none shadow-2xs"
+                        />
+                        {formKtt ? (
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setFormKtt('');
+                              setShowKttSuggestions(true);
+                            }}
+                            className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 p-1 cursor-pointer"
+                          >
+                            <X size={13} />
+                          </button>
+                        ) : (
+                          <Search size={14} className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-300 pointer-events-none" />
+                        )}
+                      </div>
+
+                      {/* Dropdown Hasil Live Search KTT */}
+                      {showKttSuggestions && filteredKttSuggestions.length > 0 && (
+                        <div className="absolute left-0 right-0 top-full mt-1.5 z-50 bg-white rounded-2xl border border-slate-200 shadow-xl max-h-60 overflow-y-auto divide-y divide-slate-100 animate-in fade-in slide-in-from-top-1 duration-150">
+                          <div className="p-2.5 bg-slate-50 border-b border-slate-100 text-[10px] font-bold text-slate-400 uppercase tracking-wider flex items-center justify-between">
+                            <span>Saran KTT Master ({filteredKttSuggestions.length})</span>
+                            <span className="text-emerald-700">Auto-fill wilayah</span>
+                          </div>
+                          {filteredKttSuggestions.map((item) => (
+                            <div
+                              key={item.id}
+                              onClick={() => handleSelectKtt(item)}
+                              className="p-3 hover:bg-emerald-50/70 transition-colors cursor-pointer flex flex-col gap-0.5 text-left"
+                            >
+                              <div className="flex items-center justify-between">
+                                <span className="font-extrabold text-xs text-slate-900">
+                                  {item.namaKelompok}
+                                </span>
+                                {item.ketua && item.ketua !== '-' && (
+                                  <span className="text-[10px] text-slate-500 font-medium truncate max-w-[120px]">
+                                    Ketua: {item.ketua}
+                                  </span>
+                                )}
+                              </div>
+                              <div className="flex items-center gap-1.5 text-[10px] text-slate-500 font-semibold mt-0.5">
+                                <span className="bg-slate-100 text-slate-700 px-1.5 py-0.5 rounded-md">
+                                  Kec. {item.kecamatan}
+                                </span>
+                                <span className="bg-slate-100 text-slate-700 px-1.5 py-0.5 rounded-md">
+                                  Desa {item.desa}
+                                </span>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      )}
                     </div>
 
                     <div>
@@ -1236,7 +1374,7 @@ export default function MonevKTT() {
                       <th className="px-4 py-3.5 text-right">Sisa Pokok</th>
                       <th className="px-4 py-3.5 text-right">Total Aset</th>
                       <th className="px-4 py-3.5 text-center">GPS &amp; Berkas BA</th>
-                      <th className="px-4 py-3.5 text-center">Aksi</th>
+                      {canEdit && <th className="px-4 py-3.5 text-center">Aksi</th>}
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-100">
@@ -1328,31 +1466,33 @@ export default function MonevKTT() {
                               )}
                             </div>
                           </td>
-                          <td className="px-4 py-3.5 text-center">
-                            <div className="flex items-center justify-center gap-1.5">
-                              <button
-                                onClick={() => handleEditClick(d)}
-                                className="w-8 h-8 rounded-lg border border-slate-200 bg-slate-50 hover:bg-slate-100 text-slate-700 flex items-center justify-center transition-colors cursor-pointer"
-                                title="Edit"
-                              >
-                                <Edit2 size={13} strokeWidth={2.5} />
-                              </button>
-                              <button
-                                onClick={() => handleDeleteClick(d.id)}
-                                className="w-8 h-8 rounded-lg border border-red-200 bg-red-50 hover:bg-red-100 text-red-700 flex items-center justify-center transition-colors cursor-pointer"
-                                title="Hapus"
-                              >
-                                <Trash2 size={13} strokeWidth={2.5} />
-                              </button>
-                            </div>
-                          </td>
+                          {canEdit && (
+                            <td className="px-4 py-3.5 text-center">
+                              <div className="flex items-center justify-center gap-1.5">
+                                <button
+                                  onClick={() => handleEditClick(d)}
+                                  className="w-8 h-8 rounded-lg border border-slate-200 bg-slate-50 hover:bg-slate-100 text-slate-700 flex items-center justify-center transition-colors cursor-pointer"
+                                  title="Edit"
+                                >
+                                  <Edit2 size={13} strokeWidth={2.5} />
+                                </button>
+                                <button
+                                  onClick={() => handleDeleteClick(d.id)}
+                                  className="w-8 h-8 rounded-lg border border-red-200 bg-red-50 hover:bg-red-100 text-red-700 flex items-center justify-center transition-colors cursor-pointer"
+                                  title="Hapus"
+                                >
+                                  <Trash2 size={13} strokeWidth={2.5} />
+                                </button>
+                              </div>
+                            </td>
+                          )}
                         </tr>
                       );
                     })}
 
                     {dbLapanganFiltered.length === 0 && (
                       <tr>
-                        <td colSpan={10} className="px-5 py-10 text-center text-slate-400 font-medium">
+                        <td colSpan={canEdit ? 10 : 9} className="px-5 py-10 text-center text-slate-400 font-medium">
                           Belum ada data monev lapangan tersimpan untuk Tahun Bantuan {tahunBantuanFilter}.
                         </td>
                       </tr>

@@ -3,6 +3,7 @@
 import { useState, useEffect, useMemo } from 'react';
 import Link from 'next/link';
 import * as XLSX from 'xlsx';
+import { usePageAuth } from '@/hooks/usePageAuth';
 import {
   ArrowLeft,
   Plus,
@@ -89,6 +90,7 @@ const INITIAL_NKV_DATA: NKVRecord[] = [
 ];
 
 export default function NKVPage() {
+  const { isReady, canEdit } = usePageAuth('kesmavet', 'nkv');
   const [dataNkv, setDataNkv] = useState<NKVRecord[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -304,6 +306,8 @@ export default function NKVPage() {
     return Array.from(new Set(dataNkv.map((d) => d.jenisUsaha).filter(Boolean)));
   }, [dataNkv]);
 
+  if (loading || !isReady) return null;
+
   return (
     <div className="min-h-screen bg-purple-50/30 text-slate-900 font-sans selection:bg-purple-600 selection:text-white pb-20">
       
@@ -342,13 +346,15 @@ export default function NKVPage() {
               <Download size={16} strokeWidth={2.5} />
               <span className="hidden sm:inline">Export Excel</span>
             </button>
-            <button
-              onClick={handleOpenAdd}
-              className="min-h-touch min-w-touch h-11 px-4 rounded-xl bg-purple-600 hover:bg-purple-700 text-white text-xs sm:text-sm font-bold flex items-center gap-2 transition-all shadow-xs cursor-pointer"
-            >
-              <Plus size={16} strokeWidth={2.5} />
-              <span>Tambah Data NKV</span>
-            </button>
+            {canEdit && (
+              <button
+                onClick={handleOpenAdd}
+                className="min-h-touch min-w-touch h-11 px-4 rounded-xl bg-purple-600 hover:bg-purple-700 text-white text-xs sm:text-sm font-bold flex items-center gap-2 transition-all shadow-xs cursor-pointer"
+              >
+                <Plus size={16} strokeWidth={2.5} />
+                <span>Tambah Data NKV</span>
+              </button>
+            )}
           </div>
 
         </div>
@@ -469,13 +475,13 @@ export default function NKVPage() {
                   <th className="p-3.5 border-r border-slate-200">Pelatihan Higiene Sanitasi</th>
                   <th className="p-3.5 border-r border-slate-200">Pengeluaran Rekomendasi</th>
                   <th className="p-3.5 border-r border-slate-200">Keterangan</th>
-                  <th className="p-3.5 text-center sticky right-0 bg-slate-50 z-10">Aksi</th>
+                  {canEdit && <th className="p-3.5 text-center sticky right-0 bg-slate-50 z-10">Aksi</th>}
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100 text-slate-800 font-medium">
                 {filteredData.length === 0 ? (
                   <tr>
-                    <td colSpan={12} className="p-8 text-center text-slate-400 font-medium text-xs">
+                    <td colSpan={canEdit ? 12 : 11} className="p-8 text-center text-slate-400 font-medium text-xs">
                       Tidak ditemukan data Nomor Kontrol Veteriner (NKV).
                     </td>
                   </tr>
@@ -525,24 +531,26 @@ export default function NKVPage() {
                       <td className="p-3.5 border-r border-slate-100 text-slate-500 max-w-[220px] truncate" title={row.keterangan}>
                         {row.keterangan || '-'}
                       </td>
-                      <td className="p-3.5 text-center sticky right-0 bg-white z-10 border-l border-slate-100">
-                        <div className="flex items-center justify-center gap-1.5">
-                          <button
-                            onClick={() => handleOpenEdit(row)}
-                            title="Edit Data"
-                            className="w-8 h-8 rounded-lg bg-slate-100 hover:bg-purple-100 hover:text-purple-800 text-slate-600 flex items-center justify-center transition-colors cursor-pointer"
-                          >
-                            <Edit2 size={13} strokeWidth={2.5} />
-                          </button>
-                          <button
-                            onClick={() => handleDelete(row.id)}
-                            title="Hapus Data"
-                            className="w-8 h-8 rounded-lg bg-red-50 hover:bg-red-100 text-red-600 flex items-center justify-center transition-colors cursor-pointer"
-                          >
-                            <Trash2 size={13} strokeWidth={2.5} />
-                          </button>
-                        </div>
-                      </td>
+                      {canEdit && (
+                        <td className="p-3.5 text-center sticky right-0 bg-white z-10 border-l border-slate-100">
+                          <div className="flex items-center justify-center gap-1.5">
+                            <button
+                              onClick={() => handleOpenEdit(row)}
+                              title="Edit Data"
+                              className="w-8 h-8 rounded-lg bg-slate-100 hover:bg-purple-100 hover:text-purple-800 text-slate-600 flex items-center justify-center transition-colors cursor-pointer"
+                            >
+                              <Edit2 size={13} strokeWidth={2.5} />
+                            </button>
+                            <button
+                              onClick={() => handleDelete(row.id)}
+                              title="Hapus Data"
+                              className="w-8 h-8 rounded-lg bg-red-50 hover:bg-red-100 text-red-600 flex items-center justify-center transition-colors cursor-pointer"
+                            >
+                              <Trash2 size={13} strokeWidth={2.5} />
+                            </button>
+                          </div>
+                        </td>
+                      )}
                     </tr>
                   ))
                 )}

@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import * as XLSX from 'xlsx';
+import { usePageAuth } from '@/hooks/usePageAuth';
 import {
   ArrowLeft,
   Download,
@@ -1529,6 +1530,7 @@ const FIELD_LABELS: Record<string, string> = {
 };
 
 export default function RphTphTpuPage() {
+  const { isReady, canEdit } = usePageAuth('kesmavet', 'rph-tph-tpu');
   const [dataRph, setDataRph] = useState<RphItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
@@ -1818,6 +1820,8 @@ export default function RphTphTpuPage() {
       (d.sertifikat_nkv || '').toLowerCase().includes('rph')
   ).length;
 
+  if (loading || !isReady) return null;
+
   return (
     <div className="min-h-screen bg-slate-50 text-slate-900 font-sans selection:bg-purple-600 selection:text-white pb-20">
       
@@ -1858,15 +1862,17 @@ export default function RphTphTpuPage() {
               <Download size={16} strokeWidth={2.5} />
               <span className="hidden sm:inline">Export Excel</span>
             </button>
-            <button
-              onClick={openAddModal}
-              title="Tambah Unit"
-              aria-label="Tambah Unit"
-              className="min-h-touch min-w-touch h-11 w-11 sm:w-auto sm:px-5 rounded-xl bg-purple-600 text-white text-xs sm:text-sm font-bold flex items-center justify-center sm:gap-2 hover:bg-purple-700 transition-all shadow-xs cursor-pointer"
-            >
-              <Plus size={16} strokeWidth={2.5} />
-              <span className="hidden sm:inline">Tambah Unit</span>
-            </button>
+            {canEdit && (
+              <button
+                onClick={openAddModal}
+                title="Tambah Unit"
+                aria-label="Tambah Unit"
+                className="min-h-touch min-w-touch h-11 w-11 sm:w-auto sm:px-5 rounded-xl bg-purple-600 text-white text-xs sm:text-sm font-bold flex items-center justify-center sm:gap-2 hover:bg-purple-700 transition-all shadow-xs cursor-pointer"
+              >
+                <Plus size={16} strokeWidth={2.5} />
+                <span className="hidden sm:inline">Tambah Unit</span>
+              </button>
+            )}
           </div>
 
         </div>
@@ -1960,7 +1966,7 @@ export default function RphTphTpuPage() {
                   <th className="p-3.5 text-center">STATUS HALAL</th>
                   <th className="p-3.5 text-center">STATUS NKV</th>
                   <th className="p-3.5 text-center">DOKUMEN TERLAMPIR</th>
-                  <th className="p-3.5 text-center w-24 sticky right-0 bg-slate-50">AKSI</th>
+                  {canEdit && <th className="p-3.5 text-center w-24 sticky right-0 bg-slate-50">AKSI</th>}
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100 text-slate-800">
@@ -2008,7 +2014,7 @@ export default function RphTphTpuPage() {
                         <td className="p-3.5 text-center">
                           {isNKV ? (
                             <span className="px-2.5 py-1 rounded-full text-xs font-extrabold bg-blue-100 text-blue-800 border border-blue-300">
-                              {item.sertifikat_nkv && !item.sertifikat_nkv.toLowerCase().includes('belum') ? item.sertifikat_nkv : 'Ada NKV'}
+                              ✓ NKV
                             </span>
                           ) : (
                             <span className="text-slate-500 font-bold text-xs">Belum</span>
@@ -2061,47 +2067,49 @@ export default function RphTphTpuPage() {
                             )}
                           </div>
                         </td>
-                        <td className="p-3.5 text-center sticky right-0 bg-white shadow-[-5px_0_10px_rgba(0,0,0,0.03)]">
-                          <div className="flex items-center justify-center gap-1">
-                            <button
-                              onClick={() => openEditModal(item)}
-                              className="min-h-touch h-7 w-7 rounded-lg border border-slate-200 bg-slate-50 text-slate-600 hover:bg-slate-100 flex items-center justify-center transition-colors"
-                              title="Edit Data"
-                            >
-                              <Edit2 size={12} />
-                            </button>
-                            {confirmDeleteNo === item.no ? (
-                              <div className="flex items-center gap-1">
-                                <button
-                                  onClick={() => handleDelete(item.no)}
-                                  className="h-7 px-2 rounded-lg bg-red-600 text-white font-bold text-[10px]"
-                                >
-                                  Ya
-                                </button>
-                                <button
-                                  onClick={() => setConfirmDeleteNo(null)}
-                                  className="h-7 px-2 rounded-lg bg-slate-200 text-slate-700 font-bold text-[10px]"
-                                >
-                                  Batal
-                                </button>
-                              </div>
-                            ) : (
+                        {canEdit && (
+                          <td className="p-3.5 text-center sticky right-0 bg-white shadow-[-5px_0_10px_rgba(0,0,0,0.03)]">
+                            <div className="flex items-center justify-center gap-1">
                               <button
-                                onClick={() => setConfirmDeleteNo(item.no)}
-                                className="min-h-touch h-7 w-7 rounded-lg border border-red-200 bg-red-50 text-red-600 hover:bg-red-100 flex items-center justify-center transition-colors"
-                                title="Hapus Data"
+                                onClick={() => openEditModal(item)}
+                                className="min-h-touch h-7 w-7 rounded-lg border border-slate-200 bg-slate-50 text-slate-600 hover:bg-slate-100 flex items-center justify-center transition-colors"
+                                title="Edit Data"
                               >
-                                <Trash2 size={12} />
+                                <Edit2 size={12} />
                               </button>
-                            )}
-                          </div>
-                        </td>
+                              {confirmDeleteNo === item.no ? (
+                                <div className="flex items-center gap-1">
+                                  <button
+                                    onClick={() => handleDelete(item.no)}
+                                    className="h-7 px-2 rounded-lg bg-red-600 text-white font-bold text-[10px]"
+                                  >
+                                    Ya
+                                  </button>
+                                  <button
+                                    onClick={() => setConfirmDeleteNo(null)}
+                                    className="h-7 px-2 rounded-lg bg-slate-200 text-slate-700 font-bold text-[10px]"
+                                  >
+                                    Batal
+                                  </button>
+                                </div>
+                              ) : (
+                                <button
+                                  onClick={() => setConfirmDeleteNo(item.no)}
+                                  className="min-h-touch h-7 w-7 rounded-lg border border-red-200 bg-red-50 text-red-600 hover:bg-red-100 flex items-center justify-center transition-colors"
+                                  title="Hapus Data"
+                                >
+                                  <Trash2 size={12} />
+                                </button>
+                              )}
+                            </div>
+                          </td>
+                        )}
                       </tr>
                     );
                   })
                 ) : (
                   <tr>
-                    <td colSpan={11} className="p-12 text-center text-slate-400 font-medium">
+                    <td colSpan={canEdit ? 11 : 10} className="p-12 text-center text-slate-400 font-medium">
                       Pencarian &quot;{searchTerm}&quot; tidak ditemukan.
                     </td>
                   </tr>

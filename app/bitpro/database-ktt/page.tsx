@@ -68,19 +68,38 @@ const KELAS_ORDER = ["Pemula", "Lanjut", "Madya", "Utama"];
 const PAGE_SIZE = 10;
 
 function KelasBadge({ kelas }: { kelas: string }) {
-  if (!kelas) {
+  if (!kelas || kelas === '-') {
     return <span className="text-xs text-slate-400 italic">Belum diklasifikasi</span>;
   }
-  const isHigh = kelas === 'Madya' || kelas === 'Utama';
+
+  const k = kelas.trim().toLowerCase();
+
+  // Warna berbeda untuk setiap kelas namun lembut/tidak mencolok (Soft & Elegant)
+  let badgeStyle = "bg-slate-100 text-slate-700 border-slate-200";
+  let dotStyle = "bg-slate-400";
+
+  if (k.includes('pemula')) {
+    badgeStyle = "bg-sky-50/90 text-sky-800 border-sky-200";
+    dotStyle = "bg-sky-500";
+  } else if (k.includes('lanjut')) {
+    badgeStyle = "bg-emerald-50/90 text-emerald-800 border-emerald-200";
+    dotStyle = "bg-emerald-500";
+  } else if (k.includes('madya')) {
+    badgeStyle = "bg-amber-50/90 text-amber-800 border-amber-200";
+    dotStyle = "bg-amber-500";
+  } else if (k.includes('utama')) {
+    badgeStyle = "bg-purple-50/90 text-purple-800 border-purple-200";
+    dotStyle = "bg-purple-500";
+  } else if (k.includes('mandiri')) {
+    badgeStyle = "bg-indigo-50/90 text-indigo-800 border-indigo-200";
+    dotStyle = "bg-indigo-500";
+  }
+
   return (
     <span
-      className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold font-sans border ${
-        isHigh
-          ? 'bg-amber-50 text-amber-700 border-amber-200'
-          : 'bg-slate-100 text-slate-700 border-slate-200'
-      }`}
+      className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-bold font-sans border shadow-2xs ${badgeStyle}`}
     >
-      <span className={`w-1.5 h-1.5 rounded-full ${isHigh ? 'bg-amber-500' : 'bg-slate-400'}`} />
+      <span className={`w-1.5 h-1.5 rounded-full ${dotStyle}`} />
       {kelas}
     </span>
   );
@@ -132,7 +151,9 @@ export default function DatabaseKTTPage() {
 
   const desaList = useMemo(() => {
     if (!filterKecamatan) return [];
-    const desas = data.filter(d => d.kecamatan === filterKecamatan).map(d => d.desa);
+    const desas = data
+      .filter(d => (d.kecamatan || '').trim().toUpperCase() === filterKecamatan.trim().toUpperCase())
+      .map(d => d.desa);
     return Array.from(new Set(desas)).sort();
   }, [data, filterKecamatan]);
 
@@ -145,8 +166,8 @@ export default function DatabaseKTTPage() {
       const nmDesa = row.desa ? row.desa.toLowerCase() : "";
 
       const matchSearch = !q || namaKel.includes(q) || namaKet.includes(q) || nmDesa.includes(q) || nmrReg.includes(q);
-      const matchKecamatan = !filterKecamatan || row.kecamatan === filterKecamatan;
-      const matchDesa = !filterDesa || row.desa === filterDesa;
+      const matchKecamatan = !filterKecamatan || (row.kecamatan || '').trim().toUpperCase() === filterKecamatan.trim().toUpperCase();
+      const matchDesa = !filterDesa || (row.desa || '').trim().toUpperCase() === filterDesa.trim().toUpperCase();
       const matchJenis = !filterJenis || row.jenisKelompok === filterJenis;
       return matchSearch && matchKecamatan && matchDesa && matchJenis;
     });
@@ -160,16 +181,17 @@ export default function DatabaseKTTPage() {
     const base = data.filter((row) => !filterJenis || row.jenisKelompok === filterJenis);
     const map = new Map<string, number>();
     for (const row of base) {
-      map.set(row.kecamatan, (map.get(row.kecamatan) || 0) + 1);
+      const k = (row.kecamatan || '').trim().toUpperCase();
+      map.set(k, (map.get(k) || 0) + 1);
     }
     return KECAMATAN_OPTIONS.map((k) => ({
       kecamatan: k,
-      jumlah: map.get(k) || 0,
+      jumlah: map.get(k.trim().toUpperCase()) || 0,
     }));
   }, [data, filterJenis]);
 
   function pilihKecamatan(kec: string) {
-    if (filterKecamatan !== kec) {
+    if (filterKecamatan.trim().toUpperCase() !== kec.trim().toUpperCase()) {
       setFilterKecamatan(kec);
       setFilterDesa("");
     } else {
@@ -347,7 +369,7 @@ export default function DatabaseKTTPage() {
               </button>
 
               {kecamatanIndex.map(({ kecamatan, jumlah }) => {
-                const active = filterKecamatan === kecamatan;
+                const active = filterKecamatan.trim().toUpperCase() === kecamatan.trim().toUpperCase();
                 return (
                   <button
                     key={kecamatan}

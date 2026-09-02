@@ -1,17 +1,9 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import Link from 'next/link';
 import * as XLSX from 'xlsx';
 import { ArrowLeft, Search, Download } from 'lucide-react';
-
-const TOTAL_ROW = [
-  4986, 6337, 6078, 8725, 7291, 31557, 64996, 0, 0, 0, 0, 0, 0, 0, 12, 14, 13,
-  23, 38, 70, 170, 4, 3, 28, 17, 112, 110, 274, 8742, 12278, 11846, 13692,
-  14738, 39959, 101255, 2484, 3385, 2721, 3357, 3919, 9605, 25552, 137, 184,
-  108, 195, 37, 119, 780, 864412, 73976, 2636000, 70808, 87200, 81573, 2153,
-  54168, 1303, 2538, 3907,
-];
 
 const HEADERS = [
   'AJ Sapi', 'AB Sapi', 'MJ Sapi', 'MB Sapi', 'DJ Sapi', 'DB Sapi', 'Total Sapi Potong',
@@ -22,18 +14,20 @@ const HEADERS = [
   'AJ Domba', 'AB Domba', 'MJ Domba', 'MB Domba', 'DJ Domba', 'DB Domba', 'Total Domba',
   'AJ Babi', 'AB Babi', 'MJ Babi', 'MB Babi', 'DJ Babi', 'DB Babi', 'Total Babi',
   'Ayam Kampung', 'Ayam Petelur', 'Ayam Broiler', 'Puyuh', 'Itik', 'Entog', 'Angsa', 'Merpati',
-  'Kelinci Jantan', 'Kelinci Betina',
+  'Kelinci Jantan', 'Kelinci Betina', 'Total Kelinci'
 ];
 
 export default function Populasi2025() {
   const [search, setSearch] = useState('');
+  const [selectedTw, setSelectedTw] = useState('4');
   const [dataPopulasi, setDataPopulasi] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await fetch('/api/get-populasi');
+        setIsLoading(true);
+        const response = await fetch(`/api/get-populasi?tw=${selectedTw}`);
         const data = await response.json();
         setDataPopulasi(Array.isArray(data) ? data : []);
       } catch (error) {
@@ -44,15 +38,34 @@ export default function Populasi2025() {
       }
     };
     fetchData();
-  }, []);
+  }, [selectedTw]);
 
-  const filteredData = Array.isArray(dataPopulasi)
-    ? dataPopulasi.filter(
-        (row) =>
-          (row.kec || '').toLowerCase().includes(search.toLowerCase()) ||
-          (row.desa || '').toLowerCase().includes(search.toLowerCase())
-      )
-    : [];
+  const filteredData = useMemo(() => {
+    if (!Array.isArray(dataPopulasi)) return [];
+    const q = search.trim().toLowerCase();
+    if (!q) return dataPopulasi;
+    return dataPopulasi.filter(
+      (row) =>
+        (row.kec || '').toLowerCase().includes(q) ||
+        (row.desa || '').toLowerCase().includes(q)
+    );
+  }, [dataPopulasi, search]);
+
+  // Total Kabupaten dinamis dihitung otomatis dari database
+  const dynamicTotalRow = useMemo(() => {
+    if (!filteredData || filteredData.length === 0) return Array(HEADERS.length).fill(0);
+    const totals = Array(HEADERS.length).fill(0);
+    filteredData.forEach((row) => {
+      if (Array.isArray(row.v)) {
+        row.v.forEach((val: any, idx: number) => {
+          if (idx < totals.length) {
+            totals[idx] += Number(val) || 0;
+          }
+        });
+      }
+    });
+    return totals;
+  }, [filteredData]);
 
   const handleExportExcel = () => {
     if (!dataPopulasi || dataPopulasi.length === 0) return alert('Belum ada data populasi untuk diekspor!');
@@ -72,8 +85,8 @@ export default function Populasi2025() {
 
     const ws = XLSX.utils.json_to_sheet(rows);
     const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, 'Populasi_2025');
-    XLSX.writeFile(wb, `Data_Populasi_Ternak_2025_${new Date().toISOString().split('T')[0]}.xlsx`);
+    XLSX.utils.book_append_sheet(wb, ws, `Populasi_2025_TW${selectedTw}`);
+    XLSX.writeFile(wb, `Data_Populasi_Ternak_2025_TW${selectedTw}_${new Date().toISOString().split('T')[0]}.xlsx`);
   };
 
   return (
@@ -101,12 +114,23 @@ export default function Populasi2025() {
                 <span className="text-xs font-bold text-emerald-700 whitespace-nowrap">Populasi 2025</span>
               </div>
               <h1 className="text-base sm:text-xl font-bold text-slate-900 tracking-tight leading-tight truncate">
-                Data Populasi Ternak TW 4 Tahun 2025
+                Data Populasi Ternak TW {selectedTw} Tahun 2025
               </h1>
             </div>
           </div>
 
           <div className="flex items-center gap-2 shrink-0">
+            <select
+              value={selectedTw}
+              onChange={(e) => setSelectedTw(e.target.value)}
+              className="min-h-touch h-11 px-3 rounded-xl border border-emerald-200 bg-emerald-50 text-emerald-900 text-xs sm:text-sm font-bold focus:outline-none focus:border-emerald-600 shadow-xs"
+            >
+              <option value="1">Triwulan 1 (TW 1)</option>
+              <option value="2">Triwulan 2 (TW 2)</option>
+              <option value="3">Triwulan 3 (TW 3)</option>
+              <option value="4">Triwulan 4 (TW 4)</option>
+            </select>
+
             <button
               onClick={handleExportExcel}
               title="Export Excel"
@@ -138,18 +162,18 @@ export default function Populasi2025() {
         <div className="rounded-2xl border border-slate-200 bg-white shadow-sm overflow-hidden">
           
           <div className="p-4 border-b border-slate-200 flex items-center justify-between bg-slate-50/50">
-            <h2 className="font-bold text-sm text-slate-900">
-              Tabel Data Populasi Lengkap (16 Komoditas Ternak)
-            </h2>
-            <span className="font-sans text-xs text-slate-500">
-              Menampilkan {filteredData.length} baris desa terdaftar
+            <span className="text-xs font-bold text-slate-700 font-sans">
+              Menampilkan {filteredData.length} Desa dari Database MySQL (`populasi`)
+            </span>
+            <span className="text-xs font-semibold text-emerald-700 bg-emerald-50 px-3 py-1 rounded-full border border-emerald-100">
+              Sinkronisasi Live
             </span>
           </div>
 
           {isLoading ? (
             <div className="flex justify-center items-center h-64">
               <span className="font-sans text-xs text-slate-500 uppercase tracking-widest animate-pulse">
-                Memuat data populasi ternak 2025...
+                Memuat data populasi ternak 2025 dari database...
               </span>
             </div>
           ) : (
@@ -169,7 +193,7 @@ export default function Populasi2025() {
                   {filteredData.map((row, idx) => (
                     <tr key={idx} className="hover:bg-slate-50/80 transition-colors">
                       <td className="p-3 text-center font-sans text-slate-400 sticky left-0 bg-white z-10 border-r border-slate-100">
-                        {row.no}
+                        {row.no || idx + 1}
                       </td>
                       <td className="p-3 font-semibold text-slate-900 sticky left-[48px] bg-white z-10 border-r border-slate-100">
                         {row.kec}
@@ -190,7 +214,7 @@ export default function Populasi2025() {
                     <td colSpan={3} className="p-3 text-center sticky left-0 bg-slate-100 z-30 border-r border-slate-300 font-sans uppercase">
                       TOTAL KABUPATEN
                     </td>
-                    {TOTAL_ROW.map((val, i) => (
+                    {dynamicTotalRow.map((val: number, i: number) => (
                       <td key={i} className="p-3 text-right font-sans text-emerald-600 font-bold border-r border-slate-300">
                         {Number(val).toLocaleString('id-ID')}
                       </td>

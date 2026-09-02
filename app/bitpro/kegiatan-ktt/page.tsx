@@ -3,6 +3,7 @@
 import { useState, useEffect, useMemo, useRef } from 'react';
 import Link from 'next/link';
 import * as XLSX from 'xlsx';
+import { usePageAuth } from '@/hooks/usePageAuth';
 import {
   ArrowLeft,
   Plus,
@@ -73,6 +74,7 @@ const NAMA_BULAN = [
 ];
 
 export default function KegiatanKTTPage() {
+  const { isReady, canEdit } = usePageAuth('bitpro', 'kegiatan-ktt');
   const [listKegiatan, setListKegiatan] = useState<KegiatanKTT[]>([]);
   const [listKTT, setListKTT] = useState<KTTMaster[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -472,7 +474,8 @@ export default function KegiatanKTTPage() {
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-10 space-y-8">
         
         {/* ── FORM INLINE CATAT KEGIATAN KTT BARU (POSISI UTAMA / PALING ATAS) ── */}
-        <section id="form-catat-kegiatan" className="bg-white rounded-3xl border border-slate-200 shadow-sm p-6 sm:p-8 space-y-6">
+        {canEdit && (
+          <section id="form-catat-kegiatan" className="bg-white rounded-3xl border border-slate-200 shadow-sm p-6 sm:p-8 space-y-6">
           <div className="flex items-center justify-between pb-4 border-b border-slate-100">
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 rounded-2xl bg-emerald-600 text-white flex items-center justify-center font-bold shadow-xs">
@@ -801,8 +804,9 @@ export default function KegiatanKTTPage() {
               </button>
             </div>
 
-          </form>
-        </section>
+            </form>
+          </section>
+        )}
         
         {/* KPI Metrics */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
@@ -1122,22 +1126,24 @@ export default function KegiatanKTTPage() {
                         {item.tanggal ? item.tanggal.substring(0, 10) : '-'}
                       </span>
 
-                      <div className="flex items-center gap-1 ml-2">
-                        <button
-                          onClick={() => handleEdit(item)}
-                          className="w-8 h-8 rounded-lg border border-slate-200 bg-slate-50 hover:bg-slate-100 text-slate-600 flex items-center justify-center transition-colors cursor-pointer"
-                          title="Edit"
-                        >
-                          <Edit2 size={14} strokeWidth={2.5} />
-                        </button>
-                        <button
-                          onClick={() => handleDelete(item.id)}
-                          className="w-8 h-8 rounded-lg border border-red-200 bg-red-50 hover:bg-red-100 text-red-600 flex items-center justify-center transition-colors cursor-pointer"
-                          title="Hapus"
-                        >
-                          <Trash2 size={14} strokeWidth={2.5} />
-                        </button>
-                      </div>
+                      {canEdit && (
+                        <div className="flex items-center gap-1 ml-2">
+                          <button
+                            onClick={() => handleEdit(item)}
+                            className="w-8 h-8 rounded-lg border border-slate-200 bg-slate-50 hover:bg-slate-100 text-slate-600 flex items-center justify-center transition-colors cursor-pointer"
+                            title="Edit"
+                          >
+                            <Edit2 size={14} strokeWidth={2.5} />
+                          </button>
+                          <button
+                            onClick={() => handleDelete(item.id)}
+                            className="w-8 h-8 rounded-lg border border-red-200 bg-red-50 hover:bg-red-100 text-red-600 flex items-center justify-center transition-colors cursor-pointer"
+                            title="Hapus"
+                          >
+                            <Trash2 size={14} strokeWidth={2.5} />
+                          </button>
+                        </div>
+                      )}
                     </div>
                   </div>
 

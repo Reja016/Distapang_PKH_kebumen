@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import * as XLSX from 'xlsx';
+import { usePageAuth } from '@/hooks/usePageAuth';
 import {
   ArrowLeft,
   Search,
@@ -133,6 +134,7 @@ function getFieldLabels(key: CommodityKey) {
 }
 
 export default function DataFarmPage() {
+  const { isReady, canEdit } = usePageAuth('bitpro', 'data-farm');
   const [dataBroiler, setDataBroiler] = useState<any[]>([]);
   const [dataPetelur, setDataPetelur] = useState<any[]>([]);
   const [dataGeneral, setDataGeneral] = useState<any[]>([]);
@@ -271,7 +273,7 @@ export default function DataFarmPage() {
     XLSX.writeFile(wb, `Data_Farm_Peternakan_${new Date().toISOString().split('T')[0]}.xlsx`);
   };
 
-  if (isLoading) {
+  if (isLoading || !isReady) {
     return (
       <div className="min-h-screen bg-slate-50 flex items-center justify-center font-sans">
         <div className="flex flex-col items-center gap-3">
@@ -458,13 +460,15 @@ export default function DataFarmPage() {
                       />
                     </div>
 
-                    <button
-                      onClick={openAddModal}
-                      className="min-h-touch h-10 px-4 rounded-xl bg-emerald-600 text-white text-xs font-bold flex items-center gap-1.5 hover:bg-emerald-600/90 active:scale-95 transition-all shadow-sm shrink-0"
-                    >
-                      <Plus size={16} />
-                      <span>Tambah Farm</span>
-                    </button>
+                    {canEdit && (
+                      <button
+                        onClick={openAddModal}
+                        className="min-h-touch h-10 px-4 rounded-xl bg-emerald-600 text-white text-xs font-bold flex items-center gap-1.5 hover:bg-emerald-600/90 active:scale-95 transition-all shadow-sm shrink-0"
+                      >
+                        <Plus size={16} />
+                        <span>Tambah Farm</span>
+                      </button>
+                    )}
                   </div>
                 </div>
 
@@ -479,7 +483,7 @@ export default function DataFarmPage() {
                           <th className="p-4">KECAMATAN</th>
                           <th className="p-4">DESA</th>
                           <th className="p-4 text-right">KAPASITAS KANDANG</th>
-                          <th className="p-4 text-center w-28">AKSI</th>
+                          {canEdit && <th className="p-4 text-center w-28">AKSI</th>}
                         </tr>
                       </thead>
                       <tbody className="divide-y divide-slate-200 text-slate-800">
@@ -495,20 +499,22 @@ export default function DataFarmPage() {
                               <td className="p-4 text-right font-sans font-bold text-emerald-600">
                                 {item.kapasitas_kandang || '-'}
                               </td>
-                              <td className="p-4 text-center">
-                                <button
-                                  onClick={() => openEditModal(item)}
-                                  className="min-h-touch h-8 px-3 rounded-lg border border-slate-200 bg-slate-50 hover:bg-slate-100 text-slate-700 text-xs font-bold inline-flex items-center gap-1.5 transition-colors"
-                                >
-                                  <Edit2 size={13} />
-                                  <span>Edit</span>
-                                </button>
-                              </td>
+                              {canEdit && (
+                                <td className="p-4 text-center">
+                                  <button
+                                    onClick={() => openEditModal(item)}
+                                    className="min-h-touch h-8 px-3 rounded-lg border border-slate-200 bg-slate-50 hover:bg-slate-100 text-slate-700 text-xs font-bold inline-flex items-center gap-1.5 transition-colors cursor-pointer"
+                                  >
+                                    <Edit2 size={13} />
+                                    <span>Edit</span>
+                                  </button>
+                                </td>
+                              )}
                             </tr>
                           ))
                         ) : (
                           <tr>
-                            <td colSpan={6} className="p-12 text-center text-slate-400 font-medium text-sm">
+                            <td colSpan={canEdit ? 6 : 5} className="p-12 text-center text-slate-400 font-medium text-sm">
                               Tidak ada data farm yang cocok dengan pencarian &quot;{searchTerm}&quot;.
                             </td>
                           </tr>

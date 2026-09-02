@@ -3,6 +3,7 @@
 import { useState, useEffect, useMemo } from 'react';
 import Link from 'next/link';
 import * as XLSX from 'xlsx';
+import { usePageAuth } from '@/hooks/usePageAuth';
 import {
   ArrowLeft,
   Plus,
@@ -88,6 +89,7 @@ const INITIAL_KENDARAAN_DATA: KendaraanRecord[] = [
 ];
 
 export default function InventarisKendaraanPage() {
+  const { isReady, canEdit } = usePageAuth('aset', 'inventaris-kendaraan');
   const [dataKendaraan, setDataKendaraan] = useState<KendaraanRecord[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -284,6 +286,8 @@ export default function InventarisKendaraanPage() {
     });
   }, [dataKendaraan, searchTerm]);
 
+  if (loading || !isReady) return null;
+
   return (
     <div className="min-h-screen bg-amber-50/30 text-slate-900 font-sans selection:bg-amber-600 selection:text-white pb-20">
       
@@ -322,13 +326,15 @@ export default function InventarisKendaraanPage() {
               <Download size={16} strokeWidth={2.5} />
               <span className="hidden sm:inline">Export Excel</span>
             </button>
-            <button
-              onClick={handleOpenAdd}
-              className="min-h-touch min-w-touch h-11 px-4 rounded-xl bg-amber-600 hover:bg-amber-700 text-white text-xs sm:text-sm font-bold flex items-center gap-2 transition-all shadow-xs cursor-pointer"
-            >
-              <Plus size={16} strokeWidth={2.5} />
-              <span>Tambah Kendaraan</span>
-            </button>
+            {canEdit && (
+              <button
+                onClick={handleOpenAdd}
+                className="min-h-touch min-w-touch h-11 px-4 rounded-xl bg-amber-600 hover:bg-amber-700 text-white text-xs sm:text-sm font-bold flex items-center gap-2 transition-all shadow-xs cursor-pointer"
+              >
+                <Plus size={16} strokeWidth={2.5} />
+                <span>Tambah Kendaraan</span>
+              </button>
+            )}
           </div>
 
         </div>
@@ -430,13 +436,13 @@ export default function InventarisKendaraanPage() {
                   <th className="p-3.5 border-r border-slate-200 text-center bg-emerald-50/50 text-emerald-900">Nopol Baru</th>
                   <th className="p-3.5 border-r border-slate-200 font-mono">Nomor Mesin</th>
                   <th className="p-3.5 border-r border-slate-200 font-mono">Nomor Rangka</th>
-                  <th className="p-3.5 text-center sticky right-0 bg-slate-50 z-10">Aksi</th>
+                  {canEdit && <th className="p-3.5 text-center sticky right-0 bg-slate-50 z-10">Aksi</th>}
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100 text-slate-800 font-medium">
                 {filteredData.length === 0 ? (
                   <tr>
-                    <td colSpan={9} className="p-8 text-center text-slate-400 font-medium text-xs">
+                    <td colSpan={canEdit ? 9 : 8} className="p-8 text-center text-slate-400 font-medium text-xs">
                       Tidak ditemukan data kendaraan dinas yang cocok.
                     </td>
                   </tr>
@@ -471,24 +477,26 @@ export default function InventarisKendaraanPage() {
                       <td className="p-3.5 font-mono text-xs font-bold text-slate-700 border-r border-slate-100">
                         {row.nomorRangka || '-'}
                       </td>
-                      <td className="p-3.5 text-center sticky right-0 bg-white z-10 border-l border-slate-100">
-                        <div className="flex items-center justify-center gap-1.5">
-                          <button
-                            onClick={() => handleOpenEdit(row)}
-                            title="Edit Data Kendaraan"
-                            className="w-8 h-8 rounded-lg bg-slate-100 hover:bg-amber-100 hover:text-amber-800 text-slate-600 flex items-center justify-center transition-colors cursor-pointer"
-                          >
-                            <Edit2 size={13} strokeWidth={2.5} />
-                          </button>
-                          <button
-                            onClick={() => handleDelete(row.id)}
-                            title="Hapus Data Kendaraan"
-                            className="w-8 h-8 rounded-lg bg-red-50 hover:bg-red-100 text-red-600 flex items-center justify-center transition-colors cursor-pointer"
-                          >
-                            <Trash2 size={13} strokeWidth={2.5} />
-                          </button>
-                        </div>
-                      </td>
+                      {canEdit && (
+                        <td className="p-3.5 text-center sticky right-0 bg-white z-10 border-l border-slate-100">
+                          <div className="flex items-center justify-center gap-1.5">
+                            <button
+                              onClick={() => handleOpenEdit(row)}
+                              title="Edit Data Kendaraan"
+                              className="w-8 h-8 rounded-lg bg-slate-100 hover:bg-amber-100 hover:text-amber-800 text-slate-600 flex items-center justify-center transition-colors cursor-pointer"
+                            >
+                              <Edit2 size={13} strokeWidth={2.5} />
+                            </button>
+                            <button
+                              onClick={() => handleDelete(row.id)}
+                              title="Hapus Data Kendaraan"
+                              className="w-8 h-8 rounded-lg bg-red-50 hover:bg-red-100 text-red-600 flex items-center justify-center transition-colors cursor-pointer"
+                            >
+                              <Trash2 size={13} strokeWidth={2.5} />
+                            </button>
+                          </div>
+                        </td>
+                      )}
                     </tr>
                   ))
                 )}

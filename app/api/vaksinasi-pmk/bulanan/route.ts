@@ -2,9 +2,12 @@ import { NextResponse } from 'next/server';
 import { pool } from '@/lib/db';
 
 // GET → ambil rekap bulanan, realisasi/kekurangan/Jan-Des dihitung otomatis
-// dari SUM data harian di tabel vaksinasi_harian
-export async function GET() {
+// dari SUM data harian di tabel vaksinasi_harian sesuai tahun yang dipilih
+export async function GET(request: Request) {
   try {
+    const { searchParams } = new URL(request.url);
+    const tahun = searchParams.get('tahun') || '2027';
+
     const [rows]: any = await pool.execute(`
       SELECT
         b.id, b.no_urut, b.puskeswan, b.target, b.pengambilan,
@@ -23,10 +26,10 @@ export async function GET() {
         COALESCE(SUM(CASE WHEN MONTH(h.tanggal)=11 THEN h.jumlah END), 0) AS nov,
         COALESCE(SUM(CASE WHEN MONTH(h.tanggal)=12 THEN h.jumlah END), 0) AS des
       FROM vaksinasi_bulanan b
-      LEFT JOIN vaksinasi_harian h ON h.puskeswan = b.puskeswan
+      LEFT JOIN vaksinasi_harian h ON h.puskeswan = b.puskeswan AND YEAR(h.tanggal) = ?
       GROUP BY b.id
       ORDER BY b.no_urut ASC
-    `);
+    `, [tahun]);
 
     // PENTING: SUM() dari MySQL dikirim sebagai string oleh driver mysql2.
     // Konversi paksa ke Number di sini supaya penjumlahan di frontend tidak "nyambung" jadi teks.

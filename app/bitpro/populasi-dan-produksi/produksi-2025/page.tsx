@@ -21,7 +21,7 @@ const PALETTE = [
   '#475569',
 ];
 
-// SVG Donut Chart Component
+// Modern SVG Donut Chart Component with Ranked Progress Legend
 function DonutChart({
   title,
   subtitle,
@@ -38,140 +38,213 @@ function DonutChart({
   const total = useMemo(() => data.reduce((acc, item) => acc + (item.value || 0), 0), [data]);
   const [hoveredIdx, setHoveredIdx] = useState<number | null>(null);
 
-  // Calculate SVG Pie Segments
+  // Filter data yang memiliki nilai > 0
+  const activeData = useMemo(() => {
+    return data.filter((d) => d.value > 0);
+  }, [data]);
+
+  // Urutkan data dari kontribusi terbesar ke terkecil untuk legenda
+  const sortedData = useMemo(() => {
+    return [...activeData].sort((a, b) => b.value - a.value);
+  }, [activeData]);
+
+  // Kalkulasi busur SVG Pie Segments dengan celah pemisah yang rapi
   let cumulativeAngle = 0;
-  const slices = data
-    .filter((d) => d.value > 0)
-    .map((item, idx) => {
-      const percentage = total > 0 ? (item.value / total) * 100 : 0;
-      const angle = total > 0 ? (item.value / total) * 360 : 0;
-      const startAngle = cumulativeAngle;
-      const endAngle = cumulativeAngle + angle;
-      cumulativeAngle += angle;
+  const slices = activeData.map((item, idx) => {
+    const percentage = total > 0 ? (item.value / total) * 100 : 0;
+    const angle = total > 0 ? (item.value / total) * 360 : 0;
+    const startAngle = cumulativeAngle;
+    const endAngle = cumulativeAngle + angle;
+    cumulativeAngle += angle;
 
-      const startRad = ((startAngle - 90) * Math.PI) / 180;
-      const endRad = ((endAngle - 90) * Math.PI) / 180;
+    // Celah pemisah antar segmen agar tidak bertumpukan
+    const gap = activeData.length > 1 ? Math.min(1.5, angle * 0.1) : 0;
+    const adjustedStart = startAngle + gap / 2;
+    const adjustedEnd = endAngle - gap / 2;
 
-      const x1 = 100 + 75 * Math.cos(startRad);
-      const y1 = 100 + 75 * Math.sin(startRad);
-      const x2 = 100 + 75 * Math.cos(endRad);
-      const y2 = 100 + 75 * Math.sin(endRad);
+    const startRad = ((adjustedStart - 90) * Math.PI) / 180;
+    const endRad = ((adjustedEnd - 90) * Math.PI) / 180;
 
-      const largeArcFlag = angle > 180 ? 1 : 0;
-      const pathData =
-        angle >= 359.99
-          ? `M 100 25 A 75 75 0 1 1 99.99 25`
-          : `M ${x1} ${y1} A 75 75 0 ${largeArcFlag} 1 ${x2} ${y2}`;
+    const radius = 70;
+    const cx = 100;
+    const cy = 100;
 
-      return {
-        ...item,
-        percentage,
-        pathData,
-        idx,
-      };
-    });
+    const x1 = cx + radius * Math.cos(startRad);
+    const y1 = cy + radius * Math.sin(startRad);
+    const x2 = cx + radius * Math.cos(endRad);
+    const y2 = cy + radius * Math.sin(endRad);
+
+    const largeArcFlag = angle - gap > 180 ? 1 : 0;
+    const pathData =
+      angle >= 359.9
+        ? `M ${cx} ${cy - radius} A ${radius} ${radius} 0 1 1 ${cx - 0.01} ${cy - radius}`
+        : `M ${x1} ${y1} A ${radius} ${radius} 0 ${largeArcFlag} 1 ${x2} ${y2}`;
+
+    return {
+      ...item,
+      percentage,
+      pathData,
+      idx,
+    };
+  });
+
+  const topContributor = sortedData.length > 0 ? sortedData[0] : null;
+  const topPercentage = topContributor && total > 0 ? (topContributor.value / total) * 100 : 0;
 
   return (
-    <div className="bg-white rounded-3xl border border-slate-200 p-6 sm:p-7 shadow-sm space-y-5 flex flex-col justify-between">
+    <div className="bg-white rounded-3xl border border-slate-200 p-5 sm:p-7 shadow-sm space-y-5 flex flex-col justify-between hover:shadow-md transition-shadow">
       {/* Chart Header */}
-      <div className="flex items-center justify-between pb-3 border-b border-slate-100">
-        <div className="flex items-center gap-3">
-          <span className="text-2xl">{icon}</span>
-          <div>
-            <h3 className="font-extrabold text-base text-slate-900">{title}</h3>
-            <p className="text-xs text-slate-500">{subtitle}</p>
+      <div className="flex items-center justify-between pb-3 border-b border-slate-100 gap-2">
+        <div className="flex items-center gap-3 min-w-0">
+          <span className="text-2xl shrink-0">{icon}</span>
+          <div className="min-w-0">
+            <h3 className="font-extrabold text-base text-slate-900 truncate">{title}</h3>
+            <p className="text-xs text-slate-500 truncate">{subtitle}</p>
           </div>
         </div>
-        <span className="px-2.5 py-1 rounded-full bg-slate-100 text-slate-700 text-xs font-bold font-sans">
-          Total: {total.toLocaleString('id-ID')} {unit}
+        <span className="px-3 py-1 rounded-xl bg-slate-100 text-slate-800 text-xs font-extrabold font-sans shrink-0 border border-slate-200">
+          {total > 1000 ? `${(total / 1000).toLocaleString('id-ID', { maximumFractionDigits: 1 })} Ton` : `${total.toLocaleString('id-ID')} ${unit}`}
         </span>
       </div>
 
       {total === 0 ? (
-        <div className="h-56 flex flex-col items-center justify-center text-slate-400 text-xs space-y-1">
-          <PieChartIcon size={32} className="opacity-40" />
-          <span>Belum ada data tonase untuk digambarkan</span>
+        <div className="h-64 flex flex-col items-center justify-center text-slate-400 text-xs space-y-2">
+          <PieChartIcon size={36} className="opacity-30 text-slate-400" />
+          <span className="font-medium">Belum ada data tonase untuk digambarkan</span>
         </div>
       ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 items-center">
+        <div className="grid grid-cols-1 md:grid-cols-12 gap-6 items-center">
           
-          {/* Donut SVG */}
-          <div className="relative flex items-center justify-center">
-            <svg viewBox="0 0 200 200" className="w-48 h-48 sm:w-52 sm:h-52 transform -rotate-90">
-              {slices.map((slice) => (
-                <path
-                  key={slice.label}
-                  d={slice.pathData}
-                  fill="none"
-                  stroke={slice.color}
-                  strokeWidth={hoveredIdx === slice.idx ? 32 : 26}
-                  strokeLinecap="round"
-                  className="transition-all duration-200 cursor-pointer"
-                  onMouseEnter={() => setHoveredIdx(slice.idx)}
-                  onMouseLeave={() => setHoveredIdx(null)}
-                />
-              ))}
+          {/* Donut SVG Ring (5 cols) */}
+          <div className="md:col-span-5 relative flex items-center justify-center">
+            <svg viewBox="0 0 200 200" className="w-48 h-48 sm:w-52 sm:h-52 transform -rotate-90 select-none">
+              {/* Background Ring Halus */}
+              <circle
+                cx="100"
+                cy="100"
+                r="70"
+                fill="none"
+                stroke="#F1F5F9"
+                strokeWidth="24"
+              />
+
+              {slices.map((slice) => {
+                const isHovered = hoveredIdx === slice.idx;
+                return (
+                  <path
+                    key={slice.label}
+                    d={slice.pathData}
+                    fill="none"
+                    stroke={slice.color}
+                    strokeWidth={isHovered ? 28 : 22}
+                    className="transition-all duration-200 cursor-pointer"
+                    style={{
+                      opacity: hoveredIdx !== null && !isHovered ? 0.35 : 1,
+                      filter: isHovered ? 'drop-shadow(0 4px 8px rgba(0,0,0,0.25))' : 'none',
+                    }}
+                    onMouseEnter={() => setHoveredIdx(slice.idx)}
+                    onMouseLeave={() => setHoveredIdx(null)}
+                  />
+                );
+              })}
             </svg>
 
-            {/* Inner Center Label */}
+            {/* Pusat Ring Donut yang Sangat Jelas */}
             <div className="absolute inset-0 flex flex-col items-center justify-center text-center pointer-events-none px-4">
               {hoveredIdx !== null && slices.find((s) => s.idx === hoveredIdx) ? (
                 (() => {
                   const activeSlice = slices.find((s) => s.idx === hoveredIdx)!;
                   return (
-                    <>
-                      <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 truncate max-w-[110px]">
+                    <div className="animate-in fade-in zoom-in-95 duration-150">
+                      <span className="text-[10px] font-black uppercase tracking-wider text-slate-400 block truncate max-w-[110px]">
                         {activeSlice.label}
                       </span>
-                      <span className="text-base font-extrabold text-slate-900">
+                      <span className="text-xl font-black text-slate-900 leading-tight">
                         {activeSlice.percentage.toFixed(1)}%
                       </span>
-                      <span className="text-[10px] text-emerald-700 font-bold">
+                      <span className="text-[11px] font-bold block mt-0.5" style={{ color: activeSlice.color }}>
                         {activeSlice.value.toLocaleString('id-ID')} {unit}
                       </span>
-                    </>
+                    </div>
                   );
                 })()
               ) : (
-                <>
-                  <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Total Produksi</span>
-                  <span className="text-base font-extrabold text-slate-900">
-                    {total > 1000 ? `${(total / 1000).toFixed(1)} Ton` : `${total.toLocaleString('id-ID')} ${unit}`}
+                <div className="animate-in fade-in duration-150">
+                  <span className="text-[9px] font-black uppercase tracking-wider text-slate-400 block">Total</span>
+                  <span className="text-lg sm:text-xl font-black text-slate-900 leading-tight">
+                    {total > 1000 ? `${(total / 1000).toLocaleString('id-ID', { maximumFractionDigits: 1 })} Ton` : `${total.toLocaleString('id-ID')}`}
                   </span>
-                  <span className="text-[10px] text-slate-400">{slices.length} Komoditas</span>
-                </>
+                  <span className="text-[10px] font-bold text-slate-500 block">
+                    {slices.length} Komoditas
+                  </span>
+                </div>
               )}
             </div>
           </div>
 
-          {/* Color Legend List */}
-          <div className="space-y-1.5 max-h-52 overflow-y-auto pr-1">
-            {slices.map((slice) => (
-              <div
-                key={slice.label}
-                onMouseEnter={() => setHoveredIdx(slice.idx)}
-                onMouseLeave={() => setHoveredIdx(null)}
-                className={`flex items-center justify-between p-1.5 rounded-xl text-xs transition-colors cursor-pointer ${
-                  hoveredIdx === slice.idx ? 'bg-slate-100 font-bold' : 'hover:bg-slate-50'
-                }`}
-              >
-                <div className="flex items-center gap-2 min-w-0">
-                  <span
-                    className="w-3 h-3 rounded-full shrink-0"
-                    style={{ backgroundColor: slice.color }}
-                  />
-                  <span className="truncate text-slate-700">{slice.label}</span>
+          {/* Legenda Horizontal Progress Bar Terurut (7 cols) */}
+          <div className="md:col-span-7 space-y-2 max-h-60 overflow-y-auto pr-1 text-xs">
+            {sortedData.map((item) => {
+              const slice = slices.find((s) => s.label === item.label);
+              const percentage = total > 0 ? (item.value / total) * 100 : 0;
+              const isHovered = slice && hoveredIdx === slice.idx;
+
+              return (
+                <div
+                  key={item.label}
+                  onMouseEnter={() => slice && setHoveredIdx(slice.idx)}
+                  onMouseLeave={() => setHoveredIdx(null)}
+                  className={`p-2 rounded-2xl border transition-all cursor-pointer ${
+                    isHovered
+                      ? 'bg-slate-50 border-slate-300 shadow-xs'
+                      : 'bg-white border-slate-100 hover:border-slate-200'
+                  }`}
+                >
+                  <div className="flex items-center justify-between mb-1 gap-2">
+                    <div className="flex items-center gap-2 min-w-0">
+                      <span
+                        className="w-2.5 h-2.5 rounded-full shrink-0"
+                        style={{ backgroundColor: item.color }}
+                      />
+                      <span className="font-bold text-slate-800 truncate">{item.label}</span>
+                    </div>
+                    <div className="flex items-center gap-2 shrink-0">
+                      <span className="font-black text-slate-900 font-mono">{percentage.toFixed(1)}%</span>
+                      <span className="text-[10px] text-slate-400 font-medium">
+                        ({item.value.toLocaleString('id-ID')} {unit})
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Horizontal Mini Progress Bar */}
+                  <div className="w-full h-1.5 bg-slate-100 rounded-full overflow-hidden">
+                    <div
+                      className="h-full rounded-full transition-all duration-300"
+                      style={{
+                        width: `${Math.max(percentage, 1)}%`,
+                        backgroundColor: item.color,
+                      }}
+                    />
+                  </div>
                 </div>
-                <div className="text-right shrink-0 ml-2">
-                  <span className="font-extrabold text-slate-900">{slice.percentage.toFixed(1)}%</span>
-                  <span className="text-[10px] text-slate-400 block">
-                    {slice.value.toLocaleString('id-ID')} {unit}
-                  </span>
-                </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
 
+        </div>
+      )}
+
+      {/* Footer Pill: Kontributor Terbesar */}
+      {topContributor && total > 0 && (
+        <div className="pt-3 border-t border-slate-100 flex items-center justify-between text-xs bg-slate-50/80 px-3.5 py-2.5 rounded-2xl">
+          <div className="flex items-center gap-2 text-slate-600">
+            <span className="text-sm">🏆</span>
+            <span className="font-semibold">Kontribusi Terbesar:</span>
+            <strong className="text-slate-900">{topContributor.label}</strong>
+          </div>
+          <span className="font-black text-emerald-700 bg-emerald-100/80 px-2 py-0.5 rounded-lg text-[11px]">
+            {topPercentage.toFixed(1)}% ({topContributor.value.toLocaleString('id-ID')} {unit})
+          </span>
         </div>
       )}
     </div>

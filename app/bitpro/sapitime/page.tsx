@@ -189,10 +189,35 @@ export default function SapiTimePage() {
       icon: '➕',
     };
 
-    setCattleList([...cattleList, { ...newCattle, inseminations: [] }]);
+    let initialInseminations: any[] = [];
+    if (formData.status === 'Bunting' && formData.pregnancyDate) {
+      const pkbDate = new Date(formData.pregnancyDate);
+      pkbDate.setDate(pkbDate.getDate() + 90);
+      const initialIb = {
+        id: Date.now(),
+        cattle_id: newId,
+        date: formData.pregnancyDate,
+        time: '08:00',
+        kecamatan: formData.kecamatan,
+        desa: formData.desa,
+        inseminatorName: 'Petugas Inseminator',
+        strawCode: 'STRAW-IB',
+        bullName: 'Pejantan Unggul',
+        bullBreed: formData.breed || 'Simmental',
+        rekomendasiPkb: pkbDate.toLocaleDateString('id-ID'),
+        notes: 'Dicatat saat pendaftaran SapiTime',
+      };
+      initialInseminations = [initialIb];
+    }
+
+    setCattleList([...cattleList, { ...newCattle, inseminations: initialInseminations }]);
     setShowAddModal(false);
     setFormData({ status: 'Estrus', cycleLength: 21, kecamatan: '', desa: '', ownerName: '' });
     await executeApi('add_cattle', newCattle, historyObj);
+
+    if (initialInseminations.length > 0) {
+      await executeApi('add_ib', initialInseminations[0]);
+    }
   };
 
   const handleEditCattle = (cattle: Cattle) => {
@@ -491,10 +516,10 @@ export default function SapiTimePage() {
                 {editingCattle ? (
                   <>
                     <Edit2 size={18} className="text-emerald-700" />
-                    <span>Edit Data Sapi: {editingCattle.name}</span>
+                    <span>Edit Data Sapi: {editingCattle.name}</span> 
                   </>
                 ) : (
-                  <span>Pendaftaran Indukan Sapi Baru</span>
+                  <span>Data Inseminasi Buatan</span>
                 )}
               </h3>
               <p className="text-xs text-slate-500">
@@ -518,16 +543,6 @@ export default function SapiTimePage() {
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           <div>
-            <label className="block text-xs font-bold mb-1 text-slate-700">Nama Sapi <span className="text-red-500">*</span></label>
-            <input
-              type="text"
-              className="w-full min-h-touch h-10 px-3.5 border border-slate-200 rounded-xl bg-slate-50 focus:bg-white focus:outline-none focus:border-emerald-600 text-xs font-bold text-slate-900"
-              value={formData.name || ''}
-              onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-              placeholder="Contoh: Si Manis"
-            />
-          </div>
-          <div>
             <label className="block text-xs font-bold mb-1 text-slate-700">Nama Peternak <span className="text-red-500">*</span></label>
             <input
               type="text"
@@ -538,23 +553,33 @@ export default function SapiTimePage() {
             />
           </div>
           <div>
-            <label className="block text-xs font-bold mb-1 text-slate-700">Kecamatan</label>
+            <label className="block text-xs font-bold mb-1 text-slate-700">Nama Sapi <span className="text-red-500">*</span></label>
             <input
               type="text"
-              className="w-full min-h-touch h-10 px-3.5 border border-slate-200 rounded-xl bg-slate-50 focus:bg-white focus:outline-none focus:border-emerald-600 text-xs font-medium text-slate-900"
-              value={formData.kecamatan || ''}
-              onChange={(e) => setFormData({ ...formData, kecamatan: e.target.value })}
-              placeholder="Kecamatan"
+              className="w-full min-h-touch h-10 px-3.5 border border-slate-200 rounded-xl bg-slate-50 focus:bg-white focus:outline-none focus:border-emerald-600 text-xs font-bold text-slate-900"
+              value={formData.name || ''}
+              onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+              placeholder="Contoh: Si Manis"
             />
           </div>
           <div>
-            <label className="block text-xs font-bold mb-1 text-slate-700">Desa</label>
+            <label className="block text-xs font-bold mb-1 text-slate-700">Desa <span className="text-red-500">*</span></label>
             <input
               type="text"
               className="w-full min-h-touch h-10 px-3.5 border border-slate-200 rounded-xl bg-slate-50 focus:bg-white focus:outline-none focus:border-emerald-600 text-xs font-medium text-slate-900"
               value={formData.desa || ''}
               onChange={(e) => setFormData({ ...formData, desa: e.target.value })}
               placeholder="Desa"
+            />
+          </div>
+          <div>
+            <label className="block text-xs font-bold mb-1 text-slate-700">Kecamatan <span className="text-red-500">*</span></label>
+            <input
+              type="text"
+              className="w-full min-h-touch h-10 px-3.5 border border-slate-200 rounded-xl bg-slate-50 focus:bg-white focus:outline-none focus:border-emerald-600 text-xs font-medium text-slate-900"
+              value={formData.kecamatan || ''}
+              onChange={(e) => setFormData({ ...formData, kecamatan: e.target.value })}
+              placeholder="Kecamatan"
             />
           </div>
           <div>
@@ -1176,33 +1201,23 @@ export default function SapiTimePage() {
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
-                <label className="block text-xs font-bold mb-1 text-slate-700">Nama Sapi</label>
-                <input
-                  type="text"
-                  className="w-full min-h-touch h-11 px-3.5 border border-slate-200 rounded-xl bg-slate-50 focus:bg-white focus:outline-none focus:border-emerald-600 text-xs text-slate-900"
-                  value={formData.name || ''}
-                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                  placeholder="Contoh: Si Manis"
-                />
-              </div>
-              <div>
                 <label className="block text-xs font-bold mb-1 text-slate-700">Nama Peternak</label>
                 <input
                   type="text"
-                  className="w-full min-h-touch h-11 px-3.5 border border-slate-200 rounded-xl bg-slate-50 focus:bg-white focus:outline-none focus:border-emerald-600 text-xs text-slate-900"
+                  className="w-full min-h-touch h-11 px-3.5 border border-slate-200 rounded-xl bg-slate-50 focus:bg-white focus:outline-none focus:border-emerald-600 text-xs text-slate-900 font-bold"
                   value={formData.ownerName || ''}
                   onChange={(e) => setFormData({ ...formData, ownerName: e.target.value })}
                   placeholder="Nama pemilik peternak"
                 />
               </div>
               <div>
-                <label className="block text-xs font-bold mb-1 text-slate-700">Kecamatan</label>
+                <label className="block text-xs font-bold mb-1 text-slate-700">Nama Sapi</label>
                 <input
                   type="text"
-                  className="w-full min-h-touch h-11 px-3.5 border border-slate-200 rounded-xl bg-slate-50 focus:bg-white focus:outline-none focus:border-emerald-600 text-xs text-slate-900"
-                  value={formData.kecamatan || ''}
-                  onChange={(e) => setFormData({ ...formData, kecamatan: e.target.value })}
-                  placeholder="Kecamatan"
+                  className="w-full min-h-touch h-11 px-3.5 border border-slate-200 rounded-xl bg-slate-50 focus:bg-white focus:outline-none focus:border-emerald-600 text-xs text-slate-900 font-bold"
+                  value={formData.name || ''}
+                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                  placeholder="Contoh: Si Manis"
                 />
               </div>
               <div>
@@ -1213,6 +1228,16 @@ export default function SapiTimePage() {
                   value={formData.desa || ''}
                   onChange={(e) => setFormData({ ...formData, desa: e.target.value })}
                   placeholder="Desa"
+                />
+              </div>
+              <div>
+                <label className="block text-xs font-bold mb-1 text-slate-700">Kecamatan</label>
+                <input
+                  type="text"
+                  className="w-full min-h-touch h-11 px-3.5 border border-slate-200 rounded-xl bg-slate-50 focus:bg-white focus:outline-none focus:border-emerald-600 text-xs text-slate-900"
+                  value={formData.kecamatan || ''}
+                  onChange={(e) => setFormData({ ...formData, kecamatan: e.target.value })}
+                  placeholder="Kecamatan"
                 />
               </div>
               <div>

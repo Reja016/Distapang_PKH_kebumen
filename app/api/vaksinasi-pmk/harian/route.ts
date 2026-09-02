@@ -6,7 +6,7 @@ export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url);
     const bulan = searchParams.get('bulan');
-    const tahun = searchParams.get('tahun') || '2026';
+    const tahun = searchParams.get('tahun') || '2027';
 
     let query = 'SELECT * FROM vaksinasi_harian WHERE YEAR(tanggal) = ?';
     const params: any[] = [tahun];

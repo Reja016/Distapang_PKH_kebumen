@@ -1,7 +1,6 @@
 import { NextResponse } from 'next/server';
 import pool from '@/lib/db';
 
-// Mencegah Next.js melakukan caching agar data selalu real-time
 export const dynamic = 'force-dynamic';
 
 // ==========================================
@@ -9,22 +8,22 @@ export const dynamic = 'force-dynamic';
 // ==========================================
 export async function GET() {
   try {
-    // Tarik semua data dari tabel ktt_master, urutkan dari ID terbesar (terbaru)
-    const [rows]: any = await pool.query('SELECT * FROM ktt_master ORDER BY id DESC');
+    const [rows]: any = await pool.query('SELECT * FROM ktt_master ORDER BY id ASC');
     
-    // Ubah format penulisan MySQL (snake_case) ke format React (camelCase)
     const formatted = rows.map((row: any) => ({
       id: row.id,
       kecamatan: row.kecamatan,
       desa: row.desa,
+      gapoktanInduk: row.gapoktan_induk || '-',
+      kelas: row.kelas || row.kelas_kelompok || '-',
       namaKelompok: row.nama_kelompok,
-      nomorRegister: row.nomor_register,
-      jenisKelompok: row.jenis_kelompok,
-      kelasKelompok: row.kelas_kelompok,
-      luasLahanHa: Number(row.luas_lahan_ha),
-      anggotaLaki: Number(row.anggota_laki),
-      anggotaPerempuan: Number(row.anggota_perempuan),
-      namaKetuaKelompok: row.nama_ketua
+      nomorRegister: row.nomor_register || '-',
+      jenisKelompok: row.jenis_kelompok || 'Sapi Potong',
+      kelasKelompok: row.kelas_kelompok || row.kelas || 'Pemula',
+      luasLahanHa: Number(row.luas_lahan_ha) || 0,
+      anggotaLaki: Number(row.anggota_laki) || 0,
+      anggotaPerempuan: Number(row.anggota_perempuan) || 0,
+      namaKetuaKelompok: row.nama_ketua || '-'
     }));
 
     return NextResponse.json(formatted);
@@ -41,32 +40,34 @@ export async function POST(request: Request) {
   try {
     const body = await request.json();
     const { 
-      id, kecamatan, desa, namaKelompok, nomorRegister, 
+      id, kecamatan, desa, gapoktanInduk, kelas, namaKelompok, nomorRegister, 
       jenisKelompok, kelasKelompok, luasLahanHa, 
       anggotaLaki, anggotaPerempuan, namaKetuaKelompok 
     } = body;
 
+    const kelasFinal = kelas || kelasKelompok || 'Pemula';
+
     if (id) {
-      // JIKA ADA ID = EDIT DATA LAMA
+      // EDIT DATA LAMA
       await pool.query(
         `UPDATE ktt_master 
-         SET kecamatan=?, desa=?, nama_kelompok=?, nomor_register=?, 
+         SET kecamatan=?, desa=?, gapoktan_induk=?, kelas=?, nama_kelompok=?, nomor_register=?, 
              jenis_kelompok=?, kelas_kelompok=?, luas_lahan_ha=?, 
              anggota_laki=?, anggota_perempuan=?, nama_ketua=? 
          WHERE id=?`,
-        [kecamatan, desa, namaKelompok, nomorRegister, jenisKelompok, 
-         kelasKelompok, luasLahanHa, anggotaLaki, anggotaPerempuan, 
+        [kecamatan, desa, gapoktanInduk || null, kelasFinal, namaKelompok, nomorRegister, jenisKelompok, 
+         kelasFinal, Number(luasLahanHa) || 0, Number(anggotaLaki) || 0, Number(anggotaPerempuan) || 0, 
          namaKetuaKelompok, id]
       );
     } else {
-      // JIKA TIDAK ADA ID = TAMBAH DATA BARU
+      // TAMBAH DATA BARU
       await pool.query(
         `INSERT INTO ktt_master 
-         (kecamatan, desa, nama_kelompok, nomor_register, jenis_kelompok, 
+         (kecamatan, desa, gapoktan_induk, kelas, nama_kelompok, nomor_register, jenis_kelompok, 
           kelas_kelompok, luas_lahan_ha, anggota_laki, anggota_perempuan, nama_ketua) 
-         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-        [kecamatan, desa, namaKelompok, nomorRegister, jenisKelompok, 
-         kelasKelompok, luasLahanHa, anggotaLaki, anggotaPerempuan, namaKetuaKelompok]
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+        [kecamatan, desa, gapoktanInduk || null, kelasFinal, namaKelompok, nomorRegister, jenisKelompok, 
+         kelasFinal, Number(luasLahanHa) || 0, Number(anggotaLaki) || 0, Number(anggotaPerempuan) || 0, namaKetuaKelompok]
       );
     }
     return NextResponse.json({ status: 'success' });
