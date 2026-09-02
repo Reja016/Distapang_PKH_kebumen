@@ -14,6 +14,14 @@ export const metadata: Metadata = {
   title: 'SiMantap — Sistem Informasi Manajemen Peternakan Terpadu',
   description:
     'Portal resmi Bidang Peternakan dan Kesehatan Hewan, Dinas Pertanian dan Pangan Kabupaten Kebumen. Merangkum data Perbibitan & Produksi, Kesehatan Hewan, dan Kesehatan Masyarakat Veteriner.',
+  icons: {
+    icon: [
+      { url: '/logo-circle.svg', type: 'image/svg+xml' },
+      { url: '/logo-simantap.png', type: 'image/png' },
+    ],
+    shortcut: '/logo-circle.svg',
+    apple: '/logo-circle.svg',
+  },
 };
 
 export default function RootLayout({
