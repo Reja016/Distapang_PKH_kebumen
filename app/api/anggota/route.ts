@@ -1,10 +1,12 @@
 import { NextResponse } from 'next/server';
 import { pool } from '@/lib/db';
 import {
-  UserPermissions,
   DEFAULT_FULL_PERMISSIONS,
   DEFAULT_VIEW_ONLY_PERMISSIONS,
 } from '@/lib/permissions';
+import { hashPassword } from '@/lib/password';
+
+export const dynamic = 'force-dynamic';
 
 // Fallback data awal jika database offline
 const INITIAL_FALLBACK_MEMBERS = [
@@ -12,7 +14,7 @@ const INITIAL_FALLBACK_MEMBERS = [
     id: 1,
     nama: 'Administrator Distapang',
     nip_username: 'admin@kebumen.go.id',
-    password: 'password123',
+    password: hashPassword('password123'),
     role: 'Administrator',
     status: 'Aktif',
     permissions: JSON.stringify(DEFAULT_FULL_PERMISSIONS),
@@ -21,7 +23,7 @@ const INITIAL_FALLBACK_MEMBERS = [
     id: 2,
     nama: 'Drh. Ahmad Fauzi (Petugas Keswan)',
     nip_username: 'ahmad.keswan@kebumen.go.id',
-    password: 'password123',
+    password: hashPassword('password123'),
     role: 'Petugas Teknis',
     status: 'Aktif',
     permissions: JSON.stringify({
@@ -40,7 +42,7 @@ const INITIAL_FALLBACK_MEMBERS = [
     id: 3,
     nama: 'Budi Santoso (Enumerator Bitpro)',
     nip_username: 'budi.bitpro@kebumen.go.id',
-    password: 'password123',
+    password: hashPassword('password123'),
     role: 'Enumerator',
     status: 'Aktif',
     permissions: JSON.stringify({
@@ -57,25 +59,6 @@ const INITIAL_FALLBACK_MEMBERS = [
           'sapitime': { enabled: true, mode: 'edit' },
           'sklb': { enabled: true, mode: 'edit' },
           'database-ib': { enabled: true, mode: 'edit' },
-        },
-      },
-    }),
-  },
-  {
-    id: 4,
-    nama: 'Siti Rahmawati (Staf Pengawas Kesmavet)',
-    nip_username: 'siti.kesmavet@kebumen.go.id',
-    password: 'password123',
-    role: 'Petugas Teknis',
-    status: 'Aktif',
-    permissions: JSON.stringify({
-      ...DEFAULT_VIEW_ONLY_PERMISSIONS,
-      kesmavet: {
-        enabled: true,
-        mode: 'edit',
-        submenus: {
-          'nkv': { enabled: true, mode: 'edit' },
-          'rph-tph-tpu': { enabled: true, mode: 'edit' },
         },
       },
     }),
@@ -119,7 +102,7 @@ export async function GET() {
     await ensureTable();
     const [rows]: any = await pool.execute(`SELECT * FROM anggota_users ORDER BY id ASC`);
     if (Array.isArray(rows) && rows.length > 0) {
-      const parsed = rows.map((r) => ({
+      const parsed = rows.map((r: any) => ({
         ...r,
         permissions: typeof r.permissions === 'string' ? JSON.parse(r.permissions) : r.permissions,
       }));
@@ -135,7 +118,7 @@ export async function GET() {
   })));
 }
 
-// POST: Tambah anggota baru
+// POST: Tambah anggota baru (Password otomatis di-hash)
 export async function POST(req: Request) {
   try {
     const body = await req.json();
@@ -145,6 +128,7 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'Nama, NIP/Username, dan Password wajib diisi!' }, { status: 400 });
     }
 
+    const hashedPassword = hashPassword(password);
     const permStr = typeof permissions === 'object' ? JSON.stringify(permissions) : JSON.stringify(DEFAULT_FULL_PERMISSIONS);
     const userRole = role || 'Petugas Teknis';
     const userStatus = status || 'Aktif';
@@ -153,9 +137,9 @@ export async function POST(req: Request) {
       await ensureTable();
       const [res]: any = await pool.execute(
         `INSERT INTO anggota_users (nama, nip_username, password, role, status, permissions) VALUES (?, ?, ?, ?, ?, ?)`,
-        [nama, nip_username, password, userRole, userStatus, permStr]
+        [nama, nip_username, hashedPassword, userRole, userStatus, permStr]
       );
-      return NextResponse.json({ success: true, id: res.insertId, message: 'Anggota berhasil ditambahkan' });
+      return NextResponse.json({ success: true, id: res.insertId, message: 'Anggota berhasil ditambahkan dengan password terenkripsi hash!' });
     } catch (dbErr: any) {
       if (dbErr.code === 'ER_DUP_ENTRY') {
         return NextResponse.json({ error: 'NIP/Username sudah terdaftar! Gunakan NIP/Username lain.' }, { status: 409 });
@@ -167,7 +151,7 @@ export async function POST(req: Request) {
   }
 }
 
-// PUT: Perbarui anggota / izin
+// PUT: Perbarui anggota / izin (Password otomatis di-hash jika diisi baru)
 export async function PUT(req: Request) {
   try {
     const body = await req.json();
@@ -182,15 +166,16 @@ export async function PUT(req: Request) {
     try {
       await ensureTable();
       if (password && password.trim() !== '') {
+        const hashedPassword = hashPassword(password);
         if (permStr) {
           await pool.execute(
             `UPDATE anggota_users SET nama = ?, nip_username = ?, password = ?, role = ?, status = ?, permissions = ? WHERE id = ?`,
-            [nama, nip_username, password, role, status, permStr, id]
+            [nama, nip_username, hashedPassword, role, status, permStr, id]
           );
         } else {
           await pool.execute(
             `UPDATE anggota_users SET nama = ?, nip_username = ?, password = ?, role = ?, status = ? WHERE id = ?`,
-            [nama, nip_username, password, role, status, id]
+            [nama, nip_username, hashedPassword, role, status, id]
           );
         }
       } else {

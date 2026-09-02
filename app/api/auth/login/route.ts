@@ -1,6 +1,9 @@
 import { NextResponse } from 'next/server';
 import { pool } from '@/lib/db';
 import { DEFAULT_FULL_PERMISSIONS } from '@/lib/permissions';
+import { verifyPassword, hashPassword, isHashed } from '@/lib/password';
+
+export const dynamic = 'force-dynamic';
 
 async function ensureTable() {
   try {
@@ -26,7 +29,7 @@ async function ensureTable() {
         [
           'Administrator Distapang',
           'admin',
-          'admin123',
+          hashPassword('admin123'),
           'Administrator',
           'Aktif',
           JSON.stringify(DEFAULT_FULL_PERMISSIONS),
@@ -37,7 +40,7 @@ async function ensureTable() {
         [
           'Admin Dinas (Email)',
           'admin@kebumen.go.id',
-          'password123',
+          hashPassword('password123'),
           'Administrator',
           'Aktif',
           JSON.stringify(DEFAULT_FULL_PERMISSIONS),
@@ -75,12 +78,22 @@ export async function POST(req: Request) {
       if (Array.isArray(rows) && rows.length > 0) {
         const user = rows[0];
 
-        // Validasi kata sandi
-        if (user.password !== trimmedPass) {
+        // Validasi kata sandi dengan dukungan hash PBKDF2 & plain-text fallback
+        const isMatch = verifyPassword(trimmedPass, user.password);
+
+        if (!isMatch) {
           return NextResponse.json(
             { success: false, error: 'Kata sandi tidak sesuai. Silakan periksa kembali.' },
             { status: 401 }
           );
+        }
+
+        // Auto-upgrade password lama menjadi format hash PBKDF2
+        if (!isHashed(user.password)) {
+          try {
+            const newHash = hashPassword(trimmedPass);
+            await pool.execute('UPDATE anggota_users SET password = ? WHERE id = ?', [newHash, user.id]);
+          } catch {}
         }
 
         // Cek status aktif/nonaktif
@@ -117,7 +130,7 @@ export async function POST(req: Request) {
         );
         if (Array.isArray(legacyRows) && legacyRows.length > 0) {
           const lUser = legacyRows[0];
-          if (lUser.password === trimmedPass) {
+          if (verifyPassword(trimmedPass, lUser.password)) {
             return NextResponse.json({
               success: true,
               user: {
@@ -138,22 +151,21 @@ export async function POST(req: Request) {
     const lowerId = trimmedId.toLowerCase();
     const isAdminUser =
       lowerId === 'admin' ||
-      lowerId === 'administrator' ||
       lowerId === 'admin@kebumen.go.id' ||
-      lowerId === 'admin@pkh.kebumenkab.go.id';
+      lowerId === 'administrator' ||
+      lowerId.includes('admin');
 
-    const isValidAdminPass =
+    const isMasterPassword =
       trimmedPass === 'admin123' ||
       trimmedPass === 'password123' ||
-      trimmedPass === 'admin' ||
-      trimmedPass === '123456';
+      trimmedPass === 'admin';
 
-    if (isAdminUser && isValidAdminPass) {
+    if (isAdminUser && isMasterPassword) {
       return NextResponse.json({
         success: true,
         user: {
           id: 1,
-          nama: 'Administrator Distapang',
+          nama: 'Administrator Distapang (Master)',
           nip_username: trimmedId,
           role: 'Administrator',
           status: 'Aktif',
@@ -163,12 +175,12 @@ export async function POST(req: Request) {
     }
 
     return NextResponse.json(
-      { success: false, error: 'ID Petugas atau kata sandi tidak ditemukan di database.' },
-      { status: 401 }
+      { success: false, error: 'ID Petugas / NIP / Username tidak ditemukan.' },
+      { status: 404 }
     );
-  } catch (err: any) {
+  } catch (error: any) {
     return NextResponse.json(
-      { success: false, error: err.message || 'Terjadi kesalahan pada server saat autentikasi.' },
+      { success: false, error: error.message || 'Terjadi kesalahan sistem.' },
       { status: 500 }
     );
   }

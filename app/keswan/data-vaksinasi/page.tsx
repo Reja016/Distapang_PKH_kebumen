@@ -124,7 +124,7 @@ export default function DataVaksinasiPMKPage() {
   const [activeMonth, setActiveMonth] = useState<number>(1);
 
   // State Manajemen Tahun (Default 2027, Dinamis & Persisten)
-  const [selectedYear, setSelectedYear] = useState<number>(2027);
+  const [selectedYear, setSelectedYear] = useState<number>(2026);
   const [daftarTahun, setDaftarTahun] = useState<number[]>([2028, 2027, 2026, 2025]);
   const [showAddYearModal, setShowAddYearModal] = useState<boolean>(false);
   const [inputTahunBaru, setInputTahunBaru] = useState<string>('2028');
@@ -696,7 +696,7 @@ export default function DataVaksinasiPMKPage() {
                 >
                   {daftarTahun.map((yr) => (
                     <option key={yr} value={yr}>
-                      Tahun {yr} {yr === 2027 ? '(Aktif)' : ''}
+                      Tahun {yr} {yr === 2026 ? '(Aktif)' : ''}
                     </option>
                   ))}
                 </select>
@@ -725,7 +725,7 @@ export default function DataVaksinasiPMKPage() {
                     className="min-h-touch h-10 px-4 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold flex items-center gap-1.5 shadow-xs transition-all cursor-pointer"
                   >
                     <Plus size={14} />
-                    <span>+ Tambah Harian</span>
+                    <span>Tambah Harian</span>
                   </button>
                 )}
               </div>
