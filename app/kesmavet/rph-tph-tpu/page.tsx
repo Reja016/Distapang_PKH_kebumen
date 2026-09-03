@@ -1,9 +1,10 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import Link from 'next/link';
 import * as XLSX from 'xlsx';
 import { usePageAuth } from '@/hooks/usePageAuth';
+import { getAuthSession } from '@/lib/auth';
 import {
   ArrowLeft,
   Download,
@@ -13,1827 +14,610 @@ import {
   Trash2,
   X,
   CheckCircle2,
-  Layers,
-  Phone,
-  MapPin,
-  ShieldCheck,
   Building2,
-  Filter,
-  FileText,
-  UploadCloud,
-  Eye,
-  Paperclip,
-  Image as ImageIcon,
-  FileCheck,
+  Save,
+  Loader2,
+  Calendar,
+  Table as TableIcon,
   FileSpreadsheet,
-  ExternalLink,
+  ShieldCheck,
+  Sparkles,
+  Layers,
 } from 'lucide-react';
 
-// Data JSON Pelaku Usaha Pemotongan Hewan (101 Entri Awal)
-const initialDataRph = [
-  {
-    no: 1,
-    lokasi_desa_kecamatan_alamat_pemilik:
-      'Tratas Rt 03 Rw 01, Desa Sidomukti, Kec. Kuwarasan, Kab. Kebumen',
-    nama_tph_r_u: 'RPU Pangestu',
-    jenis_unit_usaha: 'TPU',
-    pemilik: 'Mahfanda Aldin',
-    no_telp: '087735300037',
-    status_ijin_usaha: '',
-    lokasi_rpu:
-      'Tratas Rt 03 Rw 01, Desa Sidomukti, Kec. Kuwarasan, Kab. Kebumen',
-    pemotongan_per_hari_ekor: '',
-    sertifikat_halal: 'Sudah (Disperindag)',
-    sertifikat_nkv: 'belum',
-    rata2_produksi_per_bulan_kg: '',
-  },
-  {
-    no: 2,
-    lokasi_desa_kecamatan_alamat_pemilik: 'Sidoagung',
-    nama_tph_r_u: 'Haryanto',
-    jenis_unit_usaha: 'TPU',
-    pemilik: 'Haryanto',
-    no_telp: '',
-    status_ijin_usaha: '',
-    lokasi_rpu: '',
-    pemotongan_per_hari_ekor: '',
-    sertifikat_halal: '',
-    sertifikat_nkv: 'belum',
-    rata2_produksi_per_bulan_kg: '',
-  },
-  {
-    no: 3,
-    lokasi_desa_kecamatan_alamat_pemilik: 'Desa Sidoagung, Kec. Sruweng',
-    nama_tph_r_u: 'RPU ASRIYAH',
-    jenis_unit_usaha: 'RPU',
-    pemilik: 'Asriyah',
-    no_telp: '85156338895',
-    status_ijin_usaha: '',
-    lokasi_rpu: 'Dusun Pacalbalung,Desa Sidoagung, Kec. Sruweng, Kab Kebumen',
-    pemotongan_per_hari_ekor: '',
-    sertifikat_halal: 'Sudah (disperindag)',
-    sertifikat_nkv: 'belum',
-    rata2_produksi_per_bulan_kg: '',
-  },
-  {
-    no: 4,
-    lokasi_desa_kecamatan_alamat_pemilik: 'Desa Sidoagung, Kec. Sruweng',
-    nama_tph_r_u: 'RPU ZAIN',
-    jenis_unit_usaha: 'RPU',
-    pemilik: 'Mugiarti',
-    no_telp: '81329706588',
-    status_ijin_usaha: '',
-    lokasi_rpu: 'Dusun Pacalbalung,Desa Sidoagung, Kec. Sruweng, Kab Kebumen',
-    pemotongan_per_hari_ekor: '',
-    sertifikat_halal: 'Sudah (disperindag)',
-    sertifikat_nkv: 'belum',
-    rata2_produksi_per_bulan_kg: '',
-  },
-  {
-    no: 5,
-    lokasi_desa_kecamatan_alamat_pemilik: 'Desa Sidoagung, Kec. Sruweng',
-    nama_tph_r_u: 'RPU FITRIA',
-    jenis_unit_usaha: 'RPU',
-    pemilik: 'Muhajir',
-    no_telp: '81327051625',
-    status_ijin_usaha: '',
-    lokasi_rpu: 'Dusun Pacalbalung,Desa Sidoagung, Kec. Sruweng, Kab Kebumen',
-    pemotongan_per_hari_ekor: '',
-    sertifikat_halal: 'Sudah (disperindag)',
-    sertifikat_nkv: 'belum',
-    rata2_produksi_per_bulan_kg: '',
-  },
-  {
-    no: 6,
-    lokasi_desa_kecamatan_alamat_pemilik: 'Sido gede',
-    nama_tph_r_u: 'Ayam Broiler Segar Prembun',
-    jenis_unit_usaha: 'TPU',
-    pemilik: 'Diana Herdiana Wati',
-    no_telp: '',
-    status_ijin_usaha: '',
-    lokasi_rpu: 'Sidogede Prembun',
-    pemotongan_per_hari_ekor: '',
-    sertifikat_halal: 'ada',
-    sertifikat_nkv: '-',
-    rata2_produksi_per_bulan_kg: '',
-  },
-  {
-    no: 7,
-    lokasi_desa_kecamatan_alamat_pemilik: 'Sidogede',
-    nama_tph_r_u: 'Pak Muslim',
-    jenis_unit_usaha: 'TPU',
-    pemilik: 'Muslim',
-    no_telp: '',
-    status_ijin_usaha: '',
-    lokasi_rpu: 'Sidogede Rt 03 / Rw 01',
-    pemotongan_per_hari_ekor: '35',
-    sertifikat_halal: '',
-    sertifikat_nkv: 'belum',
-    rata2_produksi_per_bulan_kg: '2100',
-  },
-  {
-    no: 8,
-    lokasi_desa_kecamatan_alamat_pemilik: 'Kabuaran',
-    nama_tph_r_u: 'Pak giman',
-    jenis_unit_usaha: 'TPU',
-    pemilik: 'Giman',
-    no_telp: '',
-    status_ijin_usaha: '',
-    lokasi_rpu: 'Kepek Kabuaran Prembun',
-    pemotongan_per_hari_ekor: '30',
-    sertifikat_halal: 'belum',
-    sertifikat_nkv: 'belum',
-    rata2_produksi_per_bulan_kg: '1800',
-  },
-  {
-    no: 9,
-    lokasi_desa_kecamatan_alamat_pemilik: 'Karanganyar',
-    nama_tph_r_u: 'Kios Ayam Nugraha',
-    jenis_unit_usaha: 'TPU',
-    pemilik: 'Siti Aminah',
-    no_telp: '',
-    status_ijin_usaha: '',
-    lokasi_rpu: 'Pasar Karanganyar',
-    pemotongan_per_hari_ekor: '200',
-    sertifikat_halal: 'belum',
-    sertifikat_nkv: 'belum',
-    rata2_produksi_per_bulan_kg: '12000',
-  },
-  {
-    no: 10,
-    lokasi_desa_kecamatan_alamat_pemilik: 'Karanganyar',
-    nama_tph_r_u: 'Pemotongan Ayam Zain',
-    jenis_unit_usaha: 'TPH-U',
-    pemilik: 'Mugiarti',
-    no_telp: '81329706588',
-    status_ijin_usaha: '',
-    lokasi_rpu: 'Pasar Karanganyar',
-    pemotongan_per_hari_ekor: '200',
-    sertifikat_halal: 'belum',
-    sertifikat_nkv: 'belum',
-    rata2_produksi_per_bulan_kg: '12000',
-  },
-  {
-    no: 11,
-    lokasi_desa_kecamatan_alamat_pemilik: 'Karanganyar',
-    nama_tph_r_u: 'Ayam Potong Bu Asriyah',
-    jenis_unit_usaha: 'TPH-U',
-    pemilik: 'Asriyah',
-    no_telp: '85156338895',
-    status_ijin_usaha: '',
-    lokasi_rpu: 'Pasar Karanganyar',
-    pemotongan_per_hari_ekor: '200',
-    sertifikat_halal: 'belum',
-    sertifikat_nkv: 'belum',
-    rata2_produksi_per_bulan_kg: '12000',
-  },
-  {
-    no: 12,
-    lokasi_desa_kecamatan_alamat_pemilik: 'Karanganyar',
-    nama_tph_r_u: 'Pemotongan Ayam Bu Pon',
-    jenis_unit_usaha: 'TPH-U',
-    pemilik: 'Turisman',
-    no_telp: '81391636730',
-    status_ijin_usaha: '',
-    lokasi_rpu: 'Pasar Karanganyar',
-    pemotongan_per_hari_ekor: '200',
-    sertifikat_halal: 'belum',
-    sertifikat_nkv: 'belum',
-    rata2_produksi_per_bulan_kg: '12000',
-  },
-  {
-    no: 13,
-    lokasi_desa_kecamatan_alamat_pemilik: 'Sidomulyo, Karanganyar',
-    nama_tph_r_u: 'RPU TURISMAN',
-    jenis_unit_usaha: 'RPU',
-    pemilik: 'Turisman',
-    no_telp: '81391636730',
-    status_ijin_usaha: '',
-    lokasi_rpu: 'Sidomulyo, Desa Sidomulyo, Kec.Karanganyar, Kab Kebumen',
-    pemotongan_per_hari_ekor: '200',
-    sertifikat_halal: 'sudah (disperindag)',
-    sertifikat_nkv: 'belum',
-    rata2_produksi_per_bulan_kg: '12000',
-  },
-  {
-    no: 14,
-    lokasi_desa_kecamatan_alamat_pemilik: 'Semanding',
-    nama_tph_r_u: 'H Paiman',
-    jenis_unit_usaha: 'TPH-R',
-    pemilik: '',
-    no_telp: '',
-    status_ijin_usaha: '',
-    lokasi_rpu: 'Jl.Potongan , Desa Semanding',
-    pemotongan_per_hari_ekor: '2',
-    sertifikat_halal: 'ada',
-    sertifikat_nkv: 'belum',
-    rata2_produksi_per_bulan_kg: '30',
-  },
-  {
-    no: 15,
-    lokasi_desa_kecamatan_alamat_pemilik: 'Gombong',
-    nama_tph_r_u: 'H Manisman',
-    jenis_unit_usaha: 'TPH-R',
-    pemilik: '',
-    no_telp: '',
-    status_ijin_usaha: '',
-    lokasi_rpu: 'Pemotongan di RPH',
-    pemotongan_per_hari_ekor: '1',
-    sertifikat_halal: 'ada',
-    sertifikat_nkv: 'belum',
-    rata2_produksi_per_bulan_kg: '15',
-  },
-  {
-    no: 16,
-    lokasi_desa_kecamatan_alamat_pemilik: 'Gombong',
-    nama_tph_r_u: 'Pak Elim',
-    jenis_unit_usaha: 'TPH-B',
-    pemilik: '',
-    no_telp: '',
-    status_ijin_usaha: '',
-    lokasi_rpu: 'Pemotongan di RPH',
-    pemotongan_per_hari_ekor: '1',
-    sertifikat_halal: 'TPH B',
-    sertifikat_nkv: 'tidak',
-    rata2_produksi_per_bulan_kg: '10',
-  },
-  {
-    no: 17,
-    lokasi_desa_kecamatan_alamat_pemilik: 'Gombong',
-    nama_tph_r_u: 'Pak Intras',
-    jenis_unit_usaha: 'TPH-B',
-    pemilik: '',
-    no_telp: '',
-    status_ijin_usaha: '',
-    lokasi_rpu: 'Pemotongan di RPH',
-    pemotongan_per_hari_ekor: '1',
-    sertifikat_halal: 'TPH B',
-    sertifikat_nkv: 'tidak',
-    rata2_produksi_per_bulan_kg: '10',
-  },
-  {
-    no: 18,
-    lokasi_desa_kecamatan_alamat_pemilik: 'Desa Wonokriyo/Kec. Gombong',
-    nama_tph_r_u: 'RPU CABUT BULU DAN POTONGAN AYAM ANDRI',
-    jenis_unit_usaha: 'TPH-U',
-    pemilik: 'Andriyanto',
-    no_telp: '081326965865',
-    status_ijin_usaha: '',
-    lokasi_rpu: 'Pasar Gombong',
-    pemotongan_per_hari_ekor: '',
-    sertifikat_halal: 'sudah (disperindag)',
-    sertifikat_nkv: 'belum',
-    rata2_produksi_per_bulan_kg: '',
-  },
-  {
-    no: 19,
-    lokasi_desa_kecamatan_alamat_pemilik: 'Gombong',
-    nama_tph_r_u: 'Pemotongan mAs Arief',
-    jenis_unit_usaha: 'TPH-U',
-    pemilik: 'Arief Jami Faisal',
-    no_telp: '',
-    status_ijin_usaha: '',
-    lokasi_rpu: 'Pasar Gombong',
-    pemotongan_per_hari_ekor: '',
-    sertifikat_halal: '-',
-    sertifikat_nkv: 'belum',
-    rata2_produksi_per_bulan_kg: '',
-  },
-  {
-    no: 20,
-    lokasi_desa_kecamatan_alamat_pemilik: 'Desa Kemukus, Kec. Gombong',
-    nama_tph_r_u: 'RPU PAK BAMBANG',
-    jenis_unit_usaha: 'TPH-U',
-    pemilik: 'Sudarmiya Tiningsih',
-    no_telp: '085878748120',
-    status_ijin_usaha: '',
-    lokasi_rpu: 'Pasar Gombong',
-    pemotongan_per_hari_ekor: '',
-    sertifikat_halal: 'sudah (disperindag',
-    sertifikat_nkv: 'belum',
-    rata2_produksi_per_bulan_kg: '',
-  },
-  {
-    no: 21,
-    lokasi_desa_kecamatan_alamat_pemilik: 'Gombong',
-    nama_tph_r_u: 'RPA FAIZ',
-    jenis_unit_usaha: 'TPH-U',
-    pemilik: 'Faizatul Fuadah',
-    no_telp: '',
-    status_ijin_usaha: '',
-    lokasi_rpu: 'Pasar Gombong',
-    pemotongan_per_hari_ekor: '',
-    sertifikat_halal: '-',
-    sertifikat_nkv: 'belum',
-    rata2_produksi_per_bulan_kg: '',
-  },
-  {
-    no: 22,
-    lokasi_desa_kecamatan_alamat_pemilik: 'Gombong',
-    nama_tph_r_u: 'RPA Pangestu',
-    jenis_unit_usaha: 'TPH-U',
-    pemilik: 'Mahfanda Aldin',
-    no_telp: '',
-    status_ijin_usaha: '',
-    lokasi_rpu: 'Pasar Gombong',
-    pemotongan_per_hari_ekor: '',
-    sertifikat_halal: '-',
-    sertifikat_nkv: 'belum',
-    rata2_produksi_per_bulan_kg: '',
-  },
-  {
-    no: 23,
-    lokasi_desa_kecamatan_alamat_pemilik: 'Semanding, Gombong',
-    nama_tph_r_u: 'RPH Gombong',
-    jenis_unit_usaha: 'RPH',
-    pemilik: '',
-    no_telp: '082135423674 (drh. Rizki) 081802695072 (drh. Suci)',
-    status_ijin_usaha: '',
-    lokasi_rpu: 'jl. Potongan Semanding satu, Desa Semanding, Kec. Gombong',
-    pemotongan_per_hari_ekor: '',
-    sertifikat_halal: 'sudah',
-    sertifikat_nkv: 'proses',
-    rata2_produksi_per_bulan_kg: '',
-  },
-  {
-    no: 24,
-    lokasi_desa_kecamatan_alamat_pemilik: 'Sadang Kulon/ Sadang',
-    nama_tph_r_u: 'Bp. Suyit',
-    jenis_unit_usaha: 'TPU',
-    pemilik: 'Bp. Suyit',
-    no_telp: '085956379134',
-    status_ijin_usaha: 'belum',
-    lokasi_rpu: 'dk. Kalipetir 04/03, Sadangkulon',
-    pemotongan_per_hari_ekor: '75-100',
-    sertifikat_halal: 'belum',
-    sertifikat_nkv: 'belum',
-    rata2_produksi_per_bulan_kg: '6000',
-  },
-  {
-    no: 25,
-    lokasi_desa_kecamatan_alamat_pemilik: 'Sadang Kulon/ Sadang',
-    nama_tph_r_u: 'Sutijah',
-    jenis_unit_usaha: 'TPU',
-    pemilik: 'Sutijah',
-    no_telp: '085215948968',
-    status_ijin_usaha: 'belum',
-    lokasi_rpu: 'sadangkulon, sadang',
-    pemotongan_per_hari_ekor: '30',
-    sertifikat_halal: 'belum',
-    sertifikat_nkv: 'belum',
-    rata2_produksi_per_bulan_kg: '1800',
-  },
-  {
-    no: 26,
-    lokasi_desa_kecamatan_alamat_pemilik: 'Banioro/Karangsambung',
-    nama_tph_r_u: 'Ayam Potong Bu. Salamah',
-    jenis_unit_usaha: 'TPU',
-    pemilik: 'Salamah',
-    no_telp: '',
-    status_ijin_usaha: '',
-    lokasi_rpu: 'Jalan, Panjer, Banioro, Karangsambung, Kebumen Regency, Centr',
-    pemotongan_per_hari_ekor: '50',
-    sertifikat_halal: 'belum',
-    sertifikat_nkv: 'belum',
-    rata2_produksi_per_bulan_kg: '3000',
-  },
-  {
-    no: 27,
-    lokasi_desa_kecamatan_alamat_pemilik: 'Langse/Karangsambung',
-    nama_tph_r_u: 'Kasim Broiler',
-    jenis_unit_usaha: 'TPU',
-    pemilik: 'Kasim',
-    no_telp: '082133090079',
-    status_ijin_usaha: 'belum',
-    lokasi_rpu: 'dukuh gelagah amba rt 2 rw 2, Langse',
-    pemotongan_per_hari_ekor: '60 s/d 70',
-    sertifikat_halal: 'belum',
-    sertifikat_nkv: 'belum',
-    rata2_produksi_per_bulan_kg: '',
-  },
-  {
-    no: 28,
-    lokasi_desa_kecamatan_alamat_pemilik: 'Balingasal',
-    nama_tph_r_u: 'Pak Sakiman',
-    jenis_unit_usaha: 'TPU',
-    pemilik: 'Sakiman',
-    no_telp: '',
-    status_ijin_usaha: '',
-    lokasi_rpu: 'Dusun Kenayan RT 2 / RW 1, desa Balingasal',
-    pemotongan_per_hari_ekor: '35',
-    sertifikat_halal: 'ada',
-    sertifikat_nkv: 'belum',
-    rata2_produksi_per_bulan_kg: '2100',
-  },
-  {
-    no: 29,
-    lokasi_desa_kecamatan_alamat_pemilik: 'Korowelang',
-    nama_tph_r_u: 'Pemotongan Ayam Subhan',
-    jenis_unit_usaha: 'TPU',
-    pemilik: 'Subhan',
-    no_telp: '',
-    status_ijin_usaha: '',
-    lokasi_rpu: 'Korowelang',
-    pemotongan_per_hari_ekor: '15',
-    sertifikat_halal: '-',
-    sertifikat_nkv: 'belum',
-    rata2_produksi_per_bulan_kg: '900',
-  },
-  {
-    no: 30,
-    lokasi_desa_kecamatan_alamat_pemilik: 'Mekarsari',
-    nama_tph_r_u: 'Pemotongan Ayam Rasiyo',
-    jenis_unit_usaha: 'TPU',
-    pemilik: 'Rasiyo (Nasir Machmud /anak)',
-    no_telp: '',
-    status_ijin_usaha: '',
-    lokasi_rpu: 'Duduhan RT 3 RW 3 Mekarsari',
-    pemotongan_per_hari_ekor: '100',
-    sertifikat_halal: '-',
-    sertifikat_nkv: 'belum',
-    rata2_produksi_per_bulan_kg: '6000',
-  },
-  {
-    no: 31,
-    lokasi_desa_kecamatan_alamat_pemilik: 'Tanjungsari',
-    nama_tph_r_u: 'Nur Taufik',
-    jenis_unit_usaha: 'TPU',
-    pemilik: 'Nur Taufik',
-    no_telp: '',
-    status_ijin_usaha: '',
-    lokasi_rpu: 'Tanjungsari',
-    pemotongan_per_hari_ekor: '80',
-    sertifikat_halal: '-',
-    sertifikat_nkv: 'belum',
-    rata2_produksi_per_bulan_kg: '4800',
-  },
-  {
-    no: 32,
-    lokasi_desa_kecamatan_alamat_pemilik: 'Tanjungsari',
-    nama_tph_r_u: 'Umam',
-    jenis_unit_usaha: '',
-    pemilik: 'Umam',
-    no_telp: '',
-    status_ijin_usaha: '',
-    lokasi_rpu: 'Tanjungsari',
-    pemotongan_per_hari_ekor: '50',
-    sertifikat_halal: '-',
-    sertifikat_nkv: 'belum',
-    rata2_produksi_per_bulan_kg: '3000',
-  },
-  {
-    no: 33,
-    lokasi_desa_kecamatan_alamat_pemilik:
-      'Duduhan, Desa Mekarsari, Kec. Kutowinangun, Kab. Kebumen',
-    nama_tph_r_u: 'RPU ABS PREMBUN',
-    jenis_unit_usaha: 'RPU',
-    pemilik: 'Diana Herdiyana Wati',
-    no_telp: '081333591994',
-    status_ijin_usaha: '',
-    lokasi_rpu: 'Pasar Kutowinangun',
-    pemotongan_per_hari_ekor: '',
-    sertifikat_halal: 'sudah (disperindag)',
-    sertifikat_nkv: 'belum',
-    rata2_produksi_per_bulan_kg: '0',
-  },
-  {
-    no: 34,
-    lokasi_desa_kecamatan_alamat_pemilik: 'Korowelang',
-    nama_tph_r_u: 'Manisah',
-    jenis_unit_usaha: 'TPU',
-    pemilik: 'Manisah',
-    no_telp: '',
-    status_ijin_usaha: '',
-    lokasi_rpu: 'Korowelang',
-    pemotongan_per_hari_ekor: '25',
-    sertifikat_halal: '-',
-    sertifikat_nkv: 'belum',
-    rata2_produksi_per_bulan_kg: '1500',
-  },
-  {
-    no: 35,
-    lokasi_desa_kecamatan_alamat_pemilik: 'Mekarsari',
-    nama_tph_r_u: 'Mohamad Tulud',
-    jenis_unit_usaha: 'TPU',
-    pemilik: 'Mohamad Tulud',
-    no_telp: '',
-    status_ijin_usaha: '',
-    lokasi_rpu: 'Duduhan RT 2/ RW 3 Mekarsari',
-    pemotongan_per_hari_ekor: '25',
-    sertifikat_halal: '-',
-    sertifikat_nkv: '-',
-    rata2_produksi_per_bulan_kg: '1500',
-  },
-  {
-    no: 36,
-    lokasi_desa_kecamatan_alamat_pemilik: 'Mekarsari',
-    nama_tph_r_u: 'Bambang Ismanto',
-    jenis_unit_usaha: '',
-    pemilik: 'Bambang Ismanto',
-    no_telp: '',
-    status_ijin_usaha: '',
-    lokasi_rpu: 'Duduhan RT 2/ RW 3 Mekarsari',
-    pemotongan_per_hari_ekor: '20',
-    sertifikat_halal: '-',
-    sertifikat_nkv: 'belum',
-    rata2_produksi_per_bulan_kg: '1200',
-  },
-  {
-    no: 37,
-    lokasi_desa_kecamatan_alamat_pemilik: 'Mekarsari',
-    nama_tph_r_u: 'Hj. Roisah',
-    jenis_unit_usaha: '',
-    pemilik: 'Hj. Roisah',
-    no_telp: '',
-    status_ijin_usaha: '',
-    lokasi_rpu: 'Duduhan RT 2/ RW 3 Mekarsari',
-    pemotongan_per_hari_ekor: '50',
-    sertifikat_halal: '-',
-    sertifikat_nkv: 'belum',
-    rata2_produksi_per_bulan_kg: '3000',
-  },
-  {
-    no: 38,
-    lokasi_desa_kecamatan_alamat_pemilik: 'Mekarsari',
-    nama_tph_r_u: 'Toha Salim',
-    jenis_unit_usaha: '',
-    pemilik: 'Toha Salim',
-    no_telp: '',
-    status_ijin_usaha: '',
-    lokasi_rpu: 'Kuwaon RT 2/ RW 1 Mekarsari',
-    pemotongan_per_hari_ekor: '60',
-    sertifikat_halal: '-',
-    sertifikat_nkv: 'belum',
-    rata2_produksi_per_bulan_kg: '3600',
-  },
-  {
-    no: 39,
-    lokasi_desa_kecamatan_alamat_pemilik: 'Mekarsari',
-    nama_tph_r_u: 'Ismiatun',
-    jenis_unit_usaha: '',
-    pemilik: 'Ismiatun',
-    no_telp: '',
-    status_ijin_usaha: '',
-    lokasi_rpu: 'Patokan 3/4 Mekarsari',
-    pemotongan_per_hari_ekor: '25',
-    sertifikat_halal: '-',
-    sertifikat_nkv: 'belum',
-    rata2_produksi_per_bulan_kg: '1500',
-  },
-  {
-    no: 40,
-    lokasi_desa_kecamatan_alamat_pemilik: 'Kewayuhan',
-    nama_tph_r_u: '',
-    jenis_unit_usaha: 'TPH-R',
-    pemilik: 'Bakir Sutopo',
-    no_telp: '',
-    status_ijin_usaha: '',
-    lokasi_rpu: 'Kewayuhan',
-    pemotongan_per_hari_ekor: '1',
-    sertifikat_halal: 'ada (disperindag)',
-    sertifikat_nkv: 'belum',
-    rata2_produksi_per_bulan_kg: '10',
-  },
-  {
-    no: 41,
-    lokasi_desa_kecamatan_alamat_pemilik: 'Kewayuhan',
-    nama_tph_r_u: '',
-    jenis_unit_usaha: 'TPH-R',
-    pemilik: 'Supriyadi',
-    no_telp: '',
-    status_ijin_usaha: '',
-    lokasi_rpu: 'Kewayuhan',
-    pemotongan_per_hari_ekor: '1',
-    sertifikat_halal: 'ada (diseprindag)',
-    sertifikat_nkv: 'belum',
-    rata2_produksi_per_bulan_kg: '10',
-  },
-  {
-    no: 42,
-    lokasi_desa_kecamatan_alamat_pemilik:
-      'Dukuh Mertokondo, Rt. 004/Rw004, Desa Kutosari Kebumen',
-    nama_tph_r_u: 'RPU SUPER BAROKAH',
-    jenis_unit_usaha: 'RPU',
-    pemilik: 'Syamsul Kurnia',
-    no_telp: '082324259345',
-    status_ijin_usaha: 'ada',
-    lokasi_rpu: 'Dk. Krajan Rt.001/Rw 001 Desa Kedawung Pejagoan',
-    pemotongan_per_hari_ekor: '500',
-    sertifikat_halal: 'ID33110021067310125',
-    sertifikat_nkv: 'belum',
-    rata2_produksi_per_bulan_kg: '30000',
-  },
-  {
-    no: 43,
-    lokasi_desa_kecamatan_alamat_pemilik: 'Wonotirto',
-    nama_tph_r_u: '',
-    jenis_unit_usaha: 'TPH-U',
-    pemilik: 'Supriyono',
-    no_telp: '',
-    status_ijin_usaha: '',
-    lokasi_rpu: 'Karanggayam',
-    pemotongan_per_hari_ekor: '25',
-    sertifikat_halal: '-',
-    sertifikat_nkv: 'belum',
-    rata2_produksi_per_bulan_kg: '1500',
-  },
-  {
-    no: 44,
-    lokasi_desa_kecamatan_alamat_pemilik: 'Mergosono',
-    nama_tph_r_u: 'Sugaianto',
-    jenis_unit_usaha: 'TPH-U',
-    pemilik: 'Sugianto',
-    no_telp: '',
-    status_ijin_usaha: '',
-    lokasi_rpu: '',
-    pemotongan_per_hari_ekor: '',
-    sertifikat_halal: '-',
-    sertifikat_nkv: 'belum',
-    rata2_produksi_per_bulan_kg: '-',
-  },
-  {
-    no: 45,
-    lokasi_desa_kecamatan_alamat_pemilik: 'Arjowinangun',
-    nama_tph_r_u: 'RPU Bapak Hamid (Pak Lurah)',
-    jenis_unit_usaha: 'TPH-U',
-    pemilik: 'Hamid',
-    no_telp: '',
-    status_ijin_usaha: '',
-    lokasi_rpu: '',
-    pemotongan_per_hari_ekor: '',
-    sertifikat_halal: '-',
-    sertifikat_nkv: 'belum',
-    rata2_produksi_per_bulan_kg: '-',
-  },
-  {
-    no: 46,
-    lokasi_desa_kecamatan_alamat_pemilik: 'Buluspesantren',
-    nama_tph_r_u: 'Setrojenar',
-    jenis_unit_usaha: 'TPU',
-    pemilik: 'Bp. Sihim',
-    no_telp: '',
-    status_ijin_usaha: '',
-    lokasi_rpu: 'setrojenar',
-    pemotongan_per_hari_ekor: '',
-    sertifikat_halal: '-',
-    sertifikat_nkv: 'belum',
-    rata2_produksi_per_bulan_kg: '-',
-  },
-  {
-    no: 47,
-    lokasi_desa_kecamatan_alamat_pemilik: 'Buayan',
-    nama_tph_r_u: 'Pangestu Broiler',
-    jenis_unit_usaha: 'TPH-U',
-    pemilik: 'Wakhidin',
-    no_telp: '0821-3922-5865',
-    status_ijin_usaha: '',
-    lokasi_rpu: 'Meto lor 1/4 Rogodadi, Buayan, Kebumen',
-    pemotongan_per_hari_ekor: '8000',
-    sertifikat_halal: 'ID33110024117160725',
-    sertifikat_nkv: 'Berproses',
-    rata2_produksi_per_bulan_kg: '480000',
-  },
-  {
-    no: 48,
-    lokasi_desa_kecamatan_alamat_pemilik: 'Jladri',
-    nama_tph_r_u: 'Saludin',
-    jenis_unit_usaha: 'TPH-U',
-    pemilik: 'Saludin',
-    no_telp: '0821-3782-2233',
-    status_ijin_usaha: '',
-    lokasi_rpu: 'Desa Jladri Kecamatan Buayan',
-    pemotongan_per_hari_ekor: '50',
-    sertifikat_halal: '-',
-    sertifikat_nkv: 'belum',
-    rata2_produksi_per_bulan_kg: '3000',
-  },
-  {
-    no: 49,
-    lokasi_desa_kecamatan_alamat_pemilik: 'Jladri',
-    nama_tph_r_u: 'Sodik',
-    jenis_unit_usaha: 'TPH-U',
-    pemilik: 'Sodik',
-    no_telp: '',
-    status_ijin_usaha: '',
-    lokasi_rpu: 'Desa Jladri Kecamatan Buayan',
-    pemotongan_per_hari_ekor: '50',
-    sertifikat_halal: '-',
-    sertifikat_nkv: 'belum',
-    rata2_produksi_per_bulan_kg: '3000',
-  },
-  {
-    no: 50,
-    lokasi_desa_kecamatan_alamat_pemilik: 'Mergosono',
-    nama_tph_r_u: 'Sugaianto',
-    jenis_unit_usaha: 'TPH-U',
-    pemilik: 'Sugianto',
-    no_telp: '',
-    status_ijin_usaha: '',
-    lokasi_rpu: '',
-    pemotongan_per_hari_ekor: '',
-    sertifikat_halal: '-',
-    sertifikat_nkv: 'belum',
-    rata2_produksi_per_bulan_kg: '0',
-  },
-  {
-    no: 51,
-    lokasi_desa_kecamatan_alamat_pemilik: 'Sikayu',
-    nama_tph_r_u: '',
-    jenis_unit_usaha: 'TPU',
-    pemilik: 'Suwarni',
-    no_telp: '',
-    status_ijin_usaha: '',
-    lokasi_rpu: '',
-    pemotongan_per_hari_ekor: '',
-    sertifikat_halal: '-',
-    sertifikat_nkv: 'belum',
-    rata2_produksi_per_bulan_kg: '0',
-  },
-  {
-    no: 52,
-    lokasi_desa_kecamatan_alamat_pemilik: 'Kalijaya, Alian',
-    nama_tph_r_u: 'RPU Sucipto',
-    jenis_unit_usaha: 'RPU',
-    pemilik: 'Sucipto',
-    no_telp: '',
-    status_ijin_usaha: '',
-    lokasi_rpu: 'Delisen, Kalijaya',
-    pemotongan_per_hari_ekor: '5000',
-    sertifikat_halal: 'ada',
-    sertifikat_nkv: 'Tingkat III',
-    rata2_produksi_per_bulan_kg: '300000',
-  },
-  {
-    no: 53,
-    lokasi_desa_kecamatan_alamat_pemilik:
-      'Dusun Delisen, Desa Kalijaya, Kec. Alian, Kab. Kebumen',
-    nama_tph_r_u: 'RPU UD  Wahyu Jaya',
-    jenis_unit_usaha: 'RPU',
-    pemilik: 'Suratman',
-    no_telp: '081548338303',
-    status_ijin_usaha: 'sudah',
-    lokasi_rpu: 'Dk Delisen Rt 02/Rw 01; Aneka Usaha',
-    pemotongan_per_hari_ekor: '50',
-    sertifikat_halal: 'No:MUI-LPPOM-1502114930723 Tanggal 7 Juli 2023',
-    sertifikat_nkv: 'belum',
-    rata2_produksi_per_bulan_kg: '3000',
-  },
-  {
-    no: 54,
-    lokasi_desa_kecamatan_alamat_pemilik: 'Surotrunan, Alian',
-    nama_tph_r_u: 'Ahmad broiler',
-    jenis_unit_usaha: 'TPH-U',
-    pemilik: 'Ahmad',
-    no_telp: '082322951116',
-    status_ijin_usaha: '',
-    lokasi_rpu: 'Dk kebebekan surotrunan',
-    pemotongan_per_hari_ekor: '45',
-    sertifikat_halal: 'Belum',
-    sertifikat_nkv: 'Belum',
-    rata2_produksi_per_bulan_kg: '2700',
-  },
-  {
-    no: 55,
-    lokasi_desa_kecamatan_alamat_pemilik:
-      'Desa Jatimulyo Rt 04/Rw04, Kecamatan Alian, Kab. Kebumen',
-    nama_tph_r_u: 'RPU KEBUMEN JAYA FARM',
-    jenis_unit_usaha: 'TPH-U',
-    pemilik: 'Wahyu sugiantoro',
-    no_telp: '081327417131',
-    status_ijin_usaha: 'sudah',
-    lokasi_rpu: 'dk Jatimalang, Jatimulyo',
-    pemotongan_per_hari_ekor: '100',
-    sertifikat_halal: 'sudah',
-    sertifikat_nkv: 'Proses',
-    rata2_produksi_per_bulan_kg: '6000',
-  },
-  {
-    no: 56,
-    lokasi_desa_kecamatan_alamat_pemilik: 'Karangkembang',
-    nama_tph_r_u: 'Kharisun',
-    jenis_unit_usaha: 'TPH-U',
-    pemilik: 'Kharisun',
-    no_telp: '082133336550',
-    status_ijin_usaha: 'belum',
-    lokasi_rpu: 'dk. Era 2/1 Karangkembang',
-    pemotongan_per_hari_ekor: '75',
-    sertifikat_halal: 'belum',
-    sertifikat_nkv: 'belum',
-    rata2_produksi_per_bulan_kg: '4500',
-  },
-  {
-    no: 57,
-    lokasi_desa_kecamatan_alamat_pemilik: '',
-    nama_tph_r_u: '',
-    jenis_unit_usaha: '',
-    pemilik: '',
-    no_telp: '',
-    status_ijin_usaha: '',
-    lokasi_rpu: '',
-    pemotongan_per_hari_ekor: '',
-    sertifikat_halal: '',
-    sertifikat_nkv: '',
-    rata2_produksi_per_bulan_kg: '',
-  },
-  {
-    no: 58,
-    lokasi_desa_kecamatan_alamat_pemilik: 'Surotrunan, Alian',
-    nama_tph_r_u: 'Hangry',
-    jenis_unit_usaha: 'TPH-U',
-    pemilik: 'Topan Ali Purba',
-    no_telp: '082137164182',
-    status_ijin_usaha: 'belum',
-    lokasi_rpu: 'dk kebebekan 3/4 Surotrunan',
-    pemotongan_per_hari_ekor: '40',
-    sertifikat_halal: 'belum',
-    sertifikat_nkv: 'belum',
-    rata2_produksi_per_bulan_kg: '2400',
-  },
-  {
-    no: 59,
-    lokasi_desa_kecamatan_alamat_pemilik: 'Ambalresmi, Ambal',
-    nama_tph_r_u: 'Kaswardiyanto',
-    jenis_unit_usaha: 'TPH-U',
-    pemilik: 'Kaswardiyanto',
-    no_telp: '081805879319',
-    status_ijin_usaha: '',
-    lokasi_rpu: 'Ambalresmi, Ambal',
-    pemotongan_per_hari_ekor: '40',
-    sertifikat_halal: '-',
-    sertifikat_nkv: 'belum',
-    rata2_produksi_per_bulan_kg: '2400',
-  },
-  {
-    no: 60,
-    lokasi_desa_kecamatan_alamat_pemilik: 'Ambalresmi, Ambal',
-    nama_tph_r_u: 'Sugito',
-    jenis_unit_usaha: 'TPH-U',
-    pemilik: 'Sugito',
-    no_telp: '085799329023',
-    status_ijin_usaha: '',
-    lokasi_rpu: 'Ambalresmi, Ambal',
-    pemotongan_per_hari_ekor: '50',
-    sertifikat_halal: '-',
-    sertifikat_nkv: 'belum',
-    rata2_produksi_per_bulan_kg: '3000',
-  },
-  {
-    no: 61,
-    lokasi_desa_kecamatan_alamat_pemilik:
-      'Desa Sumberjati, Rt03/Rw04, Kec. Ambal, Kab. Kebumen',
-    nama_tph_r_u: 'KARENZ BROILER',
-    jenis_unit_usaha: 'TPH-U',
-    pemilik: 'Karyanto',
-    no_telp: '082223585456',
-    status_ijin_usaha: '',
-    lokasi_rpu: 'Sumberjati, Ambal',
-    pemotongan_per_hari_ekor: '1200',
-    sertifikat_halal: 'sudah (disperindag)',
-    sertifikat_nkv: 'belum',
-    rata2_produksi_per_bulan_kg: '72000',
-  },
-  {
-    no: 62,
-    lokasi_desa_kecamatan_alamat_pemilik: 'Blengorwetan, Ambal',
-    nama_tph_r_u: 'Jihan Broiler',
-    jenis_unit_usaha: 'TPH-U',
-    pemilik: 'Tunut',
-    no_telp: '085759006750',
-    status_ijin_usaha: '',
-    lokasi_rpu: 'Blengorwetan, Ambal',
-    pemotongan_per_hari_ekor: '300',
-    sertifikat_halal: '-',
-    sertifikat_nkv: 'belum',
-    rata2_produksi_per_bulan_kg: '18000',
-  },
-  {
-    no: 63,
-    lokasi_desa_kecamatan_alamat_pemilik: 'Blengorkulon, Ambal',
-    nama_tph_r_u: 'Anugrah Broiler',
-    jenis_unit_usaha: 'TPH-U',
-    pemilik: 'H. Warisman',
-    no_telp: '088220129838',
-    status_ijin_usaha: '',
-    lokasi_rpu: 'Blengorkulon, Ambal',
-    pemotongan_per_hari_ekor: '40',
-    sertifikat_halal: '-',
-    sertifikat_nkv: 'belum',
-    rata2_produksi_per_bulan_kg: '2400',
-  },
-  {
-    no: 64,
-    lokasi_desa_kecamatan_alamat_pemilik: 'Selotumpeng, Mirit',
-    nama_tph_r_u: 'MS Suyat',
-    jenis_unit_usaha: 'TPH-U',
-    pemilik: 'Rusdiyono',
-    no_telp: '085292825369',
-    status_ijin_usaha: '',
-    lokasi_rpu: 'Selotumpeng, Mirit',
-    pemotongan_per_hari_ekor: '300',
-    sertifikat_halal: '-',
-    sertifikat_nkv: 'belum',
-    rata2_produksi_per_bulan_kg: '18000',
-  },
-  {
-    no: 65,
-    lokasi_desa_kecamatan_alamat_pemilik: 'Wergonayan, Mirit',
-    nama_tph_r_u: 'Rudy',
-    jenis_unit_usaha: 'TPH-U',
-    pemilik: 'Rudy',
-    no_telp: '081393717244',
-    status_ijin_usaha: '',
-    lokasi_rpu: 'Wergonayan, Mirit',
-    pemotongan_per_hari_ekor: '50',
-    sertifikat_halal: '-',
-    sertifikat_nkv: 'belum',
-    rata2_produksi_per_bulan_kg: '3000',
-  },
-  {
-    no: 66,
-    lokasi_desa_kecamatan_alamat_pemilik: 'Tlogopragoto',
-    nama_tph_r_u: 'Sri Fajar Komsiati',
-    jenis_unit_usaha: 'TPH-U',
-    pemilik: 'Sri Fajar Komsiati',
-    no_telp: '083120496479',
-    status_ijin_usaha: '',
-    lokasi_rpu: 'Tlogopragoto, Mirit',
-    pemotongan_per_hari_ekor: '40',
-    sertifikat_halal: '',
-    sertifikat_nkv: 'belum',
-    rata2_produksi_per_bulan_kg: '2400',
-  },
-  {
-    no: 67,
-    lokasi_desa_kecamatan_alamat_pemilik: 'Adimulyo',
-    nama_tph_r_u: 'PT. Nindya',
-    jenis_unit_usaha: 'TPH-U',
-    pemilik: 'Takhrir / Katamsi',
-    no_telp: '081330535616',
-    status_ijin_usaha: '',
-    lokasi_rpu: 'Desa Mangunharjo rt06/04 Adimulyo',
-    pemotongan_per_hari_ekor: '10000',
-    sertifikat_halal: 'sudah',
-    sertifikat_nkv: 'Berproses',
-    rata2_produksi_per_bulan_kg: '600000',
-  },
-  {
-    no: 68,
-    lokasi_desa_kecamatan_alamat_pemilik: 'Adimulyo',
-    nama_tph_r_u: 'TPH Avika Farm',
-    jenis_unit_usaha: 'TPH-R',
-    pemilik: 'Nugroho Wisnu B',
-    no_telp: '087715478640',
-    status_ijin_usaha: '',
-    lokasi_rpu: 'Kemujan, Adimulyo',
-    pemotongan_per_hari_ekor: '',
-    sertifikat_halal: '-',
-    sertifikat_nkv: 'belum',
-    rata2_produksi_per_bulan_kg: '0',
-  },
-  {
-    no: 69,
-    lokasi_desa_kecamatan_alamat_pemilik: 'Sitiadi',
-    nama_tph_r_u: 'RPHU PT. Cemerlang Unggas Lestari',
-    jenis_unit_usaha: 'RPU',
-    pemilik: 'milik PT',
-    no_telp: '',
-    status_ijin_usaha: '',
-    lokasi_rpu: 'jl. Puring-Gombong No. 117 Area sawah, Sitiadi',
-    pemotongan_per_hari_ekor: '7500',
-    sertifikat_halal: 'ada',
-    sertifikat_nkv: 'RPH-U 330503-237',
-    rata2_produksi_per_bulan_kg: '450000',
-  },
-  {
-    no: 70,
-    lokasi_desa_kecamatan_alamat_pemilik:
-      'Puring Kulon Rt.03/Rw 02, Desa Sitiadi, Kec. Puring, Kab. Kebumen',
-    nama_tph_r_u: 'RPU NUGRAHA',
-    jenis_unit_usaha: 'RPU',
-    pemilik: 'Siti Aminatun',
-    no_telp: '08122725614',
-    status_ijin_usaha: '',
-    lokasi_rpu:
-      'Puring Kulon Rt.03/Rw 02, Desa Sitiadi, Kec. Puring, Kab. Kebumen',
-    pemotongan_per_hari_ekor: '',
-    sertifikat_halal: 'sudah(disperindag)',
-    sertifikat_nkv: 'belum',
-    rata2_produksi_per_bulan_kg: '0',
-  },
-  {
-    no: 71,
-    lokasi_desa_kecamatan_alamat_pemilik: 'Demangsari RT 1 RW 2, Ayah',
-    nama_tph_r_u: 'RPA Satar Chicken',
-    jenis_unit_usaha: 'TPU',
-    pemilik: 'Satar',
-    no_telp: '081327366729',
-    status_ijin_usaha: '',
-    lokasi_rpu: 'Demangsari RT 1 RW 2',
-    pemotongan_per_hari_ekor: '250',
-    sertifikat_halal: '-',
-    sertifikat_nkv: 'belum',
-    rata2_produksi_per_bulan_kg: '15000',
-  },
-  {
-    no: 72,
-    lokasi_desa_kecamatan_alamat_pemilik: 'Pasar Rwowokele',
-    nama_tph_r_u: 'Az Zahra Broiler',
-    jenis_unit_usaha: 'TPu',
-    pemilik: 'Lili Riyanti',
-    no_telp: '085750460866',
-    status_ijin_usaha: '',
-    lokasi_rpu: 'Pasar Rowokele',
-    pemotongan_per_hari_ekor: '50',
-    sertifikat_halal: '-',
-    sertifikat_nkv: 'belum',
-    rata2_produksi_per_bulan_kg: '3000',
-  },
-  {
-    no: 73,
-    lokasi_desa_kecamatan_alamat_pemilik: 'Bejiruyung, Sempor',
-    nama_tph_r_u: 'Barokah',
-    jenis_unit_usaha: 'TPU',
-    pemilik: 'Pak Supri / Najwa',
-    no_telp: '082220429508',
-    status_ijin_usaha: '',
-    lokasi_rpu: 'Jl. Kaligandu, RT 03/1 Bejiruyung, sempor',
-    pemotongan_per_hari_ekor: '50',
-    sertifikat_halal: '-',
-    sertifikat_nkv: 'belum',
-    rata2_produksi_per_bulan_kg: '3000',
-  },
-  {
-    no: 74,
-    lokasi_desa_kecamatan_alamat_pemilik: 'Semanding RT 4/4',
-    nama_tph_r_u: 'Pak Kadar',
-    jenis_unit_usaha: 'TPU',
-    pemilik: 'Pak Kadar',
-    no_telp: '81328267114',
-    status_ijin_usaha: '',
-    lokasi_rpu: 'Semanding RT 4/4',
-    pemotongan_per_hari_ekor: '100',
-    sertifikat_halal: '-',
-    sertifikat_nkv: 'belum',
-    rata2_produksi_per_bulan_kg: '6000',
-  },
-  {
-    no: 75,
-    lokasi_desa_kecamatan_alamat_pemilik: 'Semanding RT 4/4',
-    nama_tph_r_u: 'Sumber Rejeki',
-    jenis_unit_usaha: 'TPU',
-    pemilik: 'Nurfiya',
-    no_telp: '85645112119',
-    status_ijin_usaha: '',
-    lokasi_rpu: 'Karanggayam RT 7 RW 5',
-    pemotongan_per_hari_ekor: '35',
-    sertifikat_halal: '-',
-    sertifikat_nkv: 'belum',
-    rata2_produksi_per_bulan_kg: '2100',
-  },
-  {
-    no: 76,
-    lokasi_desa_kecamatan_alamat_pemilik: 'Karanggayam RT 7 RW 5',
-    nama_tph_r_u: 'Bu surya',
-    jenis_unit_usaha: 'TPU',
-    pemilik: 'Surya',
-    no_telp: '81385644372',
-    status_ijin_usaha: '',
-    lokasi_rpu: 'Dukung Klangon RT 02 RW Desa Sidoagung , Karanganyar',
-    pemotongan_per_hari_ekor: '250',
-    sertifikat_halal: '-',
-    sertifikat_nkv: 'belum',
-    rata2_produksi_per_bulan_kg: '15000',
-  },
-  {
-    no: 77,
-    lokasi_desa_kecamatan_alamat_pemilik:
-      'Dukung Klangon RT 02 RW Desa Sidoagung , Karanganyar',
-    nama_tph_r_u: 'Muslimin',
-    jenis_unit_usaha: 'TPU',
-    pemilik: 'Muslimin',
-    no_telp: '82225977197',
-    status_ijin_usaha: '',
-    lokasi_rpu: 'Kewayuhan Dukuh Taleban RT 02 w 03',
-    pemotongan_per_hari_ekor: '400',
-    sertifikat_halal: '-',
-    sertifikat_nkv: 'belum',
-    rata2_produksi_per_bulan_kg: '24000',
-  },
-  {
-    no: 78,
-    lokasi_desa_kecamatan_alamat_pemilik: 'Kewayuhan Dukuh Taleban RT 02 w 03',
-    nama_tph_r_u: 'Barokah',
-    jenis_unit_usaha: 'TPU',
-    pemilik: 'Bambang',
-    no_telp: '8871379029',
-    status_ijin_usaha: '',
-    lokasi_rpu: 'Dk Pernak 1/3 Kedungwinangun',
-    pemotongan_per_hari_ekor: '25',
-    sertifikat_halal: '-',
-    sertifikat_nkv: 'belum',
-    rata2_produksi_per_bulan_kg: '1500',
-  },
-  {
-    no: 79,
-    lokasi_desa_kecamatan_alamat_pemilik: 'Dk Pernak 1/3 Kedungwinangun',
-    nama_tph_r_u: 'Sari Pitik',
-    jenis_unit_usaha: 'TPU',
-    pemilik: 'Agus',
-    no_telp: '85227010232',
-    status_ijin_usaha: '',
-    lokasi_rpu: 'Dk Rendeng 1/3 Sidomulyo',
-    pemotongan_per_hari_ekor: '250',
-    sertifikat_halal: '-',
-    sertifikat_nkv: 'belum',
-    rata2_produksi_per_bulan_kg: '15000',
-  },
-  {
-    no: 80,
-    lokasi_desa_kecamatan_alamat_pemilik: 'Dk Rendeng 1/3 Sidomulyo',
-    nama_tph_r_u: 'Ayam Kembar',
-    jenis_unit_usaha: 'TPU',
-    pemilik: 'Sulam Taufik',
-    no_telp: '0852-1594-8968',
-    status_ijin_usaha: '',
-    lokasi_rpu: 'DK. Siluk 3/4 Sadangkulon',
-    pemotongan_per_hari_ekor: '50',
-    sertifikat_halal: '-',
-    sertifikat_nkv: 'belum',
-    rata2_produksi_per_bulan_kg: '3000',
-  },
-  {
-    no: 81,
-    lokasi_desa_kecamatan_alamat_pemilik: 'DK. Siluk 3/4 Sadangkulon',
-    nama_tph_r_u: 'Bu Salamah',
-    jenis_unit_usaha: 'TPU',
-    pemilik: 'Salamah',
-    no_telp: '0813 9111 7359',
-    status_ijin_usaha: '',
-    lokasi_rpu: 'Desa Banioro',
-    pemotongan_per_hari_ekor: '25',
-    sertifikat_halal: '-',
-    sertifikat_nkv: 'belum',
-    rata2_produksi_per_bulan_kg: '1500',
-  },
-  {
-    no: 82,
-    lokasi_desa_kecamatan_alamat_pemilik: 'Desa Banioro',
-    nama_tph_r_u: 'Karminah',
-    jenis_unit_usaha: 'TPU',
-    pemilik: 'Karminah',
-    no_telp: '83862269875',
-    status_ijin_usaha: '',
-    lokasi_rpu: 'karang cangkring rt 03 rw 02 tlogorejo bonorowo',
-    pemotongan_per_hari_ekor: '25',
-    sertifikat_halal: '-',
-    sertifikat_nkv: 'belum',
-    rata2_produksi_per_bulan_kg: '1500',
-  },
-  {
-    no: 83,
-    lokasi_desa_kecamatan_alamat_pemilik:
-      'karang cangkring rt 03 rw 02 tlogorejo bonorowo',
-    nama_tph_r_u: 'Surip',
-    jenis_unit_usaha: 'TPU',
-    pemilik: 'Surip',
-    no_telp: '087872456892',
-    status_ijin_usaha: '',
-    lokasi_rpu: 'Dk Kranggan RT 3 RW 4 Desa Prembun, Kec.Prembun',
-    pemotongan_per_hari_ekor: '5',
-    sertifikat_halal: '-',
-    sertifikat_nkv: 'belum',
-    rata2_produksi_per_bulan_kg: '300',
-  },
-  {
-    no: 84,
-    lokasi_desa_kecamatan_alamat_pemilik:
-      'Dk Kranggan RT 3 RW 4 Desa Prembun, Kec.Prembun',
-    nama_tph_r_u: 'Berkah Lestari',
-    jenis_unit_usaha: 'TPU',
-    pemilik: 'Mugiem',
-    no_telp: '',
-    status_ijin_usaha: '',
-    lokasi_rpu: 'Padureso',
-    pemotongan_per_hari_ekor: '850',
-    sertifikat_halal: '-',
-    sertifikat_nkv: 'belum',
-    rata2_produksi_per_bulan_kg: '51000',
-  },
-  {
-    no: 85,
-    lokasi_desa_kecamatan_alamat_pemilik: 'Padureso',
-    nama_tph_r_u: 'Puji Astuti',
-    jenis_unit_usaha: 'TPU',
-    pemilik: 'Puji Astuti',
-    no_telp: '',
-    status_ijin_usaha: '',
-    lokasi_rpu: 'Ungaran RT 2 RW 5 Kec.Kutowinangun',
-    pemotongan_per_hari_ekor: '13',
-    sertifikat_halal: '-',
-    sertifikat_nkv: 'belum',
-    rata2_produksi_per_bulan_kg: '780',
-  },
-  {
-    no: 86,
-    lokasi_desa_kecamatan_alamat_pemilik: 'Ungaran RT 2 RW 5 Kec.Kutowinangun',
-    nama_tph_r_u: 'Lembu Mas',
-    jenis_unit_usaha: 'TPU',
-    pemilik: 'Nanang',
-    no_telp: '88238400692',
-    status_ijin_usaha: '',
-    lokasi_rpu: 'Pasar Wonokriyo / Kalitengah',
-    pemotongan_per_hari_ekor: '15',
-    sertifikat_halal: '-',
-    sertifikat_nkv: 'belum',
-    rata2_produksi_per_bulan_kg: '900',
-  },
-  {
-    no: 87,
-    lokasi_desa_kecamatan_alamat_pemilik: 'Pasar Wonokriyo / Kalitengah',
-    nama_tph_r_u: 'Pak Wakhidin',
-    jenis_unit_usaha: 'TPU',
-    pemilik: 'Ibu Ginah',
-    no_telp: '81226338781',
-    status_ijin_usaha: '',
-    lokasi_rpu: 'Pasar Wonokriyo / Somagede',
-    pemotongan_per_hari_ekor: '50',
-    sertifikat_halal: '-',
-    sertifikat_nkv: 'belum',
-    rata2_produksi_per_bulan_kg: '3000',
-  },
-  {
-    no: 88,
-    lokasi_desa_kecamatan_alamat_pemilik: 'Pasar Wonokriyo / Somagede',
-    nama_tph_r_u: 'Siti Mutmainah (RPU AHM kutowinangun)',
-    jenis_unit_usaha: 'TPU',
-    pemilik: 'Mas Didin',
-    no_telp: '',
-    status_ijin_usaha: '',
-    lokasi_rpu: 'Pasar Tumenggungan',
-    pemotongan_per_hari_ekor: '100',
-    sertifikat_halal: '-',
-    sertifikat_nkv: 'belum',
-    rata2_produksi_per_bulan_kg: '6000',
-  },
-  {
-    no: 89,
-    lokasi_desa_kecamatan_alamat_pemilik: 'Pasar Tumenggungan',
-    nama_tph_r_u: 'badriyah ( kuwayuhan)',
-    jenis_unit_usaha: 'TPU',
-    pemilik: 'Suwarti',
-    no_telp: '82220150054',
-    status_ijin_usaha: '',
-    lokasi_rpu: 'Pasar Tumenggungan',
-    pemotongan_per_hari_ekor: '30',
-    sertifikat_halal: '-',
-    sertifikat_nkv: 'belum',
-    rata2_produksi_per_bulan_kg: '1800',
-  },
-  {
-    no: 90,
-    lokasi_desa_kecamatan_alamat_pemilik:
-      'Arjowinangun RT 2 / 2, Buluspesantren',
-    nama_tph_r_u: 'RPU New Broiler',
-    jenis_unit_usaha: 'TPU',
-    pemilik: 'Atik Muhimatun / Hamid',
-    no_telp: '85747313332',
-    status_ijin_usaha: '',
-    lokasi_rpu: 'Arjowinangun RT 2 / 2, Buluspesantren',
-    pemotongan_per_hari_ekor: '100',
-    sertifikat_halal: 'halal',
-    sertifikat_nkv: 'belum',
-    rata2_produksi_per_bulan_kg: '3000',
-  },
-  {
-    no: 91,
-    lokasi_desa_kecamatan_alamat_pemilik: 'Krajan RT 3 /1, Padureso',
-    nama_tph_r_u: 'Subur Jaya',
-    jenis_unit_usaha: 'TPU',
-    pemilik: 'Subur Gunawan',
-    no_telp: '81573654703',
-    status_ijin_usaha: '',
-    lokasi_rpu: 'Krajan RT 3 /1, Padureso',
-    pemotongan_per_hari_ekor: '30',
-    sertifikat_halal: '-',
-    sertifikat_nkv: 'belum',
-    rata2_produksi_per_bulan_kg: '900',
-  },
-  {
-    no: 92,
-    lokasi_desa_kecamatan_alamat_pemilik:
-      'Sidobunder, RT 1 RW 1, Puring, Kebumen',
-    nama_tph_r_u: 'Adem Ayem',
-    jenis_unit_usaha: 'TPU',
-    pemilik: 'Septiana Retno Lestari',
-    no_telp: '895329231822',
-    status_ijin_usaha: '',
-    lokasi_rpu: 'Sidobunder, RT 1 RW 1, Puring, Kebumen',
-    pemotongan_per_hari_ekor: '30',
-    sertifikat_halal: 'halal',
-    sertifikat_nkv: 'belum',
-    rata2_produksi_per_bulan_kg: '900',
-  },
-  {
-    no: 93,
-    lokasi_desa_kecamatan_alamat_pemilik: 'Tamanwinangun RT 3 RW 5',
-    nama_tph_r_u: 'Kencleng',
-    jenis_unit_usaha: 'TPU',
-    pemilik: 'Dani Riyadi',
-    no_telp: '82329355617',
-    status_ijin_usaha: '',
-    lokasi_rpu: 'Tamanwinangun RT 3 RW 5',
-    pemotongan_per_hari_ekor: '30',
-    sertifikat_halal: '-',
-    sertifikat_nkv: 'belum',
-    rata2_produksi_per_bulan_kg: '900',
-  },
-  {
-    no: 94,
-    lokasi_desa_kecamatan_alamat_pemilik:
-      'Jl. Pemandian Barat Dk. Era, Karangkembang, Alian',
-    nama_tph_r_u: 'Ayam Potong Pak Kharisun',
-    jenis_unit_usaha: 'TPU',
-    pemilik: 'Kharisun',
-    no_telp: '88227219400',
-    status_ijin_usaha: '',
-    lokasi_rpu:
-      '/ Pasar Sruni /Jl. Pemandian Barat Dk. Era, Karangkembang, Alian',
-    pemotongan_per_hari_ekor: '3-',
-    sertifikat_halal: '-',
-    sertifikat_nkv: 'belum',
-    rata2_produksi_per_bulan_kg: '900',
-  },
-  {
-    no: 95,
-    lokasi_desa_kecamatan_alamat_pemilik:
-      'Dk. Taleban RT 2 RW 3, Kuwayuhan, Pejagoan',
-    nama_tph_r_u: 'Muslimin',
-    jenis_unit_usaha: 'TPU',
-    pemilik: 'Muslimin',
-    no_telp: '08225977197/087790034000',
-    status_ijin_usaha: '',
-    lokasi_rpu: 'Dk. Taleban RT 2 RW 3, Kuwayuhan, Pejagoan',
-    pemotongan_per_hari_ekor: '50',
-    sertifikat_halal: 'halal',
-    sertifikat_nkv: 'belum',
-    rata2_produksi_per_bulan_kg: '1500',
-  },
-  {
-    no: 96,
-    lokasi_desa_kecamatan_alamat_pemilik: 'Tlogopragoto, Mirit',
-    nama_tph_r_u: 'Supriyono',
-    jenis_unit_usaha: 'TPU',
-    pemilik: 'Supriyono',
-    no_telp: '81227425917',
-    status_ijin_usaha: '',
-    lokasi_rpu: 'Tlogopragoto, Mirit',
-    pemotongan_per_hari_ekor: '20',
-    sertifikat_halal: '-',
-    sertifikat_nkv: 'belum',
-    rata2_produksi_per_bulan_kg: '600',
-  },
-  {
-    no: 97,
-    lokasi_desa_kecamatan_alamat_pemilik: 'Grogol beningsari',
-    nama_tph_r_u: 'Toko RJ',
-    jenis_unit_usaha: 'TPU',
-    pemilik: 'Muslihatun',
-    no_telp: '85227876107',
-    status_ijin_usaha: '',
-    lokasi_rpu: 'Grogol, Beningsari',
-    pemotongan_per_hari_ekor: '50',
-    sertifikat_halal: '-',
-    sertifikat_nkv: 'belum',
-    rata2_produksi_per_bulan_kg: '1500',
-  },
-  {
-    no: 98,
-    lokasi_desa_kecamatan_alamat_pemilik: 'Bocor RT 6 RW 1',
-    nama_tph_r_u: 'Nasehudin',
-    jenis_unit_usaha: 'TPU',
-    pemilik: 'ABS Kebumen',
-    no_telp: '85134583141',
-    status_ijin_usaha: '',
-    lokasi_rpu: 'Bocor RT 6 RW 1, Buluspesantren',
-    pemotongan_per_hari_ekor: '25',
-    sertifikat_halal: '-',
-    sertifikat_nkv: 'belum',
-    rata2_produksi_per_bulan_kg: '750',
-  },
-  {
-    no: 99,
-    lokasi_desa_kecamatan_alamat_pemilik: 'Argopeni RT 2 RW 3, Kebumen',
-    nama_tph_r_u: 'Sofiyanto',
-    jenis_unit_usaha: 'TPU',
-    pemilik: 'Argo Mulia',
-    no_telp: '87700040707',
-    status_ijin_usaha: '',
-    lokasi_rpu: 'Argopeni RT 2 RW 3, Kebumen',
-    pemotongan_per_hari_ekor: '250',
-    sertifikat_halal: '-',
-    sertifikat_nkv: 'belum',
-    rata2_produksi_per_bulan_kg: '7500',
-  },
-  {
-    no: 100,
-    lokasi_desa_kecamatan_alamat_pemilik: 'Kuwayuhan',
-    nama_tph_r_u: 'Mursiyah',
-    jenis_unit_usaha: 'TPU',
-    pemilik: 'Mrs Broiler',
-    no_telp: '85227761833',
-    status_ijin_usaha: '',
-    lokasi_rpu: 'Kuwayuhan',
-    pemotongan_per_hari_ekor: '20',
-    sertifikat_halal: 'halal',
-    sertifikat_nkv: 'belum',
-    rata2_produksi_per_bulan_kg: '600',
-  },
-  {
-    no: 101,
-    lokasi_desa_kecamatan_alamat_pemilik: 'Kuwayuhan, Pejagoan',
-    nama_tph_r_u: 'Muslimin',
-    jenis_unit_usaha: 'TPH (ayam, Bebek, Sapi)',
-    pemilik: 'Muslimin',
-    no_telp: '08225977197/ 087790034000',
-    status_ijin_usaha: '',
-    lokasi_rpu: 'Kuwayuhan, Pejagoan',
-    pemotongan_per_hari_ekor: '-',
-    sertifikat_halal: 'halal',
-    sertifikat_nkv: 'belum',
-    rata2_produksi_per_bulan_kg: '-',
-  },
+const BULAN_NAMES = [
+  'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
+  'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'
 ];
 
-// Tipe data satu entri unit pemotongan dengan dukungan upload berkas
-export interface RphItem {
-  no: number;
-  lokasi_desa_kecamatan_alamat_pemilik?: string;
-  nama_tph_r_u?: string;
-  jenis_unit_usaha?: string;
-  pemilik?: string;
-  no_telp?: string;
-  status_ijin_usaha?: string;
-  lokasi_rpu?: string;
-  pemotongan_per_hari_ekor?: string;
-  sertifikat_halal?: string;
-  sertifikat_nkv?: string;
-  rata2_produksi_per_bulan_kg?: string;
-  // Upload berkas dokumen
-  file_sertifikat_halal?: string;
-  file_sertifikat_halal_name?: string;
-  file_sertifikat_nkv?: string;
-  file_sertifikat_nkv_name?: string;
-  file_izin_usaha?: string;
-  file_izin_usaha_name?: string;
-  file_foto_fasilitas?: string;
-  file_foto_fasilitas_name?: string;
-}
+const LOKASI_CONFIGS = [
+  { key: 'rph_kebumen', label: '1. RPH Kebumen', subtitle: 'Unit Pemotongan Hewan Resmi Kebumen' },
+  { key: 'luar_rph_kebumen', label: '2. Luar RPH Kebumen', subtitle: 'Pemotongan Masyarakat / Wilayah Luar RPH Kebumen' },
+  { key: 'rph_gombong', label: '3. RPH Gombong', subtitle: 'Unit Pemotongan Hewan Resmi Gombong (Termasuk Babi)' },
+  { key: 'luar_rph_gombong', label: '4. Luar RPH Gombong', subtitle: 'Pemotongan Masyarakat / Wilayah Luar RPH Gombong (Termasuk Babi)' },
+];
 
-const LS_KEY = 'data_rph_tph_tpu_v1';
-
-// Skema kosong untuk form tambah/edit
-const emptyForm: RphItem = {
-  no: 0,
-  lokasi_desa_kecamatan_alamat_pemilik: '',
-  nama_tph_r_u: '',
-  jenis_unit_usaha: 'TPU',
-  pemilik: '',
-  no_telp: '',
-  status_ijin_usaha: '',
-  lokasi_rpu: '',
-  pemotongan_per_hari_ekor: '',
-  sertifikat_halal: '',
-  sertifikat_nkv: '',
-  rata2_produksi_per_bulan_kg: '',
-  file_sertifikat_halal: '',
-  file_sertifikat_halal_name: '',
-  file_sertifikat_nkv: '',
-  file_sertifikat_nkv_name: '',
-  file_izin_usaha: '',
-  file_izin_usaha_name: '',
-  file_foto_fasilitas: '',
-  file_foto_fasilitas_name: '',
-};
-
-const FIELD_LABELS: Record<string, string> = {
-  nama_tph_r_u: 'Nama TPH/RPU / Unit Usaha',
-  jenis_unit_usaha: 'Jenis Unit Usaha',
-  pemilik: 'Nama Pemilik / Pengelola',
-  no_telp: 'No. Telp / WhatsApp',
-  status_ijin_usaha: 'Status Ijin Usaha / Legalitas',
-  lokasi_rpu: 'Lokasi RPU / TPH',
-  lokasi_desa_kecamatan_alamat_pemilik: 'Lokasi Desa / Kecamatan / Alamat Lengkap',
-  pemotongan_per_hari_ekor: 'Estimasi Pemotongan per Hari (ekor)',
-  sertifikat_halal: 'Keterangan Sertifikat Halal',
-  sertifikat_nkv: 'Keterangan Sertifikat NKV',
-  rata2_produksi_per_bulan_kg: 'Rata-rata Produksi Daging per Bulan (kg)',
-};
+const KOMODITAS_LIST = ['Sapi Potong', 'Kuda', 'Babi', 'Kambing', 'Domba'];
 
 export default function RphTphTpuPage() {
-  const { isReady, canEdit } = usePageAuth('kesmavet', 'rph-tph-tpu');
-  const [dataRph, setDataRph] = useState<RphItem[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [selectedKategori, setSelectedKategori] = useState('Semua');
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [editingNo, setEditingNo] = useState<number | null>(null);
-  const [formValues, setFormValues] = useState<RphItem>(emptyForm);
-  const [confirmDeleteNo, setConfirmDeleteNo] = useState<number | null>(null);
+  const { isReady, canEdit, userRole } = usePageAuth('kesmavet', 'rph-tph-tpu');
 
-  // State untuk modal pratinjau dokumen / PDF / Foto
-  const [previewDoc, setPreviewDoc] = useState<{
-    isOpen: boolean;
-    title: string;
-    url: string;
-    fileName: string;
-  }>({
-    isOpen: false,
-    title: '',
-    url: '',
-    fileName: '',
+  // Role Admin Check
+  const isAdmin = useMemo(() => {
+    const session = getAuthSession();
+    const roleFromSession = (session?.role || '').toLowerCase();
+    const roleFromHook = (userRole || '').toLowerCase();
+    return (
+      roleFromSession.includes('admin') ||
+      roleFromHook.includes('admin') ||
+      session?.role === 'Administrator' ||
+      userRole === 'Administrator' ||
+      canEdit
+    );
+  }, [userRole, canEdit]);
+
+  // Navigation tabs (URUTAN SESUAI PERMINTAAN USER: 1. Input Pemotongan, 2. TPH, 3. Data Rumah Potong)
+  const [activeTab, setActiveTab] = useState<'pemotongan_rumpun' | 'rekap_komoditas' | 'rumah_potong'>('pemotongan_rumpun');
+
+  // Tab 1 & 2 Location Switcher (Horizontal Button Switcher)
+  const [selectedLokasiKey, setSelectedLokasiKey] = useState<string>('rph_kebumen');
+  const [selectedKomoditasFilter, setSelectedKomoditasFilter] = useState<string>('ALL');
+
+  // Year filter & dynamic multi-year state
+  const [selectedYear, setSelectedYear] = useState<number>(2025);
+  const [availableYears, setAvailableYears] = useState<number[]>([2025, 2026]);
+  const [showAddYearModal, setShowAddYearModal] = useState<boolean>(false);
+  const [newYearInput, setNewYearInput] = useState<number>(2026);
+  const [isAddingYear, setIsAddingYear] = useState<boolean>(false);
+
+  // ── 1. STATE TAB: DATA RUMAH POTONG (RPH / TPH / TPU) ──
+  const [rphList, setRphList] = useState<any[]>([]);
+  const [isLoadingRph, setIsLoadingRph] = useState(true);
+  const [searchRph, setSearchRph] = useState('');
+  const [filterJenis, setFilterJenis] = useState('ALL');
+  const [filterHalal, setFilterHalal] = useState('ALL');
+  const [showAddModal, setShowAddModal] = useState(false);
+  const [editingItem, setEditingItem] = useState<any | null>(null);
+  const [formRph, setFormRph] = useState({
+    nama_usaha: '',
+    jenis: 'TPU',
+    pemilik: '',
+    alamat_pemilik: '',
+    kontak: '',
+    lokasi: '',
+    status_perijinan: '',
+    sertifikat_halal: '',
+    sertifikat_nkv: 'belum',
   });
 
-  // Load data dari database
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        setLoading(true);
-        const res = await fetch('/api/pemotongan-hewan');
-        const json = await res.json();
-        if (json.success && Array.isArray(json.data)) {
-          const mapped: RphItem[] = json.data.map((row: any, idx: number) => ({
-            no: row.id || idx + 1,
-            nama_tph_r_u: row.nama_usaha || '',
-            jenis_unit_usaha: row.jenis || '',
-            pemilik: row.pemilik || '',
-            no_telp: row.kontak || '',
-            status_ijin_usaha: row.status_perijinan || '',
-            lokasi_rpu: row.lokasi || '',
-            lokasi_desa_kecamatan_alamat_pemilik: row.alamat_pemilik || '',
-            pemotongan_per_hari_ekor: row.pemotongan_per_hari_ekor ? String(row.pemotongan_per_hari_ekor) : '',
-            sertifikat_halal: row.sertifikat_halal || '',
-            sertifikat_nkv: row.sertifikat_nkv || '',
-            rata2_produksi_per_bulan_kg: row.produksi_per_bulan_kg ? String(row.produksi_per_bulan_kg) : '',
-            file_sertifikat_halal: '',
-            file_sertifikat_halal_name: '',
-            file_sertifikat_nkv: '',
-            file_sertifikat_nkv_name: '',
-            file_izin_usaha: '',
-            file_izin_usaha_name: '',
-            file_foto_fasilitas: '',
-            file_foto_fasilitas_name: '',
-          }));
-          setDataRph(mapped);
-        }
-      } catch (err) {
-        console.error('Gagal memuat data RPH/TPH:', err);
-      } finally {
-        setLoading(false);
+  // ── 2. STATE TAB: INPUT PEMOTONGAN RUMAH POTONG HEWAN (4 TABEL RUMPUN SAPI) ──
+  const [rumpunData, setRumpunData] = useState<Record<string, any[]>>({
+    rph_kebumen: [],
+    luar_rph_kebumen: [],
+    rph_gombong: [],
+    luar_rph_gombong: [],
+  });
+  const [isLoadingRumpun, setIsLoadingRumpun] = useState(false);
+  const [isSavingRumpun, setIsSavingRumpun] = useState(false);
+  const [rumpunSaveMessage, setRumpunSaveMessage] = useState('');
+
+  // ── 3. STATE TAB: TEMPAT PEMOTONGAN HEWAN (TPH) / KOMODITAS TERNAK (12 BULAN) ──
+  const [komoditasData, setKomoditasData] = useState<any[]>([]);
+  const [isLoadingKomoditas, setIsLoadingKomoditas] = useState(false);
+  const [isSavingKomoditas, setIsSavingKomoditas] = useState(false);
+  const [komoditasSaveMessage, setKomoditasSaveMessage] = useState('');
+
+  // ── FETCH AVAILABLE YEARS ──
+  const loadAvailableYears = async () => {
+    try {
+      const [res1, res2] = await Promise.all([
+        fetch('/api/pemotongan-rumpun?action=years'),
+        fetch('/api/pemotongan-komoditas?action=years'),
+      ]);
+      const json1 = await res1.json();
+      const json2 = await res2.json();
+      
+      const yearsSet = new Set<number>([2025, 2026]);
+      if (json1.success && Array.isArray(json1.years)) {
+        json1.years.forEach((y: number) => yearsSet.add(Number(y)));
       }
-    };
-    fetchData();
+      if (json2.success && Array.isArray(json2.years)) {
+        json2.years.forEach((y: number) => yearsSet.add(Number(y)));
+      }
+      setAvailableYears(Array.from(yearsSet).sort((a, b) => a - b));
+    } catch (err) {
+      console.warn('Gagal memuat tahun unik:', err);
+    }
+  };
+
+  // ── 1. LOAD DATA RUMAH POTONG ──
+  const loadRphData = async () => {
+    try {
+      setIsLoadingRph(true);
+      const res = await fetch('/api/pemotongan-hewan');
+      const json = await res.json();
+      if (json.success && Array.isArray(json.data)) {
+        setRphList(json.data);
+      }
+    } catch (err) {
+      console.error('Gagal memuat data RPH:', err);
+    } finally {
+      setIsLoadingRph(false);
+    }
+  };
+
+  // ── 2. LOAD DATA PEMOTONGAN RUMPUN SAPI ──
+  const loadRumpunData = async (year: number) => {
+    try {
+      setIsLoadingRumpun(true);
+      const res = await fetch(`/api/pemotongan-rumpun?tahun=${year}`);
+      const json = await res.json();
+      if (json.success && json.data) {
+        setRumpunData({
+          rph_kebumen: json.data.rph_kebumen || [],
+          luar_rph_kebumen: json.data.luar_rph_kebumen || [],
+          rph_gombong: json.data.rph_gombong || [],
+          luar_rph_gombong: json.data.luar_rph_gombong || [],
+        });
+      }
+    } catch (err) {
+      console.error('Gagal memuat data pemotongan rumpun:', err);
+    } finally {
+      setIsLoadingRumpun(false);
+    }
+  };
+
+  // ── 3. LOAD DATA REKAP KOMODITAS TERNAK ──
+  const loadKomoditasData = async (year: number) => {
+    try {
+      setIsLoadingKomoditas(true);
+      const res = await fetch(`/api/pemotongan-komoditas?tahun=${year}`);
+      const json = await res.json();
+      if (json.success && Array.isArray(json.data)) {
+        // Ensure Gombong and Luar Gombong have Babi row if missing
+        let data = json.data;
+        const ensureBabi = (lokasiName: string) => {
+          const exists = data.some((r: any) => r.nama_pemotongan === lokasiName && (r.komoditas || '').toLowerCase() === 'babi');
+          if (!exists) {
+            data.push({
+              tahun: year,
+              nama_pemotongan: lokasiName,
+              komoditas: 'Babi',
+              jan_jantan: 0, jan_betina: 0,
+              feb_jantan: 0, feb_betina: 0,
+              mar_jantan: 0, mar_betina: 0,
+              apr_jantan: 0, apr_betina: 0,
+              mei_jantan: 0, mei_betina: 0,
+              jun_jantan: 0, jun_betina: 0,
+              jul_jantan: 0, jul_betina: 0,
+              agu_jantan: 0, agu_betina: 0,
+              sep_jantan: 0, sep_betina: 0,
+              okt_jantan: 0, okt_betina: 0,
+              nov_jantan: 0, nov_betina: 0,
+              des_jantan: 0, des_betina: 0,
+            });
+          }
+        };
+        ensureBabi('RPH Gombong');
+        ensureBabi('Luar RPH Gombong');
+        setKomoditasData(data);
+      }
+    } catch (err) {
+      console.error('Gagal memuat data komoditas:', err);
+    } finally {
+      setIsLoadingKomoditas(false);
+    }
+  };
+
+  useEffect(() => {
+    loadAvailableYears();
+    loadRphData();
   }, []);
 
+  useEffect(() => {
+    loadRumpunData(selectedYear);
+    loadKomoditasData(selectedYear);
+  }, [selectedYear]);
 
-  const filteredData = dataRph.filter((item) => {
-    const matchSearch =
-      (item.nama_tph_r_u || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
-      (item.pemilik || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
-      (item.lokasi_rpu || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
-      (item.lokasi_desa_kecamatan_alamat_pemilik || '').toLowerCase().includes(searchTerm.toLowerCase());
-
-    const matchKategori =
-      selectedKategori === 'Semua' ||
-      (item.jenis_unit_usaha || '').toUpperCase().includes(selectedKategori.toUpperCase());
-
-    return matchSearch && matchKategori;
-  });
-
-  const openAddModal = () => {
-    setEditingNo(null);
-    setFormValues(emptyForm);
-    setIsModalOpen(true);
-  };
-
-  const openEditModal = (item: RphItem) => {
-    setEditingNo(item.no);
-    setFormValues({ ...item });
-    setIsModalOpen(true);
-  };
-
-  const closeModal = () => {
-    setIsModalOpen(false);
-    setEditingNo(null);
-    setFormValues(emptyForm);
-  };
-
-  const handleFieldChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-    const { name, value } = e.target;
-    setFormValues((prev) => ({ ...prev, [name]: value }));
-  };
-
-  // Handler Upload Berkas File (PDF / Gambar)
-  const handleFileUpload = (
-    e: React.ChangeEvent<HTMLInputElement>,
-    fieldKey: 'file_sertifikat_halal' | 'file_sertifikat_nkv' | 'file_izin_usaha' | 'file_foto_fasilitas',
-    nameKey: 'file_sertifikat_halal_name' | 'file_sertifikat_nkv_name' | 'file_izin_usaha_name' | 'file_foto_fasilitas_name'
-  ) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-
-    if (file.size > 15 * 1024 * 1024) {
-      alert('Ukuran berkas maksimal 15 MB.');
-      return;
-    }
-
-    const reader = new FileReader();
-    reader.onload = (event) => {
-      const base64 = event.target?.result as string;
-      setFormValues((prev) => {
-        const next = {
-          ...prev,
-          [fieldKey]: base64,
-          [nameKey]: file.name,
-        };
-        // Auto-sinkronisasi teks keterangan jika kosong
-        if (fieldKey === 'file_sertifikat_halal' && (!prev.sertifikat_halal || prev.sertifikat_halal.toLowerCase().includes('belum'))) {
-          next.sertifikat_halal = 'Sudah Halal (Berkas Terlampir)';
-        }
-        if (fieldKey === 'file_sertifikat_nkv' && (!prev.sertifikat_nkv || prev.sertifikat_nkv.toLowerCase().includes('belum'))) {
-          next.sertifikat_nkv = 'Ada Sertifikat NKV (Berkas Terlampir)';
-        }
-        if (fieldKey === 'file_izin_usaha' && (!prev.status_ijin_usaha || prev.status_ijin_usaha.trim() === '')) {
-          next.status_ijin_usaha = 'Ada NIB / Izin Usaha (Berkas Terlampir)';
-        }
-        return next;
-      });
-    };
-    reader.readAsDataURL(file);
-  };
-
-  const handleRemoveFile = (
-    fieldKey: 'file_sertifikat_halal' | 'file_sertifikat_nkv' | 'file_izin_usaha' | 'file_foto_fasilitas',
-    nameKey: 'file_sertifikat_halal_name' | 'file_sertifikat_nkv_name' | 'file_izin_usaha_name' | 'file_foto_fasilitas_name'
-  ) => {
-    setFormValues((prev) => ({
-      ...prev,
-      [fieldKey]: '',
-      [nameKey]: '',
-    }));
-  };
-
-  const openDocPreview = (title: string, url: string, fileName: string) => {
-    setPreviewDoc({
-      isOpen: true,
-      title,
-      url,
-      fileName,
-    });
-  };
-
-  const closeDocPreview = () => {
-    setPreviewDoc({
-      isOpen: false,
-      title: '',
-      url: '',
-      fileName: '',
-    });
-  };
-
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+  // ── TAMBAH TAHUN BARU HANDLER ──
+  const handleAddYearSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!formValues.nama_tph_r_u || !formValues.nama_tph_r_u.trim()) {
-      alert('Nama TPH/RPU wajib diisi.');
+    if (!newYearInput || newYearInput < 2000) {
+      alert('Masukkan tahun yang valid');
       return;
     }
 
     try {
-      const payload = {
-        id: editingNo,
-        nama_usaha: formValues.nama_tph_r_u,
-        jenis: formValues.jenis_unit_usaha || 'RPH',
-        pemilik: formValues.pemilik,
-        alamat_pemilik: formValues.lokasi_desa_kecamatan_alamat_pemilik || '',
-        kontak: formValues.no_telp || '-',
-        lokasi: formValues.lokasi_rpu || formValues.lokasi_desa_kecamatan_alamat_pemilik || '-',
-        status_perijinan: formValues.status_ijin_usaha || 'Belum Berizin',
-        sertifikat_halal: formValues.sertifikat_halal || 'Tidak',
-        sertifikat_nkv: formValues.sertifikat_nkv || 'Tidak',
-        produksi_per_bulan_kg: Number(formValues.rata2_produksi_per_bulan_kg) || 0,
-        pemotongan_per_hari_ekor: Number(formValues.pemotongan_per_hari_ekor) || 0,
-      };
+      setIsAddingYear(true);
+      const [res1, res2] = await Promise.all([
+        fetch('/api/pemotongan-rumpun', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ action: 'add_year', tahun: newYearInput }),
+        }),
+        fetch('/api/pemotongan-komoditas', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ action: 'add_year', tahun: newYearInput }),
+        }),
+      ]);
 
-      if (editingNo !== null) {
-        const res = await fetch('/api/pemotongan-hewan', {
+      const json1 = await res1.json();
+      const json2 = await res2.json();
+
+      if (json1.success || json2.success) {
+        await loadAvailableYears();
+        setSelectedYear(newYearInput);
+        setShowAddYearModal(false);
+        alert(`Periode Tahun ${newYearInput} berhasil ditambahkan!`);
+      } else {
+        alert(json1.error || json2.error || 'Gagal menambahkan tahun baru');
+      }
+    } catch (err: any) {
+      alert('Terjadi kesalahan: ' + err.message);
+    } finally {
+      setIsAddingYear(false);
+    }
+  };
+
+  // ── SAVE TAB 1: RUMPUN SAPI INLINE SPREADSHEET ──
+  const handleRumpunCellChange = (lokasiKey: string, monthIndex: number, field: string, value: any) => {
+    if (!isAdmin) return;
+    const num = Math.max(0, parseInt(value, 10) || 0);
+
+    setRumpunData((prev) => {
+      const copy = { ...prev };
+      const lokasiRows = [...(copy[lokasiKey] || [])];
+      if (lokasiRows[monthIndex]) {
+        lokasiRows[monthIndex] = {
+          ...lokasiRows[monthIndex],
+          [field]: num,
+        };
+      }
+      copy[lokasiKey] = lokasiRows;
+      return copy;
+    });
+  };
+
+  const handleSaveRumpun = async () => {
+    if (!isAdmin) return;
+    try {
+      setIsSavingRumpun(true);
+      setRumpunSaveMessage('');
+      const res = await fetch('/api/pemotongan-rumpun', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          tahun: selectedYear,
+          data: rumpunData,
+        }),
+      });
+      const json = await res.json();
+      if (json.success) {
+        setRumpunSaveMessage('✓ Perubahan 4 Tabel Pemotongan berhasil disimpan!');
+        setTimeout(() => setRumpunSaveMessage(''), 4000);
+      } else {
+        alert('Gagal menyimpan: ' + json.error);
+      }
+    } catch (err: any) {
+      alert('Terjadi kesalahan saat menyimpan: ' + err.message);
+    } finally {
+      setIsSavingRumpun(false);
+    }
+  };
+
+  // ── SAVE TAB 2: KOMODITAS SPREADSHEET ──
+  const handleSaveKomoditas = async () => {
+    if (!isAdmin) return;
+    try {
+      setIsSavingKomoditas(true);
+      setKomoditasSaveMessage('');
+      const res = await fetch('/api/pemotongan-komoditas', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          tahun: selectedYear,
+          data: komoditasData,
+        }),
+      });
+      const json = await res.json();
+      if (json.success) {
+        setKomoditasSaveMessage('✓ Rekap Pemotongan Komoditas berhasil disimpan!');
+        setTimeout(() => setKomoditasSaveMessage(''), 4000);
+      } else {
+        alert('Gagal menyimpan: ' + json.error);
+      }
+    } catch (err: any) {
+      alert('Terjadi kesalahan: ' + err.message);
+    } finally {
+      setIsSavingKomoditas(false);
+    }
+  };
+
+  const handleKomoditasCellChange = (rowIndex: number, field: string, val: any) => {
+    if (!isAdmin) return;
+    setKomoditasData((prev) => {
+      const copy = [...prev];
+      if (copy[rowIndex]) {
+        copy[rowIndex] = { ...copy[rowIndex], [field]: val };
+      }
+      return copy;
+    });
+  };
+
+  // Add new row to Komoditas table
+  const handleAddKomoditasRow = () => {
+    if (!isAdmin) return;
+    const newRow = {
+      tahun: selectedYear,
+      nama_pemotongan: 'RPH Gombong',
+      komoditas: 'Babi',
+      jan_jantan: 0, jan_betina: 0,
+      feb_jantan: 0, feb_betina: 0,
+      mar_jantan: 0, mar_betina: 0,
+      apr_jantan: 0, apr_betina: 0,
+      mei_jantan: 0, mei_betina: 0,
+      jun_jantan: 0, jun_betina: 0,
+      jul_jantan: 0, jul_betina: 0,
+      agu_jantan: 0, agu_betina: 0,
+      sep_jantan: 0, sep_betina: 0,
+      okt_jantan: 0, okt_betina: 0,
+      nov_jantan: 0, nov_betina: 0,
+      des_jantan: 0, des_betina: 0,
+    };
+    setKomoditasData((prev) => [...prev, newRow]);
+  };
+
+  // Delete row from Komoditas table
+  const handleDeleteKomoditasRow = (rowIndex: number) => {
+    if (!isAdmin) return;
+    if (!confirm('Apakah Anda yakin ingin menghapus baris pemotongan ini?')) return;
+    setKomoditasData((prev) => prev.filter((_, i) => i !== rowIndex));
+  };
+
+  // ── CALCULATIONS FOR TAB 1: RUMPUN SAPI DENGAN TOTAL JANTAN, BETINA PROD & NON TERPISAH SETIAP BULAN ──
+  const getTableSummary = (rows: any[]) => {
+    const summary = {
+      po_jantan: 0, po_betina_prod: 0, po_betina_non_prod: 0, po_total: 0,
+      so_jantan: 0, so_betina_prod: 0, so_betina_non_prod: 0, so_total: 0,
+      simmental_jantan: 0, simmental_betina_prod: 0, simmental_betina_non_prod: 0, simmental_total: 0,
+      limousine_jantan: 0, limousine_betina_prod: 0, limousine_betina_non_prod: 0, limousine_total: 0,
+      babi_jantan: 0, babi_betina: 0, babi_total: 0,
+      total_jantan: 0, total_betina_prod: 0, total_betina_non_prod: 0,
+      grand_total: 0,
+    };
+
+    (rows || []).forEach((r) => {
+      const pj = Number(r.po_jantan) || 0;
+      const pbp = Number(r.po_betina_prod) || 0;
+      const pbnp = Number(r.po_betina_non_prod) || 0;
+
+      const sj = Number(r.so_jantan) || 0;
+      const sbp = Number(r.so_betina_prod) || 0;
+      const sbnp = Number(r.so_betina_non_prod) || 0;
+
+      const smj = Number(r.simmental_jantan) || 0;
+      const smbp = Number(r.simmental_betina_prod) || 0;
+      const smbnp = Number(r.simmental_betina_non_prod) || 0;
+
+      const lj = Number(r.limousine_jantan) || 0;
+      const lbp = Number(r.limousine_betina_prod) || 0;
+      const lbnp = Number(r.limousine_betina_non_prod) || 0;
+
+      const bj = Number(r.babi_jantan) || 0;
+      const bb = Number(r.babi_betina) || Number(r.babi_betina_prod) || 0;
+
+      summary.po_jantan += pj; summary.po_betina_prod += pbp; summary.po_betina_non_prod += pbnp;
+      summary.so_jantan += sj; summary.so_betina_prod += sbp; summary.so_betina_non_prod += sbnp;
+      summary.simmental_jantan += smj; summary.simmental_betina_prod += smbp; summary.simmental_betina_non_prod += smbnp;
+      summary.limousine_jantan += lj; summary.limousine_betina_prod += lbp; summary.limousine_betina_non_prod += lbnp;
+      summary.babi_jantan += bj; summary.babi_betina += bb;
+
+      summary.total_jantan += pj + sj + smj + lj + bj;
+      summary.total_betina_prod += pbp + sbp + smbp + lbp + bb;
+      summary.total_betina_non_prod += pbnp + sbnp + smbnp + lbnp;
+    });
+
+    summary.po_total = summary.po_jantan + summary.po_betina_prod + summary.po_betina_non_prod;
+    summary.so_total = summary.so_jantan + summary.so_betina_prod + summary.so_betina_non_prod;
+    summary.simmental_total = summary.simmental_jantan + summary.simmental_betina_prod + summary.simmental_betina_non_prod;
+    summary.limousine_total = summary.limousine_jantan + summary.limousine_betina_prod + summary.limousine_betina_non_prod;
+    summary.babi_total = summary.babi_jantan + summary.babi_betina;
+    summary.grand_total = summary.total_jantan + summary.total_betina_prod + summary.total_betina_non_prod;
+
+    return summary;
+  };
+
+  const getBabiSummary = (rows: any[]) => {
+    let jantan = 0;
+    let betina_prod = 0;
+    let betina_non_prod = 0;
+    (rows || []).forEach((r) => {
+      jantan += Number(r.babi_jantan) || 0;
+      betina_prod += Number(r.babi_betina_prod) || 0;
+      betina_non_prod += Number(r.babi_betina_non_prod) || 0;
+    });
+    return {
+      jantan,
+      betina_prod,
+      betina_non_prod,
+      grand_total: jantan + betina_prod + betina_non_prod,
+    };
+  };
+
+  // ── EXPORT EXCEL HANDLERS ──
+  const exportRphToExcel = () => {
+    try {
+      const ws = XLSX.utils.json_to_sheet(
+        rphList.map((r, i) => ({
+          No: i + 1,
+          'Nama Usaha': r.nama_usaha,
+          Jenis: r.jenis,
+          Pemilik: r.pemilik,
+          Kontak: r.kontak,
+          Lokasi: r.lokasi || r.alamat_pemilik,
+          'Sertifikat Halal': r.sertifikat_halal ? 'Sudah' : 'Belum',
+          'Sertifikat NKV': r.sertifikat_nkv || 'Belum',
+        }))
+      );
+      const wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, ws, 'Data Rumah Potong');
+      XLSX.writeFile(wb, `Data_Rumah_Potong_Kebumen_${new Date().toISOString().split('T')[0]}.xlsx`);
+    } catch {
+      alert('Gagal mengekspor data RPH.');
+    }
+  };
+
+  const exportRumpunToExcel = () => {
+    try {
+      const wb = XLSX.utils.book_new();
+      LOKASI_CONFIGS.forEach((cfg) => {
+        const rows = rumpunData[cfg.key] || [];
+        const data = rows.map((r, idx) => {
+          const totJ = (Number(r.po_jantan) || 0) + (Number(r.so_jantan) || 0) + (Number(r.simmental_jantan) || 0) + (Number(r.limousine_jantan) || 0);
+          const totBP = (Number(r.po_betina_prod) || 0) + (Number(r.so_betina_prod) || 0) + (Number(r.simmental_betina_prod) || 0) + (Number(r.limousine_betina_prod) || 0);
+          const totBNP = (Number(r.po_betina_non_prod) || 0) + (Number(r.so_betina_non_prod) || 0) + (Number(r.simmental_betina_non_prod) || 0) + (Number(r.limousine_betina_non_prod) || 0);
+          const totBulan = totJ + totBP + totBNP;
+
+          return {
+            Bulan: r.bulan || BULAN_NAMES[idx],
+            'PO Jantan': r.po_jantan || 0,
+            'PO Betina Prod': r.po_betina_prod || 0,
+            'PO Betina Non-P': r.po_betina_non_prod || 0,
+            'SO Jantan': r.so_jantan || 0,
+            'SO Betina Prod': r.so_betina_prod || 0,
+            'SO Betina Non-P': r.so_betina_non_prod || 0,
+            'Simmental Jantan': r.simmental_jantan || 0,
+            'Simmental Betina Prod': r.simmental_betina_prod || 0,
+            'Simmental Betina Non-P': r.simmental_betina_non_prod || 0,
+            'Limousine Jantan': r.limousine_jantan || 0,
+            'Limousine Betina Prod': r.limousine_betina_prod || 0,
+            'Limousine Betina Non-P': r.limousine_betina_non_prod || 0,
+            'Total Jantan': totJ,
+            'Total Betina Prod': totBP,
+            'Total Betina Non-P': totBNP,
+            'Total Keseluruhan Bulan': totBulan,
+          };
+        });
+        const ws = XLSX.utils.json_to_sheet(data);
+        XLSX.utils.book_append_sheet(wb, ws, cfg.label.substring(0, 31));
+      });
+      XLSX.writeFile(wb, `Data_Pemotongan_Rumpun_${selectedYear}.xlsx`);
+    } catch {
+      alert('Gagal mengekspor data pemotongan.');
+    }
+  };
+
+  const exportKomoditasToExcel = () => {
+    try {
+      const months = ['jan', 'feb', 'mar', 'apr', 'mei', 'jun', 'jul', 'agu', 'sep', 'okt', 'nov', 'des'];
+      const data = komoditasData.map((r, i) => {
+        const item: any = {
+          No: i + 1,
+          'Nama Pemotongan': r.nama_pemotongan,
+          Komoditas: r.komoditas,
+        };
+        let totJ = 0;
+        let totB = 0;
+        months.forEach((m) => {
+          const j = Number(r[`${m}_jantan`]) || 0;
+          const b = Number(r[`${m}_betina`]) || 0;
+          item[`${m.toUpperCase()} Jantan`] = j;
+          item[`${m.toUpperCase()} Betina`] = b;
+          totJ += j;
+          totB += b;
+        });
+        item['Total Jantan'] = totJ;
+        item['Total Betina'] = totB;
+        item['Total Keseluruhan'] = totJ + totB;
+        return item;
+      });
+
+      const ws = XLSX.utils.json_to_sheet(data);
+      const wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, ws, 'Rekap Komoditas');
+      XLSX.writeFile(wb, `Rekap_Pemotongan_Komoditas_${selectedYear}.xlsx`);
+    } catch {
+      alert('Gagal mengekspor rekap komoditas.');
+    }
+  };
+
+  const filteredRph = useMemo(() => {
+    return rphList.filter((r) => {
+      const matchSearch =
+        !searchRph ||
+        (r.nama_usaha && r.nama_usaha.toLowerCase().includes(searchRph.toLowerCase())) ||
+        (r.pemilik && r.pemilik.toLowerCase().includes(searchRph.toLowerCase())) ||
+        (r.lokasi && r.lokasi.toLowerCase().includes(searchRph.toLowerCase()));
+
+      const matchJenis = filterJenis === 'ALL' || r.jenis === filterJenis;
+      const matchHalal = filterHalal === 'ALL' || (filterHalal === 'Sudah' ? r.sertifikat_halal : !r.sertifikat_halal);
+
+      return matchSearch && matchJenis && matchHalal;
+    });
+  }, [rphList, searchRph, filterJenis, filterHalal]);
+
+  // Form submit for Tab 3 (Admin only)
+  const handleRphSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!isAdmin) return;
+
+    try {
+      if (editingItem) {
+        const res = await fetch(`/api/pemotongan-hewan/${editingItem.id}`, {
           method: 'PUT',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(payload),
+          body: JSON.stringify(formRph),
         });
-        const json = await res.json();
-        if (json.success) {
-          setDataRph((prev) =>
-            prev.map((item) => (item.no === editingNo ? { ...formValues, no: editingNo } : item))
-          );
-          alert('Data RPH/TPH berhasil diperbarui di database!');
-        } else {
-          alert('Gagal memperbarui: ' + json.error);
+        if (res.ok) {
+          loadRphData();
+          setShowAddModal(false);
+          setEditingItem(null);
         }
       } else {
         const res = await fetch('/api/pemotongan-hewan', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(payload),
+          body: JSON.stringify(formRph),
         });
-        const json = await res.json();
-        if (json.success) {
-          const nextNo = json.insertId || (dataRph.length > 0 ? Math.max(...dataRph.map((d) => Number(d.no) || 0)) + 1 : 1);
-          setDataRph((prev) => [{ ...formValues, no: nextNo }, ...prev]);
-          alert('Data RPH/TPH baru berhasil disimpan ke database!');
-        } else {
-          alert('Gagal menyimpan: ' + json.error);
+        if (res.ok) {
+          loadRphData();
+          setShowAddModal(false);
         }
       }
-    } catch {
-      alert('Terjadi kesalahan koneksi saat menyimpan data.');
+    } catch (err) {
+      console.error('Submit error:', err);
     }
-    closeModal();
   };
 
-  const handleDelete = async (no: number) => {
+  const handleDeleteRph = async (id: number) => {
+    if (!isAdmin) return;
+    if (!confirm('Apakah Anda yakin ingin menghapus unit pemotongan ini?')) return;
+
     try {
-      const res = await fetch(`/api/pemotongan-hewan?id=${no}`, { method: 'DELETE' });
-      const json = await res.json();
-      if (json.success) {
-        setDataRph((prev) => prev.filter((item) => item.no !== no));
-      } else {
-        alert('Gagal menghapus: ' + json.error);
+      const res = await fetch(`/api/pemotongan-hewan/${id}`, { method: 'DELETE' });
+      if (res.ok) {
+        loadRphData();
       }
-    } catch {
-      alert('Terjadi kesalahan saat menghapus data.');
+    } catch (err) {
+      console.error('Delete error:', err);
     }
-    setConfirmDeleteNo(null);
   };
 
-  const handleExportExcel = () => {
-    const exportData = dataRph.map((item) => ({
-      No: item.no,
-      'Nama TPH/RPU': item.nama_tph_r_u,
-      'Jenis Unit Usaha': item.jenis_unit_usaha,
-      Pemilik: item.pemilik,
-      'No. Telp': item.no_telp,
-      'Status Ijin Usaha': item.status_ijin_usaha,
-      'Lokasi RPU/TPH': item.lokasi_rpu,
-      'Lokasi Desa/Kecamatan/Alamat Pemilik': item.lokasi_desa_kecamatan_alamat_pemilik,
-      'Pemotongan per Hari (ekor)': item.pemotongan_per_hari_ekor,
-      'Sertifikat Halal': item.sertifikat_halal,
-      'Berkas Halal Terlampir': item.file_sertifikat_halal_name ? 'Ada File' : 'Tidak Ada',
-      'Sertifikat NKV': item.sertifikat_nkv,
-      'Berkas NKV Terlampir': item.file_sertifikat_nkv_name ? 'Ada File' : 'Tidak Ada',
-      'Berkas Izin Usaha': item.file_izin_usaha_name ? 'Ada File' : 'Tidak Ada',
-      'Foto Fasilitas': item.file_foto_fasilitas_name ? 'Ada File' : 'Tidak Ada',
-      'Rata-rata Produksi per Bulan (kg)': item.rata2_produksi_per_bulan_kg,
-    }));
-
-    const worksheet = XLSX.utils.json_to_sheet(exportData);
-    const workbook = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(workbook, worksheet, 'Data RPH-TPH-TPU');
-    const today = new Date().toISOString().slice(0, 10);
-    XLSX.writeFile(workbook, `Data_RPH_TPH_TPU_${today}.xlsx`);
-  };
-
-  const countRPU = dataRph.filter((d) => (d.jenis_unit_usaha || '').toUpperCase().includes('RPU')).length;
-  const countTPU = dataRph.filter(
-    (d) =>
-      (d.jenis_unit_usaha || '').toUpperCase().includes('TPU') ||
-      (d.jenis_unit_usaha || '').toUpperCase().includes('TPH')
-  ).length;
-  const countHalal = dataRph.filter(
-    (d) =>
-      (d.sertifikat_halal || '').toLowerCase().includes('sudah') ||
-      (d.sertifikat_halal || '').toLowerCase().includes('ada') ||
-      (d.sertifikat_halal || '').toLowerCase().includes('halal') ||
-      (d.sertifikat_halal || '').toLowerCase().includes('id33')
-  ).length;
-  const countNKV = dataRph.filter(
-    (d) =>
-      (d.sertifikat_nkv || '').toLowerCase().includes('tingkat') ||
-      (d.sertifikat_nkv || '').toLowerCase().includes('rph')
-  ).length;
-
-  if (loading || !isReady) return null;
+  if (!isReady) return null;
 
   return (
-    <div className="min-h-screen bg-slate-50 text-slate-900 font-sans selection:bg-purple-600 selection:text-white pb-20">
+    <div className="min-h-screen bg-purple-50/30 text-slate-900 font-sans selection:bg-purple-600 selection:text-white pb-24">
       
-      {/* ── TOP HEADER (Tema Ungu - Lega & Bernapas) ── */}
+      {/* ── TOP HEADER (Tema Ungu Khas Kesmavet) ── */}
       <header className="border-b border-purple-100 bg-white/95 backdrop-blur-md sticky top-0 z-30 shadow-xs">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-5 min-h-[80px] sm:min-h-[88px] flex items-center justify-between gap-3">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-5 min-h-[80px] sm:min-h-[88px] flex flex-col md:flex-row md:items-center justify-between gap-4">
           
           <div className="flex items-center gap-3 min-w-0 flex-1">
             <Link
               href="/kesmavet"
               className="min-h-touch min-w-touch w-11 h-11 rounded-2xl bg-purple-600 hover:bg-purple-700 text-white flex items-center justify-center transition-all shadow-xs shrink-0"
-              aria-label="Kembali ke Kesmavet"
+              aria-label="Kembali ke Modul Kesmavet"
             >
               <ArrowLeft size={18} strokeWidth={2.5} />
             </Link>
@@ -1844,747 +628,1096 @@ export default function RphTphTpuPage() {
                   Kesmavet
                 </Link>
                 <span className="text-slate-300">/</span>
-                <span className="text-xs font-bold text-purple-700 whitespace-nowrap">RPH &amp; TPU</span>
+                <span className="text-xs font-bold text-purple-700 whitespace-nowrap">RPH, TPH &amp; TPU</span>
               </div>
-              <h1 className="text-base sm:text-xl font-bold text-slate-900 tracking-tight leading-tight truncate">
-                Database Rumah Potong &amp; Tempat Pemotongan Hewan
+              <h1 className="text-base sm:text-xl font-extrabold text-slate-900 tracking-tight leading-tight truncate">
+                Manajemen Rumah Potong &amp; Pemotongan Hewan
               </h1>
             </div>
           </div>
 
-          <div className="flex items-center gap-2 shrink-0">
-            <button
-              onClick={handleExportExcel}
-              title="Export Excel"
-              aria-label="Export Excel"
-              className="min-h-touch min-w-touch h-11 w-11 sm:w-auto sm:px-5 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 text-xs sm:text-sm font-bold flex items-center justify-center sm:gap-2 transition-colors shadow-xs cursor-pointer"
-            >
-              <Download size={16} strokeWidth={2.5} />
-              <span className="hidden sm:inline">Export Excel</span>
-            </button>
-            {canEdit && (
-              <button
-                onClick={openAddModal}
-                title="Tambah Unit"
-                aria-label="Tambah Unit"
-                className="min-h-touch min-w-touch h-11 w-11 sm:w-auto sm:px-5 rounded-xl bg-purple-600 text-white text-xs sm:text-sm font-bold flex items-center justify-center sm:gap-2 hover:bg-purple-700 transition-all shadow-xs cursor-pointer"
-              >
-                <Plus size={16} strokeWidth={2.5} />
-                <span className="hidden sm:inline">Tambah Unit</span>
-              </button>
+          <div className="flex items-center gap-2.5 shrink-0">
+            {activeTab === 'pemotongan_rumpun' && (
+              <>
+                <button
+                  onClick={exportRumpunToExcel}
+                  className="h-10 px-4 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 text-xs font-bold flex items-center gap-1.5 transition-all shadow-xs cursor-pointer"
+                >
+                  <Download size={15} strokeWidth={2.5} />
+                  <span>Export 4 Tabel Excel</span>
+                </button>
+
+                {(canEdit || isAdmin) && (
+                  <button
+                    onClick={handleSaveRumpun}
+                    disabled={isSavingRumpun}
+                    className="h-10 px-4 rounded-xl bg-purple-600 hover:bg-purple-700 disabled:opacity-50 text-white text-xs font-bold flex items-center gap-1.5 shadow-xs transition-colors cursor-pointer"
+                  >
+                    {isSavingRumpun ? <Loader2 size={15} className="animate-spin" /> : <Save size={15} />}
+                    <span>Simpan Perubahan</span>
+                  </button>
+                )}
+              </>
+            )}
+
+            {activeTab === 'rekap_komoditas' && (
+              <>
+                <button
+                  onClick={exportKomoditasToExcel}
+                  className="h-10 px-4 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 text-xs font-bold flex items-center gap-1.5 transition-all shadow-xs cursor-pointer"
+                >
+                  <Download size={15} strokeWidth={2.5} />
+                  <span>Export Excel</span>
+                </button>
+
+                {isAdmin && (
+                  <>
+                    <button
+                      onClick={handleAddKomoditasRow}
+                      className="h-10 px-3.5 rounded-xl border border-purple-200 bg-purple-50 hover:bg-purple-100 text-purple-700 text-xs font-bold flex items-center gap-1.5 transition-colors cursor-pointer"
+                    >
+                      <Plus size={15} strokeWidth={2.5} />
+                      <span>Tambah Baris</span>
+                    </button>
+
+                    <button
+                      onClick={handleSaveKomoditas}
+                      disabled={isSavingKomoditas}
+                      className="h-10 px-4 rounded-xl bg-purple-600 hover:bg-purple-700 disabled:opacity-50 text-white text-xs font-bold flex items-center gap-1.5 shadow-xs transition-colors cursor-pointer"
+                    >
+                      {isSavingKomoditas ? <Loader2 size={15} className="animate-spin" /> : <Save size={15} />}
+                      <span>Simpan Perubahan</span>
+                    </button>
+                  </>
+                )}
+              </>
+            )}
+
+            {activeTab === 'rumah_potong' && (
+              <>
+                <button
+                  onClick={exportRphToExcel}
+                  className="h-10 px-4 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 text-xs font-bold flex items-center gap-1.5 transition-all shadow-xs cursor-pointer"
+                >
+                  <Download size={15} strokeWidth={2.5} />
+                  <span>Export Excel</span>
+                </button>
+
+                {isAdmin && (
+                  <button
+                    onClick={() => {
+                      setEditingItem(null);
+                      setFormRph({
+                        nama_usaha: '',
+                        jenis: 'TPU',
+                        pemilik: '',
+                        alamat_pemilik: '',
+                        kontak: '',
+                        lokasi: '',
+                        status_perijinan: '',
+                        sertifikat_halal: '',
+                        sertifikat_nkv: 'belum',
+                      });
+                      setShowAddModal(true);
+                    }}
+                    className="h-10 px-4 rounded-xl bg-purple-600 hover:bg-purple-700 text-white text-xs font-bold flex items-center gap-1.5 shadow-xs transition-colors cursor-pointer"
+                  >
+                    <Plus size={15} strokeWidth={2.5} />
+                    <span>Tambah Rumah Potong</span>
+                  </button>
+                )}
+              </>
             )}
           </div>
 
         </div>
       </header>
 
-      {/* ── MAIN WORKSPACE ── */}
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 sm:py-12 space-y-8">
+      {/* ── WORKSPACE ── */}
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 space-y-6">
         
-        {/* KPI Cards */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-          <div className="p-5 rounded-2xl border border-slate-200 bg-white shadow-sm">
-            <p className="text-xs font-sans font-semibold uppercase tracking-wider text-slate-500 mb-1">
-              Total Unit Terdata
-            </p>
-            <p className="font-sans text-2xl sm:text-3xl font-bold text-slate-900">
-              {dataRph.length} <span className="text-xs font-normal text-slate-500">Unit</span>
-            </p>
+        {/* ═══════════════════════════════════════════════════════════════
+            Opsi Pilihan Tahun di Tengah di Atas Konten (Sesuai Permintaan)
+        ═══════════════════════════════════════════════════════════════ */}
+        <div className="flex flex-col sm:flex-row items-center justify-center gap-3 bg-white p-3.5 rounded-2xl border border-purple-200 shadow-xs max-w-xl mx-auto">
+          <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl border border-purple-200 bg-purple-50/70">
+            <Calendar className="text-purple-700" size={16} />
+            <span className="text-xs font-bold text-purple-900">Pilih Tahun:</span>
+            <select
+              value={selectedYear}
+              onChange={(e) => setSelectedYear(Number(e.target.value))}
+              className="bg-transparent text-xs font-black text-purple-800 focus:outline-none cursor-pointer"
+            >
+              {availableYears.map((yr) => (
+                <option key={yr} value={yr}>Tahun {yr}</option>
+              ))}
+            </select>
           </div>
 
-          <div className="p-5 rounded-2xl border border-slate-200 bg-white shadow-sm">
-            <p className="text-xs font-sans font-semibold uppercase tracking-wider text-slate-500 mb-1">
-              Unit RPU & TPU
-            </p>
-            <p className="font-sans text-2xl sm:text-3xl font-bold text-purple-600">
-              {countRPU + countTPU} <span className="text-xs font-normal text-slate-500">Unggas/Hewan</span>
-            </p>
-          </div>
-
-          <div className="p-5 rounded-2xl border border-slate-200 bg-white shadow-sm">
-            <p className="text-xs font-sans font-semibold uppercase tracking-wider text-slate-500 mb-1">
-              Sertifikasi Halal
-            </p>
-            <p className="font-sans text-2xl sm:text-3xl font-bold text-vitality">
-              {countHalal} <span className="text-xs font-normal text-slate-500">Tersertifikasi</span>
-            </p>
-          </div>
-
-          <div className="p-5 rounded-2xl border border-slate-200 bg-white shadow-sm">
-            <p className="text-xs font-sans font-semibold uppercase tracking-wider text-slate-500 mb-1">
-              Memiliki NKV
-            </p>
-            <p className="font-sans text-2xl sm:text-3xl font-bold text-lime">
-              {countNKV} <span className="text-xs font-normal text-slate-500">Unit</span>
-            </p>
-          </div>
+          {isAdmin && (
+            <button
+              onClick={() => {
+                const maxYear = Math.max(...availableYears, 2026);
+                setNewYearInput(maxYear + 1);
+                setShowAddYearModal(true);
+              }}
+              className="h-9 px-3.5 rounded-xl bg-purple-600 hover:bg-purple-700 text-white text-xs font-bold flex items-center gap-1.5 shadow-xs transition-colors cursor-pointer"
+            >
+              <Plus size={14} />
+              <span>Tambah Tahun Baru</span>
+            </button>
+          )}
         </div>
 
-        {/* Filter Toolbar */}
-        <div className="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm flex flex-col sm:flex-row items-center justify-between gap-3">
-          <div className="flex flex-wrap items-center gap-2 w-full sm:w-auto">
-            {['Semua', 'RPU', 'TPU', 'TPH', 'RPH'].map((cat) => (
-              <button
-                key={cat}
-                onClick={() => setSelectedKategori(cat)}
-                className={`min-h-touch h-9 px-3.5 rounded-xl text-xs font-bold transition-all border ${
-                  selectedKategori === cat
-                    ? 'bg-purple-600 text-white border-purple-600 shadow-sm'
-                    : 'bg-slate-50 text-slate-600 border-slate-200 hover:bg-slate-100'
-                }`}
-              >
-                {cat}
-              </button>
-            ))}
-          </div>
+        {/* ── MAIN TAB NAVIGATION (URUTAN SESUAI PERMINTAAN USER) ── */}
+        <div className="flex items-center gap-2 p-1.5 bg-white rounded-2xl border border-purple-100 shadow-xs overflow-x-auto">
+          <button
+            onClick={() => setActiveTab('pemotongan_rumpun')}
+            className={`px-4 py-2.5 rounded-xl text-xs sm:text-sm font-extrabold flex items-center gap-2 transition-all shrink-0 cursor-pointer ${
+              activeTab === 'pemotongan_rumpun'
+                ? 'bg-purple-600 text-white shadow-xs'
+                : 'text-slate-600 hover:text-purple-700 hover:bg-purple-50'
+            }`}
+          >
+            <TableIcon size={16} />
+            <span>1. Input Pemotongan Rumah Potong Hewan</span>
+          </button>
 
-          <div className="relative w-full sm:w-80">
-            <Search size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
-            <input
-              type="text"
-              placeholder="Cari nama usaha, pemilik, lokasi..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full min-h-touch h-10 pl-9 pr-4 rounded-xl border border-slate-200 bg-slate-50 text-xs text-slate-900 focus:outline-none focus:border-purple-500 focus:bg-white"
-            />
-          </div>
+          <button
+            onClick={() => setActiveTab('rekap_komoditas')}
+            className={`px-4 py-2.5 rounded-xl text-xs sm:text-sm font-extrabold flex items-center gap-2 transition-all shrink-0 cursor-pointer ${
+              activeTab === 'rekap_komoditas'
+                ? 'bg-purple-600 text-white shadow-xs'
+                : 'text-slate-600 hover:text-purple-700 hover:bg-purple-50'
+            }`}
+          >
+            <FileSpreadsheet size={16} />
+            <span>2. Tempat Pemotongan Hewan (TPH)</span>
+          </button>
+
+          <button
+            onClick={() => setActiveTab('rumah_potong')}
+            className={`px-4 py-2.5 rounded-xl text-xs sm:text-sm font-extrabold flex items-center gap-2 transition-all shrink-0 cursor-pointer ${
+              activeTab === 'rumah_potong'
+                ? 'bg-purple-600 text-white shadow-xs'
+                : 'text-slate-600 hover:text-purple-700 hover:bg-purple-50'
+            }`}
+          >
+            <Building2 size={16} />
+            <span>3. Data Rumah Potong</span>
+          </button>
         </div>
 
-        {/* Main Table */}
-        <div className="rounded-2xl border border-slate-200 bg-white shadow-sm overflow-hidden">
-          <div className="overflow-x-auto max-h-[600px] overflow-y-auto">
-            <table className="w-full text-xs text-left whitespace-nowrap">
-              <thead className="bg-slate-50 text-slate-600 font-semibold uppercase tracking-wider border-b border-slate-200 sticky top-0 z-20 shadow-sm">
-                <tr>
-                  <th className="p-3.5 w-12 text-center">NO</th>
-                  <th className="p-3.5">NAMA UNIT USAHA</th>
-                  <th className="p-3.5">JENIS</th>
-                  <th className="p-3.5">PEMILIK</th>
-                  <th className="p-3.5">KONTAK</th>
-                  <th className="p-3.5">LOKASI USAHA</th>
-                  <th className="p-3.5 text-center font-sans">KAPASITAS (EKOR/HR)</th>
-                  <th className="p-3.5 text-center">STATUS HALAL</th>
-                  <th className="p-3.5 text-center">STATUS NKV</th>
-                  <th className="p-3.5 text-center">DOKUMEN TERLAMPIR</th>
-                  {canEdit && <th className="p-3.5 text-center w-24 sticky right-0 bg-slate-50">AKSI</th>}
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-100 text-slate-800">
-                {filteredData.length > 0 ? (
-                  filteredData.map((item) => {
-                    const isHalal =
-                      (item.sertifikat_halal || '').toLowerCase().includes('sudah') ||
-                      (item.sertifikat_halal || '').toLowerCase().includes('ada') ||
-                      (item.sertifikat_halal || '').toLowerCase().includes('halal') ||
-                      (item.sertifikat_halal || '').toLowerCase().includes('id33') ||
-                      !!item.file_sertifikat_halal;
+        {/* ───────────────────────────────────────────────────────────
+            TAB 1: INPUT PEMOTONGAN RUMAH POTONG HEWAN (DENGAN BUTTON SWITCHER KE SAMPING)
+        ─────────────────────────────────────────────────────────── */}
+        {activeTab === 'pemotongan_rumpun' && (
+          <div className="space-y-4">
+            
+            {/* Horizontal Button Switcher untuk 4 Lokasi (Tidak Perlu Scroll Bawah) */}
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 bg-white p-3.5 rounded-2xl border border-slate-200 shadow-xs">
+              <div className="flex items-center gap-2 overflow-x-auto pb-1 sm:pb-0">
+                {LOKASI_CONFIGS.map((cfg) => {
+                  const isActive = selectedLokasiKey === cfg.key;
+                  return (
+                    <button
+                      key={cfg.key}
+                      onClick={() => setSelectedLokasiKey(cfg.key)}
+                      className={`px-4 py-2.5 rounded-xl text-xs font-bold transition-all shrink-0 cursor-pointer ${
+                        isActive
+                          ? 'bg-purple-600 text-white shadow-xs'
+                          : 'bg-slate-100 hover:bg-purple-50 text-slate-700 hover:text-purple-700'
+                      }`}
+                    >
+                      {cfg.label}
+                    </button>
+                  );
+                })}
+              </div>
 
-                    const isNKV =
-                      (item.sertifikat_nkv || '').toLowerCase().includes('tingkat') ||
-                      (item.sertifikat_nkv || '').toLowerCase().includes('rph') ||
-                      (item.sertifikat_nkv || '').toLowerCase().includes('ada') ||
-                      !!item.file_sertifikat_nkv;
+              {rumpunSaveMessage && (
+                <span className="text-xs font-bold text-emerald-700 bg-emerald-50 px-3 py-1 rounded-xl border border-emerald-200 animate-in fade-in">
+                  {rumpunSaveMessage}
+                </span>
+              )}
+            </div>
 
-                    return (
-                      <tr key={item.no} className="hover:bg-slate-50/80 transition-colors">
-                        <td className="p-3.5 text-center font-sans font-bold text-slate-600">{item.no}</td>
-                        <td className="p-3.5 font-extrabold text-slate-950 text-sm">{item.nama_tph_r_u || '-'}</td>
-                        <td className="p-3.5">
-                          <span className="px-2.5 py-1 rounded-lg text-xs font-extrabold bg-slate-100 text-slate-800 border border-slate-300">
-                            {item.jenis_unit_usaha || '-'}
-                          </span>
-                        </td>
-                        <td className="p-3.5 font-bold text-slate-900">{item.pemilik || '-'}</td>
-                        <td className="p-3.5 font-sans font-bold text-slate-800">{item.no_telp || '-'}</td>
-                        <td className="p-3.5 font-semibold text-slate-800 max-w-xs truncate" title={item.lokasi_rpu || item.lokasi_desa_kecamatan_alamat_pemilik}>
-                          {item.lokasi_rpu || item.lokasi_desa_kecamatan_alamat_pemilik || '-'}
-                        </td>
-                        <td className="p-3.5 text-center font-sans font-extrabold text-sm text-purple-700">
-                          {item.pemotongan_per_hari_ekor || '-'}
-                        </td>
-                        <td className="p-3.5 text-center">
-                          {isHalal ? (
-                            <span className="px-2.5 py-1 rounded-full text-xs font-extrabold bg-emerald-100 text-emerald-800 border border-emerald-300">
-                              ✓ Halal
-                            </span>
-                          ) : (
-                            <span className="text-slate-500 font-bold text-xs">Belum</span>
+            {/* TABEL LOKASI TERPILIH DENGAN TOTAL TERPISAH (J, BP, BT, TOTAL) */}
+            {(() => {
+              const activeCfg = LOKASI_CONFIGS.find((c) => c.key === selectedLokasiKey) || LOKASI_CONFIGS[0];
+              const isGombong = activeCfg.key === 'rph_gombong' || activeCfg.key === 'luar_rph_gombong';
+              const rows = rumpunData[activeCfg.key] || [];
+              const summary = getTableSummary(rows);
+
+              return (
+                <div className="bg-white rounded-3xl border border-slate-200 shadow-xs overflow-hidden space-y-3 p-4 sm:p-6 animate-in fade-in duration-150">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-3 border-b border-purple-100">
+                    <div>
+                      <h3 className="text-base font-extrabold text-slate-900 flex items-center gap-2">
+                        <span className="w-3 h-3 rounded-full bg-purple-600" />
+                        <span>{activeCfg.label}</span>
+                      </h3>
+                      <p className="text-xs text-slate-500">{activeCfg.subtitle} &bull; Periode Tahun {selectedYear}</p>
+                    </div>
+
+                    <div className="flex items-center gap-2">
+                      <span className="px-3.5 py-1.5 rounded-xl bg-purple-50 border border-purple-200 text-xs font-black text-purple-800">
+                        Total Pemotongan: {summary.grand_total.toLocaleString('id-ID')} Ekor
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Spreadsheet Inline-Editable Table dengan Rincian Total Bulanan Terpisah */}
+                  <div className="overflow-x-auto rounded-2xl border border-slate-200">
+                    <table className="w-full min-w-[1280px] text-center text-xs border-collapse">
+                      <thead>
+                        {/* Level 1 Header: Rumpun Sapi & Babi & Total Terpisah */}
+                        <tr className="bg-purple-900 text-white font-bold border border-purple-950">
+                          <th rowSpan={2} className="p-3 border border-purple-800 text-center w-28 min-w-[110px] bg-purple-950 sticky left-0 z-20">
+                            BULAN
+                          </th>
+                          <th colSpan={3} className="p-2.5 border border-purple-800 bg-purple-900/95 text-purple-100 text-xs">
+                            PERANAKAN ONGOLE (PO)
+                          </th>
+                          <th colSpan={3} className="p-2.5 border border-purple-800 bg-purple-900/85 text-purple-100 text-xs">
+                            SAPI ONGOLE / JAWA (SO)
+                          </th>
+                          <th colSpan={3} className="p-2.5 border border-purple-800 bg-purple-900/95 text-purple-100 text-xs">
+                            SIMMENTAL
+                          </th>
+                          <th colSpan={3} className="p-2.5 border border-purple-800 bg-purple-900/85 text-purple-100 text-xs">
+                            LIMOUSINE
+                          </th>
+                          {isGombong && (
+                            <th colSpan={2} className="p-2.5 border border-purple-800 bg-rose-900 text-rose-100 font-extrabold text-xs">
+                              BABI
+                            </th>
                           )}
-                        </td>
-                        <td className="p-3.5 text-center">
-                          {isNKV ? (
-                            <span className="px-2.5 py-1 rounded-full text-xs font-extrabold bg-blue-100 text-blue-800 border border-blue-300">
-                              ✓ NKV
-                            </span>
-                          ) : (
-                            <span className="text-slate-500 font-bold text-xs">Belum</span>
+                          <th colSpan={4} className="p-2.5 border border-purple-800 bg-purple-950 text-purple-100 font-extrabold text-xs">
+                            TOTAL BULANAN
+                          </th>
+                        </tr>
+                        {/* Level 2 Header: Jantan / Betina */}
+                        <tr className="bg-purple-50 text-purple-950 font-bold border border-purple-200 text-[11px]">
+                          {/* PO */}
+                          <th className="p-2 border border-purple-200 min-w-[65px]">J</th>
+                          <th className="p-2 border border-purple-200 min-w-[65px]">BP</th>
+                          <th className="p-2 border border-purple-200 min-w-[65px]">BT</th>
+                          {/* SO */}
+                          <th className="p-2 border border-purple-200 min-w-[65px]">J</th>
+                          <th className="p-2 border border-purple-200 min-w-[65px]">BP</th>
+                          <th className="p-2 border border-purple-200 min-w-[65px]">BT</th>
+                          {/* Simmental */}
+                          <th className="p-2 border border-purple-200 min-w-[65px]">J</th>
+                          <th className="p-2 border border-purple-200 min-w-[65px]">BP</th>
+                          <th className="p-2 border border-purple-200 min-w-[65px]">BT</th>
+                          {/* Limousine */}
+                          <th className="p-2 border border-purple-200 min-w-[65px]">J</th>
+                          <th className="p-2 border border-purple-200 min-w-[65px]">BP</th>
+                          <th className="p-2 border border-purple-200 min-w-[65px]">BT</th>
+                          {/* Babi (Hanya J dan B) */}
+                          {isGombong && (
+                            <>
+                              <th className="p-2 border border-purple-200 bg-rose-100 text-rose-950 font-black min-w-[65px]">J</th>
+                              <th className="p-2 border border-purple-200 bg-rose-100 text-rose-950 font-black min-w-[65px]">B</th>
+                            </>
                           )}
-                        </td>
-                        <td className="p-3.5 text-center">
-                          <div className="flex items-center justify-center gap-1.5 flex-wrap">
-                            {item.file_sertifikat_halal && (
-                              <button
-                                onClick={() => openDocPreview('Sertifikat Halal', item.file_sertifikat_halal!, item.file_sertifikat_halal_name || 'Sertifikat_Halal.pdf')}
-                                className="px-2 py-1 rounded-lg text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200 hover:bg-emerald-100 flex items-center gap-1 transition-colors shadow-2xs"
-                                title="Lihat Berkas Halal"
-                              >
-                                <FileCheck size={12} className="text-emerald-600" />
-                                <span>Halal</span>
-                              </button>
-                            )}
-                            {item.file_sertifikat_nkv && (
-                              <button
-                                onClick={() => openDocPreview('Sertifikat NKV', item.file_sertifikat_nkv!, item.file_sertifikat_nkv_name || 'Sertifikat_NKV.pdf')}
-                                className="px-2 py-1 rounded-lg text-[10px] font-bold bg-blue-50 text-blue-700 border border-blue-200 hover:bg-blue-100 flex items-center gap-1 transition-colors shadow-2xs"
-                                title="Lihat Berkas NKV"
-                              >
-                                <ShieldCheck size={12} className="text-blue-600" />
-                                <span>NKV</span>
-                              </button>
-                            )}
-                            {item.file_izin_usaha && (
-                              <button
-                                onClick={() => openDocPreview('Surat Izin Usaha / NIB', item.file_izin_usaha!, item.file_izin_usaha_name || 'Izin_Usaha.pdf')}
-                                className="px-2 py-1 rounded-lg text-[10px] font-bold bg-purple-50 text-purple-700 border border-purple-200 hover:bg-purple-100 flex items-center gap-1 transition-colors shadow-2xs"
-                                title="Lihat Berkas Izin Usaha"
-                              >
-                                <FileText size={12} className="text-purple-600" />
-                                <span>Izin</span>
-                              </button>
-                            )}
-                            {item.file_foto_fasilitas && (
-                              <button
-                                onClick={() => openDocPreview('Foto Fasilitas Tempat Pemotongan', item.file_foto_fasilitas!, item.file_foto_fasilitas_name || 'Foto_Fasilitas.jpg')}
-                                className="px-2 py-1 rounded-lg text-[10px] font-bold bg-amber-50 text-amber-800 border border-amber-200 hover:bg-amber-100 flex items-center gap-1 transition-colors shadow-2xs"
-                                title="Lihat Foto Fasilitas"
-                              >
-                                <ImageIcon size={12} className="text-amber-600" />
-                                <span>Foto</span>
-                              </button>
-                            )}
-                            {!item.file_sertifikat_halal && !item.file_sertifikat_nkv && !item.file_izin_usaha && !item.file_foto_fasilitas && (
-                              <span className="text-slate-400 text-[11px]">-</span>
-                            )}
-                          </div>
-                        </td>
-                        {canEdit && (
-                          <td className="p-3.5 text-center sticky right-0 bg-white shadow-[-5px_0_10px_rgba(0,0,0,0.03)]">
-                            <div className="flex items-center justify-center gap-1">
-                              <button
-                                onClick={() => openEditModal(item)}
-                                className="min-h-touch h-7 w-7 rounded-lg border border-slate-200 bg-slate-50 text-slate-600 hover:bg-slate-100 flex items-center justify-center transition-colors"
-                                title="Edit Data"
-                              >
-                                <Edit2 size={12} />
-                              </button>
-                              {confirmDeleteNo === item.no ? (
-                                <div className="flex items-center gap-1">
-                                  <button
-                                    onClick={() => handleDelete(item.no)}
-                                    className="h-7 px-2 rounded-lg bg-red-600 text-white font-bold text-[10px]"
-                                  >
-                                    Ya
-                                  </button>
-                                  <button
-                                    onClick={() => setConfirmDeleteNo(null)}
-                                    className="h-7 px-2 rounded-lg bg-slate-200 text-slate-700 font-bold text-[10px]"
-                                  >
-                                    Batal
-                                  </button>
-                                </div>
-                              ) : (
-                                <button
-                                  onClick={() => setConfirmDeleteNo(item.no)}
-                                  className="min-h-touch h-7 w-7 rounded-lg border border-red-200 bg-red-50 text-red-600 hover:bg-red-100 flex items-center justify-center transition-colors"
-                                  title="Hapus Data"
-                                >
-                                  <Trash2 size={12} />
-                                </button>
+                          {/* Total Terpisah Setiap Bulan */}
+                          <th className="p-2 border border-purple-200 bg-purple-100/90 text-purple-950 min-w-[68px]">Total J</th>
+                          <th className="p-2 border border-purple-200 bg-purple-100/90 text-purple-950 min-w-[68px]">Total BP</th>
+                          <th className="p-2 border border-purple-200 bg-purple-100/90 text-purple-950 min-w-[68px]">Total BT</th>
+                          <th className="p-2 border border-purple-200 bg-purple-200 text-purple-950 font-black min-w-[80px]">Total Bulan</th>
+                        </tr>
+                      </thead>
+
+                      <tbody>
+                        {rows.map((row, monthIdx) => {
+                          const pj = Number(row.po_jantan) || 0;
+                          const pbp = Number(row.po_betina_prod) || 0;
+                          const pbnp = Number(row.po_betina_non_prod) || 0;
+
+                          const sj = Number(row.so_jantan) || 0;
+                          const sbp = Number(row.so_betina_prod) || 0;
+                          const sbnp = Number(row.so_betina_non_prod) || 0;
+
+                          const smj = Number(row.simmental_jantan) || 0;
+                          const smbp = Number(row.simmental_betina_prod) || 0;
+                          const smbnp = Number(row.simmental_betina_non_prod) || 0;
+
+                          const lj = Number(row.limousine_jantan) || 0;
+                          const lbp = Number(row.limousine_betina_prod) || 0;
+                          const lbnp = Number(row.limousine_betina_non_prod) || 0;
+
+                          const bj = isGombong ? (Number(row.babi_jantan) || 0) : 0;
+                          const bb = isGombong ? (Number(row.babi_betina) || Number(row.babi_betina_prod) || 0) : 0;
+
+                          const rowTotalJantan = pj + sj + smj + lj + bj;
+                          const rowTotalBetinaProd = pbp + sbp + smbp + lbp + bb;
+                          const rowTotalBetinaNon = pbnp + sbnp + smbnp + lbnp;
+                          const rowGrandTotal = rowTotalJantan + rowTotalBetinaProd + rowTotalBetinaNon;
+
+                          return (
+                            <tr key={monthIdx} className="hover:bg-purple-50/40 transition-colors">
+                              {/* Month Name */}
+                              <td className="p-2 border border-slate-200 font-bold text-slate-900 bg-slate-50 sticky left-0 z-10 text-left pl-3.5">
+                                {row.bulan || BULAN_NAMES[monthIdx]}
+                              </td>
+
+                              {/* PO */}
+                              <td className="p-1 border border-slate-200">
+                                {canEdit || isAdmin ? (
+                                  <input
+                                    type="number"
+                                    min="0"
+                                    value={row.po_jantan ?? 0}
+                                    onChange={(e) => handleRumpunCellChange(activeCfg.key, monthIdx, 'po_jantan', e.target.value)}
+                                    className="w-full h-8 text-center rounded border border-slate-200/60 focus:border-purple-600 focus:bg-white bg-slate-50/40 font-mono font-bold text-slate-900 text-xs outline-none"
+                                  />
+                                ) : (
+                                  <span className="font-mono font-bold text-slate-800">{(row.po_jantan || 0).toLocaleString('id-ID')}</span>
+                                )}
+                              </td>
+                              <td className="p-1 border border-slate-200">
+                                {canEdit || isAdmin ? (
+                                  <input
+                                    type="number"
+                                    min="0"
+                                    value={row.po_betina_prod ?? 0}
+                                    onChange={(e) => handleRumpunCellChange(activeCfg.key, monthIdx, 'po_betina_prod', e.target.value)}
+                                    className="w-full h-8 text-center rounded border border-slate-200/60 focus:border-purple-600 focus:bg-white bg-slate-50/40 font-mono font-bold text-slate-900 text-xs outline-none"
+                                  />
+                                ) : (
+                                  <span className="font-mono font-bold text-slate-800">{(row.po_betina_prod || 0).toLocaleString('id-ID')}</span>
+                                )}
+                              </td>
+                              <td className="p-1 border border-slate-200">
+                                {canEdit || isAdmin ? (
+                                  <input
+                                    type="number"
+                                    min="0"
+                                    value={row.po_betina_non_prod ?? 0}
+                                    onChange={(e) => handleRumpunCellChange(activeCfg.key, monthIdx, 'po_betina_non_prod', e.target.value)}
+                                    className="w-full h-8 text-center rounded border border-slate-200/60 focus:border-purple-600 focus:bg-white bg-slate-50/40 font-mono font-bold text-slate-900 text-xs outline-none"
+                                  />
+                                ) : (
+                                  <span className="font-mono font-bold text-slate-800">{(row.po_betina_non_prod || 0).toLocaleString('id-ID')}</span>
+                                )}
+                              </td>
+
+                              {/* SO */}
+                              <td className="p-1 border border-slate-200">
+                                {canEdit || isAdmin ? (
+                                  <input
+                                    type="number"
+                                    min="0"
+                                    value={row.so_jantan ?? 0}
+                                    onChange={(e) => handleRumpunCellChange(activeCfg.key, monthIdx, 'so_jantan', e.target.value)}
+                                    className="w-full h-8 text-center rounded border border-slate-200/60 focus:border-purple-600 focus:bg-white bg-slate-50/40 font-mono font-bold text-slate-900 text-xs outline-none"
+                                  />
+                                ) : (
+                                  <span className="font-mono font-bold text-slate-800">{(row.so_jantan || 0).toLocaleString('id-ID')}</span>
+                                )}
+                              </td>
+                              <td className="p-1 border border-slate-200">
+                                {canEdit || isAdmin ? (
+                                  <input
+                                    type="number"
+                                    min="0"
+                                    value={row.so_betina_prod ?? 0}
+                                    onChange={(e) => handleRumpunCellChange(activeCfg.key, monthIdx, 'so_betina_prod', e.target.value)}
+                                    className="w-full h-8 text-center rounded border border-slate-200/60 focus:border-purple-600 focus:bg-white bg-slate-50/40 font-mono font-bold text-slate-900 text-xs outline-none"
+                                  />
+                                ) : (
+                                  <span className="font-mono font-bold text-slate-800">{(row.so_betina_prod || 0).toLocaleString('id-ID')}</span>
+                                )}
+                              </td>
+                              <td className="p-1 border border-slate-200">
+                                {canEdit || isAdmin ? (
+                                  <input
+                                    type="number"
+                                    min="0"
+                                    value={row.so_betina_non_prod ?? 0}
+                                    onChange={(e) => handleRumpunCellChange(activeCfg.key, monthIdx, 'so_betina_non_prod', e.target.value)}
+                                    className="w-full h-8 text-center rounded border border-slate-200/60 focus:border-purple-600 focus:bg-white bg-slate-50/40 font-mono font-bold text-slate-900 text-xs outline-none"
+                                  />
+                                ) : (
+                                  <span className="font-mono font-bold text-slate-800">{(row.so_betina_non_prod || 0).toLocaleString('id-ID')}</span>
+                                )}
+                              </td>
+
+                              {/* Simmental */}
+                              <td className="p-1 border border-slate-200">
+                                {canEdit || isAdmin ? (
+                                  <input
+                                    type="number"
+                                    min="0"
+                                    value={row.simmental_jantan ?? 0}
+                                    onChange={(e) => handleRumpunCellChange(activeCfg.key, monthIdx, 'simmental_jantan', e.target.value)}
+                                    className="w-full h-8 text-center rounded border border-slate-200/60 focus:border-purple-600 focus:bg-white bg-slate-50/40 font-mono font-bold text-slate-900 text-xs outline-none"
+                                  />
+                                ) : (
+                                  <span className="font-mono font-bold text-slate-800">{(row.simmental_jantan || 0).toLocaleString('id-ID')}</span>
+                                )}
+                              </td>
+                              <td className="p-1 border border-slate-200">
+                                {canEdit || isAdmin ? (
+                                  <input
+                                    type="number"
+                                    min="0"
+                                    value={row.simmental_betina_prod ?? 0}
+                                    onChange={(e) => handleRumpunCellChange(activeCfg.key, monthIdx, 'simmental_betina_prod', e.target.value)}
+                                    className="w-full h-8 text-center rounded border border-slate-200/60 focus:border-purple-600 focus:bg-white bg-slate-50/40 font-mono font-bold text-slate-900 text-xs outline-none"
+                                  />
+                                ) : (
+                                  <span className="font-mono font-bold text-slate-800">{(row.simmental_betina_prod || 0).toLocaleString('id-ID')}</span>
+                                )}
+                              </td>
+                              <td className="p-1 border border-slate-200">
+                                {canEdit || isAdmin ? (
+                                  <input
+                                    type="number"
+                                    min="0"
+                                    value={row.simmental_betina_non_prod ?? 0}
+                                    onChange={(e) => handleRumpunCellChange(activeCfg.key, monthIdx, 'simmental_betina_non_prod', e.target.value)}
+                                    className="w-full h-8 text-center rounded border border-slate-200/60 focus:border-purple-600 focus:bg-white bg-slate-50/40 font-mono font-bold text-slate-900 text-xs outline-none"
+                                  />
+                                ) : (
+                                  <span className="font-mono font-bold text-slate-800">{(row.simmental_betina_non_prod || 0).toLocaleString('id-ID')}</span>
+                                )}
+                              </td>
+
+                              {/* Limousine */}
+                              <td className="p-1 border border-slate-200">
+                                {canEdit || isAdmin ? (
+                                  <input
+                                    type="number"
+                                    min="0"
+                                    value={row.limousine_jantan ?? 0}
+                                    onChange={(e) => handleRumpunCellChange(activeCfg.key, monthIdx, 'limousine_jantan', e.target.value)}
+                                    className="w-full h-8 text-center rounded border border-slate-200/60 focus:border-purple-600 focus:bg-white bg-slate-50/40 font-mono font-bold text-slate-900 text-xs outline-none"
+                                  />
+                                ) : (
+                                  <span className="font-mono font-bold text-slate-800">{(row.limousine_jantan || 0).toLocaleString('id-ID')}</span>
+                                )}
+                              </td>
+                              <td className="p-1 border border-slate-200">
+                                {canEdit || isAdmin ? (
+                                  <input
+                                    type="number"
+                                    min="0"
+                                    value={row.limousine_betina_prod ?? 0}
+                                    onChange={(e) => handleRumpunCellChange(activeCfg.key, monthIdx, 'limousine_betina_prod', e.target.value)}
+                                    className="w-full h-8 text-center rounded border border-slate-200/60 focus:border-purple-600 focus:bg-white bg-slate-50/40 font-mono font-bold text-slate-900 text-xs outline-none"
+                                  />
+                                ) : (
+                                  <span className="font-mono font-bold text-slate-800">{(row.limousine_betina_prod || 0).toLocaleString('id-ID')}</span>
+                                )}
+                              </td>
+                              <td className="p-1 border border-slate-200">
+                                {canEdit || isAdmin ? (
+                                  <input
+                                    type="number"
+                                    min="0"
+                                    value={row.limousine_betina_non_prod ?? 0}
+                                    onChange={(e) => handleRumpunCellChange(activeCfg.key, monthIdx, 'limousine_betina_non_prod', e.target.value)}
+                                    className="w-full h-8 text-center rounded border border-slate-200/60 focus:border-purple-600 focus:bg-white bg-slate-50/40 font-mono font-bold text-slate-900 text-xs outline-none"
+                                  />
+                                ) : (
+                                  <span className="font-mono font-bold text-slate-800">{(row.limousine_betina_non_prod || 0).toLocaleString('id-ID')}</span>
+                                )}
+                              </td>
+
+                              {/* Babi (Hanya J dan B - Khusus Gombong & Luar Gombong di Samping Limousine) */}
+                              {isGombong && (
+                                <>
+                                  <td className="p-1 border border-slate-200 bg-rose-50/30">
+                                    {canEdit || isAdmin ? (
+                                      <input
+                                        type="number"
+                                        min="0"
+                                        value={row.babi_jantan ?? 0}
+                                        onChange={(e) => handleRumpunCellChange(activeCfg.key, monthIdx, 'babi_jantan', e.target.value)}
+                                        className="w-full h-8 text-center rounded border border-rose-200 focus:border-rose-600 focus:bg-white bg-white font-mono font-bold text-slate-900 text-xs outline-none"
+                                      />
+                                    ) : (
+                                      <span className="font-mono font-bold text-slate-800">{(row.babi_jantan || 0).toLocaleString('id-ID')}</span>
+                                    )}
+                                  </td>
+                                  <td className="p-1 border border-slate-200 bg-rose-50/30">
+                                    {canEdit || isAdmin ? (
+                                      <input
+                                        type="number"
+                                        min="0"
+                                        value={row.babi_betina ?? (row.babi_betina_prod || 0)}
+                                        onChange={(e) => {
+                                          handleRumpunCellChange(activeCfg.key, monthIdx, 'babi_betina_prod', e.target.value);
+                                          handleRumpunCellChange(activeCfg.key, monthIdx, 'babi_betina', e.target.value);
+                                        }}
+                                        className="w-full h-8 text-center rounded border border-rose-200 focus:border-rose-600 focus:bg-white bg-white font-mono font-bold text-slate-900 text-xs outline-none"
+                                      />
+                                    ) : (
+                                      <span className="font-mono font-bold text-slate-800">{(Number(row.babi_betina) || Number(row.babi_betina_prod) || 0).toLocaleString('id-ID')}</span>
+                                    )}
+                                  </td>
+                                </>
                               )}
-                            </div>
+
+                              {/* TOTAL TERPISAH SETIAP BULAN (Jantan, Betina Prod, Betina Non, Total Bulan) */}
+                              <td className="p-2 border border-slate-200 font-mono font-bold text-slate-900 bg-purple-50/30">
+                                {rowTotalJantan.toLocaleString('id-ID')}
+                              </td>
+                              <td className="p-2 border border-slate-200 font-mono font-bold text-slate-900 bg-purple-50/30">
+                                {rowTotalBetinaProd.toLocaleString('id-ID')}
+                              </td>
+                              <td className="p-2 border border-slate-200 font-mono font-bold text-slate-900 bg-purple-50/30">
+                                {rowTotalBetinaNon.toLocaleString('id-ID')}
+                              </td>
+                              <td className="p-2 border border-slate-200 font-extrabold font-mono text-purple-900 bg-purple-100/70">
+                                {rowGrandTotal.toLocaleString('id-ID')}
+                              </td>
+                            </tr>
+                          );
+                        })}
+                      </tbody>
+
+                      {/* SUMMARY / TOTALS FOOTER ROW */}
+                      <tfoot>
+                        <tr className="bg-purple-100/90 text-purple-950 font-bold border border-purple-200">
+                          <td className="p-3 border border-purple-200 font-black text-left pl-3.5 sticky left-0 z-10 bg-purple-100">
+                            TOTAL TAHUNAN
                           </td>
-                        )}
-                      </tr>
-                    );
-                  })
-                ) : (
-                  <tr>
-                    <td colSpan={canEdit ? 11 : 10} className="p-12 text-center text-slate-400 font-medium">
-                      Pencarian &quot;{searchTerm}&quot; tidak ditemukan.
-                    </td>
-                  </tr>
-                )}
-              </tbody>
-            </table>
+                          {/* PO */}
+                          <td className="p-2 border border-purple-200 font-mono font-bold">{summary.po_jantan.toLocaleString('id-ID')}</td>
+                          <td className="p-2 border border-purple-200 font-mono font-bold">{summary.po_betina_prod.toLocaleString('id-ID')}</td>
+                          <td className="p-2 border border-purple-200 font-mono font-bold">{summary.po_betina_non_prod.toLocaleString('id-ID')}</td>
+                          {/* SO */}
+                          <td className="p-2 border border-purple-200 font-mono font-bold">{summary.so_jantan.toLocaleString('id-ID')}</td>
+                          <td className="p-2 border border-purple-200 font-mono font-bold">{summary.so_betina_prod.toLocaleString('id-ID')}</td>
+                          <td className="p-2 border border-purple-200 font-mono font-bold">{summary.so_betina_non_prod.toLocaleString('id-ID')}</td>
+                          {/* Simmental */}
+                          <td className="p-2 border border-purple-200 font-mono font-bold">{summary.simmental_jantan.toLocaleString('id-ID')}</td>
+                          <td className="p-2 border border-purple-200 font-mono font-bold">{summary.simmental_betina_prod.toLocaleString('id-ID')}</td>
+                          <td className="p-2 border border-purple-200 font-mono font-bold">{summary.simmental_betina_non_prod.toLocaleString('id-ID')}</td>
+                          {/* Limousine */}
+                          <td className="p-2 border border-purple-200 font-mono font-bold">{summary.limousine_jantan.toLocaleString('id-ID')}</td>
+                          <td className="p-2 border border-purple-200 font-mono font-bold">{summary.limousine_betina_prod.toLocaleString('id-ID')}</td>
+                          <td className="p-2 border border-purple-200 font-mono font-bold">{summary.limousine_betina_non_prod.toLocaleString('id-ID')}</td>
+                          {/* Babi Footer (Khusus Gombong & Luar Gombong) */}
+                          {isGombong && (
+                            <>
+                              <td className="p-2 border border-purple-200 font-mono font-bold bg-rose-100/70 text-rose-950">{summary.babi_jantan.toLocaleString('id-ID')}</td>
+                              <td className="p-2 border border-purple-200 font-mono font-bold bg-rose-100/70 text-rose-950">{summary.babi_betina.toLocaleString('id-ID')}</td>
+                            </>
+                          )}
+                          {/* Subtotals Footer */}
+                          <td className="p-2 border border-purple-200 font-mono font-black text-purple-950 bg-purple-200/60">{summary.total_jantan.toLocaleString('id-ID')}</td>
+                          <td className="p-2 border border-purple-200 font-mono font-black text-purple-950 bg-purple-200/60">{summary.total_betina_prod.toLocaleString('id-ID')}</td>
+                          <td className="p-2 border border-purple-200 font-mono font-black text-purple-950 bg-purple-200/60">{summary.total_betina_non_prod.toLocaleString('id-ID')}</td>
+                          <td className="p-2.5 border border-purple-200 font-black font-mono text-purple-950 bg-purple-300/80 text-sm">
+                            {summary.grand_total.toLocaleString('id-ID')}
+                          </td>
+                        </tr>
+                      </tfoot>
+                    </table>
+                  </div>
+                </div>
+              );
+            })()}
+
           </div>
-        </div>
+        )}
+
+        {/* ───────────────────────────────────────────────────────────
+            TAB 2: TEMPAT PEMOTONGAN HEWAN (TPH) / REKAP KOMODITAS DENGAN BABI DI GOMBONG
+        ─────────────────────────────────────────────────────────── */}
+        {activeTab === 'rekap_komoditas' && (
+          <div className="space-y-4">
+            
+            {/* Location Switcher Toolbar */}
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 bg-white p-3.5 rounded-2xl border border-slate-200 shadow-xs">
+              <div className="flex items-center gap-2 overflow-x-auto">
+                {['ALL', 'RPH Kebumen', 'Luar RPH Kebumen', 'RPH Gombong', 'Luar RPH Gombong'].map((lok) => (
+                  <button
+                    key={lok}
+                    onClick={() => setSelectedKomoditasFilter(lok)}
+                    className={`px-3.5 py-2 rounded-xl text-xs font-bold transition-all shrink-0 cursor-pointer ${
+                      selectedKomoditasFilter === lok
+                        ? 'bg-purple-600 text-white shadow-xs'
+                        : 'bg-slate-100 hover:bg-purple-50 text-slate-700'
+                    }`}
+                  >
+                    {lok === 'ALL' ? 'Semua Lokasi' : lok}
+                  </button>
+                ))}
+              </div>
+
+              {komoditasSaveMessage && (
+                <span className="text-xs font-bold text-emerald-700 bg-emerald-50 px-3 py-1 rounded-xl border border-emerald-200 animate-in fade-in">
+                  {komoditasSaveMessage}
+                </span>
+              )}
+            </div>
+
+            {/* Table TPH Komoditas */}
+            <div className="bg-white rounded-3xl border border-slate-200 shadow-xs overflow-hidden p-4 sm:p-6">
+              <div className="overflow-x-auto rounded-2xl border border-slate-200">
+                <table className="w-full min-w-[1750px] text-center text-xs border-collapse">
+                  <thead>
+                    <tr className="bg-purple-900 text-white font-bold border border-purple-950">
+                      <th rowSpan={2} className="p-3 border border-purple-800 w-12 min-w-[48px] bg-purple-950 sticky left-0 z-20">NO</th>
+                      <th rowSpan={2} className="p-3 border border-purple-800 text-left min-w-[190px] w-52 bg-purple-950 sticky left-[48px] z-20 shadow-[2px_0_5px_-2px_rgba(0,0,0,0.3)]">
+                        NAMA PEMOTONGAN
+                      </th>
+                      <th rowSpan={2} className="p-3 border border-purple-800 text-left min-w-[130px] w-36 bg-purple-900">
+                        KOMODITAS
+                      </th>
+                      {['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'].map((m) => (
+                        <th key={m} colSpan={2} className="p-2 border border-purple-800 bg-purple-900/90 text-purple-100 text-xs">
+                          {m}
+                        </th>
+                      ))}
+                      <th colSpan={3} className="p-2 border border-purple-800 bg-purple-950 text-purple-100 font-extrabold text-xs">
+                        TOTAL TAHUNAN
+                      </th>
+                      {isAdmin && (
+                        <th rowSpan={2} className="p-2 border border-purple-800 w-14 min-w-[56px] text-center bg-rose-950 text-rose-100">
+                          AKSI
+                        </th>
+                      )}
+                    </tr>
+                    <tr className="bg-purple-50 text-purple-950 font-bold border border-purple-200 text-[11px]">
+                      {Array.from({ length: 12 }).map((_, i) => (
+                        <div key={i} className="contents">
+                          <th className="p-2 border border-purple-200 min-w-[58px] w-16">J</th>
+                          <th className="p-2 border border-purple-200 min-w-[58px] w-16">B</th>
+                        </div>
+                      ))}
+                      <th className="p-2 border border-purple-200 bg-purple-100/70 min-w-[72px] w-20">Jantan</th>
+                      <th className="p-2 border border-purple-200 bg-purple-100/70 min-w-[72px] w-20">Betina</th>
+                      <th className="p-2 border border-purple-200 bg-purple-200 text-purple-950 font-black min-w-[85px] w-24">Total</th>
+                    </tr>
+                  </thead>
+
+                  <tbody>
+                    {isLoadingKomoditas ? (
+                      <tr>
+                        <td colSpan={isAdmin ? 29 : 28} className="p-8 text-center text-slate-400">
+                          <Loader2 className="animate-spin inline-block mr-2 text-purple-600" size={16} />
+                          Memuat data komoditas...
+                        </td>
+                      </tr>
+                    ) : komoditasData.length === 0 ? (
+                      <tr>
+                        <td colSpan={isAdmin ? 29 : 28} className="p-8 text-center text-slate-400">
+                          Belum ada data rekap komoditas untuk tahun {selectedYear}.
+                        </td>
+                      </tr>
+                    ) : (
+                      komoditasData
+                        .filter((row) => selectedKomoditasFilter === 'ALL' || (row.nama_pemotongan || '').toLowerCase().includes(selectedKomoditasFilter.toLowerCase()))
+                        .map((row, idx) => {
+                          const months = ['jan', 'feb', 'mar', 'apr', 'mei', 'jun', 'jul', 'agu', 'sep', 'okt', 'nov', 'des'];
+                          let rowJantan = 0;
+                          let rowBetina = 0;
+                          months.forEach((m) => {
+                            rowJantan += Number(row[`${m}_jantan`]) || 0;
+                            rowBetina += Number(row[`${m}_betina`]) || 0;
+                          });
+                          const grandRowTotal = rowJantan + rowBetina;
+
+                          return (
+                            <tr key={idx} className="hover:bg-purple-50/40 transition-colors">
+                              {/* Sticky No */}
+                              <td className="p-2 border border-slate-200 font-semibold text-slate-500 bg-slate-50 sticky left-0 z-10">
+                                {idx + 1}
+                              </td>
+                              
+                              {/* Sticky Nama Pemotongan */}
+                              <td className="p-1 border border-slate-200 text-left bg-white sticky left-[48px] z-10 shadow-[2px_0_5px_-2px_rgba(0,0,0,0.08)]">
+                                {isAdmin ? (
+                                  <input
+                                    type="text"
+                                    value={row.nama_pemotongan || ''}
+                                    onChange={(e) => handleKomoditasCellChange(idx, 'nama_pemotongan', e.target.value)}
+                                    placeholder="Nama RPH/TPH..."
+                                    className="w-full h-8 px-2 rounded border border-slate-200/70 focus:border-purple-600 focus:bg-white bg-slate-50/40 text-xs font-bold text-slate-900 outline-none"
+                                  />
+                                ) : (
+                                  <span className="font-bold text-slate-900 pl-2">{row.nama_pemotongan}</span>
+                                )}
+                              </td>
+
+                              {/* Komoditas Ternak */}
+                              <td className="p-1 border border-slate-200 text-left">
+                                {isAdmin ? (
+                                  <select
+                                    value={row.komoditas || 'Sapi Potong'}
+                                    onChange={(e) => handleKomoditasCellChange(idx, 'komoditas', e.target.value)}
+                                    className="w-full h-8 px-1.5 rounded border border-slate-200/70 focus:border-purple-600 focus:bg-white bg-slate-50/40 text-xs font-bold text-purple-700 outline-none"
+                                  >
+                                    {KOMODITAS_LIST.map((k) => (
+                                      <option key={k} value={k}>{k}</option>
+                                    ))}
+                                  </select>
+                                ) : (
+                                  <span className="font-bold text-purple-700 pl-2">{row.komoditas}</span>
+                                )}
+                              </td>
+
+                              {/* 12 Months Cells (J & B) */}
+                              {months.map((m) => (
+                                <div key={m} className="contents">
+                                  <td className="p-1 border border-slate-200">
+                                    {isAdmin ? (
+                                      <input
+                                        type="number"
+                                        min="0"
+                                        value={row[`${m}_jantan`] ?? 0}
+                                        onChange={(e) => handleKomoditasCellChange(idx, `${m}_jantan`, Math.max(0, parseInt(e.target.value, 10) || 0))}
+                                        className="w-full h-8 text-center rounded border border-slate-200/60 focus:border-purple-600 focus:bg-white bg-slate-50/40 font-mono font-bold text-slate-900 text-xs outline-none"
+                                      />
+                                    ) : (
+                                      <span className="font-mono font-semibold text-slate-800">{(row[`${m}_jantan`] || 0).toLocaleString('id-ID')}</span>
+                                    )}
+                                  </td>
+                                  <td className="p-1 border border-slate-200">
+                                    {isAdmin ? (
+                                      <input
+                                        type="number"
+                                        min="0"
+                                        value={row[`${m}_betina`] ?? 0}
+                                        onChange={(e) => handleKomoditasCellChange(idx, `${m}_betina`, Math.max(0, parseInt(e.target.value, 10) || 0))}
+                                        className="w-full h-8 text-center rounded border border-slate-200/60 focus:border-purple-600 focus:bg-white bg-slate-50/40 font-mono font-bold text-slate-900 text-xs outline-none"
+                                      />
+                                    ) : (
+                                      <span className="font-mono font-semibold text-slate-800">{(row[`${m}_betina`] || 0).toLocaleString('id-ID')}</span>
+                                    )}
+                                  </td>
+                                </div>
+                              ))}
+
+                              {/* Subtotal Row */}
+                              <td className="p-2 border border-slate-200 font-mono font-bold text-slate-900 bg-purple-50/30">
+                                {rowJantan.toLocaleString('id-ID')}
+                              </td>
+                              <td className="p-2 border border-slate-200 font-mono font-bold text-slate-900 bg-purple-50/30">
+                                {rowBetina.toLocaleString('id-ID')}
+                              </td>
+                              <td className="p-2 border border-slate-200 font-mono font-black text-purple-950 bg-purple-100/70">
+                                {grandRowTotal.toLocaleString('id-ID')}
+                              </td>
+
+                              {/* Action: Tambah Baris di Samping Hapus */}
+                              {isAdmin && (
+                                <td className="p-1 border border-slate-200 text-center">
+                                  <div className="flex items-center justify-center gap-1.5">
+                                    <button
+                                      onClick={handleAddKomoditasRow}
+                                      className="w-7 h-7 rounded-lg bg-purple-100 text-purple-700 hover:bg-purple-200 flex items-center justify-center transition-colors cursor-pointer"
+                                      title="Tambah Baris Baru"
+                                    >
+                                      <Plus size={13} strokeWidth={2.5} />
+                                    </button>
+                                    <button
+                                      onClick={() => handleDeleteKomoditasRow(idx)}
+                                      className="w-7 h-7 rounded-lg bg-rose-50 text-rose-600 hover:bg-rose-100 flex items-center justify-center transition-colors cursor-pointer"
+                                      title="Hapus baris"
+                                    >
+                                      <Trash2 size={13} />
+                                    </button>
+                                  </div>
+                                </td>
+                              )}
+                            </tr>
+                          );
+                        })
+                    )}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+          </div>
+        )}
+
+        {/* ───────────────────────────────────────────────────────────
+            TAB 3: DATA RUMAH POTONG (RPH / TPH / TPU)
+        ─────────────────────────────────────────────────────────── */}
+        {activeTab === 'rumah_potong' && (
+          <div className="space-y-4">
+            {/* Toolbar */}
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 bg-white p-4 rounded-2xl border border-slate-200 shadow-xs">
+              <div className="flex items-center gap-2 flex-1 max-w-md">
+                <div className="relative w-full">
+                  <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
+                  <input
+                    type="text"
+                    value={searchRph}
+                    onChange={(e) => setSearchRph(e.target.value)}
+                    placeholder="Cari nama usaha, pemilik, atau lokasi..."
+                    className="w-full h-10 pl-10 pr-3.5 text-xs rounded-xl border border-slate-200 bg-slate-50/60 focus:bg-white focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-600 font-medium"
+                  />
+                </div>
+              </div>
+
+              <div className="flex items-center gap-2 flex-wrap">
+                <select
+                  value={filterJenis}
+                  onChange={(e) => setFilterJenis(e.target.value)}
+                  className="h-10 px-3.5 text-xs rounded-xl border border-slate-200 bg-white font-bold text-slate-700 focus:outline-none focus:border-purple-600"
+                >
+                  <option value="ALL">Semua Jenis Unit</option>
+                  <option value="RPH">RPH (Rumah Potong Hewan)</option>
+                  <option value="TPU">TPU (Tempat Pemotongan Unggas)</option>
+                  <option value="RPU">RPU (Rumah Potong Unggas)</option>
+                  <option value="TPH">TPH (Tempat Pemotongan Hewan)</option>
+                </select>
+
+                <select
+                  value={filterHalal}
+                  onChange={(e) => setFilterHalal(e.target.value)}
+                  className="h-10 px-3.5 text-xs rounded-xl border border-slate-200 bg-white font-bold text-slate-700 focus:outline-none focus:border-purple-600"
+                >
+                  <option value="ALL">Semua Status Halal</option>
+                  <option value="Sudah">Sudah Bersertifikat</option>
+                  <option value="Belum">Belum Bersertifikat</option>
+                </select>
+              </div>
+            </div>
+
+            {/* Table RPH List */}
+            <div className="bg-white rounded-3xl border border-slate-200 shadow-xs overflow-hidden">
+              <div className="overflow-x-auto">
+                <table className="w-full text-xs text-left border-collapse">
+                  <thead className="bg-purple-900 text-white font-bold uppercase tracking-wider text-[11px]">
+                    <tr>
+                      <th className="p-3.5 w-12 text-center">NO</th>
+                      <th className="p-3.5">NAMA USAHA</th>
+                      <th className="p-3.5 text-center">JENIS</th>
+                      <th className="p-3.5">PEMILIK</th>
+                      <th className="p-3.5">KONTAK</th>
+                      <th className="p-3.5">LOKASI / ALAMAT</th>
+                      <th className="p-3.5 text-center">SERTIFIKAT HALAL</th>
+                      <th className="p-3.5 text-center">NKV</th>
+                      {isAdmin && <th className="p-3.5 text-center w-24">AKSI</th>}
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-100 text-slate-700">
+                    {isLoadingRph ? (
+                      <tr>
+                        <td colSpan={isAdmin ? 9 : 8} className="p-8 text-center text-slate-400">
+                          <Loader2 className="animate-spin inline-block mr-2 text-purple-600" size={16} />
+                          Memuat data rumah potong...
+                        </td>
+                      </tr>
+                    ) : filteredRph.length === 0 ? (
+                      <tr>
+                        <td colSpan={isAdmin ? 9 : 8} className="p-8 text-center text-slate-400">
+                          Tidak ada data yang sesuai.
+                        </td>
+                      </tr>
+                    ) : (
+                      filteredRph.map((item, idx) => (
+                        <tr key={item.id || idx} className="hover:bg-purple-50/30 transition-colors">
+                          <td className="p-3.5 text-center font-semibold text-slate-400">{idx + 1}</td>
+                          <td className="p-3.5 font-bold text-slate-900">{item.nama_usaha}</td>
+                          <td className="p-3.5 text-center">
+                            <span className="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold bg-purple-50 text-purple-700 border border-purple-200">
+                              {item.jenis}
+                            </span>
+                          </td>
+                          <td className="p-3.5 font-medium">{item.pemilik || '-'}</td>
+                          <td className="p-3.5 text-slate-500">{item.kontak || '-'}</td>
+                          <td className="p-3.5 text-slate-600 max-w-xs truncate">{item.lokasi || item.alamat_pemilik || '-'}</td>
+                          <td className="p-3.5 text-center">
+                            <span
+                              className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold border ${
+                                item.sertifikat_halal
+                                  ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
+                                  : 'bg-amber-50 text-amber-700 border-amber-200'
+                              }`}
+                            >
+                              {item.sertifikat_halal ? 'Sudah' : 'Belum'}
+                            </span>
+                          </td>
+                          <td className="p-3.5 text-center">
+                            <span
+                              className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold border ${
+                                item.sertifikat_nkv && !item.sertifikat_nkv.includes('belum')
+                                  ? 'bg-purple-50 text-purple-700 border-purple-200'
+                                  : 'bg-slate-50 text-slate-500 border-slate-200'
+                              }`}
+                            >
+                              {item.sertifikat_nkv || 'Belum'}
+                            </span>
+                          </td>
+                          {isAdmin && (
+                            <td className="p-3.5 text-center">
+                              <div className="flex items-center justify-center gap-1.5">
+                                <button
+                                  onClick={() => {
+                                    setEditingItem(item);
+                                    setFormRph({
+                                      nama_usaha: item.nama_usaha || '',
+                                      jenis: item.jenis || 'TPU',
+                                      pemilik: item.pemilik || '',
+                                      alamat_pemilik: item.alamat_pemilik || '',
+                                      kontak: item.kontak || '',
+                                      lokasi: item.lokasi || '',
+                                      status_perijinan: item.status_perijinan || '',
+                                      sertifikat_halal: item.sertifikat_halal || '',
+                                      sertifikat_nkv: item.sertifikat_nkv || 'belum',
+                                    });
+                                    setShowAddModal(true);
+                                  }}
+                                  className="w-7 h-7 rounded-lg bg-purple-50 text-purple-700 hover:bg-purple-100 flex items-center justify-center transition-colors cursor-pointer"
+                                  title="Edit"
+                                >
+                                  <Edit2 size={13} />
+                                </button>
+                                <button
+                                  onClick={() => handleDeleteRph(item.id)}
+                                  className="w-7 h-7 rounded-lg bg-rose-50 text-rose-600 hover:bg-rose-100 flex items-center justify-center transition-colors cursor-pointer"
+                                  title="Hapus"
+                                >
+                                  <Trash2 size={13} />
+                                </button>
+                              </div>
+                            </td>
+                          )}
+                        </tr>
+                      ))
+                    )}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        )}
 
       </main>
 
-      {/* ── MODAL TAMBAH / EDIT DENGAN UPLOAD FILE LENGKAP ── */}
-      {isModalOpen && (
-        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-3xl p-6 sm:p-8 max-w-3xl w-full shadow-2xl space-y-6 max-h-[92vh] overflow-y-auto">
-            <div className="flex items-center justify-between pb-4 border-b border-slate-200">
+      {/* ───────────────────────────────────────────────────────────
+          MODAL: TAMBAH / EDIT RUMAH POTONG (ADMIN ONLY)
+      ─────────────────────────────────────────────────────────── */}
+      {showAddModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-xs animate-in fade-in duration-200">
+          <div className="w-full max-w-lg bg-white rounded-3xl border border-slate-200 shadow-2xl p-6 relative max-h-[90vh] overflow-y-auto">
+            <button
+              onClick={() => setShowAddModal(false)}
+              className="w-8 h-8 rounded-full border border-slate-200 flex items-center justify-center text-slate-400 hover:text-slate-600 absolute top-5 right-5 cursor-pointer"
+            >
+              <X size={16} />
+            </button>
+
+            <h3 className="text-lg font-bold text-slate-900 mb-1">
+              {editingItem ? 'Edit Data Rumah Potong' : 'Tambah Unit Rumah Potong Baru'}
+            </h3>
+            <p className="text-xs text-slate-500 mb-5">
+              Kelola informasi unit RPH, TPH, TPU, atau RPU di Kabupaten Kebumen.
+            </p>
+
+            <form onSubmit={handleRphSubmit} className="space-y-4 text-xs font-semibold text-slate-700">
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block mb-1 font-bold text-slate-700">Nama Usaha / Tempat <span className="text-red-500">*</span></label>
+                  <input
+                    type="text"
+                    required
+                    value={formRph.nama_usaha}
+                    onChange={(e) => setFormRph({ ...formRph, nama_usaha: e.target.value })}
+                    placeholder="Contoh: RPH Kalirejo"
+                    className="w-full h-10 px-3 rounded-xl border border-slate-200 bg-white font-bold text-slate-800 focus:outline-none focus:border-purple-600"
+                  />
+                </div>
+                <div>
+                  <label className="block mb-1 font-bold text-slate-700">Jenis Usaha <span className="text-red-500">*</span></label>
+                  <select
+                    value={formRph.jenis}
+                    onChange={(e) => setFormRph({ ...formRph, jenis: e.target.value })}
+                    className="w-full h-10 px-3 rounded-xl border border-slate-200 bg-white font-bold text-slate-800 focus:outline-none focus:border-purple-600"
+                  >
+                    <option value="RPH">RPH (Rumah Potong Hewan)</option>
+                    <option value="TPU">TPU (Tempat Pemotongan Unggas)</option>
+                    <option value="RPU">RPU (Rumah Potong Unggas)</option>
+                    <option value="TPH">TPH (Tempat Pemotongan Hewan)</option>
+                  </select>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block mb-1 font-bold text-slate-700">Nama Pemilik / Pengelola <span className="text-red-500">*</span></label>
+                  <input
+                    type="text"
+                    required
+                    value={formRph.pemilik}
+                    onChange={(e) => setFormRph({ ...formRph, pemilik: e.target.value })}
+                    placeholder="Nama pemilik..."
+                    className="w-full h-10 px-3 rounded-xl border border-slate-200 bg-white font-bold text-slate-800 focus:outline-none focus:border-purple-600"
+                  />
+                </div>
+                <div>
+                  <label className="block mb-1 font-bold text-slate-700">Kontak / Telepon</label>
+                  <input
+                    type="text"
+                    value={formRph.kontak}
+                    onChange={(e) => setFormRph({ ...formRph, kontak: e.target.value })}
+                    placeholder="08xxxxxxxxxx"
+                    className="w-full h-10 px-3 rounded-xl border border-slate-200 bg-white font-bold text-slate-800 focus:outline-none focus:border-purple-600"
+                  />
+                </div>
+              </div>
+
               <div>
-                <h3 className="font-bold text-lg text-slate-900">
-                  {editingNo !== null ? 'Edit Unit Usaha Pemotongan' : 'Tambah Unit Usaha Pemotongan Baru'}
-                </h3>
-                <p className="text-xs text-slate-500 mt-0.5">
-                  Isi data identitas unit usaha dan lampirkan berkas dokumen persyaratan (PDF / Foto).
-                </p>
+                <label className="block mb-1 font-bold text-slate-700">Lokasi / Alamat Lengkap <span className="text-red-500">*</span></label>
+                <textarea
+                  required
+                  rows={2}
+                  value={formRph.lokasi}
+                  onChange={(e) => setFormRph({ ...formRph, lokasi: e.target.value, alamat_pemilik: e.target.value })}
+                  placeholder="Alamat desa, kecamatan..."
+                  className="w-full p-3 rounded-xl border border-slate-200 bg-white font-medium text-slate-800 focus:outline-none focus:border-purple-600"
+                />
               </div>
-              <button
-                onClick={closeModal}
-                className="w-9 h-9 rounded-xl border border-slate-200 bg-slate-50 hover:bg-slate-100 flex items-center justify-center text-slate-600 transition-colors"
-              >
-                <X size={18} />
-              </button>
-            </div>
 
-            <form onSubmit={handleSubmit} className="space-y-6 text-xs">
-              
-              {/* ── SEKSI 1: PROFIL & DATA LAPANGAN ── */}
-              <div className="space-y-4">
-                <h4 className="text-xs font-bold uppercase tracking-wider text-purple-900 flex items-center gap-2">
-                  <Building2 size={15} className="text-purple-600" />
-                  <span>1. Identitas & Profil Unit Usaha</span>
-                </h4>
-
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  {/* Nama Unit */}
-                  <div>
-                    <label className="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1">
-                      Nama TPH/RPU / Unit Usaha *
-                    </label>
-                    <input
-                      type="text"
-                      name="nama_tph_r_u"
-                      value={formValues.nama_tph_r_u ?? ''}
-                      onChange={handleFieldChange}
-                      required
-                      placeholder="Contoh: RPU Pangestu / Kios Daging Sejahtera"
-                      className="w-full min-h-touch h-10 px-3 rounded-xl border border-slate-200 bg-slate-50 text-sm focus:border-purple-500 focus:bg-white outline-none"
-                    />
-                  </div>
-
-                  {/* Jenis Unit Usaha */}
-                  <div>
-                    <label className="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1">
-                      Jenis Unit Usaha
-                    </label>
-                    <select
-                      name="jenis_unit_usaha"
-                      value={formValues.jenis_unit_usaha ?? 'TPU'}
-                      onChange={handleFieldChange}
-                      className="w-full min-h-touch h-10 px-3 rounded-xl border border-slate-200 bg-slate-50 text-sm focus:border-purple-500 focus:bg-white outline-none"
-                    >
-                      <option value="TPU">TPU (Tempat Pemotongan Unggas)</option>
-                      <option value="TPH">TPH (Tempat Pemotongan Hewan)</option>
-                      <option value="TPH-U">TPH-U (Tempat Penjualan Daging / Unggas)</option>
-                      <option value="RPU">RPU (Rumah Potong Unggas)</option>
-                      <option value="RPH">RPH (Rumah Potong Hewan Ruminansia)</option>
-                    </select>
-                  </div>
-
-                  {/* Pemilik */}
-                  <div>
-                    <label className="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1">
-                      Nama Pemilik / Pengelola
-                    </label>
-                    <input
-                      type="text"
-                      name="pemilik"
-                      value={formValues.pemilik ?? ''}
-                      onChange={handleFieldChange}
-                      placeholder="Nama pemilik unit usaha"
-                      className="w-full min-h-touch h-10 px-3 rounded-xl border border-slate-200 bg-slate-50 text-sm focus:border-purple-500 focus:bg-white outline-none"
-                    />
-                  </div>
-
-                  {/* Kontak */}
-                  <div>
-                    <label className="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1">
-                      No. Telp / WhatsApp
-                    </label>
-                    <input
-                      type="text"
-                      name="no_telp"
-                      value={formValues.no_telp ?? ''}
-                      onChange={handleFieldChange}
-                      placeholder="Contoh: 081234567890"
-                      className="w-full min-h-touch h-10 px-3 rounded-xl border border-slate-200 bg-slate-50 text-sm focus:border-purple-500 focus:bg-white outline-none"
-                    />
-                  </div>
-
-                  {/* Lokasi Alamat */}
-                  <div className="sm:col-span-2">
-                    <label className="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1">
-                      Lokasi Desa / Kecamatan / Alamat Lengkap Pemilik
-                    </label>
-                    <input
-                      type="text"
-                      name="lokasi_desa_kecamatan_alamat_pemilik"
-                      value={formValues.lokasi_desa_kecamatan_alamat_pemilik ?? ''}
-                      onChange={handleFieldChange}
-                      placeholder="Contoh: Desa Sidomukti, RT 03 RW 01, Kec. Kuwarasan"
-                      className="w-full min-h-touch h-10 px-3 rounded-xl border border-slate-200 bg-slate-50 text-sm focus:border-purple-500 focus:bg-white outline-none"
-                    />
-                  </div>
-
-                  {/* Lokasi RPU */}
-                  <div className="sm:col-span-2">
-                    <label className="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1">
-                      Lokasi Spesifik RPU / TPH (Jika Berbeda)
-                    </label>
-                    <input
-                      type="text"
-                      name="lokasi_rpu"
-                      value={formValues.lokasi_rpu ?? ''}
-                      onChange={handleFieldChange}
-                      placeholder="Contoh: Pasar Karanganyar / Kompleks RPH Pejagoan"
-                      className="w-full min-h-touch h-10 px-3 rounded-xl border border-slate-200 bg-slate-50 text-sm focus:border-purple-500 focus:bg-white outline-none"
-                    />
-                  </div>
-
-                  {/* Kapasitas Potong */}
-                  <div>
-                    <label className="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1">
-                      Kapasitas Potong per Hari (ekor)
-                    </label>
-                    <input
-                      type="text"
-                      name="pemotongan_per_hari_ekor"
-                      value={formValues.pemotongan_per_hari_ekor ?? ''}
-                      onChange={handleFieldChange}
-                      placeholder="Contoh: 50 / 200"
-                      className="w-full min-h-touch h-10 px-3 rounded-xl border border-slate-200 bg-slate-50 text-sm focus:border-purple-500 focus:bg-white outline-none"
-                    />
-                  </div>
-
-                  {/* Rata-rata Produksi */}
-                  <div>
-                    <label className="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1">
-                      Rata-rata Produksi per Bulan (kg)
-                    </label>
-                    <input
-                      type="text"
-                      name="rata2_produksi_per_bulan_kg"
-                      value={formValues.rata2_produksi_per_bulan_kg ?? ''}
-                      onChange={handleFieldChange}
-                      placeholder="Contoh: 1500"
-                      className="w-full min-h-touch h-10 px-3 rounded-xl border border-slate-200 bg-slate-50 text-sm focus:border-purple-500 focus:bg-white outline-none"
-                    />
-                  </div>
-
-                  {/* Status Izin */}
-                  <div>
-                    <label className="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1">
-                      Status Ijin Usaha / Legalitas
-                    </label>
-                    <input
-                      type="text"
-                      name="status_ijin_usaha"
-                      value={formValues.status_ijin_usaha ?? ''}
-                      onChange={handleFieldChange}
-                      placeholder="Contoh: NIB Terbit / Dalam Proses"
-                      className="w-full min-h-touch h-10 px-3 rounded-xl border border-slate-200 bg-slate-50 text-sm focus:border-purple-500 focus:bg-white outline-none"
-                    />
-                  </div>
-
-                  {/* Keterangan Halal */}
-                  <div>
-                    <label className="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1">
-                      Keterangan Sertifikat Halal
-                    </label>
-                    <input
-                      type="text"
-                      name="sertifikat_halal"
-                      value={formValues.sertifikat_halal ?? ''}
-                      onChange={handleFieldChange}
-                      placeholder="Contoh: ID3311000... / Sudah Halal"
-                      className="w-full min-h-touch h-10 px-3 rounded-xl border border-slate-200 bg-slate-50 text-sm focus:border-purple-500 focus:bg-white outline-none"
-                    />
-                  </div>
-
-                  {/* Keterangan NKV */}
-                  <div className="sm:col-span-2">
-                    <label className="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1">
-                      Keterangan Sertifikat NKV
-                    </label>
-                    <input
-                      type="text"
-                      name="sertifikat_nkv"
-                      value={formValues.sertifikat_nkv ?? ''}
-                      onChange={handleFieldChange}
-                      placeholder="Contoh: NKV Tingkat 2 / RPH-3305... / Belum"
-                      className="w-full min-h-touch h-10 px-3 rounded-xl border border-slate-200 bg-slate-50 text-sm focus:border-purple-500 focus:bg-white outline-none"
-                    />
-                  </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block mb-1 font-bold text-slate-700">Sertifikat Halal</label>
+                  <input
+                    type="text"
+                    value={formRph.sertifikat_halal}
+                    onChange={(e) => setFormRph({ ...formRph, sertifikat_halal: e.target.value })}
+                    placeholder="No Sertifikat / Sudah / Belum"
+                    className="w-full h-10 px-3 rounded-xl border border-slate-200 bg-white font-bold text-slate-800 focus:outline-none focus:border-purple-600"
+                  />
+                </div>
+                <div>
+                  <label className="block mb-1 font-bold text-slate-700">Nomor Kontrol Veteriner (NKV)</label>
+                  <input
+                    type="text"
+                    value={formRph.sertifikat_nkv}
+                    onChange={(e) => setFormRph({ ...formRph, sertifikat_nkv: e.target.value })}
+                    placeholder="Nomor NKV..."
+                    className="w-full h-10 px-3 rounded-xl border border-slate-200 bg-white font-bold text-slate-800 focus:outline-none focus:border-purple-600"
+                  />
                 </div>
               </div>
 
-              {/* ── SEKSI 2: UPLOAD BERKAS DOKUMEN PERSYARATAN ── */}
-              <div className="space-y-4 pt-4 border-t border-slate-200">
-                <div className="flex items-center justify-between">
-                  <h4 className="text-xs font-bold uppercase tracking-wider text-purple-900 flex items-center gap-2">
-                    <Paperclip size={15} className="text-purple-600" />
-                    <span>2. Dokumen Persyaratan & Berkas Legalitas (Upload File PDF / Foto)</span>
-                  </h4>
-                  <span className="text-[11px] text-slate-400 font-medium hidden sm:inline">Maks 15 MB per file</span>
-                </div>
-
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  
-                  {/* UPLOAD 1: SERTIFIKAT HALAL */}
-                  <div className="p-4 rounded-2xl border border-emerald-200 bg-emerald-50/40 space-y-3">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-2">
-                        <div className="w-7 h-7 rounded-lg bg-emerald-100 text-emerald-700 flex items-center justify-center">
-                          <FileCheck size={15} />
-                        </div>
-                        <span className="font-bold text-slate-900 text-xs">Sertifikat Halal (BPJPH/MUI)</span>
-                      </div>
-                      {formValues.file_sertifikat_halal && (
-                        <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-600 text-white">
-                          Terlampir
-                        </span>
-                      )}
-                    </div>
-
-                    {formValues.file_sertifikat_halal ? (
-                      <div className="p-2.5 rounded-xl bg-white border border-emerald-200 flex items-center justify-between gap-2 shadow-2xs">
-                        <div className="min-w-0 flex items-center gap-2">
-                          <FileText size={16} className="text-emerald-600 shrink-0" />
-                          <span className="text-xs text-slate-800 font-semibold truncate">
-                            {formValues.file_sertifikat_halal_name || 'Berkas_Halal.pdf'}
-                          </span>
-                        </div>
-                        <div className="flex items-center gap-1 shrink-0">
-                          <button
-                            type="button"
-                            onClick={() => openDocPreview('Sertifikat Halal', formValues.file_sertifikat_halal!, formValues.file_sertifikat_halal_name || 'Berkas_Halal.pdf')}
-                            className="h-7 px-2 rounded-lg bg-emerald-50 text-emerald-700 hover:bg-emerald-100 text-[11px] font-bold flex items-center gap-1 transition-colors"
-                          >
-                            <Eye size={12} />
-                            <span>Lihat</span>
-                          </button>
-                          <button
-                            type="button"
-                            onClick={() => handleRemoveFile('file_sertifikat_halal', 'file_sertifikat_halal_name')}
-                            className="h-7 w-7 rounded-lg bg-red-50 text-red-600 hover:bg-red-100 flex items-center justify-center transition-colors"
-                          >
-                            <Trash2 size={12} />
-                          </button>
-                        </div>
-                      </div>
-                    ) : (
-                      <label className="flex flex-col items-center justify-center p-3 rounded-xl border-2 border-dashed border-emerald-300 bg-white hover:bg-emerald-50/60 cursor-pointer transition-colors text-center">
-                        <UploadCloud size={20} className="text-emerald-600 mb-1" />
-                        <span className="text-xs font-bold text-emerald-800">Pilih File Sertifikat Halal</span>
-                        <span className="text-[10px] text-slate-400 mt-0.5">Format PDF atau Foto Scan (Maks 15MB)</span>
-                        <input
-                          type="file"
-                          accept=".pdf,image/*"
-                          onChange={(e) => handleFileUpload(e, 'file_sertifikat_halal', 'file_sertifikat_halal_name')}
-                          className="hidden"
-                        />
-                      </label>
-                    )}
-                  </div>
-
-                  {/* UPLOAD 2: SERTIFIKAT NKV */}
-                  <div className="p-4 rounded-2xl border border-blue-200 bg-blue-50/40 space-y-3">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-2">
-                        <div className="w-7 h-7 rounded-lg bg-blue-100 text-blue-700 flex items-center justify-center">
-                          <ShieldCheck size={15} />
-                        </div>
-                        <span className="font-bold text-slate-900 text-xs">Sertifikat NKV Resmi</span>
-                      </div>
-                      {formValues.file_sertifikat_nkv && (
-                        <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-blue-600 text-white">
-                          Terlampir
-                        </span>
-                      )}
-                    </div>
-
-                    {formValues.file_sertifikat_nkv ? (
-                      <div className="p-2.5 rounded-xl bg-white border border-blue-200 flex items-center justify-between gap-2 shadow-2xs">
-                        <div className="min-w-0 flex items-center gap-2">
-                          <FileText size={16} className="text-blue-600 shrink-0" />
-                          <span className="text-xs text-slate-800 font-semibold truncate">
-                            {formValues.file_sertifikat_nkv_name || 'Berkas_NKV.pdf'}
-                          </span>
-                        </div>
-                        <div className="flex items-center gap-1 shrink-0">
-                          <button
-                            type="button"
-                            onClick={() => openDocPreview('Sertifikat NKV', formValues.file_sertifikat_nkv!, formValues.file_sertifikat_nkv_name || 'Berkas_NKV.pdf')}
-                            className="h-7 px-2 rounded-lg bg-blue-50 text-blue-700 hover:bg-blue-100 text-[11px] font-bold flex items-center gap-1 transition-colors"
-                          >
-                            <Eye size={12} />
-                            <span>Lihat</span>
-                          </button>
-                          <button
-                            type="button"
-                            onClick={() => handleRemoveFile('file_sertifikat_nkv', 'file_sertifikat_nkv_name')}
-                            className="h-7 w-7 rounded-lg bg-red-50 text-red-600 hover:bg-red-100 flex items-center justify-center transition-colors"
-                          >
-                            <Trash2 size={12} />
-                          </button>
-                        </div>
-                      </div>
-                    ) : (
-                      <label className="flex flex-col items-center justify-center p-3 rounded-xl border-2 border-dashed border-blue-300 bg-white hover:bg-blue-50/60 cursor-pointer transition-colors text-center">
-                        <UploadCloud size={20} className="text-blue-600 mb-1" />
-                        <span className="text-xs font-bold text-blue-800">Pilih File Sertifikat NKV</span>
-                        <span className="text-[10px] text-slate-400 mt-0.5">Format PDF atau Foto Scan (Maks 15MB)</span>
-                        <input
-                          type="file"
-                          accept=".pdf,image/*"
-                          onChange={(e) => handleFileUpload(e, 'file_sertifikat_nkv', 'file_sertifikat_nkv_name')}
-                          className="hidden"
-                        />
-                      </label>
-                    )}
-                  </div>
-
-                  {/* UPLOAD 3: SURAT IZIN USAHA / NIB */}
-                  <div className="p-4 rounded-2xl border border-purple-200 bg-purple-50/40 space-y-3">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-2">
-                        <div className="w-7 h-7 rounded-lg bg-purple-100 text-purple-700 flex items-center justify-center">
-                          <FileText size={15} />
-                        </div>
-                        <span className="font-bold text-slate-900 text-xs">Surat Izin Usaha / NIB</span>
-                      </div>
-                      {formValues.file_izin_usaha && (
-                        <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-purple-600 text-white">
-                          Terlampir
-                        </span>
-                      )}
-                    </div>
-
-                    {formValues.file_izin_usaha ? (
-                      <div className="p-2.5 rounded-xl bg-white border border-purple-200 flex items-center justify-between gap-2 shadow-2xs">
-                        <div className="min-w-0 flex items-center gap-2">
-                          <FileText size={16} className="text-purple-600 shrink-0" />
-                          <span className="text-xs text-slate-800 font-semibold truncate">
-                            {formValues.file_izin_usaha_name || 'Izin_Usaha.pdf'}
-                          </span>
-                        </div>
-                        <div className="flex items-center gap-1 shrink-0">
-                          <button
-                            type="button"
-                            onClick={() => openDocPreview('Surat Izin Usaha / NIB', formValues.file_izin_usaha!, formValues.file_izin_usaha_name || 'Izin_Usaha.pdf')}
-                            className="h-7 px-2 rounded-lg bg-purple-50 text-purple-700 hover:bg-purple-100 text-[11px] font-bold flex items-center gap-1 transition-colors"
-                          >
-                            <Eye size={12} />
-                            <span>Lihat</span>
-                          </button>
-                          <button
-                            type="button"
-                            onClick={() => handleRemoveFile('file_izin_usaha', 'file_izin_usaha_name')}
-                            className="h-7 w-7 rounded-lg bg-red-50 text-red-600 hover:bg-red-100 flex items-center justify-center transition-colors"
-                          >
-                            <Trash2 size={12} />
-                          </button>
-                        </div>
-                      </div>
-                    ) : (
-                      <label className="flex flex-col items-center justify-center p-3 rounded-xl border-2 border-dashed border-purple-300 bg-white hover:bg-purple-50/60 cursor-pointer transition-colors text-center">
-                        <UploadCloud size={20} className="text-purple-600 mb-1" />
-                        <span className="text-xs font-bold text-purple-800">Pilih File Izin Usaha / NIB</span>
-                        <span className="text-[10px] text-slate-400 mt-0.5">Format PDF atau Foto Scan (Maks 15MB)</span>
-                        <input
-                          type="file"
-                          accept=".pdf,image/*"
-                          onChange={(e) => handleFileUpload(e, 'file_izin_usaha', 'file_izin_usaha_name')}
-                          className="hidden"
-                        />
-                      </label>
-                    )}
-                  </div>
-
-                  {/* UPLOAD 4: FOTO FASILITAS / TEMPAT PEMOTONGAN */}
-                  <div className="p-4 rounded-2xl border border-amber-200 bg-amber-50/40 space-y-3">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-2">
-                        <div className="w-7 h-7 rounded-lg bg-amber-100 text-amber-800 flex items-center justify-center">
-                          <ImageIcon size={15} />
-                        </div>
-                        <span className="font-bold text-slate-900 text-xs">Foto Fasilitas Tempat Potong</span>
-                      </div>
-                      {formValues.file_foto_fasilitas && (
-                        <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-600 text-white">
-                          Terlampir
-                        </span>
-                      )}
-                    </div>
-
-                    {formValues.file_foto_fasilitas ? (
-                      <div className="p-2.5 rounded-xl bg-white border border-amber-200 flex items-center justify-between gap-2 shadow-2xs">
-                        <div className="min-w-0 flex items-center gap-2">
-                          <img
-                            src={formValues.file_foto_fasilitas}
-                            alt="Preview Fasilitas"
-                            className="w-8 h-8 rounded-lg object-cover border border-slate-200 shrink-0"
-                          />
-                          <span className="text-xs text-slate-800 font-semibold truncate">
-                            {formValues.file_foto_fasilitas_name || 'Foto_Fasilitas.jpg'}
-                          </span>
-                        </div>
-                        <div className="flex items-center gap-1 shrink-0">
-                          <button
-                            type="button"
-                            onClick={() => openDocPreview('Foto Fasilitas Pemotongan', formValues.file_foto_fasilitas!, formValues.file_foto_fasilitas_name || 'Foto_Fasilitas.jpg')}
-                            className="h-7 px-2 rounded-lg bg-amber-50 text-amber-800 hover:bg-amber-100 text-[11px] font-bold flex items-center gap-1 transition-colors"
-                          >
-                            <Eye size={12} />
-                            <span>Lihat</span>
-                          </button>
-                          <button
-                            type="button"
-                            onClick={() => handleRemoveFile('file_foto_fasilitas', 'file_foto_fasilitas_name')}
-                            className="h-7 w-7 rounded-lg bg-red-50 text-red-600 hover:bg-red-100 flex items-center justify-center transition-colors"
-                          >
-                            <Trash2 size={12} />
-                          </button>
-                        </div>
-                      </div>
-                    ) : (
-                      <label className="flex flex-col items-center justify-center p-3 rounded-xl border-2 border-dashed border-amber-300 bg-white hover:bg-amber-50/60 cursor-pointer transition-colors text-center">
-                        <UploadCloud size={20} className="text-amber-600 mb-1" />
-                        <span className="text-xs font-bold text-amber-800">Pilih Foto Dokumentasi Lapangan</span>
-                        <span className="text-[10px] text-slate-400 mt-0.5">Format Gambar JPG / PNG / WebP (Maks 15MB)</span>
-                        <input
-                          type="file"
-                          accept="image/*"
-                          onChange={(e) => handleFileUpload(e, 'file_foto_fasilitas', 'file_foto_fasilitas_name')}
-                          className="hidden"
-                        />
-                      </label>
-                    )}
-                  </div>
-
-                </div>
-              </div>
-
-              {/* ── TOMBOL AKSI MODAL ── */}
-              <div className="pt-4 border-t border-slate-200 flex items-center justify-end gap-3">
+              <div className="flex items-center justify-end gap-2 pt-3 border-t border-slate-100">
                 <button
                   type="button"
-                  onClick={closeModal}
-                  className="min-h-touch h-11 px-5 rounded-xl border border-slate-200 bg-slate-100 hover:bg-slate-200 text-xs sm:text-sm font-bold text-slate-700 transition-colors cursor-pointer"
+                  onClick={() => setShowAddModal(false)}
+                  className="h-10 px-4 rounded-xl border border-slate-200 text-slate-600 hover:bg-slate-50 font-bold cursor-pointer"
                 >
                   Batal
                 </button>
                 <button
                   type="submit"
-                  className="min-h-touch h-11 px-6 rounded-xl bg-purple-600 hover:bg-purple-700 active:scale-95 text-white text-xs sm:text-sm font-bold shadow-xs transition-all cursor-pointer"
+                  className="h-10 px-5 rounded-xl bg-purple-600 hover:bg-purple-700 text-white font-bold shadow-xs cursor-pointer flex items-center gap-2"
                 >
-                  {editingNo !== null ? 'Simpan Perubahan' : 'Simpan Data Unit Usaha'}
+                  <CheckCircle2 size={15} />
+                  <span>Simpan Rumah Potong</span>
                 </button>
               </div>
             </form>
@@ -2592,70 +1725,57 @@ export default function RphTphTpuPage() {
         </div>
       )}
 
-      {/* ── MODAL PRATINJAU DOKUMEN / PDF / FOTO ── */}
-      {previewDoc.isOpen && (
-        <div className="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-3xl p-6 max-w-3xl w-full shadow-2xl space-y-4 max-h-[92vh] flex flex-col">
-            <div className="flex items-center justify-between pb-3 border-b border-slate-200">
-              <div className="flex items-center gap-2.5">
-                <div className="w-9 h-9 rounded-xl bg-purple-50 text-purple-600 border border-purple-200 flex items-center justify-center">
-                  <FileText size={18} />
-                </div>
-                <div>
-                  <h3 className="font-bold text-base text-slate-900 leading-tight">
-                    {previewDoc.title}
-                  </h3>
-                  <p className="text-xs text-slate-500 truncate max-w-md">
-                    {previewDoc.fileName}
-                  </p>
-                </div>
+      {/* ───────────────────────────────────────────────────────────
+          MODAL: TAMBAH TAHUN BARU
+      ─────────────────────────────────────────────────────────── */}
+      {showAddYearModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-xs animate-in fade-in duration-200">
+          <div className="w-full max-w-md bg-white rounded-3xl border border-slate-200 shadow-2xl p-6 relative">
+            <button
+              onClick={() => setShowAddYearModal(false)}
+              className="w-8 h-8 rounded-full border border-slate-200 flex items-center justify-center text-slate-400 hover:text-slate-600 absolute top-5 right-5 cursor-pointer"
+            >
+              <X size={16} />
+            </button>
+
+            <h3 className="text-lg font-bold text-slate-900 mb-1">Tambah Periode Tahun Baru</h3>
+            <p className="text-xs text-slate-500 mb-5">
+              Buat periode pemotongan hewan untuk tahun berikutnya.
+            </p>
+
+            <form onSubmit={handleAddYearSubmit} className="space-y-4 text-xs font-semibold text-slate-700">
+              <div>
+                <label className="block mb-1 font-bold text-slate-700">Tahun Baru yang Ditambahkan <span className="text-red-500">*</span></label>
+                <input
+                  type="number"
+                  required
+                  min={2020}
+                  max={2100}
+                  value={newYearInput}
+                  onChange={(e) => setNewYearInput(Number(e.target.value))}
+                  placeholder="Contoh: 2027"
+                  className="w-full h-10 px-3.5 rounded-xl border border-slate-200 bg-white font-bold text-slate-900 focus:outline-none focus:border-purple-600 text-sm"
+                />
               </div>
-              <button
-                onClick={closeDocPreview}
-                className="w-9 h-9 rounded-xl border border-slate-200 bg-slate-50 hover:bg-slate-100 flex items-center justify-center text-slate-600 transition-colors"
-              >
-                <X size={18} />
-              </button>
-            </div>
 
-            <div className="flex-1 min-h-[380px] max-h-[520px] bg-slate-50 rounded-2xl border border-slate-200 p-2 overflow-hidden flex items-center justify-center">
-              {previewDoc.url.startsWith('data:application/pdf') || previewDoc.fileName.toLowerCase().endsWith('.pdf') ? (
-                <iframe
-                  src={previewDoc.url}
-                  className="w-full h-full min-h-[460px] rounded-xl border border-slate-200 bg-white"
-                  title={previewDoc.title}
-                />
-              ) : (
-                <img
-                  src={previewDoc.url}
-                  alt={previewDoc.title}
-                  className="max-w-full max-h-[480px] object-contain rounded-xl shadow-xs"
-                />
-              )}
-            </div>
-
-            <div className="pt-3 border-t border-slate-200 flex items-center justify-between gap-3">
-              <span className="text-xs text-slate-500">
-                Dokumen Tersimpan di Database Unit Usaha Kesmavet
-              </span>
-              <div className="flex items-center gap-2">
-                <a
-                  href={previewDoc.url}
-                  download={previewDoc.fileName || 'dokumen_pemotongan.pdf'}
-                  className="min-h-touch h-10 px-4 rounded-xl bg-purple-600 hover:bg-purple-700 text-white text-xs font-bold flex items-center gap-1.5 transition-colors shadow-xs"
-                >
-                  <Download size={14} />
-                  <span>Unduh File</span>
-                </a>
+              <div className="flex items-center justify-end gap-2 pt-3 border-t border-slate-100">
                 <button
                   type="button"
-                  onClick={closeDocPreview}
-                  className="min-h-touch h-10 px-4 rounded-xl border border-slate-200 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold transition-colors"
+                  onClick={() => setShowAddYearModal(false)}
+                  className="h-10 px-4 rounded-xl border border-slate-200 text-slate-600 hover:bg-slate-50 font-bold cursor-pointer"
                 >
-                  Tutup
+                  Batal
+                </button>
+                <button
+                  type="submit"
+                  disabled={isAddingYear}
+                  className="flex-1 h-10 px-5 rounded-xl bg-purple-600 hover:bg-purple-700 disabled:opacity-50 text-white font-bold shadow-xs cursor-pointer flex items-center justify-center gap-2"
+                >
+                  {isAddingYear ? <Loader2 size={14} className="animate-spin" /> : <Plus size={14} />}
+                  <span>{isAddingYear ? 'Menambahkan...' : 'Buat Tahun Baru'}</span>
                 </button>
               </div>
-            </div>
+            </form>
           </div>
         </div>
       )}
@@ -2663,4 +1783,3 @@ export default function RphTphTpuPage() {
     </div>
   );
 }
-

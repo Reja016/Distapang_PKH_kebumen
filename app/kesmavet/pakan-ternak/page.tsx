@@ -34,6 +34,14 @@ import {
 export default function PakanTernakPage() {
   const { isReady, canEdit } = usePageAuth('kesmavet', 'pakan-ternak');
 
+  // State Multi-Tahun
+  const [selectedYear, setSelectedYear] = useState<number>(2025);
+  const [availableYears, setAvailableYears] = useState<number[]>([2026, 2025, 2024]);
+  const [showAddYearModal, setShowAddYearModal] = useState<boolean>(false);
+  const [newYearInput, setNewYearInput] = useState<number>(2026);
+  const [copyFromYearInput, setCopyFromYearInput] = useState<number>(2025);
+  const [isAddingYear, setIsAddingYear] = useState<boolean>(false);
+
   // State Mobile Tab: 'map' (Peta Visual) atau 'table' (Tabel Data)
   const [mobileTab, setMobileTab] = useState<'map' | 'table'>('map');
 
@@ -65,22 +73,75 @@ export default function PakanTernakPage() {
     setTimeout(() => setToast(null), 3000);
   };
 
-  // Muat Data dari API
-  const loadData = async () => {
+  // Muat Daftar Tahun dari API
+  const loadYears = async () => {
     try {
-      const res = await fetch('/api/pakan-ternak');
+      const res = await fetch('/api/pakan-ternak?action=years');
+      const result = await res.json();
+      if (result.success && Array.isArray(result.years) && result.years.length > 0) {
+        setAvailableYears(result.years);
+      }
+    } catch {
+      console.warn('Gagal memuat daftar tahun');
+    }
+  };
+
+  // Muat Data dari API per Tahun
+  const loadData = async (year: number) => {
+    try {
+      const res = await fetch(`/api/pakan-ternak?tahun=${year}`);
       const result = await res.json();
       if (result.success && Array.isArray(result.data) && result.data.length > 0) {
         setDataPakan(result.data);
       }
     } catch {
-      console.warn('Gagal memuat data dari API, menggunakan fallback 2025');
+      console.warn(`Gagal memuat data dari API untuk tahun ${year}`);
     }
   };
 
   useEffect(() => {
-    loadData();
+    loadYears();
   }, []);
+
+  useEffect(() => {
+    loadData(selectedYear);
+  }, [selectedYear]);
+
+  // Handler Tambah Tahun Baru
+  const handleAddYearSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newYearInput || newYearInput < 2000) {
+      showToast('error', 'Masukkan tahun yang valid.');
+      return;
+    }
+
+    try {
+      setIsAddingYear(true);
+      const res = await fetch('/api/pakan-ternak', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'add_year',
+          tahun: newYearInput,
+          copyFromYear: copyFromYearInput,
+        }),
+      });
+      const result = await res.json();
+
+      if (result.success) {
+        showToast('success', result.message || `Tahun ${newYearInput} berhasil ditambahkan!`);
+        setShowAddYearModal(false);
+        await loadYears();
+        setSelectedYear(newYearInput);
+      } else {
+        showToast('error', result.error || 'Gagal menambahkan tahun baru.');
+      }
+    } catch (err: any) {
+      showToast('error', 'Terjadi kesalahan: ' + err.message);
+    } finally {
+      setIsAddingYear(false);
+    }
+  };
 
   // Update selectedKecamatan jika dataPakan berubah
   useEffect(() => {
@@ -177,13 +238,14 @@ export default function PakanTernakPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           id: editingItem.id,
+          tahun: selectedYear,
           potensi_pakan_kg: potPakan,
           kapasitas_tampung_ekor: kapTampung,
           jumlah_ternak_st: jmlTernak,
           keterangan: formValues.keterangan,
         }),
       });
-      showToast('success', `Data Kecamatan ${editingItem.nama} berhasil diperbarui!`);
+      showToast('success', `Data Kecamatan ${editingItem.nama} Tahun ${selectedYear} berhasil diperbarui!`);
       setShowEditModal(false);
     } catch {
       showToast('error', 'Gagal menyimpan perubahan ke database.');
@@ -194,6 +256,7 @@ export default function PakanTernakPage() {
   const handleExportExcel = () => {
     const rows = dataPakan.map((k, index) => ({
       No: index + 1,
+      Tahun: selectedYear,
       Kecamatan: k.nama,
       'Potensi Pakan (kg)': k.potensi_pakan_kg,
       'Kapasitas Tampung (ekor)': k.kapasitas_tampung_ekor,
@@ -205,6 +268,7 @@ export default function PakanTernakPage() {
     // Tambahkan Baris TOTAL
     rows.push({
       No: 'TOTAL' as any,
+      Tahun: selectedYear,
       Kecamatan: 'TOTAL (Kabupaten Kebumen)',
       'Potensi Pakan (kg)': totalPotensiPakan,
       'Kapasitas Tampung (ekor)': totalKapasitasTampung,
@@ -215,8 +279,8 @@ export default function PakanTernakPage() {
 
     const ws = XLSX.utils.json_to_sheet(rows);
     const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, 'Kapasitas_Pakan_2025');
-    XLSX.writeFile(wb, `Data_Kapasitas_Pakan_Kebumen_2025_${new Date().toISOString().split('T')[0]}.xlsx`);
+    XLSX.utils.book_append_sheet(wb, ws, `Kapasitas_Pakan_${selectedYear}`);
+    XLSX.writeFile(wb, `Data_Kapasitas_Pakan_Kebumen_${selectedYear}_${new Date().toISOString().split('T')[0]}.xlsx`);
   };
 
   if (!isReady) return null;
@@ -238,7 +302,7 @@ export default function PakanTernakPage() {
 
       {/* ── TOP HEADER (Tema Ungu Kesmavet) ── */}
       <header className="border-b border-purple-100 bg-white/95 backdrop-blur-md sticky top-0 z-30 shadow-xs">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-5 min-h-[80px] sm:min-h-[88px] flex items-center justify-between gap-3">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-5 min-h-[80px] sm:min-h-[88px] flex flex-col md:flex-row md:items-center justify-between gap-4">
           
           <div className="flex items-center gap-3 min-w-0 flex-1">
             <Link
@@ -258,19 +322,20 @@ export default function PakanTernakPage() {
                 <span className="text-xs font-bold text-purple-700 whitespace-nowrap">Pakan Ternak</span>
               </div>
               <h1 className="text-base sm:text-xl font-bold text-slate-900 tracking-tight leading-tight truncate">
-                Data Kapasitas Pakan Kabupaten Kebumen Tahun 2025
+                Data Kapasitas Pakan Kabupaten Kebumen Tahun {selectedYear}
               </h1>
             </div>
           </div>
 
-          <div className="flex items-center gap-2 shrink-0">
+          {/* Right Action: Export Excel */}
+          <div className="flex items-center gap-2.5 flex-wrap shrink-0">
             <button
               onClick={handleExportExcel}
               title="Export Excel"
-              className="min-h-touch min-w-touch h-11 px-4 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 text-xs sm:text-sm font-bold flex items-center gap-2 transition-all shadow-xs cursor-pointer"
+              className="h-10 px-4 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 text-xs font-bold flex items-center gap-1.5 transition-all shadow-xs cursor-pointer"
             >
-              <Download size={16} strokeWidth={2.5} />
-              <span className="hidden sm:inline">Export Excel</span>
+              <Download size={15} strokeWidth={2.5} />
+              <span>Export Excel</span>
             </button>
           </div>
 
@@ -279,6 +344,37 @@ export default function PakanTernakPage() {
 
       {/* ── WORKSPACE ── */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 space-y-6 sm:space-y-8">
+        
+        {/* ═══════════════════════════════════════════════════════════════
+            Opsi Pilihan Tahun di Tengah di Atas Peta & Konten
+        ═══════════════════════════════════════════════════════════════ */}
+        <div className="flex flex-col sm:flex-row items-center justify-center gap-3 bg-white p-3.5 rounded-2xl border border-purple-200 shadow-xs max-w-xl mx-auto">
+          <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl border border-purple-200 bg-purple-50/70">
+            <span className="text-xs font-bold text-purple-950">Pilih Tahun:</span>
+            <select
+              value={selectedYear}
+              onChange={(e) => setSelectedYear(Number(e.target.value))}
+              className="bg-transparent text-xs font-black text-purple-900 focus:outline-none cursor-pointer font-mono"
+            >
+              {availableYears.map((yr) => (
+                <option key={yr} value={yr}>Tahun {yr}</option>
+              ))}
+            </select>
+          </div>
+
+          {canEdit && (
+            <button
+              onClick={() => {
+                setNewYearInput(new Date().getFullYear() + 1);
+                setCopyFromYearInput(selectedYear);
+                setShowAddYearModal(true);
+              }}
+              className="h-9 px-3.5 rounded-xl bg-purple-600 hover:bg-purple-700 text-white text-xs font-bold flex items-center gap-1.5 shadow-xs transition-colors cursor-pointer"
+            >
+              <span>+ Tambah Tahun Baru</span>
+            </button>
+          )}
+        </div>
         
         {/* ═══════════════════════════════════════════════════════════════
             TAB SWITCHER KHUSUS MOBILE (OPSI 1)
@@ -304,7 +400,7 @@ export default function PakanTernakPage() {
             }`}
           >
             <TableIcon size={15} />
-            <span>Tabel Data 2025</span>
+            <span>Tabel Data {selectedYear}</span>
           </button>
         </div>
 
@@ -380,7 +476,7 @@ export default function PakanTernakPage() {
                     }}
                   />
 
-                  {/* 26 Poligon Kecamatan Resmi dari CorelDRAW */}
+                  {/* 26 Poligon Kecamatan Resmi */}
                   {dataPakan.map((kec) => {
                     const color = getKapasitasPakanColor(kec);
                     const isSelected = selectedKecamatan?.id === kec.id;
@@ -554,7 +650,7 @@ export default function PakanTernakPage() {
 
                 {/* Metadata & Skala */}
                 <div className="text-[10px] sm:text-[11px] text-slate-400 space-y-0.5 text-center sm:text-right">
-                  <p className="font-semibold text-slate-600">Vektor Peta: Batas Administrasi Resmi CorelDRAW</p>
+                  <p className="font-semibold text-slate-600">Vektor Peta: https://tanahair.indonesia.go.id</p>
                   <p>Basis Evaluasi: Standar Daya Tampung Satuan Ternak (ST) 2025</p>
                 </div>
               </div>
@@ -1049,6 +1145,74 @@ export default function PakanTernakPage() {
                   className="flex-1 min-h-touch h-11 px-6 rounded-xl bg-purple-600 hover:bg-purple-700 text-white text-xs sm:text-sm font-bold shadow-xs transition-all cursor-pointer"
                 >
                   Simpan Perubahan
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Modal Tambah Tahun Baru */}
+      {showAddYearModal && canEdit && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-xs animate-in fade-in">
+          <div className="w-full max-w-md bg-white rounded-3xl border border-slate-200 shadow-2xl p-6 relative">
+            <button
+              onClick={() => setShowAddYearModal(false)}
+              className="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-600 flex items-center justify-center font-bold absolute top-5 right-5 cursor-pointer"
+            >
+              ✕
+            </button>
+
+            <h3 className="text-lg font-bold text-slate-900 mb-1">Tambah Periode Tahun Pakan Baru</h3>
+            <p className="text-xs text-slate-500 mb-5">
+              Buat data kapasitas pakan untuk tahun baru tanpa menimpa data tahun-tahun sebelumnya.
+            </p>
+
+            <form onSubmit={handleAddYearSubmit} className="space-y-4 text-xs font-semibold text-slate-700">
+              <div>
+                <label className="block mb-1">Tahun Baru yang Ditambahkan <span className="text-red-500">*</span></label>
+                <input
+                  type="number"
+                  required
+                  min={2000}
+                  max={2100}
+                  value={newYearInput}
+                  onChange={(e) => setNewYearInput(Number(e.target.value))}
+                  placeholder="Contoh: 2026"
+                  className="w-full h-10 px-3.5 rounded-xl border border-slate-200 bg-white font-bold text-slate-900 focus:border-purple-600 outline-none text-sm"
+                />
+              </div>
+
+              <div>
+                <label className="block mb-1">Salin Baseline / Format Data Dari Tahun:</label>
+                <select
+                  value={copyFromYearInput}
+                  onChange={(e) => setCopyFromYearInput(Number(e.target.value))}
+                  className="w-full h-10 px-3 rounded-xl border border-slate-200 bg-white font-bold text-purple-900 focus:border-purple-600 outline-none text-xs"
+                >
+                  {availableYears.map((yr) => (
+                    <option key={yr} value={yr}>Tahun {yr}</option>
+                  ))}
+                </select>
+                <p className="text-[11px] text-slate-400 font-normal mt-1">
+                  Format koordinat peta 26 kecamatan akan disalin dari tahun ini sebagai dasar awal.
+                </p>
+              </div>
+
+              <div className="flex gap-2 pt-3 border-t border-slate-100">
+                <button
+                  type="button"
+                  onClick={() => setShowAddYearModal(false)}
+                  className="h-10 px-4 rounded-xl border border-slate-200 bg-slate-100 hover:bg-slate-200 text-xs font-bold text-slate-700 cursor-pointer"
+                >
+                  Batal
+                </button>
+                <button
+                  type="submit"
+                  disabled={isAddingYear}
+                  className="flex-1 h-10 px-5 rounded-xl bg-purple-600 hover:bg-purple-700 disabled:opacity-50 text-white text-xs font-bold shadow-xs cursor-pointer flex items-center justify-center gap-2"
+                >
+                  {isAddingYear ? 'Menambahkan...' : 'Buat Tahun Baru'}
                 </button>
               </div>
             </form>

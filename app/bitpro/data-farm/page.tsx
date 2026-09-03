@@ -670,12 +670,6 @@ export default function DataFarmPage() {
                               </td>
                               <td className="p-4 font-bold text-slate-900 border-r border-slate-100">
                                 {item.nama_peternak || item.nama_unit_farm || item.nama_badan_usaha || item.nama_unit_farm_perusahaan || item.nama_unit_farm_mandiri || '-'}
-                                {item.telp_hp && (
-                                  <span className="flex items-center gap-1 text-[11px] font-normal text-slate-400 font-mono mt-0.5">
-                                    <Phone size={11} className="text-slate-400 shrink-0" />
-                                    <span>{item.telp_hp}</span>
-                                  </span>
-                                )}
                               </td>
                               <td className="p-4 font-semibold text-slate-700 border-r border-slate-100">
                                 {item.kecamatan || '-'}

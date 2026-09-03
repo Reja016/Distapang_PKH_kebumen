@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
@@ -9,13 +9,17 @@ import {
   ArrowRight,
   Menu,
   X,
+  Eye,
+  EyeOff,
   ShieldCheck,
   ChevronRight,
+  ChevronDown,
   BarChart3,
   Building2,
   Users,
   Stethoscope,
   Syringe,
+  AlertCircle,
   CheckCircle2,
   Lock,
   Activity,
@@ -23,173 +27,35 @@ import {
   PackageCheck,
   FlaskConical,
   Landmark,
-  FileText,
   Search,
-  AlertCircle,
-  Eye,
-  EyeOff,
-  Store,
+  MapPin,
+  LayoutGrid,
+  List,
+  Navigation,
+  ExternalLink,
+  Loader2,
 } from 'lucide-react';
 
-/* ─────────────────────────────────────────────
-   DATA STATISTIK RESMI KEBUMEN (2025)
-───────────────────────────────────────────── */
-const REKAP_POPULASI_2025 = [
-  { komoditas: 'Sapi Potong', total: 64996 },
-  { komoditas: 'Sapi Perah', total: 0 },
-  { komoditas: 'Kerbau', total: 170 },
-  { komoditas: 'Kuda', total: 274 },
-  { komoditas: 'Kambing', total: 101255 },
-  { komoditas: 'Domba', total: 25552 },
-  { komoditas: 'Babi', total: 780 },
-  { komoditas: 'Ayam Kampung', total: 864412 },
-  { komoditas: 'Ayam Petelur', total: 73976 },
-  { komoditas: 'Ayam Broiler', total: 2636000 },
-  { komoditas: 'Puyuh', total: 70808 },
-  { komoditas: 'Itik', total: 87200 },
-  { komoditas: 'Entog', total: 81573 },
-  { komoditas: 'Angsa', total: 2153 },
-  { komoditas: 'Merpati', total: 54168 },
-  { komoditas: 'Kelinci', total: 3907 },
+const PALETTE_TERNAK = [
+  { bg: 'bg-blue-600', gradient: 'from-blue-600 to-blue-700', text: 'text-blue-600', border: 'border-blue-200', light: 'bg-blue-50' },
+  { bg: 'bg-sky-500', gradient: 'from-sky-500 to-sky-600', text: 'text-sky-600', border: 'border-sky-200', light: 'bg-sky-50' },
+  { bg: 'bg-indigo-500', gradient: 'from-indigo-500 to-indigo-600', text: 'text-indigo-600', border: 'border-indigo-200', light: 'bg-indigo-50' },
+  { bg: 'bg-emerald-500', gradient: 'from-emerald-500 to-emerald-600', text: 'text-emerald-600', border: 'border-emerald-200', light: 'bg-emerald-50' },
+  { bg: 'bg-amber-500', gradient: 'from-amber-500 to-amber-600', text: 'text-amber-600', border: 'border-amber-200', light: 'bg-amber-50' },
+  { bg: 'bg-rose-500', gradient: 'from-rose-500 to-rose-600', text: 'text-rose-600', border: 'border-rose-200', light: 'bg-rose-50' },
+  { bg: 'bg-purple-500', gradient: 'from-purple-500 to-purple-600', text: 'text-purple-600', border: 'border-purple-200', light: 'bg-purple-50' },
+  { bg: 'bg-slate-400', gradient: 'from-slate-400 to-slate-500', text: 'text-slate-600', border: 'border-slate-200', light: 'bg-slate-50' },
 ];
 
-const dataDaging = [
-  { jenis: 'Sapi Potong', total: 2671799 },
-  { jenis: 'Kambing Potong', total: 476066.4 },
-  { jenis: 'Ayam Ras Pedaging', total: 11218855 },
-  { jenis: 'Domba', total: 35032.42 },
-  { jenis: 'Babi', total: 5947.94 },
-  { jenis: 'Itik', total: 67869 },
-];
-
-const dataTelur = [
-  { jenis: 'Ayam Ras Petelur Produktif', total: 641709.53 },
-  { jenis: 'Ayam Buras', total: 2389258.2 },
-  { jenis: 'Itik', total: 786706.0 },
-  { jenis: 'Burung Puyuh', total: 121869 },
-  { jenis: 'Entog', total: 687138.55 },
-];
-
-const REKAP_SEBARAN_FARM = [
-  { komoditas: 'Ayam Broiler', jumlah_farm: 111, total_populasi: '1.435.000 Ekor' },
-  { komoditas: 'Ayam Petelur', jumlah_farm: 112, total_populasi: '184.500 Ekor' },
-  { komoditas: 'Sapi Potong (KTT Terbina)', jumlah_farm: 3, total_populasi: '116 Ekor' },
-  { komoditas: 'Domba & Kambing', jumlah_farm: 5, total_populasi: '445 Ekor' },
-  { komoditas: 'Babi (Perorangan)', jumlah_farm: 11, total_populasi: '315 Ekor' },
-];
-
-const DATA_SKLB_RESMI = [
-  { desa: 'Argopeni', jantan: 8, betina: 48 },
-  { desa: 'Miritpetikusan', jantan: 12, betina: 62 },
-  { desa: 'Karanggayam', jantan: 6, betina: 35 },
-  { desa: 'Prembun', jantan: 9, betina: 54 },
-  { desa: 'Kuwarisan', jantan: 7, betina: 41 },
-  { desa: 'Sidoagung', jantan: 10, betina: 59 },
-  { desa: 'Klirong', jantan: 8, betina: 46 },
-  { desa: 'Gombong', jantan: 6, betina: 38 },
-  { desa: 'Buayan', jantan: 9, betina: 52 },
-  { desa: 'Alian', jantan: 7, betina: 44 },
-  { desa: 'Ambal', jantan: 11, betina: 60 },
-  { desa: 'Petanahan', jantan: 8, betina: 49 },
-  { desa: 'Buluspesantren', jantan: 9, betina: 55 },
-  { desa: 'Kutowinangun', jantan: 6, betina: 39 },
-  { desa: 'Puring', jantan: 7, betina: 43 },
-  { desa: 'Rowokele', jantan: 6, betina: 37 },
-  { desa: 'Sempor', jantan: 8, betina: 50 },
-  { desa: 'Sadang', jantan: 5, betina: 31 },
-  { desa: 'Padureso', jantan: 4, betina: 28 },
-  { desa: 'Bonorowo', jantan: 7, betina: 45 },
-  { desa: 'Karanganyar', jantan: 8, betina: 47 },
-  { desa: 'Sruweng', jantan: 9, betina: 53 },
-  { desa: 'Pejagoan', jantan: 7, betina: 42 },
-  { desa: 'Poncowarno', jantan: 6, betina: 36 },
-];
-
-const DATA_PUSKESWAN_AKTIF = [
-  { nama: 'Puskeswan Mirit', wilayah: 'Kec. Mirit, Bonorowo, Ambal', koordinator: 'drh. Triyanto' },
-  { nama: 'Puskeswan Klirong', wilayah: 'Kec. Klirong, Buluspesantren, Petanahan', koordinator: 'drh. Agus Sugiharto' },
-  { nama: 'Puskeswan Gombong', wilayah: 'Kec. Gombong, Sempor, Rowokele', koordinator: 'drh. Hendra Kurniawan' },
-  { nama: 'Puskeswan Buayan', wilayah: 'Kec. Buayan, Ayah, Puring', koordinator: 'drh. Bambang S.' },
-  { nama: 'Puskeswan Alian', wilayah: 'Kec. Alian, Sadang, Padureso', koordinator: 'drh. Sri Wahyuni' },
-  { nama: 'Puskeswan Prembun', wilayah: 'Kec. Prembun, Kutowinangun, Poncowarno', koordinator: 'drh. Rahmat Hidayat' },
-  { nama: 'Puskeswan Kebumen', wilayah: 'Kec. Kebumen, Pejagoan', koordinator: 'drh. Nurul Hidayati' },
-  { nama: 'Puskeswan Karanganyar', wilayah: 'Kec. Karanganyar, Karanggayam, Sruweng', koordinator: 'drh. Eko Prasetyo' },
-];
-
-const DATA_VAKSINASI_RESMI = [
-  { desa: 'Desa Sidomukti', jenis: 'PMK & LSD', jan: 120, feb: 145, mar: 130, apr: 140, mei: 155, jun: 160, jul: 150, agu: 165, sep: 170, okt: 155, nov: 140, des: 165, total: 1795 },
-  { desa: 'Desa Sidoagung', jenis: 'PMK & LSD', jan: 110, feb: 135, mar: 125, apr: 130, mei: 145, jun: 150, jul: 140, agu: 155, sep: 160, okt: 145, nov: 135, des: 150, total: 1680 },
-  { desa: 'Desa Argopeni', jenis: 'PMK & LSD', jan: 150, feb: 160, mar: 140, apr: 165, mei: 170, jun: 180, jul: 175, agu: 190, sep: 185, okt: 170, nov: 165, des: 180, total: 2030 },
-  { desa: 'Desa Miritpetikusan', jenis: 'PMK & LSD', jan: 95, feb: 120, mar: 110, apr: 115, mei: 125, jun: 130, jul: 125, agu: 135, sep: 140, okt: 130, nov: 120, des: 135, total: 1480 },
-  { desa: 'Desa Kuwayuhan', jenis: 'PMK & LSD', jan: 80, feb: 105, mar: 95, apr: 100, mei: 110, jun: 115, jul: 110, agu: 120, sep: 125, okt: 115, nov: 105, des: 120, total: 1300 },
-  { desa: 'Desa Prembun', jenis: 'PMK & LSD', jan: 140, feb: 155, mar: 150, apr: 160, mei: 165, jun: 175, jul: 170, agu: 180, sep: 185, okt: 170, nov: 160, des: 175, total: 1985 },
-  { desa: 'Desa Klirong', jenis: 'PMK & LSD', jan: 130, feb: 140, mar: 135, apr: 145, mei: 150, jun: 160, jul: 155, agu: 165, sep: 170, okt: 155, nov: 145, des: 160, total: 1810 },
-  { desa: 'Desa Gombong', jenis: 'PMK & LSD', jan: 160, feb: 175, mar: 165, apr: 180, mei: 185, jun: 195, jul: 190, agu: 205, sep: 200, okt: 185, nov: 175, des: 190, total: 2205 },
-  { desa: 'Desa Buayan', jenis: 'PMK & LSD', jan: 105, feb: 125, mar: 115, apr: 120, mei: 130, jun: 135, jul: 130, agu: 140, sep: 145, okt: 135, nov: 125, des: 140, total: 1545 },
-  { desa: 'Desa Alian', jenis: 'PMK & LSD', jan: 90, feb: 110, mar: 100, apr: 105, mei: 115, jun: 120, jul: 115, agu: 125, sep: 130, okt: 120, nov: 110, des: 125, total: 1365 },
-  { desa: 'Desa Karanggayam', jenis: 'PMK & LSD', jan: 85, feb: 95, mar: 90, apr: 95, mei: 105, jun: 110, jul: 105, agu: 115, sep: 120, okt: 110, nov: 100, des: 115, total: 1245 },
-  { desa: 'Desa Kutowinangun', jenis: 'PMK & LSD', jan: 115, feb: 130, mar: 120, apr: 125, mei: 135, jun: 140, jul: 135, agu: 145, sep: 150, okt: 140, nov: 130, des: 145, total: 1610 },
-  { desa: 'Desa Petanahan', jenis: 'PMK & LSD', jan: 125, feb: 140, mar: 130, apr: 135, mei: 145, jun: 150, jul: 145, agu: 155, sep: 160, okt: 150, nov: 140, des: 155, total: 1730 },
-  { desa: 'Desa Buluspesantren', jenis: 'PMK & LSD', jan: 135, feb: 150, mar: 145, apr: 150, mei: 160, jun: 165, jul: 160, agu: 170, sep: 175, okt: 165, nov: 155, des: 170, total: 1900 },
-  { desa: 'Desa Ambal', jenis: 'PMK & LSD', jan: 145, feb: 160, mar: 155, apr: 160, mei: 170, jun: 175, jul: 170, agu: 180, sep: 185, okt: 175, nov: 165, des: 180, total: 2020 },
-  { desa: 'Desa Puring', jenis: 'PMK & LSD', jan: 100, feb: 115, mar: 105, apr: 110, mei: 120, jun: 125, jul: 120, agu: 130, sep: 135, okt: 125, nov: 115, des: 130, total: 1430 },
-  { desa: 'Desa Sempor', jenis: 'PMK & LSD', jan: 110, feb: 125, mar: 120, apr: 125, mei: 135, jun: 140, jul: 135, agu: 145, sep: 150, okt: 140, nov: 130, des: 145, total: 1600 },
-  { desa: 'Desa Ayah', jenis: 'PMK & LSD', jan: 95, feb: 105, mar: 100, apr: 105, mei: 115, jun: 120, jul: 115, agu: 125, sep: 130, okt: 120, nov: 110, des: 125, total: 1365 },
-  { desa: 'Desa Rowokele', jenis: 'PMK & LSD', jan: 90, feb: 100, mar: 95, apr: 100, mei: 110, jun: 115, jul: 110, agu: 120, sep: 125, okt: 115, nov: 105, des: 120, total: 1305 },
-  { desa: 'Desa Sruweng', jenis: 'PMK & LSD', jan: 115, feb: 130, mar: 125, apr: 130, mei: 140, jun: 145, jul: 140, agu: 150, sep: 155, okt: 145, nov: 135, des: 150, total: 1640 },
-];
-
-const DATA_RPH_TPH_RESMI = [
-  { nama: 'RPU Pangestu', desa: 'Desa Sidomukti, Kuwarasan', halal: 'Sudah' },
-  { nama: 'RPU ASRIYAH', desa: 'Desa Sidoagung, Sruweng', halal: 'Sudah' },
-  { nama: 'RPU ZAIN', desa: 'Desa Sidoagung, Sruweng', halal: 'Sudah' },
-  { nama: 'RPU FITRIA', desa: 'Desa Sidoagung, Sruweng', halal: 'Sudah' },
-  { nama: 'RPH Unggas Ayam Broiler', desa: 'Desa Prembun, Prembun', halal: 'Sudah' },
-  { nama: 'TPH Berkah Daging Sapi', desa: 'Desa Argopeni, Ayah', halal: 'Sudah' },
-  { nama: 'RPU Barokah Kuwayuhan', desa: 'Desa Kuwayuhan, Pejagoan', halal: 'Sudah' },
-  { nama: 'RPH Ruminansia Kebumen', desa: 'Desa Muktisari, Kebumen', halal: 'Sudah' },
-  { nama: 'TPH Sumber Rejeki', desa: 'Desa Klirong, Klirong', halal: 'Sudah' },
-  { nama: 'TPU Unggas Gombong', desa: 'Desa Wero, Gombong', halal: 'Sudah' },
-  { nama: 'RPU Mandiri Jaya', desa: 'Desa Alian, Alian', halal: 'Sudah' },
-  { nama: 'TPH Sapi Lembu Makmur', desa: 'Desa Petanahan, Petanahan', halal: 'Sudah' },
-  { nama: 'RPU Mitra Ternak', desa: 'Desa Kutowinangun, Kutowinangun', halal: 'Sudah' },
-  { nama: 'TPH Kambing Barokah', desa: 'Desa Karanganyar, Karanganyar', halal: 'Belum' },
-  { nama: 'RPU Sejahtera Bersama', desa: 'Desa Buayan, Buayan', halal: 'Sudah' },
-];
-
-const DATA_NKV_RESMI = [
-  { nama_pt: 'PT Kebumen Poultry Mandiri', alamat: 'Jl. Raya Prembun Km 4, Desa Prembun, Kec. Prembun', status_nkv: 'Ada' },
-  { nama_pt: 'PT Sumber Unggas Kebumen', alamat: 'Jl. Sempor Lama No. 18, Desa Sidomukti, Kec. Kuwarasan', status_nkv: 'Ada' },
-  { nama_pt: 'PT Mitra Ternak Ruminansia', alamat: 'Dusun Pacalbalung, Desa Sidoagung, Kec. Sruweng', status_nkv: 'Ada' },
-  { nama_pt: 'RPH Modern Ruminansia Kebumen', alamat: 'Jl. Ronggowarsito No. 12, Pejagoan, Kab. Kebumen', status_nkv: 'Ada' },
-  { nama_pt: 'RPU Berkah Unggas Kuwayuhan', alamat: 'Jl. Kuwayuhan Rt 02/03, Pejagoan, Kab. Kebumen', status_nkv: 'Ada' },
-  { nama_pt: 'PT Sinar Abadi Farm Kebumen', alamat: 'Desa Argopeni Rt 01/02, Kec. Ayah, Kab. Kebumen', status_nkv: 'Ada' },
-  { nama_pt: 'UD Lembu Jaya Makmur', alamat: 'Desa Muktisari Rt 03/01, Kec. Kebumen, Kab. Kebumen', status_nkv: 'Ada' },
-  { nama_pt: 'CV Unggas Prima Kebumen', alamat: 'Desa Wero Rt 04/02, Kec. Gombong, Kab. Kebumen', status_nkv: 'Ada' },
-  { nama_pt: 'PT Peternakan Terpadu Kebumen', alamat: 'Jl. Lingkar Selatan, Desa Klirong, Kec. Klirong', status_nkv: 'Ada' },
-  { nama_pt: 'RPH Ternak Potong Prembun', alamat: 'Jl. Stasiun Prembun No. 05, Kec. Prembun, Kab. Kebumen', status_nkv: 'Ada' },
-];
-
-const DATA_POPULASI_TERNAK = [
-  { komoditas: 'Kambing', total: 101255 },
-  { komoditas: 'Sapi Potong', total: 64996 },
-  { komoditas: 'Domba', total: 25552 },
-  { komoditas: 'Kelinci', total: 3907 },
-  { komoditas: 'Babi', total: 780 },
-  { komoditas: 'Kuda', total: 274 },
-  { komoditas: 'Kerbau', total: 170 },
-  { komoditas: 'Sapi Perah', total: 0 },
-];
-
-const DATA_POPULASI_UNGGAS = [
-  { komoditas: 'Ayam Broiler', total: 2636000 },
-  { komoditas: 'Ayam Kampung', total: 864412 },
-  { komoditas: 'Itik', total: 87200 },
-  { komoditas: 'Entog', total: 81573 },
-  { komoditas: 'Ayam Petelur', total: 73976 },
-  { komoditas: 'Puyuh', total: 70808 },
-  { komoditas: 'Merpati', total: 54168 },
-  { komoditas: 'Angsa', total: 2153 },
+const PALETTE_UNGGAS = [
+  { bg: 'bg-amber-500', gradient: 'from-amber-500 to-amber-600', text: 'text-amber-600', border: 'border-amber-200', light: 'bg-amber-50' },
+  { bg: 'bg-orange-500', gradient: 'from-orange-500 to-orange-600', text: 'text-orange-600', border: 'border-orange-200', light: 'bg-orange-50' },
+  { bg: 'bg-blue-600', gradient: 'from-blue-600 to-blue-700', text: 'text-blue-600', border: 'border-blue-200', light: 'bg-blue-50' },
+  { bg: 'bg-sky-500', gradient: 'from-sky-500 to-sky-600', text: 'text-sky-600', border: 'border-sky-200', light: 'bg-sky-50' },
+  { bg: 'bg-emerald-500', gradient: 'from-emerald-500 to-emerald-600', text: 'text-emerald-600', border: 'border-emerald-200', light: 'bg-emerald-50' },
+  { bg: 'bg-indigo-500', gradient: 'from-indigo-500 to-indigo-600', text: 'text-indigo-600', border: 'border-indigo-200', light: 'bg-indigo-50' },
+  { bg: 'bg-violet-500', gradient: 'from-violet-500 to-violet-600', text: 'text-violet-600', border: 'border-violet-200', light: 'bg-violet-50' },
+  { bg: 'bg-pink-500', gradient: 'from-pink-500 to-pink-600', text: 'text-pink-600', border: 'border-pink-200', light: 'bg-pink-50' },
 ];
 
 const PALETTE_DAGING = [
@@ -212,59 +78,103 @@ const PALETTE_TELUR = [
 const MODULES = [
   {
     key: 'bitpro',
+    step: '1. Bitpro',
     label: 'Bitpro',
     caption: 'Perbibitan & Produksi Ternak',
+    image: '/card-bitpro.png',
     icon: Activity,
     accent: '#059669',
   },
   {
     key: 'keswan',
+    step: '2. Keswan',
     label: 'Keswan',
     caption: 'Kesehatan Hewan & Puskeswan',
+    image: '/card-keswan.png',
     icon: Stethoscope,
     accent: '#0284c7',
   },
   {
     key: 'kesmavet',
+    step: '3. Kesmavet',
     label: 'Kesmavet',
     caption: 'Kesehatan Masyarakat Veteriner',
+    image: '/card-kesmavet.png',
     icon: FlaskConical,
-    accent: '#7c3aed',
+    accent: '#4f46e5',
   },
 ] as const;
 
 export default function LandingPage() {
   const router = useRouter();
 
-  // Navigation state
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  // ── 100% PURE DATABASE STATES (Semua dari MySQL) ──
+  const [populasi16, setPopulasi16] = useState<{ komoditas: string; total: number }[]>([]);
+  const [populasiTernak8, setPopulasiTernak8] = useState<{ komoditas: string; total: number }[]>([]);
+  const [populasiUnggas8, setPopulasiUnggas8] = useState<{ komoditas: string; total: number }[]>([]);
+  const [dagingList, setDagingList] = useState<{ jenis: string; total: number }[]>([]);
+  const [telurList, setTelurList] = useState<{ jenis: string; total: number }[]>([]);
+  const [sebaranFarmList, setSebaranFarmList] = useState<{ komoditas: string; jumlah_farm: number; total_populasi: string }[]>([]);
+  const [puskeswanList, setPuskeswanList] = useState<any[]>([]);
+  const [vaksinasiList, setVaksinasiList] = useState<any[]>([]);
+  const [rphList, setRphList] = useState<any[]>([]);
+  const [nkvList, setNkvList] = useState<any[]>([]);
+  const [isDataLoading, setIsDataLoading] = useState(true);
+
+  // State Auth Modal & Navigation
   const [showLoginModal, setShowLoginModal] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   // Dashboard state
   const [activeModule, setActiveModule] = useState<'bitpro' | 'keswan' | 'kesmavet'>('bitpro');
   const [detailView, setDetailView] = useState<string | null>(null);
   const [subTabProd, setSubTabProd] = useState<'populasi' | 'daging' | 'telur'>('populasi');
-  const [rankedMetric, setRankedMetric] = useState<'populasi' | 'daging' | 'telur'>('populasi');
+  const [expandedPuskeswanLayanan, setExpandedPuskeswanLayanan] = useState<number | null>(null);
+  const [expandedTableLayanan, setExpandedTableLayanan] = useState<number | null>(null);
   const [searchVaksin, setSearchVaksin] = useState('');
+  const [searchPuskeswan, setSearchPuskeswan] = useState('');
+  const [puskeswanViewMode, setPuskeswanViewMode] = useState<'cards' | 'table'>('cards');
 
-  // Realtime Data State
-  const [populasiData, setPopulasiData] = useState(REKAP_POPULASI_2025);
-  const [dagingData, setDagingData] = useState(dataDaging);
-  const [telurData, setTelurData] = useState(dataTelur);
-  const [farmData, setFarmData] = useState(REKAP_SEBARAN_FARM);
-  const [puskeswanData, setPuskeswanData] = useState(DATA_PUSKESWAN_AKTIF);
-  const [vaksinasiData, setVaksinasiData] = useState(DATA_VAKSINASI_RESMI);
-  const [rphData, setRphData] = useState(DATA_RPH_TPH_RESMI);
-  const [nkvData, setNkvData] = useState(DATA_NKV_RESMI);
-
-  // Form login state
+  // Form login
   const [loginId, setLoginId] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
 
-  // Check existing session
+  // ── FETCH LANGSUNG 100% DATA REAL DARI DATABASE MYSQL ──
+  useEffect(() => {
+    const loadPortalData = async () => {
+      try {
+        setIsDataLoading(true);
+        const res = await fetch('/api/portal-stats');
+        if (res.ok) {
+          const json = await res.json();
+          if (json.success && json.data) {
+            const d = json.data;
+            setPopulasi16(d.populasi16 || []);
+            setPopulasiTernak8(d.populasiTernak8 || []);
+            setPopulasiUnggas8(d.populasiUnggas8 || []);
+            setDagingList(d.dataDaging || []);
+            setTelurList(d.dataTelur || []);
+            setSebaranFarmList(d.sebaranFarm || []);
+            setPuskeswanList(d.puskeswanList || []);
+            setVaksinasiList(d.vaksinasiList || []);
+            setRphList(d.rphList || []);
+            setNkvList(d.nkvList || []);
+          }
+        }
+      } catch (err) {
+        console.error('Gagal memuat data portal dari database:', err);
+      } finally {
+        setIsDataLoading(false);
+      }
+    };
+
+    loadPortalData();
+  }, []);
+
+  // Cek sesi login
   useEffect(() => {
     const checkSession = async () => {
       const {
@@ -275,93 +185,7 @@ export default function LandingPage() {
     checkSession();
   }, [router]);
 
-  // Realtime Database Fetching
-  useEffect(() => {
-    const fetchRealtimeData = async () => {
-      try {
-        // Fetch Populasi
-        const resPopulasi = await fetch('/api/get-populasi');
-        if (resPopulasi.ok) {
-          const json = await resPopulasi.json();
-          if (json.data && Array.isArray(json.data) && json.data.length > 0) {
-            const sumMap: Record<string, number> = {};
-            json.data.forEach((row: any) => {
-              if (row.data_v && typeof row.data_v === 'object') {
-                Object.entries(row.data_v).forEach(([komoditas, val]) => {
-                  sumMap[komoditas] = (sumMap[komoditas] || 0) + Number(val || 0);
-                });
-              }
-            });
-            const aggregated = Object.entries(sumMap).map(([komoditas, total]) => ({
-              komoditas,
-              total,
-            }));
-            if (aggregated.length > 0) {
-              setPopulasiData(aggregated);
-            }
-          }
-        }
-
-        // Fetch Produksi
-        const resProduksi = await fetch('/api/get-produksi');
-        if (resProduksi.ok) {
-          const json = await resProduksi.json();
-          if (json.daging && json.daging.length > 0) setDagingData(json.daging);
-          if (json.telur && json.telur.length > 0) setTelurData(json.telur);
-        }
-
-        // Fetch Farm
-        const resFarm = await fetch('/api/get-farm');
-        if (resFarm.ok) {
-          const json = await resFarm.json();
-          if (Array.isArray(json) && json.length > 0) {
-            const countByKategori: Record<string, { count: number; totalCap: number }> = {};
-            json.forEach((f: any) => {
-              const cat = f.komoditas || f.kategori || 'Lainnya';
-              if (!countByKategori[cat]) countByKategori[cat] = { count: 0, totalCap: 0 };
-              countByKategori[cat].count += 1;
-              countByKategori[cat].totalCap += Number(f.kapasitas_populasi || f.populasi || 0);
-            });
-            const farmSummary = Object.entries(countByKategori).map(([komoditas, val]) => ({
-              komoditas,
-              jumlah_farm: val.count,
-              total_populasi: `${val.totalCap.toLocaleString('id-ID')} Ekor`,
-            }));
-            if (farmSummary.length > 0) setFarmData(farmSummary);
-          }
-        }
-
-        // Fetch NKV
-        const resNkv = await fetch('/api/nkv');
-        if (resNkv.ok) {
-          const json = await resNkv.json();
-          if (Array.isArray(json) && json.length > 0) {
-            setNkvData(json.slice(0, 15));
-          }
-        }
-
-        // Fetch RPH
-        const resRph = await fetch('/api/pemotongan-hewan');
-        if (resRph.ok) {
-          const json = await resRph.json();
-          if (Array.isArray(json) && json.length > 0) {
-            setRphData(
-              json.slice(0, 15).map((r: any) => ({
-                nama: r.nama_unit || r.nama || 'Unit RPH/TPH',
-                desa: `${r.desa || ''}, ${r.kecamatan || ''}`,
-                halal: r.sertifikat_halal ? 'Sudah' : 'Belum',
-              }))
-            );
-          }
-        }
-      } catch (err) {
-        console.warn('Realtime sync fallback to baseline data:', err);
-      }
-    };
-
-    fetchRealtimeData();
-  }, []);
-
+  // Handler Login Petugas
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
@@ -383,97 +207,96 @@ export default function LandingPage() {
         }
       }
 
+      // Fallback Supabase
+      const formattedEmail = loginId.includes('@') ? loginId : `${loginId}@pkh.kebumenkab.go.id`;
       const { error: signInError } = await supabase.auth.signInWithPassword({
-        email: loginId.includes('@') ? loginId : `${loginId}@pkh.kebumenkab.go.id`,
+        email: formattedEmail,
         password,
       });
 
       if (signInError) {
-        setError('Akses ditolak. Periksa kembali ID Petugas atau kata sandi Anda.');
+        setError('Akses ditolak. Periksa kembali ID Petugas/NIP atau kata sandi Anda.');
+        setIsLoading(false);
       } else {
         router.push('/beranda');
       }
-    } catch {
-      setError('Terjadi kesalahan koneksi server. Coba lagi.');
-    } finally {
+    } catch (err: any) {
+      console.error('Login error:', err);
+      setError('Terjadi kesalahan saat memproses login. Silakan coba kembali.');
       setIsLoading(false);
     }
   };
 
-  const totalPopulasi = populasiData.reduce((sum, d) => sum + (d.total || 0), 0);
-  const totalDaging = dagingData.reduce((sum, d) => sum + (d.total || 0), 0);
-  const totalTelur = telurData.reduce((sum, d) => sum + (d.total || 0), 0);
-  const totalFarm = farmData.reduce((sum, d) => sum + (d.jumlah_farm || 0), 0);
+  // ── KALKULASI TOTAL STATISTIK DARI DATABASE SECARA OTOMATIS ──
+  const totalPopulasi = useMemo(() => populasi16.reduce((sum, d) => sum + d.total, 0), [populasi16]);
+  const totalDagingKg = useMemo(() => dagingList.reduce((sum, d) => sum + d.total, 0), [dagingList]);
+  const totalTelurKg = useMemo(() => telurList.reduce((sum, d) => sum + d.total, 0), [telurList]);
+  const totalFarm = useMemo(() => sebaranFarmList.reduce((sum, d) => sum + d.jumlah_farm, 0), [sebaranFarmList]);
 
-  const topKomoditas = [...populasiData].filter((d) => d.total > 0).sort((a, b) => b.total - a.total).slice(0, 5);
-  const topDaging = [...dagingData].sort((a, b) => b.total - a.total).slice(0, 5);
-  const topTelur = [...telurData].sort((a, b) => b.total - a.total).slice(0, 5);
+  const totalTernakHewan = useMemo(() => populasiTernak8.reduce((sum, d) => sum + d.total, 0), [populasiTernak8]);
+  const totalUnggas = useMemo(() => populasiUnggas8.reduce((sum, d) => sum + d.total, 0), [populasiUnggas8]);
 
-  const totalTernakHewan = DATA_POPULASI_TERNAK.reduce((sum, d) => sum + d.total, 0);
-  const totalUnggas = DATA_POPULASI_UNGGAS.reduce((sum, d) => sum + d.total, 0);
-
-  const dataProduksiDagingTon = dagingData
+  const dataProduksiDaging = useMemo(() => [...dagingList]
     .map((d) => ({ jenis: d.jenis, ton: d.total / 1000 }))
-    .sort((a, b) => b.ton - a.ton);
+    .sort((a, b) => b.ton - a.ton), [dagingList]);
 
-  const dataProduksiTelurTon = telurData
+  const dataProduksiTelur = useMemo(() => [...telurList]
     .map((d) => ({ jenis: d.jenis, ton: d.total / 1000 }))
-    .sort((a, b) => b.ton - a.ton);
+    .sort((a, b) => b.ton - a.ton), [telurList]);
 
-  const maxDagingTon = dataProduksiDagingTon[0]?.ton || 1;
-  const maxTelurTon = dataProduksiTelurTon[0]?.ton || 1;
+  const totalProdDagingTon = totalDagingKg / 1000;
+  const totalProdTelurTon = totalTelurKg / 1000;
 
-  const metricConfigs = {
-    populasi: {
-      label: 'Populasi Ternak',
-      unit: 'Ekor',
-      data: topKomoditas,
-      max: topKomoditas[0]?.total || 1,
-      getName: (r: any) => r.komoditas,
-      barColor: '#0284c7',
-    },
-    daging: {
-      label: 'Produksi Daging',
-      unit: 'Kg',
-      data: topDaging,
-      max: topDaging[0]?.total || 1,
-      getName: (r: any) => r.jenis,
-      barColor: '#e11d48',
-    },
-    telur: {
-      label: 'Produksi Telur',
-      unit: 'Kg',
-      data: topTelur,
-      max: topTelur[0]?.total || 1,
-      getName: (r: any) => r.jenis,
-      barColor: '#f59e0b',
-    },
-  };
+  const maxTernak = populasiTernak8[0]?.total || 1;
+  const maxUnggas = populasiUnggas8[0]?.total || 1;
+  const maxDagingTon = dataProduksiDaging[0]?.ton || 1;
+  const maxTelurTon = dataProduksiTelur[0]?.ton || 1;
 
-  const cfg = metricConfigs[rankedMetric];
-  const activeMod = MODULES.find((m) => m.key === activeModule) || MODULES[0];
+  // 4 Kartu Metrik Sekunder Teratas (Dihitung Otomatis dari Database)
+  const topUnggas = populasiUnggas8[0] || { komoditas: 'Unggas Terbesar', total: 0 };
+  const topDaging = dataProduksiDaging[0] || { jenis: 'Daging Terbesar', ton: 0 };
+  const topTelur = dataProduksiTelur[0] || { jenis: 'Telur Terbesar', ton: 0 };
+  const sapiPotongPop = populasi16.find((x) => x.komoditas === 'Sapi Potong')?.total || 0;
 
-  const filteredVaksinasi = vaksinasiData.filter((v) =>
-    v.desa.toLowerCase().includes(searchVaksin.toLowerCase())
+  const filteredVaksinasi = vaksinasiList.filter((row: any) =>
+    (row.desa || '').toLowerCase().includes(searchVaksin.toLowerCase()) ||
+    (row.jenis || '').toLowerCase().includes(searchVaksin.toLowerCase())
   );
+
+  const filteredPuskeswan = puskeswanList.filter((p: any) => {
+    if (!searchPuskeswan) return true;
+    const q = searchPuskeswan.toLowerCase();
+    return (
+      (p.nama || '').toLowerCase().includes(q) ||
+      (p.wilayah || '').toLowerCase().includes(q) ||
+      (p.koordinator || '').toLowerCase().includes(q) ||
+      (p.kecamatan || []).some((kec: string) => (kec || '').toLowerCase().includes(q))
+    );
+  });
 
   const scrollToSection = (id: string) => {
     const el = document.getElementById(id);
-    if (el) el.scrollIntoView({ behavior: 'smooth' });
+    if (el) {
+      el.scrollIntoView({ behavior: 'smooth' });
+    }
   };
 
   return (
-    <div className="min-h-screen bg-[#f4f7fc] text-slate-900 font-sans selection:bg-blue-600 selection:text-white flex flex-col items-center">
+    <div className="min-h-screen bg-[#f4f7fc] text-slate-900 font-sans p-0 sm:p-3 md:p-6 selection:bg-blue-600 selection:text-white flex flex-col items-center">
       
       {/* ─────────────────────────────────────────────
-          1. TOP NAVIGATION
+          MAIN DASHBOARD CONTAINER (Theme: Biru Putih)
       ───────────────────────────────────────────── */}
-      <header className="fixed top-0 inset-x-0 z-40 border-b border-slate-200 bg-white/95 backdrop-blur-md shadow-xs">
-        <nav className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-18 sm:h-20 flex items-center justify-between">
+      <div className="max-w-[1360px] w-full mx-auto bg-white sm:rounded-3xl lg:rounded-[32px] shadow-sm sm:border sm:border-blue-100/80 overflow-hidden flex flex-col min-h-screen sm:min-h-[94vh]">
+        
+        {/* ─────────────────────────────────────────────
+            1. TOPBAR / HEADER (Blue & White)
+        ───────────────────────────────────────────── */}
+        <header className="border-b border-blue-50/80 px-4 sm:px-6 md:px-8 py-3.5 sm:py-5 flex items-center justify-between bg-white sticky top-0 z-30">
           
           {/* Logo Brand */}
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-xl bg-slate-50 border border-slate-200 p-1 flex items-center justify-center shadow-xs shrink-0">
+          <div className="flex items-center gap-2.5 sm:gap-3">
+            <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-blue-50/60 border border-blue-100 p-1 flex items-center justify-center shrink-0 shadow-2xs">
               <img
                 src="/logo-simantap.png"
                 alt="Logo SiMantap"
@@ -484,67 +307,56 @@ export default function LandingPage() {
                 }}
               />
               <div className="hidden text-blue-600 items-center justify-center">
-                <Landmark size={20} />
+                <Landmark size={18} />
               </div>
             </div>
-            <div>
-              <div className="flex items-center gap-2">
-                <span className="font-sans text-xl sm:text-2xl font-bold tracking-tight text-blue-700">
-                  SiMantap
-                </span>
-                <span className="text-[11px] font-bold px-2 py-0.5 rounded-full border border-emerald-200 bg-emerald-50 text-emerald-800 uppercase tracking-wider">
-                  Kebumen
-                </span>
+            
+            <div className="flex items-center gap-1.5 sm:gap-2">
+              <span className="font-bold text-base sm:text-xl text-blue-600 tracking-tight">
+                SiMantap
+              </span>
+              <div className="inline-flex items-center gap-1 px-2 sm:px-2.5 py-0.5 rounded-full bg-blue-50 border border-blue-200 text-blue-700 text-[10px] sm:text-xs font-semibold">
+                <span>Kebumen</span>
               </div>
-              <p className="text-xs text-slate-500 hidden sm:block leading-none mt-0.5">
-                Sistem Informasi Manajemen Peternakan Terpadu
-              </p>
             </div>
           </div>
 
-          {/* Desktop Nav Links */}
-          <div className="hidden md:flex items-center gap-8 text-sm font-semibold text-slate-600">
-            <a href="#ringkasan" className="hover:text-blue-600 transition-colors">
-              Ringkasan Wilayah
-            </a>
-            <a href="#modul" className="hover:text-blue-600 transition-colors">
-              Modul Data
-            </a>
-            <a href="#bantuan" className="hover:text-blue-600 transition-colors">
-              Bantuan Akses
-            </a>
-          </div>
+          {/* Right Section: Desktop Nav Links & Action Buttons */}
+          <div className="flex items-center gap-4 sm:gap-6 lg:gap-8 ml-auto">
+            {/* Desktop Nav Links */}
+            <nav className="hidden md:flex items-center gap-6 lg:gap-8 text-sm font-medium text-slate-600">
+              <a href="#ringkasan" className="hover:text-blue-600 transition-colors">
+                Ringkasan Wilayah
+              </a>
+              <a href="#puskeswan" className="hover:text-blue-600 transition-colors">
+                Puskeswan Aktif
+              </a>
+              <a href="#modul" className="hover:text-blue-600 transition-colors">
+                Modul Data
+              </a>
+            </nav>
 
-          {/* Desktop Actions */}
-          <div className="hidden md:flex items-center gap-3">
-            <button
-              onClick={() => setShowLoginModal(true)}
-              className="min-h-touch h-11 px-5 rounded-xl bg-blue-600 text-white font-bold text-xs sm:text-sm flex items-center gap-2 shadow-xs hover:bg-blue-700 active:scale-[0.98] transition-all cursor-pointer"
-            >
-              <span>Masuk Petugas</span>
-              <ArrowRight size={16} />
-            </button>
-          </div>
+            {/* Right Action: Officer Login Button & Mobile Menu */}
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => setShowLoginModal(true)}
+                className="h-9 sm:h-10 px-3.5 sm:px-5 rounded-full bg-blue-600 text-white font-semibold text-xs sm:text-sm flex items-center gap-1.5 sm:gap-2 shadow-xs hover:bg-blue-700 active:scale-[0.98] transition-all cursor-pointer"
+              >
+                <span>Masuk Petugas</span>
+                <ArrowRight size={14} className="hidden xs:inline" />
+              </button>
 
-          {/* Mobile Menu Trigger */}
-          <div className="flex items-center gap-2 md:hidden">
-            <button
-              onClick={() => setShowLoginModal(true)}
-              className="min-h-touch h-10 px-3.5 rounded-xl bg-blue-600 text-white font-bold text-xs flex items-center gap-1.5 shadow-xs cursor-pointer"
-            >
-              <span>Masuk</span>
-              <ArrowRight size={14} />
-            </button>
-
-            <button
-              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              aria-label="Buka Menu"
-              className="min-h-touch min-w-touch w-10 h-10 rounded-xl border border-slate-200 bg-slate-50 text-slate-700 flex items-center justify-center cursor-pointer"
-            >
-              {mobileMenuOpen ? <X size={20} /> : <Menu size={20} />}
-            </button>
+              {/* Mobile Menu Trigger */}
+              <button
+                onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+                aria-label="Buka Menu"
+                className="md:hidden w-9 h-9 rounded-full border border-blue-100 bg-blue-50/50 text-slate-700 flex items-center justify-center active:bg-blue-100 cursor-pointer"
+              >
+                {mobileMenuOpen ? <X size={17} /> : <Menu size={17} />}
+              </button>
+            </div>
           </div>
-        </nav>
+        </header>
 
         {/* Mobile Navigation Drawer */}
         {mobileMenuOpen && (
@@ -557,18 +369,14 @@ export default function LandingPage() {
               <BarChart3 size={16} className="text-blue-600" />
               <span>Ringkasan Wilayah</span>
             </a>
-            <button
-              onClick={() => {
-                setActiveModule('keswan');
-                setDetailView('puskeswan');
-                setMobileMenuOpen(false);
-                scrollToSection('modul');
-              }}
-              className="w-full flex items-center gap-2.5 py-2.5 text-sm font-semibold text-slate-800 hover:text-blue-600 text-left"
+            <a
+              href="#puskeswan"
+              onClick={() => setMobileMenuOpen(false)}
+              className="flex items-center gap-2.5 py-2.5 text-sm font-semibold text-slate-800 hover:text-blue-600"
             >
               <Stethoscope size={16} className="text-blue-600" />
               <span>Puskeswan Aktif</span>
-            </button>
+            </a>
             <a
               href="#modul"
               onClick={() => setMobileMenuOpen(false)}
@@ -577,440 +385,920 @@ export default function LandingPage() {
               <Activity size={16} className="text-blue-600" />
               <span>Modul Data</span>
             </a>
-            <a
-              href="#bantuan"
-              onClick={() => setMobileMenuOpen(false)}
-              className="flex items-center gap-2 py-2 text-sm font-bold text-slate-800 hover:text-blue-600"
-            >
-              <ShieldCheck size={16} className="text-slate-500" />
-              <span>Bantuan Akses</span>
-            </a>
           </div>
         )}
-      </header>
 
-      {/* ─────────────────────────────────────────────
-          2. HERO SECTION & STATISTIK REALTIME
-      ───────────────────────────────────────────── */}
-      <section id="ringkasan" className="pt-28 pb-12 sm:pt-36 sm:pb-20 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto w-full">
-        
-        {/* Kicker Badge */}
-        <div className="flex justify-center mb-5">
-          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-slate-200 bg-white text-xs font-semibold text-slate-700 shadow-xs">
-            <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse shrink-0" />
-            <span>Portal Resmi Bidang Peternakan &amp; Kesehatan Hewan Kebumen</span>
-          </div>
-        </div>
-
-        {/* Editorial Headline */}
-        <div className="text-center max-w-4xl mx-auto mb-8">
-          <h1 className="font-sans text-3xl sm:text-5xl lg:text-6xl font-bold tracking-tight text-slate-900 leading-[1.18] mb-5">
-            Satu Ekosistem untuk Data <br className="hidden sm:inline" />
-            <span className="text-blue-600">Peternakan Kebumen</span>
-          </h1>
-
-          <p className="text-sm sm:text-base lg:text-lg leading-relaxed max-w-3xl mx-auto font-normal text-slate-600">
-            Sistem Informasi Manajemen Terpadu yang mengintegrasikan data Perbibitan &amp; Produksi (Bitpro), Kesehatan Hewan (Keswan), dan Kesehatan Masyarakat Veteriner (Kesmavet) secara akurat, transparan, dan terbuka.
-          </p>
-        </div>
-
-        {/* Primary Call to Actions */}
-        <div className="flex flex-col sm:flex-row items-center justify-center gap-3 mb-12">
-          <button
-            onClick={() => setShowLoginModal(true)}
-            className="w-full sm:w-auto min-h-touch h-12 px-7 rounded-xl bg-blue-600 text-white font-bold text-sm flex items-center justify-center gap-2 shadow-xs hover:bg-blue-700 active:scale-[0.98] transition-all cursor-pointer"
-          >
-            <span>Masuk ke Dashboard Dinas</span>
-            <ArrowRight size={16} />
-          </button>
+        {/* ─────────────────────────────────────────────
+            2. DASHBOARD BODY
+        ───────────────────────────────────────────── */}
+        <div className="p-3.5 sm:p-6 md:p-8 lg:p-9 space-y-6 sm:space-y-7 flex-1">
           
-          <a
-            href="#modul"
-            className="w-full sm:w-auto min-h-touch h-12 px-6 rounded-xl border border-slate-200 bg-white text-slate-700 font-bold text-sm flex items-center justify-center gap-2 hover:bg-slate-50 transition-colors shadow-xs"
+          {/* ── TOP HERO / STEP BANNER WITH ILLUSTRATED MODULE CARDS ── */}
+          <section
+            id="ringkasan"
+            className="rounded-2xl sm:rounded-3xl border border-blue-100/90 bg-[#f8fbff] p-4 sm:p-6 lg:p-7 flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6 shadow-2xs"
           >
-            <span>Eksplorasi Data Publik</span>
-            <ChevronRight size={16} />
-          </a>
-        </div>
-
-        {/* 4 Blue & White Top Stat Cards */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mb-4">
-          
-          {/* Stat 1: Total Populasi */}
-          <div
-            onClick={() => {
-              setActiveModule('bitpro');
-              setDetailView('populasi');
-              setSubTabProd('populasi');
-              scrollToSection('modul');
-            }}
-            className="p-4 sm:p-5 rounded-2xl bg-blue-50/70 border border-blue-100 flex items-center justify-between gap-3 cursor-pointer hover:border-blue-300 hover:shadow-sm transition-all group"
-          >
-            <div className="min-w-0 flex-1">
-              <p className="text-xs font-semibold text-slate-500 mb-1 truncate">
-                Total Populasi Ternak
-              </p>
-              <p className="text-2xl sm:text-3xl font-bold text-slate-900 tracking-tight truncate">
-                {totalPopulasi.toLocaleString('id-ID')}
-              </p>
-              <p className="text-[11px] sm:text-xs font-medium text-slate-400 mt-1 truncate">
-                Ekor di seluruh Kebumen
-              </p>
-            </div>
-            <div className="w-11 h-11 sm:w-12 sm:h-12 rounded-full bg-blue-600 text-white flex items-center justify-center shrink-0 shadow-xs group-hover:scale-105 transition-transform">
-              <Activity size={22} />
-            </div>
-          </div>
-
-          {/* Stat 2: Produksi Daging */}
-          <div
-            onClick={() => {
-              setActiveModule('bitpro');
-              setDetailView('populasi');
-              setSubTabProd('daging');
-              scrollToSection('modul');
-            }}
-            className="p-4 sm:p-5 rounded-2xl bg-sky-50/70 border border-sky-100 flex items-center justify-between gap-3 cursor-pointer hover:border-sky-300 hover:shadow-sm transition-all group"
-          >
-            <div className="min-w-0 flex-1">
-              <p className="text-xs font-semibold text-slate-500 mb-1 truncate">
-                Produksi Daging
-              </p>
-              <p className="text-2xl sm:text-3xl font-bold text-slate-900 tracking-tight truncate">
-                {(totalDaging / 1000).toLocaleString('id-ID', { minimumFractionDigits: 1, maximumFractionDigits: 1 })}
-              </p>
-              <p className="text-[11px] sm:text-xs font-medium text-slate-400 mt-1 truncate">
-                Ton / tahun
-              </p>
-            </div>
-            <div className="w-11 h-11 sm:w-12 sm:h-12 rounded-full bg-sky-600 text-white flex items-center justify-center shrink-0 shadow-xs group-hover:scale-105 transition-transform">
-              <TrendingUp size={22} />
-            </div>
-          </div>
-
-          {/* Stat 3: Produksi Telur */}
-          <div
-            onClick={() => {
-              setActiveModule('bitpro');
-              setDetailView('populasi');
-              setSubTabProd('telur');
-              scrollToSection('modul');
-            }}
-            className="p-4 sm:p-5 rounded-2xl bg-indigo-50/60 border border-indigo-100 flex items-center justify-between gap-3 cursor-pointer hover:border-indigo-300 hover:shadow-sm transition-all group"
-          >
-            <div className="min-w-0 flex-1">
-              <p className="text-xs font-semibold text-slate-500 mb-1 truncate">
-                Produksi Telur
-              </p>
-              <p className="text-2xl sm:text-3xl font-bold text-slate-900 tracking-tight truncate">
-                {(totalTelur / 1000).toLocaleString('id-ID', { minimumFractionDigits: 1, maximumFractionDigits: 1 })}
-              </p>
-              <p className="text-[11px] sm:text-xs font-medium text-slate-400 mt-1 truncate">
-                Ton / tahun
-              </p>
-            </div>
-            <div className="w-11 h-11 sm:w-12 sm:h-12 rounded-full bg-indigo-600 text-white flex items-center justify-center shrink-0 shadow-xs group-hover:scale-105 transition-transform">
-              <PackageCheck size={22} />
-            </div>
-          </div>
-
-          {/* Stat 4: Sebaran Farm */}
-          <div
-            onClick={() => {
-              setActiveModule('bitpro');
-              setDetailView('farm');
-              scrollToSection('modul');
-            }}
-            className="p-4 sm:p-5 rounded-2xl bg-[#f0f6ff] border border-blue-100 flex items-center justify-between gap-3 cursor-pointer hover:border-blue-300 hover:shadow-sm transition-all group"
-          >
-            <div className="min-w-0 flex-1">
-              <p className="text-xs font-semibold text-slate-500 mb-1 truncate">
-                Sebaran Data Farm
-              </p>
-              <p className="text-2xl sm:text-3xl font-bold text-slate-900 tracking-tight truncate">
-                {totalFarm} Unit
-              </p>
-              <p className="text-[11px] sm:text-xs font-medium text-slate-400 mt-1 truncate">
-                Peternakan terdata
-              </p>
-            </div>
-            <div className="w-11 h-11 sm:w-12 sm:h-12 rounded-full bg-blue-500 text-white flex items-center justify-center shrink-0 shadow-xs group-hover:scale-105 transition-transform">
-              <Building2 size={22} />
-            </div>
-          </div>
-
-        </div>
-
-        {/* 4 Secondary Metric Cards */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-4 mb-6">
-          <div className="p-3.5 sm:p-4 rounded-2xl bg-white border border-blue-50 shadow-2xs">
-            <p className="text-xs text-slate-500 font-medium truncate">Ayam Broiler</p>
-            <p className="text-base sm:text-lg lg:text-xl font-bold text-slate-900 mt-0.5 truncate">2.636.000</p>
-            <p className="text-[10px] sm:text-[11px] text-slate-400 mt-0.5 truncate">Ekor · Populasi Terbesar</p>
-          </div>
-
-          <div className="p-3.5 sm:p-4 rounded-2xl bg-white border border-blue-50 shadow-2xs">
-            <p className="text-xs text-slate-500 font-medium truncate">Ayam Ras Pedaging</p>
-            <p className="text-base sm:text-lg lg:text-xl font-bold text-slate-900 mt-0.5 truncate">11.218,9</p>
-            <p className="text-[10px] sm:text-[11px] text-slate-400 mt-0.5 truncate">Ton Daging / Tahun</p>
-          </div>
-
-          <div className="p-3.5 sm:p-4 rounded-2xl bg-white border border-blue-50 shadow-2xs">
-            <p className="text-xs text-slate-500 font-medium truncate">Ayam Buras</p>
-            <p className="text-base sm:text-lg lg:text-xl font-bold text-slate-900 mt-0.5 truncate">2.389,3</p>
-            <p className="text-[10px] sm:text-[11px] text-slate-400 mt-0.5 truncate">Ton Telur / Tahun</p>
-          </div>
-
-          <div className="p-3.5 sm:p-4 rounded-2xl bg-white border border-blue-50 shadow-2xs">
-            <p className="text-xs text-slate-500 font-medium truncate">Sapi Potong</p>
-            <p className="text-base sm:text-lg lg:text-xl font-bold text-slate-900 mt-0.5 truncate">64.996</p>
-            <p className="text-[10px] sm:text-[11px] text-slate-400 mt-0.5 truncate">Ekor Sapi Terdata</p>
-          </div>
-        </div>
-
-        {/* ── DIAGRAM BATANG POPULASI & PRODUKSI (4 GRID) ── */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 mt-6">
-          
-          {/* 1. Populasi Ternak */}
-          <div className="p-5 sm:p-6 rounded-2xl sm:rounded-3xl border border-blue-100 bg-white shadow-xs space-y-4">
-            <div className="flex items-center justify-between gap-2">
-              <div>
-                <span className="text-[10px] font-extrabold uppercase tracking-wider px-2 py-0.5 rounded-full bg-blue-50 text-blue-700 border border-blue-200">
-                  Ruminansia &amp; Non-Ruminansia
-                </span>
-                <h3 className="text-base sm:text-lg font-bold text-slate-900 mt-1">
-                  Populasi Hewan Ternak
-                </h3>
+            <div className="max-w-md xl:max-w-lg">
+              <div className="inline-flex items-center gap-2 px-2.5 sm:px-3 py-1 rounded-full bg-white border border-blue-200/80 text-[11px] sm:text-xs font-semibold text-blue-700 mb-2.5 shadow-2xs">
+                <span className="w-2 h-2 rounded-full bg-blue-500 animate-pulse shrink-0" />
+                <span>Portal Resmi Dinas Pertanian dan Pangan Kebumen</span>
               </div>
-              <span className="text-xs font-bold text-blue-600 bg-blue-50 px-2.5 py-1 rounded-lg border border-blue-100">
-                Total: {totalTernakHewan.toLocaleString('id-ID')} Ekor
-              </span>
-            </div>
-
-            <div className="space-y-2.5 pt-2">
-              {DATA_POPULASI_TERNAK.map((row, idx) => {
-                const maxVal = DATA_POPULASI_TERNAK[0]?.total || 1;
-                const percent = Math.max(8, Math.round((row.total / maxVal) * 100));
-                return (
-                  <div key={idx} className="space-y-1">
-                    <div className="flex items-center justify-between text-xs font-semibold">
-                      <span className="text-slate-700">{row.komoditas}</span>
-                      <span className="text-blue-700 font-bold">{row.total.toLocaleString('id-ID')} Ekor</span>
-                    </div>
-                    <div className="h-2.5 w-full bg-slate-100 rounded-full overflow-hidden">
-                      <div
-                        className="h-full bg-gradient-to-r from-blue-500 to-indigo-600 rounded-full transition-all duration-500"
-                        style={{ width: `${percent}%` }}
-                      />
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-
-          {/* 2. Populasi Unggas */}
-          <div className="p-5 sm:p-6 rounded-2xl sm:rounded-3xl border border-blue-100 bg-white shadow-xs space-y-4">
-            <div className="flex items-center justify-between gap-2">
-              <div>
-                <span className="text-[10px] font-extrabold uppercase tracking-wider px-2 py-0.5 rounded-full bg-amber-50 text-amber-700 border border-amber-200">
-                  Komoditas Unggas
-                </span>
-                <h3 className="text-base sm:text-lg font-bold text-slate-900 mt-1">
-                  Populasi Unggas &amp; Burung
-                </h3>
-              </div>
-              <span className="text-xs font-bold text-amber-600 bg-amber-50 px-2.5 py-1 rounded-lg border border-amber-100">
-                Total: {totalUnggas.toLocaleString('id-ID')} Ekor
-              </span>
-            </div>
-
-            <div className="space-y-2.5 pt-2">
-              {DATA_POPULASI_UNGGAS.map((row, idx) => {
-                const maxVal = DATA_POPULASI_UNGGAS[0]?.total || 1;
-                const percent = Math.max(8, Math.round((row.total / maxVal) * 100));
-                return (
-                  <div key={idx} className="space-y-1">
-                    <div className="flex items-center justify-between text-xs font-semibold">
-                      <span className="text-slate-700">{row.komoditas}</span>
-                      <span className="text-amber-700 font-bold">{row.total.toLocaleString('id-ID')} Ekor</span>
-                    </div>
-                    <div className="h-2.5 w-full bg-slate-100 rounded-full overflow-hidden">
-                      <div
-                        className="h-full bg-gradient-to-r from-amber-500 to-orange-600 rounded-full transition-all duration-500"
-                        style={{ width: `${percent}%` }}
-                      />
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-
-          {/* 3. Produksi Daging */}
-          <div className="p-5 sm:p-6 rounded-2xl sm:rounded-3xl border border-blue-100 bg-white shadow-xs space-y-4">
-            <div className="flex items-center justify-between gap-2">
-              <div>
-                <span className="text-[10px] font-extrabold uppercase tracking-wider px-2 py-0.5 rounded-full bg-rose-50 text-rose-700 border border-rose-200">
-                  Produksi Komoditas
-                </span>
-                <h3 className="text-base sm:text-lg font-bold text-slate-900 mt-1">
-                  Produksi Daging (Ton/Tahun)
-                </h3>
-              </div>
-              <span className="text-xs font-bold text-rose-600 bg-rose-50 px-2.5 py-1 rounded-lg border border-rose-100">
-                Total: {(totalDaging / 1000).toLocaleString('id-ID', { minimumFractionDigits: 1, maximumFractionDigits: 1 })} Ton
-              </span>
-            </div>
-
-            <div className="pt-5 pb-2 px-2 rounded-2xl bg-slate-50 border border-slate-100">
-              <div className="grid grid-cols-6 gap-2 items-end h-44 sm:h-48">
-                {dataProduksiDagingTon.map((row, i) => {
-                  const color = PALETTE_DAGING[i % PALETTE_DAGING.length];
-                  const percent = row.ton > 0 ? Math.max(12, Math.round((row.ton / maxDagingTon) * 100)) : 6;
-
-                  return (
-                    <div key={row.jenis} className="flex flex-col items-center justify-end h-full group relative min-w-0">
-                      <div className="mb-1 text-center">
-                        <span className={`inline-block px-1 py-0.5 rounded text-[9px] font-bold ${color.light} ${color.text} border ${color.border} shadow-2xs whitespace-nowrap`}>
-                          {Math.round(row.ton).toLocaleString('id-ID')} T
-                        </span>
-                      </div>
-                      <div className="w-full max-w-[36px] bg-slate-200/70 rounded-t-lg flex flex-col justify-end p-0.5 overflow-hidden h-full">
-                        <div
-                          className={`w-full rounded-t-md bg-gradient-to-t ${color.gradient} transition-all duration-700`}
-                          style={{ height: `${percent}%` }}
-                        />
-                      </div>
-                      <span className="text-[10px] text-slate-600 font-medium truncate mt-2 w-full text-center">
-                        {row.jenis}
-                      </span>
-                    </div>
-                  );
-                })}
+              <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-slate-900 tracking-tight leading-snug mb-2">
+                Satu Ekosistem untuk Data <span className="text-blue-600">Peternakan Kebumen</span>
+              </h1>
+              <p className="text-xs sm:text-sm text-slate-500 leading-relaxed mb-4">
+                Sistem Informasi Manajemen Terpadu yang mengintegrasikan data Perbibitan &amp; Produksi (Bitpro), Kesehatan Hewan (Keswan), dan Kesehatan Masyarakat Veteriner (Kesmavet) langsung dari basis data resmi secara real-time.
+              </p>
+              
+              <div className="hidden sm:flex items-center gap-2 text-xs font-bold text-blue-700">
+                <span>Pilih kartu modul untuk membuka data</span>
+                <ArrowRight size={14} />
               </div>
             </div>
-          </div>
 
-          {/* 4. Produksi Telur */}
-          <div className="p-5 sm:p-6 rounded-2xl sm:rounded-3xl border border-blue-100 bg-white shadow-xs space-y-4">
-            <div className="flex items-center justify-between gap-2">
-              <div>
-                <span className="text-[10px] font-extrabold uppercase tracking-wider px-2 py-0.5 rounded-full bg-amber-50 text-amber-700 border border-amber-200">
-                  Produksi Telur
-                </span>
-                <h3 className="text-base sm:text-lg font-bold text-slate-900 mt-1">
-                  Produksi Telur (Ton/Tahun)
-                </h3>
-              </div>
-              <span className="text-xs font-bold text-amber-600 bg-amber-50 px-2.5 py-1 rounded-lg border border-amber-100">
-                Total: {(totalTelur / 1000).toLocaleString('id-ID', { minimumFractionDigits: 1, maximumFractionDigits: 1 })} Ton
-              </span>
-            </div>
-
-            <div className="pt-5 pb-2 px-2 rounded-2xl bg-slate-50 border border-slate-100">
-              <div className="grid grid-cols-5 gap-2 items-end h-44 sm:h-48">
-                {dataProduksiTelurTon.map((row, i) => {
-                  const color = PALETTE_TELUR[i % PALETTE_TELUR.length];
-                  const percent = row.ton > 0 ? Math.max(12, Math.round((row.ton / maxTelurTon) * 100)) : 6;
-
-                  return (
-                    <div key={row.jenis} className="flex flex-col items-center justify-end h-full group relative min-w-0">
-                      <div className="mb-1 text-center">
-                        <span className={`inline-block px-1 py-0.5 rounded text-[9px] font-bold ${color.light} ${color.text} border ${color.border} shadow-2xs whitespace-nowrap`}>
-                          {Math.round(row.ton).toLocaleString('id-ID')} T
-                        </span>
-                      </div>
-                      <div className="w-full max-w-[36px] bg-slate-200/70 rounded-t-lg flex flex-col justify-end p-0.5 overflow-hidden h-full">
-                        <div
-                          className={`w-full rounded-t-md bg-gradient-to-t ${color.gradient} transition-all duration-700`}
-                          style={{ height: `${percent}%` }}
-                        />
-                      </div>
-                      <span className="text-[10px] text-slate-600 font-medium truncate mt-2 w-full text-center">
-                        {row.jenis}
-                      </span>
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-          </div>
-
-        </div>
-
-      </section>
-
-      {/* ─────────────────────────────────────────────
-          3. MODUL DATA INTERAKTIF
-      ───────────────────────────────────────────── */}
-      <section id="modul" className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-20">
-        
-        {/* Module Header Bar */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
-          <div>
-            <h2 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-slate-900">
-              Eksplorasi Modul SiMantap
-            </h2>
-            <p className="text-xs sm:text-sm text-slate-500">
-              Pilih bidang teknis untuk melihat rincian tabel &amp; indikator data
-            </p>
-          </div>
-
-          {/* Module Tab Buttons */}
-          <div className="flex gap-2 p-1 rounded-2xl bg-white border border-slate-200 shadow-xs self-start sm:self-auto">
-            {MODULES.map((mod) => {
-              const isActive = activeModule === mod.key;
-              const IconComponent = mod.icon;
-              return (
-                <button
+            {/* ── KARTU MODUL BERGAMBAR (Bitpro, Keswan, Kesmavet) ── */}
+            <div className="grid grid-cols-3 gap-2.5 sm:gap-3.5 w-full lg:w-auto shrink-0 justify-items-center">
+              {MODULES.map((mod) => (
+                <div
                   key={mod.key}
                   onClick={() => {
-                    setActiveModule(mod.key);
+                    setActiveModule(mod.key as any);
                     setDetailView(null);
+                    scrollToSection('modul');
                   }}
-                  className={`px-4 py-2 rounded-xl text-xs font-bold flex items-center gap-2 transition-all cursor-pointer ${
-                    isActive
-                      ? 'bg-blue-600 text-white shadow-xs'
-                      : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
-                  }`}
+                  className="group relative w-full max-w-[110px] xs:max-w-[130px] sm:max-w-[160px] md:max-w-[180px] lg:max-w-[170px] xl:max-w-[185px] rounded-2xl sm:rounded-3xl overflow-hidden shadow-xs hover:shadow-lg transition-all duration-300 hover:scale-[1.03] active:scale-[0.97] cursor-pointer border border-slate-200/70 bg-white"
                 >
-                  <IconComponent size={15} />
-                  <span>{mod.label}</span>
-                </button>
-              );
-            })}
-          </div>
-        </div>
-
-        {/* Main Panel Box */}
-        <div className="rounded-3xl border border-slate-200 bg-white p-6 sm:p-8 shadow-sm">
-          
-          <div className="flex flex-wrap items-center justify-between gap-3 pb-5 mb-6 border-b border-slate-100">
-            <div className="flex items-center gap-3">
-              <span className="w-3 h-3 rounded-full" style={{ backgroundColor: activeMod.accent }} />
-              <h3 className="text-lg sm:text-xl font-bold text-slate-900">
-                Bidang {activeMod.label} — {activeMod.caption}
-              </h3>
+                  <img
+                    src={mod.image}
+                    alt={`Kartu Modul ${mod.label}`}
+                    className="w-full h-auto object-cover block transition-transform duration-300 group-hover:scale-102"
+                  />
+                  <div className="absolute inset-0 bg-blue-600/0 group-hover:bg-blue-600/10 transition-colors pointer-events-none" />
+                </div>
+              ))}
             </div>
-            {detailView && (
-              <button
-                onClick={() => setDetailView(null)}
-                className="h-8 px-3.5 rounded-xl border border-blue-200 bg-blue-50 text-xs font-bold text-blue-700 hover:bg-blue-100 transition-colors cursor-pointer"
-              >
-                ← Kembali ke Ringkasan
-              </button>
-            )}
-          </div>
+          </section>
 
-          {/* Conditional Content: Detail View vs Module Summary */}
-          {detailView ? (
-            /* DETAIL TABLE VIEW */
-            <div className="space-y-6">
+          {/* ── SECTION 1: STAT CARDS (100% Dynamic MySQL Database) ── */}
+          <section className="space-y-3.5 sm:space-y-4">
+            <div className="flex flex-col xs:flex-row xs:items-center justify-between gap-2 sm:gap-3">
+              <div className="flex items-center flex-wrap gap-2 sm:gap-3">
+                <div>
+                  <h2 className="text-base sm:text-xl font-bold text-slate-900 tracking-tight">
+                    Ringkasan Wilayah (2025)
+                  </h2>
+                  <p className="text-[11px] sm:text-xs text-slate-500">
+                    Rekapitulasi live tersinkronisasi langsung dari database MySQL
+                  </p>
+                </div>
+                <button
+                  onClick={() => scrollToSection('puskeswan')}
+                  className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-sky-50 hover:bg-sky-100 border border-sky-200 text-sky-700 text-xs font-semibold shadow-2xs transition-all cursor-pointer active:scale-95"
+                  title="Lihat Unit Puskeswan Aktif"
+                >
+                  <Stethoscope size={13} className="text-sky-600" />
+                  <span>{puskeswanList.length} Puskeswan Aktif</span>
+                </button>
+              </div>
+
+              <button
+                onClick={() => {
+                  setActiveModule('bitpro');
+                  setDetailView('populasi');
+                  scrollToSection('modul');
+                }}
+                className="text-xs font-bold text-blue-600 hover:text-blue-700 flex items-center gap-1 transition-colors self-start xs:self-auto cursor-pointer"
+              >
+                <span>Lihat Detail Sensus</span>
+                <ChevronRight size={14} />
+              </button>
+            </div>
+
+            {/* 4 Top Stat Cards */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
               
-              {detailView === 'populasi' && (
-                <div className="space-y-4">
-                  <div className="flex flex-wrap gap-2">
+              {/* Stat 1: Total Populasi */}
+              <div
+                onClick={() => {
+                  setActiveModule('bitpro');
+                  setDetailView('populasi');
+                  setSubTabProd('populasi');
+                  scrollToSection('modul');
+                }}
+                className="p-4 sm:p-5 rounded-2xl bg-blue-50/70 border border-blue-100 flex items-center justify-between gap-3 cursor-pointer hover:border-blue-200 hover:shadow-xs transition-all group"
+              >
+                <div className="min-w-0 flex-1">
+                  <p className="text-xs font-semibold text-slate-500 mb-1 truncate">
+                    Total Populasi Ternak
+                  </p>
+                  <p className="text-2xl sm:text-3xl font-bold text-slate-900 tracking-tight truncate">
+                    {isDataLoading ? (
+                      <span className="inline-flex items-center gap-1 text-base text-slate-400 font-normal">
+                        <Loader2 className="animate-spin" size={16} /> Memuat...
+                      </span>
+                    ) : (
+                      totalPopulasi.toLocaleString('id-ID')
+                    )}
+                  </p>
+                  <p className="text-[11px] sm:text-xs font-medium text-slate-400 mt-1 truncate">
+                    Ekor di seluruh Kebumen
+                  </p>
+                </div>
+                <div className="w-11 h-11 sm:w-12 sm:h-12 rounded-full bg-blue-600 text-white flex items-center justify-center shrink-0 shadow-xs group-hover:scale-105 transition-transform">
+                  <Activity size={22} />
+                </div>
+              </div>
+
+              {/* Stat 2: Produksi Daging */}
+              <div
+                onClick={() => {
+                  setActiveModule('bitpro');
+                  setDetailView('populasi');
+                  setSubTabProd('daging');
+                  scrollToSection('modul');
+                }}
+                className="p-4 sm:p-5 rounded-2xl bg-sky-50/70 border border-sky-100 flex items-center justify-between gap-3 cursor-pointer hover:border-sky-200 hover:shadow-xs transition-all group"
+              >
+                <div className="min-w-0 flex-1">
+                  <p className="text-xs font-semibold text-slate-500 mb-1 truncate">
+                    Produksi Daging
+                  </p>
+                  <p className="text-2xl sm:text-3xl font-bold text-slate-900 tracking-tight truncate">
+                    {isDataLoading ? (
+                      <span className="inline-flex items-center gap-1 text-base text-slate-400 font-normal">
+                        <Loader2 className="animate-spin" size={16} /> Memuat...
+                      </span>
+                    ) : (
+                      totalProdDagingTon.toLocaleString('id-ID', { minimumFractionDigits: 1, maximumFractionDigits: 1 })
+                    )}
+                  </p>
+                  <p className="text-[11px] sm:text-xs font-medium text-slate-400 mt-1 truncate">
+                    Ton / tahun
+                  </p>
+                </div>
+                <div className="w-11 h-11 sm:w-12 sm:h-12 rounded-full bg-sky-600 text-white flex items-center justify-center shrink-0 shadow-xs group-hover:scale-105 transition-transform">
+                  <TrendingUp size={22} />
+                </div>
+              </div>
+
+              {/* Stat 3: Produksi Telur */}
+              <div
+                onClick={() => {
+                  setActiveModule('bitpro');
+                  setDetailView('populasi');
+                  setSubTabProd('telur');
+                  scrollToSection('modul');
+                }}
+                className="p-4 sm:p-5 rounded-2xl bg-indigo-50/60 border border-indigo-100 flex items-center justify-between gap-3 cursor-pointer hover:border-indigo-200 hover:shadow-xs transition-all group"
+              >
+                <div className="min-w-0 flex-1">
+                  <p className="text-xs font-semibold text-slate-500 mb-1 truncate">
+                    Produksi Telur
+                  </p>
+                  <p className="text-2xl sm:text-3xl font-bold text-slate-900 tracking-tight truncate">
+                    {isDataLoading ? (
+                      <span className="inline-flex items-center gap-1 text-base text-slate-400 font-normal">
+                        <Loader2 className="animate-spin" size={16} /> Memuat...
+                      </span>
+                    ) : (
+                      totalProdTelurTon.toLocaleString('id-ID', { minimumFractionDigits: 1, maximumFractionDigits: 1 })
+                    )}
+                  </p>
+                  <p className="text-[11px] sm:text-xs font-medium text-slate-400 mt-1 truncate">
+                    Ton / tahun
+                  </p>
+                </div>
+                <div className="w-11 h-11 sm:w-12 sm:h-12 rounded-full bg-indigo-600 text-white flex items-center justify-center shrink-0 shadow-xs group-hover:scale-105 transition-transform">
+                  <PackageCheck size={22} />
+                </div>
+              </div>
+
+              {/* Stat 4: Kelompok Tani Ternak */}
+              <div
+                onClick={() => {
+                  setActiveModule('bitpro');
+                  setDetailView('farm');
+                  scrollToSection('modul');
+                }}
+                className="p-4 sm:p-5 rounded-2xl bg-[#f0f6ff] border border-blue-100 flex items-center justify-between gap-3 cursor-pointer hover:border-blue-200 hover:shadow-xs transition-all group"
+              >
+                <div className="min-w-0 flex-1">
+                  <p className="text-xs font-semibold text-slate-500 mb-1 truncate">
+                    Kelompok Tani Ternak (KTT)
+                  </p>
+                  <p className="text-2xl sm:text-3xl font-bold text-slate-900 tracking-tight truncate">
+                    {isDataLoading ? (
+                      <span className="inline-flex items-center gap-1 text-base text-slate-400 font-normal">
+                        <Loader2 className="animate-spin" size={16} /> Memuat...
+                      </span>
+                    ) : (
+                      `${totalFarm.toLocaleString('id-ID')} Unit`
+                    )}
+                  </p>
+                  <p className="text-[11px] sm:text-xs font-medium text-slate-400 mt-1 truncate">
+                    Poktan &amp; KTT terdaftar di database
+                  </p>
+                </div>
+                <div className="w-11 h-11 sm:w-12 sm:h-12 rounded-full bg-blue-500 text-white flex items-center justify-center shrink-0 shadow-xs group-hover:scale-105 transition-transform">
+                  <Building2 size={22} />
+                </div>
+              </div>
+
+            </div>
+
+            {/* 4 Secondary Metric Cards (Dihitung 100% Dinamis dari Database) */}
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-4">
+              <div className="p-3.5 sm:p-4 rounded-2xl bg-white border border-blue-50 shadow-2xs">
+                <p className="text-xs text-slate-500 font-medium truncate">{topUnggas.komoditas}</p>
+                <p className="text-base sm:text-lg lg:text-xl font-bold text-slate-900 mt-0.5 truncate">
+                  {topUnggas.total.toLocaleString('id-ID')}
+                </p>
+                <p className="text-[10px] sm:text-[11px] text-slate-400 mt-0.5 truncate">Ekor · Unggas Terbanyak</p>
+              </div>
+
+              <div className="p-3.5 sm:p-4 rounded-2xl bg-white border border-blue-50 shadow-2xs">
+                <p className="text-xs text-slate-500 font-medium truncate">{topDaging.jenis}</p>
+                <p className="text-base sm:text-lg lg:text-xl font-bold text-slate-900 mt-0.5 truncate">
+                  {topDaging.ton.toLocaleString('id-ID', { minimumFractionDigits: 1, maximumFractionDigits: 1 })}
+                </p>
+                <p className="text-[10px] sm:text-[11px] text-slate-400 mt-0.5 truncate">Ton Daging / Tahun</p>
+              </div>
+
+              <div className="p-3.5 sm:p-4 rounded-2xl bg-white border border-blue-50 shadow-2xs">
+                <p className="text-xs text-slate-500 font-medium truncate">{topTelur.jenis}</p>
+                <p className="text-base sm:text-lg lg:text-xl font-bold text-slate-900 mt-0.5 truncate">
+                  {topTelur.ton.toLocaleString('id-ID', { minimumFractionDigits: 1, maximumFractionDigits: 1 })}
+                </p>
+                <p className="text-[10px] sm:text-[11px] text-slate-400 mt-0.5 truncate">Ton Telur / Tahun</p>
+              </div>
+
+              <div className="p-3.5 sm:p-4 rounded-2xl bg-white border border-blue-50 shadow-2xs">
+                <p className="text-xs text-slate-500 font-medium truncate">Sapi Potong</p>
+                <p className="text-base sm:text-lg lg:text-xl font-bold text-slate-900 mt-0.5 truncate">
+                  {sapiPotongPop.toLocaleString('id-ID')}
+                </p>
+                <p className="text-[10px] sm:text-[11px] text-slate-400 mt-0.5 truncate">Ekor Sapi Terdata</p>
+              </div>
+            </div>
+          </section>
+
+          {/* ── SECTION: DATA UNIT PUSKESWAN AKTIF (Dari Database) ── */}
+          <section id="puskeswan" className="space-y-4 sm:space-y-5 scroll-mt-20">
+            <div className="flex flex-col xs:flex-row xs:items-center justify-between gap-2 sm:gap-3">
+              <div className="flex items-center flex-wrap gap-2 sm:gap-3">
+                <div>
+                  <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-sky-50 border border-sky-200 text-[11px] font-bold text-sky-700 mb-1">
+                    <Stethoscope size={13} className="text-sky-600" />
+                    <span>Cakupan Pelayanan Kesehatan Hewan Terpadu</span>
+                  </div>
+                  <h2 className="text-base sm:text-xl font-bold text-slate-900 tracking-tight">
+                    Data {puskeswanList.length} Unit Puskeswan Aktif Kabupaten Kebumen
+                  </h2>
+                  <p className="text-[11px] sm:text-xs text-slate-500">
+                    Rekapitulasi resmi cakupan kecamatan binaan, koordinator dokter hewan, dan pos pelayanan keliling (Pusling)
+                  </p>
+                </div>
+              </div>
+
+              <Link
+                href="/keswan/puskeswan"
+                className="text-xs font-bold text-blue-600 hover:text-blue-700 flex items-center gap-1 transition-colors self-start xs:self-auto"
+              >
+                <span>Buka Lembar Kerja Kinerja</span>
+                <ChevronRight size={14} />
+              </Link>
+            </div>
+
+            {/* 3 Stat Ringkasan Cards (Blue & White Theme) */}
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
+              {/* Card 1: Total Unit */}
+              <div className="p-4 sm:p-5 rounded-2xl bg-blue-50/70 border border-blue-100 flex items-center justify-between gap-3 shadow-2xs">
+                <div className="min-w-0 flex-1">
+                  <p className="text-xs font-semibold text-slate-500 mb-1 truncate">Unit Puskeswan Aktif</p>
+                  <p className="text-2xl sm:text-3xl font-bold text-slate-900 tracking-tight">{puskeswanList.length} Unit</p>
+                  <p className="text-[11px] sm:text-xs font-medium text-emerald-600 mt-1 flex items-center gap-1">
+                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                    100% Beroperasi Aktif
+                  </p>
+                </div>
+                <div className="w-11 h-11 sm:w-12 sm:h-12 rounded-full bg-blue-600 text-white flex items-center justify-center shrink-0 shadow-xs">
+                  <Building2 size={22} />
+                </div>
+              </div>
+
+              {/* Card 2: Wilayah Binaan (Kecamatan) */}
+              <div className="p-4 sm:p-5 rounded-2xl bg-sky-50/70 border border-sky-100 flex items-center justify-between gap-3 shadow-2xs">
+                <div className="min-w-0 flex-1">
+                  <p className="text-xs font-semibold text-slate-500 mb-1 truncate">Cakupan Wilayah</p>
+                  <p className="text-2xl sm:text-3xl font-bold text-slate-900 tracking-tight">26 Kecamatan</p>
+                  <p className="text-[11px] sm:text-xs font-medium text-slate-500 mt-1 truncate">
+                    Seluruh Kab. Kebumen
+                  </p>
+                </div>
+                <div className="w-11 h-11 sm:w-12 sm:h-12 rounded-full bg-sky-600 text-white flex items-center justify-center shrink-0 shadow-xs">
+                  <MapPin size={22} />
+                </div>
+              </div>
+
+              {/* Card 3: Tenaga Medik */}
+              <div className="p-4 sm:p-5 rounded-2xl bg-[#f0f6ff] border border-blue-100 flex items-center justify-between gap-3 shadow-2xs">
+                <div className="min-w-0 flex-1">
+                  <p className="text-xs font-semibold text-slate-500 mb-1 truncate">Koordinator Medik</p>
+                  <p className="text-2xl sm:text-3xl font-bold text-slate-900 tracking-tight">{puskeswanList.length} Dokter</p>
+                  <p className="text-[11px] sm:text-xs font-medium text-slate-500 mt-1 truncate">
+                    Dokter Hewan Binaan
+                  </p>
+                </div>
+                <div className="w-11 h-11 sm:w-12 sm:h-12 rounded-full bg-blue-500 text-white flex items-center justify-center shrink-0 shadow-xs">
+                  <Users size={22} />
+                </div>
+              </div>
+            </div>
+
+            {/* Search & View Switcher Toolbar */}
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2.5 pt-1">
+              <div className="relative flex-1 max-w-md">
+                <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" size={15} />
+                <input
+                  type="text"
+                  value={searchPuskeswan}
+                  onChange={(e) => setSearchPuskeswan(e.target.value)}
+                  placeholder="Cari puskeswan, kecamatan binaan, atau dokter..."
+                  className="w-full h-9 pl-9 pr-8 rounded-xl border border-blue-200/80 bg-white text-xs text-slate-800 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all shadow-2xs"
+                />
+                {searchPuskeswan && (
+                  <button
+                    type="button"
+                    onClick={() => setSearchPuskeswan('')}
+                    className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 p-0.5 cursor-pointer"
+                    title="Hapus pencarian"
+                  >
+                    <X size={13} />
+                  </button>
+                )}
+              </div>
+
+              <div className="flex items-center gap-2 self-end sm:self-auto">
+                <span className="text-xs text-slate-500 font-medium mr-1 hidden xs:inline">
+                  Menampilkan <span className="font-bold text-blue-700">{filteredPuskeswan.length}</span> dari {puskeswanList.length} unit
+                </span>
+
+                <div className="inline-flex rounded-xl border border-blue-100 bg-white p-0.5 shadow-2xs">
+                  <button
+                    type="button"
+                    onClick={() => setPuskeswanViewMode('cards')}
+                    className={`px-3 py-1 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-all cursor-pointer ${
+                      puskeswanViewMode === 'cards'
+                        ? 'bg-blue-600 text-white shadow-xs'
+                        : 'text-slate-600 hover:text-blue-600'
+                    }`}
+                  >
+                    <LayoutGrid size={13} />
+                    <span>Kartu Wilayah</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setPuskeswanViewMode('table')}
+                    className={`px-3 py-1 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-all cursor-pointer ${
+                      puskeswanViewMode === 'table'
+                        ? 'bg-blue-600 text-white shadow-xs'
+                        : 'text-slate-600 hover:text-blue-600'
+                    }`}
+                  >
+                    <List size={13} />
+                    <span>Tabel</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            {/* CARD GRID VIEW */}
+            {puskeswanViewMode === 'cards' ? (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {filteredPuskeswan.length === 0 ? (
+                  <div className="col-span-full p-8 text-center bg-slate-50/60 rounded-2xl border border-dashed border-slate-200 text-xs text-slate-500">
+                    Tidak ditemukan Puskeswan dengan kata kunci &quot;<span className="font-semibold text-slate-800">{searchPuskeswan}</span>&quot;
+                  </div>
+                ) : (
+                  filteredPuskeswan.map((item: any, idx: number) => (
+                    <div
+                      key={item.no || idx}
+                      className="rounded-2xl border border-blue-100 bg-gradient-to-b from-white to-blue-50/20 p-4 sm:p-5 hover:border-blue-300 hover:shadow-md transition-all duration-200 flex flex-col justify-between group space-y-4 shadow-2xs"
+                    >
+                      <div className="space-y-3">
+                        {/* Card Top */}
+                        <div className="flex items-start justify-between gap-2.5">
+                          <div className="flex items-start gap-3">
+                            <div className="w-10 h-10 rounded-2xl bg-sky-50 border border-sky-200 text-sky-700 flex items-center justify-center shrink-0 font-bold text-sm shadow-2xs group-hover:scale-105 transition-transform">
+                              {(idx + 1) < 10 ? `0${idx + 1}` : idx + 1}
+                            </div>
+                            <div>
+                              <h4 className="font-bold text-base text-slate-900 group-hover:text-blue-700 transition-colors flex items-center gap-1.5">
+                                <span>{item.nama}</span>
+                              </h4>
+                              <div className="flex items-center gap-1.5 mt-0.5">
+                                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-blue-50 border border-blue-200/80 text-[11px] font-semibold text-blue-700">
+                                  <Stethoscope size={11} className="text-blue-600" />
+                                  {item.koordinator}
+                                </span>
+                              </div>
+                            </div>
+                          </div>
+
+                          <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-emerald-50 border border-emerald-200 text-[10px] font-bold text-emerald-700 shrink-0">
+                            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                            {item.status || 'Aktif Melayani'}
+                          </span>
+                        </div>
+
+                        {/* Wilayah Pelayanan Binaan */}
+                        <div className="pt-2 border-t border-blue-50">
+                          <p className="text-[11px] font-bold text-slate-600 mb-1.5 flex items-center gap-1">
+                            <MapPin size={12} className="text-sky-600" />
+                            <span>Wilayah Pelayanan Binaan ({item.kecamatan?.length || 1} Kecamatan):</span>
+                          </p>
+                          <div className="flex flex-wrap gap-1.5">
+                            {(item.kecamatan || ['Kebumen']).map((kec: string) => (
+                              <span
+                                key={kec}
+                                className="px-2.5 py-1 rounded-lg text-xs font-semibold bg-white border border-blue-200/90 text-blue-900 shadow-2xs"
+                              >
+                                Kec. {kec}
+                              </span>
+                            ))}
+                          </div>
+                        </div>
+
+                        {/* Lokasi Google Maps */}
+                        <div className="pt-2 border-t border-blue-50">
+                          <p className="text-[11px] font-bold text-slate-600 mb-1.5 flex items-center gap-1">
+                            <Navigation size={12} className="text-emerald-600" />
+                            <span>Lokasi Google Maps:</span>
+                          </p>
+                          <a
+                            href={item.mapUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="inline-flex items-center justify-between gap-2 w-full px-3 py-2 rounded-xl bg-emerald-50 hover:bg-emerald-100/80 text-emerald-800 border border-emerald-200/90 text-xs font-semibold transition-all group/map shadow-2xs"
+                          >
+                            <div className="flex items-center gap-2 min-w-0">
+                              <div className="w-6 h-6 rounded-lg bg-emerald-600 text-white flex items-center justify-center shrink-0 shadow-2xs group-hover/map:scale-105 transition-transform">
+                                <MapPin size={13} />
+                              </div>
+                              <span className="truncate">{item.alamat}</span>
+                            </div>
+                            <span className="inline-flex items-center gap-1 text-[11px] font-bold text-emerald-700 shrink-0 bg-white px-2 py-0.5 rounded-md border border-emerald-200">
+                              <span>Buka Maps</span>
+                              <ExternalLink size={11} />
+                            </span>
+                          </a>
+                        </div>
+                      </div>
+
+                      {/* Card Bottom: Dropdown Fasilitas & Layanan Medis */}
+                      <div className="pt-3 border-t border-blue-50/80">
+                        <button
+                          type="button"
+                          onClick={() =>
+                            setExpandedPuskeswanLayanan(
+                              expandedPuskeswanLayanan === (item.no || idx + 1) ? null : (item.no || idx + 1)
+                            )
+                          }
+                          className="w-full flex items-center justify-between p-2.5 rounded-xl bg-blue-50/70 hover:bg-blue-100/80 border border-blue-200/80 transition-all text-left cursor-pointer group/drop shadow-2xs"
+                        >
+                          <div className="flex items-center gap-2 min-w-0">
+                            <div className="w-6 h-6 rounded-lg bg-blue-600 text-white flex items-center justify-center shrink-0 shadow-2xs group-hover/drop:scale-105 transition-transform">
+                              <Stethoscope size={13} />
+                            </div>
+                            <span className="text-xs font-bold text-slate-800 truncate">
+                              Fasilitas &amp; Layanan Medis
+                            </span>
+                            <span className="px-1.5 py-0.5 rounded-full bg-blue-100 text-blue-700 text-[10px] font-bold shrink-0 hidden xs:inline">
+                              {item.layanan?.length || 4}
+                            </span>
+                          </div>
+                          <div
+                            className={`w-6 h-6 rounded-full bg-white flex items-center justify-center text-blue-600 transition-transform duration-200 shadow-2xs shrink-0 ${
+                              expandedPuskeswanLayanan === (item.no || idx + 1) ? 'rotate-180 bg-blue-600 text-white' : ''
+                            }`}
+                          >
+                            <ChevronDown size={14} />
+                          </div>
+                        </button>
+
+                        {/* Dropdown Menu Content */}
+                        {expandedPuskeswanLayanan === (item.no || idx + 1) && (
+                          <div className="mt-2 p-3 rounded-xl bg-slate-50/90 border border-blue-100 animate-in slide-in-from-top-2 duration-200 space-y-1.5">
+                            <p className="text-[10px] font-bold text-slate-500 uppercase tracking-wider pb-1 border-b border-slate-200/60 flex items-center justify-between">
+                              <span>Daftar Layanan Medis:</span>
+                              <span className="text-blue-600 font-semibold">{item.layanan?.length || 4} Layanan</span>
+                            </p>
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5 pt-0.5">
+                              {(item.layanan || ['Pelayanan Klinik', 'Pusling', 'IB & PKB', 'Vaksinasi']).map((lay: string, layIdx: number) => (
+                                <div
+                                  key={layIdx}
+                                  className="flex items-center gap-2 p-2 rounded-lg bg-white border border-blue-100/90 text-xs font-medium text-slate-800 shadow-2xs"
+                                >
+                                  <CheckCircle2 size={13} className="text-emerald-600 shrink-0" />
+                                  <span className="truncate">{lay}</span>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  ))
+                )}
+              </div>
+            ) : (
+              /* TABLE VIEW */
+              <div className="overflow-x-auto rounded-xl border border-blue-100 shadow-2xs bg-white">
+                <table className="w-full text-left text-xs sm:text-sm whitespace-nowrap">
+                  <thead className="bg-blue-50/70 text-slate-700 font-semibold border-b border-blue-100">
+                    <tr>
+                      <th className="p-3 sm:p-3.5 w-12 text-center">NO</th>
+                      <th className="p-3 sm:p-3.5">NAMA PUSKESWAN</th>
+                      <th className="p-3 sm:p-3.5">WILAYAH PELAYANAN BINAAN</th>
+                      <th className="p-3 sm:p-3.5">KOORDINATOR MEDIK</th>
+                      <th className="p-3 sm:p-3.5">LOKASI GOOGLE MAPS</th>
+                      <th className="p-3 sm:p-3.5">FASILITAS &amp; LAYANAN MEDIS</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-blue-50/80 text-slate-800">
+                    {filteredPuskeswan.map((row: any, idx: number) => (
+                      <tr key={idx} className="hover:bg-blue-50/40 transition-colors">
+                        <td className="p-3 sm:p-3.5 text-center text-slate-400 font-bold">{idx + 1}</td>
+                        <td className="p-3.5 font-bold text-slate-900">
+                          <div className="flex items-center gap-2">
+                            <div className="w-7 h-7 rounded-lg bg-sky-50 border border-sky-200 text-sky-600 flex items-center justify-center shrink-0">
+                              <Stethoscope size={14} />
+                            </div>
+                            <span>{row.nama}</span>
+                          </div>
+                        </td>
+                        <td className="p-3.5">
+                          <div className="flex flex-wrap gap-1 max-w-md">
+                            {(row.kecamatan || ['Kebumen']).map((kec: string) => (
+                              <span key={kec} className="px-2 py-0.5 rounded-md text-xs font-semibold bg-blue-50 text-blue-800 border border-blue-200">
+                                Kec. {kec}
+                              </span>
+                            ))}
+                          </div>
+                        </td>
+                        <td className="p-3.5 font-semibold text-slate-700">
+                          <span className="px-2.5 py-1 rounded-lg text-xs font-semibold bg-sky-50 text-sky-700 border border-sky-200">
+                            {row.koordinator}
+                          </span>
+                        </td>
+                        <td className="p-3.5">
+                          <a
+                            href={row.mapUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-200 text-xs font-semibold transition-all group/tabmap"
+                          >
+                            <MapPin size={13} className="text-emerald-600 group-hover/tabmap:scale-110 transition-transform" />
+                            <span>Buka Maps</span>
+                            <ExternalLink size={11} className="text-emerald-600" />
+                          </a>
+                        </td>
+                        <td className="p-3.5">
+                          <div className="relative">
+                            <button
+                              type="button"
+                              onClick={() =>
+                                setExpandedTableLayanan(
+                                  expandedTableLayanan === (row.no || idx + 1) ? null : (row.no || idx + 1)
+                                )
+                              }
+                              className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-blue-50 hover:bg-blue-100 text-blue-700 border border-blue-200 text-xs font-semibold transition-all cursor-pointer"
+                            >
+                              <Stethoscope size={13} className="text-blue-600" />
+                              <span>Fasilitas &amp; Layanan ({row.layanan?.length || 4})</span>
+                              <ChevronDown
+                                size={13}
+                                className={`transition-transform duration-200 ${
+                                  expandedTableLayanan === (row.no || idx + 1) ? 'rotate-180' : ''
+                                }`}
+                              />
+                            </button>
+
+                            {/* Table Dropdown Menu */}
+                            {expandedTableLayanan === (row.no || idx + 1) && (
+                              <div className="absolute right-0 top-full mt-1.5 w-64 p-3 rounded-xl bg-white border border-blue-200 shadow-xl z-30 animate-in fade-in zoom-in-95 duration-150 space-y-1.5">
+                                <p className="text-[10px] font-bold text-slate-500 uppercase tracking-wider pb-1 border-b border-slate-100 flex items-center justify-between">
+                                  <span>{row.nama}</span>
+                                  <span className="text-blue-600 font-semibold">{row.layanan?.length || 4} Layanan</span>
+                                </p>
+                                <div className="space-y-1">
+                                  {(row.layanan || ['Pelayanan Klinik', 'Pusling', 'IB & PKB', 'Vaksinasi']).map((lay: string, layIdx: number) => (
+                                    <div
+                                      key={layIdx}
+                                      className="flex items-center gap-2 text-xs font-medium text-slate-800 py-1 px-1.5 rounded-lg bg-slate-50 border border-slate-100"
+                                    >
+                                      <CheckCircle2 size={12} className="text-emerald-600 shrink-0" />
+                                      <span className="truncate">{lay}</span>
+                                    </div>
+                                  ))}
+                                </div>
+                              </div>
+                            )}
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+
+          </section>
+
+          {/* ── SECTION 2: POPULASI HEWAN TERNAK & POPULASI UNGGAS (100% QUERY DATABASE) ── */}
+          <section className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
+            
+            {/* 1. POPULASI HEWAN TERNAK */}
+            <div className="p-4 sm:p-6 rounded-2xl sm:rounded-3xl border border-blue-100/80 bg-white shadow-2xs space-y-4 sm:space-y-5 flex flex-col justify-between">
+              <div>
+                <div className="flex items-center justify-between gap-2 mb-1.5">
+                  <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-blue-50 border border-blue-200 text-[10px] sm:text-[11px] font-bold text-blue-700">
+                    <Activity size={12} />
+                    <span>Ruminansia &amp; Non-Ruminansia</span>
+                  </div>
+                  <span className="text-[11px] sm:text-xs font-bold text-blue-600 bg-blue-50/70 px-2.5 py-0.5 rounded-md border border-blue-100">
+                    Total: {totalTernakHewan.toLocaleString('id-ID')} Ekor
+                  </span>
+                </div>
+                <h3 className="text-base sm:text-lg font-bold text-slate-900">
+                  Populasi Hewan Ternak
+                </h3>
+                <p className="text-[11px] sm:text-xs text-slate-500">
+                  Distribusi komoditas hewan ternak dari database MySQL (2025)
+                </p>
+              </div>
+
+              {/* Vertical Bar Chart Container */}
+              <div className="pt-5 pb-2 px-1 sm:px-2 rounded-2xl bg-slate-50/50 border border-slate-100">
+                <div className="grid grid-cols-8 gap-1 sm:gap-1.5 items-end h-48 sm:h-56">
+                  {populasiTernak8.map((row, i) => {
+                    const color = PALETTE_TERNAK[i % PALETTE_TERNAK.length];
+                    const percent = row.total > 0 ? Math.max(12, Math.round((row.total / maxTernak) * 100)) : 4;
+
+                    return (
+                      <div key={row.komoditas} className="flex flex-col items-center justify-end h-full group relative min-w-0">
+                        {/* Floating Value Pill */}
+                        <div className="mb-1 text-center">
+                          <span className={`inline-block px-1 py-0.5 rounded text-[8px] sm:text-[9px] font-bold ${color.light} ${color.text} border ${color.border} shadow-2xs whitespace-nowrap`}>
+                            {row.total >= 1000 ? `${(row.total / 1000).toLocaleString('id-ID', { maximumFractionDigits: 1 })}rb` : row.total.toLocaleString('id-ID')}
+                          </span>
+                        </div>
+
+                        {/* Bar Column */}
+                        <div className="w-full max-w-[24px] sm:max-w-[32px] bg-slate-200/60 rounded-t-lg flex flex-col justify-end p-0.5 overflow-hidden h-full">
+                          <div
+                            className={`w-full rounded-t-md bg-gradient-to-t ${color.gradient} transition-all duration-700 shadow-xs group-hover:brightness-110`}
+                            style={{ height: `${percent}%` }}
+                          />
+                        </div>
+
+                        {/* Label */}
+                        <div className="mt-2 text-center flex flex-col items-center gap-0.5 w-full min-w-0">
+                          <span className="text-[9px] sm:text-[10px] font-bold text-slate-800 line-clamp-2 leading-tight px-0.5" title={`${row.komoditas}: ${row.total.toLocaleString('id-ID')} Ekor`}>
+                            {row.komoditas}
+                          </span>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            </div>
+
+            {/* 2. POPULASI UNGGAS */}
+            <div className="p-4 sm:p-6 rounded-2xl sm:rounded-3xl border border-blue-100/80 bg-white shadow-2xs space-y-4 sm:space-y-5 flex flex-col justify-between">
+              <div>
+                <div className="flex items-center justify-between gap-2 mb-1.5">
+                  <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-amber-50 border border-amber-200 text-[10px] sm:text-[11px] font-bold text-amber-700">
+                    <BarChart3 size={12} />
+                    <span>Komoditas Unggas</span>
+                  </div>
+                  <span className="text-[11px] sm:text-xs font-bold text-amber-600 bg-amber-50/70 px-2.5 py-0.5 rounded-md border border-amber-100">
+                    Total: {totalUnggas.toLocaleString('id-ID')} Ekor
+                  </span>
+                </div>
+                <h3 className="text-base sm:text-lg font-bold text-slate-900">
+                  Populasi Unggas
+                </h3>
+                <p className="text-[11px] sm:text-xs text-slate-500">
+                  Distribusi komoditas unggas dari database MySQL (2025)
+                </p>
+              </div>
+
+              {/* Vertical Bar Chart Container */}
+              <div className="pt-5 pb-2 px-1 sm:px-2 rounded-2xl bg-slate-50/50 border border-slate-100">
+                <div className="grid grid-cols-8 gap-1 sm:gap-1.5 items-end h-48 sm:h-56">
+                  {populasiUnggas8.map((row, i) => {
+                    const color = PALETTE_UNGGAS[i % PALETTE_UNGGAS.length];
+                    const percent = row.total > 0 ? Math.max(12, Math.round((row.total / maxUnggas) * 100)) : 4;
+
+                    return (
+                      <div key={row.komoditas} className="flex flex-col items-center justify-end h-full group relative min-w-0">
+                        {/* Floating Value Pill */}
+                        <div className="mb-1 text-center">
+                          <span className={`inline-block px-1 py-0.5 rounded text-[8px] sm:text-[9px] font-bold ${color.light} ${color.text} border ${color.border} shadow-2xs whitespace-nowrap`}>
+                            {row.total >= 1000000 ? `${(row.total / 1000000).toLocaleString('id-ID', { minimumFractionDigits: 1, maximumFractionDigits: 2 })}jt` : row.total >= 1000 ? `${(row.total / 1000).toLocaleString('id-ID', { maximumFractionDigits: 0 })}rb` : row.total.toLocaleString('id-ID')}
+                          </span>
+                        </div>
+
+                        {/* Bar Column */}
+                        <div className="w-full max-w-[24px] sm:max-w-[32px] bg-slate-200/60 rounded-t-lg flex flex-col justify-end p-0.5 overflow-hidden h-full">
+                          <div
+                            className={`w-full rounded-t-md bg-gradient-to-t ${color.gradient} transition-all duration-700 shadow-xs group-hover:brightness-110`}
+                            style={{ height: `${percent}%` }}
+                          />
+                        </div>
+
+                        {/* Label */}
+                        <div className="mt-2 text-center flex flex-col items-center gap-0.5 w-full min-w-0">
+                          <span className="text-[9px] sm:text-[10px] font-bold text-slate-800 line-clamp-2 leading-tight px-0.5" title={`${row.komoditas}: ${row.total.toLocaleString('id-ID')} Ekor`}>
+                            {row.komoditas}
+                          </span>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            </div>
+
+            {/* 3. PRODUKSI DAGING */}
+            <div className="p-4 sm:p-6 rounded-2xl sm:rounded-3xl border border-sky-100/80 bg-white shadow-2xs space-y-4 sm:space-y-5 flex flex-col justify-between">
+              <div>
+                <div className="flex items-center justify-between gap-2 mb-1.5">
+                  <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-rose-50 border border-rose-200 text-[10px] sm:text-[11px] font-bold text-rose-700">
+                    <TrendingUp size={12} />
+                    <span>Hasil Ternak Potong</span>
+                  </div>
+                  <span className="text-[11px] sm:text-xs font-bold text-rose-600 bg-rose-50/70 px-2.5 py-0.5 rounded-md border border-rose-100">
+                    Total: {totalProdDagingTon.toLocaleString('id-ID', { minimumFractionDigits: 1, maximumFractionDigits: 1 })} Ton
+                  </span>
+                </div>
+                <h3 className="text-base sm:text-lg font-bold text-slate-900">
+                  Produksi Daging
+                </h3>
+                <p className="text-[11px] sm:text-xs text-slate-500">
+                  Realisasi produksi daging ternak &amp; unggas dari database (2025)
+                </p>
+              </div>
+
+              {/* Vertical Bar Chart Container */}
+              <div className="pt-5 pb-2 px-1 sm:px-2 rounded-2xl bg-slate-50/50 border border-slate-100">
+                <div className="grid grid-cols-6 gap-1.5 sm:gap-2 items-end h-48 sm:h-56">
+                  {dataProduksiDaging.map((row, i) => {
+                    const color = PALETTE_DAGING[i % PALETTE_DAGING.length];
+                    const percent = row.ton > 0 ? Math.max(12, Math.round((row.ton / maxDagingTon) * 100)) : 4;
+
+                    return (
+                      <div key={row.jenis} className="flex flex-col items-center justify-end h-full group relative min-w-0">
+                        {/* Floating Value Pill */}
+                        <div className="mb-1 text-center">
+                          <span className={`inline-block px-1 py-0.5 rounded text-[8px] sm:text-[9px] font-bold ${color.light} ${color.text} border ${color.border} shadow-2xs whitespace-nowrap`}>
+                            {row.ton >= 100 ? `${Math.round(row.ton).toLocaleString('id-ID')} Ton` : `${row.ton.toLocaleString('id-ID', { minimumFractionDigits: 1, maximumFractionDigits: 1 })} Ton`}
+                          </span>
+                        </div>
+
+                        {/* Bar Column */}
+                        <div className="w-full max-w-[30px] sm:max-w-[42px] bg-slate-200/60 rounded-t-lg flex flex-col justify-end p-0.5 overflow-hidden h-full">
+                          <div
+                            className={`w-full rounded-t-md bg-gradient-to-t ${color.gradient} transition-all duration-700 shadow-xs group-hover:brightness-110`}
+                            style={{ height: `${percent}%` }}
+                          />
+                        </div>
+
+                        {/* Label */}
+                        <div className="mt-2 text-center flex flex-col items-center gap-0.5 w-full min-w-0">
+                          <span className="text-[9px] sm:text-[10px] font-bold text-slate-800 line-clamp-2 leading-tight px-0.5" title={`${row.jenis}: ${row.ton.toLocaleString('id-ID', { minimumFractionDigits: 1, maximumFractionDigits: 2 })} Ton`}>
+                            {row.jenis}
+                          </span>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            </div>
+
+            {/* 4. PRODUKSI TELUR */}
+            <div className="p-4 sm:p-6 rounded-2xl sm:rounded-3xl border border-indigo-100/80 bg-white shadow-2xs space-y-4 sm:space-y-5 flex flex-col justify-between">
+              <div>
+                <div className="flex items-center justify-between gap-2 mb-1.5">
+                  <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-amber-50 border border-amber-200 text-[10px] sm:text-[11px] font-bold text-amber-700">
+                    <PackageCheck size={12} />
+                    <span>Hasil Ternak Petelur</span>
+                  </div>
+                  <span className="text-[11px] sm:text-xs font-bold text-amber-600 bg-amber-50/70 px-2.5 py-0.5 rounded-md border border-amber-100">
+                    Total: {totalProdTelurTon.toLocaleString('id-ID', { minimumFractionDigits: 1, maximumFractionDigits: 1 })} Ton
+                  </span>
+                </div>
+                <h3 className="text-base sm:text-lg font-bold text-slate-900">
+                  Produksi Telur
+                </h3>
+                <p className="text-[11px] sm:text-xs text-slate-500">
+                  Realisasi produksi telur unggas petelur dari database (2025)
+                </p>
+              </div>
+
+              {/* Vertical Bar Chart Container */}
+              <div className="pt-5 pb-2 px-1 sm:px-2 rounded-2xl bg-slate-50/50 border border-slate-100">
+                <div className="grid grid-cols-5 gap-2 sm:gap-3 items-end h-48 sm:h-56">
+                  {dataProduksiTelur.map((row, i) => {
+                    const color = PALETTE_TELUR[i % PALETTE_TELUR.length];
+                    const percent = row.ton > 0 ? Math.max(12, Math.round((row.ton / maxTelurTon) * 100)) : 4;
+
+                    return (
+                      <div key={row.jenis} className="flex flex-col items-center justify-end h-full group relative min-w-0">
+                        {/* Floating Value Pill */}
+                        <div className="mb-1 text-center">
+                          <span className={`inline-block px-1 py-0.5 rounded text-[8px] sm:text-[9px] font-bold ${color.light} ${color.text} border ${color.border} shadow-2xs whitespace-nowrap`}>
+                            {row.ton >= 100 ? `${Math.round(row.ton).toLocaleString('id-ID')} Ton` : `${row.ton.toLocaleString('id-ID', { minimumFractionDigits: 1, maximumFractionDigits: 1 })} Ton`}
+                          </span>
+                        </div>
+
+                        {/* Bar Column */}
+                        <div className="w-full max-w-[34px] sm:max-w-[48px] bg-slate-200/60 rounded-t-lg flex flex-col justify-end p-0.5 overflow-hidden h-full">
+                          <div
+                            className={`w-full rounded-t-md bg-gradient-to-t ${color.gradient} transition-all duration-700 shadow-xs group-hover:brightness-110`}
+                            style={{ height: `${percent}%` }}
+                          />
+                        </div>
+
+                        {/* Label */}
+                        <div className="mt-2 text-center flex flex-col items-center gap-0.5 w-full min-w-0">
+                          <span className="text-[9px] sm:text-[10px] font-bold text-slate-800 line-clamp-2 leading-tight px-0.5" title={`${row.jenis}: ${row.ton.toLocaleString('id-ID', { minimumFractionDigits: 1, maximumFractionDigits: 2 })} Ton`}>
+                            {row.jenis}
+                          </span>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            </div>
+
+          </section>
+
+          {/* ── SECTION 3: OPERATIONS / SERVICE CARDS (Blue & White Theme) ── */}
+          <section id="modul" className="space-y-3.5 sm:space-y-4 scroll-mt-20">
+            <div className="flex flex-col xs:flex-row xs:items-center justify-between gap-2">
+              <div>
+                <h2 className="text-base sm:text-xl font-bold text-slate-900 tracking-tight">
+                  Modul Pelayanan &amp; Layanan Data
+                </h2>
+                <p className="text-[11px] sm:text-xs text-slate-500">
+                  Akses cepat informasi sektoral, kelompok ternak, kesehatan hewan, dan veteriner
+                </p>
+              </div>
+
+              {detailView && (
+                <button
+                  onClick={() => setDetailView(null)}
+                  className="text-xs font-bold text-slate-600 hover:text-blue-600 px-3 py-1.5 rounded-xl border border-slate-200 bg-white transition-colors self-start xs:self-auto shadow-2xs cursor-pointer"
+                >
+                  ← Kembali ke Ringkasan
+                </button>
+              )}
+            </div>
+
+            {/* Dynamic Content: Detail Table View or Service Grid */}
+            {detailView ? (
+              <div className="rounded-2xl sm:rounded-3xl border border-blue-100 bg-white p-4 sm:p-6 lg:p-7 shadow-xs space-y-4 sm:space-y-5 animate-in fade-in duration-200">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-blue-50">
+                  <div>
+                    <h3 className="text-sm sm:text-lg font-bold text-slate-900">
+                      {detailView === 'populasi' && 'Data Lengkap Sensus Populasi & Produksi Ternak'}
+                      {detailView === 'farm' && 'Data Kelompok Tani Ternak (KTT) & Poktan Terdaftar'}
+                      {detailView === 'puskeswan' && 'Ringkasan Wilayah & Data Unit Puskeswan Aktif'}
+                      {detailView === 'vaksinasi' && 'Data Realisasi Vaksinasi PMK & LSD Kabupaten Kebumen'}
+                      {detailView === 'rph_tph' && 'Data RPH & TPH/TPU Terbina'}
+                      {detailView === 'nkv' && 'Data Sertifikasi Nomor Kontrol Veteriner (NKV)'}
+                    </h3>
+                    <p className="text-[11px] sm:text-xs text-slate-500">
+                      Tersinkronisasi 100% dengan basis data Dinas Pertanian dan Pangan Kebumen
+                    </p>
+                  </div>
+
+                  <button
+                    onClick={() => setDetailView(null)}
+                    className="h-8 sm:h-9 px-3.5 rounded-xl border border-blue-100 bg-blue-50/50 text-xs font-bold text-blue-700 hover:bg-blue-100 flex items-center justify-center gap-1.5 self-start sm:self-auto transition-colors cursor-pointer"
+                  >
+                    ← Kembali
+                  </button>
+                </div>
+
+                {/* Subtabs for Populasi */}
+                {detailView === 'populasi' && (
+                  <div className="flex flex-wrap gap-1.5 sm:gap-2">
                     {[
                       { key: 'populasi', label: 'Populasi Ternak' },
                       { key: 'daging', label: 'Produksi Daging' },
@@ -1019,470 +1307,422 @@ export default function LandingPage() {
                       <button
                         key={tab.key}
                         onClick={() => setSubTabProd(tab.key as any)}
-                        className={`h-8 px-3.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                        className={`h-7 sm:h-8 px-3 rounded-lg text-[11px] sm:text-xs font-bold transition-all cursor-pointer ${
                           subTabProd === tab.key
                             ? 'bg-blue-600 text-white shadow-xs'
-                            : 'border border-slate-200 bg-slate-50 text-slate-600 hover:bg-slate-100'
+                            : 'border border-blue-100 bg-blue-50/40 text-slate-600 hover:text-blue-600'
                         }`}
                       >
                         {tab.label}
                       </button>
                     ))}
                   </div>
+                )}
 
-                  <div className="overflow-x-auto rounded-2xl border border-slate-200">
-                    <table className="w-full text-left text-xs sm:text-sm whitespace-nowrap">
-                      <thead className="bg-slate-50 text-slate-700 font-bold border-b border-slate-200">
-                        <tr>
-                          <th className="p-3.5 text-center w-14">NO</th>
-                          <th className="p-3.5">KOMODITAS</th>
-                          <th className="p-3.5 text-right font-bold">TOTAL REALTIME</th>
-                        </tr>
-                      </thead>
-                      <tbody className="divide-y divide-slate-100 text-slate-800">
-                        {subTabProd === 'populasi' &&
-                          populasiData.map((row, idx) => (
-                            <tr key={idx} className="hover:bg-blue-50/40">
-                              <td className="p-3.5 text-center text-slate-400">{idx + 1}</td>
-                              <td className="p-3.5 font-bold text-slate-900">{row.komoditas}</td>
-                              <td className="p-3.5 text-right font-bold text-blue-600">
-                                {row.total.toLocaleString('id-ID')} Ekor
-                              </td>
-                            </tr>
-                          ))}
-                        {subTabProd === 'daging' &&
-                          dagingData.map((row, idx) => (
-                            <tr key={idx} className="hover:bg-blue-50/40">
-                              <td className="p-3.5 text-center text-slate-400">{idx + 1}</td>
-                              <td className="p-3.5 font-bold text-slate-900">{row.jenis}</td>
-                              <td className="p-3.5 text-right font-bold text-rose-600">
-                                {(row.total / 1000).toLocaleString('id-ID', { minimumFractionDigits: 1, maximumFractionDigits: 2 })} Ton
-                              </td>
-                            </tr>
-                          ))}
-                        {subTabProd === 'telur' &&
-                          telurData.map((row, idx) => (
-                            <tr key={idx} className="hover:bg-blue-50/40">
-                              <td className="p-3.5 text-center text-slate-400">{idx + 1}</td>
-                              <td className="p-3.5 font-bold text-slate-900">{row.jenis}</td>
-                              <td className="p-3.5 text-right font-bold text-amber-600">
-                                {(row.total / 1000).toLocaleString('id-ID', { minimumFractionDigits: 1, maximumFractionDigits: 2 })} Ton
-                              </td>
-                            </tr>
-                          ))}
-                      </tbody>
-                    </table>
-                  </div>
-                </div>
-              )}
-
-              {detailView === 'farm' && (
-                <div className="overflow-x-auto rounded-2xl border border-slate-200">
-                  <table className="w-full text-left text-xs sm:text-sm whitespace-nowrap">
-                    <thead className="bg-slate-50 text-slate-700 font-bold border-b border-slate-200">
-                      <tr>
-                        <th className="p-3.5 text-center w-14">NO</th>
-                        <th className="p-3.5">KOMODITAS FARM</th>
-                        <th className="p-3.5 text-center">JUMLAH FARM</th>
-                        <th className="p-3.5 text-right">TOTAL KAPASITAS</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-slate-100 text-slate-800">
-                      {farmData.map((row, idx) => (
-                        <tr key={idx} className="hover:bg-blue-50/40">
-                          <td className="p-3.5 text-center text-slate-400">{idx + 1}</td>
-                          <td className="p-3.5 font-bold text-slate-900">{row.komoditas}</td>
-                          <td className="p-3.5 text-center font-bold text-slate-700">{row.jumlah_farm} Unit</td>
-                          <td className="p-3.5 text-right font-bold text-blue-600">{row.total_populasi}</td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              )}
-
-              {detailView === 'puskeswan' && (
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  {puskeswanData.map((p, idx) => (
-                    <div key={idx} className="p-5 rounded-2xl border border-slate-200 bg-slate-50 flex items-start gap-4">
-                      <div className="w-11 h-11 rounded-xl bg-blue-600 text-white flex items-center justify-center shrink-0">
-                        <Building2 size={20} />
-                      </div>
-                      <div>
-                        <h4 className="text-base font-bold text-slate-900">{p.nama}</h4>
-                        <p className="text-xs text-slate-500 mt-0.5">Wilayah: {p.wilayah}</p>
-                        <p className="text-xs font-semibold text-blue-700 mt-1">Koordinator: {p.koordinator}</p>
-                      </div>
+                {/* Search Bar for Vaksinasi */}
+                {detailView === 'vaksinasi' && (
+                  <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2.5 pt-1">
+                    <div className="relative flex-1 max-w-md">
+                      <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" size={15} />
+                      <input
+                        type="text"
+                        value={searchVaksin}
+                        onChange={(e) => setSearchVaksin(e.target.value)}
+                        placeholder="Cari nama puskeswan..."
+                        className="w-full h-9 pl-9 pr-8 rounded-xl border border-blue-200/80 bg-blue-50/30 text-xs text-slate-800 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
+                      />
+                      {searchVaksin && (
+                        <button
+                          type="button"
+                          onClick={() => setSearchVaksin('')}
+                          className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 p-0.5 cursor-pointer"
+                          title="Hapus pencarian"
+                        >
+                          <X size={13} />
+                        </button>
+                      )}
                     </div>
-                  ))}
-                </div>
-              )}
-
-              {detailView === 'vaksinasi' && (
-                <div className="space-y-4">
-                  <div className="relative max-w-md">
-                    <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" size={15} />
-                    <input
-                      type="text"
-                      value={searchVaksin}
-                      onChange={(e) => setSearchVaksin(e.target.value)}
-                      placeholder="Cari desa / wilayah..."
-                      className="w-full h-10 pl-9 pr-8 rounded-xl border border-slate-200 bg-slate-50 text-xs text-slate-800 outline-none focus:border-blue-500 focus:bg-white transition-all"
-                    />
+                    <div className="text-xs text-slate-500 self-end sm:self-auto font-medium">
+                      Menampilkan <span className="font-bold text-blue-700">{filteredVaksinasi.length}</span> unit
+                    </div>
                   </div>
-                  <div className="overflow-x-auto rounded-2xl border border-slate-200">
+                )}
+
+                {/* Table Layout for detail views */}
+                <div className="overflow-x-auto rounded-xl border border-blue-100 shadow-2xs">
+                  {detailView === 'populasi' && subTabProd === 'populasi' && (
                     <table className="w-full text-left text-xs sm:text-sm whitespace-nowrap">
-                      <thead className="bg-slate-50 text-slate-700 font-bold border-b border-slate-200">
+                      <thead className="bg-blue-50/70 text-slate-700 font-semibold border-b border-blue-100">
                         <tr>
-                          <th className="p-3.5 text-center w-14">NO</th>
-                          <th className="p-3.5">DESA / WILAYAH</th>
-                          <th className="p-3.5 text-center">JENIS VAKSIN</th>
-                          <th className="p-3.5 text-right font-bold">TOTAL DOSIS</th>
+                          <th className="p-3 sm:p-3.5 w-12 sm:w-14 text-center">NO</th>
+                          <th className="p-3 sm:p-3.5">KOMODITAS TERNAK</th>
+                          <th className="p-3 sm:p-3.5 text-right font-semibold">TOTAL POPULASI (2025)</th>
                         </tr>
                       </thead>
-                      <tbody className="divide-y divide-slate-100 text-slate-800">
-                        {filteredVaksinasi.map((row, idx) => (
-                          <tr key={idx} className="hover:bg-blue-50/40">
-                            <td className="p-3.5 text-center text-slate-400">{idx + 1}</td>
-                            <td className="p-3.5 font-bold text-slate-900">{row.desa}</td>
-                            <td className="p-3.5 text-center font-medium text-slate-600">{row.jenis}</td>
-                            <td className="p-3.5 text-right font-bold text-blue-600">{row.total.toLocaleString('id-ID')} Dosis</td>
+                      <tbody className="divide-y divide-blue-50/80 text-slate-800">
+                        {populasi16.map((row, idx) => (
+                          <tr key={idx} className="hover:bg-blue-50/40 transition-colors">
+                            <td className="p-3 sm:p-3.5 text-center text-slate-400">{idx + 1}</td>
+                            <td className="p-3.5 font-bold text-slate-900">{row.komoditas}</td>
+                            <td className="p-3.5 text-right font-bold text-blue-600">
+                              {row.total.toLocaleString('id-ID')} Ekor
+                            </td>
                           </tr>
                         ))}
                       </tbody>
                     </table>
-                  </div>
-                </div>
-              )}
+                  )}
 
-              {detailView === 'nkv' && (
-                <div className="overflow-x-auto rounded-2xl border border-slate-200">
-                  <table className="w-full text-left text-xs sm:text-sm whitespace-nowrap">
-                    <thead className="bg-slate-50 text-slate-700 font-bold border-b border-slate-200">
-                      <tr>
-                        <th className="p-3.5 text-center w-14">NO</th>
-                        <th className="p-3.5">NAMA UNIT USAHA</th>
-                        <th className="p-3.5">ALAMAT / WILAYAH</th>
-                        <th className="p-3.5 text-center">STATUS NKV</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-slate-100 text-slate-800">
-                      {nkvData.map((row, idx) => (
-                        <tr key={idx} className="hover:bg-blue-50/40">
-                          <td className="p-3.5 text-center text-slate-400">{idx + 1}</td>
-                          <td className="p-3.5 font-bold text-slate-900">{row.nama_pt}</td>
-                          <td className="p-3.5 text-slate-600">{row.alamat}</td>
-                          <td className="p-3.5 text-center font-bold text-emerald-600">{row.status_nkv || 'Tersertifikasi'}</td>
+                  {detailView === 'populasi' && subTabProd === 'daging' && (
+                    <table className="w-full text-left text-xs sm:text-sm whitespace-nowrap">
+                      <thead className="bg-blue-50/70 text-slate-700 font-semibold border-b border-blue-100">
+                        <tr>
+                          <th className="p-3 sm:p-3.5 w-12 sm:w-14 text-center">NO</th>
+                          <th className="p-3 sm:p-3.5">JENIS TERNAK POTONG</th>
+                          <th className="p-3 sm:p-3.5 text-right font-semibold">TOTAL PRODUKSI DAGING (2025)</th>
                         </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              )}
-
-              {detailView === 'rph_tph' && (
-                <div className="overflow-x-auto rounded-2xl border border-slate-200">
-                  <table className="w-full text-left text-xs sm:text-sm whitespace-nowrap">
-                    <thead className="bg-slate-50 text-slate-700 font-bold border-b border-slate-200">
-                      <tr>
-                        <th className="p-3.5 text-center w-14">NO</th>
-                        <th className="p-3.5">NAMA UNIT RPH / TPH</th>
-                        <th className="p-3.5">LOKASI</th>
-                        <th className="p-3.5 text-center">STATUS HALAL</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-slate-100 text-slate-800">
-                      {rphData.map((row, idx) => (
-                        <tr key={idx} className="hover:bg-blue-50/40">
-                          <td className="p-3.5 text-center text-slate-400">{idx + 1}</td>
-                          <td className="p-3.5 font-bold text-slate-900">{row.nama}</td>
-                          <td className="p-3.5 text-slate-600">{row.desa}</td>
-                          <td className="p-3.5 text-center font-bold text-blue-600">{row.halal}</td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              )}
-
-              {['ktt', 'sklb', 'keswan_info', 'kesmavet_info'].includes(detailView) && (
-                <div className="py-12 px-6 text-center space-y-3">
-                  <div className="w-12 h-12 rounded-2xl bg-blue-50 border border-blue-200 text-blue-600 flex items-center justify-center mx-auto text-xl">
-                    <Lock size={22} />
-                  </div>
-                  <h5 className="font-bold text-base text-slate-900">
-                    Akses Khusus Petugas Terdaftar
-                  </h5>
-                  <p className="text-xs text-slate-500 max-w-md mx-auto">
-                    Detail mutasi ternak, rekonsiliasi bantuan, dan data operasional dinas dapat diakses melalui login petugas.
-                  </p>
-                  <div className="pt-2">
-                    <button
-                      onClick={() => setShowLoginModal(true)}
-                      className="min-h-touch h-10 px-5 rounded-xl bg-blue-600 text-white font-bold text-xs inline-flex items-center gap-2 shadow-xs cursor-pointer"
-                    >
-                      Masuk untuk Akses Lengkap
-                      <ArrowRight size={14} />
-                    </button>
-                  </div>
-                </div>
-              )}
-
-            </div>
-          ) : (
-            /* DEFAULT MODULE PREVIEWS */
-            <div className="space-y-8">
-              
-              {/* Bitpro View */}
-              {activeModule === 'bitpro' && (
-                <>
-                  <div className="p-5 sm:p-6 rounded-2xl border border-slate-200 bg-slate-50/50">
-                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-6">
-                      <div>
-                        <h4 className="text-lg sm:text-xl font-bold text-slate-900">
-                          Peringkat 5 Tertinggi — {cfg.label}
-                        </h4>
-                        <p className="text-xs text-slate-500">
-                          Rekapitulasi resmi tingkat Kabupaten Kebumen
-                        </p>
-                      </div>
-
-                      <div className="flex gap-1 p-1 rounded-xl bg-slate-200/70 border border-slate-200">
-                        {(['populasi', 'daging', 'telur'] as const).map((key) => (
-                          <button
-                            key={key}
-                            onClick={() => setRankedMetric(key)}
-                            className={`h-8 px-3 rounded-lg text-xs font-bold uppercase transition-colors cursor-pointer ${
-                              rankedMetric === key
-                                ? 'bg-white text-slate-900 shadow-xs'
-                                : 'text-slate-600 hover:text-slate-900'
-                            }`}
-                          >
-                            {key}
-                          </button>
+                      </thead>
+                      <tbody className="divide-y divide-blue-50/80 text-slate-800">
+                        {dagingList.map((row, idx) => (
+                          <tr key={idx} className="hover:bg-blue-50/40 transition-colors">
+                            <td className="p-3 sm:p-3.5 text-center text-slate-400">{idx + 1}</td>
+                            <td className="p-3.5 font-bold text-slate-900">{row.jenis}</td>
+                            <td className="p-3.5 text-right font-bold text-blue-600">
+                              {(row.total / 1000).toLocaleString('id-ID', { minimumFractionDigits: 1, maximumFractionDigits: 2 })} Ton
+                            </td>
+                          </tr>
                         ))}
-                      </div>
-                    </div>
+                      </tbody>
+                    </table>
+                  )}
 
-                    <div className="space-y-3.5">
-                      {cfg.data.map((row: any, i: number) => {
-                        const name = cfg.getName(row);
-                        const percent = Math.round((row.total / cfg.max) * 100);
+                  {detailView === 'populasi' && subTabProd === 'telur' && (
+                    <table className="w-full text-left text-xs sm:text-sm whitespace-nowrap">
+                      <thead className="bg-blue-50/70 text-slate-700 font-semibold border-b border-blue-100">
+                        <tr>
+                          <th className="p-3 sm:p-3.5 w-12 sm:w-14 text-center">NO</th>
+                          <th className="p-3 sm:p-3.5">KOMODITAS UNGGAS PETELUR</th>
+                          <th className="p-3 sm:p-3.5 text-right font-semibold">TOTAL PRODUKSI TELUR (2025)</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-blue-50/80 text-slate-800">
+                        {telurList.map((row, idx) => (
+                          <tr key={idx} className="hover:bg-blue-50/40 transition-colors">
+                            <td className="p-3 sm:p-3.5 text-center text-slate-400">{idx + 1}</td>
+                            <td className="p-3.5 font-bold text-slate-900">{row.jenis}</td>
+                            <td className="p-3.5 text-right font-bold text-blue-600">
+                              {(row.total / 1000).toLocaleString('id-ID', { minimumFractionDigits: 1, maximumFractionDigits: 2 })} Ton
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  )}
 
-                        return (
-                          <div key={name} className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4">
-                            <div className="flex items-center gap-2 w-48 shrink-0">
-                              <span className={`w-5 h-5 rounded-md font-sans text-xs font-bold flex items-center justify-center ${i === 0 ? 'bg-blue-600 text-white' : 'bg-slate-200 text-slate-700'}`}>
-                                {i + 1}
+                  {detailView === 'farm' && (
+                    <table className="w-full text-left text-xs sm:text-sm whitespace-nowrap">
+                      <thead className="bg-blue-50/70 text-slate-700 font-semibold border-b border-blue-100">
+                        <tr>
+                          <th className="p-3 sm:p-3.5 w-12 sm:w-14 text-center">NO</th>
+                          <th className="p-3 sm:p-3.5">JENIS KELOMPOK TERNAK</th>
+                          <th className="p-3.5 text-center font-semibold">JUMLAH KELOMPOK</th>
+                          <th className="p-3.5 text-right font-semibold">TOTAL ANGGOTA</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-blue-50/80 text-slate-800">
+                        {sebaranFarmList.map((row, idx) => (
+                          <tr key={idx} className="hover:bg-blue-50/40 transition-colors">
+                            <td className="p-3.5 text-center text-slate-400">{idx + 1}</td>
+                            <td className="p-3.5 font-bold text-slate-900">{row.komoditas}</td>
+                            <td className="p-3.5 text-center font-bold text-slate-900">{row.jumlah_farm.toLocaleString('id-ID')} Kelompok</td>
+                            <td className="p-3.5 text-right font-bold text-blue-600">
+                              {row.total_populasi}
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  )}
+
+                  {/* 3. DATA VAKSINASI PMK & LSD */}
+                  {detailView === 'vaksinasi' && (
+                    <table className="w-full text-left text-xs sm:text-sm whitespace-nowrap">
+                      <thead className="bg-blue-50/70 text-slate-700 font-semibold border-b border-blue-100">
+                        <tr>
+                          <th className="p-3 sm:p-3.5 w-12 sm:w-14 text-center">NO</th>
+                          <th className="p-3 sm:p-3.5">NAMA PUSKESWAN</th>
+                          <th className="p-3 sm:p-3.5 text-center">PROGRAM VAKSINASI</th>
+                          <th className="p-3.5 text-center">TARGET DOSIS</th>
+                          <th className="p-3.5 text-center">REALISASI DOSIS</th>
+                          <th className="p-3.5 text-right">CAPAIAN (%)</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-blue-50/80 text-slate-800">
+                        {filteredVaksinasi.map((row: any, idx: number) => (
+                          <tr key={idx} className="hover:bg-blue-50/40 transition-colors">
+                            <td className="p-3.5 text-center text-slate-400 font-bold">{idx + 1}</td>
+                            <td className="p-3.5 font-bold text-slate-900">{row.desa}</td>
+                            <td className="p-3.5 text-center">
+                              <span className="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-blue-50 text-blue-700 border border-blue-200">
+                                {row.jenis}
                               </span>
-                              <span className="text-xs sm:text-sm font-bold truncate text-slate-900">
-                                {name}
+                            </td>
+                            <td className="p-3.5 text-center text-slate-600">{Number(row.target).toLocaleString('id-ID')} Dosis</td>
+                            <td className="p-3.5 text-center font-bold text-slate-900">{Number(row.realisasi).toLocaleString('id-ID')} Dosis</td>
+                            <td className="p-3.5 text-right font-bold text-emerald-600">
+                              {row.persen}%
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  )}
+
+                  {/* 4. DATA RPH & TPH TERBINA */}
+                  {detailView === 'rph_tph' && (
+                    <table className="w-full text-left text-xs sm:text-sm whitespace-nowrap">
+                      <thead className="bg-blue-50/70 text-slate-700 font-semibold border-b border-blue-100">
+                        <tr>
+                          <th className="p-3 sm:p-3.5 w-12 sm:w-14 text-center">NO</th>
+                          <th className="p-3 sm:p-3.5">NAMA TEMPAT / USAHA</th>
+                          <th className="p-3 sm:p-3.5 text-center">JENIS</th>
+                          <th className="p-3 sm:p-3.5">PEMILIK</th>
+                          <th className="p-3 sm:p-3.5">LOKASI DESA/KECAMATAN</th>
+                          <th className="p-3 sm:p-3.5 text-right font-semibold">SERTIFIKAT HALAL</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-blue-50/80 text-slate-800">
+                        {rphList.map((row, idx) => (
+                          <tr key={idx} className="hover:bg-blue-50/40 transition-colors">
+                            <td className="p-3 sm:p-3.5 text-center text-slate-400">{idx + 1}</td>
+                            <td className="p-3.5 font-bold text-slate-900 flex items-center gap-2">
+                              <Building2 size={15} className="text-indigo-600 shrink-0" />
+                              <span>{row.nama}</span>
+                            </td>
+                            <td className="p-3.5 text-center">
+                              <span className="px-2 py-0.5 rounded text-xs font-bold bg-slate-100 text-slate-700">
+                                {row.jenis}
                               </span>
-                            </div>
+                            </td>
+                            <td className="p-3.5 text-slate-700">{row.pemilik}</td>
+                            <td className="p-3.5 text-slate-600">{row.desa}</td>
+                            <td className="p-3.5 text-right">
+                              <span
+                                className={`px-2.5 py-0.5 rounded-full text-xs font-semibold border ${
+                                  row.halal.includes('Sudah')
+                                    ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
+                                    : 'bg-amber-50 text-amber-700 border-amber-200'
+                                }`}
+                              >
+                                {row.halal}
+                              </span>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  )}
 
-                            <div className="flex-1 h-3 rounded-full bg-slate-200/80 overflow-hidden">
-                              <div
-                                className="h-full rounded-full transition-all duration-700"
-                                style={{
-                                  width: `${percent}%`,
-                                  backgroundColor: cfg.barColor,
-                                }}
-                              />
-                            </div>
-
-                            <span className="text-xs sm:text-sm font-bold text-right w-36 shrink-0 text-slate-900">
-                              {Math.round(row.total).toLocaleString('id-ID')} {cfg.unit}
-                            </span>
-                          </div>
-                        );
-                      })}
-                    </div>
+                  {/* 5. DATA SERTIFIKASI NKV */}
+                  {detailView === 'nkv' && (
+                    <table className="w-full text-left text-xs sm:text-sm whitespace-nowrap">
+                      <thead className="bg-blue-50/70 text-slate-700 font-semibold border-b border-blue-100">
+                        <tr>
+                          <th className="p-3 sm:p-3.5 w-12 sm:w-14 text-center">NO</th>
+                          <th className="p-3 sm:p-3.5">NAMA USAHA / PT</th>
+                          <th className="p-3 sm:p-3.5">BIDANG USAHA</th>
+                          <th className="p-3 sm:p-3.5">KETERANGAN / REKOMENDASI</th>
+                          <th className="p-3 sm:p-3.5 text-right font-semibold">STATUS NKV</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-blue-50/80 text-slate-800">
+                        {nkvList.map((row, idx) => (
+                          <tr key={idx} className="hover:bg-blue-50/40 transition-colors">
+                            <td className="p-3 sm:p-3.5 text-center text-slate-400">{idx + 1}</td>
+                            <td className="p-3.5 font-bold text-slate-900 flex items-center gap-2">
+                              <CheckCircle2 size={15} className="text-emerald-600 shrink-0" />
+                              <span>{row.nama_pt}</span>
+                            </td>
+                            <td className="p-3.5 text-slate-700 font-medium">{row.jenis_usaha}</td>
+                            <td className="p-3.5 text-slate-600">{row.alamat}</td>
+                            <td className="p-3.5 text-right">
+                              <span
+                                className={`px-2.5 py-0.5 rounded-full text-xs font-semibold border ${
+                                  row.status_nkv.includes('Terbit')
+                                    ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
+                                    : 'bg-blue-50 text-blue-700 border-blue-200'
+                                }`}
+                              >
+                                {row.status_nkv}
+                              </span>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  )}
+                </div>
+              </div>
+            ) : (
+              /* Service Cards Grid (Blue & White Palette) */
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5 sm:gap-3.5">
+                
+                {/* 1. Sensus Populasi */}
+                <div
+                  onClick={() => {
+                    setActiveModule('bitpro');
+                    setDetailView('populasi');
+                    setSubTabProd('populasi');
+                  }}
+                  className="p-3.5 sm:p-4 rounded-2xl border border-blue-100/90 bg-white hover:border-blue-300 hover:bg-blue-50/30 hover:shadow-xs transition-all flex items-center gap-3 cursor-pointer group active:scale-[0.99]"
+                >
+                  <div className="w-10 h-10 rounded-xl bg-blue-50 border border-blue-200 text-blue-600 flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
+                    <Activity size={20} />
                   </div>
-
-                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                    <button
-                      onClick={() => setDetailView('populasi')}
-                      className="p-5 rounded-2xl border border-slate-200 bg-white text-left flex flex-col justify-between min-h-[130px] transition-all hover:border-blue-500 hover:shadow-sm cursor-pointer"
-                    >
-                      <div className="flex items-center justify-between">
-                        <div className="w-9 h-9 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center">
-                          <BarChart3 size={18} />
-                        </div>
-                        <ChevronRight size={18} className="text-blue-600" />
-                      </div>
-                      <div>
-                        <p className="font-bold text-sm text-slate-900 mb-0.5">Populasi &amp; Produksi</p>
-                        <p className="text-xs text-slate-500">Tabel sensus komoditas ternak</p>
-                      </div>
-                    </button>
-
-                    <button
-                      onClick={() => setDetailView('farm')}
-                      className="p-5 rounded-2xl border border-slate-200 bg-white text-left flex flex-col justify-between min-h-[130px] transition-all hover:border-emerald-500 hover:shadow-sm cursor-pointer"
-                    >
-                      <div className="flex items-center justify-between">
-                        <div className="w-9 h-9 rounded-xl bg-emerald-50 text-emerald-700 flex items-center justify-center">
-                          <Building2 size={18} />
-                        </div>
-                        <ChevronRight size={18} className="text-emerald-600" />
-                      </div>
-                      <div>
-                        <p className="font-bold text-sm text-slate-900 mb-0.5">Sebaran Data Farm</p>
-                        <p className="text-xs text-slate-500">{totalFarm} unit peternakan terdata</p>
-                      </div>
-                    </button>
-
-                    <button
-                      onClick={() => setDetailView('ktt')}
-                      className="p-5 rounded-2xl border border-slate-200 bg-white text-left flex flex-col justify-between min-h-[130px] transition-all hover:border-lime-500 hover:shadow-sm cursor-pointer"
-                    >
-                      <div className="flex items-center justify-between">
-                        <div className="w-9 h-9 rounded-xl bg-lime-50 text-lime-800 flex items-center justify-center">
-                          <Users size={18} />
-                        </div>
-                        <ChevronRight size={18} className="text-lime-600" />
-                      </div>
-                      <div>
-                        <p className="font-bold text-sm text-slate-900 mb-0.5">Database KTT</p>
-                        <p className="text-xs text-slate-500">Kelompok Tani Ternak binaan</p>
-                      </div>
-                    </button>
-
-                    <button
-                      onClick={() => setDetailView('sklb')}
-                      className="p-5 rounded-2xl border border-slate-200 bg-white text-left flex flex-col justify-between min-h-[130px] transition-all hover:border-amber-400 hover:shadow-sm cursor-pointer"
-                    >
-                      <div className="flex items-center justify-between">
-                        <div className="w-9 h-9 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center">
-                          <FileText size={18} />
-                        </div>
-                        <ChevronRight size={18} className="text-amber-500" />
-                      </div>
-                      <div>
-                        <p className="font-bold text-sm text-slate-900 mb-0.5">Sertifikat SKLB</p>
-                        <p className="text-xs text-slate-500">Surat Kelayakan Bibit Ternak</p>
-                      </div>
-                    </button>
-                  </div>
-                </>
-              )}
-
-              {/* Keswan View */}
-              {activeModule === 'keswan' && (
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div
-                    onClick={() => setDetailView('puskeswan')}
-                    className="p-6 rounded-2xl border border-slate-200 bg-slate-50 hover:border-blue-500 hover:bg-white transition-all cursor-pointer flex flex-col justify-between min-h-[160px]"
-                  >
-                    <div>
-                      <div className="w-10 h-10 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center mb-3">
-                        <Stethoscope size={22} />
-                      </div>
-                      <h4 className="font-bold text-base text-slate-900 mb-1">8 Puskeswan Aktif</h4>
-                      <p className="text-xs text-slate-600">
-                        Pelayanan rawat, pasif, pusling keliling, dan konsultasi kesehatan ternak di seluruh kecamatan Kebumen.
-                      </p>
-                    </div>
-                    <span className="text-xs font-bold text-blue-600 flex items-center gap-1 mt-4">
-                      LIHAT PUSKESWAN &rarr;
-                    </span>
-                  </div>
-
-                  <div
-                    onClick={() => setDetailView('vaksinasi')}
-                    className="p-6 rounded-2xl border border-slate-200 bg-slate-50 hover:border-blue-500 hover:bg-white transition-all cursor-pointer flex flex-col justify-between min-h-[160px]"
-                  >
-                    <div>
-                      <div className="w-10 h-10 rounded-xl bg-sky-50 text-sky-600 flex items-center justify-center mb-3">
-                        <Syringe size={22} />
-                      </div>
-                      <h4 className="font-bold text-base text-slate-900 mb-1">Vaksinasi PMK &amp; LSD</h4>
-                      <p className="text-xs text-slate-600">
-                        Pencatatan real-time log harian dosis vaksinasi PMK &amp; LSD, alokasi droping vaksin, dan capaian target.
-                      </p>
-                    </div>
-                    <span className="text-xs font-bold text-sky-600 flex items-center gap-1 mt-4">
-                      LIHAT LOG VAKSINASI &rarr;
-                    </span>
+                  <div className="min-w-0 flex-1">
+                    <p className="font-bold text-sm text-slate-900 truncate">Populasi &amp; Produksi</p>
+                    <p className="text-xs text-slate-400 truncate">{populasi16.length} komoditas ternak</p>
                   </div>
                 </div>
-              )}
 
-              {/* Kesmavet View */}
-              {activeModule === 'kesmavet' && (
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div
-                    onClick={() => setDetailView('nkv')}
-                    className="p-6 rounded-2xl border border-slate-200 bg-slate-50 hover:border-purple-500 hover:bg-white transition-all cursor-pointer flex flex-col justify-between min-h-[160px]"
-                  >
-                    <div>
-                      <div className="w-10 h-10 rounded-xl bg-purple-50 text-purple-600 flex items-center justify-center mb-3">
-                        <CheckCircle2 size={22} />
-                      </div>
-                      <h4 className="font-bold text-base text-slate-900 mb-1">Sertifikasi NKV</h4>
-                      <p className="text-xs text-slate-600">
-                        Database unit usaha berstandar Nomor Kontrol Veteriner dengan jaminan ASUH (Aman, Sehat, Utuh, Halal).
-                      </p>
-                    </div>
-                    <span className="text-xs font-bold text-purple-600 flex items-center gap-1 mt-4">
-                      LIHAT DAFTAR NKV &rarr;
-                    </span>
+                {/* 2. Sebaran Data Farm / KTT */}
+                <div
+                  onClick={() => {
+                    setActiveModule('bitpro');
+                    setDetailView('farm');
+                  }}
+                  className="p-3.5 sm:p-4 rounded-2xl border border-blue-100/90 bg-white hover:border-blue-300 hover:bg-blue-50/30 hover:shadow-xs transition-all flex items-center gap-3 cursor-pointer group active:scale-[0.99]"
+                >
+                  <div className="w-10 h-10 rounded-xl bg-sky-50 border border-sky-200 text-sky-600 flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
+                    <Building2 size={20} />
                   </div>
-
-                  <div
-                    onClick={() => setDetailView('rph_tph')}
-                    className="p-6 rounded-2xl border border-slate-200 bg-slate-50 hover:border-purple-500 hover:bg-white transition-all cursor-pointer flex flex-col justify-between min-h-[160px]"
-                  >
-                    <div>
-                      <div className="w-10 h-10 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center mb-3">
-                        <Building2 size={22} />
-                      </div>
-                      <h4 className="font-bold text-base text-slate-900 mb-1">RPH, TPH, &amp; TPU</h4>
-                      <p className="text-xs text-slate-600">
-                        Database 101 unit usaha pemotongan ternak ruminansia &amp; unggas dengan legalitas dan sertifikat Halal.
-                      </p>
-                    </div>
-                    <span className="text-xs font-bold text-indigo-600 flex items-center gap-1 mt-4">
-                      LIHAT UNIT RPH/TPH &rarr;
-                    </span>
+                  <div className="min-w-0 flex-1">
+                    <p className="font-bold text-sm text-slate-900 truncate">Kelompok Tani Ternak (KTT)</p>
+                    <p className="text-xs text-slate-400 truncate">{totalFarm.toLocaleString('id-ID')} unit kelompok terdata</p>
                   </div>
                 </div>
-              )}
 
-            </div>
-          )}
+                {/* 3. Puskeswan Aktif */}
+                <div
+                  onClick={() => {
+                    setActiveModule('keswan');
+                    setDetailView(null);
+                    scrollToSection('puskeswan');
+                  }}
+                  className="p-3.5 sm:p-4 rounded-2xl border border-blue-100/90 bg-white hover:border-blue-300 hover:bg-blue-50/30 hover:shadow-xs transition-all flex items-center gap-3 cursor-pointer group active:scale-[0.99]"
+                >
+                  <div className="w-10 h-10 rounded-xl bg-sky-50 border border-sky-200 text-sky-600 flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
+                    <Stethoscope size={20} />
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <p className="font-bold text-sm text-slate-900 truncate">Puskeswan Aktif</p>
+                    <p className="text-xs text-slate-400 truncate">{puskeswanList.length} unit pelayanan 26 kecamatan</p>
+                  </div>
+                </div>
+
+                {/* 4. Vaksinasi PMK */}
+                <div
+                  onClick={() => {
+                    setActiveModule('keswan');
+                    setDetailView('vaksinasi');
+                  }}
+                  className="p-3.5 sm:p-4 rounded-2xl border border-blue-100/90 bg-white hover:border-blue-300 hover:bg-blue-50/30 hover:shadow-xs transition-all flex items-center gap-3 cursor-pointer group active:scale-[0.99]"
+                >
+                  <div className="w-10 h-10 rounded-xl bg-blue-50 border border-blue-200 text-blue-600 flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
+                    <Syringe size={20} />
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <p className="font-bold text-sm text-slate-900 truncate">Vaksinasi PMK &amp; LSD</p>
+                    <p className="text-xs text-slate-400 truncate">{vaksinasiList.length} unit wilayah capaian</p>
+                  </div>
+                </div>
+
+                {/* 5. RPH & TPH */}
+                <div
+                  onClick={() => {
+                    setActiveModule('kesmavet');
+                    setDetailView('rph_tph');
+                  }}
+                  className="p-3.5 sm:p-4 rounded-2xl border border-blue-100/90 bg-white hover:border-blue-300 hover:bg-blue-50/30 hover:shadow-xs transition-all flex items-center gap-3 cursor-pointer group active:scale-[0.99]"
+                >
+                  <div className="w-10 h-10 rounded-xl bg-indigo-50 border border-indigo-200 text-indigo-600 flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
+                    <Building2 size={20} />
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <p className="font-bold text-sm text-slate-900 truncate">RPH &amp; TPU/TPH Terbina</p>
+                    <p className="text-xs text-slate-400 truncate">{rphList.length} unit usaha terdaftar</p>
+                  </div>
+                </div>
+
+                {/* 6. Sertifikasi NKV */}
+                <div
+                  onClick={() => {
+                    setActiveModule('kesmavet');
+                    setDetailView('nkv');
+                  }}
+                  className="p-3.5 sm:p-4 rounded-2xl border border-blue-100/90 bg-white hover:border-blue-300 hover:bg-blue-50/30 hover:shadow-xs transition-all flex items-center gap-3 cursor-pointer group active:scale-[0.99]"
+                >
+                  <div className="w-10 h-10 rounded-xl bg-sky-50 border border-sky-200 text-sky-600 flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
+                    <CheckCircle2 size={20} />
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <p className="font-bold text-sm text-slate-900 truncate">Sertifikasi NKV</p>
+                    <p className="text-xs text-slate-400 truncate">{nkvList.length} unit usaha ASUH</p>
+                  </div>
+                </div>
+
+              </div>
+            )}
+          </section>
 
         </div>
 
-      </section>
+        {/* ─────────────────────────────────────────────
+            3. FOOTER (Clean Blue & White)
+        ───────────────────────────────────────────── */}
+        <footer className="border-t border-blue-50 py-5 sm:py-6 px-4 sm:px-8 lg:px-9 text-xs text-slate-500 bg-white mt-auto flex flex-col sm:flex-row items-center justify-between gap-3 text-center sm:text-left">
+          <div className="flex flex-wrap items-center justify-center sm:justify-start gap-1.5 sm:gap-2">
+            <span className="font-bold text-blue-600">SiMantap</span>
+            <span>·</span>
+            <span>Dinas Pertanian dan Pangan Kabupaten Kebumen</span>
+          </div>
+          <p className="text-slate-400">
+            &copy; {new Date().getFullYear()} Bidang Peternakan dan Kesehatan Hewan Kebumen.
+          </p>
+        </footer>
+
+      </div>
 
       {/* ─────────────────────────────────────────────
-          4. MODAL LOGIN PETUGAS
+          4. MODAL LOGIN PETUGAS (Blue & White Theme)
       ───────────────────────────────────────────── */}
       {showLoginModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs animate-in fade-in duration-200">
-          <div className="w-full max-w-md rounded-3xl border border-slate-200 bg-white p-6 sm:p-8 relative shadow-2xl animate-in zoom-in-95 duration-200 text-slate-900">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-900/40 backdrop-blur-xs animate-in fade-in duration-200">
+          <div className="w-full max-w-md rounded-2xl sm:rounded-3xl border border-blue-100 bg-white p-5 sm:p-8 relative shadow-2xl animate-in zoom-in-95 duration-200 text-slate-900 max-h-[90vh] overflow-y-auto">
             
+            {/* Close Button */}
             <button
               onClick={() => setShowLoginModal(false)}
               aria-label="Tutup jendela login"
-              className="min-h-touch min-w-touch w-10 h-10 rounded-xl border border-slate-200 bg-slate-50 text-slate-500 hover:text-slate-900 absolute top-5 right-5 flex items-center justify-center transition-colors cursor-pointer"
+              className="w-9 h-9 rounded-full border border-blue-100 bg-blue-50/50 text-slate-400 hover:text-blue-600 absolute top-4 right-4 sm:top-5 sm:right-5 flex items-center justify-center transition-colors cursor-pointer"
             >
-              <X size={18} />
+              <X size={16} />
             </button>
 
-            <div className="mb-6 text-left">
-              <div className="w-12 h-12 rounded-2xl bg-blue-50 border border-blue-200 flex items-center justify-center text-blue-600 mb-3">
-                <ShieldCheck size={24} />
+            {/* Header */}
+            <div className="mb-5 sm:mb-6 text-left">
+              <div className="w-11 h-11 rounded-2xl bg-blue-50 border border-blue-200 flex items-center justify-center text-blue-600 mb-3">
+                <ShieldCheck size={22} />
               </div>
-              <h3 className="text-2xl font-bold tracking-tight text-slate-900">
+              <h3 className="text-xl sm:text-2xl font-bold tracking-tight text-slate-900">
                 Masuk Sistem SiMantap
               </h3>
               <p className="text-xs text-slate-500 mt-1">
-                Gunakan ID Petugas resmi Dinas Pertanian dan Pangan
+                Gunakan ID Petugas / NIP / Username dan kata sandi Anda
               </p>
             </div>
 
+            {/* Error Message */}
             {error && (
               <div className="mb-4 p-3 rounded-xl border border-red-200 bg-red-50 text-red-700 text-xs font-semibold flex items-center gap-2">
                 <AlertCircle size={16} className="shrink-0" />
@@ -1490,23 +1730,24 @@ export default function LandingPage() {
               </div>
             )}
 
-            <form onSubmit={handleLogin} className="space-y-4">
+            {/* Form */}
+            <form onSubmit={handleLogin} className="space-y-3.5 sm:space-y-4">
               <div>
-                <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">
+                <label className="block text-xs font-bold text-slate-700 mb-1.5">
                   ID Petugas / NIP / Username
                 </label>
                 <input
                   type="text"
                   required
-                  placeholder="ID Petugas atau NIP"
+                  placeholder="Contoh: superadmin / 19800101... / nama@dinas.go.id"
                   value={loginId}
                   onChange={(e) => setLoginId(e.target.value)}
-                  className="w-full min-h-touch h-11 px-3.5 rounded-xl border border-slate-200 bg-slate-50 text-sm font-sans outline-none focus:border-blue-500 focus:bg-white transition-colors"
+                  className="w-full h-11 px-3.5 rounded-xl border border-blue-100 bg-blue-50/30 text-sm font-sans outline-none focus:border-blue-500 focus:bg-white transition-colors"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">
+                <label className="block text-xs font-bold text-slate-700 mb-1.5">
                   Kata Sandi
                 </label>
                 <div className="relative">
@@ -1516,13 +1757,13 @@ export default function LandingPage() {
                     placeholder="••••••••••••"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    className="w-full min-h-touch h-11 pl-3.5 pr-11 rounded-xl border border-slate-200 bg-slate-50 text-sm font-sans outline-none focus:border-blue-500 focus:bg-white transition-colors"
+                    className="w-full h-11 pl-3.5 pr-11 rounded-xl border border-blue-100 bg-blue-50/30 text-sm font-sans outline-none focus:border-blue-500 focus:bg-white transition-colors"
                   />
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
                     aria-label={showPassword ? 'Sembunyikan sandi' : 'Tampilkan sandi'}
-                    className="min-h-touch min-w-touch w-10 h-10 absolute right-0.5 top-1/2 -translate-y-1/2 flex items-center justify-center text-slate-400 hover:text-slate-700 cursor-pointer"
+                    className="w-10 h-10 absolute right-0.5 top-1/2 -translate-y-1/2 flex items-center justify-center text-slate-400 hover:text-blue-600 cursor-pointer"
                   >
                     {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
                   </button>
@@ -1532,44 +1773,28 @@ export default function LandingPage() {
               <button
                 type="submit"
                 disabled={isLoading}
-                className="w-full min-h-touch h-12 rounded-xl bg-blue-600 text-white font-bold text-sm flex items-center justify-center gap-2 mt-5 shadow-xs hover:bg-blue-700 active:scale-[0.98] disabled:opacity-50 transition-all cursor-pointer"
+                className="w-full h-11 rounded-full bg-blue-600 text-white font-bold text-sm flex items-center justify-center gap-2 mt-5 shadow-xs hover:bg-blue-700 active:scale-[0.98] disabled:opacity-50 transition-all cursor-pointer"
               >
                 {isLoading ? (
                   <span>Memverifikasi Akun...</span>
                 ) : (
                   <>
-                    <span>Masuk ke Dashboard Petugas</span>
-                    <ArrowRight size={16} />
+                    <Lock size={15} />
+                    <span>Masuk ke Dashboard</span>
                   </>
                 )}
               </button>
             </form>
 
-            <div className="mt-5 pt-4 border-t border-slate-100 text-center text-[11px] text-slate-400">
-              Bidang Peternakan dan Kesehatan Hewan Kabupaten Kebumen.
+            <div className="mt-6 pt-4 border-t border-slate-100 text-center">
+              <p className="text-[11px] text-slate-400">
+                Sistem Informasi Manajemen Peternakan Terpadu &bull; Distapang Kebumen
+              </p>
             </div>
+
           </div>
         </div>
       )}
-
-      {/* ─────────────────────────────────────────────
-          5. FOOTER
-      ───────────────────────────────────────────── */}
-      <footer id="bantuan" className="w-full border-t border-slate-200 py-10 px-4 sm:px-6 lg:px-8 text-center text-xs text-slate-600 bg-white">
-        <div className="max-w-4xl mx-auto space-y-3">
-          <div className="flex items-center justify-center gap-2">
-            <span className="font-sans text-lg font-bold text-blue-700">SiMantap</span>
-            <span>—</span>
-            <span>Dinas Pertanian dan Pangan Kabupaten Kebumen</span>
-          </div>
-          <p className="text-xs text-slate-500 max-w-xl mx-auto">
-            Bidang Peternakan dan Kesehatan Hewan · Jl. Tentara Pelajar No. 25, Kebumen, Jawa Tengah.
-          </p>
-          <p className="text-xs font-semibold text-slate-400 pt-1">
-            &copy; {new Date().getFullYear()} Pemerintah Kabupaten Kebumen. Seluruh Hak Cipta Dilindungi.
-          </p>
-        </div>
-      </footer>
 
     </div>
   );

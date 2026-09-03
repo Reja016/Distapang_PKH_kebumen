@@ -2,6 +2,8 @@ import OpenAI from "openai";
 import pool from "@/lib/db";
 import { NextResponse } from "next/server";
 
+export const dynamic = 'force-dynamic';
+
 let _groq: OpenAI | null = null;
 function getGroqClient() {
   if (!_groq) {

@@ -677,14 +677,11 @@ export default function DataVaksinasiPMKPage() {
         {activeTab === 'harian' && (
           <div className="space-y-6 animate-in fade-in duration-200">
             
-            {/* Control Bar: Selector Tahun & Tambah Tahun */}
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-white p-3.5 sm:p-4 rounded-2xl border border-slate-200 shadow-xs">
-              <div className="flex flex-wrap items-center gap-2.5">
-                <span className="text-xs font-bold text-slate-500 uppercase tracking-wider flex items-center gap-1.5">
-                  <Calendar size={16} className="text-blue-600" />
-                  <span>Tahun Laporan:</span>
-                </span>
-
+            {/* Control Bar: Selector Tahun & Tambah Tahun (Centered) */}
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-3 bg-white p-3.5 sm:p-4 rounded-2xl border-2 border-slate-300 shadow-xs max-w-xl mx-auto">
+              <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl border border-blue-200 bg-blue-50/70">
+                <Calendar size={16} className="text-blue-700" />
+                <span className="text-xs font-bold text-blue-950">Pilih Tahun:</span>
                 <select
                   value={selectedYear}
                   onChange={(e) => {
@@ -692,7 +689,7 @@ export default function DataVaksinasiPMKPage() {
                     setSelectedYear(yr);
                     fetchAll(yr);
                   }}
-                  className="min-h-touch h-10 px-3.5 rounded-xl border border-slate-200 bg-slate-50 text-xs font-black text-slate-900 focus:border-blue-600 focus:bg-white outline-none cursor-pointer shadow-2xs font-mono"
+                  className="bg-transparent text-xs font-black text-blue-900 focus:outline-none cursor-pointer font-mono"
                 >
                   {daftarTahun.map((yr) => (
                     <option key={yr} value={yr}>
@@ -700,19 +697,19 @@ export default function DataVaksinasiPMKPage() {
                     </option>
                   ))}
                 </select>
-
-                <button
-                  type="button"
-                  onClick={() => setShowAddYearModal(true)}
-                  className="min-h-touch h-10 px-3.5 rounded-xl border border-dashed border-blue-300 hover:border-blue-600 bg-blue-50/60 hover:bg-blue-50 text-blue-700 text-xs font-bold flex items-center gap-1.5 transition-colors cursor-pointer"
-                >
-                  <Plus size={14} />
-                  <span>Tambah Tahun Baru</span>
-                </button>
               </div>
 
-              <div className="flex items-center gap-2">
-                {canEdit && (
+              {canEdit && (
+                <div className="flex items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setShowAddYearModal(true)}
+                    className="h-9 px-3.5 rounded-xl bg-blue-50 hover:bg-blue-100 border border-blue-200 text-blue-700 text-xs font-bold flex items-center gap-1.5 transition-colors cursor-pointer"
+                  >
+                    <Plus size={14} />
+                    <span>Tahun Baru</span>
+                  </button>
+
                   <button
                     onClick={() => {
                       setFormHarianManual({
@@ -722,13 +719,13 @@ export default function DataVaksinasiPMKPage() {
                       });
                       setModalHarianManual(true);
                     }}
-                    className="min-h-touch h-10 px-4 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold flex items-center gap-1.5 shadow-xs transition-all cursor-pointer"
+                    className="h-9 px-3.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold flex items-center gap-1.5 shadow-xs transition-all cursor-pointer"
                   >
                     <Plus size={14} />
                     <span>Tambah Harian</span>
                   </button>
-                )}
-              </div>
+                </div>
+              )}
             </div>
 
             {/* Month Filter Selector */}
@@ -751,36 +748,36 @@ export default function DataVaksinasiPMKPage() {
               })}
             </div>
 
-            {/* Matrix Table with Click-to-Edit */}
-            <div className="rounded-3xl border border-slate-200 bg-white shadow-sm overflow-hidden">
-              <div className="p-4 sm:p-5 border-b border-slate-200 flex flex-wrap items-center justify-between gap-3 bg-slate-50/50">
+            {/* Matrix Table with Click-to-Edit (Mobile Friendly & Border Kontras) */}
+            <div className="border-2 border-slate-700 bg-white shadow-md rounded-xl overflow-hidden -mx-4 sm:mx-0">
+              <div className="p-3.5 sm:p-5 border-b-2 border-slate-700 flex flex-wrap items-center justify-between gap-3 bg-slate-100">
                 <div>
-                  <h3 className="font-extrabold text-sm sm:text-base text-slate-900">
+                  <h3 className="font-black text-sm sm:text-base text-slate-900">
                     Matriks Log Harian — Bulan {BULAN_LONG[activeMonth]} {selectedYear}
                   </h3>
-                  <p className="text-xs text-slate-500">
-                    Klik langsung pada sel tanggal untuk mengetik angka dosis vaksinasi (Click-to-Edit)
+                  <p className="text-xs font-semibold text-slate-700">
+                    Klik langsung pada kotak sel tanggal untuk mengisi/mengubah dosis vaksinasi (Click-to-Edit)
                   </p>
                 </div>
-                <span className="px-3 py-1 rounded-full bg-blue-50 text-blue-800 border border-blue-200 text-xs font-bold">
+                <span className="px-3.5 py-1 rounded-full bg-blue-700 text-white font-black text-xs shadow-xs">
                   {daysInMonth(activeMonth, selectedYear)} Hari Aktif
                 </span>
               </div>
 
-              <div className="overflow-x-auto max-h-[70vh]">
+              <div className="overflow-x-auto touch-pan-x max-h-[70vh]">
                 <table className="w-full text-xs text-left whitespace-nowrap border-collapse">
-                  <thead className="bg-slate-100 text-slate-700 font-semibold uppercase tracking-wider sticky top-0 z-20 border-b border-slate-200 shadow-sm">
+                  <thead className="bg-slate-200 text-slate-900 font-extrabold uppercase tracking-wider sticky top-0 z-20 border-b-2 border-slate-700">
                     <tr>
-                      <th className="p-3.5 sticky left-0 bg-slate-100 z-30 border-r border-slate-200">PUSKESWAN</th>
-                      <th className="p-3.5 text-right font-sans border-r border-slate-200">TARGET</th>
-                      <th className="p-3.5 text-right font-sans border-r border-slate-200">AMBIL</th>
-                      <th className="p-3.5 text-right font-sans text-emerald-700 border-r border-slate-200">REALISASI</th>
+                      <th className="p-3 sticky left-0 bg-slate-300 z-30 border-r-2 border-slate-700 shadow-[2px_0_4px_-1px_rgba(0,0,0,0.15)] font-black text-slate-950">PUSKESWAN</th>
+                      <th className="p-3 text-right font-sans border-r-2 border-slate-500 font-black">TARGET</th>
+                      <th className="p-3 text-right font-sans border-r-2 border-slate-500 font-black">AMBIL</th>
+                      <th className="p-3 text-right font-sans text-emerald-950 bg-emerald-100 border-r-2 border-slate-500 font-black">REALISASI</th>
                       {Array.from({ length: daysInMonth(activeMonth, selectedYear) }, (_, i) => i + 1).map((d) => (
-                        <th key={d} className="p-2 text-center font-sans w-10 min-w-[40px] border-r border-slate-200">{d}</th>
+                        <th key={d} className="p-2 text-center font-sans w-11 min-w-[44px] border-r-2 border-slate-500 bg-slate-200 font-black text-slate-950">{d}</th>
                       ))}
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-slate-100 text-slate-800">
+                  <tbody className="divide-y-2 divide-slate-400 text-slate-900 font-medium">
                     {bulanan.map((row) => {
                       const days = Array.from({ length: daysInMonth(activeMonth, selectedYear) }, (_, i) => i + 1);
                       const realisasiBulanIni = Object.entries(harianMap[row.puskeswan] || {})
@@ -788,13 +785,13 @@ export default function DataVaksinasiPMKPage() {
                         .reduce((sum, [, v]) => sum + v.jumlah, 0);
 
                       return (
-                        <tr key={row.id || row.puskeswan} className="hover:bg-slate-50/80 transition-colors">
-                          <td className="p-3.5 font-bold text-slate-900 sticky left-0 bg-white z-10 border-r border-slate-200">
+                        <tr key={row.id || row.puskeswan} className="hover:bg-blue-50/50 transition-colors border-b-2 border-slate-400">
+                          <td className="p-3 font-black text-slate-950 sticky left-0 bg-white z-10 border-r-2 border-slate-700 shadow-[2px_0_4px_-1px_rgba(0,0,0,0.12)]">
                             {row.puskeswan}
                           </td>
-                          <td className="p-3.5 text-right font-sans border-r border-slate-100">{row.target.toLocaleString('id-ID')}</td>
-                          <td className="p-3.5 text-right font-sans border-r border-slate-100">{row.pengambilan}</td>
-                          <td className="p-3.5 text-right font-sans font-bold text-emerald-700 bg-emerald-50/40 border-r border-slate-100">
+                          <td className="p-3 text-right font-sans font-bold border-r-2 border-slate-400 bg-slate-50/70">{row.target.toLocaleString('id-ID')}</td>
+                          <td className="p-3 text-right font-sans font-bold border-r-2 border-slate-400 bg-slate-50/70">{row.pengambilan}</td>
+                          <td className="p-3 text-right font-sans font-black text-emerald-950 bg-emerald-100/70 border-r-2 border-slate-400">
                             {realisasiBulanIni.toLocaleString('id-ID')}
                           </td>
                           {days.map((d) => {
@@ -804,7 +801,7 @@ export default function DataVaksinasiPMKPage() {
 
                             if (isEditing) {
                               return (
-                                <td key={d} className="p-0.5 text-center font-sans border-r border-blue-400 bg-blue-50">
+                                <td key={d} className="p-0.5 text-center font-sans border-r-2 border-blue-600 bg-blue-100">
                                   <input
                                     ref={harianInputRef}
                                     type="number"
@@ -815,7 +812,7 @@ export default function DataVaksinasiPMKPage() {
                                       if (e.key === 'Enter') saveEditHarian();
                                       else if (e.key === 'Escape') setEditingHarian(null);
                                     }}
-                                    className="w-full text-center py-1 px-0.5 text-xs font-bold font-sans bg-white border border-blue-500 rounded focus:outline-none focus:ring-1 focus:ring-blue-400 text-slate-900 shadow-sm"
+                                    className="w-full text-center py-1 px-1 text-xs font-black font-sans bg-white border-2 border-blue-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400 text-blue-900 shadow-sm"
                                   />
                                 </td>
                               );
@@ -826,11 +823,19 @@ export default function DataVaksinasiPMKPage() {
                                 key={d}
                                 onClick={() => startEditHarian(row.puskeswan, dateStr)}
                                 title={`Klik untuk ubah dosis ${row.puskeswan} tgl ${d}`}
-                                className={`p-1 text-center font-sans border-r border-slate-100 cursor-pointer select-none transition-colors ${
-                                  val ? 'bg-blue-600/10 text-blue-600 font-bold hover:bg-blue-600/20' : 'text-slate-300 hover:bg-slate-100'
+                                className={`p-1.5 text-center font-sans border-r-2 border-slate-400 cursor-pointer select-none transition-all ${
+                                  val && val > 0
+                                    ? 'bg-blue-100 text-blue-950 font-black hover:bg-blue-200'
+                                    : 'bg-white hover:bg-blue-100/60 text-slate-400 hover:text-blue-900 font-bold'
                                 }`}
                               >
-                                {val && val > 0 ? val : '-'}
+                                {val && val > 0 ? (
+                                  <span className="inline-block py-0.5 px-1.5 rounded-md bg-blue-600 text-white font-mono font-black shadow-2xs">
+                                    {val}
+                                  </span>
+                                ) : (
+                                  '-'
+                                )}
                               </td>
                             );
                           })}
@@ -853,8 +858,8 @@ export default function DataVaksinasiPMKPage() {
                 <h3 className="font-extrabold text-base text-slate-900">
                   Capaian Vaksinasi Per Puskeswan (Akumulasi Bulanan {selectedYear})
                 </h3>
-                <p className="text-xs text-slate-500">
-                  Target dan realisasi droping vaksin per puskeswan tahun {selectedYear}
+                <p className="text-xs text-slate-600 font-semibold">
+                  Target dan realisasi droping vaksin per puskeswan tahun {selectedYear} &bull; Klik kotak Target / Ambil untuk edit langsung
                 </p>
               </div>
               {canEdit && (
@@ -868,41 +873,41 @@ export default function DataVaksinasiPMKPage() {
               )}
             </div>
 
-            <div className="rounded-3xl border border-slate-200 bg-white shadow-sm overflow-hidden">
-              <div className="overflow-x-auto">
+            <div className="border-2 border-slate-700 bg-white shadow-md rounded-xl overflow-hidden -mx-4 sm:mx-0">
+              <div className="overflow-x-auto touch-pan-x">
                 <table className="w-full text-xs text-left whitespace-nowrap border-collapse">
-                  <thead className="bg-slate-50 text-slate-600 font-semibold uppercase tracking-wider border-b border-slate-200">
+                  <thead className="bg-slate-200 text-slate-900 font-extrabold uppercase tracking-wider border-b-2 border-slate-700">
                     <tr>
-                      <th className="p-3.5 text-center w-12 sticky left-0 bg-slate-50 z-10 border-r border-slate-200">NO</th>
-                      <th className="p-3.5 sticky left-12 bg-slate-50 z-10 border-r border-slate-200">PUSKESWAN</th>
-                      <th className="p-3.5 text-right font-sans border-r border-slate-200">TARGET</th>
-                      <th className="p-3.5 text-right font-sans border-r border-slate-200">AMBIL</th>
-                      <th className="p-3.5 text-right font-sans text-emerald-700 font-bold border-r border-slate-200">REALISASI</th>
-                      <th className="p-3.5 text-right font-sans text-red-600 font-bold border-r border-slate-200">KURANG</th>
+                      <th className="p-3 text-center w-12 sticky left-0 bg-slate-300 z-10 border-r-2 border-slate-500 font-black">NO</th>
+                      <th className="p-3 sticky left-12 bg-slate-300 z-10 border-r-2 border-slate-700 shadow-[2px_0_4px_-1px_rgba(0,0,0,0.15)] font-black">PUSKESWAN</th>
+                      <th className="p-3 text-right font-sans border-r-2 border-slate-500 min-w-[100px] font-black">TARGET</th>
+                      <th className="p-3 text-right font-sans border-r-2 border-slate-500 min-w-[100px] font-black">AMBIL</th>
+                      <th className="p-3 text-right font-sans text-emerald-950 bg-emerald-100 font-black border-r-2 border-slate-500">REALISASI</th>
+                      <th className="p-3 text-right font-sans text-rose-950 bg-rose-100 font-black border-r-2 border-slate-500">KURANG</th>
                       {BULAN_LABEL.slice(1).map((m) => (
-                        <th key={m} className="p-3 text-right font-sans border-r border-slate-100">{m}</th>
+                        <th key={m} className="p-3 text-right font-sans border-r-2 border-slate-500 font-black">{m}</th>
                       ))}
-                      {canEdit && <th className="p-3.5 text-center w-20">AKSI</th>}
+                      {canEdit && <th className="p-3 text-center w-20 font-black">AKSI</th>}
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-slate-100 text-slate-800">
+                  <tbody className="divide-y-2 divide-slate-400 text-slate-900 font-medium">
                     {bulanan.map((row) => {
                       const isEditingTarget = editingBulananCell?.id === row.id && editingBulananCell?.field === 'target';
                       const isEditingAmbil = editingBulananCell?.id === row.id && editingBulananCell?.field === 'pengambilan';
 
                       return (
-                        <tr key={row.id} className="hover:bg-slate-50/80 transition-colors">
-                          <td className="p-3.5 text-center font-bold text-slate-400 sticky left-0 bg-white z-10 border-r border-slate-200">
+                        <tr key={row.id} className="hover:bg-blue-50/50 transition-colors border-b-2 border-slate-400">
+                          <td className="p-3 text-center font-black text-slate-700 sticky left-0 bg-slate-100 z-10 border-r-2 border-slate-500">
                             {row.no_urut}
                           </td>
-                          <td className="p-3.5 font-bold text-slate-900 sticky left-12 bg-white z-10 border-r border-slate-200">
+                          <td className="p-3 font-black text-slate-950 sticky left-12 bg-white z-10 border-r-2 border-slate-700 shadow-[2px_0_4px_-1px_rgba(0,0,0,0.12)]">
                             {row.puskeswan}
                           </td>
 
-                          {/* Editable Target */}
+                          {/* Editable Target dengan Kotak Input Tebal & Jelas */}
                           <td
                             onClick={() => startEditBulananCell(row.id, 'target', row.target)}
-                            className="p-3.5 text-right font-sans border-r border-slate-100 cursor-pointer hover:bg-blue-50"
+                            className="p-2 text-right font-sans border-r-2 border-slate-400 cursor-pointer"
                           >
                             {isEditingTarget ? (
                               <input
@@ -915,17 +920,19 @@ export default function DataVaksinasiPMKPage() {
                                   if (e.key === 'Enter') saveEditBulananCell();
                                   else if (e.key === 'Escape') setEditingBulananCell(null);
                                 }}
-                                className="w-20 text-right py-0.5 px-1 text-xs font-bold border border-blue-500 rounded bg-white"
+                                className="w-24 text-right py-1 px-2 text-xs font-black border-2 border-blue-600 ring-2 ring-blue-300 rounded-md bg-white text-blue-900"
                               />
                             ) : (
-                              row.target.toLocaleString('id-ID')
+                              <div className="py-1 px-2 rounded-md border-2 border-blue-500 bg-blue-50 font-black text-blue-950 hover:border-blue-700 hover:bg-blue-100 transition-all shadow-xs">
+                                {row.target.toLocaleString('id-ID')}
+                              </div>
                             )}
                           </td>
 
-                          {/* Editable Pengambilan */}
+                          {/* Editable Pengambilan dengan Kotak Input Tebal & Jelas */}
                           <td
                             onClick={() => startEditBulananCell(row.id, 'pengambilan', row.pengambilan)}
-                            className="p-3.5 text-right font-sans border-r border-slate-100 cursor-pointer hover:bg-blue-50"
+                            className="p-2 text-right font-sans border-r-2 border-slate-400 cursor-pointer"
                           >
                             {isEditingAmbil ? (
                               <input
@@ -938,36 +945,38 @@ export default function DataVaksinasiPMKPage() {
                                   if (e.key === 'Enter') saveEditBulananCell();
                                   else if (e.key === 'Escape') setEditingBulananCell(null);
                                 }}
-                                className="w-20 text-right py-0.5 px-1 text-xs font-bold border border-blue-500 rounded bg-white"
+                                className="w-24 text-right py-1 px-2 text-xs font-black border-2 border-blue-600 ring-2 ring-blue-300 rounded-md bg-white text-blue-900"
                               />
                             ) : (
-                              row.pengambilan.toLocaleString('id-ID')
+                              <div className="py-1 px-2 rounded-md border-2 border-blue-500 bg-blue-50 font-black text-blue-950 hover:border-blue-700 hover:bg-blue-100 transition-all shadow-xs">
+                                {row.pengambilan.toLocaleString('id-ID')}
+                              </div>
                             )}
                           </td>
 
-                          <td className="p-3.5 text-right font-sans font-bold text-emerald-700 bg-emerald-50/40 border-r border-slate-100">
+                          <td className="p-3 text-right font-sans font-black text-emerald-950 bg-emerald-100/70 border-r-2 border-slate-400">
                             {row.realisasi.toLocaleString('id-ID')}
                           </td>
-                          <td className="p-3.5 text-right font-sans font-bold text-red-600 border-r border-slate-100">
+                          <td className="p-3 text-right font-sans font-black text-rose-950 bg-rose-100/70 border-r-2 border-slate-400">
                             {row.kekurangan.toLocaleString('id-ID')}
                           </td>
                           {BULAN_KEY.map((k) => (
-                            <td key={k} className="p-3 text-right font-sans border-r border-slate-100">
+                            <td key={k} className="p-3 text-right font-sans border-r-2 border-slate-400 font-bold">
                               {n(row[k]) > 0 ? n(row[k]).toLocaleString('id-ID') : '-'}
                             </td>
                           ))}
                           {canEdit && (
-                            <td className="p-3.5 text-center">
+                            <td className="p-3 text-center border-l-2 border-slate-400">
                               <div className="flex items-center justify-center gap-1">
                                 <button
                                   onClick={() => openEditBulanan(row)}
-                                  className="min-h-touch h-7 w-7 rounded-lg border border-slate-200 bg-slate-50 text-slate-600 hover:bg-blue-50 hover:text-blue-600 flex items-center justify-center cursor-pointer"
+                                  className="h-7 w-7 border border-slate-300 bg-white text-slate-700 hover:bg-blue-50 hover:text-blue-600 flex items-center justify-center cursor-pointer"
                                 >
                                   <Edit2 size={12} />
                                 </button>
                                 <button
                                   onClick={() => deleteBulanan(row)}
-                                  className="min-h-touch h-7 w-7 rounded-lg border border-red-200 bg-red-50 text-red-600 hover:bg-red-100 flex items-center justify-center cursor-pointer"
+                                  className="h-7 w-7 border border-rose-300 bg-rose-50 text-rose-700 hover:bg-rose-100 flex items-center justify-center cursor-pointer"
                                 >
                                   <Trash2 size={12} />
                                 </button>
@@ -979,23 +988,23 @@ export default function DataVaksinasiPMKPage() {
                     })}
 
                     {/* Total Row */}
-                    <tr className="bg-slate-100 font-bold border-t-2 border-slate-300">
-                      <td colSpan={2} className="p-3.5 text-center sticky left-0 bg-slate-100 z-10 border-r border-slate-300">
+                    <tr className="bg-slate-200 font-black text-slate-900 border-t-2 border-slate-400">
+                      <td colSpan={2} className="p-3 text-center sticky left-0 bg-slate-200 z-10 border-r-2 border-slate-400">
                         JUMLAH TOTAL
                       </td>
-                      <td className="p-3.5 text-right font-sans border-r border-slate-300">{totalBulanan.target.toLocaleString('id-ID')}</td>
-                      <td className="p-3.5 text-right font-sans border-r border-slate-300">{totalBulanan.pengambilan.toLocaleString('id-ID')}</td>
-                      <td className="p-3.5 text-right font-sans text-emerald-700 border-r border-slate-300">{totalBulanan.realisasi.toLocaleString('id-ID')}</td>
-                      <td className="p-3.5 text-right font-sans text-red-600 border-r border-slate-300">{totalBulanan.kekurangan.toLocaleString('id-ID')}</td>
+                      <td className="p-3 text-right font-sans border-r border-slate-300">{totalBulanan.target.toLocaleString('id-ID')}</td>
+                      <td className="p-3 text-right font-sans border-r border-slate-300">{totalBulanan.pengambilan.toLocaleString('id-ID')}</td>
+                      <td className="p-3 text-right font-sans text-emerald-900 border-r border-slate-300">{totalBulanan.realisasi.toLocaleString('id-ID')}</td>
+                      <td className="p-3 text-right font-sans text-rose-800 border-r border-slate-300">{totalBulanan.kekurangan.toLocaleString('id-ID')}</td>
                       {BULAN_KEY.map((k) => {
                         const sumM = bulanan.reduce((sum, r) => sum + n(r[k]), 0);
                         return (
-                          <td key={k} className="p-3 text-right font-sans border-r border-slate-200">
+                          <td key={k} className="p-3 text-right font-sans border-r border-slate-300">
                             {sumM > 0 ? sumM.toLocaleString('id-ID') : '-'}
                           </td>
                         );
                       })}
-                      {canEdit && <td></td>}
+                      {canEdit && <td />}
                     </tr>
                   </tbody>
                 </table>
@@ -1021,34 +1030,34 @@ export default function DataVaksinasiPMKPage() {
                 </div>
               </div>
 
-              <div className="rounded-3xl border border-slate-200 bg-white shadow-sm overflow-hidden">
-                <div className="overflow-x-auto">
+              <div className="border-2 border-slate-700 bg-white shadow-md rounded-xl overflow-hidden -mx-4 sm:mx-0">
+                <div className="overflow-x-auto touch-pan-x">
                   <table className="w-full text-xs text-left whitespace-nowrap border-collapse">
-                    <thead className="bg-slate-50 text-slate-600 font-semibold uppercase tracking-wider border-b border-slate-200">
+                    <thead className="bg-slate-200 text-slate-950 font-black uppercase tracking-wider border-b-2 border-slate-700">
                       <tr>
-                        <th className="p-3.5 text-center w-12 border-r border-slate-200">NO</th>
-                        <th className="p-3.5 border-r border-slate-200">PUSKESWAN</th>
-                        <th className="p-3.5 text-right font-sans border-r border-slate-200">TARGET LSD</th>
-                        <th className="p-3.5 text-right font-sans border-r border-slate-200">TARGET ND-AI</th>
-                        <th className="p-3.5 text-right font-sans border-r border-slate-200">TARGET RABIES</th>
-                        <th className="p-3.5 text-right font-sans border-r border-slate-200">TARGET APHTOVAKS</th>
-                        <th className="p-3.5 border-r border-slate-200">AMBIL ND-AI</th>
-                        <th className="p-3.5 border-r border-slate-200">AMBIL APHTOVAKS</th>
-                        <th className="p-3.5">CATATAN</th>
+                        <th className="p-3 text-center w-12 border-r-2 border-slate-500">NO</th>
+                        <th className="p-3 border-r-2 border-slate-500">PUSKESWAN</th>
+                        <th className="p-3 text-right font-sans border-r-2 border-slate-500">TARGET LSD</th>
+                        <th className="p-3 text-right font-sans border-r-2 border-slate-500">TARGET ND-AI</th>
+                        <th className="p-3 text-right font-sans border-r-2 border-slate-500">TARGET RABIES</th>
+                        <th className="p-3 text-right font-sans border-r-2 border-slate-500">TARGET APHTOVAKS</th>
+                        <th className="p-3 border-r-2 border-slate-500">AMBIL ND-AI</th>
+                        <th className="p-3 border-r-2 border-slate-500">AMBIL APHTOVAKS</th>
+                        <th className="p-3">CATATAN</th>
                       </tr>
                     </thead>
-                    <tbody className="divide-y divide-slate-100 text-slate-800">
+                    <tbody className="divide-y-2 divide-slate-400 text-slate-900 font-medium">
                       {apbdTarget.map((row) => (
-                        <tr key={row.id} className="hover:bg-slate-50/80 transition-colors">
-                          <td className="p-3.5 text-center font-bold text-slate-400 border-r border-slate-200">{row.no_urut}</td>
-                          <td className="p-3.5 font-bold text-slate-900 border-r border-slate-200">{row.puskeswan}</td>
-                          <td className="p-3.5 text-right font-sans border-r border-slate-100">{row.target_lsd.toLocaleString('id-ID')}</td>
-                          <td className="p-3.5 text-right font-sans border-r border-slate-100">{row.target_ndai.toLocaleString('id-ID')}</td>
-                          <td className="p-3.5 text-right font-sans border-r border-slate-100">{row.target_rabies.toLocaleString('id-ID')}</td>
-                          <td className="p-3.5 text-right font-sans border-r border-slate-100">{row.target_aphtovaks.toLocaleString('id-ID')}</td>
-                          <td className="p-3.5 font-sans border-r border-slate-100">{row.pengambilan_ndai || '-'}</td>
-                          <td className="p-3.5 font-sans border-r border-slate-100">{row.pengambilan_aphtovaks || '-'}</td>
-                          <td className="p-3.5 text-slate-500">{row.catatan || '-'}</td>
+                        <tr key={row.id} className="hover:bg-blue-50/50 transition-colors border-b-2 border-slate-400">
+                          <td className="p-3 text-center font-black text-slate-700 border-r-2 border-slate-400 bg-slate-100">{row.no_urut}</td>
+                          <td className="p-3 font-black text-slate-950 border-r-2 border-slate-400">{row.puskeswan}</td>
+                          <td className="p-3 text-right font-sans font-bold border-r-2 border-slate-400">{row.target_lsd.toLocaleString('id-ID')}</td>
+                          <td className="p-3 text-right font-sans font-bold border-r-2 border-slate-400">{row.target_ndai.toLocaleString('id-ID')}</td>
+                          <td className="p-3 text-right font-sans font-bold border-r-2 border-slate-400">{row.target_rabies.toLocaleString('id-ID')}</td>
+                          <td className="p-3 text-right font-sans font-bold border-r-2 border-slate-400">{row.target_aphtovaks.toLocaleString('id-ID')}</td>
+                          <td className="p-3 font-sans font-bold border-r-2 border-slate-400">{row.pengambilan_ndai || '-'}</td>
+                          <td className="p-3 font-sans font-bold border-r-2 border-slate-400">{row.pengambilan_aphtovaks || '-'}</td>
+                          <td className="p-3 text-slate-700 font-semibold">{row.catatan || '-'}</td>
                         </tr>
                       ))}
                     </tbody>
