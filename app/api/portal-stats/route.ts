@@ -214,6 +214,26 @@ export async function GET() {
       }));
     }
 
+    // 8. QUERY POPULASI SAPI PO (tabel bitpro_sklb_populasi_sapi_po)
+    let totalSapiPo = 0;
+    try {
+      const [sapiPoRows]: any = await pool.query(
+        `SELECT COALESCE(SUM(populasi), 0) AS total FROM bitpro_sklb_populasi_sapi_po WHERE tahun = 2025`
+      );
+      if (sapiPoRows && sapiPoRows.length > 0 && Number(sapiPoRows[0].total) > 0) {
+        totalSapiPo = Number(sapiPoRows[0].total) || 0;
+      } else {
+        const [sapiPoAny]: any = await pool.query(
+          `SELECT COALESCE(SUM(populasi), 0) AS total FROM bitpro_sklb_populasi_sapi_po`
+        );
+        if (sapiPoAny && sapiPoAny.length > 0) {
+          totalSapiPo = Number(sapiPoAny[0].total) || 0;
+        }
+      }
+    } catch (e) {
+      console.warn('Query Sapi PO warning:', e);
+    }
+
     return NextResponse.json({
       success: true,
       data: {
@@ -223,6 +243,7 @@ export async function GET() {
         dataDaging,
         dataTelur,
         sebaranFarm,
+        totalSapiPo,
         puskeswanList,
         vaksinasiList,
         rphList,

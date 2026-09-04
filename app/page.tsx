@@ -115,6 +115,7 @@ export default function LandingPage() {
   const [dagingList, setDagingList] = useState<{ jenis: string; total: number }[]>([]);
   const [telurList, setTelurList] = useState<{ jenis: string; total: number }[]>([]);
   const [sebaranFarmList, setSebaranFarmList] = useState<{ komoditas: string; jumlah_farm: number; total_populasi: string }[]>([]);
+  const [totalSapiPo, setTotalSapiPo] = useState<number>(0);
   const [puskeswanList, setPuskeswanList] = useState<any[]>([]);
   const [vaksinasiList, setVaksinasiList] = useState<any[]>([]);
   const [rphList, setRphList] = useState<any[]>([]);
@@ -158,6 +159,7 @@ export default function LandingPage() {
             setDagingList(d.dataDaging || []);
             setTelurList(d.dataTelur || []);
             setSebaranFarmList(d.sebaranFarm || []);
+            setTotalSapiPo(d.totalSapiPo || 0);
             setPuskeswanList(d.puskeswanList || []);
             setVaksinasiList(d.vaksinasiList || []);
             setRphList(d.rphList || []);
@@ -489,7 +491,7 @@ export default function LandingPage() {
               >
                 <div className="min-w-0 flex-1">
                   <p className="text-xs font-semibold text-slate-500 mb-1 truncate">
-                    Total Populasi Ternak
+                    Total Populasi Ternak *2025
                   </p>
                   <p className="text-2xl sm:text-3xl font-bold text-slate-900 tracking-tight truncate">
                     {isDataLoading ? (
@@ -521,7 +523,7 @@ export default function LandingPage() {
               >
                 <div className="min-w-0 flex-1">
                   <p className="text-xs font-semibold text-slate-500 mb-1 truncate">
-                    Produksi Daging
+                    Produksi Daging *2025
                   </p>
                   <p className="text-2xl sm:text-3xl font-bold text-slate-900 tracking-tight truncate">
                     {isDataLoading ? (
@@ -553,7 +555,7 @@ export default function LandingPage() {
               >
                 <div className="min-w-0 flex-1">
                   <p className="text-xs font-semibold text-slate-500 mb-1 truncate">
-                    Produksi Telur
+                    Produksi Telur *2025
                   </p>
                   <p className="text-2xl sm:text-3xl font-bold text-slate-900 tracking-tight truncate">
                     {isDataLoading ? (
@@ -573,18 +575,16 @@ export default function LandingPage() {
                 </div>
               </div>
 
-              {/* Stat 4: Kelompok Tani Ternak */}
+              {/* Stat 4: Populasi Sapi PO (Dari Database Sapi PO) */}
               <div
                 onClick={() => {
-                  setActiveModule('bitpro');
-                  setDetailView('farm');
-                  scrollToSection('modul');
+                  router.push('/bitpro/sklb');
                 }}
                 className="p-4 sm:p-5 rounded-2xl bg-[#f0f6ff] border border-blue-100 flex items-center justify-between gap-3 cursor-pointer hover:border-blue-200 hover:shadow-xs transition-all group"
               >
                 <div className="min-w-0 flex-1">
                   <p className="text-xs font-semibold text-slate-500 mb-1 truncate">
-                    Kelompok Tani Ternak (KTT)
+                    Populasi Sapi PO *2025
                   </p>
                   <p className="text-2xl sm:text-3xl font-bold text-slate-900 tracking-tight truncate">
                     {isDataLoading ? (
@@ -592,15 +592,15 @@ export default function LandingPage() {
                         <Loader2 className="animate-spin" size={16} /> Memuat...
                       </span>
                     ) : (
-                      `${totalFarm.toLocaleString('id-ID')} Unit`
+                      `${totalSapiPo.toLocaleString('id-ID')} Ekor`
                     )}
                   </p>
                   <p className="text-[11px] sm:text-xs font-medium text-slate-400 mt-1 truncate">
-                    Poktan &amp; KTT terdaftar di database
+                    Data SKLB Sapi PO di database
                   </p>
                 </div>
                 <div className="w-11 h-11 sm:w-12 sm:h-12 rounded-full bg-blue-500 text-white flex items-center justify-center shrink-0 shadow-xs group-hover:scale-105 transition-transform">
-                  <Building2 size={22} />
+                  <Activity size={22} />
                 </div>
               </div>
 
@@ -609,7 +609,7 @@ export default function LandingPage() {
             {/* 4 Secondary Metric Cards (Dihitung 100% Dinamis dari Database) */}
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-4">
               <div className="p-3.5 sm:p-4 rounded-2xl bg-white border border-blue-50 shadow-2xs">
-                <p className="text-xs text-slate-500 font-medium truncate">{topUnggas.komoditas}</p>
+                <p className="text-xs text-slate-500 font-medium truncate">{topUnggas.komoditas} *2025</p>
                 <p className="text-base sm:text-lg lg:text-xl font-bold text-slate-900 mt-0.5 truncate">
                   {topUnggas.total.toLocaleString('id-ID')}
                 </p>
@@ -617,7 +617,7 @@ export default function LandingPage() {
               </div>
 
               <div className="p-3.5 sm:p-4 rounded-2xl bg-white border border-blue-50 shadow-2xs">
-                <p className="text-xs text-slate-500 font-medium truncate">{topDaging.jenis}</p>
+                <p className="text-xs text-slate-500 font-medium truncate">{topDaging.jenis} *2025</p>
                 <p className="text-base sm:text-lg lg:text-xl font-bold text-slate-900 mt-0.5 truncate">
                   {topDaging.ton.toLocaleString('id-ID', { minimumFractionDigits: 1, maximumFractionDigits: 1 })}
                 </p>
@@ -625,7 +625,7 @@ export default function LandingPage() {
               </div>
 
               <div className="p-3.5 sm:p-4 rounded-2xl bg-white border border-blue-50 shadow-2xs">
-                <p className="text-xs text-slate-500 font-medium truncate">{topTelur.jenis}</p>
+                <p className="text-xs text-slate-500 font-medium truncate">{topTelur.jenis} *2025</p>
                 <p className="text-base sm:text-lg lg:text-xl font-bold text-slate-900 mt-0.5 truncate">
                   {topTelur.ton.toLocaleString('id-ID', { minimumFractionDigits: 1, maximumFractionDigits: 1 })}
                 </p>
@@ -633,7 +633,7 @@ export default function LandingPage() {
               </div>
 
               <div className="p-3.5 sm:p-4 rounded-2xl bg-white border border-blue-50 shadow-2xs">
-                <p className="text-xs text-slate-500 font-medium truncate">Sapi Potong</p>
+                <p className="text-xs text-slate-500 font-medium truncate">Sapi Potong *2025</p>
                 <p className="text-base sm:text-lg lg:text-xl font-bold text-slate-900 mt-0.5 truncate">
                   {sapiPotongPop.toLocaleString('id-ID')}
                 </p>
@@ -700,13 +700,13 @@ export default function LandingPage() {
                 </div>
               </div>
 
-              {/* Card 3: Tenaga Medik */}
+              {/* Card 3: Koordinator Puskeswan */}
               <div className="p-4 sm:p-5 rounded-2xl bg-[#f0f6ff] border border-blue-100 flex items-center justify-between gap-3 shadow-2xs">
                 <div className="min-w-0 flex-1">
-                  <p className="text-xs font-semibold text-slate-500 mb-1 truncate">Koordinator Medik</p>
-                  <p className="text-2xl sm:text-3xl font-bold text-slate-900 tracking-tight">{puskeswanList.length} Dokter</p>
+                  <p className="text-xs font-semibold text-slate-500 mb-1 truncate">Koordinator Puskeswan</p>
+                  <p className="text-2xl sm:text-3xl font-bold text-slate-900 tracking-tight">{puskeswanList.length} Dokter Hewan</p>
                   <p className="text-[11px] sm:text-xs font-medium text-slate-500 mt-1 truncate">
-                    Dokter Hewan Binaan
+                    Di Wilayah Pelayanan Kabupaten Kebumen
                   </p>
                 </div>
                 <div className="w-11 h-11 sm:w-12 sm:h-12 rounded-full bg-blue-500 text-white flex items-center justify-center shrink-0 shadow-xs">

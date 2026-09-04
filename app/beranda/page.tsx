@@ -17,8 +17,10 @@ import {
   Landmark,
   Lock,
   Users,
+  Database,
 } from 'lucide-react';
 import UserManagementModal from '@/components/UserManagementModal';
+import DatabaseBackupModal from '@/components/DatabaseBackupModal';
 
 export default function BerandaPage() {
   const router = useRouter();
@@ -26,6 +28,7 @@ export default function BerandaPage() {
   const [userDisplay, setUserDisplay] = useState('');
   const [isAdmin, setIsAdmin] = useState(false);
   const [showUserModal, setShowUserModal] = useState(false);
+  const [showBackupModal, setShowBackupModal] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
@@ -113,16 +116,27 @@ export default function BerandaPage() {
           </div>
 
           <div className="flex items-center gap-2">
-            {/* Tombol Kelola Anggota (Hanya untuk Admin) */}
+            {/* Tombol Kelola Anggota & Backup Database (Hanya untuk Admin) */}
             {isAdmin && (
-              <button
-                onClick={() => setShowUserModal(true)}
-                title="Kelola Anggota & Hak Akses"
-                className="min-h-touch h-10 px-3.5 rounded-xl bg-white/20 hover:bg-white/30 border border-white/30 text-white text-xs font-bold flex items-center gap-1.5 transition-all shadow-xs backdrop-blur-md cursor-pointer"
-              >
-                <Users size={14} strokeWidth={2.5} />
-                <span className="hidden sm:inline">Kelola Anggota</span>
-              </button>
+              <>
+                <button
+                  onClick={() => setShowBackupModal(true)}
+                  title="Cadangkan & Pulihkan Database MySQL"
+                  className="min-h-touch h-10 px-3.5 rounded-xl bg-white/20 hover:bg-white/30 border border-white/30 text-white text-xs font-bold flex items-center gap-1.5 transition-all shadow-xs backdrop-blur-md cursor-pointer"
+                >
+                  <Database size={14} strokeWidth={2.5} />
+                  <span className="hidden sm:inline">Backup DB</span>
+                </button>
+
+                <button
+                  onClick={() => setShowUserModal(true)}
+                  title="Kelola Anggota & Hak Akses"
+                  className="min-h-touch h-10 px-3.5 rounded-xl bg-white/20 hover:bg-white/30 border border-white/30 text-white text-xs font-bold flex items-center gap-1.5 transition-all shadow-xs backdrop-blur-md cursor-pointer"
+                >
+                  <Users size={14} strokeWidth={2.5} />
+                  <span className="hidden sm:inline">Kelola Anggota</span>
+                </button>
+              </>
             )}
 
             <Link
@@ -329,6 +343,12 @@ export default function BerandaPage() {
       <UserManagementModal
         isOpen={showUserModal}
         onClose={() => setShowUserModal(false)}
+      />
+
+      {/* ── MODAL CADANGKAN & PULIHKAN DATABASE ── */}
+      <DatabaseBackupModal
+        isOpen={showBackupModal}
+        onClose={() => setShowBackupModal(false)}
       />
 
     </div>
