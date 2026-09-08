@@ -1077,51 +1077,6 @@ export default function LandingPage() {
                   </Link>
                 </div>
 
-                {/* 3 Stat Ringkasan Cards RPH */}
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
-                  {/* Card 1: Total Unit RPH */}
-                  <div className="p-4 sm:p-5 rounded-2xl bg-blue-50/70 border border-blue-100 flex items-center justify-between gap-3 shadow-2xs">
-                    <div className="min-w-0 flex-1">
-                      <p className="text-xs font-semibold text-slate-500 mb-1 truncate">Unit RPH Resmi</p>
-                      <p className="text-2xl sm:text-3xl font-bold text-slate-900 tracking-tight">2 Unit Utama</p>
-                      <p className="text-[11px] sm:text-xs font-medium text-blue-600 mt-1 truncate">
-                        RPH Kebumen &amp; RPH Gombong
-                      </p>
-                    </div>
-                    <div className="w-11 h-11 sm:w-12 sm:h-12 rounded-full bg-blue-600 text-white flex items-center justify-center shrink-0 shadow-xs">
-                      <Building2 size={22} />
-                    </div>
-                  </div>
-
-                  {/* Card 2: Standar Halal & Juleha */}
-                  <div className="p-4 sm:p-5 rounded-2xl bg-emerald-50/70 border border-emerald-100 flex items-center justify-between gap-3 shadow-2xs">
-                    <div className="min-w-0 flex-1">
-                      <p className="text-xs font-semibold text-slate-500 mb-1 truncate">Standarisasi Pemotongan</p>
-                      <p className="text-2xl sm:text-3xl font-bold text-emerald-900 tracking-tight">100% Halal &amp; ASUH</p>
-                      <p className="text-[11px] sm:text-xs font-medium text-emerald-600 mt-1 truncate">
-                        Juru Sembelih Halal &amp; Medis Terpadu
-                      </p>
-                    </div>
-                    <div className="w-11 h-11 sm:w-12 sm:h-12 rounded-full bg-emerald-600 text-white flex items-center justify-center shrink-0 shadow-xs">
-                      <CheckCircle2 size={22} />
-                    </div>
-                  </div>
-
-                  {/* Card 3: Komoditas Terlayani */}
-                  <div className="p-4 sm:p-5 rounded-2xl bg-indigo-50/70 border border-indigo-100 flex items-center justify-between gap-3 shadow-2xs">
-                    <div className="min-w-0 flex-1">
-                      <p className="text-xs font-semibold text-slate-500 mb-1 truncate">Komoditas Terlayani</p>
-                      <p className="text-2xl sm:text-3xl font-bold text-indigo-900 tracking-tight">Sapi, Kambing, Babi</p>
-                      <p className="text-[11px] sm:text-xs font-medium text-indigo-600 mt-1 truncate">
-                        Gombong: Tempat Terpisah Untuk Babi
-                      </p>
-                    </div>
-                    <div className="w-11 h-11 sm:w-12 sm:h-12 rounded-full bg-indigo-600 text-white flex items-center justify-center shrink-0 shadow-xs">
-                      <Layers size={22} />
-                    </div>
-                  </div>
-                </div>
-
                 {/* Search & View Switcher Toolbar RPH */}
                 <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2.5 pt-1">
                   <div className="relative flex-1 max-w-md">
@@ -1130,7 +1085,7 @@ export default function LandingPage() {
                       type="text"
                       value={searchRphFilter}
                       onChange={(e) => setSearchRphFilter(e.target.value)}
-                      placeholder="Cari RPH Kebumen, Gombong, lokasi, komoditas..."
+                      placeholder="Cari RPH Kebumen, Gombong, atau lokasi..."
                       className="w-full h-9 pl-9 pr-8 rounded-xl border border-blue-200/80 bg-white text-xs text-slate-800 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all shadow-2xs"
                     />
                     {searchRphFilter && (
@@ -1182,7 +1137,6 @@ export default function LandingPage() {
                     {/* CARD 1: RPH KEBUMEN */}
                     {('rph kebumen'.includes(searchRphFilter.toLowerCase()) ||
                       'kebumen'.includes(searchRphFilter.toLowerCase()) ||
-                      'sapi'.includes(searchRphFilter.toLowerCase()) ||
                       searchRphFilter === '') && (
                       <div className="rounded-2xl border border-blue-100 bg-gradient-to-b from-white to-blue-50/20 p-5 hover:border-blue-300 hover:shadow-md transition-all duration-200 flex flex-col justify-between group space-y-4 shadow-2xs">
                         <div className="space-y-3">
@@ -1205,24 +1159,6 @@ export default function LandingPage() {
                               <CheckCircle2 size={12} className="text-emerald-600" />
                               Sertifikat Halal Resmi
                             </span>
-                          </div>
-
-                          {/* Layanan Komoditas Hewan */}
-                          <div className="pt-2 border-t border-blue-50">
-                            <p className="text-[11px] font-bold text-slate-600 mb-1.5 flex items-center gap-1">
-                              <Activity size={12} className="text-blue-600" />
-                              <span>Komoditas Pemotongan Ternak:</span>
-                            </p>
-                            <div className="flex flex-wrap gap-1.5">
-                              {['Sapi PO', 'Sapi Simmental', 'Sapi Limousine', 'Kerbau', 'Kambing / Domba'].map((kom) => (
-                                <span
-                                  key={kom}
-                                  className="px-2.5 py-1 rounded-lg text-xs font-semibold bg-white border border-blue-200/90 text-blue-900 shadow-2xs"
-                                >
-                                  {kom}
-                                </span>
-                              ))}
-                            </div>
                           </div>
 
                           {/* Fasilitas & Standar Higienis */}
@@ -1282,8 +1218,6 @@ export default function LandingPage() {
                     {/* CARD 2: RPH GOMBONG */}
                     {('rph gombong'.includes(searchRphFilter.toLowerCase()) ||
                       'gombong'.includes(searchRphFilter.toLowerCase()) ||
-                      'babi'.includes(searchRphFilter.toLowerCase()) ||
-                      'sapi'.includes(searchRphFilter.toLowerCase()) ||
                       searchRphFilter === '') && (
                       <div className="rounded-2xl border border-indigo-100 bg-gradient-to-b from-white to-indigo-50/20 p-5 hover:border-indigo-300 hover:shadow-md transition-all duration-200 flex flex-col justify-between group space-y-4 shadow-2xs">
                         <div className="space-y-3">
@@ -1306,28 +1240,6 @@ export default function LandingPage() {
                               <CheckCircle2 size={12} className="text-emerald-600" />
                               Sertifikat Halal Resmi
                             </span>
-                          </div>
-
-                          {/* Layanan Komoditas Hewan */}
-                          <div className="pt-2 border-t border-indigo-50">
-                            <p className="text-[11px] font-bold text-slate-600 mb-1.5 flex items-center gap-1">
-                              <Activity size={12} className="text-indigo-600" />
-                              <span>Komoditas Pemotongan Ternak:</span>
-                            </p>
-                            <div className="flex flex-wrap gap-1.5">
-                              {['Sapi PO', 'Sapi Limousine', 'Kambing', 'Babi (Tempat Khusus Terpisah)'].map((kom) => (
-                                <span
-                                  key={kom}
-                                  className={`px-2.5 py-1 rounded-lg text-xs font-semibold border shadow-2xs ${
-                                    kom.includes('Babi')
-                                      ? 'bg-amber-50 border-amber-200 text-amber-900'
-                                      : 'bg-white border-indigo-200/90 text-indigo-900'
-                                  }`}
-                                >
-                                  {kom}
-                                </span>
-                              ))}
-                            </div>
                           </div>
 
                           {/* Fasilitas & Standar Higienis */}
@@ -1394,7 +1306,6 @@ export default function LandingPage() {
                           <th className="p-3 sm:p-3.5 w-12 text-center">NO</th>
                           <th className="p-3 sm:p-3.5">NAMA RUMAH POTONG HEWAN</th>
                           <th className="p-3 sm:p-3.5">LOKASI KECAMATAN</th>
-                          <th className="p-3 sm:p-3.5">KOMODITAS PEMOTONGAN</th>
                           <th className="p-3 sm:p-3.5">STANDAR HYGIENE &amp; HALAL</th>
                           <th className="p-3 sm:p-3.5">LOKASI MAPS</th>
                         </tr>
@@ -1409,11 +1320,6 @@ export default function LandingPage() {
                             </div>
                           </td>
                           <td className="p-3.5 text-slate-700">Kecamatan Kebumen</td>
-                          <td className="p-3.5">
-                            <span className="px-2 py-0.5 rounded-md text-xs font-semibold bg-blue-50 text-blue-800 border border-blue-200">
-                              Sapi PO, Simmental, Limousine, Kambing
-                            </span>
-                          </td>
                           <td className="p-3.5">
                             <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
                               <CheckCircle2 size={12} />
@@ -1443,11 +1349,6 @@ export default function LandingPage() {
                             </div>
                           </td>
                           <td className="p-3.5 text-slate-700">Kecamatan Gombong</td>
-                          <td className="p-3.5">
-                            <span className="px-2 py-0.5 rounded-md text-xs font-semibold bg-indigo-50 text-indigo-800 border border-indigo-200">
-                              Sapi, Kambing, &amp; Babi (Line Terpisah)
-                            </span>
-                          </td>
                           <td className="p-3.5">
                             <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
                               <CheckCircle2 size={12} />
