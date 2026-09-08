@@ -711,7 +711,7 @@ export default function UnifiedSKLBPage() {
 
                     const commonProps = {
                       fill: colorInfo.fill,
-                      stroke: isSelected ? '#064E3B' : isHovered ? '#0F172A' : '#FFFFFF',
+                      stroke: isSelected ? '#451A03' : isHovered ? '#78350F' : '#FFFFFF',
                       strokeWidth: isSelected ? 90 : isHovered ? 60 : 35,
                       strokeLinejoin: 'round' as const,
                       strokeLinecap: 'round' as const,
@@ -760,7 +760,7 @@ export default function UnifiedSKLBPage() {
                           fontFamily="system-ui, -apple-system, sans-serif"
                           style={
                             colorInfo.textColor === '#FFFFFF'
-                              ? { paintOrder: 'stroke', stroke: '#064E3B', strokeWidth: '55px' }
+                              ? { paintOrder: 'stroke', stroke: '#451A03', strokeWidth: '55px' }
                               : { paintOrder: 'stroke', stroke: '#FFFFFF', strokeWidth: '40px' }
                           }
                         >
@@ -777,7 +777,7 @@ export default function UnifiedSKLBPage() {
                           fontFamily="system-ui, -apple-system, sans-serif"
                           style={
                             colorInfo.textColor === '#FFFFFF'
-                              ? { paintOrder: 'stroke', stroke: '#064E3B', strokeWidth: '65px' }
+                              ? { paintOrder: 'stroke', stroke: '#451A03', strokeWidth: '65px' }
                               : { paintOrder: 'stroke', stroke: '#FFFFFF', strokeWidth: '50px' }
                           }
                         >
@@ -794,7 +794,7 @@ export default function UnifiedSKLBPage() {
                           fontFamily="system-ui, -apple-system, sans-serif"
                           style={
                             colorInfo.textColor === '#FFFFFF'
-                              ? { paintOrder: 'stroke', stroke: '#064E3B', strokeWidth: '45px' }
+                              ? { paintOrder: 'stroke', stroke: '#451A03', strokeWidth: '45px' }
                               : { paintOrder: 'stroke', stroke: '#FFFFFF', strokeWidth: '35px' }
                           }
                         >
@@ -808,19 +808,19 @@ export default function UnifiedSKLBPage() {
 
               {/* Detail Box Saat Kecamatan Dipilih */}
               {selectedKecamatan && (
-                <div className="w-full mt-4 p-4.5 bg-white rounded-2xl border border-emerald-200 shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-3 animate-in fade-in">
+                <div className="w-full mt-4 p-4.5 bg-white rounded-2xl border border-amber-200 shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-3 animate-in fade-in">
                   <div className="flex items-center gap-3">
                     <div
                       className="w-11 h-11 rounded-2xl flex items-center justify-center font-bold text-white text-base shadow-xs shrink-0"
                       style={{ backgroundColor: getSapiPOColor(sapiPOKecMap[selectedKecamatan.id.toLowerCase().replace('k_', '')] || 0).fill }}
                     >
-                      <MapPin size={22} className={getSapiPOColor(sapiPOKecMap[selectedKecamatan.id.toLowerCase().replace('k_', '')] || 0).textColor === '#064E3B' ? 'text-emerald-950' : 'text-white'} />
+                      <MapPin size={22} className={getSapiPOColor(sapiPOKecMap[selectedKecamatan.id.toLowerCase().replace('k_', '')] || 0).textColor === '#78350F' ? 'text-amber-950' : 'text-white'} />
                     </div>
                     <div>
                       <h4 className="text-sm font-extrabold text-slate-900">Kecamatan {selectedKecamatan.nama}</h4>
                       <p className="text-xs font-semibold text-slate-500">
                         Populasi Sapi PO Tahun {selectedYear}:{' '}
-                        <span className="text-emerald-800 font-black text-sm">
+                        <span className="text-amber-900 font-black text-sm">
                           {(sapiPOKecMap[selectedKecamatan.id.toLowerCase().replace('k_', '')] || 0).toLocaleString('id-ID')} Ekor
                         </span>
                       </p>

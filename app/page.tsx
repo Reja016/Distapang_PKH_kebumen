@@ -34,6 +34,7 @@ import {
   Navigation,
   ExternalLink,
   Loader2,
+  Layers,
 } from 'lucide-react';
 
 const PALETTE_TERNAK = [
@@ -135,6 +136,9 @@ export default function LandingPage() {
   const [searchVaksin, setSearchVaksin] = useState('');
   const [searchPuskeswan, setSearchPuskeswan] = useState('');
   const [puskeswanViewMode, setPuskeswanViewMode] = useState<'cards' | 'table'>('cards');
+  const [facilityTab, setFacilityTab] = useState<'puskeswan' | 'rph'>('puskeswan');
+  const [searchRphFilter, setSearchRphFilter] = useState('');
+  const [rphViewMode, setRphViewMode] = useState<'cards' | 'table'>('cards');
 
   // Form login
   const [loginId, setLoginId] = useState('');
@@ -331,7 +335,7 @@ export default function LandingPage() {
                 Ringkasan Wilayah
               </a>
               <a href="#puskeswan" className="hover:text-blue-600 transition-colors">
-                Puskeswan Aktif
+                Puskeswan & RPH
               </a>
               <a href="#modul" className="hover:text-blue-600 transition-colors">
                 Modul Data
@@ -642,362 +646,297 @@ export default function LandingPage() {
             </div>
           </section>
 
-          {/* ── SECTION: DATA UNIT PUSKESWAN AKTIF (Dari Database) ── */}
+          {/* ── SECTION: DATA UNIT PELAYANAN PUBLIK (PUSKESWAN & RPH) ── */}
           <section id="puskeswan" className="space-y-4 sm:space-y-5 scroll-mt-20">
-            <div className="flex flex-col xs:flex-row xs:items-center justify-between gap-2 sm:gap-3">
-              <div className="flex items-center flex-wrap gap-2 sm:gap-3">
-                <div>
-                  <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-sky-50 border border-sky-200 text-[11px] font-bold text-sky-700 mb-1">
-                    <Stethoscope size={13} className="text-sky-600" />
-                    <span>Cakupan Pelayanan Kesehatan Hewan Terpadu</span>
-                  </div>
-                  <h2 className="text-base sm:text-xl font-bold text-slate-900 tracking-tight">
-                    Data {puskeswanList.length} Unit Puskeswan Aktif Kabupaten Kebumen
-                  </h2>
-                  <p className="text-[11px] sm:text-xs text-slate-500">
-                    Rekapitulasi resmi cakupan kecamatan binaan, koordinator dokter hewan, dan pos pelayanan keliling (Pusling)
-                  </p>
-                </div>
-              </div>
-
-              <Link
-                href="/keswan/puskeswan"
-                className="text-xs font-bold text-blue-600 hover:text-blue-700 flex items-center gap-1 transition-colors self-start xs:self-auto"
+            
+            {/* TAB NAVIGASI FASILITAS PELAYANAN (KIRI & KANAN) */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 p-1.5 rounded-2xl bg-blue-50/80 border border-blue-200/90 shadow-2xs">
+              <button
+                type="button"
+                onClick={() => setFacilityTab('puskeswan')}
+                className={`min-h-touch h-11 px-4 rounded-xl font-bold text-xs sm:text-sm flex items-center justify-center gap-2 transition-all cursor-pointer ${
+                  facilityTab === 'puskeswan'
+                    ? 'bg-blue-600 text-white shadow-xs scale-[1.01]'
+                    : 'bg-white/70 hover:bg-white text-slate-700 hover:text-blue-700 border border-blue-100'
+                }`}
               >
-                <span>Buka Lembar Kerja Kinerja</span>
-                <ChevronRight size={14} />
-              </Link>
+                <Stethoscope size={18} />
+                <span>Unit Puskeswan (8 Unit Aktif)</span>
+              </button>
+              
+              <button
+                type="button"
+                onClick={() => setFacilityTab('rph')}
+                className={`min-h-touch h-11 px-4 rounded-xl font-bold text-xs sm:text-sm flex items-center justify-center gap-2 transition-all cursor-pointer ${
+                  facilityTab === 'rph'
+                    ? 'bg-blue-600 text-white shadow-xs scale-[1.01]'
+                    : 'bg-white/70 hover:bg-white text-slate-700 hover:text-blue-700 border border-blue-100'
+                }`}
+              >
+                <Building2 size={18} />
+                <span>Rumah Potong Hewan (RPH Kebumen &amp; Gombong)</span>
+              </button>
             </div>
 
-            {/* 3 Stat Ringkasan Cards (Blue & White Theme) */}
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
-              {/* Card 1: Total Unit */}
-              <div className="p-4 sm:p-5 rounded-2xl bg-blue-50/70 border border-blue-100 flex items-center justify-between gap-3 shadow-2xs">
-                <div className="min-w-0 flex-1">
-                  <p className="text-xs font-semibold text-slate-500 mb-1 truncate">Unit Puskeswan Aktif</p>
-                  <p className="text-2xl sm:text-3xl font-bold text-slate-900 tracking-tight">{puskeswanList.length} Unit</p>
-                  <p className="text-[11px] sm:text-xs font-medium text-emerald-600 mt-1 flex items-center gap-1">
-                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                    100% Beroperasi Aktif
-                  </p>
-                </div>
-                <div className="w-11 h-11 sm:w-12 sm:h-12 rounded-full bg-blue-600 text-white flex items-center justify-center shrink-0 shadow-xs">
-                  <Building2 size={22} />
-                </div>
-              </div>
-
-              {/* Card 2: Wilayah Binaan (Kecamatan) */}
-              <div className="p-4 sm:p-5 rounded-2xl bg-sky-50/70 border border-sky-100 flex items-center justify-between gap-3 shadow-2xs">
-                <div className="min-w-0 flex-1">
-                  <p className="text-xs font-semibold text-slate-500 mb-1 truncate">Cakupan Wilayah</p>
-                  <p className="text-2xl sm:text-3xl font-bold text-slate-900 tracking-tight">26 Kecamatan</p>
-                  <p className="text-[11px] sm:text-xs font-medium text-slate-500 mt-1 truncate">
-                    Seluruh Kab. Kebumen
-                  </p>
-                </div>
-                <div className="w-11 h-11 sm:w-12 sm:h-12 rounded-full bg-sky-600 text-white flex items-center justify-center shrink-0 shadow-xs">
-                  <MapPin size={22} />
-                </div>
-              </div>
-
-              {/* Card 3: Koordinator Puskeswan */}
-              <div className="p-4 sm:p-5 rounded-2xl bg-[#f0f6ff] border border-blue-100 flex items-center justify-between gap-3 shadow-2xs">
-                <div className="min-w-0 flex-1">
-                  <p className="text-xs font-semibold text-slate-500 mb-1 truncate">Koordinator Puskeswan</p>
-                  <p className="text-2xl sm:text-3xl font-bold text-slate-900 tracking-tight">{puskeswanList.length} Dokter Hewan</p>
-                  <p className="text-[11px] sm:text-xs font-medium text-slate-500 mt-1 truncate">
-                    Di Wilayah Pelayanan Kabupaten Kebumen
-                  </p>
-                </div>
-                <div className="w-11 h-11 sm:w-12 sm:h-12 rounded-full bg-blue-500 text-white flex items-center justify-center shrink-0 shadow-xs">
-                  <Users size={22} />
-                </div>
-              </div>
-            </div>
-
-            {/* Search & View Switcher Toolbar */}
-            <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2.5 pt-1">
-              <div className="relative flex-1 max-w-md">
-                <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" size={15} />
-                <input
-                  type="text"
-                  value={searchPuskeswan}
-                  onChange={(e) => setSearchPuskeswan(e.target.value)}
-                  placeholder="Cari puskeswan, kecamatan binaan, atau dokter..."
-                  className="w-full h-9 pl-9 pr-8 rounded-xl border border-blue-200/80 bg-white text-xs text-slate-800 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all shadow-2xs"
-                />
-                {searchPuskeswan && (
-                  <button
-                    type="button"
-                    onClick={() => setSearchPuskeswan('')}
-                    className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 p-0.5 cursor-pointer"
-                    title="Hapus pencarian"
-                  >
-                    <X size={13} />
-                  </button>
-                )}
-              </div>
-
-              <div className="flex items-center gap-2 self-end sm:self-auto">
-                <span className="text-xs text-slate-500 font-medium mr-1 hidden xs:inline">
-                  Menampilkan <span className="font-bold text-blue-700">{filteredPuskeswan.length}</span> dari {puskeswanList.length} unit
-                </span>
-
-                <div className="inline-flex rounded-xl border border-blue-100 bg-white p-0.5 shadow-2xs">
-                  <button
-                    type="button"
-                    onClick={() => setPuskeswanViewMode('cards')}
-                    className={`px-3 py-1 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-all cursor-pointer ${
-                      puskeswanViewMode === 'cards'
-                        ? 'bg-blue-600 text-white shadow-xs'
-                        : 'text-slate-600 hover:text-blue-600'
-                    }`}
-                  >
-                    <LayoutGrid size={13} />
-                    <span>Kartu Wilayah</span>
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setPuskeswanViewMode('table')}
-                    className={`px-3 py-1 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-all cursor-pointer ${
-                      puskeswanViewMode === 'table'
-                        ? 'bg-blue-600 text-white shadow-xs'
-                        : 'text-slate-600 hover:text-blue-600'
-                    }`}
-                  >
-                    <List size={13} />
-                    <span>Tabel</span>
-                  </button>
-                </div>
-              </div>
-            </div>
-
-            {/* CARD GRID VIEW */}
-            {puskeswanViewMode === 'cards' ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {filteredPuskeswan.length === 0 ? (
-                  <div className="col-span-full p-8 text-center bg-slate-50/60 rounded-2xl border border-dashed border-slate-200 text-xs text-slate-500">
-                    Tidak ditemukan Puskeswan dengan kata kunci &quot;<span className="font-semibold text-slate-800">{searchPuskeswan}</span>&quot;
-                  </div>
-                ) : (
-                  filteredPuskeswan.map((item: any, idx: number) => (
-                    <div
-                      key={item.no || idx}
-                      className="rounded-2xl border border-blue-100 bg-gradient-to-b from-white to-blue-50/20 p-4 sm:p-5 hover:border-blue-300 hover:shadow-md transition-all duration-200 flex flex-col justify-between group space-y-4 shadow-2xs"
-                    >
-                      <div className="space-y-3">
-                        {/* Card Top */}
-                        <div className="flex items-start justify-between gap-2.5">
-                          <div className="flex items-start gap-3">
-                            <div className="w-10 h-10 rounded-2xl bg-sky-50 border border-sky-200 text-sky-700 flex items-center justify-center shrink-0 font-bold text-sm shadow-2xs group-hover:scale-105 transition-transform">
-                              {(idx + 1) < 10 ? `0${idx + 1}` : idx + 1}
-                            </div>
-                            <div>
-                              <h4 className="font-bold text-base text-slate-900 group-hover:text-blue-700 transition-colors flex items-center gap-1.5">
-                                <span>{item.nama}</span>
-                              </h4>
-                              <div className="flex items-center gap-1.5 mt-0.5">
-                                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-blue-50 border border-blue-200/80 text-[11px] font-semibold text-blue-700">
-                                  <Stethoscope size={11} className="text-blue-600" />
-                                  {item.koordinator}
-                                </span>
-                              </div>
-                            </div>
-                          </div>
-
-                          <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-emerald-50 border border-emerald-200 text-[10px] font-bold text-emerald-700 shrink-0">
-                            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                            {item.status || 'Aktif Melayani'}
-                          </span>
-                        </div>
-
-                        {/* Wilayah Pelayanan Binaan */}
-                        <div className="pt-2 border-t border-blue-50">
-                          <p className="text-[11px] font-bold text-slate-600 mb-1.5 flex items-center gap-1">
-                            <MapPin size={12} className="text-sky-600" />
-                            <span>Wilayah Pelayanan Binaan ({item.kecamatan?.length || 1} Kecamatan):</span>
-                          </p>
-                          <div className="flex flex-wrap gap-1.5">
-                            {(item.kecamatan || ['Kebumen']).map((kec: string) => (
-                              <span
-                                key={kec}
-                                className="px-2.5 py-1 rounded-lg text-xs font-semibold bg-white border border-blue-200/90 text-blue-900 shadow-2xs"
-                              >
-                                Kec. {kec}
-                              </span>
-                            ))}
-                          </div>
-                        </div>
-
-                        {/* Lokasi Google Maps */}
-                        <div className="pt-2 border-t border-blue-50">
-                          <p className="text-[11px] font-bold text-slate-600 mb-1.5 flex items-center gap-1">
-                            <Navigation size={12} className="text-emerald-600" />
-                            <span>Lokasi Google Maps:</span>
-                          </p>
-                          <a
-                            href={item.mapUrl}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="inline-flex items-center justify-between gap-2 w-full px-3 py-2 rounded-xl bg-emerald-50 hover:bg-emerald-100/80 text-emerald-800 border border-emerald-200/90 text-xs font-semibold transition-all group/map shadow-2xs"
-                          >
-                            <div className="flex items-center gap-2 min-w-0">
-                              <div className="w-6 h-6 rounded-lg bg-emerald-600 text-white flex items-center justify-center shrink-0 shadow-2xs group-hover/map:scale-105 transition-transform">
-                                <MapPin size={13} />
-                              </div>
-                              <span className="truncate">{item.alamat}</span>
-                            </div>
-                            <span className="inline-flex items-center gap-1 text-[11px] font-bold text-emerald-700 shrink-0 bg-white px-2 py-0.5 rounded-md border border-emerald-200">
-                              <span>Buka Maps</span>
-                              <ExternalLink size={11} />
-                            </span>
-                          </a>
-                        </div>
+            {/* ── KONTEN TAB 1: UNIT PUSKESWAN ── */}
+            {facilityTab === 'puskeswan' && (
+              <div className="space-y-4 sm:space-y-5 animate-in fade-in duration-200">
+                <div className="flex flex-col xs:flex-row xs:items-center justify-between gap-2 sm:gap-3">
+                  <div className="flex items-center flex-wrap gap-2 sm:gap-3">
+                    <div>
+                      <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-sky-50 border border-sky-200 text-[11px] font-bold text-sky-700 mb-1">
+                        <Stethoscope size={13} className="text-sky-600" />
+                        <span>Cakupan Pelayanan Kesehatan Hewan Terpadu</span>
                       </div>
-
-                      {/* Card Bottom: Dropdown Fasilitas & Layanan Medis */}
-                      <div className="pt-3 border-t border-blue-50/80">
-                        <button
-                          type="button"
-                          onClick={() =>
-                            setExpandedPuskeswanLayanan(
-                              expandedPuskeswanLayanan === (item.no || idx + 1) ? null : (item.no || idx + 1)
-                            )
-                          }
-                          className="w-full flex items-center justify-between p-2.5 rounded-xl bg-blue-50/70 hover:bg-blue-100/80 border border-blue-200/80 transition-all text-left cursor-pointer group/drop shadow-2xs"
-                        >
-                          <div className="flex items-center gap-2 min-w-0">
-                            <div className="w-6 h-6 rounded-lg bg-blue-600 text-white flex items-center justify-center shrink-0 shadow-2xs group-hover/drop:scale-105 transition-transform">
-                              <Stethoscope size={13} />
-                            </div>
-                            <span className="text-xs font-bold text-slate-800 truncate">
-                              Fasilitas &amp; Layanan Medis
-                            </span>
-                            <span className="px-1.5 py-0.5 rounded-full bg-blue-100 text-blue-700 text-[10px] font-bold shrink-0 hidden xs:inline">
-                              {item.layanan?.length || 4}
-                            </span>
-                          </div>
-                          <div
-                            className={`w-6 h-6 rounded-full bg-white flex items-center justify-center text-blue-600 transition-transform duration-200 shadow-2xs shrink-0 ${
-                              expandedPuskeswanLayanan === (item.no || idx + 1) ? 'rotate-180 bg-blue-600 text-white' : ''
-                            }`}
-                          >
-                            <ChevronDown size={14} />
-                          </div>
-                        </button>
-
-                        {/* Dropdown Menu Content */}
-                        {expandedPuskeswanLayanan === (item.no || idx + 1) && (
-                          <div className="mt-2 p-3 rounded-xl bg-slate-50/90 border border-blue-100 animate-in slide-in-from-top-2 duration-200 space-y-1.5">
-                            <p className="text-[10px] font-bold text-slate-500 uppercase tracking-wider pb-1 border-b border-slate-200/60 flex items-center justify-between">
-                              <span>Daftar Layanan Medis:</span>
-                              <span className="text-blue-600 font-semibold">{item.layanan?.length || 4} Layanan</span>
-                            </p>
-                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5 pt-0.5">
-                              {(item.layanan || ['Pelayanan Klinik', 'Pusling', 'IB & PKB', 'Vaksinasi']).map((lay: string, layIdx: number) => (
-                                <div
-                                  key={layIdx}
-                                  className="flex items-center gap-2 p-2 rounded-lg bg-white border border-blue-100/90 text-xs font-medium text-slate-800 shadow-2xs"
-                                >
-                                  <CheckCircle2 size={13} className="text-emerald-600 shrink-0" />
-                                  <span className="truncate">{lay}</span>
-                                </div>
-                              ))}
-                            </div>
-                          </div>
-                        )}
-                      </div>
+                      <h2 className="text-base sm:text-xl font-bold text-slate-900 tracking-tight">
+                        Data {puskeswanList.length} Unit Puskeswan Aktif Kabupaten Kebumen
+                      </h2>
+                      <p className="text-[11px] sm:text-xs text-slate-500">
+                        Rekapitulasi resmi cakupan kecamatan binaan, koordinator dokter hewan, dan pos pelayanan keliling (Pusling)
+                      </p>
                     </div>
-                  ))
-                )}
-              </div>
-            ) : (
-              /* TABLE VIEW */
-              <div className="overflow-x-auto rounded-xl border border-blue-100 shadow-2xs bg-white">
-                <table className="w-full text-left text-xs sm:text-sm whitespace-nowrap">
-                  <thead className="bg-blue-50/70 text-slate-700 font-semibold border-b border-blue-100">
-                    <tr>
-                      <th className="p-3 sm:p-3.5 w-12 text-center">NO</th>
-                      <th className="p-3 sm:p-3.5">NAMA PUSKESWAN</th>
-                      <th className="p-3 sm:p-3.5">WILAYAH PELAYANAN BINAAN</th>
-                      <th className="p-3 sm:p-3.5">KOORDINATOR MEDIK</th>
-                      <th className="p-3 sm:p-3.5">LOKASI GOOGLE MAPS</th>
-                      <th className="p-3 sm:p-3.5">FASILITAS &amp; LAYANAN MEDIS</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-blue-50/80 text-slate-800">
-                    {filteredPuskeswan.map((row: any, idx: number) => (
-                      <tr key={idx} className="hover:bg-blue-50/40 transition-colors">
-                        <td className="p-3 sm:p-3.5 text-center text-slate-400 font-bold">{idx + 1}</td>
-                        <td className="p-3.5 font-bold text-slate-900">
-                          <div className="flex items-center gap-2">
-                            <div className="w-7 h-7 rounded-lg bg-sky-50 border border-sky-200 text-sky-600 flex items-center justify-center shrink-0">
-                              <Stethoscope size={14} />
-                            </div>
-                            <span>{row.nama}</span>
-                          </div>
-                        </td>
-                        <td className="p-3.5">
-                          <div className="flex flex-wrap gap-1 max-w-md">
-                            {(row.kecamatan || ['Kebumen']).map((kec: string) => (
-                              <span key={kec} className="px-2 py-0.5 rounded-md text-xs font-semibold bg-blue-50 text-blue-800 border border-blue-200">
-                                Kec. {kec}
+                  </div>
+
+                  <Link
+                    href="/keswan/puskeswan"
+                    className="text-xs font-bold text-blue-600 hover:text-blue-700 flex items-center gap-1 transition-colors self-start xs:self-auto"
+                  >
+                    <span>Buka Lembar Kerja Kinerja</span>
+                    <ChevronRight size={14} />
+                  </Link>
+                </div>
+
+                {/* 3 Stat Ringkasan Cards (Blue & White Theme) */}
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
+                  {/* Card 1: Total Unit */}
+                  <div className="p-4 sm:p-5 rounded-2xl bg-blue-50/70 border border-blue-100 flex items-center justify-between gap-3 shadow-2xs">
+                    <div className="min-w-0 flex-1">
+                      <p className="text-xs font-semibold text-slate-500 mb-1 truncate">Unit Puskeswan Aktif</p>
+                      <p className="text-2xl sm:text-3xl font-bold text-slate-900 tracking-tight">{puskeswanList.length} Unit</p>
+                      <p className="text-[11px] sm:text-xs font-medium text-emerald-600 mt-1 flex items-center gap-1">
+                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                        100% Beroperasi Aktif
+                      </p>
+                    </div>
+                    <div className="w-11 h-11 sm:w-12 sm:h-12 rounded-full bg-blue-600 text-white flex items-center justify-center shrink-0 shadow-xs">
+                      <Building2 size={22} />
+                    </div>
+                  </div>
+
+                  {/* Card 2: Wilayah Binaan (Kecamatan) */}
+                  <div className="p-4 sm:p-5 rounded-2xl bg-sky-50/70 border border-sky-100 flex items-center justify-between gap-3 shadow-2xs">
+                    <div className="min-w-0 flex-1">
+                      <p className="text-xs font-semibold text-slate-500 mb-1 truncate">Cakupan Wilayah</p>
+                      <p className="text-2xl sm:text-3xl font-bold text-slate-900 tracking-tight">26 Kecamatan</p>
+                      <p className="text-[11px] sm:text-xs font-medium text-slate-500 mt-1 truncate">
+                        Seluruh Kab. Kebumen
+                      </p>
+                    </div>
+                    <div className="w-11 h-11 sm:w-12 sm:h-12 rounded-full bg-sky-600 text-white flex items-center justify-center shrink-0 shadow-xs">
+                      <MapPin size={22} />
+                    </div>
+                  </div>
+
+                  {/* Card 3: Puskeswan (Koordinator Dokter) */}
+                  <div className="p-4 sm:p-5 rounded-2xl bg-[#f0f6ff] border border-blue-100 flex items-center justify-between gap-3 shadow-2xs">
+                    <div className="min-w-0 flex-1">
+                      <p className="text-xs font-semibold text-slate-500 mb-1 truncate">Puskeswan</p>
+                      <p className="text-2xl sm:text-3xl font-bold text-slate-900 tracking-tight">{puskeswanList.length}</p>
+                      <p className="text-[11px] sm:text-xs font-medium text-slate-500 mt-1 truncate">
+                        {puskeswanList.length} Koordinator Dokter Puskeswan
+                      </p>
+                    </div>
+                    <div className="w-11 h-11 sm:w-12 sm:h-12 rounded-full bg-blue-500 text-white flex items-center justify-center shrink-0 shadow-xs">
+                      <Users size={22} />
+                    </div>
+                  </div>
+                </div>
+
+                {/* Search & View Switcher Toolbar */}
+                <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2.5 pt-1">
+                  <div className="relative flex-1 max-w-md">
+                    <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" size={15} />
+                    <input
+                      type="text"
+                      value={searchPuskeswan}
+                      onChange={(e) => setSearchPuskeswan(e.target.value)}
+                      placeholder="Cari puskeswan, kecamatan binaan, atau dokter..."
+                      className="w-full h-9 pl-9 pr-8 rounded-xl border border-blue-200/80 bg-white text-xs text-slate-800 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all shadow-2xs"
+                    />
+                    {searchPuskeswan && (
+                      <button
+                        type="button"
+                        onClick={() => setSearchPuskeswan('')}
+                        className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 p-0.5 cursor-pointer"
+                        title="Hapus pencarian"
+                      >
+                        <X size={13} />
+                      </button>
+                    )}
+                  </div>
+
+                  <div className="flex items-center gap-2 self-end sm:self-auto">
+                    <span className="text-xs text-slate-500 font-medium mr-1 hidden xs:inline">
+                      Menampilkan <span className="font-bold text-blue-700">{filteredPuskeswan.length}</span> dari {puskeswanList.length} unit
+                    </span>
+
+                    <div className="inline-flex rounded-xl border border-blue-100 bg-white p-0.5 shadow-2xs">
+                      <button
+                        type="button"
+                        onClick={() => setPuskeswanViewMode('cards')}
+                        className={`px-3 py-1 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-all cursor-pointer ${
+                          puskeswanViewMode === 'cards'
+                            ? 'bg-blue-600 text-white shadow-xs'
+                            : 'text-slate-600 hover:text-blue-600'
+                        }`}
+                      >
+                        <LayoutGrid size={13} />
+                        <span>Daftar Visual</span>
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setPuskeswanViewMode('table')}
+                        className={`px-3 py-1 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-all cursor-pointer ${
+                          puskeswanViewMode === 'table'
+                            ? 'bg-blue-600 text-white shadow-xs'
+                            : 'text-slate-600 hover:text-blue-600'
+                        }`}
+                      >
+                        <List size={13} />
+                        <span>Tabel</span>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+
+                {/* CARD GRID VIEW */}
+                {puskeswanViewMode === 'cards' ? (
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {filteredPuskeswan.length === 0 ? (
+                      <div className="col-span-full p-8 text-center bg-slate-50/60 rounded-2xl border border-dashed border-slate-200 text-xs text-slate-500">
+                        Tidak ditemukan Puskeswan dengan kata kunci &quot;<span className="font-semibold text-slate-800">{searchPuskeswan}</span>&quot;
+                      </div>
+                    ) : (
+                      filteredPuskeswan.map((item: any, idx: number) => (
+                        <div
+                          key={item.no || idx}
+                          className="rounded-2xl border border-blue-100 bg-gradient-to-b from-white to-blue-50/20 p-4 sm:p-5 hover:border-blue-300 hover:shadow-md transition-all duration-200 flex flex-col justify-between group space-y-4 shadow-2xs"
+                        >
+                          <div className="space-y-3">
+                            {/* Card Top */}
+                            <div className="flex items-start justify-between gap-2.5">
+                              <div className="flex items-start gap-3">
+                                <div className="w-10 h-10 rounded-2xl bg-sky-50 border border-sky-200 text-sky-700 flex items-center justify-center shrink-0 font-bold text-sm shadow-2xs group-hover:scale-105 transition-transform">
+                                  {(idx + 1) < 10 ? `0${idx + 1}` : idx + 1}
+                                </div>
+                                <div>
+                                  <h4 className="font-bold text-base text-slate-900 group-hover:text-blue-700 transition-colors flex items-center gap-1.5">
+                                    <span>{item.nama}</span>
+                                  </h4>
+                                  <div className="flex items-center gap-1.5 mt-0.5">
+                                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-blue-50 border border-blue-200/80 text-[11px] font-semibold text-blue-700">
+                                      <Stethoscope size={11} className="text-blue-600" />
+                                      {item.koordinator}
+                                    </span>
+                                  </div>
+                                </div>
+                              </div>
+
+                              <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-emerald-50 border border-emerald-200 text-[10px] font-bold text-emerald-700 shrink-0">
+                                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                                {item.status || 'Aktif Melayani'}
                               </span>
-                            ))}
+                            </div>
+
+                            {/* Wilayah Pelayanan Binaan */}
+                            <div className="pt-2 border-t border-blue-50">
+                              <p className="text-[11px] font-bold text-slate-600 mb-1.5 flex items-center gap-1">
+                                <MapPin size={12} className="text-sky-600" />
+                                <span>Wilayah Pelayanan Binaan ({item.kecamatan?.length || 1} Kecamatan):</span>
+                              </p>
+                              <div className="flex flex-wrap gap-1.5">
+                                {(item.kecamatan || ['Kebumen']).map((kec: string) => (
+                                 <span
+                                    key={kec}
+                                    className="px-2.5 py-1 rounded-lg text-xs font-semibold bg-white border border-blue-200/90 text-blue-900 shadow-2xs"
+                                  >
+                                    Kec. {kec}
+                                  </span>
+                                ))}
+                              </div>
+                            </div>
+
+                            {/* Lokasi Google Maps */}
+                            <div className="pt-2 border-t border-blue-50">
+                              <p className="text-[11px] font-bold text-slate-600 mb-1.5 flex items-center gap-1">
+                                <Navigation size={12} className="text-emerald-600" />
+                                <span>Lokasi Google Maps:</span>
+                              </p>
+                              <a
+                                href={item.mapUrl}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="inline-flex items-center justify-between gap-2 w-full px-3 py-2 rounded-xl bg-emerald-50 hover:bg-emerald-100/80 text-emerald-800 border border-emerald-200/90 text-xs font-semibold transition-all group/map shadow-2xs"
+                              >
+                                <div className="flex items-center gap-2 min-w-0">
+                                  <div className="w-6 h-6 rounded-lg bg-emerald-600 text-white flex items-center justify-center shrink-0 shadow-2xs group-hover/map:scale-105 transition-transform">
+                                    <MapPin size={13} />
+                                  </div>
+                                  <span className="truncate">{item.alamat}</span>
+                                </div>
+                                <span className="inline-flex items-center gap-1 text-[11px] font-bold text-emerald-700 shrink-0 bg-white px-2 py-0.5 rounded-md border border-emerald-200">
+                                  <span>Buka Maps</span>
+                                  <ExternalLink size={11} />
+                                </span>
+                              </a>
+                            </div>
                           </div>
-                        </td>
-                        <td className="p-3.5 font-semibold text-slate-700">
-                          <span className="px-2.5 py-1 rounded-lg text-xs font-semibold bg-sky-50 text-sky-700 border border-sky-200">
-                            {row.koordinator}
-                          </span>
-                        </td>
-                        <td className="p-3.5">
-                          <a
-                            href={row.mapUrl}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-200 text-xs font-semibold transition-all group/tabmap"
-                          >
-                            <MapPin size={13} className="text-emerald-600 group-hover/tabmap:scale-110 transition-transform" />
-                            <span>Buka Maps</span>
-                            <ExternalLink size={11} className="text-emerald-600" />
-                          </a>
-                        </td>
-                        <td className="p-3.5">
-                          <div className="relative">
+
+                          {/* Card Bottom: Dropdown Fasilitas & Layanan Medis */}
+                          <div className="pt-3 border-t border-blue-50/80">
                             <button
                               type="button"
                               onClick={() =>
-                                setExpandedTableLayanan(
-                                  expandedTableLayanan === (row.no || idx + 1) ? null : (row.no || idx + 1)
+                                setExpandedPuskeswanLayanan(
+                                  expandedPuskeswanLayanan === (item.no || idx + 1) ? null : (item.no || idx + 1)
                                 )
                               }
-                              className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-blue-50 hover:bg-blue-100 text-blue-700 border border-blue-200 text-xs font-semibold transition-all cursor-pointer"
+                              className="w-full flex items-center justify-between p-2.5 rounded-xl bg-blue-50/70 hover:bg-blue-100/80 border border-blue-200/80 transition-all text-left cursor-pointer group/drop shadow-2xs"
                             >
-                              <Stethoscope size={13} className="text-blue-600" />
-                              <span>Fasilitas &amp; Layanan ({row.layanan?.length || 4})</span>
-                              <ChevronDown
-                                size={13}
-                                className={`transition-transform duration-200 ${
-                                  expandedTableLayanan === (row.no || idx + 1) ? 'rotate-180' : ''
+                              <div className="flex items-center gap-2 min-w-0">
+                                <div className="w-6 h-6 rounded-lg bg-blue-600 text-white flex items-center justify-center shrink-0 shadow-2xs group-hover/drop:scale-105 transition-transform">
+                                  <Stethoscope size={13} />
+                                </div>
+                                <span className="text-xs font-bold text-slate-800 truncate">
+                                  Fasilitas &amp; Layanan Medis
+                                </span>
+                                <span className="px-1.5 py-0.5 rounded-full bg-blue-100 text-blue-700 text-[10px] font-bold shrink-0 hidden xs:inline">
+                                  {item.layanan?.length || 4}
+                                </span>
+                              </div>
+                              <div
+                                className={`w-6 h-6 rounded-full bg-white flex items-center justify-center text-blue-600 transition-transform duration-200 shadow-2xs shrink-0 ${
+                                  expandedPuskeswanLayanan === (item.no || idx + 1) ? 'rotate-180 bg-blue-600 text-white' : ''
                                 }`}
-                              />
+                              >
+                                <ChevronDown size={14} />
+                              </div>
                             </button>
 
-                            {/* Table Dropdown Menu */}
-                            {expandedTableLayanan === (row.no || idx + 1) && (
-                              <div className="absolute right-0 top-full mt-1.5 w-64 p-3 rounded-xl bg-white border border-blue-200 shadow-xl z-30 animate-in fade-in zoom-in-95 duration-150 space-y-1.5">
-                                <p className="text-[10px] font-bold text-slate-500 uppercase tracking-wider pb-1 border-b border-slate-100 flex items-center justify-between">
-                                  <span>{row.nama}</span>
-                                  <span className="text-blue-600 font-semibold">{row.layanan?.length || 4} Layanan</span>
+                            {/* Dropdown Menu Content */}
+                            {expandedPuskeswanLayanan === (item.no || idx + 1) && (
+                              <div className="mt-2 p-3 rounded-xl bg-slate-50/90 border border-blue-100 animate-in slide-in-from-top-2 duration-200 space-y-1.5">
+                                <p className="text-[10px] font-bold text-slate-500 uppercase tracking-wider pb-1 border-b border-slate-200/60 flex items-center justify-between">
+                                  <span>Daftar Layanan Medis:</span>
+                                  <span className="text-blue-600 font-semibold">{item.layanan?.length || 4} Layanan</span>
                                 </p>
-                                <div className="space-y-1">
-                                  {(row.layanan || ['Pelayanan Klinik', 'Pusling', 'IB & PKB', 'Vaksinasi']).map((lay: string, layIdx: number) => (
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5 pt-0.5">
+                                  {(item.layanan || ['Pelayanan Klinik', 'Pusling', 'IB & PKB', 'Vaksinasi']).map((lay: string, layIdx: number) => (
                                     <div
                                       key={layIdx}
-                                      className="flex items-center gap-2 text-xs font-medium text-slate-800 py-1 px-1.5 rounded-lg bg-slate-50 border border-slate-100"
+                                      className="flex items-center gap-2 p-2 rounded-lg bg-white border border-blue-100/90 text-xs font-medium text-slate-800 shadow-2xs"
                                     >
-                                      <CheckCircle2 size={12} className="text-emerald-600 shrink-0" />
+                                      <CheckCircle2 size={13} className="text-emerald-600 shrink-0" />
                                       <span className="truncate">{lay}</span>
                                     </div>
                                   ))}
@@ -1005,11 +944,537 @@ export default function LandingPage() {
                               </div>
                             )}
                           </div>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
+                        </div>
+                      ))
+                    )}
+                  </div>
+                ) : (
+                  /* TABLE VIEW PUSKESWAN */
+                  <div className="overflow-x-auto rounded-xl border border-blue-100 shadow-2xs bg-white">
+                    <table className="w-full text-left text-xs sm:text-sm whitespace-nowrap">
+                      <thead className="bg-blue-50/70 text-slate-700 font-semibold border-b border-blue-100">
+                        <tr>
+                          <th className="p-3 sm:p-3.5 w-12 text-center">NO</th>
+                          <th className="p-3 sm:p-3.5">NAMA PUSKESWAN</th>
+                          <th className="p-3 sm:p-3.5">WILAYAH PELAYANAN BINAAN</th>
+                          <th className="p-3 sm:p-3.5">KOORDINATOR MEDIK</th>
+                          <th className="p-3 sm:p-3.5">LOKASI GOOGLE MAPS</th>
+                          <th className="p-3 sm:p-3.5">FASILITAS &amp; LAYANAN MEDIS</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-blue-50/80 text-slate-800">
+                        {filteredPuskeswan.map((row: any, idx: number) => (
+                          <tr key={idx} className="hover:bg-blue-50/40 transition-colors">
+                            <td className="p-3 sm:p-3.5 text-center text-slate-400 font-bold">{idx + 1}</td>
+                            <td className="p-3.5 font-bold text-slate-900">
+                              <div className="flex items-center gap-2">
+                                <div className="w-7 h-7 rounded-lg bg-sky-50 border border-sky-200 text-sky-600 flex items-center justify-center shrink-0">
+                                  <Stethoscope size={14} />
+                                </div>
+                                <span>{row.nama}</span>
+                              </div>
+                            </td>
+                            <td className="p-3.5">
+                              <div className="flex flex-wrap gap-1 max-w-md">
+                                {(row.kecamatan || ['Kebumen']).map((kec: string) => (
+                                  <span key={kec} className="px-2 py-0.5 rounded-md text-xs font-semibold bg-blue-50 text-blue-800 border border-blue-200">
+                                    Kec. {kec}
+                                  </span>
+                                ))}
+                              </div>
+                            </td>
+                            <td className="p-3.5 font-semibold text-slate-700">
+                              <span className="px-2.5 py-1 rounded-lg text-xs font-semibold bg-sky-50 text-sky-700 border border-sky-200">
+                                {row.koordinator}
+                              </span>
+                            </td>
+                            <td className="p-3.5">
+                              <a
+                                href={row.mapUrl}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-200 text-xs font-semibold transition-all group/tabmap"
+                              >
+                                <MapPin size={13} className="text-emerald-600 group-hover/tabmap:scale-110 transition-transform" />
+                                <span>Buka Maps</span>
+                                <ExternalLink size={11} className="text-emerald-600" />
+                              </a>
+                            </td>
+                            <td className="p-3.5">
+                              <div className="relative">
+                                <button
+                                  type="button"
+                                  onClick={() =>
+                                    setExpandedTableLayanan(
+                                      expandedTableLayanan === (row.no || idx + 1) ? null : (row.no || idx + 1)
+                                    )
+                                  }
+                                  className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-blue-50 hover:bg-blue-100 text-blue-700 border border-blue-200 text-xs font-semibold transition-all cursor-pointer"
+                                >
+                                  <Stethoscope size={13} className="text-blue-600" />
+                                  <span>Fasilitas &amp; Layanan ({row.layanan?.length || 4})</span>
+                                  <ChevronDown
+                                    size={13}
+                                    className={`transition-transform duration-200 ${
+                                      expandedTableLayanan === (row.no || idx + 1) ? 'rotate-180' : ''
+                                    }`}
+                                  />
+                                </button>
+
+                                {/* Table Dropdown Menu */}
+                                {expandedTableLayanan === (row.no || idx + 1) && (
+                                  <div className="absolute right-0 top-full mt-1.5 w-64 p-3 rounded-xl bg-white border border-blue-200 shadow-xl z-30 animate-in fade-in zoom-in-95 duration-150 space-y-1.5">
+                                    <p className="text-[10px] font-bold text-slate-500 uppercase tracking-wider pb-1 border-b border-slate-100 flex items-center justify-between">
+                                      <span>{row.nama}</span>
+                                      <span className="text-blue-600 font-semibold">{row.layanan?.length || 4} Layanan</span>
+                                    </p>
+                                    <div className="space-y-1">
+                                      {(row.layanan || ['Pelayanan Klinik', 'Pusling', 'IB & PKB', 'Vaksinasi']).map((lay: string, layIdx: number) => (
+                                        <div
+                                          key={layIdx}
+                                          className="flex items-center gap-2 text-xs font-medium text-slate-800 py-1 px-1.5 rounded-lg bg-slate-50 border border-slate-100"
+                                        >
+                                          <CheckCircle2 size={12} className="text-emerald-600 shrink-0" />
+                                          <span className="truncate">{lay}</span>
+                                        </div>
+                                      ))}
+                                    </div>
+                                  </div>
+                                )}
+                              </div>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* ── KONTEN TAB 2: RUMAH POTONG HEWAN (RPH KEBUMEN & GOMBONG) ── */}
+            {facilityTab === 'rph' && (
+              <div className="space-y-4 sm:space-y-5 animate-in fade-in duration-200">
+                <div className="flex flex-col xs:flex-row xs:items-center justify-between gap-2 sm:gap-3">
+                  <div className="flex items-center flex-wrap gap-2 sm:gap-3">
+                    <div>
+                      <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-emerald-50 border border-emerald-200 text-[11px] font-bold text-emerald-700 mb-1">
+                        <Building2 size={13} className="text-emerald-600" />
+                        <span>Fasilitas Rumah Potong Hewan (RPH) Resmi Daerah</span>
+                      </div>
+                      <h2 className="text-base sm:text-xl font-bold text-slate-900 tracking-tight">
+                        Rumah Potong Hewan (RPH) Kabupaten Kebumen
+                      </h2>
+                      <p className="text-[11px] sm:text-xs text-slate-500">
+                        Fasilitas pemotongan ternak resmi berstandar ASUH (Aman, Sehat, Utuh, Halal) di RPH Kebumen dan RPH Gombong
+                      </p>
+                    </div>
+                  </div>
+
+                  <Link
+                    href="/kesmavet/rph-tph-tpu"
+                    className="text-xs font-bold text-blue-600 hover:text-blue-700 flex items-center gap-1 transition-colors self-start xs:self-auto"
+                  >
+                    <span>Buka Modul RPH-TPH-TPU</span>
+                    <ChevronRight size={14} />
+                  </Link>
+                </div>
+
+                {/* 3 Stat Ringkasan Cards RPH */}
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
+                  {/* Card 1: Total Unit RPH */}
+                  <div className="p-4 sm:p-5 rounded-2xl bg-blue-50/70 border border-blue-100 flex items-center justify-between gap-3 shadow-2xs">
+                    <div className="min-w-0 flex-1">
+                      <p className="text-xs font-semibold text-slate-500 mb-1 truncate">Unit RPH Resmi</p>
+                      <p className="text-2xl sm:text-3xl font-bold text-slate-900 tracking-tight">2 Unit Utama</p>
+                      <p className="text-[11px] sm:text-xs font-medium text-blue-600 mt-1 truncate">
+                        RPH Kebumen &amp; RPH Gombong
+                      </p>
+                    </div>
+                    <div className="w-11 h-11 sm:w-12 sm:h-12 rounded-full bg-blue-600 text-white flex items-center justify-center shrink-0 shadow-xs">
+                      <Building2 size={22} />
+                    </div>
+                  </div>
+
+                  {/* Card 2: Standar Halal & Juleha */}
+                  <div className="p-4 sm:p-5 rounded-2xl bg-emerald-50/70 border border-emerald-100 flex items-center justify-between gap-3 shadow-2xs">
+                    <div className="min-w-0 flex-1">
+                      <p className="text-xs font-semibold text-slate-500 mb-1 truncate">Standarisasi Pemotongan</p>
+                      <p className="text-2xl sm:text-3xl font-bold text-emerald-900 tracking-tight">100% Halal &amp; ASUH</p>
+                      <p className="text-[11px] sm:text-xs font-medium text-emerald-600 mt-1 truncate">
+                        Juru Sembelih Halal &amp; Medis Terpadu
+                      </p>
+                    </div>
+                    <div className="w-11 h-11 sm:w-12 sm:h-12 rounded-full bg-emerald-600 text-white flex items-center justify-center shrink-0 shadow-xs">
+                      <CheckCircle2 size={22} />
+                    </div>
+                  </div>
+
+                  {/* Card 3: Komoditas Terlayani */}
+                  <div className="p-4 sm:p-5 rounded-2xl bg-indigo-50/70 border border-indigo-100 flex items-center justify-between gap-3 shadow-2xs">
+                    <div className="min-w-0 flex-1">
+                      <p className="text-xs font-semibold text-slate-500 mb-1 truncate">Komoditas Terlayani</p>
+                      <p className="text-2xl sm:text-3xl font-bold text-indigo-900 tracking-tight">Sapi, Kambing, Babi</p>
+                      <p className="text-[11px] sm:text-xs font-medium text-indigo-600 mt-1 truncate">
+                        Gombong: Tempat Terpisah Untuk Babi
+                      </p>
+                    </div>
+                    <div className="w-11 h-11 sm:w-12 sm:h-12 rounded-full bg-indigo-600 text-white flex items-center justify-center shrink-0 shadow-xs">
+                      <Layers size={22} />
+                    </div>
+                  </div>
+                </div>
+
+                {/* Search & View Switcher Toolbar RPH */}
+                <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2.5 pt-1">
+                  <div className="relative flex-1 max-w-md">
+                    <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" size={15} />
+                    <input
+                      type="text"
+                      value={searchRphFilter}
+                      onChange={(e) => setSearchRphFilter(e.target.value)}
+                      placeholder="Cari RPH Kebumen, Gombong, lokasi, komoditas..."
+                      className="w-full h-9 pl-9 pr-8 rounded-xl border border-blue-200/80 bg-white text-xs text-slate-800 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all shadow-2xs"
+                    />
+                    {searchRphFilter && (
+                      <button
+                        type="button"
+                        onClick={() => setSearchRphFilter('')}
+                        className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 p-0.5 cursor-pointer"
+                        title="Hapus pencarian"
+                      >
+                        <X size={13} />
+                      </button>
+                    )}
+                  </div>
+
+                  <div className="flex items-center gap-2 self-end sm:self-auto">
+                    <div className="inline-flex rounded-xl border border-blue-100 bg-white p-0.5 shadow-2xs">
+                      <button
+                        type="button"
+                        onClick={() => setRphViewMode('cards')}
+                        className={`px-3 py-1 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-all cursor-pointer ${
+                          rphViewMode === 'cards'
+                            ? 'bg-blue-600 text-white shadow-xs'
+                            : 'text-slate-600 hover:text-blue-600'
+                        }`}
+                      >
+                        <LayoutGrid size={13} />
+                        <span>Daftar Visual</span>
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setRphViewMode('table')}
+                        className={`px-3 py-1 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-all cursor-pointer ${
+                          rphViewMode === 'table'
+                            ? 'bg-blue-600 text-white shadow-xs'
+                            : 'text-slate-600 hover:text-blue-600'
+                        }`}
+                      >
+                        <List size={13} />
+                        <span>Tabel</span>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+
+                {/* DAFTAR VISUAL RPH */}
+                {rphViewMode === 'cards' ? (
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    
+                    {/* CARD 1: RPH KEBUMEN */}
+                    {('rph kebumen'.includes(searchRphFilter.toLowerCase()) ||
+                      'kebumen'.includes(searchRphFilter.toLowerCase()) ||
+                      'sapi'.includes(searchRphFilter.toLowerCase()) ||
+                      searchRphFilter === '') && (
+                      <div className="rounded-2xl border border-blue-100 bg-gradient-to-b from-white to-blue-50/20 p-5 hover:border-blue-300 hover:shadow-md transition-all duration-200 flex flex-col justify-between group space-y-4 shadow-2xs">
+                        <div className="space-y-3">
+                          <div className="flex items-start justify-between gap-2.5">
+                            <div className="flex items-start gap-3">
+                              <div className="w-11 h-11 rounded-2xl bg-blue-600 text-white flex items-center justify-center shrink-0 font-bold text-sm shadow-2xs group-hover:scale-105 transition-transform">
+                                01
+                              </div>
+                              <div>
+                                <h4 className="font-bold text-base text-slate-900 group-hover:text-blue-700 transition-colors flex items-center gap-1.5">
+                                  <span>RPH Unit Kebumen</span>
+                                </h4>
+                                <p className="text-xs font-medium text-slate-500">
+                                  Rumah Potong Hewan Resmi Wilayah Kebumen
+                                </p>
+                              </div>
+                            </div>
+
+                            <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-emerald-50 border border-emerald-200 text-[10px] font-bold text-emerald-700 shrink-0">
+                              <CheckCircle2 size={12} className="text-emerald-600" />
+                              Sertifikat Halal Resmi
+                            </span>
+                          </div>
+
+                          {/* Layanan Komoditas Hewan */}
+                          <div className="pt-2 border-t border-blue-50">
+                            <p className="text-[11px] font-bold text-slate-600 mb-1.5 flex items-center gap-1">
+                              <Activity size={12} className="text-blue-600" />
+                              <span>Komoditas Pemotongan Ternak:</span>
+                            </p>
+                            <div className="flex flex-wrap gap-1.5">
+                              {['Sapi PO', 'Sapi Simmental', 'Sapi Limousine', 'Kerbau', 'Kambing / Domba'].map((kom) => (
+                                <span
+                                  key={kom}
+                                  className="px-2.5 py-1 rounded-lg text-xs font-semibold bg-white border border-blue-200/90 text-blue-900 shadow-2xs"
+                                >
+                                  {kom}
+                                </span>
+                              ))}
+                            </div>
+                          </div>
+
+                          {/* Fasilitas & Standar Higienis */}
+                          <div className="pt-2 border-t border-blue-50 space-y-1.5">
+                            <p className="text-[11px] font-bold text-slate-600 flex items-center gap-1">
+                              <ShieldCheck size={12} className="text-emerald-600" />
+                              <span>Fasilitas &amp; Standar Higienis:</span>
+                            </p>
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5 text-xs text-slate-700">
+                              <div className="flex items-center gap-1.5 p-1.5 rounded-lg bg-white border border-slate-100">
+                                <CheckCircle2 size={12} className="text-emerald-600 shrink-0" />
+                                <span>Juru Sembelih Halal (Juleha)</span>
+                              </div>
+                              <div className="flex items-center gap-1.5 p-1.5 rounded-lg bg-white border border-slate-100">
+                                <CheckCircle2 size={12} className="text-emerald-600 shrink-0" />
+                                <span>Pengawasan Medik Veteriner</span>
+                              </div>
+                              <div className="flex items-center gap-1.5 p-1.5 rounded-lg bg-white border border-slate-100">
+                                <CheckCircle2 size={12} className="text-emerald-600 shrink-0" />
+                                <span>Pemeriksaan Antemortem</span>
+                              </div>
+                              <div className="flex items-center gap-1.5 p-1.5 rounded-lg bg-white border border-slate-100">
+                                <CheckCircle2 size={12} className="text-emerald-600 shrink-0" />
+                                <span>Pemeriksaan Postmortem</span>
+                              </div>
+                            </div>
+                          </div>
+
+                          {/* Lokasi & Google Maps */}
+                          <div className="pt-2 border-t border-blue-50">
+                            <p className="text-[11px] font-bold text-slate-600 mb-1.5 flex items-center gap-1">
+                              <Navigation size={12} className="text-emerald-600" />
+                              <span>Lokasi Fasilitas:</span>
+                            </p>
+                            <a
+                              href="https://www.google.com/maps/search/?api=1&query=RPH+Kebumen"
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="inline-flex items-center justify-between gap-2 w-full px-3 py-2 rounded-xl bg-emerald-50 hover:bg-emerald-100/80 text-emerald-800 border border-emerald-200/90 text-xs font-semibold transition-all group/map shadow-2xs"
+                            >
+                              <div className="flex items-center gap-2 min-w-0">
+                                <div className="w-6 h-6 rounded-lg bg-emerald-600 text-white flex items-center justify-center shrink-0 shadow-2xs group-hover/map:scale-105 transition-transform">
+                                  <MapPin size={13} />
+                                </div>
+                                <span className="truncate">Kecamatan Kebumen, Kabupaten Kebumen</span>
+                              </div>
+                              <span className="inline-flex items-center gap-1 text-[11px] font-bold text-emerald-700 shrink-0 bg-white px-2 py-0.5 rounded-md border border-emerald-200">
+                                <span>Buka Maps</span>
+                                <ExternalLink size={11} />
+                              </span>
+                            </a>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* CARD 2: RPH GOMBONG */}
+                    {('rph gombong'.includes(searchRphFilter.toLowerCase()) ||
+                      'gombong'.includes(searchRphFilter.toLowerCase()) ||
+                      'babi'.includes(searchRphFilter.toLowerCase()) ||
+                      'sapi'.includes(searchRphFilter.toLowerCase()) ||
+                      searchRphFilter === '') && (
+                      <div className="rounded-2xl border border-indigo-100 bg-gradient-to-b from-white to-indigo-50/20 p-5 hover:border-indigo-300 hover:shadow-md transition-all duration-200 flex flex-col justify-between group space-y-4 shadow-2xs">
+                        <div className="space-y-3">
+                          <div className="flex items-start justify-between gap-2.5">
+                            <div className="flex items-start gap-3">
+                              <div className="w-11 h-11 rounded-2xl bg-indigo-600 text-white flex items-center justify-center shrink-0 font-bold text-sm shadow-2xs group-hover:scale-105 transition-transform">
+                                02
+                              </div>
+                              <div>
+                                <h4 className="font-bold text-base text-slate-900 group-hover:text-indigo-700 transition-colors flex items-center gap-1.5">
+                                  <span>RPH Unit Gombong</span>
+                                </h4>
+                                <p className="text-xs font-medium text-slate-500">
+                                  Rumah Potong Hewan Resmi Wilayah Gombong
+                                </p>
+                              </div>
+                            </div>
+
+                            <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-emerald-50 border border-emerald-200 text-[10px] font-bold text-emerald-700 shrink-0">
+                              <CheckCircle2 size={12} className="text-emerald-600" />
+                              Sertifikat Halal Resmi
+                            </span>
+                          </div>
+
+                          {/* Layanan Komoditas Hewan */}
+                          <div className="pt-2 border-t border-indigo-50">
+                            <p className="text-[11px] font-bold text-slate-600 mb-1.5 flex items-center gap-1">
+                              <Activity size={12} className="text-indigo-600" />
+                              <span>Komoditas Pemotongan Ternak:</span>
+                            </p>
+                            <div className="flex flex-wrap gap-1.5">
+                              {['Sapi PO', 'Sapi Limousine', 'Kambing', 'Babi (Tempat Khusus Terpisah)'].map((kom) => (
+                                <span
+                                  key={kom}
+                                  className={`px-2.5 py-1 rounded-lg text-xs font-semibold border shadow-2xs ${
+                                    kom.includes('Babi')
+                                      ? 'bg-amber-50 border-amber-200 text-amber-900'
+                                      : 'bg-white border-indigo-200/90 text-indigo-900'
+                                  }`}
+                                >
+                                  {kom}
+                                </span>
+                              ))}
+                            </div>
+                          </div>
+
+                          {/* Fasilitas & Standar Higienis */}
+                          <div className="pt-2 border-t border-indigo-50 space-y-1.5">
+                            <p className="text-[11px] font-bold text-slate-600 flex items-center gap-1">
+                              <ShieldCheck size={12} className="text-emerald-600" />
+                              <span>Fasilitas &amp; Standar Higienis:</span>
+                            </p>
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5 text-xs text-slate-700">
+                              <div className="flex items-center gap-1.5 p-1.5 rounded-lg bg-white border border-slate-100">
+                                <CheckCircle2 size={12} className="text-emerald-600 shrink-0" />
+                                <span>Jalur Halal Ruminansia</span>
+                              </div>
+                              <div className="flex items-center gap-1.5 p-1.5 rounded-lg bg-white border border-slate-100">
+                                <CheckCircle2 size={12} className="text-amber-600 shrink-0" />
+                                <span>Tempat Terpisah Khusus Babi</span>
+                              </div>
+                              <div className="flex items-center gap-1.5 p-1.5 rounded-lg bg-white border border-slate-100">
+                                <CheckCircle2 size={12} className="text-emerald-600 shrink-0" />
+                                <span>Juru Sembelih Halal (Juleha)</span>
+                              </div>
+                              <div className="flex items-center gap-1.5 p-1.5 rounded-lg bg-white border border-slate-100">
+                                <CheckCircle2 size={12} className="text-emerald-600 shrink-0" />
+                                <span>Pengawasan Medik Veteriner</span>
+                              </div>
+                            </div>
+                          </div>
+
+                          {/* Lokasi & Google Maps */}
+                          <div className="pt-2 border-t border-indigo-50">
+                            <p className="text-[11px] font-bold text-slate-600 mb-1.5 flex items-center gap-1">
+                              <Navigation size={12} className="text-emerald-600" />
+                              <span>Lokasi Fasilitas:</span>
+                            </p>
+                            <a
+                              href="https://www.google.com/maps/search/?api=1&query=RPH+Gombong+Kebumen"
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="inline-flex items-center justify-between gap-2 w-full px-3 py-2 rounded-xl bg-emerald-50 hover:bg-emerald-100/80 text-emerald-800 border border-emerald-200/90 text-xs font-semibold transition-all group/map shadow-2xs"
+                            >
+                              <div className="flex items-center gap-2 min-w-0">
+                                <div className="w-6 h-6 rounded-lg bg-emerald-600 text-white flex items-center justify-center shrink-0 shadow-2xs group-hover/map:scale-105 transition-transform">
+                                  <MapPin size={13} />
+                                </div>
+                                <span className="truncate">Kecamatan Gombong, Kabupaten Kebumen</span>
+                              </div>
+                              <span className="inline-flex items-center gap-1 text-[11px] font-bold text-emerald-700 shrink-0 bg-white px-2 py-0.5 rounded-md border border-emerald-200">
+                                <span>Buka Maps</span>
+                                <ExternalLink size={11} />
+                              </span>
+                            </a>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+
+                  </div>
+                ) : (
+                  /* TABEL VIEW RPH */
+                  <div className="overflow-x-auto rounded-xl border border-blue-100 shadow-2xs bg-white">
+                    <table className="w-full text-left text-xs sm:text-sm whitespace-nowrap">
+                      <thead className="bg-blue-50/70 text-slate-700 font-semibold border-b border-blue-100">
+                        <tr>
+                          <th className="p-3 sm:p-3.5 w-12 text-center">NO</th>
+                          <th className="p-3 sm:p-3.5">NAMA RUMAH POTONG HEWAN</th>
+                          <th className="p-3 sm:p-3.5">LOKASI KECAMATAN</th>
+                          <th className="p-3 sm:p-3.5">KOMODITAS PEMOTONGAN</th>
+                          <th className="p-3 sm:p-3.5">STANDAR HYGIENE &amp; HALAL</th>
+                          <th className="p-3 sm:p-3.5">LOKASI MAPS</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-blue-50/80 text-slate-800">
+                        <tr className="hover:bg-blue-50/40 transition-colors">
+                          <td className="p-3.5 text-center text-slate-400 font-bold">1</td>
+                          <td className="p-3.5 font-bold text-slate-900">
+                            <div className="flex items-center gap-2">
+                              <Building2 size={16} className="text-blue-600 shrink-0" />
+                              <span>RPH Unit Kebumen</span>
+                            </div>
+                          </td>
+                          <td className="p-3.5 text-slate-700">Kecamatan Kebumen</td>
+                          <td className="p-3.5">
+                            <span className="px-2 py-0.5 rounded-md text-xs font-semibold bg-blue-50 text-blue-800 border border-blue-200">
+                              Sapi PO, Simmental, Limousine, Kambing
+                            </span>
+                          </td>
+                          <td className="p-3.5">
+                            <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                              <CheckCircle2 size={12} />
+                              Sertifikat Halal Resmi &amp; Juleha
+                            </span>
+                          </td>
+                          <td className="p-3.5">
+                            <a
+                              href="https://www.google.com/maps/search/?api=1&query=RPH+Kebumen"
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-200 text-xs font-semibold transition-all"
+                            >
+                              <MapPin size={13} className="text-emerald-600" />
+                              <span>Buka Maps</span>
+                              <ExternalLink size={11} className="text-emerald-600" />
+                            </a>
+                          </td>
+                        </tr>
+
+                        <tr className="hover:bg-blue-50/40 transition-colors">
+                          <td className="p-3.5 text-center text-slate-400 font-bold">2</td>
+                          <td className="p-3.5 font-bold text-slate-900">
+                            <div className="flex items-center gap-2">
+                              <Building2 size={16} className="text-indigo-600 shrink-0" />
+                              <span>RPH Unit Gombong</span>
+                            </div>
+                          </td>
+                          <td className="p-3.5 text-slate-700">Kecamatan Gombong</td>
+                          <td className="p-3.5">
+                            <span className="px-2 py-0.5 rounded-md text-xs font-semibold bg-indigo-50 text-indigo-800 border border-indigo-200">
+                              Sapi, Kambing, &amp; Babi (Line Terpisah)
+                            </span>
+                          </td>
+                          <td className="p-3.5">
+                            <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                              <CheckCircle2 size={12} />
+                              Sertifikat Halal &amp; Tempat Khusus Babi
+                            </span>
+                          </td>
+                          <td className="p-3.5">
+                            <a
+                              href="https://www.google.com/maps/search/?api=1&query=RPH+Gombong+Kebumen"
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-200 text-xs font-semibold transition-all"
+                            >
+                              <MapPin size={13} className="text-emerald-600" />
+                              <span>Buka Maps</span>
+                              <ExternalLink size={11} className="text-emerald-600" />
+                            </a>
+                          </td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                )}
+
               </div>
             )}
 
