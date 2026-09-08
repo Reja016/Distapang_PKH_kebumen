@@ -38,3 +38,6 @@ next-env.d.ts
 SOP_MAINTENANCE_SIMANTAP.md
 DATABASE_MIGRATIONS.md
 *.sql
+.next.zip
+deploy.bat
+deploy.ps1
