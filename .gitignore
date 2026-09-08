@@ -39,5 +39,6 @@ SOP_MAINTENANCE_SIMANTAP.md
 DATABASE_MIGRATIONS.md
 *.sql
 .next.zip
+.next.tar.gz
 deploy.bat
 deploy.ps1
