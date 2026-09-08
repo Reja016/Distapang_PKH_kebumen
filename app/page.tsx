@@ -321,9 +321,6 @@ export default function LandingPage() {
               <span className="font-bold text-base sm:text-xl text-blue-600 tracking-tight">
                 SiMantap
               </span>
-              <div className="inline-flex items-center gap-1 px-2 sm:px-2.5 py-0.5 rounded-full bg-blue-50 border border-blue-200 text-blue-700 text-[10px] sm:text-xs font-semibold">
-                <span>Kebumen</span>
-              </div>
             </div>
           </div>
 
@@ -407,7 +404,7 @@ export default function LandingPage() {
             <div className="max-w-md xl:max-w-lg">
               <div className="inline-flex items-center gap-2 px-2.5 sm:px-3 py-1 rounded-full bg-white border border-blue-200/80 text-[11px] sm:text-xs font-semibold text-blue-700 mb-2.5 shadow-2xs">
                 <span className="w-2 h-2 rounded-full bg-blue-500 animate-pulse shrink-0" />
-                <span>Portal Resmi Dinas Pertanian dan Pangan Kebumen</span>
+                <span>Portal Resmi Bidang Peternakan dan Kesehatan Hewan</span>
               </div>
               <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-slate-900 tracking-tight leading-snug mb-2">
                 Satu Ekosistem untuk Data <span className="text-blue-600">Peternakan Kebumen</span>
