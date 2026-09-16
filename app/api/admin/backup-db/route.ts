@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import pool from '@/lib/db';
+import { requireAdmin } from '@/lib/session';
 
 export const dynamic = 'force-dynamic';
 
@@ -19,6 +20,10 @@ function escapeSqlValue(val: any): string {
 
 // ── GET: GENERATE & DOWNLOAD SQL BACKUP DUMP ──
 export async function GET(req: Request) {
+  // Wajib role Administrator
+  const auth = await requireAdmin(req);
+  if ('errorResponse' in auth) return auth.errorResponse;
+
   try {
     const { searchParams } = new URL(req.url);
     const mode = searchParams.get('mode');
@@ -115,6 +120,10 @@ export async function GET(req: Request) {
 
 // ── POST: RESTORE DATABASE DARI FILE .SQL ──
 export async function POST(req: Request) {
+  // Wajib role Administrator
+  const auth = await requireAdmin(req);
+  if ('errorResponse' in auth) return auth.errorResponse;
+
   try {
     const formData = await req.formData();
     const file = formData.get('file') as File | null;

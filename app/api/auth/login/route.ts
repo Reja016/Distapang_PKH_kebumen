@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { pool } from '@/lib/db';
 import { DEFAULT_FULL_PERMISSIONS } from '@/lib/permissions';
 import { verifyPassword, hashPassword, isHashed } from '@/lib/password';
+import { createSessionToken } from '@/lib/session';
 
 export const dynamic = 'force-dynamic';
 
@@ -28,8 +29,8 @@ async function ensureTable() {
         `INSERT INTO anggota_users (nama, nip_username, password, role, status, permissions) VALUES (?, ?, ?, ?, ?, ?)`,
         [
           'Administrator Distapang',
-          'admin',
-          hashPassword('admin123'),
+          '0001',
+          hashPassword('password123'),
           'Administrator',
           'Aktif',
           JSON.stringify(DEFAULT_FULL_PERMISSIONS),
@@ -53,7 +54,7 @@ async function ensureTable() {
 export async function POST(req: Request) {
   try {
     const body = await req.json();
-    const { nip_username, password } = body;
+    const { nip_username, password, captcha_token } = body;
 
     if (!nip_username || !password) {
       return NextResponse.json(
@@ -62,6 +63,42 @@ export async function POST(req: Request) {
       );
     }
 
+    if (!captcha_token) {
+      return NextResponse.json(
+        { success: false, error: 'Silakan selesaikan verifikasi keamanan Turnstile terlebih dahulu!' },
+        { status: 400 }
+      );
+    }
+
+    // Verifikasi token Turnstile ke server Cloudflare
+    const turnstileSecret = process.env.TURNSTILE_SECRET_KEY || '1x0000000000000000000000000000000AA';
+    try {
+      const verifyFormData = new URLSearchParams();
+      verifyFormData.append('secret', turnstileSecret);
+      verifyFormData.append('response', captcha_token);
+
+      const verifyRes = await fetch('https://challenges.cloudflare.com/turnstile/v0/siteverify', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: verifyFormData,
+      });
+
+      const verifyData = await verifyRes.json();
+      if (!verifyData.success) {
+        return NextResponse.json(
+          { success: false, error: 'Verifikasi keamanan Turnstile gagal. Silakan coba lagi.' },
+          { status: 400 }
+        );
+      }
+    } catch (turnstileErr) {
+      console.error('Cloudflare Turnstile verification error:', turnstileErr);
+      return NextResponse.json(
+        { success: false, error: 'Gagal memverifikasi keamanan Turnstile. Silakan periksa koneksi internet.' },
+        { status: 500 }
+      );
+    }
+
+
     const trimmedId = String(nip_username).trim();
     const trimmedPass = String(password).trim();
 
@@ -69,7 +106,7 @@ export async function POST(req: Request) {
       // Pastikan tabel anggota_users sudah ada
       await ensureTable();
 
-      // 1. Coba cari di database tabel anggota_users
+      // 1. Coba cari di database tabel anggota_users murni berdasarkan NIP/Username
       const [rows]: any = await pool.execute(
         `SELECT id, nama, nip_username, password, role, status, permissions FROM anggota_users WHERE LOWER(nip_username) = LOWER(?) LIMIT 1`,
         [trimmedId]
@@ -78,7 +115,7 @@ export async function POST(req: Request) {
       if (Array.isArray(rows) && rows.length > 0) {
         const user = rows[0];
 
-        // Validasi kata sandi dengan dukungan hash PBKDF2 & plain-text fallback
+        // Validasi kata sandi murni dari hash yang tersimpan di database
         const isMatch = verifyPassword(trimmedPass, user.password);
 
         if (!isMatch) {
@@ -109,17 +146,31 @@ export async function POST(req: Request) {
           perms = typeof user.permissions === 'string' ? JSON.parse(user.permissions) : user.permissions;
         } catch {}
 
-        return NextResponse.json({
+        const userPayload = {
+          id: user.id,
+          nama: user.nama,
+          nip_username: user.nip_username,
+          role: user.role || 'Petugas Teknis',
+          status: user.status || 'Aktif',
+          permissions: perms,
+        };
+
+        const sessionToken = await createSessionToken(userPayload);
+
+        const response = NextResponse.json({
           success: true,
-          user: {
-            id: user.id,
-            nama: user.nama,
-            nip_username: user.nip_username,
-            role: user.role || 'Petugas Teknis',
-            status: user.status || 'Aktif',
-            permissions: perms,
-          },
+          user: userPayload,
         });
+
+        response.cookies.set({
+          name: 'simantap_session',
+          value: sessionToken,
+          path: '/',
+          maxAge: 7 * 24 * 60 * 60, // 7 hari
+          sameSite: 'lax',
+        });
+
+        return response;
       }
 
       // 2. Coba cari di tabel legacy lain jika ada (misal tabel `users` bawaan)
@@ -131,52 +182,40 @@ export async function POST(req: Request) {
         if (Array.isArray(legacyRows) && legacyRows.length > 0) {
           const lUser = legacyRows[0];
           if (verifyPassword(trimmedPass, lUser.password)) {
-            return NextResponse.json({
+            const userPayload = {
+              id: lUser.id || 999,
+              nama: lUser.name || lUser.nama || trimmedId,
+              nip_username: trimmedId,
+              role: (trimmedId.toLowerCase().includes('admin') || lUser.role === 'admin') ? 'Administrator' : 'Petugas Teknis',
+              status: 'Aktif' as const,
+              permissions: DEFAULT_FULL_PERMISSIONS,
+            };
+
+            const sessionToken = await createSessionToken(userPayload);
+
+            const response = NextResponse.json({
               success: true,
-              user: {
-                id: lUser.id || 999,
-                nama: lUser.name || lUser.nama || trimmedId,
-                nip_username: trimmedId,
-                role: (trimmedId.toLowerCase().includes('admin') || lUser.role === 'admin') ? 'Administrator' : 'Petugas Teknis',
-                status: 'Aktif',
-                permissions: DEFAULT_FULL_PERMISSIONS,
-              },
+              user: userPayload,
             });
+
+            response.cookies.set({
+              name: 'simantap_session',
+              value: sessionToken,
+              path: '/',
+              maxAge: 7 * 24 * 60 * 60,
+              sameSite: 'lax',
+            });
+
+            return response;
           }
         }
       } catch {}
     } catch {}
 
-    // 3. Master / Emergency Administrator Fallback
-    const lowerId = trimmedId.toLowerCase();
-    const isAdminUser =
-      lowerId === 'admin' ||
-      lowerId === 'admin@kebumen.go.id' ||
-      lowerId === 'administrator' ||
-      lowerId.includes('admin');
-
-    const isMasterPassword =
-      trimmedPass === 'admin123' ||
-      trimmedPass === 'password123' ||
-      trimmedPass === 'admin';
-
-    if (isAdminUser && isMasterPassword) {
-      return NextResponse.json({
-        success: true,
-        user: {
-          id: 1,
-          nama: 'Administrator Distapang (Master)',
-          nip_username: trimmedId,
-          role: 'Administrator',
-          status: 'Aktif',
-          permissions: DEFAULT_FULL_PERMISSIONS,
-        },
-      });
-    }
-
+    // Backdoor dihapus demi keamanan. Kredensial wajib terdaftar di database.
     return NextResponse.json(
-      { success: false, error: 'ID Petugas / NIP / Username tidak ditemukan.' },
-      { status: 404 }
+      { success: false, error: 'ID Petugas / NIP / Username atau kata sandi salah.' },
+      { status: 401 }
     );
   } catch (error: any) {
     return NextResponse.json(

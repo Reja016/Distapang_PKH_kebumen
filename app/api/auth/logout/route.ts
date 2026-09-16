@@ -1,0 +1,14 @@
+import { NextResponse } from 'next/server';
+
+export async function POST() {
+  const res = NextResponse.json({ success: true, message: 'Logout berhasil' });
+  res.cookies.set({
+    name: 'simantap_session',
+    value: '',
+    path: '/',
+    maxAge: 0,
+    expires: new Date(0),
+    sameSite: 'lax',
+  });
+  return res;
+}

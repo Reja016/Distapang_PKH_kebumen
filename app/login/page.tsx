@@ -1,10 +1,11 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { supabase } from '@/lib/supabase';
 import { saveAuthSession } from '@/lib/auth';
+import { CloudflareTurnstile, CloudflareTurnstileRef } from '@/components/common/CloudflareTurnstile';
 import {
   Eye,
   EyeOff,
@@ -24,24 +25,44 @@ export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
+  const [idleLogoutNotice, setIdleLogoutNotice] = useState(false);
+  const [captchaToken, setCaptchaToken] = useState<string | null>(null);
+  const turnstileRef = useRef<CloudflareTurnstileRef>(null);
   const router = useRouter();
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const params = new URLSearchParams(window.location.search);
+      if (params.get('reason') === 'idle') {
+        setIdleLogoutNotice(true);
+      }
+    }
+  }, []);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setErrorMsg('');
+
+    if (!captchaToken) {
+      setErrorMsg('Silakan selesaikan verifikasi keamanan Turnstile terlebih dahulu.');
+      return;
+    }
+
+
     setLoading(true);
 
     const trimmedId = nipUsername.trim();
     const trimmedPass = password.trim();
 
     try {
-      // 1. Autentikasi ke database tabel anggota_users
+      // 1. Autentikasi ke database tabel anggota_users beserta verifikasi Captcha
       const res = await fetch('/api/auth/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           nip_username: trimmedId,
           password: trimmedPass,
+          captcha_token: captchaToken,
         }),
       });
 
@@ -62,13 +83,14 @@ export default function LoginPage() {
         }
 
         setLoading(false);
-        router.push('/beranda');
+        window.location.href = '/beranda';
         return;
       }
 
       // 2. Jika API mengembalikan error spesifik
       if (!data.success && data.error) {
         setErrorMsg(data.error);
+        turnstileRef.current?.reset();
         setLoading(false);
         return;
       }
@@ -90,14 +112,16 @@ export default function LoginPage() {
             permissions: (await import('@/lib/permissions')).DEFAULT_FULL_PERMISSIONS,
           });
           setLoading(false);
-          router.push('/beranda');
+          window.location.href = '/beranda';
           return;
         }
       }
 
       setErrorMsg('Login gagal. Periksa kembali ID Petugas atau kata sandi Anda.');
+      turnstileRef.current?.reset();
     } catch {
       setErrorMsg('Terjadi gangguan koneksi saat menghubungi server.');
+      turnstileRef.current?.reset();
     } finally {
       setLoading(false);
     }
@@ -161,6 +185,18 @@ export default function LoginPage() {
               </p>
             </div>
           </div>
+
+          {idleLogoutNotice && (
+            <div className="p-3.5 rounded-xl border border-amber-300 bg-amber-50 text-amber-900 text-xs sm:text-sm font-medium flex items-start gap-2.5 animate-in fade-in">
+              <AlertCircle size={18} className="shrink-0 text-amber-600 mt-0.5" />
+              <div>
+                <p className="font-bold">Sesi Anda Telah Berakhir</p>
+                <p className="text-xs text-amber-800 mt-0.5">
+                  Anda otomatis keluar karena tidak ada aktivitas selama 20 menit demi menjaga keamanan akun dan data dinas. Silakan masuk kembali.
+                </p>
+              </div>
+            </div>
+          )}
 
           {errorMsg && (
             <div className="p-3.5 rounded-xl border border-red-200 bg-red-50 text-red-700 text-xs sm:text-sm font-medium flex items-center gap-2.5 animate-in fade-in">
@@ -231,11 +267,20 @@ export default function LoginPage() {
               </div>
             </div>
 
+            {/* Cloudflare Turnstile Verification */}
+            <div className="pt-1">
+              <CloudflareTurnstile
+                ref={turnstileRef}
+                onChange={setCaptchaToken}
+              />
+            </div>
+
+
             {/* Submit Button */}
             <div className="pt-2">
               <button
                 type="submit"
-                disabled={loading}
+                disabled={loading || !captchaToken}
                 className="w-full min-h-touch-lg h-12 rounded-xl bg-emerald-600 hover:bg-emerald-700 active:scale-[0.99] text-white font-bold text-sm shadow-xs transition-all flex items-center justify-center gap-2 disabled:opacity-50 cursor-pointer"
               >
                 {loading ? (

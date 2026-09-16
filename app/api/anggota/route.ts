@@ -5,6 +5,7 @@ import {
   DEFAULT_VIEW_ONLY_PERMISSIONS,
 } from '@/lib/permissions';
 import { hashPassword } from '@/lib/password';
+import { requireAdmin } from '@/lib/session';
 
 export const dynamic = 'force-dynamic';
 
@@ -96,11 +97,17 @@ async function ensureTable() {
   }
 }
 
-// GET: Ambil daftar seluruh anggota
-export async function GET() {
+// GET: Ambil daftar seluruh anggota (Wajib Admin, Password disembunyikan)
+export async function GET(req: Request) {
+  const auth = await requireAdmin(req);
+  if ('errorResponse' in auth) return auth.errorResponse;
+
   try {
     await ensureTable();
-    const [rows]: any = await pool.execute(`SELECT * FROM anggota_users ORDER BY id ASC`);
+    // JANGAN PERNAH SELECT password untuk dikirim ke client
+    const [rows]: any = await pool.execute(
+      `SELECT id, nama, nip_username, role, status, permissions, created_at, updated_at FROM anggota_users ORDER BY id ASC`
+    );
     if (Array.isArray(rows) && rows.length > 0) {
       const parsed = rows.map((r: any) => ({
         ...r,
@@ -112,14 +119,20 @@ export async function GET() {
     // Fallback if db offline
   }
 
-  return NextResponse.json(INITIAL_FALLBACK_MEMBERS.map((r) => ({
-    ...r,
-    permissions: typeof r.permissions === 'string' ? JSON.parse(r.permissions) : r.permissions,
-  })));
+  return NextResponse.json(INITIAL_FALLBACK_MEMBERS.map((r) => {
+    const { password, ...safe } = r;
+    return {
+      ...safe,
+      permissions: typeof safe.permissions === 'string' ? JSON.parse(safe.permissions) : safe.permissions,
+    };
+  }));
 }
 
-// POST: Tambah anggota baru (Password otomatis di-hash)
+// POST: Tambah anggota baru (Wajib Admin, Password otomatis di-hash)
 export async function POST(req: Request) {
+  const auth = await requireAdmin(req);
+  if ('errorResponse' in auth) return auth.errorResponse;
+
   try {
     const body = await req.json();
     const { nama, nip_username, password, role, status, permissions } = body;
@@ -151,8 +164,11 @@ export async function POST(req: Request) {
   }
 }
 
-// PUT: Perbarui anggota / izin (Password otomatis di-hash jika diisi baru)
+// PUT: Perbarui anggota / izin (Wajib Admin, Password otomatis di-hash jika diisi baru)
 export async function PUT(req: Request) {
+  const auth = await requireAdmin(req);
+  if ('errorResponse' in auth) return auth.errorResponse;
+
   try {
     const body = await req.json();
     const { id, nama, nip_username, password, role, status, permissions } = body;
@@ -200,8 +216,11 @@ export async function PUT(req: Request) {
   }
 }
 
-// DELETE: Hapus anggota
+// DELETE: Hapus anggota (Wajib Admin)
 export async function DELETE(req: Request) {
+  const auth = await requireAdmin(req);
+  if ('errorResponse' in auth) return auth.errorResponse;
+
   try {
     const { searchParams } = new URL(req.url);
     const id = searchParams.get('id');

@@ -1,11 +1,13 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
+import { usePathname } from "next/navigation";
 import { Bot, Send, X, Sparkles, CornerDownLeft } from "lucide-react";
 
 type Message = { role: "user" | "assistant"; content: string };
 
 export default function AiChatWidget() {
+  const pathname = usePathname();
   const [open, setOpen] = useState(false);
   const [messages, setMessages] = useState<Message[]>([
     {
@@ -49,13 +51,18 @@ export default function AiChatWidget() {
     }
   }
 
+  // Hanya tampilkan widget AI Chat di Dashboard ('/beranda'), sembunyikan di Portal Publik ('/') dan seluruh submenu
+  if (pathname !== "/beranda") {
+    return null;
+  }
+
   return (
     <>
       {/* Floating launcher button — 56px touch target */}
       <button
         onClick={() => setOpen(!open)}
         aria-label={open ? "Tutup Asisten AI" : "Buka Asisten AI"}
-        className="fixed bottom-5 right-5 sm:bottom-7 sm:right-7 z-50 w-14 h-14 rounded-2xl bg-obsidian text-white border-2 border-azure shadow-[0_12px_32px_rgba(33,146,255,0.25)] flex items-center justify-center transition-all duration-200 hover:scale-105 active:scale-95 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-azure/40"
+        className="fixed bottom-5 right-5 sm:bottom-7 sm:right-7 z-30 w-14 h-14 rounded-2xl bg-obsidian text-white border-2 border-azure shadow-[0_12px_32px_rgba(33,146,255,0.25)] flex items-center justify-center transition-all duration-200 sm:hover:scale-105 active:scale-95 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-azure/40"
       >
         {open ? <X className="w-6 h-6 text-white" /> : <Bot className="w-6 h-6 text-azure" />}
         {!open && (

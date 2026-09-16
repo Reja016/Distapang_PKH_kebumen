@@ -12,11 +12,31 @@ export interface AuthSessionUser {
 }
 
 const AUTH_STORAGE_KEY = 'simantap_auth_session';
+const ACTIVITY_STORAGE_KEY = 'simantap_last_activity';
+
+// Catat waktu aktivitas user terakhir (untuk deteksi idle)
+export function recordUserActivity() {
+  if (typeof window !== 'undefined') {
+    localStorage.setItem(ACTIVITY_STORAGE_KEY, Date.now().toString());
+  }
+}
+
+// Ambil waktu aktivitas terakhir
+export function getLastUserActivity(): number {
+  if (typeof window === 'undefined') return Date.now();
+  try {
+    const raw = localStorage.getItem(ACTIVITY_STORAGE_KEY);
+    return raw ? parseInt(raw, 10) : Date.now();
+  } catch {
+    return Date.now();
+  }
+}
 
 // Simpan sesi user ke localStorage
 export function saveAuthSession(user: AuthSessionUser) {
   if (typeof window !== 'undefined') {
     localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(user));
+    recordUserActivity();
   }
 }
 
@@ -37,6 +57,12 @@ export function getAuthSession(): AuthSessionUser | null {
 export function clearAuthSession() {
   if (typeof window !== 'undefined') {
     localStorage.removeItem(AUTH_STORAGE_KEY);
+    localStorage.removeItem(ACTIVITY_STORAGE_KEY);
+    // Hapus cookie sesi dari browser
+    document.cookie = 'simantap_session=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT; SameSite=Lax';
+    try {
+      fetch('/api/auth/logout', { method: 'POST' }).catch(() => {});
+    } catch {}
   }
 }
 
