@@ -63,39 +63,43 @@ export async function POST(req: Request) {
       );
     }
 
-    if (!captcha_token) {
-      return NextResponse.json(
-        { success: false, error: 'Silakan selesaikan verifikasi keamanan Turnstile terlebih dahulu!' },
-        { status: 400 }
-      );
-    }
+    const turnstileSecret = process.env.TURNSTILE_SECRET_KEY;
+    const isProductionSecret = Boolean(turnstileSecret && turnstileSecret !== '1x0000000000000000000000000000000AA');
 
-    // Verifikasi token Turnstile ke server Cloudflare
-    const turnstileSecret = process.env.TURNSTILE_SECRET_KEY || '1x0000000000000000000000000000000AA';
-    try {
-      const verifyFormData = new URLSearchParams();
-      verifyFormData.append('secret', turnstileSecret);
-      verifyFormData.append('response', captcha_token);
-
-      const verifyRes = await fetch('https://challenges.cloudflare.com/turnstile/v0/siteverify', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-        body: verifyFormData,
-      });
-
-      const verifyData = await verifyRes.json();
-      if (!verifyData.success) {
+    // Jika menggunakan key resmi Cloudflare, lakukan verifikasi ketat
+    if (isProductionSecret) {
+      if (!captcha_token || captcha_token === 'bypass') {
         return NextResponse.json(
-          { success: false, error: 'Verifikasi keamanan Turnstile gagal. Silakan coba lagi.' },
+          { success: false, error: 'Silakan selesaikan verifikasi keamanan Turnstile terlebih dahulu!' },
           { status: 400 }
         );
       }
-    } catch (turnstileErr) {
-      console.error('Cloudflare Turnstile verification error:', turnstileErr);
-      return NextResponse.json(
-        { success: false, error: 'Gagal memverifikasi keamanan Turnstile. Silakan periksa koneksi internet.' },
-        { status: 500 }
-      );
+
+      try {
+        const verifyFormData = new URLSearchParams();
+        verifyFormData.append('secret', turnstileSecret!);
+        verifyFormData.append('response', captcha_token);
+
+        const verifyRes = await fetch('https://challenges.cloudflare.com/turnstile/v0/siteverify', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+          body: verifyFormData,
+        });
+
+        const verifyData = await verifyRes.json();
+        if (!verifyData.success) {
+          return NextResponse.json(
+            { success: false, error: 'Verifikasi keamanan Turnstile gagal. Silakan coba lagi.' },
+            { status: 400 }
+          );
+        }
+      } catch (turnstileErr) {
+        console.error('Cloudflare Turnstile verification error:', turnstileErr);
+        return NextResponse.json(
+          { success: false, error: 'Gagal memverifikasi keamanan Turnstile. Silakan periksa koneksi internet.' },
+          { status: 500 }
+        );
+      }
     }
 
 

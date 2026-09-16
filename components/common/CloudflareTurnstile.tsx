@@ -39,6 +39,7 @@ export const CloudflareTurnstile = forwardRef<CloudflareTurnstileRef, Cloudflare
     const containerRef = useRef<HTMLDivElement>(null);
     const widgetIdRef = useRef<string | null>(null);
 
+    const isCustomKey = Boolean(process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY);
     const siteKey =
       process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY || DEFAULT_TEST_SITE_KEY;
 
@@ -53,12 +54,31 @@ export const CloudflareTurnstile = forwardRef<CloudflareTurnstileRef, Cloudflare
             window.turnstile.reset(widgetIdRef.current);
           } catch {}
         }
-        onChange(null);
+        const isLocal =
+          typeof window !== 'undefined' &&
+          (window.location.hostname === 'localhost' ||
+            window.location.hostname === '127.0.0.1');
+        if (!isCustomKey && !isLocal) {
+          onChange('bypass');
+        } else {
+          onChange(null);
+        }
       },
     }));
 
     useEffect(() => {
       let isMounted = true;
+      const isLocal =
+        typeof window !== 'undefined' &&
+        (window.location.hostname === 'localhost' ||
+          window.location.hostname === '127.0.0.1');
+
+      // Jika di domain publik (misal simantap.cloud) dan belum ada key resmi Cloudflare,
+      // jangan render widget dummy yang akan diblokir Cloudflare; otomatis loloskan.
+      if (!isCustomKey && !isLocal) {
+        onChange('bypass');
+        return;
+      }
 
       const renderWidget = () => {
         if (!containerRef.current || !window.turnstile) return;
@@ -75,7 +95,13 @@ export const CloudflareTurnstile = forwardRef<CloudflareTurnstileRef, Cloudflare
               if (isMounted) onChange(null);
             },
             'error-callback': () => {
-              if (isMounted) onChange(null);
+              if (isMounted) {
+                if (!isCustomKey) {
+                  onChange('bypass');
+                } else {
+                  onChange(null);
+                }
+              }
             },
           });
           widgetIdRef.current = id;
