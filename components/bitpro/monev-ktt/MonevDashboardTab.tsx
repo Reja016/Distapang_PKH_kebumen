@@ -107,7 +107,7 @@ export function MonevDashboardTab({
                         <th className="p-3.5 text-right">AWAL</th>
                         <th className="p-3.5 text-right">SISA</th>
                         <th className="p-3.5 text-right">TOTAL ASET</th>
-                        <th className="p-3.5 text-center">GPS &amp; BERKAS BA</th>
+                        <th className="p-3.5 text-center">GPS, FOTO &amp; DOKUMEN</th>
                         {canEdit && <th className="p-3.5 text-center w-24">AKSI</th>}
                       </tr>
                     </thead>
@@ -117,6 +117,9 @@ export function MonevDashboardTab({
                         const baMati = d.kondisi.matiBangkaiBAPdf;
                         const baJual = d.kondisi.jualBAPdf;
                         const baLegacy = (d.kondisi as any)?.pdfBA;
+                        const docPdf = d.dokumenHasilPdf || (d.kondisi as any)?.dokumenHasilPdf;
+                        const docPdfName = d.dokumenHasilPdfName || (d.kondisi as any)?.dokumenHasilPdfName;
+                        const allPhotos = (d.photos && d.photos.length > 0) ? d.photos : (d.photo ? [d.photo] : []);
 
                         return (
                           <tr key={d.id} className="hover:bg-slate-50/80 transition-colors">
@@ -147,16 +150,34 @@ export function MonevDashboardTab({
                                 ) : (
                                   <span className="text-slate-400 text-[11px]">No GPS</span>
                                 )}
-                                {d.photo && (
-                                  <button
-                                    type="button"
-                                    onClick={() => setPreviewPhotoModal({ url: d.photo!, title: `Foto Dokumentasi: ${d.namaKtt} (${d.desa}, ${d.kec})` })}
-                                    className="text-emerald-700 hover:text-emerald-800 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 px-1.5 py-0.5 rounded font-bold flex items-center gap-0.5 cursor-pointer transition-colors"
-                                    title="Klik untuk melihat foto dokumentasi"
+                                {allPhotos.length > 0 && (
+                                  <div className="flex items-center gap-1">
+                                    {allPhotos.map((ph, pIdx) => (
+                                      <button
+                                        key={pIdx}
+                                        type="button"
+                                        onClick={() => setPreviewPhotoModal({ url: ph, title: `Foto ${pIdx + 1}: ${d.namaKtt} (${d.desa}, ${d.kec})` })}
+                                        className="text-emerald-700 hover:text-emerald-800 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 px-1.5 py-0.5 rounded font-bold flex items-center gap-0.5 cursor-pointer transition-colors text-[11px]"
+                                        title={`Lihat / Unduh Foto ${pIdx + 1}`}
+                                      >
+                                        <ImageIcon size={11} strokeWidth={2.5} className="text-emerald-600" />
+                                        <span>Foto {allPhotos.length > 1 ? pIdx + 1 : ''}</span>
+                                      </button>
+                                    ))}
+                                  </div>
+                                )}
+                                {docPdf && (
+                                  <a
+                                    href={docPdf}
+                                    download={docPdfName || `Dokumen_${d.namaKtt.replace(/[^a-zA-Z0-9_-]/g, '_')}.pdf`}
+                                    target="_blank"
+                                    rel="noreferrer"
+                                    className="text-emerald-800 hover:text-emerald-900 bg-emerald-100 hover:bg-emerald-200 border border-emerald-300 px-1.5 py-0.5 rounded font-bold flex items-center gap-0.5 text-[11px]"
+                                    title="Unduh / Buka Dokumen Hasil Lapangan (PDF)"
                                   >
-                                    <ImageIcon size={11} strokeWidth={2.5} className="text-emerald-600" />
-                                    <span>Foto</span>
-                                  </button>
+                                    <FileText size={11} strokeWidth={2.5} className="text-emerald-700" />
+                                    <span>Dokumen PDF</span>
+                                  </a>
                                 )}
                                 {baMati && (
                                   <a

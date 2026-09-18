@@ -34,7 +34,7 @@ export function cetakLaporanRuminansia(
       m.namaKelompok.toLowerCase() === (data.namaKtt || '').toLowerCase() ||
       (m.desa.toLowerCase() === (data.desa || '').toLowerCase() && m.kecamatan.toLowerCase() === (data.kec || '').toLowerCase())
   );
-  const namaKetua = master?.ketua || (data.suratPernyataan?.nama) || '';
+  const namaKetua = data.namaKetua || (data.kondisi as any)?.namaKetua || master?.ketua || (data.suratPernyataan?.nama) || '';
   const tanggalHariIni = formatTanggalIndo(data.waktuMonev);
 
   const bJantan = (k.matiBangkaiJantan || 0) + (k.matiPotongJantan || 0);
@@ -177,9 +177,9 @@ export function cetakLaporanRuminansia(
           <td>${data.lat && data.lng ? `${data.lat}, ${data.lng}` : '..........................................................'}</td>
         </tr>
         <tr>
-          <td class="col-label">SUMBER DANA HIBAH/TAHUN</td>
+          <td class="col-label">TAHUN BANTUAN</td>
           <td class="col-colon">:</td>
-          <td>${data.sumberDana || (data.kondisi as any)?.sumberDana || 'APBD'} / ${data.tahun || '................'}</td>
+          <td>${data.tahun || '................'}</td>
         </tr>
         <tr>
           <td class="col-label">JENIS KOMODITAS TERNAK</td>
@@ -325,11 +325,7 @@ export function cetakLaporanRuminansia(
           <td style="width: 50%;">
             Ketua ${data.namaKtt || 'Kelompok'}<br/>
             <div class="ttd-container">
-              ${
-                k.fotoTtdKetuaCap
-                  ? `<img src="${k.fotoTtdKetuaCap}" class="ttd-img" alt="TTD & Cap Ketua" />`
-                  : `<div style="height: 55px;"></div>`
-              }
+              <div style="height: 55px;"></div>
             </div>
             <b>(${namaKetua || '................................................'})</b>
           </td>
@@ -340,13 +336,7 @@ export function cetakLaporanRuminansia(
               <tr>
                 <td style="border: none; width: 18px; padding: 2px 0;">1.</td>
                 <td style="border: none; padding: 2px 0;">${k.namaPetugas1 || '..............................................'}</td>
-                <td style="border: none; width: 100px; text-align: center; padding: 2px 0;">
-                  ${
-                    k.fotoTtdPetugas
-                      ? `<img src="${k.fotoTtdPetugas}" class="ttd-img-petugas" alt="TTD Petugas" />`
-                      : ': .................'
-                  }
-                </td>
+                <td style="border: none; width: 100px; text-align: center; padding: 2px 0;">: .................</td>
               </tr>
               <tr>
                 <td style="border: none; width: 18px; padding: 2px 0;">2.</td>
@@ -404,7 +394,7 @@ export function cetakLaporanUnggas(
       m.namaKelompok.toLowerCase() === (data.namaKtt || '').toLowerCase() ||
       (m.desa.toLowerCase() === (data.desa || '').toLowerCase() && m.kecamatan.toLowerCase() === (data.kec || '').toLowerCase())
   );
-  const namaKetua = master?.ketua || (data.suratPernyataan?.nama) || '';
+  const namaKetua = data.namaKetua || (data.kondisi as any)?.namaKetua || (data.kondisiUnggas as any)?.namaKetua || master?.ketua || (data.suratPernyataan?.nama) || '';
   const tanggalHariIni = formatTanggalIndo(data.waktuMonev);
 
   const htmlContent = `
@@ -428,64 +418,59 @@ export function cetakLaporanUnggas(
           color: #000;
           background: #fff;
           font-size: 11pt;
-          line-height: 1.45;
+          line-height: 1.35;
         }
         .header-title {
           text-align: center;
-          font-size: 12.5pt;
           font-weight: bold;
+          font-size: 13pt;
+          margin-bottom: 12px;
           text-transform: uppercase;
-          margin-bottom: 20px;
-          line-height: 1.3;
         }
         .identitas-table {
           width: 100%;
           border-collapse: collapse;
-          margin-bottom: 16px;
-          font-size: 11pt;
+          margin-bottom: 8px;
         }
         .identitas-table td {
-          padding: 3px 0;
+          padding: 2.5px 0;
+          font-size: 10.5pt;
           vertical-align: top;
         }
         .col-label {
           width: 250px;
-          font-weight: normal;
         }
         .col-colon {
-          width: 20px;
+          width: 15px;
           text-align: center;
         }
         .section-title {
           font-weight: bold;
-          margin-top: 14px;
-          margin-bottom: 8px;
-          font-size: 11.5pt;
+          font-size: 11pt;
+          margin-top: 10px;
+          margin-bottom: 4px;
         }
         .unggas-table {
           width: 100%;
           border-collapse: collapse;
-          margin-bottom: 16px;
-          font-size: 11pt;
+          margin-bottom: 10px;
         }
         .unggas-table td {
-          padding: 4px 0;
+          padding: 3.5px 0;
+          font-size: 10.5pt;
           vertical-align: top;
         }
         .catatan-box {
-          border: 1px dashed #666;
-          min-height: 120px;
-          padding: 8px 12px;
-          margin-top: 6px;
-          margin-bottom: 24px;
-          font-size: 10.5pt;
-          line-height: 1.5;
-          white-space: pre-wrap;
+          border: 1px solid #000;
+          padding: 8px;
+          min-height: 48px;
+          font-size: 10pt;
+          margin-bottom: 12px;
         }
         .signature-table {
           width: 100%;
           border-collapse: collapse;
-          margin-top: 14px;
+          margin-top: 10px;
           page-break-inside: avoid;
         }
         .signature-table td {
@@ -493,20 +478,10 @@ export function cetakLaporanUnggas(
           padding: 2px 6px;
         }
         .ttd-container {
-          height: 75px;
+          height: 60px;
           display: flex;
           align-items: center;
-          margin: 6px 0;
-        }
-        .ttd-img {
-          max-height: 70px;
-          max-width: 190px;
-          object-fit: contain;
-        }
-        .ttd-img-petugas {
-          max-height: 50px;
-          max-width: 130px;
-          object-fit: contain;
+          margin: 4px 0;
         }
       </style>
     </head>
@@ -533,9 +508,9 @@ export function cetakLaporanUnggas(
           <td>${data.lat && data.lng ? `${data.lat}, ${data.lng}` : '..........................................................'}</td>
         </tr>
         <tr>
-          <td class="col-label">SUMBER DANA HIBAH/TAHUN</td>
+          <td class="col-label">TAHUN BANTUAN</td>
           <td class="col-colon">:</td>
-          <td>${data.sumberDana || (data.kondisi as any)?.sumberDana || 'APBD'} / ${data.tahun || '................'}</td>
+          <td>${data.tahun || '................'}</td>
         </tr>
         <tr>
           <td class="col-label">JENIS KOMODITAS TERNAK</td>
@@ -546,11 +521,6 @@ export function cetakLaporanUnggas(
           <td class="col-label">WAKTU MONEV</td>
           <td class="col-colon">:</td>
           <td>${data.waktuMonev || tanggalHariIni}</td>
-        </tr>
-        <tr>
-          <td class="col-label">LINTANG/BUJUR LOKASI KEL.</td>
-          <td class="col-colon">:</td>
-          <td>${data.lat && data.lng ? `${data.lat}, ${data.lng}` : '..........................................................'}</td>
         </tr>
         <tr>
           <td class="col-label">HASIL MONEV</td>
@@ -601,11 +571,7 @@ export function cetakLaporanUnggas(
           <td style="width: 50%;">
             Ketua ${data.namaKtt || 'Kelompok'}<br/>
             <div class="ttd-container">
-              ${
-                ku.fotoTtdKetuaCap
-                  ? `<img src="${ku.fotoTtdKetuaCap}" class="ttd-img" alt="TTD & Cap Ketua" />`
-                  : `<div style="height: 60px;"></div>`
-              }
+              <div style="height: 60px;"></div>
             </div>
             <b>(${namaKetua || '................................................'})</b>
           </td>
@@ -616,13 +582,7 @@ export function cetakLaporanUnggas(
               <tr>
                 <td style="border: none; width: 20px; padding: 3px 0;">1.</td>
                 <td style="border: none; padding: 3px 0;">${ku.namaPetugas1 || '..............................................'}</td>
-                <td style="border: none; width: 110px; text-align: center; padding: 3px 0;">
-                  ${
-                    ku.fotoTtdPetugas
-                      ? `<img src="${ku.fotoTtdPetugas}" class="ttd-img-petugas" alt="TTD Petugas" />`
-                      : ': .................'
-                  }
-                </td>
+                <td style="border: none; width: 110px; text-align: center; padding: 3px 0;">: .................</td>
               </tr>
               <tr>
                 <td style="border: none; width: 20px; padding: 3px 0;">2.</td>

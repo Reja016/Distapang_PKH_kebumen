@@ -41,9 +41,46 @@ export const buatNamaFileFoto = (namaKtt: string, id: string | number) => {
 
 export type StatusBA = 'Ada' | 'Tidak';
 
+export const KECAMATAN_TO_PUSKESWAN: Record<string, string> = {
+  BUAYAN: 'Puskeswan Buayan',
+  AYAH: 'Puskeswan Buayan',
+  ROWOKELE: 'Puskeswan Buayan',
+  GOMBONG: 'Puskeswan Gombong',
+  SEMPOR: 'Puskeswan Gombong',
+  KUWARASAN: 'Puskeswan Gombong',
+  PURING: 'Puskeswan Gombong',
+  KARANGANYAR: 'Puskeswan Karanganyar',
+  KARANGGAYAM: 'Puskeswan Karanganyar',
+  SRUWENG: 'Puskeswan Karanganyar',
+  PEJAGOAN: 'Puskeswan Karanganyar',
+  KLIRONG: 'Puskeswan Klirong',
+  PETANAHAN: 'Puskeswan Klirong',
+  ADIMULYO: 'Puskeswan Klirong',
+  ALIAN: 'Puskeswan Alian',
+  SADANG: 'Puskeswan Alian',
+  KARANGSAMBUNG: 'Puskeswan Alian',
+  KEBUMEN: 'Puskeswan Kebumen',
+  PONCOWARNO: 'Puskeswan Kebumen',
+  BULUSPESANTREN: 'Puskeswan Kebumen',
+  PREMBUN: 'Puskeswan Prembun',
+  PADURESO: 'Puskeswan Prembun',
+  KUTOWINANGUN: 'Puskeswan Prembun',
+  MIRIT: 'Puskeswan Mirit',
+  AMBAL: 'Puskeswan Mirit',
+  BONOROWO: 'Puskeswan Mirit',
+};
+
+export function getPuskeswanByKecamatan(kec?: string | null): string {
+  if (!kec) return '-';
+  const clean = kec.trim().toUpperCase();
+  return KECAMATAN_TO_PUSKESWAN[clean] || (clean ? `Puskeswan ${clean.charAt(0) + clean.slice(1).toLowerCase()}` : '-');
+}
+
 export const KONDISI_KOSONG = {
   awalJantan: 0,
   awalBetina: 0,
+  bibitOdot: 0,
+  obatPaket: 0,
   matiBangkaiJantan: 0,
   matiBangkaiBetina: 0,
   matiBangkaiBA: 'Tidak' as StatusBA,
@@ -70,6 +107,9 @@ export const KONDISI_KOSONG = {
   jualAnakJantan: 0,
   jualAnakBetina: 0,
   jualAnakBelumTahu: 0,
+  dokumenHasilPdf: null as string | null,
+  dokumenHasilPdfName: null as string | null,
+  namaKetua: '',
   fotoTtdPetugas: null as string | null,
   fotoTtdKetuaCap: null as string | null,
   namaPetugas1: '',
@@ -110,6 +150,8 @@ export const KONDISI_UNGGAS_KOSONG = {
   rataanTelur: 0,
   konsumsiPakan: 0,
   keteranganLain: '',
+  dokumenHasilPdf: null as string | null,
+  dokumenHasilPdfName: null as string | null,
   fotoTtdPetugas: null as string | null,
   fotoTtdKetuaCap: null as string | null,
   namaPetugas1: '',
@@ -123,7 +165,7 @@ export function hitungKondisiUnggas(k: KondisiUnggas) {
   return { populasiSaatIni };
 }
 
-// ── SURAT PERNYATAAN DATA TYPES ──
+// ── SURAT PERNYATAAN DATA TYPES (LEGACY) ──
 export interface SuratPernyataanData {
   id?: string;
   nama: string;
@@ -157,6 +199,7 @@ export type FieldData = {
   kec: string;
   desa: string;
   namaKtt: string;
+  namaKetua?: string;
   alamat: string;
   kegiatan: string;
   jenis: string;
@@ -168,6 +211,9 @@ export type FieldData = {
   lat: number | null;
   lng: number | null;
   photo: string | null;
+  photos?: string[];
+  dokumenHasilPdf?: string | null;
+  dokumenHasilPdfName?: string | null;
   catatan: string;
   suratPernyataan?: SuratPernyataanData | null;
 };
@@ -177,12 +223,15 @@ export const FORM_KOSONG = {
   kec: '',
   desa: '',
   ktt: '',
+  namaKetua: '',
   alamat: '',
   kegiatan: '',
   jenis: 'Sapi',
-  sumberDana: 'APBD',
   waktuMonev: '',
   photo: null as string | null,
+  photos: [] as string[],
+  dokumenHasilPdf: null as string | null,
+  dokumenHasilPdfName: null as string | null,
   lat: null as number | null,
   lng: null as number | null,
   catatan: '',

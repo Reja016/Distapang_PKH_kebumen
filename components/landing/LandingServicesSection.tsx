@@ -101,7 +101,7 @@ export default function LandingServicesSection({
 
           {/* Subtabs for Populasi */}
           {detailView === 'populasi' && (
-            <div className="flex flex-wrap gap-1.5 sm:gap-2">
+            <div className="flex flex-wrap gap-2">
               {[
                 { key: 'populasi', label: 'Populasi Ternak' },
                 { key: 'daging', label: 'Produksi Daging' },
@@ -110,7 +110,7 @@ export default function LandingServicesSection({
                 <button
                   key={tab.key}
                   onClick={() => setSubTabProd(tab.key as any)}
-                  className={`h-7 sm:h-8 px-3 rounded-lg text-[11px] sm:text-xs font-bold transition-all cursor-pointer ${
+                  className={`min-h-[36px] px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center justify-center ${
                     subTabProd === tab.key
                       ? 'bg-blue-600 text-white shadow-xs'
                       : 'border-2 border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-400'
@@ -132,16 +132,16 @@ export default function LandingServicesSection({
                   value={searchVaksin}
                   onChange={(e) => setSearchVaksin(e.target.value)}
                   placeholder="Cari nama puskeswan..."
-                  className="w-full h-9 pl-9 pr-8 rounded-xl border-2 border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs text-slate-800 dark:text-slate-100 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
+                  className="w-full h-10 pl-9 pr-9 rounded-xl border-2 border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs text-slate-800 dark:text-slate-100 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
                 />
                 {searchVaksin && (
                   <button
                     type="button"
                     onClick={() => setSearchVaksin('')}
-                    className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 p-0.5 cursor-pointer"
+                    className="absolute right-2 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 w-7 h-7 flex items-center justify-center rounded-lg active:bg-slate-100 dark:active:bg-slate-700 cursor-pointer"
                     title="Hapus pencarian"
                   >
-                    <X size={13} />
+                    <X size={14} />
                   </button>
                 )}
               </div>
@@ -375,13 +375,13 @@ export default function LandingServicesSection({
               setDetailView('populasi');
               setSubTabProd('populasi');
             }}
-            className="p-4 sm:p-5 rounded-2xl border-2 border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:border-blue-400 dark:hover:border-blue-500 hover:shadow-xs transition-all flex items-center gap-3.5 cursor-pointer group active:scale-[0.99]"
+            className="p-3.5 sm:p-5 rounded-2xl border-2 border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:border-blue-400 dark:hover:border-blue-500 hover:shadow-xs transition-all flex items-center gap-3 sm:gap-3.5 cursor-pointer group active:scale-[0.99]"
           >
-            <div className="w-12 h-12 rounded-xl bg-blue-50 dark:bg-blue-950/60 border-2 border-blue-200 dark:border-blue-800 text-blue-600 dark:text-blue-400 flex items-center justify-center shrink-0 sm:group-hover:scale-105 transition-transform">
-              <Activity size={22} />
+            <div className="w-11 h-11 sm:w-12 sm:h-12 rounded-xl bg-blue-50 dark:bg-blue-950/60 border-2 border-blue-200 dark:border-blue-800 text-blue-600 dark:text-blue-400 flex items-center justify-center shrink-0 sm:group-hover:scale-105 transition-transform">
+              <Activity className="w-5 h-5 sm:w-5.5 sm:h-5.5" />
             </div>
             <div className="min-w-0 flex-1">
-              <p className="font-extrabold text-base sm:text-lg text-slate-900 dark:text-white truncate">Populasi &amp; Produksi</p>
+              <p className="font-extrabold text-sm sm:text-lg text-slate-900 dark:text-white truncate">Populasi &amp; Produksi</p>
               <p className="text-xs sm:text-sm font-semibold text-slate-500 dark:text-slate-400 truncate">{populasi16.length} komoditas ternak</p>
             </div>
           </div>
@@ -389,13 +389,13 @@ export default function LandingServicesSection({
           {/* 2. Sebaran Data Farm / KTT */}
           <div
             onClick={() => setDetailView('farm')}
-            className="p-4 sm:p-5 rounded-2xl border-2 border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:border-blue-400 dark:hover:border-blue-500 hover:shadow-xs transition-all flex items-center gap-3.5 cursor-pointer group active:scale-[0.99]"
+            className="p-3.5 sm:p-5 rounded-2xl border-2 border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:border-blue-400 dark:hover:border-blue-500 hover:shadow-xs transition-all flex items-center gap-3 sm:gap-3.5 cursor-pointer group active:scale-[0.99]"
           >
-            <div className="w-12 h-12 rounded-xl bg-sky-50 dark:bg-sky-950/60 border-2 border-sky-200 dark:border-sky-800 text-sky-600 dark:text-sky-400 flex items-center justify-center shrink-0 sm:group-hover:scale-105 transition-transform">
-              <Building2 size={22} />
+            <div className="w-11 h-11 sm:w-12 sm:h-12 rounded-xl bg-sky-50 dark:bg-sky-950/60 border-2 border-sky-200 dark:border-sky-800 text-sky-600 dark:text-sky-400 flex items-center justify-center shrink-0 sm:group-hover:scale-105 transition-transform">
+              <Building2 className="w-5 h-5 sm:w-5.5 sm:h-5.5" />
             </div>
             <div className="min-w-0 flex-1">
-              <p className="font-extrabold text-base sm:text-lg text-slate-900 dark:text-white truncate">Kelompok Tani Ternak (KTT)</p>
+              <p className="font-extrabold text-sm sm:text-lg text-slate-900 dark:text-white truncate">Kelompok Tani Ternak (KTT)</p>
               <p className="text-xs sm:text-sm font-semibold text-slate-500 dark:text-slate-400 truncate">{totalFarm.toLocaleString('id-ID')} unit kelompok terdata</p>
             </div>
           </div>
@@ -403,13 +403,13 @@ export default function LandingServicesSection({
           {/* 3. Puskeswan Aktif */}
           <div
             onClick={onSelectPuskeswanTab}
-            className="p-4 sm:p-5 rounded-2xl border-2 border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:border-blue-400 dark:hover:border-blue-500 hover:shadow-xs transition-all flex items-center gap-3.5 cursor-pointer group active:scale-[0.99]"
+            className="p-3.5 sm:p-5 rounded-2xl border-2 border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:border-blue-400 dark:hover:border-blue-500 hover:shadow-xs transition-all flex items-center gap-3 sm:gap-3.5 cursor-pointer group active:scale-[0.99]"
           >
-            <div className="w-12 h-12 rounded-xl bg-sky-50 dark:bg-sky-950/60 border-2 border-sky-200 dark:border-sky-800 text-sky-600 dark:text-sky-400 flex items-center justify-center shrink-0 sm:group-hover:scale-105 transition-transform">
-              <Stethoscope size={22} />
+            <div className="w-11 h-11 sm:w-12 sm:h-12 rounded-xl bg-sky-50 dark:bg-sky-950/60 border-2 border-sky-200 dark:border-sky-800 text-sky-600 dark:text-sky-400 flex items-center justify-center shrink-0 sm:group-hover:scale-105 transition-transform">
+              <Stethoscope className="w-5 h-5 sm:w-5.5 sm:h-5.5" />
             </div>
             <div className="min-w-0 flex-1">
-              <p className="font-extrabold text-base sm:text-lg text-slate-900 dark:text-white truncate">Puskeswan Aktif</p>
+              <p className="font-extrabold text-sm sm:text-lg text-slate-900 dark:text-white truncate">Puskeswan Aktif</p>
               <p className="text-xs sm:text-sm font-semibold text-slate-500 dark:text-slate-400 truncate">{puskeswanCount} unit pelayanan 26 kecamatan</p>
             </div>
           </div>
@@ -417,13 +417,13 @@ export default function LandingServicesSection({
           {/* 4. Vaksinasi PMK */}
           <div
             onClick={() => setDetailView('vaksinasi')}
-            className="p-4 sm:p-5 rounded-2xl border-2 border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:border-blue-400 dark:hover:border-blue-500 hover:shadow-xs transition-all flex items-center gap-3.5 cursor-pointer group active:scale-[0.99]"
+            className="p-3.5 sm:p-5 rounded-2xl border-2 border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:border-blue-400 dark:hover:border-blue-500 hover:shadow-xs transition-all flex items-center gap-3 sm:gap-3.5 cursor-pointer group active:scale-[0.99]"
           >
-            <div className="w-12 h-12 rounded-xl bg-blue-50 dark:bg-blue-950/60 border-2 border-blue-200 dark:border-blue-800 text-blue-600 dark:text-blue-400 flex items-center justify-center shrink-0 sm:group-hover:scale-105 transition-transform">
-              <Syringe size={22} />
+            <div className="w-11 h-11 sm:w-12 sm:h-12 rounded-xl bg-blue-50 dark:bg-blue-950/60 border-2 border-blue-200 dark:border-blue-800 text-blue-600 dark:text-blue-400 flex items-center justify-center shrink-0 sm:group-hover:scale-105 transition-transform">
+              <Syringe className="w-5 h-5 sm:w-5.5 sm:h-5.5" />
             </div>
             <div className="min-w-0 flex-1">
-              <p className="font-extrabold text-base sm:text-lg text-slate-900 dark:text-white truncate">Vaksinasi PMK &amp; LSD</p>
+              <p className="font-extrabold text-sm sm:text-lg text-slate-900 dark:text-white truncate">Vaksinasi PMK &amp; LSD</p>
               <p className="text-xs sm:text-sm font-semibold text-slate-500 dark:text-slate-400 truncate">{vaksinasiList.length} unit wilayah capaian</p>
             </div>
           </div>
@@ -431,13 +431,13 @@ export default function LandingServicesSection({
           {/* 5. RPH & TPH */}
           <div
             onClick={() => setDetailView('rph_tph')}
-            className="p-4 sm:p-5 rounded-2xl border-2 border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:border-blue-400 dark:hover:border-blue-500 hover:shadow-xs transition-all flex items-center gap-3.5 cursor-pointer group active:scale-[0.99]"
+            className="p-3.5 sm:p-5 rounded-2xl border-2 border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:border-blue-400 dark:hover:border-blue-500 hover:shadow-xs transition-all flex items-center gap-3 sm:gap-3.5 cursor-pointer group active:scale-[0.99]"
           >
-            <div className="w-12 h-12 rounded-xl bg-indigo-50 dark:bg-indigo-950/60 border-2 border-indigo-200 dark:border-indigo-800 text-indigo-600 dark:text-indigo-400 flex items-center justify-center shrink-0 sm:group-hover:scale-105 transition-transform">
-              <Building2 size={22} />
+            <div className="w-11 h-11 sm:w-12 sm:h-12 rounded-xl bg-indigo-50 dark:bg-indigo-950/60 border-2 border-indigo-200 dark:border-indigo-800 text-indigo-600 dark:text-indigo-400 flex items-center justify-center shrink-0 sm:group-hover:scale-105 transition-transform">
+              <Building2 className="w-5 h-5 sm:w-5.5 sm:h-5.5" />
             </div>
             <div className="min-w-0 flex-1">
-              <p className="font-extrabold text-base sm:text-lg text-slate-900 dark:text-white truncate">RPH &amp; TPU/TPH Terbina</p>
+              <p className="font-extrabold text-sm sm:text-lg text-slate-900 dark:text-white truncate">RPH &amp; TPU/TPH Terbina</p>
               <p className="text-xs sm:text-sm font-semibold text-slate-500 dark:text-slate-400 truncate">{rphList.length} unit usaha terdaftar</p>
             </div>
           </div>
@@ -445,13 +445,13 @@ export default function LandingServicesSection({
           {/* 6. Sertifikasi NKV */}
           <div
             onClick={() => setDetailView('nkv')}
-            className="p-4 sm:p-5 rounded-2xl border-2 border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:border-blue-400 dark:hover:border-blue-500 hover:shadow-xs transition-all flex items-center gap-3.5 cursor-pointer group active:scale-[0.99]"
+            className="p-3.5 sm:p-5 rounded-2xl border-2 border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:border-blue-400 dark:hover:border-blue-500 hover:shadow-xs transition-all flex items-center gap-3 sm:gap-3.5 cursor-pointer group active:scale-[0.99]"
           >
-            <div className="w-12 h-12 rounded-xl bg-sky-50 dark:bg-sky-950/60 border-2 border-sky-200 dark:border-sky-800 text-sky-600 dark:text-sky-400 flex items-center justify-center shrink-0 sm:group-hover:scale-105 transition-transform">
-              <CheckCircle2 size={22} />
+            <div className="w-11 h-11 sm:w-12 sm:h-12 rounded-xl bg-sky-50 dark:bg-sky-950/60 border-2 border-sky-200 dark:border-sky-800 text-sky-600 dark:text-sky-400 flex items-center justify-center shrink-0 sm:group-hover:scale-105 transition-transform">
+              <CheckCircle2 className="w-5 h-5 sm:w-5.5 sm:h-5.5" />
             </div>
             <div className="min-w-0 flex-1">
-              <p className="font-extrabold text-base sm:text-lg text-slate-900 dark:text-white truncate">Sertifikasi NKV</p>
+              <p className="font-extrabold text-sm sm:text-lg text-slate-900 dark:text-white truncate">Sertifikasi NKV</p>
               <p className="text-xs sm:text-sm font-semibold text-slate-500 dark:text-slate-400 truncate">{nkvList.length} unit usaha ASUH</p>
             </div>
           </div>

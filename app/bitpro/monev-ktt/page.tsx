@@ -16,7 +16,6 @@ import {
   Layers,
   Activity,
   Egg,
-  FileText,
 } from 'lucide-react';
 import {
   DAFTAR_TAHUN,
@@ -28,21 +27,20 @@ import {
   migrasiKondisi,
   FieldData,
   FORM_KOSONG,
-  SuratPernyataanData,
+  getPuskeswanByKecamatan,
 } from '@/components/bitpro/monev-ktt/types';
 import { MonevFormTab } from '@/components/bitpro/monev-ktt/MonevFormTab';
 import { MonevUnggasTab } from '@/components/bitpro/monev-ktt/MonevUnggasTab';
-import { MonevSuratPernyataanTab } from '@/components/bitpro/monev-ktt/MonevSuratPernyataanTab';
 import { MonevDashboardTab } from '@/components/bitpro/monev-ktt/MonevDashboardTab';
 import { MonevCameraModal, MonevPreviewPhotoModal } from '@/components/bitpro/monev-ktt/MonevModals';
 
 export default function MonevKTT() {
-  const { isReady, canCreate, canEdit } = usePageAuth('bitpro', 'monev-ktt');
+  const { isReady, canCreate, canEdit, isAdmin } = usePageAuth('bitpro', 'monev-ktt');
   const [isClient, setIsClient] = useState(false);
   const [leafletLoaded, setLeafletLoaded] = useState(false);
 
-  // TABS: 'ruminansia' | 'unggas' | 'pernyataan' | 'dashboard'
-  const [activeTab, setActiveTab] = useState<'ruminansia' | 'unggas' | 'pernyataan' | 'dashboard'>('ruminansia');
+  // TABS: 'ruminansia' | 'unggas' | 'dashboard'
+  const [activeTab, setActiveTab] = useState<'ruminansia' | 'unggas' | 'dashboard'>('ruminansia');
 
   useEffect(() => {
     if (isReady && canCreate) {
@@ -64,12 +62,12 @@ export default function MonevKTT() {
   const [formKec, setFormKec] = useState(FORM_KOSONG.kec);
   const [formDesa, setFormDesa] = useState(FORM_KOSONG.desa);
   const [formKtt, setFormKtt] = useState(FORM_KOSONG.ktt);
+  const [formNamaKetua, setFormNamaKetua] = useState(FORM_KOSONG.namaKetua);
   const [formAlamat, setFormAlamat] = useState(FORM_KOSONG.alamat);
   const [formKegiatan, setFormKegiatan] = useState(FORM_KOSONG.kegiatan);
   const [formJenis, setFormJenis] = useState(FORM_KOSONG.jenis);
-  const [formSumberDana, setFormSumberDana] = useState(FORM_KOSONG.sumberDana || 'APBD');
   const [formWaktuMonev, setFormWaktuMonev] = useState(FORM_KOSONG.waktuMonev);
-  const [formPhoto, setFormPhoto] = useState<string | null>(FORM_KOSONG.photo);
+  const [formPhotos, setFormPhotos] = useState<string[]>([]);
   const [formLat, setFormLat] = useState<number | null>(FORM_KOSONG.lat);
   const [formLng, setFormLng] = useState<number | null>(FORM_KOSONG.lng);
   const [formCatatan, setFormCatatan] = useState(FORM_KOSONG.catatan);
@@ -138,16 +136,27 @@ export default function MonevKTT() {
           const rawKondisi = typeof d.kondisi === 'string' ? JSON.parse(d.kondisi) : d.kondisi;
           const isUnggas = d.kategori === 'Unggas' || rawKondisi?.kategori === 'Unggas' || DAFTAR_JENIS_UNGGAS.some((u) => (d.jenis || '').toLowerCase().includes(u.toLowerCase()));
 
+          const rawPhotos = Array.isArray(d.photos)
+            ? d.photos
+            : Array.isArray(rawKondisi?.photos)
+            ? rawKondisi.photos
+            : d.photo
+            ? [d.photo]
+            : [];
+          const rawNamaKetua = d.namaKetua || rawKondisi?.namaKetua || '';
+          const rawDokumenPdf = d.dokumenHasilPdf || rawKondisi?.dokumenHasilPdf || null;
+          const rawDokumenPdfName = d.dokumenHasilPdfName || rawKondisi?.dokumenHasilPdfName || null;
+
           return {
             id: d.id,
             tahun: d.tahun || '2026',
             kec: d.kec,
             desa: d.desa,
             namaKtt: d.namaKtt,
+            namaKetua: rawNamaKetua,
             alamat: d.alamat || '',
             kegiatan: d.kegiatan,
             jenis: d.jenis,
-            sumberDana: d.sumberDana || rawKondisi?.sumberDana || 'APBD',
             kategori: (isUnggas ? 'Unggas' : 'Ruminansia') as 'Ruminansia' | 'Unggas',
             waktuMonev: d.waktuMonev || '',
             kondisi: migrasiKondisi(rawKondisi),
@@ -155,7 +164,10 @@ export default function MonevKTT() {
             suratPernyataan: rawKondisi?.suratPernyataan,
             lat: d.lat,
             lng: d.lng,
-            photo: d.photo,
+            photo: rawPhotos[0] || null,
+            photos: rawPhotos,
+            dokumenHasilPdf: rawDokumenPdf,
+            dokumenHasilPdfName: rawDokumenPdfName,
             catatan: d.catatan || '',
           };
         });
@@ -211,13 +223,16 @@ export default function MonevKTT() {
       .slice(0, 10);
   }, [kttMasterList, formKtt, formKec]);
 
-  const handleSelectKtt = (ktt: { namaKelompok: string; kecamatan: string; desa: string }) => {
+  const handleSelectKtt = (ktt: { namaKelompok: string; kecamatan: string; desa: string; ketua?: string }) => {
     setFormKtt(ktt.namaKelompok);
     if (ktt.kecamatan && DATA_WILAYAH[ktt.kecamatan]) {
       setFormKec(ktt.kecamatan);
     }
     if (ktt.desa) {
       setFormDesa(ktt.desa);
+    }
+    if (ktt.ketua) {
+      setFormNamaKetua(ktt.ketua);
     }
     setShowKttSuggestions(false);
   };
@@ -333,18 +348,25 @@ export default function MonevKTT() {
     if (dbLapangan.length === 0) return alert('Belum ada data lapangan untuk diekspor!');
     const rows = dbLapangan.map((d, i) => {
       const h = hitungKondisi(d.kondisi);
-      const baMatiAda = !!d.kondisi.matiBangkaiBA;
-      const baJualAda = !!d.kondisi.jualBA;
+      const baMatiAda = d.kondisi.matiBangkaiBA === 'Ada';
+      const baJualAda = d.kondisi.jualBA === 'Ada';
       const baLegacyAda = !!(d.kondisi as any)?.pdfBA;
-      const fotoAda = !!d.photo;
+      const fotoCount = (d.photos && d.photos.length > 0) ? d.photos.length : (d.photo ? 1 : 0);
+      const dokumenAda = !!d.dokumenHasilPdf || !!(d.kondisi as any)?.dokumenHasilPdf;
 
       return {
         No: i + 1,
         'Tahun Bantuan': d.tahun,
-        Kecamatan: d.kec,
-        Desa: d.desa,
         'Nama KTT': d.namaKtt,
-        Komoditas: d.jenis,
+        'Nama Ketua': d.namaKetua || (d.kondisi as any)?.namaKetua || '-',
+        Desa: d.desa,
+        Kecamatan: d.kec,
+        'Wilayah Puskeswan': getPuskeswanByKecamatan(d.kec),
+        'Jenis Ternak': d.jenis,
+        'Betina (B)': d.kondisi?.awalBetina ?? 0,
+        'Jantan (J)': d.kondisi?.awalJantan ?? 0,
+        'Bibit Odot (Stek)': (d.kondisi as any)?.bibitOdot ?? 0,
+        'Obat-obatan (Paket)': (d.kondisi as any)?.obatPaket ?? 0,
         'Waktu Monev': d.waktuMonev || '-',
         'Awal (a)': h.a,
         'Mati (b)': h.b,
@@ -360,7 +382,8 @@ export default function MonevKTT() {
         Latitude: d.lat || '-',
         Longitude: d.lng || '-',
         Catatan: d.catatan || '-',
-        'Dokumentasi Foto': fotoAda ? 'Ada (Tersimpan di SIMANTAP)' : 'Tidak Ada',
+        'Dokumentasi Foto': fotoCount > 0 ? `${fotoCount} Foto Tersimpan` : 'Tidak Ada',
+        'Dokumen Hasil Lapangan (PDF)': dokumenAda ? (d.dokumenHasilPdfName || (d.kondisi as any)?.dokumenHasilPdfName || 'Ada (PDF)') : 'Tidak Ada',
         'Lampiran Berita Acara': [
           baMatiAda ? `BA Kematian (${d.kondisi.matiBangkaiBAName || 'Tersedia'})` : null,
           baJualAda ? `BA Penjualan (${d.kondisi.jualBAName || 'Tersedia'})` : null,
@@ -388,10 +411,20 @@ export default function MonevKTT() {
         setIsGettingLocation(false);
       },
       () => {
-        alert('Gagal mengambil titik GPS. Pastikan izin lokasi diizinkan di browser Anda.');
-        setIsGettingLocation(false);
+        navigator.geolocation.getCurrentPosition(
+          (posFallback) => {
+            setFormLat(Number(posFallback.coords.latitude.toFixed(6)));
+            setFormLng(Number(posFallback.coords.longitude.toFixed(6)));
+            setIsGettingLocation(false);
+          },
+          () => {
+            alert('Gagal mengambil titik GPS. Pastikan izin lokasi diizinkan di browser Anda.');
+            setIsGettingLocation(false);
+          },
+          { enableHighAccuracy: false, timeout: 5000, maximumAge: 60000 }
+        );
       },
-      { enableHighAccuracy: true, timeout: 10000 }
+      { enableHighAccuracy: true, timeout: 5000, maximumAge: 30000 }
     );
   };
 
@@ -404,6 +437,11 @@ export default function MonevKTT() {
   };
 
   const takePhoto = () => {
+    if (formPhotos.length >= 5) {
+      alert('Maksimal 5 foto dokumentasi lapangan.');
+      closeCamera();
+      return;
+    }
     const video = videoRef.current;
     const canvas = canvasRef.current;
     if (!video || !canvas) return;
@@ -413,22 +451,39 @@ export default function MonevKTT() {
     if (ctx) {
       ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
       const compressed = compressCanvas(canvas, 2 * 1024 * 1024);
-      setFormPhoto(compressed);
+      setFormPhotos((prev) => [...prev, compressed].slice(0, 5));
     }
     closeCamera();
     if (formLat === null || formLng === null) handleGetLocation();
   };
 
   const handlePhotoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    try {
-      const compressed = await compressImageFile(file, 1600, 0.8, 2 * 1024 * 1024);
-      setFormPhoto(compressed);
-    } catch {
-      alert('Gagal memproses gambar. Pastikan format file gambar valid.');
+    const files = e.target.files;
+    if (!files || files.length === 0) return;
+    if (formPhotos.length >= 5) {
+      alert('Maksimal 5 foto dokumentasi lapangan.');
+      return;
+    }
+    const remainingSlots = 5 - formPhotos.length;
+    const filesToUpload = Array.from(files).slice(0, remainingSlots);
+    const newPhotos: string[] = [];
+    for (const file of filesToUpload) {
+      try {
+        const compressed = await compressImageFile(file, 1600, 0.8, 2 * 1024 * 1024);
+        newPhotos.push(compressed);
+      } catch {
+        alert(`Gagal memproses gambar ${file.name}. Pastikan format file gambar valid.`);
+      }
+    }
+    if (newPhotos.length > 0) {
+      setFormPhotos((prev) => [...prev, ...newPhotos].slice(0, 5));
     }
     if (formLat === null || formLng === null) handleGetLocation();
+    e.target.value = '';
+  };
+
+  const handleRemovePhoto = (index: number) => {
+    setFormPhotos((prev) => prev.filter((_, i) => i !== index));
   };
 
   const resetForm = () => {
@@ -437,12 +492,12 @@ export default function MonevKTT() {
     setFormKec(FORM_KOSONG.kec);
     setFormDesa(FORM_KOSONG.desa);
     setFormKtt(FORM_KOSONG.ktt);
+    setFormNamaKetua(FORM_KOSONG.namaKetua);
     setFormAlamat(FORM_KOSONG.alamat);
     setFormKegiatan(FORM_KOSONG.kegiatan);
     setFormJenis(FORM_KOSONG.jenis);
-    setFormSumberDana(FORM_KOSONG.sumberDana || 'APBD');
     setFormWaktuMonev(FORM_KOSONG.waktuMonev);
-    setFormPhoto(FORM_KOSONG.photo);
+    setFormPhotos([]);
     setFormLat(FORM_KOSONG.lat);
     setFormLng(FORM_KOSONG.lng);
     setFormCatatan(FORM_KOSONG.catatan);
@@ -470,20 +525,26 @@ export default function MonevKTT() {
       kec: formKec,
       desa: formDesa,
       namaKtt: formKtt,
+      namaKetua: formNamaKetua,
       alamat: formAlamat,
       kegiatan: formKegiatan,
       jenis: formJenis,
-      sumberDana: formSumberDana,
       kategori: 'Ruminansia',
       waktuMonev: formWaktuMonev,
       kondisi: {
         ...formKondisi,
-        sumberDana: formSumberDana,
+        namaKetua: formNamaKetua,
+        photos: formPhotos,
+        dokumenHasilPdf: formKondisi.dokumenHasilPdf,
+        dokumenHasilPdfName: formKondisi.dokumenHasilPdfName,
         kategori: 'Ruminansia',
       },
       lat: formLat,
       lng: formLng,
-      photo: formPhoto,
+      photo: formPhotos[0] || null,
+      photos: formPhotos,
+      dokumenHasilPdf: formKondisi.dokumenHasilPdf,
+      dokumenHasilPdfName: formKondisi.dokumenHasilPdfName,
       catatan: formCatatan,
       isEdit,
     };
@@ -516,32 +577,6 @@ export default function MonevKTT() {
     }
   };
 
-  const handleSaveSuratPernyataan = async (kttId: string, suratData: SuratPernyataanData) => {
-    const target = dbLapangan.find((d) => d.id === kttId);
-    if (!target) return;
-    const updated = {
-      ...target,
-      suratPernyataan: suratData,
-      kondisi: {
-        ...target.kondisi,
-        suratPernyataan: suratData,
-        fotoTtdKetuaCap: suratData.fotoTtdKetuaCap || target.kondisi?.fotoTtdKetuaCap,
-      },
-      isEdit: true,
-    };
-    try {
-      await fetch('/api/monev-lapangan', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(updated),
-      });
-      await fetchDatabase();
-    } catch (err) {
-      console.error('Gagal menyimpan surat pernyataan', err);
-      alert('Gagal menyimpan surat pernyataan');
-    }
-  };
-
   const handleEditClick = (data: FieldData) => {
     if (!canEdit) {
       alert('Hanya Administrator yang berhak mengedit data.');
@@ -552,15 +587,16 @@ export default function MonevKTT() {
     setFormKec(data.kec);
     setFormDesa(data.desa);
     setFormKtt(data.namaKtt);
+    setFormNamaKetua(data.namaKetua || (data.kondisi as any)?.namaKetua || '');
     setFormAlamat(data.alamat || '');
     setFormKegiatan(data.kegiatan);
     setFormJenis(data.jenis);
-    setFormSumberDana(data.sumberDana || (data.kondisi as any)?.sumberDana || 'APBD');
     setFormWaktuMonev(data.waktuMonev || '');
     setFormKondisi(migrasiKondisi(data.kondisi));
     setFormLat(data.lat);
     setFormLng(data.lng);
-    setFormPhoto(data.photo);
+    const existingPhotos = data.photos && data.photos.length > 0 ? data.photos : (data.photo ? [data.photo] : []);
+    setFormPhotos(existingPhotos);
     setFormCatatan(data.catatan || '');
     setActiveTab(data.kategori === 'Unggas' ? 'unggas' : 'ruminansia');
     if (formSectionRef.current) {
@@ -714,14 +750,13 @@ export default function MonevKTT() {
           </div>
         </div>
 
-        {/* ── 4 VIEW TABS: RUMINANSIA (TAB 1), UNGGAS (TAB 2), SURAT PERNYATAAN (TAB 3), PETA & LAPORAN (TAB 4) ── */}
+        {/* ── 3 VIEW TABS: RUMINANSIA (TAB 1), UNGGAS (TAB 2), PETA & LAPORAN (TAB 3) ── */}
         <div className="flex gap-2 border-b border-slate-200 pb-px overflow-x-auto no-scrollbar scroll-smooth -mx-4 px-4 sm:mx-0 sm:px-0">
           {[
             ...((canCreate || canEdit)
               ? [
                   { key: 'ruminansia', label: editingId ? 'Edit Ruminansia ✏️' : 'Monev Ruminansia', icon: Activity },
                   { key: 'unggas', label: 'Monev Unggas', icon: Egg },
-                  { key: 'pernyataan', label: 'Surat Pernyataan', icon: FileText },
                 ]
               : []),
             { key: 'dashboard', label: 'Peta & Laporan Lapangan', icon: MapIcon },
@@ -761,10 +796,10 @@ export default function MonevKTT() {
             setFormDesa={setFormDesa}
             formKtt={formKtt}
             setFormKtt={setFormKtt}
+            formNamaKetua={formNamaKetua}
+            setFormNamaKetua={setFormNamaKetua}
             formJenis={formJenis}
             setFormJenis={setFormJenis}
-            formSumberDana={formSumberDana}
-            setFormSumberDana={setFormSumberDana}
             formWaktuMonev={formWaktuMonev}
             setFormWaktuMonev={setFormWaktuMonev}
             formKondisi={formKondisi}
@@ -777,9 +812,9 @@ export default function MonevKTT() {
             setFormLng={setFormLng}
             handleGetLocation={handleGetLocation}
             isGettingLocation={isGettingLocation}
-            formPhoto={formPhoto}
-            setFormPhoto={setFormPhoto}
+            formPhotos={formPhotos}
             handlePhotoUpload={handlePhotoUpload}
+            handleRemovePhoto={handleRemovePhoto}
             cameraInputRef={cameraInputRef}
             galleryInputRef={galleryInputRef}
             setPreviewPhotoModal={setPreviewPhotoModal}
@@ -794,6 +829,9 @@ export default function MonevKTT() {
             resetForm={resetForm}
             dbLapanganFiltered={dbLapanganFiltered}
             canEdit={canEdit}
+            canCreate={canCreate}
+            isAdmin={isAdmin}
+            fetchDatabase={fetchDatabase}
             onEdit={handleEditClick}
             onDelete={handleDeleteClick}
             kttMasterList={kttMasterList}
@@ -813,16 +851,6 @@ export default function MonevKTT() {
             onDelete={handleDeleteClick}
             setPreviewPhotoModal={setPreviewPhotoModal}
             kttMasterList={kttMasterList}
-          />
-        )}
-
-        {/* ── TAB 3: SURAT PERNYATAAN ── */}
-        {activeTab === 'pernyataan' && (
-          <MonevSuratPernyataanTab
-            dbLapangan={dbLapangan}
-            kttMasterList={kttMasterList}
-            onSaveSuratPernyataan={handleSaveSuratPernyataan}
-            setPreviewPhotoModal={setPreviewPhotoModal}
           />
         )}
 

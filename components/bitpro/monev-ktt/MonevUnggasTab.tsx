@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useMemo, useRef } from 'react';
+import React, { useState, useMemo, useRef, useEffect } from 'react';
 import {
   Filter,
   Search,
@@ -16,17 +16,20 @@ import {
   Egg,
   Download,
   Printer,
+  FileText,
 } from 'lucide-react';
 import {
   DATA_WILAYAH,
   DAFTAR_JENIS_UNGGAS,
   FieldData,
   KondisiUnggas,
+  KONDISI_KOSONG,
   KONDISI_UNGGAS_KOSONG,
   hitungKondisiUnggas,
 } from './types';
-import { compressImageFile } from '@/lib/file-compressor';
+import { compressImageFile, validatePdfFile } from '@/lib/file-compressor';
 import { cetakLaporanUnggas } from './monev-pdf-printer';
+import { NumberStepper } from './KondisiFormSections';
 
 interface MonevUnggasTabProps {
   tahunBantuanFilter: string;
@@ -69,17 +72,21 @@ export function MonevUnggasTab({
   }, [dbLapangan, tahunBantuanFilter, filterKecamatan]);
 
   // Form State Unggas
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const formSectionRef = useRef<HTMLDivElement>(null);
   const [formTahun, setFormTahun] = useState<string>(tahunBantuanFilter === 'Semua Tahun' ? '2026' : tahunBantuanFilter);
-  const [formSumberDana, setFormSumberDana] = useState<string>('APBD');
   const [formKec, setFormKec] = useState<string>('');
   const [formDesa, setFormDesa] = useState<string>('');
   const [formKtt, setFormKtt] = useState<string>('');
+  const [formNamaKetua, setFormNamaKetua] = useState<string>('');
   const [formJenis, setFormJenis] = useState<string>(DAFTAR_JENIS_UNGGAS[0]);
   const [formWaktuMonev, setFormWaktuMonev] = useState<string>('');
   const [formLat, setFormLat] = useState<number | null>(null);
   const [formLng, setFormLng] = useState<number | null>(null);
   const [isGettingLocation, setIsGettingLocation] = useState(false);
-  const [formPhoto, setFormPhoto] = useState<string | null>(null);
+  const [formPhotos, setFormPhotos] = useState<string[]>([]);
+  const [dokumenHasilPdf, setDokumenHasilPdf] = useState<string | null>(null);
+  const [dokumenHasilPdfName, setDokumenHasilPdfName] = useState<string | null>(null);
   const [formCatatan, setFormCatatan] = useState<string>('');
 
   // Kondisi Unggas State
@@ -108,8 +115,11 @@ export function MonevUnggasTab({
       .slice(0, 10);
   }, [kttMasterList, formKtt, formKec]);
 
-  const handleSelectKtt = (ktt: { namaKelompok: string; kecamatan: string; desa: string }) => {
+  const handleSelectKtt = (ktt: { namaKelompok: string; kecamatan: string; desa: string; ketua?: string }) => {
     setFormKtt(ktt.namaKelompok);
+    if (ktt.ketua) {
+      setFormNamaKetua(ktt.ketua);
+    }
     if (ktt.kecamatan && DATA_WILAYAH[ktt.kecamatan]) {
       setFormKec(ktt.kecamatan);
     }
@@ -119,7 +129,7 @@ export function MonevUnggasTab({
     setShowKttSuggestions(false);
   };
 
-  // GPS Location Handler
+  // GPS Location Handler with low-accuracy fallback (prevents browser lock & lag)
   const handleGetLocation = () => {
     if (!navigator.geolocation) {
       alert('Browser tidak mendukung pendeteksian lokasi GPS.');
@@ -132,61 +142,111 @@ export function MonevUnggasTab({
         setFormLng(Number(pos.coords.longitude.toFixed(6)));
         setIsGettingLocation(false);
       },
-      (err) => {
-        alert('Gagal mendeteksi lokasi GPS: ' + err.message);
-        setIsGettingLocation(false);
+      () => {
+        navigator.geolocation.getCurrentPosition(
+          (posFallback) => {
+            setFormLat(Number(posFallback.coords.latitude.toFixed(6)));
+            setFormLng(Number(posFallback.coords.longitude.toFixed(6)));
+            setIsGettingLocation(false);
+          },
+          (err) => {
+            alert('Gagal mendeteksi lokasi GPS: ' + err.message);
+            setIsGettingLocation(false);
+          },
+          { enableHighAccuracy: false, timeout: 5000, maximumAge: 60000 }
+        );
       },
-      { enableHighAccuracy: true, timeout: 10000 }
+      { enableHighAccuracy: true, timeout: 5000, maximumAge: 30000 }
     );
   };
 
-  // Photo handlers
+  // Photo handlers (Maksimal 5 Foto)
   const cameraInputRef = useRef<HTMLInputElement>(null);
   const galleryInputRef = useRef<HTMLInputElement>(null);
 
   const handlePhotoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    try {
-      const compressed = await compressImageFile(file, 1600, 0.8, 2 * 1024 * 1024);
-      setFormPhoto(compressed);
-    } catch (err: any) {
-      alert(err.message || 'Gagal memproses foto dokumentasi');
+    const files = e.target.files;
+    if (!files || files.length === 0) return;
+    if (formPhotos.length >= 5) {
+      alert('Maksimal 5 foto dokumentasi lapangan.');
+      return;
     }
+    const remainingSlots = 5 - formPhotos.length;
+    const filesToUpload = Array.from(files).slice(0, remainingSlots);
+    for (const file of filesToUpload) {
+      try {
+        const compressed = await compressImageFile(file, 1600, 0.8, 2 * 1024 * 1024);
+        setFormPhotos((prev) => [...prev, compressed].slice(0, 5));
+      } catch (err: any) {
+        alert(err.message || 'Gagal memproses foto dokumentasi');
+      }
+    }
+    e.target.value = '';
   };
 
-  const handleUploadTtdPetugas = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    try {
-      const compressed = await compressImageFile(file, 1400, 0.85, 2 * 1024 * 1024);
-      updateKondisiUnggas('fotoTtdPetugas', compressed);
-    } catch (err: any) {
-      alert(err.message || 'Gagal memproses foto tanda tangan petugas');
-    }
+  const handleRemovePhoto = (idx: number) => {
+    setFormPhotos((prev) => prev.filter((_, i) => i !== idx));
   };
 
-  const handleUploadTtdKetuaCap = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  // PDF Dokumen Hasil Lapangan Handler
+  const handlePdfUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
-    try {
-      const compressed = await compressImageFile(file, 1400, 0.85, 2 * 1024 * 1024);
-      updateKondisiUnggas('fotoTtdKetuaCap', compressed);
-    } catch (err: any) {
-      alert(err.message || 'Gagal memproses foto tanda tangan + cap ketua');
+    const check = validatePdfFile(file, 2 * 1024 * 1024);
+    if (!check.valid) {
+      alert(check.error);
+      return;
+    }
+    const reader = new FileReader();
+    reader.onload = () => {
+      setDokumenHasilPdf(reader.result as string);
+      setDokumenHasilPdfName(file.name);
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const removePdf = () => {
+    setDokumenHasilPdf(null);
+    setDokumenHasilPdfName(null);
+  };
+
+  const handleEditLocal = (d: FieldData) => {
+    setEditingId(d.id);
+    setFormTahun(d.tahun || '2026');
+    setFormKec(d.kec);
+    setFormDesa(d.desa);
+    setFormKtt(d.namaKtt);
+    setFormNamaKetua(d.namaKetua || (d.kondisi as any)?.namaKetua || '');
+    setFormJenis(d.jenis);
+    setFormWaktuMonev(d.waktuMonev || '');
+    setFormLat(d.lat);
+    setFormLng(d.lng);
+    const photos = d.photos && d.photos.length > 0 ? d.photos : (d.photo ? [d.photo] : []);
+    setFormPhotos(photos);
+    setDokumenHasilPdf(d.dokumenHasilPdf || (d.kondisi as any)?.dokumenHasilPdf || null);
+    setDokumenHasilPdfName(d.dokumenHasilPdfName || (d.kondisi as any)?.dokumenHasilPdfName || null);
+    setFormCatatan(d.catatan || '');
+    if (d.kondisiUnggas) {
+      setKondisiUnggas(d.kondisiUnggas);
+    }
+    if (formSectionRef.current) {
+      formSectionRef.current.scrollIntoView({ behavior: 'smooth' });
     }
   };
 
   const resetForm = () => {
-    setFormSumberDana('APBD');
+    setEditingId(null);
     setFormKec('');
     setFormDesa('');
     setFormKtt('');
+    setFormNamaKetua('');
     setFormJenis(DAFTAR_JENIS_UNGGAS[0]);
     setFormWaktuMonev('');
     setFormLat(null);
     setFormLng(null);
-    setFormPhoto(null);
+    setFormPhotos([]);
+    setDokumenHasilPdf(null);
+    setDokumenHasilPdfName(null);
     setFormCatatan('');
     setKondisiUnggas({ ...KONDISI_UNGGAS_KOSONG });
   };
@@ -199,24 +259,28 @@ export function MonevUnggasTab({
     }
 
     const payload = {
-      id: 'unggas_' + Date.now(),
+      id: editingId || ('unggas_' + Date.now()),
       tahun: formTahun,
-      sumberDana: formSumberDana,
+      sumberDana: '',
       kec: formKec,
       desa: formDesa,
       namaKtt: formKtt,
-      alamat: '',
+      namaKetua: formNamaKetua,
+      alamat: formDesa && formKec ? `Desa ${formDesa}, Kec. ${formKec}` : '',
       kegiatan: 'Monev Hibah Unggas',
       jenis: formJenis,
       kategori: 'Unggas',
       waktuMonev: formWaktuMonev,
       lat: formLat,
       lng: formLng,
-      photo: formPhoto,
+      photo: formPhotos[0] || null,
+      photos: formPhotos,
+      dokumenHasilPdf,
+      dokumenHasilPdfName,
       catatan: formCatatan,
       kondisiUnggas: kondisiUnggas,
       kondisi: {
-        sumberDana: formSumberDana,
+        namaKetua: formNamaKetua,
         awalJantan: kondisiUnggas.awalTotal,
         awalBetina: 0,
         matiBangkaiJantan: kondisiUnggas.kematian,
@@ -231,16 +295,17 @@ export function MonevUnggasTab({
         matiAnakBetina: 0,
         jualAnakJantan: 0,
         jualAnakBetina: 0,
-        fotoTtdPetugas: kondisiUnggas.fotoTtdPetugas,
-        fotoTtdKetuaCap: kondisiUnggas.fotoTtdKetuaCap,
         namaPetugas1: kondisiUnggas.namaPetugas1,
         namaPetugas2: kondisiUnggas.namaPetugas2,
+        dokumenHasilPdf,
+        dokumenHasilPdfName,
       },
+      isEdit: !!editingId,
     };
 
     await onSaveUnggas(payload);
     resetForm();
-    alert('✓ Data Monev Ternak Hibah Unggas berhasil disimpan!');
+    alert(editingId ? '✓ Data Monev Ternak Hibah Unggas berhasil diperbarui!' : '✓ Data Monev Ternak Hibah Unggas berhasil disimpan!');
   };
 
   return (
@@ -332,7 +397,7 @@ export function MonevUnggasTab({
                 <th className="px-4 py-3.5 text-right">Dijual</th>
                 <th className="px-4 py-3.5 text-right">Populasi Saat Ini</th>
                 <th className="px-4 py-3.5 text-right">Prod. Telur / Hari</th>
-                <th className="px-4 py-3.5 text-center">GPS &amp; TTD</th>
+                <th className="px-4 py-3.5 text-center">GPS, Foto &amp; Dokumen</th>
                 <th className="px-4 py-3.5 text-center">Aksi / Cetak</th>
               </tr>
             </thead>
@@ -348,6 +413,9 @@ export function MonevUnggasTab({
                   fotoTtdKetuaCap: d.kondisi?.fotoTtdKetuaCap,
                 };
                 const sisa = Math.max(0, (ku.awalTotal || 0) - (ku.kematian || 0) - (ku.dijual || 0));
+                const docPdf = d.dokumenHasilPdf || (d.kondisi as any)?.dokumenHasilPdf;
+                const docPdfName = d.dokumenHasilPdfName || (d.kondisi as any)?.dokumenHasilPdfName;
+                const allPhotos = (d.photos && d.photos.length > 0) ? d.photos : (d.photo ? [d.photo] : []);
 
                 return (
                   <tr key={d.id} className="hover:bg-slate-50/80 transition-colors">
@@ -381,40 +449,35 @@ export function MonevUnggasTab({
                           <span className="text-red-500 font-bold text-[11px]">Belum GPS</span>
                         )}
 
-                        {d.photo && (
-                          <button
-                            type="button"
-                            onClick={() => setPreviewPhotoModal({ url: d.photo!, title: `Foto Dokumentasi Unggas: ${d.namaKtt}` })}
-                            className="text-amber-700 hover:text-amber-800 bg-amber-50 hover:bg-amber-100 border border-amber-200 px-2 py-0.5 rounded font-bold flex items-center gap-1 cursor-pointer transition-colors"
-                            title="Klik untuk melihat / unduh foto dokumentasi"
-                          >
-                            <ImageIcon size={11} strokeWidth={2.5} className="text-amber-600" />
-                            <span>Foto</span>
-                          </button>
+                        {allPhotos.length > 0 && (
+                          <div className="flex items-center gap-1">
+                            {allPhotos.map((ph, pIdx) => (
+                              <button
+                                key={pIdx}
+                                type="button"
+                                onClick={() => setPreviewPhotoModal({ url: ph, title: `Foto Dokumentasi Unggas ${pIdx + 1}: ${d.namaKtt}` })}
+                                className="text-amber-700 hover:text-amber-800 bg-amber-50 hover:bg-amber-100 border border-amber-200 px-1.5 py-0.5 rounded font-bold flex items-center gap-1 cursor-pointer transition-colors text-[11px]"
+                                title={`Klik untuk melihat / unduh foto dokumentasi ${pIdx + 1}`}
+                              >
+                                <ImageIcon size={11} strokeWidth={2.5} className="text-amber-600" />
+                                <span>Foto {allPhotos.length > 1 ? pIdx + 1 : ''}</span>
+                              </button>
+                            ))}
+                          </div>
                         )}
 
-                        {(ku.fotoTtdPetugas || d.kondisi?.fotoTtdPetugas) && (
-                          <button
-                            type="button"
-                            onClick={() => setPreviewPhotoModal({ url: (ku.fotoTtdPetugas || d.kondisi?.fotoTtdPetugas)!, title: `TTD Petugas Monev: ${d.namaKtt}` })}
-                            className="text-emerald-700 hover:text-emerald-800 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 px-1.5 py-0.5 rounded font-bold flex items-center gap-1 cursor-pointer"
-                            title="Lihat / Unduh Tanda Tangan Petugas"
+                        {docPdf && (
+                          <a
+                            href={docPdf}
+                            download={docPdfName || `Dokumen_Hasil_Unggas_${d.namaKtt.replace(/[^a-zA-Z0-9_-]/g, '_')}.pdf`}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="text-amber-800 hover:text-amber-900 bg-amber-100 hover:bg-amber-200 border border-amber-300 px-1.5 py-0.5 rounded font-bold flex items-center gap-1 text-[11px]"
+                            title="Unduh / Buka Dokumen Hasil Lapangan (PDF)"
                           >
-                            <FileCheck size={11} strokeWidth={2.5} className="text-emerald-600" />
-                            <span>TTD Petugas</span>
-                          </button>
-                        )}
-
-                        {(ku.fotoTtdKetuaCap || d.kondisi?.fotoTtdKetuaCap) && (
-                          <button
-                            type="button"
-                            onClick={() => setPreviewPhotoModal({ url: (ku.fotoTtdKetuaCap || d.kondisi?.fotoTtdKetuaCap)!, title: `TTD & Cap: ${d.namaKtt}` })}
-                            className="text-blue-700 hover:text-blue-800 bg-blue-50 hover:bg-blue-100 border border-blue-200 px-1.5 py-0.5 rounded font-bold flex items-center gap-1 cursor-pointer"
-                            title="Lihat / Unduh Tanda Tangan & Cap Kelompok"
-                          >
-                            <FileCheck size={11} strokeWidth={2.5} className="text-blue-600" />
-                            <span>TTD+Cap</span>
-                          </button>
+                            <FileText size={11} strokeWidth={2.5} className="text-amber-700" />
+                            <span>Dokumen PDF</span>
+                          </a>
                         )}
                       </div>
                     </td>
@@ -431,7 +494,10 @@ export function MonevUnggasTab({
                         {canEdit && (
                           <>
                             <button
-                              onClick={() => onEdit(d)}
+                              onClick={() => {
+                                handleEditLocal(d);
+                                onEdit(d);
+                              }}
                               className="w-8 h-8 rounded-lg border border-slate-200 bg-slate-50 hover:bg-slate-100 text-slate-700 flex items-center justify-center transition-colors cursor-pointer"
                               title="Edit"
                             >
@@ -465,17 +531,25 @@ export function MonevUnggasTab({
       </div>
 
       {/* ── 3. FORMULIR INPUT MONEV TERNAK HIBAH UNGGAS ── */}
-      <div className="bg-white p-6 sm:p-8 rounded-2xl border border-slate-200 shadow-xs space-y-6">
+      <div ref={formSectionRef} className="bg-white p-6 sm:p-8 rounded-2xl border border-slate-200 shadow-xs space-y-6">
         <div className="flex items-center justify-between pb-4 border-b border-slate-200">
           <div>
             <h3 className="font-bold text-base sm:text-lg text-slate-900 flex items-center gap-2">
               <Egg size={20} className="text-amber-600" />
-              <span>Formulir Monev Perkembangan Ternak Hibah Unggas (Tahun Bantuan {formTahun})</span>
+              <span>{editingId ? 'Edit Data Monev Unggas' : `Formulir Monev Perkembangan Ternak Hibah Unggas (Tahun Bantuan ${formTahun})`}</span>
             </h3>
             <p className="text-xs text-slate-500">
               Pencatatan kondisi populasi, mortalitas, penjualan, produksi telur, dan konsumsi pakan unggas
             </p>
           </div>
+          {editingId && (
+            <button
+              onClick={resetForm}
+              className="min-h-touch h-9 px-3.5 rounded-xl border border-slate-200 bg-slate-100 hover:bg-slate-200 text-xs font-bold text-slate-700 transition-colors cursor-pointer"
+            >
+              Batal Edit
+            </button>
+          )}
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-6">
@@ -503,14 +577,13 @@ export function MonevUnggasTab({
 
               <div>
                 <label className="block text-xs font-sans font-bold uppercase tracking-wider text-slate-600 mb-1">
-                  Sumber Dana <span className="text-red-500">*</span>
+                  Nama Ketua Kelompok <span className="text-slate-400 font-normal">(Manual / Auto)</span>
                 </label>
                 <input
                   type="text"
-                  value={formSumberDana}
-                  onChange={(e) => setFormSumberDana(e.target.value)}
-                  placeholder="Contoh: APBD / DAK"
-                  required
+                  value={formNamaKetua}
+                  onChange={(e) => setFormNamaKetua(e.target.value)}
+                  placeholder="Nama ketua kelompok..."
                   className="w-full min-h-touch h-10 px-3 rounded-xl border border-slate-200 bg-white text-xs font-bold focus:border-amber-500 outline-none"
                 />
               </div>
@@ -640,48 +713,30 @@ export function MonevUnggasTab({
                 <label className="block text-xs font-sans font-bold uppercase tracking-wider text-slate-600 mb-1">
                   1. Jumlah Ternak Awal Total (a)
                 </label>
-                <div className="relative">
-                  <input
-                    type="number"
-                    min={0}
-                    value={kondisiUnggas.awalTotal}
-                    onChange={(e) => updateKondisiUnggas('awalTotal', Number(e.target.value))}
-                    className="w-full h-11 px-3 rounded-xl border border-slate-200 bg-white font-bold text-center text-sm focus:border-amber-500 outline-none"
-                  />
-                  <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-slate-400 font-semibold pointer-events-none">Ekor</span>
-                </div>
+                <NumberStepper
+                  value={kondisiUnggas.awalTotal}
+                  onChange={(val) => updateKondisiUnggas('awalTotal', val)}
+                />
               </div>
 
               <div>
                 <label className="block text-xs font-sans font-bold uppercase tracking-wider text-slate-600 mb-1">
                   2. Kematian Ternak (b)
                 </label>
-                <div className="relative">
-                  <input
-                    type="number"
-                    min={0}
-                    value={kondisiUnggas.kematian}
-                    onChange={(e) => updateKondisiUnggas('kematian', Number(e.target.value))}
-                    className="w-full h-11 px-3 rounded-xl border border-slate-200 bg-white font-bold text-center text-sm text-red-600 focus:border-amber-500 outline-none"
-                  />
-                  <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-slate-400 font-semibold pointer-events-none">Ekor</span>
-                </div>
+                <NumberStepper
+                  value={kondisiUnggas.kematian}
+                  onChange={(val) => updateKondisiUnggas('kematian', val)}
+                />
               </div>
 
               <div>
                 <label className="block text-xs font-sans font-bold uppercase tracking-wider text-slate-600 mb-1">
                   3. Ternak Dijual (c)
                 </label>
-                <div className="relative">
-                  <input
-                    type="number"
-                    min={0}
-                    value={kondisiUnggas.dijual}
-                    onChange={(e) => updateKondisiUnggas('dijual', Number(e.target.value))}
-                    className="w-full h-11 px-3 rounded-xl border border-slate-200 bg-white font-bold text-center text-sm focus:border-amber-500 outline-none"
-                  />
-                  <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-slate-400 font-semibold pointer-events-none">Ekor</span>
-                </div>
+                <NumberStepper
+                  value={kondisiUnggas.dijual}
+                  onChange={(val) => updateKondisiUnggas('dijual', val)}
+                />
               </div>
             </div>
 
@@ -702,36 +757,24 @@ export function MonevUnggasTab({
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
               <div>
                 <label className="block text-xs font-sans font-bold uppercase tracking-wider text-slate-600 mb-1">
-                  5. Rataan Produksi Telur / Hari
+                  5. Rataan Produksi Telur (Butir / Hari)
                 </label>
-                <div className="relative">
-                  <input
-                    type="number"
-                    min={0}
-                    step="any"
-                    value={kondisiUnggas.rataanTelur}
-                    onChange={(e) => updateKondisiUnggas('rataanTelur', Number(e.target.value))}
-                    className="w-full h-11 px-3 rounded-xl border border-slate-200 bg-white font-bold text-center text-sm focus:border-amber-500 outline-none"
-                  />
-                  <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-slate-400 font-semibold pointer-events-none">Butir / Hari</span>
-                </div>
+                <NumberStepper
+                  value={kondisiUnggas.rataanTelur}
+                  onChange={(val) => updateKondisiUnggas('rataanTelur', val)}
+                  step={1}
+                />
               </div>
 
               <div>
                 <label className="block text-xs font-sans font-bold uppercase tracking-wider text-slate-600 mb-1">
-                  6. Konsumsi Pakan / Hari
+                  6. Konsumsi Pakan (Gram / Ekor / Hari)
                 </label>
-                <div className="relative">
-                  <input
-                    type="number"
-                    min={0}
-                    step="any"
-                    value={kondisiUnggas.konsumsiPakan}
-                    onChange={(e) => updateKondisiUnggas('konsumsiPakan', Number(e.target.value))}
-                    className="w-full h-11 px-3 rounded-xl border border-slate-200 bg-white font-bold text-center text-sm focus:border-amber-500 outline-none"
-                  />
-                  <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-slate-400 font-semibold pointer-events-none">Gram / Ekor / Hari</span>
-                </div>
+                <NumberStepper
+                  value={kondisiUnggas.konsumsiPakan}
+                  onChange={(val) => updateKondisiUnggas('konsumsiPakan', val)}
+                  step={5}
+                />
               </div>
             </div>
 
@@ -800,18 +843,39 @@ export function MonevUnggasTab({
               </div>
 
               <div>
-                <label className="block text-xs font-sans font-bold uppercase tracking-wider text-slate-600 mb-1">
-                  Foto Lapangan Unggas (Maks 2 MB)
-                </label>
+                <div className="flex items-center justify-between mb-1">
+                  <label className="block text-xs font-sans font-bold uppercase tracking-wider text-slate-600">
+                    Foto Lapangan Unggas ({formPhotos.length}/5 Foto)
+                  </label>
+                  {formPhotos.length >= 5 && (
+                    <span className="text-[11px] font-bold text-amber-700 bg-amber-50 px-2 py-0.5 rounded border border-amber-200">
+                      Maksimal 5 Foto
+                    </span>
+                  )}
+                </div>
 
-                <input type="file" accept="image/*" capture="environment" ref={cameraInputRef} onChange={handlePhotoUpload} className="hidden" />
-                <input type="file" accept="image/*" ref={galleryInputRef} onChange={handlePhotoUpload} className="hidden" />
+                <input
+                  type="file"
+                  accept="image/*"
+                  capture="environment"
+                  ref={cameraInputRef}
+                  onChange={handlePhotoUpload}
+                  className="hidden"
+                />
+                <input
+                  type="file"
+                  accept="image/*"
+                  ref={galleryInputRef}
+                  onChange={handlePhotoUpload}
+                  className="hidden"
+                />
 
                 <div className="flex flex-wrap items-center gap-2">
                   <button
                     type="button"
+                    disabled={formPhotos.length >= 5}
                     onClick={() => cameraInputRef.current?.click()}
-                    className="min-h-touch h-10 px-3.5 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-xs font-bold flex items-center gap-1.5 cursor-pointer shadow-2xs active:scale-95"
+                    className="min-h-touch h-10 px-3.5 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-xs font-bold flex items-center gap-1.5 cursor-pointer shadow-2xs active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     <Camera size={14} strokeWidth={2.5} className="text-amber-600" />
                     <span>Kamera HP</span>
@@ -819,152 +883,124 @@ export function MonevUnggasTab({
 
                   <button
                     type="button"
+                    disabled={formPhotos.length >= 5}
                     onClick={() => galleryInputRef.current?.click()}
-                    className="min-h-touch h-10 px-3.5 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-xs font-bold flex items-center gap-1.5 cursor-pointer shadow-2xs active:scale-95"
+                    className="min-h-touch h-10 px-3.5 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-xs font-bold flex items-center gap-1.5 cursor-pointer shadow-2xs active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     <ImageIcon size={14} strokeWidth={2.5} className="text-blue-600" />
                     <span>Galeri Foto</span>
                   </button>
 
-                  {formPhoto && (
+                  {formPhotos.length > 0 && (
                     <span className="text-xs font-bold text-amber-700 bg-amber-50 border border-amber-200 px-2.5 py-1 rounded-lg flex items-center gap-1">
-                      <CheckCircle2 size={13} strokeWidth={2.5} /> Siap Kirim (&lt; 2 MB)
+                      <CheckCircle2 size={13} strokeWidth={2.5} /> {formPhotos.length} Foto Siap
                     </span>
                   )}
                 </div>
 
-                {formPhoto && (
-                  <div className="mt-3 p-2.5 bg-slate-50 rounded-2xl border border-slate-200 inline-block shadow-2xs">
-                    <div className="relative group inline-block">
-                      <img
-                        src={formPhoto}
-                        alt="Preview Foto Unggas"
-                        onClick={() => setPreviewPhotoModal({ url: formPhoto, title: `Pratinjau Foto: ${formKtt}` })}
-                        className="w-48 h-32 sm:w-56 sm:h-36 object-cover rounded-xl border border-slate-200 shadow-xs cursor-pointer hover:opacity-95"
-                      />
-                      <button
-                        type="button"
-                        onClick={() => setFormPhoto(null)}
-                        className="absolute top-1.5 right-1.5 w-6 h-6 rounded-full bg-red-600 hover:bg-red-700 text-white flex items-center justify-center shadow-md cursor-pointer"
-                        title="Hapus / Ganti Foto"
-                      >
-                        <X size={12} strokeWidth={3} />
-                      </button>
-                    </div>
+                {/* Pratinjau Daftar Foto Lapangan Unggas (Maks 5 Foto) */}
+                {formPhotos.length > 0 && (
+                  <div className="mt-3 flex flex-wrap gap-2.5">
+                    {formPhotos.map((photo, pIdx) => (
+                      <div key={pIdx} className="relative group p-1.5 bg-white rounded-xl border border-slate-200 shadow-2xs">
+                        <img
+                          src={photo}
+                          alt={`Foto Dokumentasi Unggas ${pIdx + 1}`}
+                          onClick={() => setPreviewPhotoModal({ url: photo, title: `Foto ${pIdx + 1}: ${formKtt || 'Data Lapangan Unggas'}` })}
+                          className="w-24 h-20 sm:w-28 sm:h-24 object-cover rounded-lg cursor-pointer hover:opacity-95 transition-opacity"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => handleRemovePhoto(pIdx)}
+                          className="absolute -top-1.5 -right-1.5 w-6 h-6 rounded-full bg-red-600 hover:bg-red-700 text-white flex items-center justify-center shadow-md cursor-pointer transition-transform hover:scale-110"
+                          title="Hapus Foto"
+                        >
+                          <X size={12} strokeWidth={3} />
+                        </button>
+                        <span className="block text-[10px] text-center font-bold text-slate-500 mt-1">
+                          Foto {pIdx + 1}
+                        </span>
+                      </div>
+                    ))}
                   </div>
                 )}
               </div>
             </div>
           </div>
 
-          {/* Bagian 4: Tim Monev & Pengesahan TTD / Cap Kelompok */}
+          {/* Bagian 4: Petugas Monev & Upload Dokumen Hasil Lapangan (PDF) */}
           <div className="p-5 rounded-2xl border border-slate-200 bg-slate-50/70 space-y-4">
             <h4 className="font-sans text-xs font-bold uppercase tracking-wider text-slate-700 flex items-center gap-1.5">
               <FileCheck size={16} strokeWidth={2.5} className="text-amber-600" />
-              <span>4. Tim Monev &amp; Pengesahan Tanda Tangan / Cap Kelompok Unggas</span>
+              <span>4. Petugas Monev &amp; Upload Dokumen Hasil Lapangan (PDF Maks 2 MB)</span>
             </h4>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
                 <label className="block text-xs font-sans font-bold uppercase tracking-wider text-slate-600 mb-1">
-                  Nama Petugas Monev 1
-                </label>
-                <input
-                  type="text"
-                  placeholder="Nama petugas 1..."
-                  value={kondisiUnggas.namaPetugas1 || ''}
-                  onChange={(e) => updateKondisiUnggas('namaPetugas1', e.target.value)}
-                  className="w-full h-10 px-3 rounded-xl border border-slate-200 bg-white text-xs font-semibold focus:border-amber-500 outline-none mb-3"
-                />
-
-                <label className="block text-xs font-sans font-bold uppercase tracking-wider text-slate-600 mb-1">
-                  Upload Foto Tanda Tangan Petugas (Maks 2 MB)
+                  Upload Dokumen Hasil Lapangan (PDF Maksimal 2 MB)
                 </label>
                 <input
                   type="file"
-                  accept="image/*"
-                  onChange={handleUploadTtdPetugas}
+                  accept="application/pdf"
+                  onChange={handlePdfUpload}
                   className="w-full text-xs text-slate-600 file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-bold file:bg-amber-600 file:text-white hover:file:bg-amber-700 cursor-pointer"
                 />
-                {kondisiUnggas.fotoTtdPetugas && (
-                  <div className="mt-2 flex items-center gap-2">
-                    <img
-                      src={kondisiUnggas.fotoTtdPetugas}
-                      alt="TTD Petugas"
-                      onClick={() => setPreviewPhotoModal({ url: kondisiUnggas.fotoTtdPetugas!, title: `TTD Petugas: ${kondisiUnggas.namaPetugas1 || 'Petugas Monev'}` })}
-                      className="h-12 w-24 object-contain rounded border border-slate-200 bg-white p-1 cursor-pointer hover:opacity-90 shadow-2xs"
-                      title="Klik untuk melihat pratinjau / unduh"
-                    />
-                    <span className="text-xs text-amber-700 font-bold">✓ TTD Petugas Terunggah</span>
+                {dokumenHasilPdf && (
+                  <div className="mt-2.5 flex items-center gap-2 p-2.5 bg-amber-50 border border-amber-200 rounded-xl">
+                    <FileText size={16} className="text-amber-700 shrink-0" />
+                    <span className="text-xs font-bold text-amber-800 truncate">
+                      {dokumenHasilPdfName || 'Dokumen_Hasil_Unggas.pdf'}
+                    </span>
                     <a
-                      href={kondisiUnggas.fotoTtdPetugas}
-                      download={`TTD_Petugas_${(formKtt || 'Monev_Unggas').replace(/[^a-zA-Z0-9_-]/g, '_')}.png`}
-                      className="text-xs text-amber-700 hover:text-amber-800 hover:underline font-bold flex items-center gap-1 ml-auto"
-                      title="Unduh Tanda Tangan Petugas"
+                      href={dokumenHasilPdf}
+                      download={dokumenHasilPdfName || 'Dokumen_Hasil_Unggas.pdf'}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="text-xs text-amber-700 hover:text-amber-900 font-bold underline flex items-center gap-1 ml-auto"
                     >
-                      <Download size={12} strokeWidth={2.5} />
-                      <span>Unduh</span>
+                      <Download size={12} strokeWidth={2.5} /> Unduh
                     </a>
                     <button
                       type="button"
-                      onClick={() => updateKondisiUnggas('fotoTtdPetugas', null)}
-                      className="text-xs text-red-600 hover:underline cursor-pointer ml-2"
+                      onClick={removePdf}
+                      className="text-xs text-red-600 hover:text-red-800 font-bold ml-2 cursor-pointer"
                     >
                       Hapus
                     </button>
                   </div>
                 )}
+                <p className="text-[11px] text-slate-500 mt-1">
+                  💡 Format PDF resmi hasil kunjungan lapangan atau lembar rekap monev yang telah ditandatangani manual.
+                </p>
               </div>
 
-              <div>
-                <label className="block text-xs font-sans font-bold uppercase tracking-wider text-slate-600 mb-1">
-                  Nama Petugas Monev 2 (Opsional)
-                </label>
-                <input
-                  type="text"
-                  placeholder="Nama petugas 2..."
-                  value={kondisiUnggas.namaPetugas2 || ''}
-                  onChange={(e) => updateKondisiUnggas('namaPetugas2', e.target.value)}
-                  className="w-full h-10 px-3 rounded-xl border border-slate-200 bg-white text-xs font-semibold focus:border-amber-500 outline-none mb-3"
-                />
+              <div className="space-y-3">
+                <div>
+                  <label className="block text-xs font-sans font-bold uppercase tracking-wider text-slate-600 mb-1">
+                    Nama Petugas Monev 1
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="Nama petugas 1..."
+                    value={kondisiUnggas.namaPetugas1 || ''}
+                    onChange={(e) => updateKondisiUnggas('namaPetugas1', e.target.value)}
+                    className="w-full h-10 px-3 rounded-xl border border-slate-200 bg-white text-xs font-semibold focus:border-amber-500 outline-none"
+                  />
+                </div>
 
-                <label className="block text-xs font-sans font-bold uppercase tracking-wider text-slate-600 mb-1">
-                  Upload Foto Tanda Tangan Ketua + Cap Kelompok (1 Foto, Maks 2 MB)
-                </label>
-                <input
-                  type="file"
-                  accept="image/*"
-                  onChange={handleUploadTtdKetuaCap}
-                  className="w-full text-xs text-slate-600 file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-bold file:bg-blue-600 file:text-white hover:file:bg-blue-700 cursor-pointer"
-                />
-                {kondisiUnggas.fotoTtdKetuaCap && (
-                  <div className="mt-2 flex items-center gap-2">
-                    <img
-                      src={kondisiUnggas.fotoTtdKetuaCap}
-                      alt="TTD + Cap Ketua KTT"
-                      onClick={() => setPreviewPhotoModal({ url: kondisiUnggas.fotoTtdKetuaCap!, title: `TTD & Cap: ${formKtt || 'Ketua KTT'}` })}
-                      className="h-12 w-24 object-contain rounded border border-slate-200 bg-white p-1 cursor-pointer hover:opacity-90 shadow-2xs"
-                      title="Klik untuk melihat pratinjau / unduh"
-                    />
-                    <span className="text-xs text-blue-700 font-bold">✓ TTD + Cap Ketua Terunggah</span>
-                    <a
-                      href={kondisiUnggas.fotoTtdKetuaCap}
-                      download={`TTD_Cap_${(formKtt || 'Ketua_KTT').replace(/[^a-zA-Z0-9_-]/g, '_')}.png`}
-                      className="text-xs text-blue-700 hover:text-blue-800 hover:underline font-bold flex items-center gap-1 ml-auto"
-                      title="Unduh Tanda Tangan & Cap"
-                    >
-                      <Download size={12} strokeWidth={2.5} />
-                      <span>Unduh</span>
-                    </a>
-                    <button
-                      type="button"
-                      onClick={() => updateKondisiUnggas('fotoTtdKetuaCap', null)}
-                      className="text-xs text-red-600 hover:underline cursor-pointer ml-2"
-                    >
-                      Hapus
-                    </button>
-                  </div>
-                )}
+                <div>
+                  <label className="block text-xs font-sans font-bold uppercase tracking-wider text-slate-600 mb-1">
+                    Nama Petugas Monev 2 (Opsional)
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="Nama petugas 2..."
+                    value={kondisiUnggas.namaPetugas2 || ''}
+                    onChange={(e) => updateKondisiUnggas('namaPetugas2', e.target.value)}
+                    className="w-full h-10 px-3 rounded-xl border border-slate-200 bg-white text-xs font-semibold focus:border-amber-500 outline-none"
+                  />
+                </div>
               </div>
             </div>
           </div>
@@ -987,18 +1023,20 @@ export function MonevUnggasTab({
                 }
                 cetakLaporanUnggas(
                   {
-                    id: 'temp',
+                    id: editingId || 'temp',
                     tahun: formTahun,
-                    sumberDana: formSumberDana,
+                    namaKetua: formNamaKetua,
                     kec: formKec,
                     desa: formDesa,
                     namaKtt: formKtt,
-                    alamat: '',
+                    alamat: formDesa && formKec ? `Desa ${formDesa}, Kec. ${formKec}` : '',
                     kegiatan: 'Monev Hibah Unggas',
                     jenis: formJenis,
                     waktuMonev: formWaktuMonev,
                     kondisi: {
+                      ...KONDISI_KOSONG,
                       ...KONDISI_UNGGAS_KOSONG,
+                      namaKetua: formNamaKetua,
                       awalJantan: kondisiUnggas.awalTotal,
                       awalBetina: 0,
                       matiBangkaiJantan: kondisiUnggas.kematian,
@@ -1027,15 +1065,18 @@ export function MonevUnggasTab({
                       jualBA: 'Tidak',
                       jualBAPdf: null,
                       jualBAName: null,
-                      fotoTtdPetugas: kondisiUnggas.fotoTtdPetugas,
-                      fotoTtdKetuaCap: kondisiUnggas.fotoTtdKetuaCap,
                       namaPetugas1: kondisiUnggas.namaPetugas1,
                       namaPetugas2: kondisiUnggas.namaPetugas2,
+                      dokumenHasilPdf,
+                      dokumenHasilPdfName,
                     },
                     kondisiUnggas: kondisiUnggas,
                     lat: formLat,
                     lng: formLng,
-                    photo: formPhoto,
+                    photo: formPhotos[0] || null,
+                    photos: formPhotos,
+                    dokumenHasilPdf,
+                    dokumenHasilPdfName,
                     catatan: formCatatan,
                   },
                   kttMasterList
@@ -1051,7 +1092,7 @@ export function MonevUnggasTab({
               type="submit"
               className="min-h-touch h-11 px-6 rounded-xl bg-amber-600 hover:bg-amber-700 text-white text-xs sm:text-sm font-bold shadow-xs transition-all flex-1 cursor-pointer"
             >
-              Simpan Data Monev Unggas
+              {editingId ? 'Perbarui Data Monev Unggas' : 'Simpan Data Monev Unggas'}
             </button>
           </div>
         </form>

@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useMemo, useRef } from 'react';
+import * as XLSX from 'xlsx';
 import {
   Filter,
   Search,
@@ -15,6 +16,8 @@ import {
   FileCheck,
   AlertCircle,
   Download,
+  Upload,
+  FileSpreadsheet,
   Printer,
 } from 'lucide-react';
 import {
@@ -22,9 +25,11 @@ import {
   DAFTAR_JENIS_TERNAK,
   FieldData,
   KondisiTernak,
+  KONDISI_KOSONG,
   hitungKondisi,
+  getPuskeswanByKecamatan,
 } from './types';
-import { BarisTernak, KondisiSection } from './KondisiFormSections';
+import { BarisTernak, KondisiSection, NumberStepper } from './KondisiFormSections';
 import { compressImageFile } from '@/lib/file-compressor';
 import { cetakLaporanRuminansia } from './monev-pdf-printer';
 
@@ -46,8 +51,8 @@ interface MonevFormTabProps {
   setFormKtt: (val: string) => void;
   formJenis: string;
   setFormJenis: (val: string) => void;
-  formSumberDana: string;
-  setFormSumberDana: (val: string) => void;
+  formNamaKetua: string;
+  setFormNamaKetua: (val: string) => void;
   formWaktuMonev: string;
   setFormWaktuMonev: (val: string) => void;
   formKondisi: KondisiTernak;
@@ -65,9 +70,9 @@ interface MonevFormTabProps {
   setFormLng: (val: number | null) => void;
   handleGetLocation: () => void;
   isGettingLocation: boolean;
-  formPhoto: string | null;
-  setFormPhoto: (val: string | null) => void;
+  formPhotos: string[];
   handlePhotoUpload: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  handleRemovePhoto: (idx: number) => void;
   cameraInputRef: React.RefObject<any>;
   galleryInputRef: React.RefObject<any>;
   setPreviewPhotoModal: (val: { url: string; title: string } | null) => void;
@@ -78,13 +83,16 @@ interface MonevFormTabProps {
   showKttSuggestions: boolean;
   setShowKttSuggestions: (val: boolean) => void;
   filteredKttSuggestions: Array<{ id: any; namaKelompok: string; kecamatan: string; desa: string; ketua?: string }>;
-  handleSelectKtt: (ktt: { namaKelompok: string; kecamatan: string; desa: string }) => void;
+  handleSelectKtt: (ktt: { namaKelompok: string; kecamatan: string; desa: string; ketua?: string }) => void;
   // Handlers
   handleSubmitLapangan: (e: React.FormEvent) => void;
   resetForm: () => void;
   // Table Data
   dbLapanganFiltered: FieldData[];
   canEdit: boolean;
+  canCreate?: boolean;
+  isAdmin?: boolean;
+  fetchDatabase?: () => Promise<void>;
   onEdit: (data: FieldData) => void;
   onDelete: (id: string) => void;
   kttMasterList?: Array<{ id: any; namaKelompok: string; kecamatan: string; desa: string; ketua?: string }>;
@@ -104,10 +112,10 @@ export function MonevFormTab({
   setFormDesa,
   formKtt,
   setFormKtt,
+  formNamaKetua,
+  setFormNamaKetua,
   formJenis,
   setFormJenis,
-  formSumberDana,
-  setFormSumberDana,
   formWaktuMonev,
   setFormWaktuMonev,
   formKondisi,
@@ -120,9 +128,9 @@ export function MonevFormTab({
   setFormLng,
   handleGetLocation,
   isGettingLocation,
-  formPhoto,
-  setFormPhoto,
+  formPhotos,
   handlePhotoUpload,
+  handleRemovePhoto,
   cameraInputRef,
   galleryInputRef,
   setPreviewPhotoModal,
@@ -137,6 +145,9 @@ export function MonevFormTab({
   resetForm,
   dbLapanganFiltered,
   canEdit,
+  canCreate = true,
+  isAdmin = false,
+  fetchDatabase,
   onEdit,
   onDelete,
   kttMasterList = [],
@@ -157,27 +168,203 @@ export function MonevFormTab({
     });
   }, [dbLapanganFiltered, filterKecamatan]);
 
-  // Upload handler for TTD Petugas (Foto Asli, Tanpa Filter)
-  const handleUploadTtdPetugas = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    try {
-      const compressed = await compressImageFile(file, 1400, 0.85, 2 * 1024 * 1024);
-      updateKondisi('fotoTtdPetugas', compressed);
-    } catch (err: any) {
-      alert(err.message || 'Gagal memproses foto tanda tangan petugas');
-    }
+  // ── FITUR EXCEL: UNDUH TEMPLATE & IMPORT MASSAL ──
+  const excelFileInputRef = useRef<HTMLInputElement>(null);
+  const [isImporting, setIsImporting] = useState(false);
+
+  const downloadTemplateExcel = () => {
+    const defaultTh = (tahunBantuanFilter && tahunBantuanFilter !== 'Semua Tahun') ? tahunBantuanFilter : '2026';
+    const sampleData = [
+      {
+        'Tahun Bantuan': defaultTh,
+        'Nama KTT': 'KTT Berkah Makmur',
+        'Nama Ketua': 'Budi Santoso',
+        'Desa': 'Jladri',
+        'Kecamatan': 'Buayan',
+        'Jenis Ternak': 'Sapi',
+        'Betina (B)': 10,
+        'Jantan (J)': 2,
+        'Bibit Odot (Stek)': 500,
+        'Obat (Paket)': 1,
+        'Keterangan': 'Bantuan APBD Kabupaten Kebumen',
+        'Latitude': -7.712345,
+        'Longitude': 109.456789,
+      },
+      {
+        'Tahun Bantuan': '2025',
+        'Nama KTT': 'KTT Lembu Sejahtera',
+        'Nama Ketua': 'Ahmad Fauzi',
+        'Desa': 'Sitiadi',
+        'Kecamatan': 'Puring',
+        'Jenis Ternak': 'Kambing',
+        'Betina (B)': 15,
+        'Jantan (J)': 3,
+        'Bibit Odot (Stek)': 0,
+        'Obat (Paket)': 1,
+        'Keterangan': 'Bantuan Hibah Provinsi',
+        'Latitude': '',
+        'Longitude': '',
+      },
+    ];
+
+    const ws = XLSX.utils.json_to_sheet(sampleData);
+    ws['!cols'] = [
+      { wch: 15 }, // Tahun Bantuan
+      { wch: 25 }, // Nama KTT
+      { wch: 20 }, // Nama Ketua
+      { wch: 16 }, // Desa
+      { wch: 16 }, // Kecamatan
+      { wch: 14 }, // Jenis Ternak
+      { wch: 12 }, // Betina (B)
+      { wch: 12 }, // Jantan (J)
+      { wch: 18 }, // Bibit Odot (Stek)
+      { wch: 14 }, // Obat (Paket)
+      { wch: 30 }, // Keterangan
+      { wch: 14 }, // Latitude
+      { wch: 14 }, // Longitude
+    ];
+
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, 'Template_Monev_KTT');
+    XLSX.writeFile(wb, `Template_Import_Monev_KTT.xlsx`);
   };
 
-  // Upload handler for TTD Ketua + Cap Kelompok (Foto Asli, Tanpa Filter)
-  const handleUploadTtdKetuaCap = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleImportExcel = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (!isAdmin) {
+      alert('Hanya Administrator yang berhak mengimpor data melalui file Excel.');
+      return;
+    }
+
     const file = e.target.files?.[0];
     if (!file) return;
+
+    setIsImporting(true);
     try {
-      const compressed = await compressImageFile(file, 1400, 0.85, 2 * 1024 * 1024);
-      updateKondisi('fotoTtdKetuaCap', compressed);
+      const buffer = await file.arrayBuffer();
+      const wb = XLSX.read(buffer, { type: 'array' });
+      const wsName = wb.SheetNames[0];
+      if (!wsName) throw new Error('File Excel tidak memiliki lembar kerja (worksheet).');
+      const rawRows: any[] = XLSX.utils.sheet_to_json(wb.Sheets[wsName]);
+
+      if (!rawRows || rawRows.length === 0) {
+        alert('File Excel tidak memiliki data baris untuk diimpor.');
+        setIsImporting(false);
+        if (excelFileInputRef.current) excelFileInputRef.current.value = '';
+        return;
+      }
+
+      const defaultTh = (tahunBantuanFilter && tahunBantuanFilter !== 'Semua Tahun') ? tahunBantuanFilter : (formTahun || '2026');
+      const parsedItems: any[] = [];
+
+      for (let i = 0; i < rawRows.length; i++) {
+        const r = rawRows[i];
+        const getVal = (aliases: string[]) => {
+          for (const k of Object.keys(r)) {
+            const cleanKey = k.trim().toLowerCase().replace(/[^a-z0-9]/g, '');
+            for (const a of aliases) {
+              if (cleanKey === a.toLowerCase().replace(/[^a-z0-9]/g, '')) {
+                return r[k];
+              }
+            }
+          }
+          return undefined;
+        };
+
+        const namaKttRaw = getVal(['nama ktt', 'ktt', 'nama kelompok', 'kelompok', 'nama ktt / kelompok']);
+        if (!namaKttRaw || String(namaKttRaw).trim() === '') {
+          continue;
+        }
+
+        const namaKtt = String(namaKttRaw).trim();
+        const namaKetua = String(getVal(['nama ketua', 'ketua', 'nama ketua kelompok']) || '').trim();
+        const desa = String(getVal(['desa', 'kelurahan', 'desa / kelurahan']) || '').trim().toUpperCase();
+        const kec = String(getVal(['kecamatan', 'kec']) || '').trim().toUpperCase();
+        const jenis = String(getVal(['jenis ternak', 'jenis', 'komoditas']) || 'Sapi').trim();
+
+        // Hybrid Cerdas: Jika di baris excel ada tahun, gunakan tahun tersebut. Jika kosong, gunakan default filter
+        const tahunRaw = getVal(['tahun bantuan', 'tahun', 'th bantuan', 'th']);
+        let tahunFinal = defaultTh;
+        if (tahunRaw !== undefined && tahunRaw !== null && String(tahunRaw).trim() !== '') {
+          tahunFinal = String(tahunRaw).trim();
+        }
+
+        const awalB = parseInt(String(getVal(['betina b', 'betina', 'b', 'jml ekor b', 'awal betina']) || '0'), 10) || 0;
+        const awalJ = parseInt(String(getVal(['jantan j', 'jantan', 'j', 'jml ekor j', 'awal jantan']) || '0'), 10) || 0;
+        const bibitOdot = parseInt(String(getVal(['bibit odot stek', 'bibit odot', 'odot', 'bibit odot (stek)']) || '0'), 10) || 0;
+        const obatPaket = parseInt(String(getVal(['obat paket', 'obat-obatan paket', 'obat', 'obat paket']) || '0'), 10) || 0;
+        const catatan = String(getVal(['keterangan', 'catatan', 'ket']) || '').trim();
+
+        const latRaw = getVal(['latitude', 'lat']);
+        const lngRaw = getVal(['longitude', 'lng', 'long']);
+        const lat = latRaw !== undefined && latRaw !== '' && !isNaN(Number(latRaw)) ? Number(latRaw) : null;
+        const lng = lngRaw !== undefined && lngRaw !== '' && !isNaN(Number(lngRaw)) ? Number(lngRaw) : null;
+
+        parsedItems.push({
+          id: `${Date.now()}_${i}_${Math.random().toString(36).substring(2, 6)}`,
+          tahun: tahunFinal,
+          kec,
+          desa,
+          namaKtt,
+          namaKetua,
+          alamat: desa && kec ? `Desa ${desa}, Kec. ${kec}` : '',
+          kegiatan: 'Monev Hibah Ternak Ruminansia',
+          jenis,
+          kategori: 'Ruminansia',
+          waktuMonev: new Date().toISOString().split('T')[0],
+          kondisi: {
+            ...KONDISI_KOSONG,
+            namaKetua,
+            awalBetina: awalB,
+            awalJantan: awalJ,
+            bibitOdot,
+            obatPaket,
+            dokumenHasilPdf: null,
+            dokumenHasilPdfName: null,
+          },
+          lat,
+          lng,
+          photo: null,
+          photos: [],
+          catatan,
+        });
+      }
+
+      if (parsedItems.length === 0) {
+        alert('Tidak ada data KTT yang valid ditemukan di file Excel.\nPastikan kolom "Nama KTT" terisi.');
+        setIsImporting(false);
+        if (excelFileInputRef.current) excelFileInputRef.current.value = '';
+        return;
+      }
+
+      const konfirmasi = confirm(`Ditemukan ${parsedItems.length} data KTT di file Excel.\n\nApakah Anda yakin ingin mengimpor semua data ini ke sistem?`);
+      if (!konfirmasi) {
+        setIsImporting(false);
+        if (excelFileInputRef.current) excelFileInputRef.current.value = '';
+        return;
+      }
+
+      const res = await fetch('/api/monev-lapangan', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(parsedItems),
+      });
+
+      if (!res.ok) {
+        const errJson = await res.json().catch(() => ({}));
+        throw new Error(errJson.details || errJson.error || 'Gagal menyimpan data ke database server.');
+      }
+
+      if (fetchDatabase) {
+        await fetchDatabase();
+      }
+
+      alert(`✅ Berhasil mengimpor ${parsedItems.length} data KTT ke database!`);
     } catch (err: any) {
-      alert(err.message || 'Gagal memproses foto tanda tangan + cap ketua KTT');
+      console.error('Gagal import excel:', err);
+      alert(`Gagal mengimpor file Excel: ${err.message || err}`);
+    } finally {
+      setIsImporting(false);
+      if (excelFileInputRef.current) excelFileInputRef.current.value = '';
     }
   };
 
@@ -264,53 +451,102 @@ export function MonevFormTab({
               Data terekam di sistem monev lapangan Dinas Pertanian dan Pangan
             </p>
           </div>
+
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={downloadTemplateExcel}
+              className="min-h-touch h-9 px-3 rounded-xl border border-slate-200 bg-slate-50 hover:bg-slate-100 text-slate-700 text-xs font-bold flex items-center gap-1.5 transition-colors cursor-pointer shadow-2xs"
+              title="Unduh format template Excel untuk pengisian data massal"
+            >
+              <Download size={13} strokeWidth={2.5} className="text-emerald-700" />
+              <span>Unduh Template</span>
+            </button>
+
+            {isAdmin && (
+              <>
+                <input
+                  type="file"
+                  ref={excelFileInputRef}
+                  onChange={handleImportExcel}
+                  accept=".xlsx, .xls"
+                  className="hidden"
+                />
+                <button
+                  type="button"
+                  disabled={isImporting}
+                  onClick={() => excelFileInputRef.current?.click()}
+                  className="min-h-touch h-9 px-3.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold flex items-center gap-1.5 transition-colors cursor-pointer shadow-xs disabled:opacity-50"
+                  title="Unggah file Excel untuk mengisi data KTT secara otomatis (Khusus Administrator)"
+                >
+                  <FileSpreadsheet size={14} strokeWidth={2.5} />
+                  <span>{isImporting ? 'Mengimpor...' : 'Import Excel'}</span>
+                </button>
+              </>
+            )}
+          </div>
         </div>
 
         <div className="overflow-x-auto w-full">
-          <table className="w-full text-xs sm:text-sm text-left whitespace-nowrap">
+          <table className="w-full text-xs sm:text-sm text-left whitespace-nowrap border-collapse">
             <thead className="bg-slate-50 text-slate-700 border-b border-slate-200 text-[11px] uppercase tracking-wider font-bold">
               <tr>
-                <th className="px-4 py-3.5 text-center w-12">No</th>
-                <th className="px-4 py-3.5">Tahun</th>
-                <th className="px-4 py-3.5">Nama KTT</th>
-                <th className="px-4 py-3.5">Wilayah</th>
-                <th className="px-4 py-3.5">Komoditas</th>
-                <th className="px-4 py-3.5 text-right">Awal</th>
-                <th className="px-4 py-3.5 text-right">Sisa Pokok</th>
-                <th className="px-4 py-3.5 text-right">Total Aset</th>
-                <th className="px-4 py-3.5 text-center">GPS &amp; TTD</th>
-                <th className="px-4 py-3.5 text-center">Aksi / Cetak</th>
+                <th rowSpan={2} className="px-3 py-2.5 text-center border-r border-b border-slate-200 w-12 align-middle">NO</th>
+                <th rowSpan={2} className="px-3 py-2.5 border-r border-b border-slate-200 align-middle">Nama KTT</th>
+                <th colSpan={3} className="px-3 py-2 text-center border-r border-b border-slate-200">ALAMAT</th>
+                <th rowSpan={2} className="px-3 py-2.5 text-center border-r border-b border-slate-200 align-middle">Jenis Ternak</th>
+                <th colSpan={2} className="px-3 py-2 text-center border-r border-b border-slate-200">Jml (Ekor)</th>
+                <th rowSpan={2} className="px-3 py-2.5 text-center border-r border-b border-slate-200 align-middle">BIBIT ODOT (STEK)</th>
+                <th rowSpan={2} className="px-3 py-2.5 text-center border-r border-b border-slate-200 align-middle">OBAT (PAKET)</th>
+                <th rowSpan={2} className="px-3 py-2.5 border-r border-b border-slate-200 align-middle">KETERANGAN</th>
+                <th rowSpan={2} className="px-3 py-2.5 text-center border-r border-b border-slate-200 align-middle">GPS, Foto &amp; Dokumen</th>
+                <th rowSpan={2} className="px-3 py-2.5 text-center border-b border-slate-200 align-middle">Aksi / Cetak</th>
+              </tr>
+              <tr>
+                <th className="px-3 py-2 border-r border-b border-slate-200 text-center text-[10px]">Desa</th>
+                <th className="px-3 py-2 border-r border-b border-slate-200 text-center text-[10px]">Kecamatan</th>
+                <th className="px-3 py-2 border-r border-b border-slate-200 text-center text-[10px]">Wil. Puskeswan</th>
+                <th className="px-3 py-2 border-r border-b border-slate-200 text-center text-[10px]">B</th>
+                <th className="px-3 py-2 border-r border-b border-slate-200 text-center text-[10px]">J</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100">
               {dbLapanganTabel.map((d, idx) => {
-                const h = hitungKondisi(d.kondisi);
                 const baMati = d.kondisi.matiBangkaiBAPdf;
                 const baJual = d.kondisi.jualBAPdf;
-                const ttdKetua = d.kondisi.fotoTtdKetuaCap;
-                const ttdPetugas = d.kondisi.fotoTtdPetugas;
+                const docPdf = d.dokumenHasilPdf || (d.kondisi as any)?.dokumenHasilPdf;
+                const docPdfName = d.dokumenHasilPdfName || (d.kondisi as any)?.dokumenHasilPdfName;
+                const allPhotos = (d.photos && d.photos.length > 0) ? d.photos : (d.photo ? [d.photo] : []);
 
                 return (
-                  <tr key={d.id} className="hover:bg-slate-50/80 transition-colors">
-                    <td className="px-4 py-3.5 text-center font-bold text-emerald-700 text-xs">{idx + 1}</td>
-                    <td className="px-4 py-3.5 font-bold text-slate-800">
-                      <span className="px-2 py-0.5 rounded-md bg-slate-100 text-slate-700 border border-slate-200 text-xs">
-                        {d.tahun}
+                  <tr key={d.id} className="hover:bg-slate-50/80 transition-colors divide-x divide-slate-100">
+                    <td className="px-3 py-3 text-center font-bold text-emerald-700 text-xs">{idx + 1}</td>
+                    <td className="px-3 py-3 font-bold text-slate-900">
+                      <div>{d.namaKtt}</div>
+                      {d.namaKetua && (
+                        <span className="text-[10px] text-slate-500 font-normal block">Ketua: {d.namaKetua}</span>
+                      )}
+                    </td>
+                    <td className="px-3 py-3 text-slate-700 text-xs">{d.desa || '-'}</td>
+                    <td className="px-3 py-3 text-slate-700 text-xs">{d.kec || '-'}</td>
+                    <td className="px-3 py-3 text-slate-700 text-xs font-medium">
+                      <span className="px-2 py-0.5 rounded bg-slate-100 text-slate-700 border border-slate-200 text-[11px]">
+                        {getPuskeswanByKecamatan(d.kec)}
                       </span>
                     </td>
-                    <td className="px-4 py-3.5 font-bold text-slate-900">{d.namaKtt}</td>
-                    <td className="px-4 py-3.5 text-slate-600 text-xs">
-                      {d.desa}, {d.kec}
-                    </td>
-                    <td className="px-4 py-3.5">
+                    <td className="px-3 py-3 text-center">
                       <span className="px-2 py-0.5 rounded-md bg-emerald-50 text-emerald-800 border border-emerald-200 text-xs font-semibold">
                         {d.jenis}
                       </span>
                     </td>
-                    <td className="px-4 py-3.5 text-right font-bold text-slate-700">{h.a}</td>
-                    <td className="px-4 py-3.5 text-right font-bold text-slate-700">{h.e}</td>
-                    <td className="px-4 py-3.5 text-right font-extrabold text-emerald-700">{h.i} Ekor</td>
-                    <td className="px-4 py-3.5 text-center">
+                    <td className="px-3 py-3 text-center font-bold text-slate-700">{d.kondisi?.awalBetina ?? 0}</td>
+                    <td className="px-3 py-3 text-center font-bold text-slate-700">{d.kondisi?.awalJantan ?? 0}</td>
+                    <td className="px-3 py-3 text-center font-bold text-slate-700">{(d.kondisi as any)?.bibitOdot ?? 0}</td>
+                    <td className="px-3 py-3 text-center font-bold text-slate-700">{(d.kondisi as any)?.obatPaket ?? 0}</td>
+                    <td className="px-3 py-3 text-slate-600 text-xs max-w-xs truncate" title={d.catatan || '-'}>
+                      {d.catatan || '-'}
+                    </td>
+                    <td className="px-3 py-3 text-center">
                       <div className="flex flex-wrap items-center justify-center gap-1.5 text-xs">
                         {d.lat ? (
                           <span className="text-emerald-700 font-bold flex items-center gap-0.5" title={`Lat: ${d.lat}, Lng: ${d.lng}`}>
@@ -320,40 +556,35 @@ export function MonevFormTab({
                           <span className="text-red-500 font-bold text-[11px]">Belum GPS</span>
                         )}
 
-                        {d.photo && (
-                          <button
-                            type="button"
-                            onClick={() => setPreviewPhotoModal({ url: d.photo!, title: `Foto Dokumentasi: ${d.namaKtt} (${d.desa}, ${d.kec})` })}
-                            className="text-emerald-700 hover:text-emerald-800 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 px-2 py-0.5 rounded font-bold flex items-center gap-1 cursor-pointer transition-colors"
-                            title="Klik untuk melihat / unduh foto dokumentasi"
-                          >
-                            <ImageIcon size={11} strokeWidth={2.5} className="text-emerald-600" />
-                            <span>Foto</span>
-                          </button>
+                        {allPhotos.length > 0 && (
+                          <div className="flex items-center gap-1">
+                            {allPhotos.map((ph, pIdx) => (
+                              <button
+                                key={pIdx}
+                                type="button"
+                                onClick={() => setPreviewPhotoModal({ url: ph, title: `Foto Dokumentasi ${pIdx + 1}: ${d.namaKtt} (${d.desa}, ${d.kec})` })}
+                                className="text-emerald-700 hover:text-emerald-800 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 px-1.5 py-0.5 rounded font-bold flex items-center gap-1 cursor-pointer transition-colors text-[11px]"
+                                title={`Lihat / Unduh Foto Lapangan ${pIdx + 1}`}
+                              >
+                                <ImageIcon size={11} strokeWidth={2.5} className="text-emerald-600" />
+                                <span>Foto {allPhotos.length > 1 ? pIdx + 1 : ''}</span>
+                              </button>
+                            ))}
+                          </div>
                         )}
 
-                        {ttdPetugas && (
-                          <button
-                            type="button"
-                            onClick={() => setPreviewPhotoModal({ url: ttdPetugas, title: `TTD Petugas Monev: ${d.namaKtt}` })}
-                            className="text-emerald-700 hover:text-emerald-800 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 px-1.5 py-0.5 rounded font-bold flex items-center gap-1 cursor-pointer"
-                            title="Lihat / Unduh Tanda Tangan Petugas"
+                        {docPdf && (
+                          <a
+                            href={docPdf}
+                            download={docPdfName || `Dokumen_Hasil_${d.namaKtt.replace(/[^a-zA-Z0-9_-]/g, '_')}.pdf`}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="text-emerald-800 hover:text-emerald-900 bg-emerald-100 hover:bg-emerald-200 border border-emerald-300 px-1.5 py-0.5 rounded font-bold flex items-center gap-1 text-[11px]"
+                            title="Unduh / Buka Dokumen Hasil Lapangan (PDF)"
                           >
-                            <FileCheck size={11} strokeWidth={2.5} className="text-emerald-600" />
-                            <span>TTD Petugas</span>
-                          </button>
-                        )}
-
-                        {ttdKetua && (
-                          <button
-                            type="button"
-                            onClick={() => setPreviewPhotoModal({ url: ttdKetua, title: `Tanda Tangan & Cap: ${d.namaKtt}` })}
-                            className="text-blue-700 hover:text-blue-800 bg-blue-50 hover:bg-blue-100 border border-blue-200 px-1.5 py-0.5 rounded font-bold flex items-center gap-1 cursor-pointer"
-                            title="Lihat / Unduh Tanda Tangan & Cap Kelompok"
-                          >
-                            <FileCheck size={11} strokeWidth={2.5} className="text-blue-600" />
-                            <span>TTD+Cap</span>
-                          </button>
+                            <FileText size={11} strokeWidth={2.5} className="text-emerald-700" />
+                            <span>Dokumen PDF</span>
+                          </a>
                         )}
 
                         {baMati && (
@@ -362,7 +593,7 @@ export function MonevFormTab({
                             download={d.kondisi.matiBangkaiBAName || 'BA_Kematian.pdf'}
                             target="_blank"
                             rel="noreferrer"
-                            className="text-red-700 hover:text-red-800 bg-red-50 hover:bg-red-100 border border-red-200 px-1.5 py-0.5 rounded font-bold flex items-center gap-0.5"
+                            className="text-red-700 hover:text-red-800 bg-red-50 hover:bg-red-100 border border-red-200 px-1.5 py-0.5 rounded font-bold flex items-center gap-0.5 text-[11px]"
                             title="Berita Acara Kematian"
                           >
                             <FileText size={11} strokeWidth={2.5} className="text-red-600" />
@@ -376,7 +607,7 @@ export function MonevFormTab({
                             download={d.kondisi.jualBAName || 'BA_Penjualan.pdf'}
                             target="_blank"
                             rel="noreferrer"
-                            className="text-amber-800 hover:text-amber-900 bg-amber-50 hover:bg-amber-100 border border-amber-200 px-1.5 py-0.5 rounded font-bold flex items-center gap-0.5"
+                            className="text-amber-800 hover:text-amber-900 bg-amber-50 hover:bg-amber-100 border border-amber-200 px-1.5 py-0.5 rounded font-bold flex items-center gap-0.5 text-[11px]"
                             title="Berita Acara Penjualan"
                           >
                             <FileText size={11} strokeWidth={2.5} className="text-amber-700" />
@@ -385,7 +616,7 @@ export function MonevFormTab({
                         )}
                       </div>
                     </td>
-                    <td className="px-4 py-3.5 text-center">
+                    <td className="px-3 py-3 text-center">
                       <div className="flex items-center justify-center gap-1.5">
                         <button
                           type="button"
@@ -421,7 +652,7 @@ export function MonevFormTab({
 
               {dbLapanganTabel.length === 0 && (
                 <tr>
-                  <td colSpan={10} className="px-5 py-10 text-center text-slate-400 font-medium">
+                  <td colSpan={13} className="px-5 py-10 text-center text-slate-400 font-medium">
                     Belum ada data monev lapangan tersimpan untuk filter {tahunBantuanFilter} · {filterKecamatan}.
                   </td>
                 </tr>
@@ -477,14 +708,13 @@ export function MonevFormTab({
 
               <div>
                 <label className="block text-xs font-sans font-bold uppercase tracking-wider text-slate-600 mb-1">
-                  Sumber Dana <span className="text-red-500">*</span>
+                  Nama Ketua Kelompok <span className="text-slate-400 font-normal"></span>
                 </label>
                 <input
                   type="text"
-                  value={formSumberDana}
-                  onChange={(e) => setFormSumberDana(e.target.value)}
-                  placeholder="Contoh: APBD / DAK"
-                  required
+                  value={formNamaKetua}
+                  onChange={(e) => setFormNamaKetua(e.target.value)}
+                  placeholder="Nama ketua kelompok..."
                   className="w-full min-h-touch h-10 px-3 rounded-xl border border-slate-200 bg-white text-xs font-bold focus:border-emerald-500 outline-none"
                 />
               </div>
@@ -609,6 +839,37 @@ export function MonevFormTab({
               2. Rincian Mutasi &amp; Kondisi Ternak Pokok (Sesuai Lembar Monev Ruminansia)
             </h4>
 
+            {/* Bantuan Tambahan: Bibit Odot & Obat-obatan */}
+            <div className="p-4 rounded-2xl border border-slate-200 bg-slate-50/70">
+              <div className="flex items-center justify-between mb-3">
+                <span className="font-sans text-xs font-bold uppercase tracking-wider text-slate-700">
+                  Bantuan Tambahan (Bibit Odot &amp; Obat-obatan)
+                </span>
+                <span className="text-[11px] font-medium text-slate-500">Sesuai Alokasi Bantuan</span>
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-xs font-sans font-bold uppercase tracking-wider text-slate-600 mb-1">
+                    Bibit Odot (Stek)
+                  </label>
+                  <NumberStepper
+                    value={formKondisi.bibitOdot || 0}
+                    onChange={(val) => updateKondisi('bibitOdot', val)}
+                    step={10}
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-sans font-bold uppercase tracking-wider text-slate-600 mb-1">
+                    Obat-obatan (Paket)
+                  </label>
+                  <NumberStepper
+                    value={formKondisi.obatPaket || 0}
+                    onChange={(val) => updateKondisi('obatPaket', val)}
+                  />
+                </div>
+              </div>
+            </div>
+
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <KondisiSection nomor="1" title="Jumlah Ternak Awal Total (a)" total={kalkulasi.a} totalLabel="Total Awal">
                 <BarisTernak
@@ -710,25 +971,17 @@ export function MonevFormTab({
                         </span>
                       )}
                     </div>
-                    <div className="relative">
-                      <input
-                        type="number"
-                        min={0}
-                        disabled={(formKondisi.lahirJantan || 0) > 0 || (formKondisi.lahirBetina || 0) > 0}
-                        placeholder="0"
-                        value={formKondisi.lahirBelumTahu || ''}
-                        onChange={(e) => {
-                          const val = e.target.value === '' ? 0 : Math.max(0, parseInt(e.target.value, 10) || 0);
-                          updateKondisi('lahirBelumTahu', val);
-                          if (val > 0) {
-                            updateKondisi('lahirJantan', 0);
-                            updateKondisi('lahirBetina', 0);
-                          }
-                        }}
-                        className="w-full min-h-touch h-10 px-3 rounded-xl border border-slate-200 bg-white font-sans font-bold text-center text-sm focus:border-emerald-500 outline-none disabled:bg-slate-100 disabled:text-slate-400 disabled:cursor-not-allowed"
-                      />
-                      <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-slate-400 font-semibold pointer-events-none">Ekor</span>
-                    </div>
+                    <NumberStepper
+                      value={formKondisi.lahirBelumTahu || 0}
+                      disabled={(formKondisi.lahirJantan || 0) > 0 || (formKondisi.lahirBetina || 0) > 0}
+                      onChange={(val) => {
+                        updateKondisi('lahirBelumTahu', val);
+                        if (val > 0) {
+                          updateKondisi('lahirJantan', 0);
+                          updateKondisi('lahirBetina', 0);
+                        }
+                      }}
+                    />
                     <p className="text-[11px] text-slate-500 mt-1">
                       💡 Jika diisi, input Jantan &amp; Betina otomatis dikunci ke 0. Nilai ini otomatis ditambahkan ke Total Lahir (f).
                     </p>
@@ -764,25 +1017,17 @@ export function MonevFormTab({
                         </span>
                       )}
                     </div>
-                    <div className="relative">
-                      <input
-                        type="number"
-                        min={0}
-                        disabled={(formKondisi.matiAnakJantan || 0) > 0 || (formKondisi.matiAnakBetina || 0) > 0}
-                        placeholder="0"
-                        value={formKondisi.matiAnakBelumTahu || ''}
-                        onChange={(e) => {
-                          const val = e.target.value === '' ? 0 : Math.max(0, parseInt(e.target.value, 10) || 0);
-                          updateKondisi('matiAnakBelumTahu', val);
-                          if (val > 0) {
-                            updateKondisi('matiAnakJantan', 0);
-                            updateKondisi('matiAnakBetina', 0);
-                          }
-                        }}
-                        className="w-full min-h-touch h-10 px-3 rounded-xl border border-slate-200 bg-white font-sans font-bold text-center text-sm focus:border-emerald-500 outline-none disabled:bg-slate-100 disabled:text-slate-400 disabled:cursor-not-allowed"
-                      />
-                      <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-slate-400 font-semibold pointer-events-none">Ekor</span>
-                    </div>
+                    <NumberStepper
+                      value={formKondisi.matiAnakBelumTahu || 0}
+                      disabled={(formKondisi.matiAnakJantan || 0) > 0 || (formKondisi.matiAnakBetina || 0) > 0}
+                      onChange={(val) => {
+                        updateKondisi('matiAnakBelumTahu', val);
+                        if (val > 0) {
+                          updateKondisi('matiAnakJantan', 0);
+                          updateKondisi('matiAnakBetina', 0);
+                        }
+                      }}
+                    />
                     <p className="text-[11px] text-slate-500 mt-1">
                       💡 Jika diisi, input Jantan &amp; Betina otomatis dikunci ke 0. Nilai ini otomatis ditambahkan ke Total Mati Anak (g).
                     </p>
@@ -818,25 +1063,17 @@ export function MonevFormTab({
                         </span>
                       )}
                     </div>
-                    <div className="relative">
-                      <input
-                        type="number"
-                        min={0}
-                        disabled={(formKondisi.jualAnakJantan || 0) > 0 || (formKondisi.jualAnakBetina || 0) > 0}
-                        placeholder="0"
-                        value={formKondisi.jualAnakBelumTahu || ''}
-                        onChange={(e) => {
-                          const val = e.target.value === '' ? 0 : Math.max(0, parseInt(e.target.value, 10) || 0);
-                          updateKondisi('jualAnakBelumTahu', val);
-                          if (val > 0) {
-                            updateKondisi('jualAnakJantan', 0);
-                            updateKondisi('jualAnakBetina', 0);
-                          }
-                        }}
-                        className="w-full min-h-touch h-10 px-3 rounded-xl border border-slate-200 bg-white font-sans font-bold text-center text-sm focus:border-emerald-500 outline-none disabled:bg-slate-100 disabled:text-slate-400 disabled:cursor-not-allowed"
-                      />
-                      <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-slate-400 font-semibold pointer-events-none">Ekor</span>
-                    </div>
+                    <NumberStepper
+                      value={formKondisi.jualAnakBelumTahu || 0}
+                      disabled={(formKondisi.jualAnakJantan || 0) > 0 || (formKondisi.jualAnakBetina || 0) > 0}
+                      onChange={(val) => {
+                        updateKondisi('jualAnakBelumTahu', val);
+                        if (val > 0) {
+                          updateKondisi('jualAnakJantan', 0);
+                          updateKondisi('jualAnakBetina', 0);
+                        }
+                      }}
+                    />
                     <p className="text-[11px] text-slate-500 mt-1">
                       💡 Jika diisi, input Jantan &amp; Betina otomatis dikunci ke 0. Nilai ini otomatis ditambahkan ke Total Jual Anak (h).
                     </p>
@@ -862,12 +1099,12 @@ export function MonevFormTab({
             </div>
           </div>
 
-          {/* Bagian 3: GPS (Wajib) & Foto Dokumentasi */}
+          {/* Bagian 3: GPS (Wajib) & Foto Dokumentasi Lapangan (Maks 5 Foto) */}
           <div className="p-5 rounded-2xl border border-slate-200 bg-slate-50/70 space-y-4">
             <h4 className="font-sans text-xs font-bold uppercase tracking-wider text-slate-700 flex items-center justify-between">
               <span className="flex items-center gap-1.5">
                 <MapPin size={16} strokeWidth={2.5} className="text-emerald-600" />
-                <span>3. Titik Koordinat GPS (Wajib) &amp; Foto Dokumentasi</span>
+                <span>3. Titik Koordinat GPS (Wajib) &amp; Foto Dokumentasi Lapangan (Maks 5 Foto)</span>
               </span>
               <span className="text-xs font-bold text-red-600 flex items-center gap-1">
                 <AlertCircle size={13} /> GPS Wajib Diisi
@@ -913,9 +1150,16 @@ export function MonevFormTab({
               </div>
 
               <div>
-                <label className="block text-xs font-sans font-bold uppercase tracking-wider text-slate-600 mb-1">
-                  Foto Lapangan (Maks 2 MB)
-                </label>
+                <div className="flex items-center justify-between mb-1">
+                  <label className="block text-xs font-sans font-bold uppercase tracking-wider text-slate-600">
+                    Foto Lapangan ({formPhotos.length}/5 Foto)
+                  </label>
+                  {formPhotos.length >= 5 && (
+                    <span className="text-[11px] font-bold text-amber-700 bg-amber-50 px-2 py-0.5 rounded border border-amber-200">
+                      Maksimal 5 Foto
+                    </span>
+                  )}
+                </div>
 
                 <input
                   type="file"
@@ -936,8 +1180,9 @@ export function MonevFormTab({
                 <div className="flex flex-wrap items-center gap-2">
                   <button
                     type="button"
+                    disabled={formPhotos.length >= 5}
                     onClick={() => cameraInputRef.current?.click()}
-                    className="min-h-touch h-10 px-3.5 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-xs font-bold flex items-center gap-1.5 transition-colors cursor-pointer shadow-2xs active:scale-95"
+                    className="min-h-touch h-10 px-3.5 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-xs font-bold flex items-center gap-1.5 transition-colors cursor-pointer shadow-2xs active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     <Camera size={14} strokeWidth={2.5} className="text-emerald-600" />
                     <span>Kamera HP</span>
@@ -945,38 +1190,45 @@ export function MonevFormTab({
 
                   <button
                     type="button"
+                    disabled={formPhotos.length >= 5}
                     onClick={() => galleryInputRef.current?.click()}
-                    className="min-h-touch h-10 px-3.5 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-xs font-bold flex items-center gap-1.5 transition-colors cursor-pointer shadow-2xs active:scale-95"
+                    className="min-h-touch h-10 px-3.5 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-xs font-bold flex items-center gap-1.5 transition-colors cursor-pointer shadow-2xs active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     <ImageIcon size={14} strokeWidth={2.5} className="text-blue-600" />
                     <span>Galeri Foto</span>
                   </button>
 
-                  {formPhoto && (
+                  {formPhotos.length > 0 && (
                     <span className="text-xs font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 px-2.5 py-1 rounded-lg flex items-center gap-1">
-                      <CheckCircle2 size={13} strokeWidth={2.5} /> Siap Kirim (&lt; 2 MB)
+                      <CheckCircle2 size={13} strokeWidth={2.5} /> {formPhotos.length} Foto Siap
                     </span>
                   )}
                 </div>
 
-                {formPhoto && (
-                  <div className="mt-3 p-2.5 bg-slate-50 rounded-2xl border border-slate-200 inline-block shadow-2xs">
-                    <div className="relative group inline-block">
-                      <img
-                        src={formPhoto}
-                        alt="Preview Foto Lapangan"
-                        onClick={() => setPreviewPhotoModal({ url: formPhoto, title: `Pratinjau Foto: ${formKtt || 'Data Lapangan'}` })}
-                        className="w-48 h-32 sm:w-56 sm:h-36 object-cover rounded-xl border border-slate-200 shadow-xs cursor-pointer hover:opacity-95 transition-opacity"
-                      />
-                      <button
-                        type="button"
-                        onClick={() => setFormPhoto(null)}
-                        className="absolute top-1.5 right-1.5 w-6 h-6 rounded-full bg-red-600 hover:bg-red-700 text-white flex items-center justify-center shadow-md cursor-pointer transition-transform hover:scale-110"
-                        title="Hapus / Ganti Foto"
-                      >
-                        <X size={12} strokeWidth={3} />
-                      </button>
-                    </div>
+                {/* Pratinjau Daftar Foto Lapangan (Maks 5 Foto) */}
+                {formPhotos.length > 0 && (
+                  <div className="mt-3 flex flex-wrap gap-2.5">
+                    {formPhotos.map((photo, pIdx) => (
+                      <div key={pIdx} className="relative group p-1.5 bg-white rounded-xl border border-slate-200 shadow-2xs">
+                        <img
+                          src={photo}
+                          alt={`Foto Dokumentasi ${pIdx + 1}`}
+                          onClick={() => setPreviewPhotoModal({ url: photo, title: `Foto ${pIdx + 1}: ${formKtt || 'Data Lapangan'}` })}
+                          className="w-24 h-20 sm:w-28 sm:h-24 object-cover rounded-lg cursor-pointer hover:opacity-95 transition-opacity"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => handleRemovePhoto(pIdx)}
+                          className="absolute -top-1.5 -right-1.5 w-6 h-6 rounded-full bg-red-600 hover:bg-red-700 text-white flex items-center justify-center shadow-md cursor-pointer transition-transform hover:scale-110"
+                          title="Hapus Foto"
+                        >
+                          <X size={12} strokeWidth={3} />
+                        </button>
+                        <span className="block text-[10px] text-center font-bold text-slate-500 mt-1">
+                          Foto {pIdx + 1}
+                        </span>
+                      </div>
+                    ))}
                   </div>
                 )}
               </div>
@@ -996,114 +1248,79 @@ export function MonevFormTab({
             </div>
           </div>
 
-          {/* Bagian 4: Tim Monev & Tanda Tangan */}
+          {/* Bagian 4: Petugas Monev & Upload Dokumen Hasil Lapangan (PDF) */}
           <div className="p-5 rounded-2xl border border-slate-200 bg-slate-50/70 space-y-4">
             <h4 className="font-sans text-xs font-bold uppercase tracking-wider text-slate-700 flex items-center gap-1.5">
               <FileCheck size={16} strokeWidth={2.5} className="text-emerald-600" />
-              <span>4. Tim Monev &amp; Pengesahan Tanda Tangan / Cap Kelompok</span>
+              <span>4. Petugas Monev &amp; Upload Dokumen Hasil Lapangan (PDF Maks 2 MB)</span>
             </h4>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
                 <label className="block text-xs font-sans font-bold uppercase tracking-wider text-slate-600 mb-1">
-                  Nama Petugas Monev 1
-                </label>
-                <input
-                  type="text"
-                  placeholder="Nama petugas 1..."
-                  value={formKondisi.namaPetugas1 || ''}
-                  onChange={(e) => updateKondisi('namaPetugas1', e.target.value)}
-                  className="w-full h-10 px-3 rounded-xl border border-slate-200 bg-white text-xs font-semibold focus:border-emerald-500 outline-none mb-3"
-                />
-
-                <label className="block text-xs font-sans font-bold uppercase tracking-wider text-slate-600 mb-1">
-                  Upload Foto Tanda Tangan Petugas (Maks 2 MB)
+                  Upload Dokumen Hasil Lapangan (PDF Maksimal 2 MB)
                 </label>
                 <input
                   type="file"
-                  accept="image/*"
-                  onChange={handleUploadTtdPetugas}
+                  accept="application/pdf"
+                  onChange={(e) => handlePdfUploadGeneric(e, 'dokumenHasilPdf', 'dokumenHasilPdfName')}
                   className="w-full text-xs text-slate-600 file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-bold file:bg-emerald-600 file:text-white hover:file:bg-emerald-700 cursor-pointer"
                 />
-                {formKondisi.fotoTtdPetugas && (
-                  <div className="mt-2 flex items-center gap-2">
-                    <img
-                      src={formKondisi.fotoTtdPetugas}
-                      alt="TTD Petugas"
-                      onClick={() => setPreviewPhotoModal({ url: formKondisi.fotoTtdPetugas!, title: `TTD Petugas: ${formKondisi.namaPetugas1 || 'Petugas Monev'}` })}
-                      className="h-12 w-24 object-contain rounded border border-slate-200 bg-white p-1 cursor-pointer hover:opacity-90 shadow-2xs"
-                      title="Klik untuk melihat pratinjau / unduh"
-                    />
-                    <span className="text-xs text-emerald-700 font-bold">✓ TTD Petugas Terunggah</span>
+                {formKondisi.dokumenHasilPdf && (
+                  <div className="mt-2.5 flex items-center gap-2 p-2.5 bg-emerald-50 border border-emerald-200 rounded-xl">
+                    <FileText size={16} className="text-emerald-700 shrink-0" />
+                    <span className="text-xs font-bold text-emerald-800 truncate">
+                      {formKondisi.dokumenHasilPdfName || 'Dokumen_Hasil_Lapangan.pdf'}
+                    </span>
                     <a
-                      href={formKondisi.fotoTtdPetugas}
-                      download={`TTD_Petugas_${(formKtt || 'Monev').replace(/[^a-zA-Z0-9_-]/g, '_')}.png`}
-                      className="text-xs text-emerald-700 hover:text-emerald-800 hover:underline font-bold flex items-center gap-1 ml-auto"
-                      title="Unduh Tanda Tangan Petugas"
+                      href={formKondisi.dokumenHasilPdf}
+                      download={formKondisi.dokumenHasilPdfName || 'Dokumen_Hasil_Lapangan.pdf'}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="text-xs text-emerald-700 hover:text-emerald-900 font-bold underline flex items-center gap-1 ml-auto"
                     >
-                      <Download size={12} strokeWidth={2.5} />
-                      <span>Unduh</span>
+                      <Download size={12} strokeWidth={2.5} /> Unduh
                     </a>
                     <button
                       type="button"
-                      onClick={() => updateKondisi('fotoTtdPetugas', null)}
-                      className="text-xs text-red-600 hover:underline cursor-pointer ml-2"
+                      onClick={() => removePdfGeneric('dokumenHasilPdf', 'dokumenHasilPdfName')}
+                      className="text-xs text-red-600 hover:text-red-800 font-bold ml-2 cursor-pointer"
                     >
                       Hapus
                     </button>
                   </div>
                 )}
+                <p className="text-[11px] text-slate-500 mt-1">
+                  💡 Format PDF resmi hasil kunjungan lapangan atau lembar rekap monev yang telah ditandatangani manual.
+                </p>
               </div>
 
-              <div>
-                <label className="block text-xs font-sans font-bold uppercase tracking-wider text-slate-600 mb-1">
-                  Nama Petugas Monev 2 (Opsional)
-                </label>
-                <input
-                  type="text"
-                  placeholder="Nama petugas 2..."
-                  value={formKondisi.namaPetugas2 || ''}
-                  onChange={(e) => updateKondisi('namaPetugas2', e.target.value)}
-                  className="w-full h-10 px-3 rounded-xl border border-slate-200 bg-white text-xs font-semibold focus:border-emerald-500 outline-none mb-3"
-                />
+              <div className="space-y-3">
+                <div>
+                  <label className="block text-xs font-sans font-bold uppercase tracking-wider text-slate-600 mb-1">
+                    Nama Petugas Monev 1
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="Nama petugas 1..."
+                    value={formKondisi.namaPetugas1 || ''}
+                    onChange={(e) => updateKondisi('namaPetugas1', e.target.value)}
+                    className="w-full h-10 px-3 rounded-xl border border-slate-200 bg-white text-xs font-semibold focus:border-emerald-500 outline-none"
+                  />
+                </div>
 
-                <label className="block text-xs font-sans font-bold uppercase tracking-wider text-slate-600 mb-1">
-                  Upload Foto Tanda Tangan Ketua + Cap Kelompok (1 Foto, Maks 2 MB)
-                </label>
-                <input
-                  type="file"
-                  accept="image/*"
-                  onChange={handleUploadTtdKetuaCap}
-                  className="w-full text-xs text-slate-600 file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-bold file:bg-blue-600 file:text-white hover:file:bg-blue-700 cursor-pointer"
-                />
-                {formKondisi.fotoTtdKetuaCap && (
-                  <div className="mt-2 flex items-center gap-2">
-                    <img
-                      src={formKondisi.fotoTtdKetuaCap}
-                      alt="TTD + Cap Ketua KTT"
-                      onClick={() => setPreviewPhotoModal({ url: formKondisi.fotoTtdKetuaCap!, title: `TTD & Cap: ${formKtt || 'Ketua KTT'}` })}
-                      className="h-12 w-24 object-contain rounded border border-slate-200 bg-white p-1 cursor-pointer hover:opacity-90 shadow-2xs"
-                      title="Klik untuk melihat pratinjau / unduh"
-                    />
-                    <span className="text-xs text-blue-700 font-bold">✓ TTD + Cap Ketua Terunggah</span>
-                    <a
-                      href={formKondisi.fotoTtdKetuaCap}
-                      download={`TTD_Cap_${(formKtt || 'Ketua_KTT').replace(/[^a-zA-Z0-9_-]/g, '_')}.png`}
-                      className="text-xs text-blue-700 hover:text-blue-800 hover:underline font-bold flex items-center gap-1 ml-auto"
-                      title="Unduh Tanda Tangan & Cap"
-                    >
-                      <Download size={12} strokeWidth={2.5} />
-                      <span>Unduh</span>
-                    </a>
-                    <button
-                      type="button"
-                      onClick={() => updateKondisi('fotoTtdKetuaCap', null)}
-                      className="text-xs text-red-600 hover:underline cursor-pointer ml-2"
-                    >
-                      Hapus
-                    </button>
-                  </div>
-                )}
+                <div>
+                  <label className="block text-xs font-sans font-bold uppercase tracking-wider text-slate-600 mb-1">
+                    Nama Petugas Monev 2 (Opsional)
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="Nama petugas 2..."
+                    value={formKondisi.namaPetugas2 || ''}
+                    onChange={(e) => updateKondisi('namaPetugas2', e.target.value)}
+                    className="w-full h-10 px-3 rounded-xl border border-slate-200 bg-white text-xs font-semibold focus:border-emerald-500 outline-none"
+                  />
+                </div>
               </div>
             </div>
           </div>
@@ -1128,7 +1345,7 @@ export function MonevFormTab({
                   {
                     id: editingId || 'temp',
                     tahun: formTahun,
-                    sumberDana: formSumberDana,
+                    namaKetua: formNamaKetua,
                     kec: formKec,
                     desa: formDesa,
                     namaKtt: formKtt,
@@ -1136,10 +1353,16 @@ export function MonevFormTab({
                     kegiatan: 'Monev Hibah Ruminansia',
                     jenis: formJenis,
                     waktuMonev: formWaktuMonev,
-                    kondisi: formKondisi,
+                    kondisi: {
+                      ...formKondisi,
+                      namaKetua: formNamaKetua,
+                    },
                     lat: formLat,
                     lng: formLng,
-                    photo: formPhoto,
+                    photo: formPhotos[0] || null,
+                    photos: formPhotos,
+                    dokumenHasilPdf: formKondisi.dokumenHasilPdf,
+                    dokumenHasilPdfName: formKondisi.dokumenHasilPdfName,
                     catatan: formCatatan,
                   },
                   kttMasterList

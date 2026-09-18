@@ -11,6 +11,7 @@ import {
   ProduksiItemSimple,
   FarmSebaranItem,
 } from '@/components/landing/types';
+import { ArrowUp } from 'lucide-react';
 import LandingHeader from '@/components/landing/LandingHeader';
 import LandingHeroSection from '@/components/landing/LandingHeroSection';
 import LandingStatsSection from '@/components/landing/LandingStatsSection';
@@ -40,6 +41,15 @@ export default function LandingPage() {
   // State Auth Modal & Navigation
   const [showLoginModal, setShowLoginModal] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [showBackToTop, setShowBackToTop] = useState(false);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setShowBackToTop(window.scrollY > 400);
+    };
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
 
   // Theme Dark / Light State
   const [isDark, setIsDark] = useState(false);
@@ -394,6 +404,17 @@ export default function LandingPage() {
         handleLogin={handleLogin}
       />
 
+      {/* 5. FLOATING BACK TO TOP BUTTON (Mobile & Desktop) */}
+      {showBackToTop && (
+        <button
+          onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+          className="fixed bottom-5 right-5 z-40 w-11 h-11 rounded-full bg-blue-600 hover:bg-blue-700 text-white shadow-lg border-2 border-white dark:border-slate-800 flex items-center justify-center transition-all animate-in fade-in zoom-in-75 duration-200 cursor-pointer active:scale-95"
+          aria-label="Kembali ke atas halaman"
+          title="Kembali ke atas"
+        >
+          <ArrowUp size={18} />
+        </button>
+      )}
 
     </div>
   );

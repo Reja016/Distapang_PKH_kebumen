@@ -63,26 +63,26 @@ export default function LandingFacilitiesSection({
         <button
           type="button"
           onClick={() => setFacilityTab('puskeswan')}
-          className={`min-h-touch h-11 px-4 rounded-xl font-bold text-xs sm:text-sm flex items-center justify-center gap-2 transition-all cursor-pointer ${
+          className={`min-h-[44px] h-auto py-2.5 px-4 rounded-xl font-bold text-xs sm:text-sm flex items-center justify-center gap-2 transition-all cursor-pointer ${
             facilityTab === 'puskeswan'
               ? 'bg-blue-600 text-white shadow-xs scale-[1.01]'
               : 'bg-white/80 dark:bg-slate-800 hover:bg-white dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 hover:text-blue-700 dark:hover:text-blue-400 border-2 border-slate-200 dark:border-slate-700'
           }`}
         >
-          <Stethoscope size={18} />
+          <Stethoscope size={18} className="shrink-0" />
           <span>Unit Puskeswan (8 Unit Aktif)</span>
         </button>
 
         <button
           type="button"
           onClick={() => setFacilityTab('rph')}
-          className={`min-h-touch h-11 px-4 rounded-xl font-bold text-xs sm:text-sm flex items-center justify-center gap-2 transition-all cursor-pointer ${
+          className={`min-h-[44px] h-auto py-2.5 px-4 rounded-xl font-bold text-xs sm:text-sm flex items-center justify-center gap-2 transition-all cursor-pointer text-center ${
             facilityTab === 'rph'
               ? 'bg-blue-600 text-white shadow-xs scale-[1.01]'
               : 'bg-white/80 dark:bg-slate-800 hover:bg-white dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 hover:text-blue-700 dark:hover:text-blue-400 border-2 border-slate-200 dark:border-slate-700'
           }`}
         >
-          <Building2 size={18} />
+          <Building2 size={18} className="shrink-0" />
           <span>Rumah Potong Hewan (RPH Kebumen &amp; Gombong)</span>
         </button>
       </div>
@@ -230,25 +230,25 @@ export default function LandingFacilitiesSection({
                   >
                     <div className="space-y-3">
                       {/* Card Top */}
-                      <div className="flex items-start justify-between gap-2.5">
-                        <div className="flex items-start gap-3">
-                          <div className="w-11 h-11 rounded-2xl bg-sky-50 dark:bg-sky-950/60 border-2 border-sky-200 dark:border-sky-800 text-sky-800 dark:text-sky-300 flex items-center justify-center shrink-0 font-extrabold text-base shadow-2xs sm:group-hover:scale-105 transition-transform">
+                      <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-2.5">
+                        <div className="flex items-start gap-3 min-w-0">
+                          <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-2xl bg-sky-50 dark:bg-sky-950/60 border-2 border-sky-200 dark:border-sky-800 text-sky-800 dark:text-sky-300 flex items-center justify-center shrink-0 font-extrabold text-sm sm:text-base shadow-2xs sm:group-hover:scale-105 transition-transform">
                             {(idx + 1) < 10 ? `0${idx + 1}` : idx + 1}
                           </div>
-                          <div>
-                            <h4 className="font-extrabold text-lg sm:text-xl text-slate-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors flex items-center gap-1.5">
+                          <div className="min-w-0 flex-1">
+                            <h4 className="font-extrabold text-base sm:text-xl text-slate-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors flex items-center gap-1.5">
                               <span>{item.nama}</span>
                             </h4>
                             <div className="flex items-center gap-1.5 mt-1">
-                              <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-blue-50 dark:bg-blue-950/60 border border-blue-200/80 dark:border-blue-800 text-xs sm:text-sm font-bold text-blue-800 dark:text-blue-300">
-                                <Stethoscope size={13} className="text-blue-600 dark:text-blue-400" />
-                                {item.koordinator}
+                              <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 sm:py-1 rounded-full bg-blue-50 dark:bg-blue-950/60 border border-blue-200/80 dark:border-blue-800 text-xs sm:text-sm font-bold text-blue-800 dark:text-blue-300">
+                                <Stethoscope size={13} className="text-blue-600 dark:text-blue-400 shrink-0" />
+                                <span className="truncate">{item.koordinator}</span>
                               </span>
                             </div>
                           </div>
                         </div>
 
-                        <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-emerald-50 dark:bg-emerald-950/60 border border-emerald-200 dark:border-emerald-800 text-xs font-bold text-emerald-800 dark:text-emerald-300 shrink-0">
+                        <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-emerald-50 dark:bg-emerald-950/60 border border-emerald-200 dark:border-emerald-800 text-xs font-bold text-emerald-800 dark:text-emerald-300 self-start shrink-0">
                           <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
                           {item.status || 'Aktif Melayani'}
                         </span>

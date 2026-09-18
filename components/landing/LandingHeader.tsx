@@ -81,22 +81,23 @@ export default function LandingHeader({
           </nav>
 
           {/* Right Action: Theme Toggle, Officer Login Button & Mobile Menu */}
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1.5 sm:gap-2">
             <button
               type="button"
               onClick={onToggleTheme}
-              className="w-9 h-9 sm:w-10 sm:h-10 rounded-full border-2 border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-700 dark:text-amber-300 flex items-center justify-center transition-colors shadow-2xs cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-700"
+              className="w-9 h-9 sm:w-10 sm:h-10 rounded-full border-2 border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-700 dark:text-amber-300 flex items-center justify-center transition-colors shadow-2xs cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-700 shrink-0"
               title={isDark ? 'Beralih ke Tema Terang' : 'Beralih ke Tema Gelap'}
               aria-label="Ganti Tema"
             >
-              {isDark ? <Sun size={17} /> : <Moon size={17} />}
+              {isDark ? <Sun size={16} /> : <Moon size={16} />}
             </button>
 
             <button
               onClick={handleLoginClick}
-              className="h-9 sm:h-10 px-4 sm:px-5 rounded-full bg-blue-600 text-white font-bold text-xs sm:text-sm flex items-center gap-1.5 sm:gap-2 shadow-xs hover:bg-blue-700 active:scale-[0.98] transition-all cursor-pointer"
+              className="h-9 sm:h-10 px-3 xs:px-3.5 sm:px-5 rounded-full bg-blue-600 text-white font-bold text-xs sm:text-sm flex items-center gap-1.5 sm:gap-2 shadow-xs hover:bg-blue-700 active:scale-[0.98] transition-all cursor-pointer shrink-0"
             >
-              <span>Masuk Petugas</span>
+              <span className="inline sm:hidden">Masuk</span>
+              <span className="hidden sm:inline">Masuk Petugas</span>
               <ArrowRight size={14} className="hidden xs:inline" />
             </button>
 
@@ -104,7 +105,7 @@ export default function LandingHeader({
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
               aria-label="Buka Menu"
-              className="md:hidden w-9 h-9 rounded-full border-2 border-slate-200 dark:border-slate-700 bg-blue-50/50 dark:bg-slate-800 text-slate-700 dark:text-slate-200 flex items-center justify-center active:bg-blue-100 dark:active:bg-slate-700 cursor-pointer"
+              className="md:hidden w-9 h-9 rounded-full border-2 border-slate-200 dark:border-slate-700 bg-blue-50/50 dark:bg-slate-800 text-slate-700 dark:text-slate-200 flex items-center justify-center active:bg-blue-100 dark:active:bg-slate-700 cursor-pointer shrink-0"
             >
               {mobileMenuOpen ? <X size={17} /> : <Menu size={17} />}
             </button>
@@ -114,11 +115,11 @@ export default function LandingHeader({
 
       {/* Mobile Navigation Drawer */}
       {mobileMenuOpen && (
-        <div className="md:hidden border-b-2 border-slate-200 dark:border-slate-800 bg-blue-50/40 dark:bg-slate-900 px-5 py-3.5 space-y-1 animate-in slide-in-from-top-2 duration-200">
+        <div className="md:hidden border-b-2 border-slate-200 dark:border-slate-800 bg-blue-50/40 dark:bg-slate-900 px-5 py-3 space-y-1 animate-in slide-in-from-top-2 duration-200">
           <a
             href="#ringkasan"
             onClick={() => setMobileMenuOpen(false)}
-            className="flex items-center gap-2.5 py-2.5 text-sm sm:text-base font-bold text-slate-800 dark:text-slate-200 hover:text-blue-600 dark:hover:text-blue-400"
+            className="flex items-center gap-2.5 py-2.5 text-sm font-bold text-slate-800 dark:text-slate-200 hover:text-blue-600 dark:hover:text-blue-400"
           >
             <BarChart3 size={18} className="text-blue-600 dark:text-blue-400" />
             <span>Ringkasan Wilayah</span>
@@ -126,18 +127,18 @@ export default function LandingHeader({
           <a
             href="#puskeswan"
             onClick={() => setMobileMenuOpen(false)}
-            className="flex items-center gap-2.5 py-2.5 text-sm sm:text-base font-bold text-slate-800 dark:text-slate-200 hover:text-blue-600 dark:hover:text-blue-400"
+            className="flex items-center gap-2.5 py-2.5 text-sm font-bold text-slate-800 dark:text-slate-200 hover:text-blue-600 dark:hover:text-blue-400"
           >
             <Stethoscope size={18} className="text-blue-600 dark:text-blue-400" />
-            <span>Puskeswan Aktif</span>
+            <span>Puskeswan &amp; RPH</span>
           </a>
           <a
             href="#modul"
             onClick={() => setMobileMenuOpen(false)}
-            className="flex items-center gap-2.5 py-2.5 text-sm sm:text-base font-bold text-slate-800 dark:text-slate-200 hover:text-blue-600 dark:hover:text-blue-400"
+            className="flex items-center gap-2.5 py-2.5 text-sm font-bold text-slate-800 dark:text-slate-200 hover:text-blue-600 dark:hover:text-blue-400"
           >
             <Activity size={18} className="text-blue-600 dark:text-blue-400" />
-            <span>Modul Data</span>
+            <span>Modul Pelayanan Data</span>
           </a>
         </div>
       )}

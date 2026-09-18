@@ -1,8 +1,114 @@
 'use client';
 
 import React from 'react';
-import { FileText } from 'lucide-react';
+import { FileText, Plus, Minus } from 'lucide-react';
 import { StatusBA } from './types';
+
+export interface NumberStepperProps {
+  value: number;
+  onChange: (val: number) => void;
+  disabled?: boolean;
+  min?: number;
+  max?: number;
+  step?: number;
+  unit?: string;
+  placeholder?: string;
+  className?: string;
+}
+
+export function NumberStepper({
+  value,
+  onChange,
+  disabled = false,
+  min = 0,
+  max,
+  step = 1,
+  unit,
+  placeholder = '0',
+  className = '',
+}: NumberStepperProps) {
+  const currentVal = typeof value === 'number' ? value : (parseFloat(String(value)) || 0);
+
+  const handleDecrement = () => {
+    if (disabled) return;
+    const next = Math.max(min, Math.round((currentVal - step) * 100) / 100);
+    onChange(next);
+  };
+
+  const handleIncrement = () => {
+    if (disabled) return;
+    const calc = Math.round((currentVal + step) * 100) / 100;
+    const next = max !== undefined ? Math.min(max, calc) : calc;
+    onChange(next);
+  };
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const raw = e.target.value.trim();
+    if (raw === '') {
+      onChange(0);
+      return;
+    }
+    const parsed = parseFloat(raw);
+    if (isNaN(parsed)) {
+      onChange(0);
+      return;
+    }
+    let safe = Math.max(min, parsed);
+    if (max !== undefined) safe = Math.min(max, safe);
+    onChange(safe);
+  };
+
+  return (
+    <div
+      className={`relative flex items-center rounded-xl border border-slate-200 bg-white overflow-hidden shadow-2xs focus-within:border-emerald-500 focus-within:ring-2 focus-within:ring-emerald-500/20 transition-all ${
+        disabled ? 'bg-slate-100 opacity-60' : ''
+      } ${className}`}
+    >
+      {/* Tombol Minus (-) Touch Target 40px */}
+      <button
+        type="button"
+        disabled={disabled || currentVal <= min}
+        onClick={handleDecrement}
+        tabIndex={-1}
+        className="w-10 h-10 min-w-[40px] flex items-center justify-center bg-slate-50 hover:bg-slate-100 active:bg-slate-200 text-slate-700 transition-colors border-r border-slate-200 disabled:opacity-30 disabled:cursor-not-allowed select-none cursor-pointer"
+        aria-label="Kurang"
+      >
+        <Minus size={15} strokeWidth={2.5} />
+      </button>
+
+      {/* Input Angka dengan Numeric Keypad & Auto-Select on Focus */}
+      <input
+        type="text"
+        inputMode={step % 1 !== 0 ? 'decimal' : 'numeric'}
+        pattern={step % 1 !== 0 ? undefined : '[0-9]*'}
+        disabled={disabled}
+        value={currentVal === 0 ? '' : currentVal}
+        placeholder={placeholder}
+        onChange={handleChange}
+        onFocus={(e) => e.target.select()}
+        className="w-full h-10 px-2 font-sans font-bold text-center text-base text-slate-900 bg-transparent outline-none disabled:cursor-not-allowed"
+      />
+
+      {unit && (
+        <span className="text-[11px] font-bold text-slate-400 mr-1.5 select-none pointer-events-none">
+          {unit}
+        </span>
+      )}
+
+      {/* Tombol Plus (+) Touch Target 40px */}
+      <button
+        type="button"
+        disabled={disabled || (max !== undefined && currentVal >= max)}
+        onClick={handleIncrement}
+        tabIndex={-1}
+        className="w-10 h-10 min-w-[40px] flex items-center justify-center bg-emerald-50 hover:bg-emerald-100 active:bg-emerald-200 text-emerald-700 transition-colors border-l border-slate-200 disabled:opacity-30 disabled:cursor-not-allowed select-none cursor-pointer"
+        aria-label="Tambah"
+      >
+        <Plus size={15} strokeWidth={2.5} />
+      </button>
+    </div>
+  );
+}
 
 interface BarisTernakProps {
   label: string;
@@ -42,26 +148,20 @@ export function BarisTernak({
           <label className="block text-xs font-sans font-bold uppercase tracking-wider text-slate-600 mb-1">
             {label} — Jantan
           </label>
-          <input
-            type="number"
-            min={0}
-            disabled={disabled}
+          <NumberStepper
             value={jantan}
-            onChange={(e) => onJantan(Number(e.target.value))}
-            className="w-full min-h-touch h-10 px-3 rounded-xl border border-slate-200 bg-white font-sans font-bold text-center text-sm focus:border-emerald-500 outline-none disabled:bg-slate-100 disabled:text-slate-400 disabled:cursor-not-allowed"
+            onChange={onJantan}
+            disabled={disabled}
           />
         </div>
         <div>
           <label className="block text-xs font-sans font-bold uppercase tracking-wider text-slate-600 mb-1">
             {label} — Betina
           </label>
-          <input
-            type="number"
-            min={0}
-            disabled={disabled}
+          <NumberStepper
             value={betina}
-            onChange={(e) => onBetina(Number(e.target.value))}
-            className="w-full min-h-touch h-10 px-3 rounded-xl border border-slate-200 bg-white font-sans font-bold text-center text-sm focus:border-emerald-500 outline-none disabled:bg-slate-100 disabled:text-slate-400 disabled:cursor-not-allowed"
+            onChange={onBetina}
+            disabled={disabled}
           />
         </div>
         {showBA && (

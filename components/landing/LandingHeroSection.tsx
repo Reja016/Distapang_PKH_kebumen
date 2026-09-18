@@ -16,19 +16,20 @@ export default function LandingHeroSection({ onSelectModule }: LandingHeroSectio
     >
       <div className="max-w-md xl:max-w-xl">
         <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white dark:bg-slate-800 border-2 border-blue-200 dark:border-blue-800 text-xs sm:text-sm font-bold text-blue-800 dark:text-blue-300 mb-3 shadow-2xs">
-          <span className="w-2.5 h-2.5 rounded-full bg-blue-600 animate-pulse shrink-0" />
-          <span>Portal Resmi Bidang Peternakan dan Kesehatan Hewan</span>
+          <span className="w-2 h-2 sm:w-2.5 sm:h-2.5 rounded-full bg-blue-600 animate-pulse shrink-0" />
+          <span className="inline sm:hidden">Portal Resmi Peternakan &amp; Keswan</span>
+          <span className="hidden sm:inline">Portal Resmi Bidang Peternakan dan Kesehatan Hewan</span>
         </div>
         <h1 className="text-2xl sm:text-3xl md:text-4xl font-extrabold text-slate-900 dark:text-white tracking-tight leading-snug mb-3">
           Satu Ekosistem untuk Data <span className="text-blue-600 dark:text-blue-400">Peternakan Kebumen</span>
         </h1>
-        <p className="text-sm sm:text-base text-slate-700 dark:text-slate-200 leading-relaxed mb-4">
+        <p className="text-xs sm:text-base text-slate-700 dark:text-slate-200 leading-relaxed mb-3 sm:mb-4">
           Sistem Informasi Manajemen Terpadu yang mengintegrasikan data Perbibitan &amp; Produksi (Bitpro), Kesehatan Hewan (Keswan), dan Kesehatan Masyarakat Veteriner (Kesmavet) langsung dari basis data resmi secara real-time.
         </p>
         
-        <div className="hidden sm:flex items-center gap-2 text-sm font-bold text-blue-700 dark:text-blue-400">
+        <div className="flex items-center gap-1.5 text-xs sm:text-sm font-bold text-blue-700 dark:text-blue-400">
           <span>Pilih kartu modul untuk membuka data</span>
-          <ArrowRight size={16} />
+          <ArrowRight size={14} className="shrink-0" />
         </div>
       </div>
 

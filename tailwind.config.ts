@@ -9,6 +9,9 @@ const config: Config = {
   darkMode: 'class',
   theme: {
     extend: {
+      screens: {
+        xs: '480px',
+      },
       colors: {
         // Theme Colors
         bitpro: {
