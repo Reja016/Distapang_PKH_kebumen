@@ -334,14 +334,18 @@ export function cetakLaporanRuminansia(
             Tim Monev :<br/>
             <table style="width: 100%; border: none; font-size: 9.5pt; margin-top: 4px;">
               <tr>
-                <td style="border: none; width: 18px; padding: 2px 0;">1.</td>
-                <td style="border: none; padding: 2px 0;">${k.namaPetugas1 || '..............................................'}</td>
-                <td style="border: none; width: 100px; text-align: center; padding: 2px 0;">: .................</td>
+                <td style="border: none; width: 18px; padding: 2px 0; vertical-align: middle;">1.</td>
+                <td style="border: none; padding: 2px 0; vertical-align: middle;">${k.namaPetugas1 || '..............................................'}</td>
+                <td style="border: none; width: 110px; text-align: center; padding: 2px 0; vertical-align: middle;">
+                  ${(k as any).ttdPetugas1 ? `<img src="${(k as any).ttdPetugas1}" style="max-height: 38px; max-width: 95px; object-fit: contain; display: block; margin: 0 auto;" />` : ': .................'}
+                </td>
               </tr>
               <tr>
-                <td style="border: none; width: 18px; padding: 2px 0;">2.</td>
-                <td style="border: none; padding: 2px 0;">${k.namaPetugas2 || '..............................................'}</td>
-                <td style="border: none; width: 100px; text-align: center; padding: 2px 0;">: .................</td>
+                <td style="border: none; width: 18px; padding: 2px 0; vertical-align: middle;">2.</td>
+                <td style="border: none; padding: 2px 0; vertical-align: middle;">${k.namaPetugas2 || '..............................................'}</td>
+                <td style="border: none; width: 110px; text-align: center; padding: 2px 0; vertical-align: middle;">
+                  ${(k as any).ttdPetugas2 ? `<img src="${(k as any).ttdPetugas2}" style="max-height: 38px; max-width: 95px; object-fit: contain; display: block; margin: 0 auto;" />` : ': .................'}
+                </td>
               </tr>
             </table>
           </td>
@@ -580,14 +584,18 @@ export function cetakLaporanUnggas(
             Tim Monev :<br/>
             <table style="width: 100%; border: none; font-size: 10pt; margin-top: 6px;">
               <tr>
-                <td style="border: none; width: 20px; padding: 3px 0;">1.</td>
-                <td style="border: none; padding: 3px 0;">${ku.namaPetugas1 || '..............................................'}</td>
-                <td style="border: none; width: 110px; text-align: center; padding: 3px 0;">: .................</td>
+                <td style="border: none; width: 20px; padding: 3px 0; vertical-align: middle;">1.</td>
+                <td style="border: none; padding: 3px 0; vertical-align: middle;">${ku.namaPetugas1 || '..............................................'}</td>
+                <td style="border: none; width: 110px; text-align: center; padding: 3px 0; vertical-align: middle;">
+                  ${(ku as any).ttdPetugas1 ? `<img src="${(ku as any).ttdPetugas1}" style="max-height: 38px; max-width: 95px; object-fit: contain; display: block; margin: 0 auto;" />` : ': .................'}
+                </td>
               </tr>
               <tr>
-                <td style="border: none; width: 20px; padding: 3px 0;">2.</td>
-                <td style="border: none; padding: 3px 0;">${ku.namaPetugas2 || '..............................................'}</td>
-                <td style="border: none; width: 110px; text-align: center; padding: 3px 0;">: .................</td>
+                <td style="border: none; width: 20px; padding: 3px 0; vertical-align: middle;">2.</td>
+                <td style="border: none; padding: 3px 0; vertical-align: middle;">${ku.namaPetugas2 || '..............................................'}</td>
+                <td style="border: none; width: 110px; text-align: center; padding: 3px 0; vertical-align: middle;">
+                  ${(ku as any).ttdPetugas2 ? `<img src="${(ku as any).ttdPetugas2}" style="max-height: 38px; max-width: 95px; object-fit: contain; display: block; margin: 0 auto;" />` : ': .................'}
+                </td>
               </tr>
             </table>
           </td>

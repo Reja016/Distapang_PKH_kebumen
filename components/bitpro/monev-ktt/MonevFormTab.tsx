@@ -32,6 +32,7 @@ import {
 import { BarisTernak, KondisiSection, NumberStepper } from './KondisiFormSections';
 import { compressImageFile } from '@/lib/file-compressor';
 import { cetakLaporanRuminansia } from './monev-pdf-printer';
+import { DigitalSignaturePad } from './DigitalSignaturePad';
 
 interface MonevFormTabProps {
   formSectionRef: React.RefObject<any>;
@@ -1499,30 +1500,46 @@ export function MonevFormTab({
                 </p>
               </div>
 
-              <div className="space-y-3">
-                <div>
-                  <label className="block text-xs font-sans font-bold uppercase tracking-wider text-slate-600 mb-1">
-                    Nama Petugas Monev 1
-                  </label>
-                  <input
-                    type="text"
-                    placeholder="Nama petugas 1..."
-                    value={formKondisi.namaPetugas1 || ''}
-                    onChange={(e) => updateKondisi('namaPetugas1', e.target.value)}
-                    className="w-full h-10 px-3 rounded-xl border border-slate-200 bg-white text-xs font-semibold focus:border-emerald-500 outline-none"
+              <div className="space-y-4">
+                <div className="p-3.5 rounded-xl border border-slate-200 bg-white/90 space-y-2.5 shadow-2xs">
+                  <div>
+                    <label className="block text-xs font-sans font-bold uppercase tracking-wider text-slate-600 mb-1">
+                      Nama Petugas Monev 1
+                    </label>
+                    <input
+                      type="text"
+                      placeholder="Nama petugas 1..."
+                      value={formKondisi.namaPetugas1 || ''}
+                      onChange={(e) => updateKondisi('namaPetugas1', e.target.value)}
+                      className="w-full h-10 px-3 rounded-xl border border-slate-200 bg-white text-xs font-semibold focus:border-emerald-500 outline-none"
+                    />
+                  </div>
+                  <DigitalSignaturePad
+                    label="Tanda Tangan Petugas 1"
+                    value={formKondisi.ttdPetugas1}
+                    onChange={(val) => updateKondisi('ttdPetugas1', val)}
+                    helperText="Goreskan tanda tangan digital untuk Petugas Monev 1."
                   />
                 </div>
 
-                <div>
-                  <label className="block text-xs font-sans font-bold uppercase tracking-wider text-slate-600 mb-1">
-                    Nama Petugas Monev 2 (Opsional)
-                  </label>
-                  <input
-                    type="text"
-                    placeholder="Nama petugas 2..."
-                    value={formKondisi.namaPetugas2 || ''}
-                    onChange={(e) => updateKondisi('namaPetugas2', e.target.value)}
-                    className="w-full h-10 px-3 rounded-xl border border-slate-200 bg-white text-xs font-semibold focus:border-emerald-500 outline-none"
+                <div className="p-3.5 rounded-xl border border-slate-200 bg-white/90 space-y-2.5 shadow-2xs">
+                  <div>
+                    <label className="block text-xs font-sans font-bold uppercase tracking-wider text-slate-600 mb-1">
+                      Nama Petugas Monev 2 (Opsional)
+                    </label>
+                    <input
+                      type="text"
+                      placeholder="Nama petugas 2..."
+                      value={formKondisi.namaPetugas2 || ''}
+                      onChange={(e) => updateKondisi('namaPetugas2', e.target.value)}
+                      className="w-full h-10 px-3 rounded-xl border border-slate-200 bg-white text-xs font-semibold focus:border-emerald-500 outline-none"
+                    />
+                  </div>
+                  <DigitalSignaturePad
+                    label="Tanda Tangan Petugas 2 (Opsional)"
+                    value={formKondisi.ttdPetugas2}
+                    onChange={(val) => updateKondisi('ttdPetugas2', val)}
+                    helperText="Goreskan tanda tangan digital untuk Petugas Monev 2."
                   />
                 </div>
               </div>

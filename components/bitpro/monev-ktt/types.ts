@@ -114,6 +114,8 @@ export const KONDISI_KOSONG = {
   fotoTtdKetuaCap: null as string | null,
   namaPetugas1: '',
   namaPetugas2: '',
+  ttdPetugas1: null as string | null,
+  ttdPetugas2: null as string | null,
 };
 
 export type KondisiTernak = typeof KONDISI_KOSONG;
@@ -156,6 +158,8 @@ export const KONDISI_UNGGAS_KOSONG = {
   fotoTtdKetuaCap: null as string | null,
   namaPetugas1: '',
   namaPetugas2: '',
+  ttdPetugas1: null as string | null,
+  ttdPetugas2: null as string | null,
 };
 
 export type KondisiUnggas = typeof KONDISI_UNGGAS_KOSONG;

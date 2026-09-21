@@ -30,6 +30,7 @@ import {
 import { compressImageFile, validatePdfFile } from '@/lib/file-compressor';
 import { cetakLaporanUnggas } from './monev-pdf-printer';
 import { NumberStepper } from './KondisiFormSections';
+import { DigitalSignaturePad } from './DigitalSignaturePad';
 
 interface MonevUnggasTabProps {
   tahunBantuanFilter: string;
@@ -975,30 +976,46 @@ export function MonevUnggasTab({
                 </p>
               </div>
 
-              <div className="space-y-3">
-                <div>
-                  <label className="block text-xs font-sans font-bold uppercase tracking-wider text-slate-600 mb-1">
-                    Nama Petugas Monev 1
-                  </label>
-                  <input
-                    type="text"
-                    placeholder="Nama petugas 1..."
-                    value={kondisiUnggas.namaPetugas1 || ''}
-                    onChange={(e) => updateKondisiUnggas('namaPetugas1', e.target.value)}
-                    className="w-full h-10 px-3 rounded-xl border border-slate-200 bg-white text-xs font-semibold focus:border-amber-500 outline-none"
+              <div className="space-y-4">
+                <div className="p-3.5 rounded-xl border border-slate-200 bg-white/90 space-y-2.5 shadow-2xs">
+                  <div>
+                    <label className="block text-xs font-sans font-bold uppercase tracking-wider text-slate-600 mb-1">
+                      Nama Petugas Monev 1
+                    </label>
+                    <input
+                      type="text"
+                      placeholder="Nama petugas 1..."
+                      value={kondisiUnggas.namaPetugas1 || ''}
+                      onChange={(e) => updateKondisiUnggas('namaPetugas1', e.target.value)}
+                      className="w-full h-10 px-3 rounded-xl border border-slate-200 bg-white text-xs font-semibold focus:border-amber-500 outline-none"
+                    />
+                  </div>
+                  <DigitalSignaturePad
+                    label="Tanda Tangan Petugas 1"
+                    value={kondisiUnggas.ttdPetugas1}
+                    onChange={(val) => updateKondisiUnggas('ttdPetugas1', val)}
+                    helperText="Goreskan tanda tangan digital untuk Petugas Monev 1."
                   />
                 </div>
 
-                <div>
-                  <label className="block text-xs font-sans font-bold uppercase tracking-wider text-slate-600 mb-1">
-                    Nama Petugas Monev 2 (Opsional)
-                  </label>
-                  <input
-                    type="text"
-                    placeholder="Nama petugas 2..."
-                    value={kondisiUnggas.namaPetugas2 || ''}
-                    onChange={(e) => updateKondisiUnggas('namaPetugas2', e.target.value)}
-                    className="w-full h-10 px-3 rounded-xl border border-slate-200 bg-white text-xs font-semibold focus:border-amber-500 outline-none"
+                <div className="p-3.5 rounded-xl border border-slate-200 bg-white/90 space-y-2.5 shadow-2xs">
+                  <div>
+                    <label className="block text-xs font-sans font-bold uppercase tracking-wider text-slate-600 mb-1">
+                      Nama Petugas Monev 2 (Opsional)
+                    </label>
+                    <input
+                      type="text"
+                      placeholder="Nama petugas 2..."
+                      value={kondisiUnggas.namaPetugas2 || ''}
+                      onChange={(e) => updateKondisiUnggas('namaPetugas2', e.target.value)}
+                      className="w-full h-10 px-3 rounded-xl border border-slate-200 bg-white text-xs font-semibold focus:border-amber-500 outline-none"
+                    />
+                  </div>
+                  <DigitalSignaturePad
+                    label="Tanda Tangan Petugas 2 (Opsional)"
+                    value={kondisiUnggas.ttdPetugas2}
+                    onChange={(val) => updateKondisiUnggas('ttdPetugas2', val)}
+                    helperText="Goreskan tanda tangan digital untuk Petugas Monev 2."
                   />
                 </div>
               </div>
