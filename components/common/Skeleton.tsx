@@ -213,3 +213,70 @@ export function DashboardSkeleton({ isDark = false }: { isDark?: boolean }) {
     </div>
   );
 }
+
+/**
+ * Skeleton Halaman Submenu (saat berpindah menu di IframeViewer).
+ * Menampilkan struktur header halaman, kartu metrik, dan tabel shimmer yang elegan.
+ */
+export function SubmenuPageSkeleton({
+  title = 'Memuat Menu...',
+  isDark = false,
+}: {
+  title?: string;
+  isDark?: boolean;
+}) {
+  return (
+    <div
+      className={`w-full h-full p-4 sm:p-6 lg:p-8 overflow-y-auto space-y-6 ${
+        isDark ? 'bg-slate-950 text-slate-100' : 'bg-slate-50 text-slate-900'
+      }`}
+    >
+      {/* Top Header Halaman Submenu */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-slate-200 dark:border-slate-800">
+        <div className="space-y-2">
+          <div className="flex items-center gap-2.5">
+            <Skeleton className="w-8 h-8 rounded-xl shrink-0" />
+            <Skeleton className="h-6 w-48 sm:w-64 rounded-md" />
+            <Skeleton className="h-5 w-20 rounded-full hidden sm:block" />
+          </div>
+          <Skeleton className="h-3.5 w-60 sm:w-96 rounded-sm opacity-70" />
+        </div>
+
+        {/* Action buttons (Tambah, Export, Filter) */}
+        <div className="flex items-center gap-2.5">
+          <Skeleton className="h-9 w-28 rounded-xl" />
+          <Skeleton className="h-9 w-32 rounded-xl" />
+        </div>
+      </div>
+
+      {/* Metric Cards Skeleton */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+        {Array.from({ length: 4 }).map((_, i) => (
+          <div
+            key={i}
+            className="p-4 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 space-y-2.5 shadow-2xs"
+          >
+            <div className="flex items-center justify-between">
+              <Skeleton className="h-3.5 w-24 rounded-sm" />
+              <Skeleton className="w-8 h-8 rounded-lg shrink-0" />
+            </div>
+            <Skeleton className="h-7 w-24 rounded-md" />
+            <Skeleton className="h-3 w-32 rounded-sm opacity-60" />
+          </div>
+        ))}
+      </div>
+
+      {/* Main Table Card Skeleton */}
+      <TableSkeleton rows={6} cols={5} />
+
+      {/* Floating Status Pill */}
+      <div className="fixed bottom-6 right-6 z-30">
+        <div className="inline-flex items-center gap-2.5 px-4 py-2 rounded-full bg-slate-900/95 dark:bg-slate-800/95 border border-slate-700/80 text-xs font-semibold text-white shadow-xl backdrop-blur-md">
+          <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping" />
+          <span>{title}</span>
+        </div>
+      </div>
+    </div>
+  );
+}
+
