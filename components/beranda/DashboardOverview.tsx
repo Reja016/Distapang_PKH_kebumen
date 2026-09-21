@@ -184,21 +184,14 @@ export default function DashboardOverview({
                                 : 'border-slate-200 bg-white hover:bg-slate-50 hover:border-slate-300 shadow-2xs'
                             }`}
                           >
-                            <div className="flex items-center gap-2 min-w-0">
+                            <div className="flex items-center gap-2.5 min-w-0">
                               <Icon
-                                size={15}
+                                size={16}
                                 className={`shrink-0 text-slate-400 ${module.color.iconHover} transition-colors`}
                               />
-                              <div className="min-w-0">
-                                <div className="font-semibold truncate">
-                                  {sub.name}
-                                </div>
-                                {sub.desc && (
-                                  <div className="text-[10px] text-slate-500 truncate">
-                                    {sub.desc}
-                                  </div>
-                                )}
-                              </div>
+                              <span className="font-semibold text-xs truncate">
+                                {sub.name}
+                              </span>
                             </div>
                             <ChevronRight
                               size={13}
