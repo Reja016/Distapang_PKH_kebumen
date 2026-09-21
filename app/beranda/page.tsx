@@ -1,4 +1,4 @@
-﻿'use client';
+'use client';
 
 import { useEffect, useState, useRef } from 'react';
 import { useRouter } from 'next/navigation';
@@ -19,6 +19,7 @@ import SidebarNav from '@/components/beranda/SidebarNav';
 import DashboardHeader from '@/components/beranda/DashboardHeader';
 import DashboardOverview from '@/components/beranda/DashboardOverview';
 import IframeViewer from '@/components/beranda/IframeViewer';
+import { DashboardSkeleton } from '@/components/common/Skeleton';
 
 export default function BerandaPage() {
   const router = useRouter();
@@ -298,22 +299,7 @@ export default function BerandaPage() {
   }).format(new Date());
 
   if (isLoading) {
-    return (
-      <div
-        className={`min-h-screen flex items-center justify-center font-sans ${
-          isDark ? 'bg-slate-950 text-slate-100' : 'bg-slate-50 text-slate-800'
-        }`}
-      >
-        <div className="flex flex-col items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-emerald-600/15 border border-emerald-600/30 flex items-center justify-center animate-spin text-emerald-600">
-            <Activity size={22} />
-          </div>
-          <p className="text-xs font-semibold tracking-wider uppercase text-slate-500">
-            Memuat Dashboard SiMantap...
-          </p>
-        </div>
-      </div>
-    );
+    return <DashboardSkeleton isDark={isDark} />;
   }
 
   return (

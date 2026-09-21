@@ -13,7 +13,7 @@ import {
 } from 'lucide-react';
 
 // ============================================================================
-// 📝 DATA INFORMASI, KONTAK & SOSIAL MEDIA (Bisa Anda ubah mandiri di bawah ini)
+// DATA INFORMASI, KONTAK & SOSIAL MEDIA (Bisa Anda ubah mandiri di bawah ini)
 // ============================================================================
 export const FOOTER_CONFIG = {
   instansi: {
@@ -23,34 +23,31 @@ export const FOOTER_CONFIG = {
       'Sistem Informasi Manajemen Peternakan Terpadu (SiMantap) merupakan platform resmi integrasi data perbibitan ternak, pelayanan kesehatan hewan, kesehatan masyarakat veteriner, dan monitoring peternakan di Kabupaten Kebumen.',
   },
   kontak: {
-    alamat: 'Jl. Arungbinang No. 25, Dukuh, Kebumen, Kec. Kebumen, Kabupaten Kebumen, Jawa Tengah 54311',
-    telepon: '(0287) 381287',
-    teleponAlt: '(0287) 381186',
+    alamat: 'Jl. Ronggowarsito No.298, Legok Kidul, Pejagoan, Kec. Pejagoan, Kabupaten Kebumen, Jawa Tengah 54361',
+    telepon: '(0287) 382179',
+    teleponAlt: '',
     email: 'distapang@kebumenkab.go.id',
     emailPkh: 'pkh.distapang@gmail.com',
-    jamKerja: 'Senin - Kamis: 07.30 - 16.00 WIB | Jumat: 07.30 - 14.30 WIB',
+    jamKerja: 'Senin - Kamis: 07.30 - 16.00 WIB | Jumat: 07.30 - 11.00 WIB',
     googleMapsUrl: 'https://maps.google.com/?q=Dinas+Pertanian+dan+Pangan+Kabupaten+Kebumen',
   },
-  // 💡 PANDUAN PENGISIAN SOSMED:
-  // - Jika link terisi (misal: 'https://instagram.com/...'), tombol otomatis AKTIF dan bisa diklik.
-  // - Jika link belum ada (cukup kosongkan ''), tombol otomatis berstatus "SEGERA HADIR" (nonaktif & aman).
-  // - Jika Anda menghapus salah satu objek dari array di bawah, tombolnya langsung HILANG dari footer.
+
   sosmed: [
     {
       nama: 'Instagram',
-      url: 'https://www.instagram.com/distapangkebumen',
-      username: '@distapangkebumen',
+      url: 'https://www.instagram.com/distapang.kebumen',
+      username: '@distapang.kebumen',
       type: 'instagram',
     },
     {
       nama: 'Facebook',
-      url: '', // Kosongkan jika belum ada (otomatis tampil 'Segera Hadir')
+      url: 'https://www.facebook.com/distapangkbm',
       username: 'Distapang Kebumen',
       type: 'facebook',
     },
     {
       nama: 'YouTube',
-      url: '', // Kosongkan jika belum ada (otomatis tampil 'Segera Hadir')
+      url: 'https://www.youtube.com/@distapang.kebumen',
       username: 'Distapang Kebumen',
       type: 'youtube',
     },
@@ -247,7 +244,7 @@ export function LandingFooter() {
                     <span className="font-semibold text-slate-200">{FOOTER_CONFIG.kontak.telepon}</span>
                     {Boolean(FOOTER_CONFIG.kontak.teleponAlt && FOOTER_CONFIG.kontak.teleponAlt.trim() !== '') && (
                       <>
-                        <span className="text-slate-600">/</span>
+                        <span className="text-slate-600"></span>
                         <span className="text-slate-300">{FOOTER_CONFIG.kontak.teleponAlt}</span>
                       </>
                     )}
@@ -309,12 +306,6 @@ export function LandingFooter() {
           <p className="font-medium">
             &copy; {currentYear} <b>{FOOTER_CONFIG.instansi.bidang}</b>, {FOOTER_CONFIG.instansi.nama}.
           </p>
-          <div className="flex items-center gap-2">
-            <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-              SiMantap v2.1 Online
-            </span>
-          </div>
         </div>
       </div>
     </footer>

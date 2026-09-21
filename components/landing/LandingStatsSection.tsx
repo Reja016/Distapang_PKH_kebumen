@@ -8,8 +8,8 @@ import {
   Activity,
   TrendingUp,
   PackageCheck,
-  Loader2,
 } from 'lucide-react';
+import { Skeleton } from '@/components/common/Skeleton';
 
 interface LandingStatsSectionProps {
   isDataLoading: boolean;
@@ -86,9 +86,7 @@ export default function LandingStatsSection({
             </p>
             <p className="text-xl sm:text-3xl lg:text-4xl font-extrabold text-slate-900 dark:text-white tracking-tight">
               {isDataLoading ? (
-                <span className="inline-flex items-center gap-1 text-base text-slate-400 font-normal">
-                  <Loader2 className="animate-spin" size={16} /> Memuat...
-                </span>
+                <Skeleton className="h-8 sm:h-9 w-28 sm:w-36 my-0.5 rounded-lg" />
               ) : (
                 totalPopulasi.toLocaleString('id-ID')
               )}
@@ -113,9 +111,7 @@ export default function LandingStatsSection({
             </p>
             <p className="text-xl sm:text-3xl lg:text-4xl font-extrabold text-slate-900 dark:text-white tracking-tight">
               {isDataLoading ? (
-                <span className="inline-flex items-center gap-1 text-base text-slate-400 font-normal">
-                  <Loader2 className="animate-spin" size={16} /> Memuat...
-                </span>
+                <Skeleton className="h-8 sm:h-9 w-28 sm:w-36 my-0.5 rounded-lg" />
               ) : (
                 totalProdDagingTon.toLocaleString('id-ID', { minimumFractionDigits: 1, maximumFractionDigits: 1 })
               )}
@@ -140,9 +136,7 @@ export default function LandingStatsSection({
             </p>
             <p className="text-xl sm:text-3xl lg:text-4xl font-extrabold text-slate-900 dark:text-white tracking-tight">
               {isDataLoading ? (
-                <span className="inline-flex items-center gap-1 text-base text-slate-400 font-normal">
-                  <Loader2 className="animate-spin" size={16} /> Memuat...
-                </span>
+                <Skeleton className="h-8 sm:h-9 w-28 sm:w-36 my-0.5 rounded-lg" />
               ) : (
                 totalProdTelurTon.toLocaleString('id-ID', { minimumFractionDigits: 1, maximumFractionDigits: 1 })
               )}
@@ -167,9 +161,7 @@ export default function LandingStatsSection({
             </p>
             <p className="text-xl sm:text-3xl lg:text-4xl font-extrabold text-slate-900 dark:text-white tracking-tight">
               {isDataLoading ? (
-                <span className="inline-flex items-center gap-1 text-base text-slate-400 font-normal">
-                  <Loader2 className="animate-spin" size={16} /> Memuat...
-                </span>
+                <Skeleton className="h-8 sm:h-9 w-28 sm:w-36 my-0.5 rounded-lg" />
               ) : (
                 `${totalSapiPo.toLocaleString('id-ID')} Ekor`
               )}
