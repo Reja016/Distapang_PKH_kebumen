@@ -8,12 +8,14 @@ import React from 'react';
 export function Skeleton({
   className = '',
   shimmer = true,
+  as: Component = 'div',
 }: {
   className?: string;
   shimmer?: boolean;
+  as?: 'div' | 'span';
 }) {
   return (
-    <div
+    <Component
       className={`rounded-md bg-slate-200/90 dark:bg-slate-800/90 ${
         shimmer ? 'skeleton-shimmer' : 'animate-pulse'
       } ${className}`}

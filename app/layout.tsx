@@ -47,7 +47,7 @@ export default function RootLayout({
           }}
         />
       </head>
-      <body className="font-sans antialiased text-slate-900 bg-slate-50 selection:bg-blue-600 selection:text-white">
+      <body className="font-sans antialiased text-slate-900 bg-slate-50 selection:bg-blue-600 selection:text-white" suppressHydrationWarning>
         {children}
         <AiChatWidget />
       </body>

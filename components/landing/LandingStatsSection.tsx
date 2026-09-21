@@ -84,13 +84,13 @@ export default function LandingStatsSection({
             <p className="text-xs sm:text-sm font-bold text-slate-700 dark:text-slate-300 mb-0.5 sm:mb-1 truncate">
               Total Populasi Ternak
             </p>
-            <p className="text-xl sm:text-3xl lg:text-4xl font-extrabold text-slate-900 dark:text-white tracking-tight">
+            <div className="text-xl sm:text-3xl lg:text-4xl font-extrabold text-slate-900 dark:text-white tracking-tight">
               {isDataLoading ? (
-                <Skeleton className="h-8 sm:h-9 w-28 sm:w-36 my-0.5 rounded-lg" />
+                <Skeleton as="span" className="inline-block h-8 sm:h-9 w-28 sm:w-36 my-0.5 rounded-lg" />
               ) : (
                 totalPopulasi.toLocaleString('id-ID')
               )}
-            </p>
+            </div>
             <p className="text-xs sm:text-sm font-semibold text-slate-500 dark:text-slate-400 mt-0.5 sm:mt-1 truncate">
               Ekor di seluruh Kebumen
             </p>
@@ -109,13 +109,13 @@ export default function LandingStatsSection({
             <p className="text-xs sm:text-sm font-bold text-slate-700 dark:text-slate-300 mb-0.5 sm:mb-1 truncate">
               Produksi Daging
             </p>
-            <p className="text-xl sm:text-3xl lg:text-4xl font-extrabold text-slate-900 dark:text-white tracking-tight">
+            <div className="text-xl sm:text-3xl lg:text-4xl font-extrabold text-slate-900 dark:text-white tracking-tight">
               {isDataLoading ? (
-                <Skeleton className="h-8 sm:h-9 w-28 sm:w-36 my-0.5 rounded-lg" />
+                <Skeleton as="span" className="inline-block h-8 sm:h-9 w-28 sm:w-36 my-0.5 rounded-lg" />
               ) : (
                 totalProdDagingTon.toLocaleString('id-ID', { minimumFractionDigits: 1, maximumFractionDigits: 1 })
               )}
-            </p>
+            </div>
             <p className="text-xs sm:text-sm font-semibold text-slate-500 dark:text-slate-400 mt-0.5 sm:mt-1 truncate">
               Ton / tahun
             </p>
@@ -134,13 +134,13 @@ export default function LandingStatsSection({
             <p className="text-xs sm:text-sm font-bold text-slate-700 dark:text-slate-300 mb-0.5 sm:mb-1 truncate">
               Produksi Telur
             </p>
-            <p className="text-xl sm:text-3xl lg:text-4xl font-extrabold text-slate-900 dark:text-white tracking-tight">
+            <div className="text-xl sm:text-3xl lg:text-4xl font-extrabold text-slate-900 dark:text-white tracking-tight">
               {isDataLoading ? (
-                <Skeleton className="h-8 sm:h-9 w-28 sm:w-36 my-0.5 rounded-lg" />
+                <Skeleton as="span" className="inline-block h-8 sm:h-9 w-28 sm:w-36 my-0.5 rounded-lg" />
               ) : (
                 totalProdTelurTon.toLocaleString('id-ID', { minimumFractionDigits: 1, maximumFractionDigits: 1 })
               )}
-            </p>
+            </div>
             <p className="text-xs sm:text-sm font-semibold text-slate-500 dark:text-slate-400 mt-0.5 sm:mt-1 truncate">
               Ton / tahun
             </p>
@@ -159,13 +159,13 @@ export default function LandingStatsSection({
             <p className="text-xs sm:text-sm font-bold text-slate-700 dark:text-slate-300 mb-0.5 sm:mb-1 truncate">
               Populasi Sapi PO
             </p>
-            <p className="text-xl sm:text-3xl lg:text-4xl font-extrabold text-slate-900 dark:text-white tracking-tight">
+            <div className="text-xl sm:text-3xl lg:text-4xl font-extrabold text-slate-900 dark:text-white tracking-tight">
               {isDataLoading ? (
-                <Skeleton className="h-8 sm:h-9 w-28 sm:w-36 my-0.5 rounded-lg" />
+                <Skeleton as="span" className="inline-block h-8 sm:h-9 w-28 sm:w-36 my-0.5 rounded-lg" />
               ) : (
                 `${totalSapiPo.toLocaleString('id-ID')} Ekor`
               )}
-            </p>
+            </div>
             <p className="text-xs sm:text-sm font-semibold text-slate-500 dark:text-slate-400 mt-0.5 sm:mt-1 truncate">
               Data resmi populasi ternak Sapi PO Kebumen
             </p>
