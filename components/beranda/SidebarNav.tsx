@@ -326,7 +326,7 @@ export default function SidebarNav({
                       type="button"
                       onClick={() => setFlyoutModule(isFlyoutOpen ? null : module.id)}
                       title={`${module.name} (${allowedSubmenus.length} menu)`}
-                      className={`w-10 h-10 rounded-xl flex items-center justify-center p-1.5 transition-all cursor-pointer ${
+                      className={`w-12 h-12 rounded-xl flex items-center justify-center p-1 transition-all cursor-pointer ${
                         isFlyoutOpen
                           ? isDark
                             ? 'bg-slate-800 ring-2 ring-emerald-500 shadow-md'
@@ -340,7 +340,7 @@ export default function SidebarNav({
                       <img
                         src={`/icons/modules/${module.id}.png`}
                         alt={module.name}
-                        className="w-7 h-7 object-contain"
+                        className="w-9 h-9 object-contain scale-110"
                       />
                     </button>
 
@@ -424,9 +424,20 @@ export default function SidebarNav({
                     }`}
                   >
                     <div className="flex items-center gap-2.5 min-w-0">
-                      <span
-                        className={`w-2 h-2 rounded-full shrink-0 ${module.color.accent}`}
-                      />
+                      <div
+                        className={`w-8 h-8 rounded-lg flex items-center justify-center p-0.5 shrink-0 border ${
+                          isDark
+                            ? 'bg-slate-800 border-slate-700'
+                            : 'bg-white border-slate-200 shadow-2xs'
+                        }`}
+                      >
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img
+                          src={`/icons/modules/${module.id}.png`}
+                          alt={module.name}
+                          className="w-full h-full object-contain scale-110"
+                        />
+                      </div>
                       <div className="min-w-0">
                         <div className="flex items-center gap-1.5">
                           <span className="text-xs font-bold truncate">

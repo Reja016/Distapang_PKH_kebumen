@@ -133,23 +133,23 @@ export default function DashboardOverview({
                       isDark ? 'border-slate-800 bg-slate-950/30' : 'border-slate-100 bg-slate-50/50'
                     }`}
                   >
-                    <div className="flex items-center gap-3">
+                    <div className="flex items-center gap-3.5">
                       <div
-                        className={`w-11 h-11 rounded-xl flex items-center justify-center p-1.5 border shrink-0 ${
+                        className={`w-14 h-14 sm:w-16 sm:h-16 rounded-2xl flex items-center justify-center p-1.5 border shrink-0 ${
                           isDark
                             ? 'bg-slate-800/90 border-slate-700'
-                            : 'bg-white border-slate-200 shadow-2xs'
+                            : 'bg-white border-slate-200 shadow-xs'
                         }`}
                       >
                         {/* eslint-disable-next-line @next/next/no-img-element */}
                         <img
                           src={`/icons/modules/${module.id}.png`}
                           alt={`Logo ${module.name}`}
-                          className="w-full h-full object-contain"
+                          className="w-full h-full object-contain scale-110"
                         />
                       </div>
                       <div>
-                        <h4 className="text-sm sm:text-base font-bold">
+                        <h4 className="text-base sm:text-lg font-bold">
                           {module.name}
                         </h4>
                         <p className="text-xs text-slate-500">{module.shortDesc}</p>
