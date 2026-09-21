@@ -135,16 +135,18 @@ export default function DashboardOverview({
                   >
                     <div className="flex items-center gap-3">
                       <div
-                        className={`w-10 h-10 rounded-xl flex items-center justify-center font-bold border ${
+                        className={`w-11 h-11 rounded-xl flex items-center justify-center p-1.5 border shrink-0 ${
                           isDark
-                            ? `${module.color.darkBadge} ${module.color.darkText}`
-                            : `${module.color.lightBadge} ${module.color.lightText}`
+                            ? 'bg-slate-800/90 border-slate-700'
+                            : 'bg-white border-slate-200 shadow-2xs'
                         }`}
                       >
-                        {module.id === 'bitpro' && <Activity size={20} />}
-                        {module.id === 'keswan' && <ShieldCheck size={20} />}
-                        {module.id === 'kesmavet' && <CheckCircle2 size={20} />}
-                        {module.id === 'aset' && <Truck size={20} />}
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img
+                          src={`/icons/modules/${module.id}.png`}
+                          alt={`Logo ${module.name}`}
+                          className="w-full h-full object-contain"
+                        />
                       </div>
                       <div>
                         <h4 className="text-sm sm:text-base font-bold">

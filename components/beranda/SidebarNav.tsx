@@ -326,20 +326,22 @@ export default function SidebarNav({
                       type="button"
                       onClick={() => setFlyoutModule(isFlyoutOpen ? null : module.id)}
                       title={`${module.name} (${allowedSubmenus.length} menu)`}
-                      className={`w-10 h-10 rounded-xl flex items-center justify-center transition-all cursor-pointer ${
+                      className={`w-10 h-10 rounded-xl flex items-center justify-center p-1.5 transition-all cursor-pointer ${
                         isFlyoutOpen
                           ? isDark
-                            ? 'bg-emerald-950/60 text-emerald-300'
-                            : 'bg-emerald-50 text-emerald-800 font-semibold'
+                            ? 'bg-slate-800 ring-2 ring-emerald-500 shadow-md'
+                            : 'bg-white ring-2 ring-emerald-500 shadow-md'
                           : isDark
-                          ? 'text-slate-400 hover:bg-slate-800/60 hover:text-slate-200'
-                          : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
+                          ? 'hover:bg-slate-800/80'
+                          : 'hover:bg-slate-100'
                       }`}
                     >
-                      {module.id === 'bitpro' && <Activity size={18} className={module.color.lightText} />}
-                      {module.id === 'keswan' && <ShieldCheck size={18} className={module.color.lightText} />}
-                      {module.id === 'kesmavet' && <CheckCircle2 size={18} className={module.color.lightText} />}
-                      {module.id === 'aset' && <Truck size={18} className={module.color.lightText} />}
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img
+                        src={`/icons/modules/${module.id}.png`}
+                        alt={module.name}
+                        className="w-7 h-7 object-contain"
+                      />
                     </button>
 
                     {/* Popover Flyout Menu on Click in mini mode */}
@@ -353,9 +355,17 @@ export default function SidebarNav({
                         }`}
                       >
                         <div className="flex items-center justify-between pb-2 border-b border-slate-100 dark:border-slate-800">
-                          <div>
-                            <div className="text-xs font-bold">{module.name}</div>
-                            <div className="text-[10px] text-slate-500">{module.shortDesc}</div>
+                          <div className="flex items-center gap-2">
+                            {/* eslint-disable-next-line @next/next/no-img-element */}
+                            <img
+                              src={`/icons/modules/${module.id}.png`}
+                              alt={module.name}
+                              className="w-5 h-5 object-contain"
+                            />
+                            <div>
+                              <div className="text-xs font-bold">{module.name}</div>
+                              <div className="text-[10px] text-slate-500">{module.shortDesc}</div>
+                            </div>
                           </div>
                           <span className="text-[10px] px-1.5 py-0.5 rounded-sm bg-slate-100 dark:bg-slate-800 font-mono text-slate-500">
                             {allowedSubmenus.length}
