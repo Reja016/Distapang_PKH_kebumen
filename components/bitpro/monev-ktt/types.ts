@@ -220,6 +220,7 @@ export type FieldData = {
 
 export const FORM_KOSONG = {
   tahun: '2026',
+  sumberDana: '',
   kec: '',
   desa: '',
   ktt: '',

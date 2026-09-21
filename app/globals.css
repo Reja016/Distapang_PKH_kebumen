@@ -28,6 +28,17 @@
   }
 }
 
+html {
+  font-size: 100%;
+}
+
+/* Enhanced readability on desktop & laptop screens (equivalent to 110% browser zoom) */
+@media (min-width: 1024px) {
+  html {
+    font-size: 110%;
+  }
+}
+
 html, body {
   overflow-y: scroll !important;
   scrollbar-gutter: stable !important;

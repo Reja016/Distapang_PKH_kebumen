@@ -177,9 +177,9 @@ export function cetakLaporanRuminansia(
           <td>${data.lat && data.lng ? `${data.lat}, ${data.lng}` : '..........................................................'}</td>
         </tr>
         <tr>
-          <td class="col-label">TAHUN BANTUAN</td>
+          <td class="col-label">TAHUN BANTUAN / SUMBER HIBAH</td>
           <td class="col-colon">:</td>
-          <td>${data.tahun || '................'}</td>
+          <td>${data.tahun || '................'}${data.sumberDana ? ` (${data.sumberDana})` : ''}</td>
         </tr>
         <tr>
           <td class="col-label">JENIS KOMODITAS TERNAK</td>

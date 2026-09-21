@@ -112,34 +112,34 @@ export function PuskeswanRekapTab({
   return (
     <div className="space-y-8 animate-in fade-in duration-200">
       {/* KPI Cards Summary */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-        <div className="bg-white p-5 rounded-3xl border border-slate-200 shadow-sm flex flex-col justify-between">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+        <div className="bg-white p-3.5 sm:p-5 rounded-2xl sm:rounded-3xl border border-slate-200 shadow-sm flex flex-col justify-between">
           <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400">Total Retribusi</span>
-          <span className="text-xl sm:text-2xl font-black text-blue-700 font-sans mt-2">
+          <span className="text-lg sm:text-2xl font-black text-blue-700 font-sans mt-1 sm:mt-2 truncate">
             Rp {formatRp(totalRetribusi)}
           </span>
           <span className="text-[10px] font-bold text-slate-500 mt-1">Akumulasi pendapatan PAD</span>
         </div>
 
-        <div className="bg-white p-5 rounded-3xl border border-slate-200 shadow-sm flex flex-col justify-between">
+        <div className="bg-white p-3.5 sm:p-5 rounded-2xl sm:rounded-3xl border border-slate-200 shadow-sm flex flex-col justify-between">
           <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400">Total Pelayanan</span>
-          <span className="text-xl sm:text-2xl font-black text-emerald-700 font-sans mt-2">
+          <span className="text-lg sm:text-2xl font-black text-emerald-700 font-sans mt-1 sm:mt-2">
             {totalLayanan.toLocaleString('id-ID')}
           </span>
           <span className="text-[10px] font-bold text-slate-500 mt-1">Aktif + Semi Aktif + Pasif</span>
         </div>
 
-        <div className="bg-white p-5 rounded-3xl border border-slate-200 shadow-sm flex flex-col justify-between">
+        <div className="bg-white p-3.5 sm:p-5 rounded-2xl sm:rounded-3xl border border-slate-200 shadow-sm flex flex-col justify-between">
           <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400">Inseminasi Buatan</span>
-          <span className="text-xl sm:text-2xl font-black text-purple-700 font-sans mt-2">
+          <span className="text-lg sm:text-2xl font-black text-purple-700 font-sans mt-1 sm:mt-2">
             {sum(filteredData, 'ib').toLocaleString('id-ID')}
           </span>
           <span className="text-[10px] font-bold text-slate-500 mt-1">Total Dosis Straw IB</span>
         </div>
 
-        <div className="bg-white p-5 rounded-3xl border border-slate-200 shadow-sm flex flex-col justify-between">
+        <div className="bg-white p-3.5 sm:p-5 rounded-2xl sm:rounded-3xl border border-slate-200 shadow-sm flex flex-col justify-between">
           <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400">Vaksinasi PMK &amp; LSD</span>
-          <span className="text-xl sm:text-2xl font-black text-amber-700 font-sans mt-2">
+          <span className="text-lg sm:text-2xl font-black text-amber-700 font-sans mt-1 sm:mt-2">
             {(sum(filteredData, 'pmk_vaks') + sum(filteredData, 'lsd_vaks')).toLocaleString('id-ID')}
           </span>
           <span className="text-[10px] font-bold text-slate-500 mt-1">Total Hewan Tervaksinasi</span>

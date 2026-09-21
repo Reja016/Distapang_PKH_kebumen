@@ -43,6 +43,8 @@ interface MonevFormTabProps {
   editingId: string | null;
   formTahun: string;
   setFormTahun: (val: string) => void;
+  formSumberDana?: string;
+  setFormSumberDana?: (val: string) => void;
   formKec: string;
   setFormKec: (val: string) => void;
   formDesa: string;
@@ -106,6 +108,8 @@ export function MonevFormTab({
   editingId,
   formTahun,
   setFormTahun,
+  formSumberDana = '',
+  setFormSumberDana,
   formKec,
   setFormKec,
   formDesa,
@@ -168,6 +172,133 @@ export function MonevFormTab({
     });
   }, [dbLapanganFiltered, filterKecamatan]);
 
+  // Total Summary untuk Tabel Rekapitulasi Kondisi Terkini Ternak
+  const rekapTotals = useMemo(() => {
+    return dbLapanganTabel.reduce(
+      (acc, d) => {
+        const k = d.kondisi;
+        const h = hitungKondisi(k);
+        const anakLahir = (k.lahirJantan || 0) + (k.lahirBetina || 0) + (k.lahirBelumTahu || 0);
+        const anakMati = (k.matiAnakJantan || 0) + (k.matiAnakBetina || 0) + (k.matiAnakBelumTahu || 0);
+        const anakDijual = (k.jualAnakJantan || 0) + (k.jualAnakBetina || 0) + (k.jualAnakBelumTahu || 0);
+        const pokokMati = (k.matiBangkaiJantan || 0) + (k.matiBangkaiBetina || 0);
+        const pokokPotongPaksa = (k.matiPotongJantan || 0) + (k.matiPotongBetina || 0);
+        const pokokDijual = (k.jualJantan || 0) + (k.jualBetina || 0);
+        const beliPengganti = (k.beliJantan || 0) + (k.beliBetina || 0);
+        const kondisiSaatIni = h.i;
+
+        acc.anakLahir += anakLahir;
+        acc.anakMati += anakMati;
+        acc.anakDijual += anakDijual;
+        acc.pokokMati += pokokMati;
+        acc.pokokPotongPaksa += pokokPotongPaksa;
+        acc.pokokDijual += pokokDijual;
+        acc.beliPengganti += beliPengganti;
+        acc.kondisiSaatIni += kondisiSaatIni;
+        return acc;
+      },
+      {
+        anakLahir: 0,
+        anakMati: 0,
+        anakDijual: 0,
+        pokokMati: 0,
+        pokokPotongPaksa: 0,
+        pokokDijual: 0,
+        beliPengganti: 0,
+        kondisiSaatIni: 0,
+      }
+    );
+  }, [dbLapanganTabel]);
+
+  // Export Excel Khusus Tabel Rekapitulasi Kondisi Terkini Ternak
+  const downloadExcelKondisiTerkini = () => {
+    if (dbLapanganTabel.length === 0) {
+      alert('Belum ada data untuk diekspor!');
+      return;
+    }
+
+    const rowsTable2: any[] = [];
+    dbLapanganTabel.forEach((d, i) => {
+      const k = d.kondisi;
+      const h = hitungKondisi(k);
+      const anakLahir = (k.lahirJantan || 0) + (k.lahirBetina || 0) + (k.lahirBelumTahu || 0);
+      const anakMati = (k.matiAnakJantan || 0) + (k.matiAnakBetina || 0) + (k.matiAnakBelumTahu || 0);
+      const anakDijual = (k.jualAnakJantan || 0) + (k.jualAnakBetina || 0) + (k.jualAnakBelumTahu || 0);
+      const pokokMati = (k.matiBangkaiJantan || 0) + (k.matiBangkaiBetina || 0);
+      const pokokPotongPaksa = (k.matiPotongJantan || 0) + (k.matiPotongBetina || 0);
+      const pokokDijual = (k.jualJantan || 0) + (k.jualBetina || 0);
+      const beliPengganti = (k.beliJantan || 0) + (k.beliBetina || 0);
+      const kondisiSaatIni = h.i;
+      const kondisiTahun = (d.waktuMonev || (d.tahun ? `TAHUN ${d.tahun}` : '-')).toUpperCase();
+
+      rowsTable2.push([
+        i + 1,
+        d.namaKtt,
+        anakLahir,
+        anakMati,
+        anakDijual,
+        pokokMati,
+        pokokPotongPaksa,
+        pokokDijual,
+        beliPengganti,
+        kondisiSaatIni,
+        kondisiTahun,
+      ]);
+    });
+
+    const aoa = [
+      ['TABEL REKAPITULASI KONDISI TERKINI TERNAK'],
+      [`Filter: Tahun ${tahunBantuanFilter} | Kecamatan: ${filterKecamatan}`],
+      [],
+      [
+        'NO',
+        'NAMA KTT',
+        'Anak Lahir',
+        'Anak Mati',
+        'Anak Dijual',
+        'Pokok Mati',
+        'Pokok Potong Paksa',
+        'Pokok Dijual',
+        'Beli Pengganti',
+        'Kondisi Saat Ini',
+        'KONDISI TAHUN',
+      ],
+      ...rowsTable2,
+      [
+        'TOTAL',
+        '',
+        rekapTotals.anakLahir,
+        rekapTotals.anakMati,
+        rekapTotals.anakDijual,
+        rekapTotals.pokokMati,
+        rekapTotals.pokokPotongPaksa,
+        rekapTotals.pokokDijual,
+        rekapTotals.beliPengganti,
+        rekapTotals.kondisiSaatIni,
+        '',
+      ],
+    ];
+
+    const ws = XLSX.utils.aoa_to_sheet(aoa);
+    ws['!cols'] = [
+      { wch: 6 },
+      { wch: 30 },
+      { wch: 14 },
+      { wch: 14 },
+      { wch: 14 },
+      { wch: 14 },
+      { wch: 18 },
+      { wch: 14 },
+      { wch: 16 },
+      { wch: 16 },
+      { wch: 22 },
+    ];
+
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, 'Kondisi_Terkini_Ternak');
+    XLSX.writeFile(wb, `Rekap_Kondisi_Terkini_Ternak_${tahunBantuanFilter}_${new Date().toISOString().split('T')[0]}.xlsx`);
+  };
+
   // ── FITUR EXCEL: UNDUH TEMPLATE & IMPORT MASSAL ──
   const excelFileInputRef = useRef<HTMLInputElement>(null);
   const [isImporting, setIsImporting] = useState(false);
@@ -186,6 +317,15 @@ export function MonevFormTab({
         'Jantan (J)': 2,
         'Bibit Odot (Stek)': 500,
         'Obat (Paket)': 1,
+        'Anak Lahir': 2,
+        'Anak Mati': 0,
+        'Anak Dijual': 0,
+        'Pokok Mati': 0,
+        'Pokok Potong Paksa': 0,
+        'Pokok Dijual': 0,
+        'Beli Pengganti': 0,
+        'Kondisi Saat Ini': 14,
+        'Kondisi Tahun': 'DESEMBER 2025',
         'Keterangan': 'Bantuan APBD Kabupaten Kebumen',
         'Latitude': -7.712345,
         'Longitude': 109.456789,
@@ -201,6 +341,15 @@ export function MonevFormTab({
         'Jantan (J)': 3,
         'Bibit Odot (Stek)': 0,
         'Obat (Paket)': 1,
+        'Anak Lahir': 4,
+        'Anak Mati': 1,
+        'Anak Dijual': 0,
+        'Pokok Mati': 0,
+        'Pokok Potong Paksa': 0,
+        'Pokok Dijual': 0,
+        'Beli Pengganti': 0,
+        'Kondisi Saat Ini': 21,
+        'Kondisi Tahun': '10 JULI 2025',
         'Keterangan': 'Bantuan Hibah Provinsi',
         'Latitude': '',
         'Longitude': '',
@@ -219,6 +368,15 @@ export function MonevFormTab({
       { wch: 12 }, // Jantan (J)
       { wch: 18 }, // Bibit Odot (Stek)
       { wch: 14 }, // Obat (Paket)
+      { wch: 13 }, // Anak Lahir
+      { wch: 13 }, // Anak Mati
+      { wch: 13 }, // Anak Dijual
+      { wch: 13 }, // Pokok Mati
+      { wch: 18 }, // Pokok Potong Paksa
+      { wch: 14 }, // Pokok Dijual
+      { wch: 15 }, // Beli Pengganti
+      { wch: 16 }, // Kondisi Saat Ini
+      { wch: 18 }, // Kondisi Tahun
       { wch: 30 }, // Keterangan
       { wch: 14 }, // Latitude
       { wch: 14 }, // Longitude
@@ -292,6 +450,18 @@ export function MonevFormTab({
         const awalJ = parseInt(String(getVal(['jantan j', 'jantan', 'j', 'jml ekor j', 'awal jantan']) || '0'), 10) || 0;
         const bibitOdot = parseInt(String(getVal(['bibit odot stek', 'bibit odot', 'odot', 'bibit odot (stek)']) || '0'), 10) || 0;
         const obatPaket = parseInt(String(getVal(['obat paket', 'obat-obatan paket', 'obat', 'obat paket']) || '0'), 10) || 0;
+
+        // Kolom Kondisi Terkini Ternak
+        const anakLahir = parseInt(String(getVal(['anak lahir', 'lahir anak', 'lahir']) || '0'), 10) || 0;
+        const anakMati = parseInt(String(getVal(['anak mati', 'mati anak']) || '0'), 10) || 0;
+        const anakDijual = parseInt(String(getVal(['anak dijual', 'jual anak', 'anak jual']) || '0'), 10) || 0;
+        const pokokMati = parseInt(String(getVal(['pokok mati', 'mati pokok', 'mati bangkai']) || '0'), 10) || 0;
+        const pokokPotongPaksa = parseInt(String(getVal(['pokok potong paksa', 'potong paksa', 'mati potong']) || '0'), 10) || 0;
+        const pokokDijual = parseInt(String(getVal(['pokok dijual', 'pokok jual', 'jual pokok']) || '0'), 10) || 0;
+        const beliPengganti = parseInt(String(getVal(['beli pengganti', 'pengganti', 'beli']) || '0'), 10) || 0;
+        const kondisiTahunRaw = getVal(['kondisi tahun', 'waktu monev', 'waktu', 'tanggal']);
+        const kondisiTahun = kondisiTahunRaw ? String(kondisiTahunRaw).trim() : '';
+
         const catatan = String(getVal(['keterangan', 'catatan', 'ket']) || '').trim();
 
         const latRaw = getVal(['latitude', 'lat']);
@@ -310,7 +480,7 @@ export function MonevFormTab({
           kegiatan: 'Monev Hibah Ternak Ruminansia',
           jenis,
           kategori: 'Ruminansia',
-          waktuMonev: new Date().toISOString().split('T')[0],
+          waktuMonev: kondisiTahun || new Date().toISOString().split('T')[0],
           kondisi: {
             ...KONDISI_KOSONG,
             namaKetua,
@@ -318,6 +488,13 @@ export function MonevFormTab({
             awalJantan: awalJ,
             bibitOdot,
             obatPaket,
+            lahirBetina: anakLahir,
+            matiAnakBetina: anakMati,
+            jualAnakBetina: anakDijual,
+            matiBangkaiBetina: pokokMati,
+            matiPotongBetina: pokokPotongPaksa,
+            jualBetina: pokokDijual,
+            beliBetina: beliPengganti,
             dokumenHasilPdf: null,
             dokumenHasilPdfName: null,
           },
@@ -708,13 +885,13 @@ export function MonevFormTab({
 
               <div>
                 <label className="block text-xs font-sans font-bold uppercase tracking-wider text-slate-600 mb-1">
-                  Nama Ketua Kelompok <span className="text-slate-400 font-normal"></span>
+                  Sumber Hibah / Sumber Dana
                 </label>
                 <input
                   type="text"
-                  value={formNamaKetua}
-                  onChange={(e) => setFormNamaKetua(e.target.value)}
-                  placeholder="Nama ketua kelompok..."
+                  value={formSumberDana}
+                  onChange={(e) => setFormSumberDana && setFormSumberDana(e.target.value)}
+                  placeholder="Contoh: APBD Kab. Kebumen, Banprov, APBN..."
                   className="w-full min-h-touch h-10 px-3 rounded-xl border border-slate-200 bg-white text-xs font-bold focus:border-emerald-500 outline-none"
                 />
               </div>
@@ -758,7 +935,7 @@ export function MonevFormTab({
               </div>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
               <div className="relative" ref={kttInputRef}>
                 <label className="block text-xs font-sans font-bold uppercase tracking-wider text-slate-600 mb-1 flex items-center justify-between">
                   <span>Nama Kelompok (KTT) <span className="text-red-500">*</span></span>
@@ -805,6 +982,19 @@ export function MonevFormTab({
 
               <div>
                 <label className="block text-xs font-sans font-bold uppercase tracking-wider text-slate-600 mb-1">
+                  Nama Ketua Kelompok
+                </label>
+                <input
+                  type="text"
+                  value={formNamaKetua}
+                  onChange={(e) => setFormNamaKetua(e.target.value)}
+                  placeholder="Nama ketua kelompok..."
+                  className="w-full min-h-touch h-10 px-3 rounded-xl border border-slate-200 bg-white text-xs font-bold focus:border-emerald-500 outline-none"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-sans font-bold uppercase tracking-wider text-slate-600 mb-1">
                   Komoditas Ruminansia <span className="text-red-500">*</span>
                 </label>
                 <select
@@ -820,7 +1010,7 @@ export function MonevFormTab({
 
               <div>
                 <label className="block text-xs font-sans font-bold uppercase tracking-wider text-slate-600 mb-1">
-                  Waktu Pelaksanaan Monev <span className="text-red-500">*</span>
+                  Waktu Pelaksanaan Monev / Kondisi Tahun <span className="text-red-500">*</span>
                 </label>
                 <input
                   type="date"
@@ -873,7 +1063,7 @@ export function MonevFormTab({
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <KondisiSection nomor="1" title="Jumlah Ternak Awal Total (a)" total={kalkulasi.a} totalLabel="Total Awal">
                 <BarisTernak
-                  label="Awal"
+                  label="Ternak Awal"
                   jantan={formKondisi.awalJantan}
                   betina={formKondisi.awalBetina}
                   onJantan={(v: number) => updateKondisi('awalJantan', v)}
@@ -881,44 +1071,53 @@ export function MonevFormTab({
                 />
               </KondisiSection>
 
-              <KondisiSection nomor="2" title="Kematian Ternak Pokok (b)" total={kalkulasi.b} totalLabel="Total Mati">
-                <div className="space-y-3">
-                  <BarisTernak
-                    label="Mati Bangkai"
-                    showBA
-                    jantan={formKondisi.matiBangkaiJantan}
-                    betina={formKondisi.matiBangkaiBetina}
-                    ba={formKondisi.matiBangkaiBA}
-                    baPdf={formKondisi.matiBangkaiBAPdf}
-                    baPdfName={formKondisi.matiBangkaiBAName}
-                    onJantan={(v: number) => updateKondisi('matiBangkaiJantan', v)}
-                    onBetina={(v: number) => updateKondisi('matiBangkaiBetina', v)}
-                    onBA={(v) => updateKondisi('matiBangkaiBA', v)}
-                    onUploadBAPdf={(e) => handlePdfUploadGeneric(e, 'matiBangkaiBAPdf', 'matiBangkaiBAName')}
-                    onRemoveBAPdf={() => removePdfGeneric('matiBangkaiBAPdf', 'matiBangkaiBAName')}
-                  />
-                  <div className="pt-2 border-t border-slate-100">
-                    <BarisTernak
-                      label="Mati Potong Paksa"
-                      showBA
-                      jantan={formKondisi.matiPotongJantan}
-                      betina={formKondisi.matiPotongBetina}
-                      ba={formKondisi.matiPotongBA}
-                      baPdf={formKondisi.matiPotongBAPdf}
-                      baPdfName={formKondisi.matiPotongBAName}
-                      onJantan={(v: number) => updateKondisi('matiPotongJantan', v)}
-                      onBetina={(v: number) => updateKondisi('matiPotongBetina', v)}
-                      onBA={(v) => updateKondisi('matiPotongBA', v)}
-                      onUploadBAPdf={(e) => handlePdfUploadGeneric(e, 'matiPotongBAPdf', 'matiPotongBAName')}
-                      onRemoveBAPdf={() => removePdfGeneric('matiPotongBAPdf', 'matiPotongBAName')}
-                    />
-                  </div>
-                </div>
+              <KondisiSection
+                nomor="2"
+                title="Pokok Mati (Mati Bangkai)"
+                total={(formKondisi.matiBangkaiJantan || 0) + (formKondisi.matiBangkaiBetina || 0)}
+                totalLabel="Total Pokok Mati"
+              >
+                <BarisTernak
+                  label="Pokok Mati"
+                  showBA
+                  jantan={formKondisi.matiBangkaiJantan}
+                  betina={formKondisi.matiBangkaiBetina}
+                  ba={formKondisi.matiBangkaiBA}
+                  baPdf={formKondisi.matiBangkaiBAPdf}
+                  baPdfName={formKondisi.matiBangkaiBAName}
+                  onJantan={(v: number) => updateKondisi('matiBangkaiJantan', v)}
+                  onBetina={(v: number) => updateKondisi('matiBangkaiBetina', v)}
+                  onBA={(v) => updateKondisi('matiBangkaiBA', v)}
+                  onUploadBAPdf={(e) => handlePdfUploadGeneric(e, 'matiBangkaiBAPdf', 'matiBangkaiBAName')}
+                  onRemoveBAPdf={() => removePdfGeneric('matiBangkaiBAPdf', 'matiBangkaiBAName')}
+                />
               </KondisiSection>
 
-              <KondisiSection nomor="3" title="Penjualan Ternak Pokok (c)" total={kalkulasi.c} totalLabel="Total Dijual">
+              <KondisiSection
+                nomor="3"
+                title="Pokok Potong Paksa"
+                total={(formKondisi.matiPotongJantan || 0) + (formKondisi.matiPotongBetina || 0)}
+                totalLabel="Total Potong Paksa"
+              >
                 <BarisTernak
-                  label="Jual Ternak Pokok"
+                  label="Pokok Potong Paksa"
+                  showBA
+                  jantan={formKondisi.matiPotongJantan}
+                  betina={formKondisi.matiPotongBetina}
+                  ba={formKondisi.matiPotongBA}
+                  baPdf={formKondisi.matiPotongBAPdf}
+                  baPdfName={formKondisi.matiPotongBAName}
+                  onJantan={(v: number) => updateKondisi('matiPotongJantan', v)}
+                  onBetina={(v: number) => updateKondisi('matiPotongBetina', v)}
+                  onBA={(v) => updateKondisi('matiPotongBA', v)}
+                  onUploadBAPdf={(e) => handlePdfUploadGeneric(e, 'matiPotongBAPdf', 'matiPotongBAName')}
+                  onRemoveBAPdf={() => removePdfGeneric('matiPotongBAPdf', 'matiPotongBAName')}
+                />
+              </KondisiSection>
+
+              <KondisiSection nomor="4" title="Pokok Dijual (c)" total={kalkulasi.c} totalLabel="Total Pokok Dijual">
+                <BarisTernak
+                  label="Pokok Dijual"
                   showBA
                   jantan={formKondisi.jualJantan}
                   betina={formKondisi.jualBetina}
@@ -933,9 +1132,9 @@ export function MonevFormTab({
                 />
               </KondisiSection>
 
-              <KondisiSection nomor="4" title="Pembelian Ternak Pokok (d)" total={kalkulasi.d} totalLabel="Total Dibeli">
+              <KondisiSection nomor="5" title="Beli Pengganti (d)" total={kalkulasi.d} totalLabel="Total Beli Pengganti">
                 <BarisTernak
-                  label="Beli Ternak Pokok"
+                  label="Beli Pengganti"
                   jantan={formKondisi.beliJantan}
                   betina={formKondisi.beliBetina}
                   onJantan={(v: number) => updateKondisi('beliJantan', v)}
@@ -943,10 +1142,10 @@ export function MonevFormTab({
                 />
               </KondisiSection>
 
-              <KondisiSection nomor="6" title="Kelahiran Anak (f)" total={kalkulasi.f} totalLabel="Total Lahir">
+              <KondisiSection nomor="6" title="Anak Lahir (f)" total={kalkulasi.f} totalLabel="Total Anak Lahir">
                 <div className="space-y-3">
                   <BarisTernak
-                    label="Lahir Anak"
+                    label="Anak Lahir"
                     disabled={(formKondisi.lahirBelumTahu || 0) > 0}
                     jantan={formKondisi.lahirJantan}
                     betina={formKondisi.lahirBetina}
@@ -983,16 +1182,16 @@ export function MonevFormTab({
                       }}
                     />
                     <p className="text-[11px] text-slate-500 mt-1">
-                      💡 Jika diisi, input Jantan &amp; Betina otomatis dikunci ke 0. Nilai ini otomatis ditambahkan ke Total Lahir (f).
+                      💡 Jika diisi, input Jantan &amp; Betina otomatis dikunci ke 0. Nilai ini otomatis ditambahkan ke Total Anak Lahir (f).
                     </p>
                   </div>
                 </div>
               </KondisiSection>
 
-              <KondisiSection nomor="7" title="Kematian Anak (g)" total={kalkulasi.g} totalLabel="Total Mati Anak">
+              <KondisiSection nomor="7" title="Anak Mati (g)" total={kalkulasi.g} totalLabel="Total Anak Mati">
                 <div className="space-y-3">
                   <BarisTernak
-                    label="Mati Anak"
+                    label="Anak Mati"
                     disabled={(formKondisi.matiAnakBelumTahu || 0) > 0}
                     jantan={formKondisi.matiAnakJantan}
                     betina={formKondisi.matiAnakBetina}
@@ -1029,16 +1228,16 @@ export function MonevFormTab({
                       }}
                     />
                     <p className="text-[11px] text-slate-500 mt-1">
-                      💡 Jika diisi, input Jantan &amp; Betina otomatis dikunci ke 0. Nilai ini otomatis ditambahkan ke Total Mati Anak (g).
+                      💡 Jika diisi, input Jantan &amp; Betina otomatis dikunci ke 0. Nilai ini otomatis ditambahkan ke Total Anak Mati (g).
                     </p>
                   </div>
                 </div>
               </KondisiSection>
 
-              <KondisiSection nomor="8" title="Penjualan Anak (h)" total={kalkulasi.h} totalLabel="Total Jual Anak">
+              <KondisiSection nomor="8" title="Anak Dijual (h)" total={kalkulasi.h} totalLabel="Total Anak Dijual">
                 <div className="space-y-3">
                   <BarisTernak
-                    label="Jual Anak"
+                    label="Anak Dijual"
                     disabled={(formKondisi.jualAnakBelumTahu || 0) > 0}
                     jantan={formKondisi.jualAnakJantan}
                     betina={formKondisi.jualAnakBetina}
@@ -1075,26 +1274,31 @@ export function MonevFormTab({
                       }}
                     />
                     <p className="text-[11px] text-slate-500 mt-1">
-                      💡 Jika diisi, input Jantan &amp; Betina otomatis dikunci ke 0. Nilai ini otomatis ditambahkan ke Total Jual Anak (h).
+                      💡 Jika diisi, input Jantan &amp; Betina otomatis dikunci ke 0. Nilai ini otomatis ditambahkan ke Total Anak Dijual (h).
                     </p>
                   </div>
                 </div>
               </KondisiSection>
             </div>
 
-            {/* Total Summary Callout Ruminansia */}
-            <div className="p-5 rounded-2xl border border-emerald-200 bg-emerald-50/50 flex flex-col sm:flex-row items-center justify-between gap-4">
-              <div>
-                <span className="text-xs font-sans font-bold uppercase tracking-wider text-emerald-800 block">
-                  Perhitungan Otomatis Ternak Ruminansia
+            {/* Total Summary Callout Ruminansia: Kondisi Terkini / Saat Ini */}
+            <div className="p-5 rounded-2xl border-2 border-emerald-300 bg-emerald-50/70 flex flex-col md:flex-row items-center justify-between gap-4 shadow-xs">
+              <div className="space-y-1">
+                <span className="text-xs font-sans font-extrabold uppercase tracking-wider text-emerald-900 flex items-center gap-1.5">
+                  <CheckCircle2 size={16} className="text-emerald-700" />
+                  <span>Kondisi Terkini Ternak (Sesuai Tabel Rekapitulasi)</span>
                 </span>
-                <p className="text-xs sm:text-sm text-slate-700 font-medium">
-                  5. Sisa Pokok (e = a - b - c + d): <span className="font-sans font-bold text-slate-900">{kalkulasi.e} Ekor</span> · Kelahiran (f): <span className="font-sans font-bold text-slate-900">{kalkulasi.f} Ekor</span>
+                <p className="text-xs text-slate-600 font-medium">
+                  Sisa Pokok (e): <span className="font-bold text-slate-900">{kalkulasi.e} Ekor</span> · Anak Lahir: <span className="font-bold text-slate-900">{kalkulasi.f} Ekor</span> · Anak Mati: <span className="font-bold text-slate-900">{kalkulasi.g} Ekor</span> · Anak Dijual: <span className="font-bold text-slate-900">{kalkulasi.h} Ekor</span>
                 </p>
               </div>
-              <div className="text-right">
-                <span className="text-xs text-slate-500 font-sans block">9. Total Aset Ternak Kelompok (i = e + f - g - h)</span>
-                <span className="font-sans font-extrabold text-2xl text-emerald-700">{kalkulasi.i} Ekor</span>
+              <div className="bg-white px-5 py-3 rounded-xl border border-emerald-300 shadow-2xs text-center md:text-right shrink-0">
+                <span className="text-[11px] font-bold text-emerald-800 uppercase tracking-wider block">
+                  Kondisi Saat Ini
+                </span>
+                <span className="font-sans font-black text-3xl text-emerald-800">
+                  {kalkulasi.i} <span className="text-sm font-bold text-slate-500">Ekor</span>
+                </span>
               </div>
             </div>
           </div>
@@ -1345,6 +1549,7 @@ export function MonevFormTab({
                   {
                     id: editingId || 'temp',
                     tahun: formTahun,
+                    sumberDana: formSumberDana,
                     namaKetua: formNamaKetua,
                     kec: formKec,
                     desa: formDesa,
@@ -1382,6 +1587,201 @@ export function MonevFormTab({
             </button>
           </div>
         </form>
+      </div>
+
+      {/* ── 4. TABEL REKAPITULASI KONDISI TERKINI TERNAK ── */}
+      <div className="bg-white border border-slate-200 rounded-2xl shadow-xs overflow-hidden">
+        <div className="p-4 sm:p-6 border-b border-slate-100 flex flex-wrap items-center justify-between gap-3 bg-white">
+          <div>
+            <h3 className="font-bold text-base sm:text-lg text-slate-900 flex items-center gap-2">
+              <span>Tabel Rekapitulasi Kondisi Terkini Ternak</span>
+              <span className="bg-emerald-50 text-emerald-800 border border-emerald-200 text-xs font-bold px-2.5 py-0.5 rounded-full">
+                {tahunBantuanFilter} · {filterKecamatan}
+              </span>
+              <span className="bg-slate-100 text-slate-700 border border-slate-200 text-xs font-bold px-2.5 py-0.5 rounded-full">
+                {dbLapanganTabel.length} Kelompok
+              </span>
+            </h3>
+            <p className="text-xs text-slate-500 mt-0.5">
+              Rekapitulasi kondisi terkini ternak mengikuti data monitoring &amp; evaluasi di atas
+            </p>
+          </div>
+
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={downloadExcelKondisiTerkini}
+              className="min-h-touch h-9 px-3.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold flex items-center gap-1.5 transition-colors cursor-pointer shadow-xs"
+              title="Unduh Tabel Rekapitulasi Kondisi Terkini Ternak format Excel"
+            >
+              <Download size={14} strokeWidth={2.5} />
+              <span>Export Excel Tabel Ini</span>
+            </button>
+          </div>
+        </div>
+
+        <div className="overflow-x-auto w-full">
+          <table className="w-full text-xs sm:text-sm text-left whitespace-nowrap border-collapse">
+            <thead>
+              {/* Baris Header Atas */}
+              <tr className="border-b border-slate-300 text-center font-bold text-xs uppercase tracking-wider">
+                <th
+                  rowSpan={2}
+                  className="px-3 py-3 text-center border-r border-b border-slate-300 bg-slate-100 text-slate-800 w-12 align-middle"
+                >
+                  NO
+                </th>
+                <th
+                  rowSpan={2}
+                  className="px-4 py-3 text-left border-r border-b border-slate-300 bg-slate-100 text-slate-800 min-w-[200px] align-middle"
+                >
+                  NAMA KTT
+                </th>
+                <th
+                  colSpan={8}
+                  className="px-4 py-2.5 text-center border-r border-b border-slate-300 bg-[#c3e6cb] text-emerald-950 font-extrabold text-sm tracking-wide"
+                >
+                  Kondisi Terkini Ternak
+                </th>
+                <th
+                  rowSpan={2}
+                  className="px-4 py-3 text-center border-b border-slate-300 bg-[#fff3cd] text-amber-950 font-extrabold text-xs tracking-wider align-middle min-w-[140px]"
+                >
+                  KONDISI TAHUN
+                </th>
+              </tr>
+              {/* Baris Subheader (Di Bawah 'Kondisi Terkini Ternak') */}
+              <tr className="border-b border-slate-300 text-center font-bold text-xs">
+                <th className="px-3 py-2.5 border-r border-b border-slate-300 bg-[#e2f0d9] text-slate-800 text-[11px]">
+                  Anak Lahir
+                </th>
+                <th className="px-3 py-2.5 border-r border-b border-slate-300 bg-[#e2f0d9] text-slate-800 text-[11px]">
+                  Anak Mati
+                </th>
+                <th className="px-3 py-2.5 border-r border-b border-slate-300 bg-[#e2f0d9] text-slate-800 text-[11px]">
+                  Anak Dijual
+                </th>
+                <th className="px-3 py-2.5 border-r border-b border-slate-300 bg-[#e2f0d9] text-slate-800 text-[11px]">
+                  Pokok Mati
+                </th>
+                <th className="px-3 py-2.5 border-r border-b border-slate-300 bg-[#e2f0d9] text-slate-800 text-[11px]">
+                  Pokok Potong Paksa
+                </th>
+                <th className="px-3 py-2.5 border-r border-b border-slate-300 bg-[#e2f0d9] text-slate-800 text-[11px]">
+                  Pokok Dijual
+                </th>
+                <th className="px-3 py-2.5 border-r border-b border-slate-300 bg-[#e2f0d9] text-slate-800 text-[11px]">
+                  Beli Pengganti
+                </th>
+                <th className="px-3 py-2.5 border-r border-b border-slate-300 bg-[#b1dfbb] text-emerald-950 font-extrabold text-[11px]">
+                  Kondisi Saat Ini
+                </th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-slate-200">
+              {dbLapanganTabel.map((d, idx) => {
+                const k = d.kondisi;
+                const h = hitungKondisi(k);
+                const anakLahir = (k.lahirJantan || 0) + (k.lahirBetina || 0) + (k.lahirBelumTahu || 0);
+                const anakMati = (k.matiAnakJantan || 0) + (k.matiAnakBetina || 0) + (k.matiAnakBelumTahu || 0);
+                const anakDijual = (k.jualAnakJantan || 0) + (k.jualAnakBetina || 0) + (k.jualAnakBelumTahu || 0);
+                const pokokMati = (k.matiBangkaiJantan || 0) + (k.matiBangkaiBetina || 0);
+                const pokokPotongPaksa = (k.matiPotongJantan || 0) + (k.matiPotongBetina || 0);
+                const pokokDijual = (k.jualJantan || 0) + (k.jualBetina || 0);
+                const beliPengganti = (k.beliJantan || 0) + (k.beliBetina || 0);
+                const kondisiSaatIni = h.i;
+                const kondisiTahun = (d.waktuMonev || (d.tahun ? `TAHUN ${d.tahun}` : '-')).toUpperCase();
+
+                return (
+                  <tr key={d.id} className="hover:bg-slate-50/80 transition-colors border-b border-slate-200">
+                    <td className="px-3 py-2.5 text-center font-bold text-slate-700 text-xs border-r border-slate-200">
+                      {idx + 1}
+                    </td>
+                    <td className="px-4 py-2.5 font-bold text-slate-900 border-r border-slate-200">
+                      <div>{d.namaKtt}</div>
+                      {d.desa && d.kec && (
+                        <span className="text-[10px] text-slate-400 font-normal block">
+                          Desa {d.desa}, Kec. {d.kec}
+                        </span>
+                      )}
+                    </td>
+                    <td className="px-3 py-2.5 text-center font-semibold text-slate-700 border-r border-slate-200">
+                      {anakLahir}
+                    </td>
+                    <td className="px-3 py-2.5 text-center font-semibold text-slate-700 border-r border-slate-200">
+                      {anakMati}
+                    </td>
+                    <td className="px-3 py-2.5 text-center font-semibold text-slate-700 border-r border-slate-200">
+                      {anakDijual}
+                    </td>
+                    <td className="px-3 py-2.5 text-center font-semibold text-slate-700 border-r border-slate-200">
+                      {pokokMati}
+                    </td>
+                    <td className="px-3 py-2.5 text-center font-semibold text-slate-700 border-r border-slate-200">
+                      {pokokPotongPaksa}
+                    </td>
+                    <td className="px-3 py-2.5 text-center font-semibold text-slate-700 border-r border-slate-200">
+                      {pokokDijual}
+                    </td>
+                    <td className="px-3 py-2.5 text-center font-semibold text-slate-700 border-r border-slate-200">
+                      {beliPengganti}
+                    </td>
+                    <td className="px-3 py-2.5 text-center font-black text-emerald-950 bg-[#d4edda]/70 border-r border-slate-200">
+                      {kondisiSaatIni}
+                    </td>
+                    <td className="px-4 py-2.5 text-center font-bold text-slate-800 text-xs bg-amber-50/40">
+                      {kondisiTahun}
+                    </td>
+                  </tr>
+                );
+              })}
+
+              {dbLapanganTabel.length === 0 && (
+                <tr>
+                  <td colSpan={11} className="px-5 py-10 text-center text-slate-400 font-medium">
+                    Belum ada data terekam untuk filter {tahunBantuanFilter} · {filterKecamatan}.
+                  </td>
+                </tr>
+              )}
+            </tbody>
+            {dbLapanganTabel.length > 0 && (
+              <tfoot className="bg-slate-100 font-bold border-t-2 border-slate-300 text-xs">
+                <tr className="divide-x divide-slate-200 border-b border-slate-300">
+                  <td colSpan={2} className="px-4 py-3 text-center font-black uppercase text-slate-900 tracking-wider">
+                    TOTAL
+                  </td>
+                  <td className="px-3 py-3 text-center font-bold text-slate-800">
+                    {rekapTotals.anakLahir}
+                  </td>
+                  <td className="px-3 py-3 text-center font-bold text-slate-800">
+                    {rekapTotals.anakMati}
+                  </td>
+                  <td className="px-3 py-3 text-center font-bold text-slate-800">
+                    {rekapTotals.anakDijual}
+                  </td>
+                  <td className="px-3 py-3 text-center font-bold text-slate-800">
+                    {rekapTotals.pokokMati}
+                  </td>
+                  <td className="px-3 py-3 text-center font-bold text-slate-800">
+                    {rekapTotals.pokokPotongPaksa}
+                  </td>
+                  <td className="px-3 py-3 text-center font-bold text-slate-800">
+                    {rekapTotals.pokokDijual}
+                  </td>
+                  <td className="px-3 py-3 text-center font-bold text-slate-800">
+                    {rekapTotals.beliPengganti}
+                  </td>
+                  <td className="px-3 py-3 text-center font-black text-emerald-950 bg-[#c3e6cb]">
+                    {rekapTotals.kondisiSaatIni}
+                  </td>
+                  <td className="px-4 py-3 text-center font-bold text-slate-400 bg-amber-50/40">
+                    -
+                  </td>
+                </tr>
+              </tfoot>
+            )}
+          </table>
+        </div>
       </div>
     </div>
   );

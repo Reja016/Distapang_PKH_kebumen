@@ -527,7 +527,7 @@ export default function KegiatanKTTPage() {
                 <span className="text-slate-300">/</span>
                 <span className="text-xs font-bold text-emerald-700 whitespace-nowrap">Kegiatan KTT</span>
               </div>
-              <h1 className="text-base sm:text-xl font-bold text-slate-900 tracking-tight leading-tight truncate">
+              <h1 className="text-sm sm:text-xl font-bold text-slate-900 tracking-tight leading-tight line-clamp-2 sm:line-clamp-none">
                 Log Aktivitas &amp; Pembinaan KTT
               </h1>
             </div>
@@ -548,7 +548,7 @@ export default function KegiatanKTTPage() {
       </header>
 
       {/* ── MAIN CONTENT ── */}
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-10 space-y-8">
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-10 space-y-6 sm:space-y-8">
         {/* Form Catat Kegiatan Inline */}
         <KegiatanForm
           canCreate={canCreate}
@@ -571,60 +571,60 @@ export default function KegiatanKTTPage() {
         />
 
         {/* KPI Metrics */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-          <div className="p-5 rounded-2xl border border-slate-200 bg-white shadow-sm flex items-center gap-4">
-            <div className="w-12 h-12 rounded-2xl bg-emerald-600 text-white flex items-center justify-center shrink-0 shadow-xs">
-              <FileText size={22} strokeWidth={2.5} />
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+          <div className="p-3.5 sm:p-5 rounded-2xl border border-slate-200 bg-white shadow-sm flex items-center gap-3.5 sm:gap-4">
+            <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl sm:rounded-2xl bg-emerald-600 text-white flex items-center justify-center shrink-0 shadow-xs">
+              <FileText className="w-5 h-5 sm:w-[22px] sm:h-[22px]" strokeWidth={2.5} />
             </div>
-            <div>
-              <p className="text-xs font-sans font-semibold uppercase tracking-wider text-slate-500 mb-0.5">
+            <div className="min-w-0">
+              <p className="text-xs font-sans font-semibold uppercase tracking-wider text-slate-500 mb-0.5 truncate">
                 Total Kegiatan
               </p>
-              <p className="font-sans text-2xl sm:text-3xl font-extrabold text-slate-900">
+              <p className="font-sans text-xl sm:text-2xl lg:text-3xl font-extrabold text-slate-900">
                 {listKegiatan.length} <span className="text-xs font-semibold text-slate-400">Aktivitas</span>
               </p>
             </div>
           </div>
 
-          <div className="p-5 rounded-2xl border border-slate-200 bg-white shadow-sm flex items-center gap-4">
-            <div className="w-12 h-12 rounded-2xl bg-emerald-600 text-white flex items-center justify-center shrink-0 shadow-xs">
-              <Users size={22} strokeWidth={2.5} />
+          <div className="p-3.5 sm:p-5 rounded-2xl border border-slate-200 bg-white shadow-sm flex items-center gap-3.5 sm:gap-4">
+            <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl sm:rounded-2xl bg-emerald-600 text-white flex items-center justify-center shrink-0 shadow-xs">
+              <Users className="w-5 h-5 sm:w-[22px] sm:h-[22px]" strokeWidth={2.5} />
             </div>
-            <div>
-              <p className="text-xs font-sans font-semibold uppercase tracking-wider text-slate-500 mb-0.5">
+            <div className="min-w-0">
+              <p className="text-xs font-sans font-semibold uppercase tracking-wider text-slate-500 mb-0.5 truncate">
                 KTT Terdampingi
               </p>
-              <p className="font-sans text-2xl sm:text-3xl font-extrabold text-emerald-700">
+              <p className="font-sans text-xl sm:text-2xl lg:text-3xl font-extrabold text-emerald-700">
                 {uniqueKttCount} <span className="text-xs font-semibold text-slate-400">Kelompok</span>
               </p>
             </div>
           </div>
 
-          <div className="p-5 rounded-2xl border border-slate-200 bg-white shadow-sm flex items-center gap-4">
-            <div className="w-12 h-12 rounded-2xl bg-emerald-600 text-white flex items-center justify-center shrink-0 shadow-xs">
-              <MapPin size={22} strokeWidth={2.5} />
+          <div className="p-3.5 sm:p-5 rounded-2xl border border-slate-200 bg-white shadow-sm flex items-center gap-3.5 sm:gap-4">
+            <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl sm:rounded-2xl bg-emerald-600 text-white flex items-center justify-center shrink-0 shadow-xs">
+              <MapPin className="w-5 h-5 sm:w-[22px] sm:h-[22px]" strokeWidth={2.5} />
             </div>
-            <div>
-              <p className="text-xs font-sans font-semibold uppercase tracking-wider text-slate-500 mb-0.5">
+            <div className="min-w-0">
+              <p className="text-xs font-sans font-semibold uppercase tracking-wider text-slate-500 mb-0.5 truncate">
                 Terverifikasi GPS
               </p>
-              <p className="font-sans text-2xl sm:text-3xl font-extrabold text-slate-900">
+              <p className="font-sans text-xl sm:text-2xl lg:text-3xl font-extrabold text-slate-900">
                 {listKegiatan.filter((k) => k.lat).length} <span className="text-xs font-semibold text-slate-400">Lokasi</span>
               </p>
             </div>
           </div>
 
-          <div className="p-5 rounded-2xl border border-slate-200 bg-white shadow-sm flex items-center gap-4">
-            <div className="w-12 h-12 rounded-2xl bg-emerald-600 text-white flex items-center justify-center shrink-0 shadow-xs">
-              <Sparkles size={22} strokeWidth={2.5} />
+          <div className="p-3.5 sm:p-5 rounded-2xl border border-slate-200 bg-white shadow-sm flex items-center gap-3.5 sm:gap-4">
+            <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl sm:rounded-2xl bg-emerald-600 text-white flex items-center justify-center shrink-0 shadow-xs">
+              <Sparkles className="w-5 h-5 sm:w-[22px] sm:h-[22px]" strokeWidth={2.5} />
             </div>
-            <div>
-              <p className="text-xs font-sans font-semibold uppercase tracking-wider text-slate-500 mb-0.5">
+            <div className="min-w-0">
+              <p className="text-xs font-sans font-semibold uppercase tracking-wider text-slate-500 mb-0.5 truncate">
                 Status Sistem
               </p>
-              <p className="font-sans text-base sm:text-lg font-bold text-emerald-800 flex items-center gap-1.5">
-                <CheckCircle2 size={18} strokeWidth={2.5} className="text-emerald-600" />
-                <span>Terhubung Realtime</span>
+              <p className="font-sans text-sm sm:text-base lg:text-lg font-bold text-emerald-800 flex items-center gap-1.5 truncate">
+                <CheckCircle2 size={16} strokeWidth={2.5} className="text-emerald-600 shrink-0" />
+                <span className="truncate">Terhubung Realtime</span>
               </p>
             </div>
           </div>

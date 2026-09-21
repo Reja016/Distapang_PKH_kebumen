@@ -59,6 +59,7 @@ export default function MonevKTT() {
 
   // Form State
   const [formTahun, setFormTahun] = useState(FORM_KOSONG.tahun);
+  const [formSumberDana, setFormSumberDana] = useState(FORM_KOSONG.sumberDana || '');
   const [formKec, setFormKec] = useState(FORM_KOSONG.kec);
   const [formDesa, setFormDesa] = useState(FORM_KOSONG.desa);
   const [formKtt, setFormKtt] = useState(FORM_KOSONG.ktt);
@@ -345,8 +346,14 @@ export default function MonevKTT() {
   }, [dbLapanganUntukPeta, leafletLoaded, activeTab]);
 
   const handleDownloadDashboard = () => {
-    if (dbLapangan.length === 0) return alert('Belum ada data lapangan untuk diekspor!');
-    const rows = dbLapangan.map((d, i) => {
+    const dataToExport = (tahunBantuanFilter && tahunBantuanFilter !== 'Semua Tahun')
+      ? dbLapanganFiltered
+      : dbLapangan;
+
+    if (dataToExport.length === 0) return alert('Belum ada data lapangan untuk diekspor!');
+
+    // ── TABEL 1: DATA LENGKAP MONITORING & EVALUASI ──
+    const rows = dataToExport.map((d, i) => {
       const h = hitungKondisi(d.kondisi);
       const baMatiAda = d.kondisi.matiBangkaiBA === 'Ada';
       const baJualAda = d.kondisi.jualBA === 'Ada';
@@ -392,10 +399,94 @@ export default function MonevKTT() {
       };
     });
 
+    // ── TABEL 2: REKAPITULASI KONDISI TERKINI TERNAK (MENGIKUTI TABEL DI ATAS) ──
+    const rowsTable2: any[] = [];
+    let totLahir = 0;
+    let totMatiAnak = 0;
+    let totJualAnak = 0;
+    let totPokokMati = 0;
+    let totPotongPaksa = 0;
+    let totPokokJual = 0;
+    let totBeli = 0;
+    let totSaatIni = 0;
+
+    dataToExport.forEach((d, i) => {
+      const k = d.kondisi;
+      const h = hitungKondisi(k);
+      const anakLahir = (k.lahirJantan || 0) + (k.lahirBetina || 0) + (k.lahirBelumTahu || 0);
+      const anakMati = (k.matiAnakJantan || 0) + (k.matiAnakBetina || 0) + (k.matiAnakBelumTahu || 0);
+      const anakDijual = (k.jualAnakJantan || 0) + (k.jualAnakBetina || 0) + (k.jualAnakBelumTahu || 0);
+      const pokokMati = (k.matiBangkaiJantan || 0) + (k.matiBangkaiBetina || 0);
+      const pokokPotongPaksa = (k.matiPotongJantan || 0) + (k.matiPotongBetina || 0);
+      const pokokDijual = (k.jualJantan || 0) + (k.jualBetina || 0);
+      const beliPengganti = (k.beliJantan || 0) + (k.beliBetina || 0);
+      const kondisiSaatIni = h.i;
+      const kondisiTahun = (d.waktuMonev || (d.tahun ? `TAHUN ${d.tahun}` : '-')).toUpperCase();
+
+      totLahir += anakLahir;
+      totMatiAnak += anakMati;
+      totJualAnak += anakDijual;
+      totPokokMati += pokokMati;
+      totPotongPaksa += pokokPotongPaksa;
+      totPokokJual += pokokDijual;
+      totBeli += beliPengganti;
+      totSaatIni += kondisiSaatIni;
+
+      rowsTable2.push([
+        i + 1,
+        d.namaKtt,
+        anakLahir,
+        anakMati,
+        anakDijual,
+        pokokMati,
+        pokokPotongPaksa,
+        pokokDijual,
+        beliPengganti,
+        kondisiSaatIni,
+        kondisiTahun,
+      ]);
+    });
+
     const ws = XLSX.utils.json_to_sheet(rows);
+
+    // Sisipkan Tabel Rekapitulasi Kondisi Terkini tepat di bawah tabel pertama
+    const startRowTable2 = rows.length + 4;
+    const table2Aoa = [
+      ['TABEL REKAPITULASI KONDISI TERKINI TERNAK'],
+      ['NO', 'NAMA KTT', 'Anak Lahir', 'Anak Mati', 'Anak Dijual', 'Pokok Mati', 'Pokok Potong Paksa', 'Pokok Dijual', 'Beli Pengganti', 'Kondisi Saat Ini', 'KONDISI TAHUN'],
+      ...rowsTable2,
+      ['TOTAL', '', totLahir, totMatiAnak, totJualAnak, totPokokMati, totPotongPaksa, totPokokJual, totBeli, totSaatIni, '']
+    ];
+
+    XLSX.utils.sheet_add_aoa(ws, table2Aoa, { origin: `A${startRowTable2}` });
+
+    // Tambahkan juga sheet terpisah untuk kemudahan analisis pengguna
+    const ws2 = XLSX.utils.aoa_to_sheet([
+      ['TABEL REKAPITULASI KONDISI TERKINI TERNAK'],
+      ['NO', 'NAMA KTT', 'Anak Lahir', 'Anak Mati', 'Anak Dijual', 'Pokok Mati', 'Pokok Potong Paksa', 'Pokok Dijual', 'Beli Pengganti', 'Kondisi Saat Ini', 'KONDISI TAHUN'],
+      ...rowsTable2,
+      ['TOTAL', '', totLahir, totMatiAnak, totJualAnak, totPokokMati, totPotongPaksa, totPokokJual, totBeli, totSaatIni, '']
+    ]);
+    ws2['!cols'] = [
+      { wch: 6 },
+      { wch: 30 },
+      { wch: 14 },
+      { wch: 14 },
+      { wch: 14 },
+      { wch: 14 },
+      { wch: 18 },
+      { wch: 14 },
+      { wch: 16 },
+      { wch: 16 },
+      { wch: 22 },
+    ];
+
     const wb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, ws, 'Monev_KTT');
-    XLSX.writeFile(wb, `Laporan_Monev_KTT_${new Date().toISOString().split('T')[0]}.xlsx`);
+    XLSX.utils.book_append_sheet(wb, ws2, 'Kondisi_Terkini_Ternak');
+
+    const yearSuffix = (tahunBantuanFilter && tahunBantuanFilter !== 'Semua Tahun') ? `_${tahunBantuanFilter}` : '';
+    XLSX.writeFile(wb, `Laporan_Monev_KTT${yearSuffix}_${new Date().toISOString().split('T')[0]}.xlsx`);
   };
 
   const handleGetLocation = () => {
@@ -489,6 +580,7 @@ export default function MonevKTT() {
   const resetForm = () => {
     setEditingId(null);
     setFormTahun(tahunBantuanFilter === 'Semua Tahun' ? '2026' : tahunBantuanFilter);
+    setFormSumberDana(FORM_KOSONG.sumberDana || '');
     setFormKec(FORM_KOSONG.kec);
     setFormDesa(FORM_KOSONG.desa);
     setFormKtt(FORM_KOSONG.ktt);
@@ -522,6 +614,7 @@ export default function MonevKTT() {
     const payload = {
       id: finalId,
       tahun: formTahun,
+      sumberDana: formSumberDana,
       kec: formKec,
       desa: formDesa,
       namaKtt: formKtt,
@@ -533,6 +626,7 @@ export default function MonevKTT() {
       waktuMonev: formWaktuMonev,
       kondisi: {
         ...formKondisi,
+        sumberDana: formSumberDana,
         namaKetua: formNamaKetua,
         photos: formPhotos,
         dokumenHasilPdf: formKondisi.dokumenHasilPdf,
@@ -584,6 +678,7 @@ export default function MonevKTT() {
     }
     setEditingId(data.id);
     setFormTahun(data.tahun || '2026');
+    setFormSumberDana(data.sumberDana || (data.kondisi as any)?.sumberDana || '');
     setFormKec(data.kec);
     setFormDesa(data.desa);
     setFormKtt(data.namaKtt);
@@ -669,7 +764,7 @@ export default function MonevKTT() {
                 <span className="text-slate-300">/</span>
                 <span className="text-xs font-bold text-emerald-700 whitespace-nowrap">Monev KTT</span>
               </div>
-              <h1 className="text-base sm:text-xl font-bold text-slate-900 tracking-tight leading-tight truncate">
+              <h1 className="text-sm sm:text-xl font-bold text-slate-900 tracking-tight leading-tight line-clamp-2 sm:line-clamp-none">
                 Monitoring &amp; Evaluasi Kelompok Tani Ternak
               </h1>
             </div>
@@ -690,60 +785,60 @@ export default function MonevKTT() {
       </header>
 
       {/* ── MAIN WORKSPACE ── */}
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-10 space-y-8">
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-10 space-y-6 sm:space-y-8">
         {/* KPI Stat Cards (Solid Icon Styling) */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-          <div className="p-5 rounded-2xl border border-slate-200 bg-white shadow-sm flex items-center gap-4">
-            <div className="w-12 h-12 rounded-2xl bg-emerald-600 text-white flex items-center justify-center shrink-0 shadow-xs">
-              <Calendar size={22} strokeWidth={2.5} />
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+          <div className="p-3.5 sm:p-5 rounded-2xl border border-slate-200 bg-white shadow-sm flex items-center gap-3.5 sm:gap-4">
+            <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl sm:rounded-2xl bg-emerald-600 text-white flex items-center justify-center shrink-0 shadow-xs">
+              <Calendar className="w-5 h-5 sm:w-[22px] sm:h-[22px]" strokeWidth={2.5} />
             </div>
-            <div>
-              <p className="text-xs font-sans font-semibold uppercase tracking-wider text-slate-500 mb-0.5">
+            <div className="min-w-0">
+              <p className="text-xs font-sans font-semibold uppercase tracking-wider text-slate-500 mb-0.5 truncate">
                 Kelompok Terpantau
               </p>
-              <p className="font-sans text-2xl sm:text-3xl font-extrabold text-slate-900">
+              <p className="font-sans text-xl sm:text-2xl lg:text-3xl font-extrabold text-slate-900">
                 {dbLapangan.length} <span className="text-xs font-semibold text-slate-400">KTT</span>
               </p>
             </div>
           </div>
 
-          <div className="p-5 rounded-2xl border border-slate-200 bg-white shadow-sm flex items-center gap-4">
-            <div className="w-12 h-12 rounded-2xl bg-emerald-600 text-white flex items-center justify-center shrink-0 shadow-xs">
-              <Layers size={22} strokeWidth={2.5} />
+          <div className="p-3.5 sm:p-5 rounded-2xl border border-slate-200 bg-white shadow-sm flex items-center gap-3.5 sm:gap-4">
+            <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl sm:rounded-2xl bg-emerald-600 text-white flex items-center justify-center shrink-0 shadow-xs">
+              <Layers className="w-5 h-5 sm:w-[22px] sm:h-[22px]" strokeWidth={2.5} />
             </div>
-            <div>
-              <p className="text-xs font-sans font-semibold uppercase tracking-wider text-slate-500 mb-0.5">
+            <div className="min-w-0">
+              <p className="text-xs font-sans font-semibold uppercase tracking-wider text-slate-500 mb-0.5 truncate">
                 Total Aset Ternak
               </p>
-              <p className="font-sans text-2xl sm:text-3xl font-extrabold text-emerald-700">
+              <p className="font-sans text-xl sm:text-2xl lg:text-3xl font-extrabold text-emerald-700">
                 {dbLapangan.reduce((acc, curr) => acc + hitungKondisi(curr.kondisi).i, 0)} <span className="text-xs font-semibold text-slate-400">Ekor</span>
               </p>
             </div>
           </div>
 
-          <div className="p-5 rounded-2xl border border-slate-200 bg-white shadow-sm flex items-center gap-4">
-            <div className="w-12 h-12 rounded-2xl bg-emerald-600 text-white flex items-center justify-center shrink-0 shadow-xs">
-              <MapPin size={22} strokeWidth={2.5} />
+          <div className="p-3.5 sm:p-5 rounded-2xl border border-slate-200 bg-white shadow-sm flex items-center gap-3.5 sm:gap-4">
+            <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl sm:rounded-2xl bg-emerald-600 text-white flex items-center justify-center shrink-0 shadow-xs">
+              <MapPin className="w-5 h-5 sm:w-[22px] sm:h-[22px]" strokeWidth={2.5} />
             </div>
-            <div>
-              <p className="text-xs font-sans font-semibold uppercase tracking-wider text-slate-500 mb-0.5">
+            <div className="min-w-0">
+              <p className="text-xs font-sans font-semibold uppercase tracking-wider text-slate-500 mb-0.5 truncate">
                 Sebaran Kecamatan
               </p>
-              <p className="font-sans text-2xl sm:text-3xl font-extrabold text-slate-900">
+              <p className="font-sans text-xl sm:text-2xl lg:text-3xl font-extrabold text-slate-900">
                 {kecamatanTerpakai.length} <span className="text-xs font-semibold text-slate-400">Wilayah</span>
               </p>
             </div>
           </div>
 
-          <div className="p-5 rounded-2xl border border-slate-200 bg-white shadow-sm flex items-center gap-4">
-            <div className="w-12 h-12 rounded-2xl bg-emerald-600 text-white flex items-center justify-center shrink-0 shadow-xs">
-              <CheckCircle2 size={22} strokeWidth={2.5} />
+          <div className="p-3.5 sm:p-5 rounded-2xl border border-slate-200 bg-white shadow-sm flex items-center gap-3.5 sm:gap-4">
+            <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl sm:rounded-2xl bg-emerald-600 text-white flex items-center justify-center shrink-0 shadow-xs">
+              <CheckCircle2 className="w-5 h-5 sm:w-[22px] sm:h-[22px]" strokeWidth={2.5} />
             </div>
-            <div>
-              <p className="text-xs font-sans font-semibold uppercase tracking-wider text-slate-500 mb-0.5">
+            <div className="min-w-0">
+              <p className="text-xs font-sans font-semibold uppercase tracking-wider text-slate-500 mb-0.5 truncate">
                 Terverifikasi GPS
               </p>
-              <p className="font-sans text-2xl sm:text-3xl font-extrabold text-emerald-700">
+              <p className="font-sans text-xl sm:text-2xl lg:text-3xl font-extrabold text-emerald-700">
                 {dbLapangan.filter((d) => d.lat !== null).length} <span className="text-xs font-semibold text-slate-400">Titik</span>
               </p>
             </div>
@@ -790,6 +885,8 @@ export default function MonevKTT() {
             editingId={editingId}
             formTahun={formTahun}
             setFormTahun={setFormTahun}
+            formSumberDana={formSumberDana}
+            setFormSumberDana={setFormSumberDana}
             formKec={formKec}
             setFormKec={setFormKec}
             formDesa={formDesa}
