@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
 import {
   MapPin,
   Phone,
@@ -8,6 +8,7 @@ import {
   Clock,
   ExternalLink,
   ChevronRight,
+  ChevronDown,
   Globe,
   ShieldCheck,
 } from 'lucide-react';
@@ -75,17 +76,19 @@ export const FOOTER_CONFIG = {
 
 export function LandingFooter() {
   const currentYear = new Date().getFullYear();
+  const [isLayananOpen, setIsLayananOpen] = useState(false);
+  const [isKontakOpen, setIsKontakOpen] = useState(false);
 
   return (
     <footer className="border-t border-blue-100/80 dark:border-slate-800 bg-blue-50/70 dark:bg-slate-900 text-slate-600 dark:text-slate-300 transition-colors">
       {/* ── BAGIAN UTAMA FOOTER (MULTI-KOLOM) ── */}
-      <div className="max-w-[1360px] mx-auto px-4 sm:px-6 lg:px-8 pt-12 pb-10">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-8 lg:gap-10">
+      <div className="max-w-[1360px] mx-auto px-4 sm:px-6 lg:px-8 pt-8 sm:pt-12 pb-7 sm:pb-10">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-4 sm:gap-8 lg:gap-10">
           
           {/* KOLOM 1: IDENTITAS DINAS & PROFIL APLIKASI (Span 5 Kolom) */}
-          <div className="lg:col-span-5 space-y-4">
+          <div className="lg:col-span-5 space-y-3 sm:space-y-4">
             <div className="flex items-center gap-3">
-              <div className="w-12 h-12 rounded-xl p-1.5 bg-white border border-blue-200/80 dark:bg-white/10 dark:border-white/20 flex items-center justify-center shrink-0 backdrop-blur-xs shadow-xs">
+              <div className="w-11 h-11 sm:w-12 sm:h-12 rounded-xl p-1.5 bg-white border border-blue-200/80 dark:bg-white/10 dark:border-white/20 flex items-center justify-center shrink-0 backdrop-blur-xs shadow-xs">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
                   src="/logo-simantap.png"
@@ -94,7 +97,7 @@ export function LandingFooter() {
                 />
               </div>
               <div>
-                <h3 className="text-lg font-black tracking-tight text-slate-900 dark:text-white flex items-center gap-1.5">
+                <h3 className="text-base sm:text-lg font-black tracking-tight text-slate-900 dark:text-white flex items-center gap-1.5">
                   <span>SiMantap</span>
                   <span className="text-xs px-2 py-0.5 rounded-md font-bold bg-blue-100 text-blue-700 border border-blue-200 dark:bg-blue-500/20 dark:text-blue-400 dark:border-blue-500/30">
                     PKH
@@ -106,16 +109,17 @@ export function LandingFooter() {
               </div>
             </div>
 
-            <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
+            {/* Deskripsi: Disembunyikan di HP (< sm) agar footer sangat ringkas */}
+            <p className="hidden sm:block text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
               {FOOTER_CONFIG.instansi.deskripsi}
             </p>
 
             {/* Tombol Sosial Media Interaktif */}
-            <div className="pt-2">
-              <span className="text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 block mb-2.5">
+            <div className="pt-1 sm:pt-2">
+              <span className="text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 block mb-2 sm:mb-2.5">
                 Kanal Resmi &amp; Media Sosial:
               </span>
-              <div className="flex flex-wrap gap-2">
+              <div className="flex flex-wrap gap-1.5 sm:gap-2">
                 {FOOTER_CONFIG.sosmed.map((s, idx) => {
                   const isAvailable = Boolean(s.url && s.url.trim() !== '' && s.url !== '#');
 
@@ -152,7 +156,7 @@ export function LandingFooter() {
                     );
                   }
 
-                  // Opsi B: Belum ada linknya -> Tampil tombol non-aktif "Segera Hadir" (Aman, tidak error, kursor not-allowed)
+                  // Opsi B: Belum ada linknya -> Tampil tombol non-aktif "Segera Hadir"
                   return (
                     <div
                       key={idx}
@@ -188,114 +192,142 @@ export function LandingFooter() {
             </div>
           </div>
 
-          {/* KOLOM 2: LAYANAN UTAMA & NAVIGASI (Span 3 Kolom) */}
+          {/* KOLOM 2: LAYANAN UTAMA & NAVIGASI (Span 3 Kolom - Accordion di Mobile) */}
           <div className="lg:col-span-3 space-y-3">
-            <h4 className="text-xs font-bold uppercase tracking-wider text-slate-900 dark:text-white border-b border-blue-100 dark:border-slate-800 pb-2 flex items-center gap-1.5">
-              <ShieldCheck size={14} className="text-blue-600 dark:text-blue-400" />
-              <span>Layanan Utama</span>
-            </h4>
-            <ul className="space-y-2 text-xs">
-              {FOOTER_CONFIG.layananUtama.map((item, idx) => (
-                <li key={idx}>
-                  <a
-                    href={item.href}
-                    className="text-slate-600 dark:text-slate-400 hover:text-blue-600 dark:hover:text-white transition-colors flex items-start gap-1.5 group"
-                  >
-                    <ChevronRight size={13} className="text-slate-400 dark:text-slate-600 group-hover:text-blue-600 dark:group-hover:text-blue-400 group-hover:translate-x-0.5 transition-all shrink-0 mt-0.5" />
-                    <span>{item.nama}</span>
-                  </a>
-                </li>
-              ))}
-            </ul>
+            <button
+              type="button"
+              onClick={() => setIsLayananOpen(!isLayananOpen)}
+              className="w-full flex items-center justify-between text-left md:pointer-events-none border-b border-blue-200/60 dark:border-slate-800 pb-2 cursor-pointer select-none"
+            >
+              <span className="text-xs font-bold uppercase tracking-wider text-slate-900 dark:text-white flex items-center gap-1.5">
+                <ShieldCheck size={14} className="text-blue-600 dark:text-blue-400" />
+                <span>Layanan Utama</span>
+              </span>
+              <ChevronDown
+                size={16}
+                className={`md:hidden text-slate-500 dark:text-slate-400 transition-transform duration-200 ${isLayananOpen ? 'rotate-180' : ''}`}
+              />
+            </button>
+            <div className={`${isLayananOpen ? 'block' : 'hidden'} md:block`}>
+              <ul className="space-y-2 text-xs">
+                {FOOTER_CONFIG.layananUtama.map((item, idx) => (
+                  <li key={idx}>
+                    <a
+                      href={item.href}
+                      className="text-slate-600 dark:text-slate-400 hover:text-blue-600 dark:hover:text-white transition-colors flex items-start gap-1.5 group py-0.5"
+                    >
+                      <ChevronRight size={13} className="text-slate-400 dark:text-slate-600 group-hover:text-blue-600 dark:group-hover:text-blue-400 group-hover:translate-x-0.5 transition-all shrink-0 mt-0.5" />
+                      <span>{item.nama}</span>
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            </div>
           </div>
 
-          {/* KOLOM 3: KONTAK RESMI & ALAMAT KANTOR (Span 4 Kolom) */}
+          {/* KOLOM 3: KONTAK RESMI & ALAMAT KANTOR (Span 4 Kolom - Accordion di Mobile) */}
           <div className="lg:col-span-4 space-y-3">
-            <h4 className="text-xs font-bold uppercase tracking-wider text-slate-900 dark:text-white border-b border-blue-100 dark:border-slate-800 pb-2 flex items-center gap-1.5">
-              <MapPin size={14} className="text-emerald-600 dark:text-emerald-400" />
-              <span>Kontak &amp; Sekretariat</span>
-            </h4>
+            <button
+              type="button"
+              onClick={() => setIsKontakOpen(!isKontakOpen)}
+              className="w-full flex items-center justify-between text-left md:pointer-events-none border-b border-blue-200/60 dark:border-slate-800 pb-2 cursor-pointer select-none"
+            >
+              <span className="text-xs font-bold uppercase tracking-wider text-slate-900 dark:text-white flex items-center gap-1.5">
+                <MapPin size={14} className="text-emerald-600 dark:text-emerald-400" />
+                <span>Kontak &amp; Sekretariat</span>
+              </span>
+              <ChevronDown
+                size={16}
+                className={`md:hidden text-slate-500 dark:text-slate-400 transition-transform duration-200 ${isKontakOpen ? 'rotate-180' : ''}`}
+              />
+            </button>
 
-            <div className="space-y-2.5 text-xs text-slate-600 dark:text-slate-400">
-              {/* Alamat */}
-              <div className="flex items-start gap-2.5">
-                <MapPin size={15} className="text-emerald-600 dark:text-emerald-400 shrink-0 mt-0.5" />
-                <div>
-                  <p className="font-semibold text-slate-800 dark:text-slate-200">Kantor Dinas Pertanian &amp; Pangan</p>
-                  <p className="text-[11px] leading-relaxed mt-0.5">{FOOTER_CONFIG.kontak.alamat}</p>
-                  {Boolean(FOOTER_CONFIG.kontak.googleMapsUrl && FOOTER_CONFIG.kontak.googleMapsUrl.trim() !== '' && FOOTER_CONFIG.kontak.googleMapsUrl !== '#') && (
-                    <a
-                      href={FOOTER_CONFIG.kontak.googleMapsUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="inline-flex items-center gap-1 text-[11px] text-emerald-600 dark:text-emerald-400 hover:text-emerald-700 dark:hover:text-emerald-300 font-bold mt-1"
-                    >
-                      Buka di Google Maps <ExternalLink size={10} />
-                    </a>
-                  )}
-                </div>
-              </div>
-
-              {/* Telepon */}
-              {Boolean(FOOTER_CONFIG.kontak.telepon) && (
-                <div className="flex items-center gap-2.5 pt-1">
-                  <Phone size={14} className="text-blue-600 dark:text-blue-400 shrink-0" />
-                  <div className="flex items-center gap-2 flex-wrap">
-                    <span className="font-semibold text-slate-800 dark:text-slate-200">{FOOTER_CONFIG.kontak.telepon}</span>
-                    {Boolean(FOOTER_CONFIG.kontak.teleponAlt && FOOTER_CONFIG.kontak.teleponAlt.trim() !== '') && (
-                      <>
-                        <span className="text-slate-400 dark:text-slate-600"></span>
-                        <span className="text-slate-600 dark:text-slate-300">{FOOTER_CONFIG.kontak.teleponAlt}</span>
-                      </>
+            <div className={`${isKontakOpen ? 'block' : 'hidden'} md:block`}>
+              <div className="space-y-2.5 text-xs text-slate-600 dark:text-slate-400">
+                {/* Alamat */}
+                <div className="flex items-start gap-2.5">
+                  <MapPin size={15} className="text-emerald-600 dark:text-emerald-400 shrink-0 mt-0.5" />
+                  <div>
+                    <p className="font-semibold text-slate-800 dark:text-slate-200">Kantor Dinas Pertanian &amp; Pangan</p>
+                    <p className="text-[11px] leading-relaxed mt-0.5">{FOOTER_CONFIG.kontak.alamat}</p>
+                    {Boolean(FOOTER_CONFIG.kontak.googleMapsUrl && FOOTER_CONFIG.kontak.googleMapsUrl.trim() !== '' && FOOTER_CONFIG.kontak.googleMapsUrl !== '#') && (
+                      <a
+                        href={FOOTER_CONFIG.kontak.googleMapsUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center gap-1 text-[11px] text-emerald-600 dark:text-emerald-400 hover:text-emerald-700 dark:hover:text-emerald-300 font-bold mt-1"
+                      >
+                        Buka di Google Maps <ExternalLink size={10} />
+                      </a>
                     )}
                   </div>
                 </div>
-              )}
 
-              {/* Email */}
-              {Boolean(FOOTER_CONFIG.kontak.email && FOOTER_CONFIG.kontak.email.trim() !== '') && (
-                <div className="flex items-center gap-2.5">
-                  <Mail size={14} className="text-amber-600 dark:text-amber-400 shrink-0" />
-                  <a
-                    href={`mailto:${FOOTER_CONFIG.kontak.email}`}
-                    className="hover:text-blue-600 dark:hover:text-white transition-colors font-medium text-slate-700 dark:text-slate-300"
-                  >
-                    {FOOTER_CONFIG.kontak.email}
-                  </a>
-                </div>
-              )}
-
-              {/* Jam Pelayanan */}
-              {Boolean(FOOTER_CONFIG.kontak.jamKerja && FOOTER_CONFIG.kontak.jamKerja.trim() !== '') && (
-                <div className="flex items-start gap-2.5 pt-1">
-                  <Clock size={14} className="text-purple-600 dark:text-purple-400 shrink-0 mt-0.5" />
-                  <div>
-                    <p className="font-semibold text-slate-800 dark:text-slate-200">Jam Pelayanan Kantor:</p>
-                    <p className="text-[11px] text-slate-600 dark:text-slate-400">{FOOTER_CONFIG.kontak.jamKerja}</p>
+                {/* Telepon */}
+                {Boolean(FOOTER_CONFIG.kontak.telepon) && (
+                  <div className="flex items-center gap-2.5 pt-1">
+                    <Phone size={14} className="text-blue-600 dark:text-blue-400 shrink-0" />
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <span className="font-semibold text-slate-800 dark:text-slate-200">{FOOTER_CONFIG.kontak.telepon}</span>
+                      {Boolean(FOOTER_CONFIG.kontak.teleponAlt && FOOTER_CONFIG.kontak.teleponAlt.trim() !== '') && (
+                        <>
+                          <span className="text-slate-400 dark:text-slate-600"></span>
+                          <span className="text-slate-600 dark:text-slate-300">{FOOTER_CONFIG.kontak.teleponAlt}</span>
+                        </>
+                      )}
+                    </div>
                   </div>
-                </div>
-              )}
+                )}
+
+                {/* Email */}
+                {Boolean(FOOTER_CONFIG.kontak.email && FOOTER_CONFIG.kontak.email.trim() !== '') && (
+                  <div className="flex items-center gap-2.5">
+                    <Mail size={14} className="text-amber-600 dark:text-amber-400 shrink-0" />
+                    <a
+                      href={`mailto:${FOOTER_CONFIG.kontak.email}`}
+                      className="hover:text-blue-600 dark:hover:text-white transition-colors font-medium text-slate-700 dark:text-slate-300"
+                    >
+                      {FOOTER_CONFIG.kontak.email}
+                    </a>
+                  </div>
+                )}
+
+                {/* Jam Pelayanan */}
+                {Boolean(FOOTER_CONFIG.kontak.jamKerja && FOOTER_CONFIG.kontak.jamKerja.trim() !== '') && (
+                  <div className="flex items-start gap-2.5 pt-1">
+                    <Clock size={14} className="text-purple-600 dark:text-purple-400 shrink-0 mt-0.5" />
+                    <div>
+                      <p className="font-semibold text-slate-800 dark:text-slate-200">Jam Pelayanan Kantor:</p>
+                      <p className="text-[11px] text-slate-600 dark:text-slate-400">{FOOTER_CONFIG.kontak.jamKerja}</p>
+                    </div>
+                  </div>
+                )}
+              </div>
             </div>
           </div>
 
         </div>
 
-        {/* ── TAUTAN LEMBAGA TERKAIT ── */}
-        <div className="mt-8 pt-6 border-t border-blue-200/60 dark:border-slate-800/80 flex flex-wrap items-center justify-between gap-3 text-xs">
-          <span className="text-[11px] font-bold text-slate-500 dark:text-slate-400">Tautan Lembaga Terkait:</span>
-          <div className="flex flex-wrap items-center gap-4">
-            {FOOTER_CONFIG.tautanTerkait.map((item, idx) => (
-              <a
-                key={idx}
-                href={item.url}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-[11px] text-slate-500 hover:text-blue-600 dark:text-slate-400 dark:hover:text-blue-400 transition-colors flex items-center gap-1"
-              >
-                <span>{item.nama}</span>
-                <ExternalLink size={10} className="opacity-70" />
-              </a>
-            ))}
+        {/* ── TAUTAN LEMBAGA TERKAIT (Simple & Rapi di Mobile) ── */}
+        <div className="mt-6 sm:mt-8 pt-5 sm:pt-6 border-t border-blue-200/60 dark:border-slate-800/80">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 sm:gap-4 text-xs">
+            <span className="text-[11px] font-bold text-slate-500 dark:text-slate-400 shrink-0">
+              Tautan Lembaga Terkait:
+            </span>
+            <div className="grid grid-cols-1 xs:grid-cols-2 sm:flex sm:flex-wrap items-center gap-2 sm:gap-3">
+              {FOOTER_CONFIG.tautanTerkait.map((item, idx) => (
+                <a
+                  key={idx}
+                  href={item.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="px-2.5 py-1.5 rounded-lg bg-white/80 dark:bg-slate-800/70 border border-blue-200/60 dark:border-slate-800 hover:border-blue-300 dark:hover:border-slate-700 text-[11px] font-medium text-slate-600 hover:text-blue-600 dark:text-slate-300 dark:hover:text-blue-400 transition-all flex items-center justify-between sm:justify-start gap-1.5 shadow-2xs group"
+                >
+                  <span className="truncate">{item.nama}</span>
+                  <ExternalLink size={10} className="opacity-50 group-hover:opacity-100 group-hover:translate-x-0.5 transition-all shrink-0" />
+                </a>
+              ))}
+            </div>
           </div>
         </div>
       </div>
