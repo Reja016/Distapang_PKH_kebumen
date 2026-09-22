@@ -42,6 +42,7 @@ export const KECAMATAN_LIST = Object.keys(KECAMATAN_DESA_MAP);
 export const COMMODITY_META: Record<CommodityKey, any> = {
   broiler: {
     title: 'Ayam Broiler',
+    emoji: '🍗',
     subtitle: 'Ayam Pedaging',
     icon: Building2,
     iconColor: 'text-emerald-600 bg-emerald-50 border-emerald-200',
@@ -49,6 +50,7 @@ export const COMMODITY_META: Record<CommodityKey, any> = {
   },
   petelur: {
     title: 'Ayam Petelur',
+    emoji: '🥚',
     subtitle: 'Ayam Ras Petelur',
     icon: PackageCheck,
     iconColor: 'text-amber-600 bg-amber-50 border-amber-200',
@@ -56,6 +58,7 @@ export const COMMODITY_META: Record<CommodityKey, any> = {
   },
   sapi: {
     title: 'Sapi Potong',
+    emoji: '🐂',
     subtitle: 'Ternak Sapi Potong Binaan',
     icon: Activity,
     iconColor: 'text-blue-600 bg-blue-50 border-blue-200',
@@ -64,6 +67,7 @@ export const COMMODITY_META: Record<CommodityKey, any> = {
   },
   domba: {
     title: 'Domba & Kambing',
+    emoji: '🐑',
     subtitle: 'Ternak Ruminansia Kecil',
     icon: Layers,
     iconColor: 'text-lime-700 bg-lime-50 border-lime-200',
@@ -72,6 +76,7 @@ export const COMMODITY_META: Record<CommodityKey, any> = {
   },
   babi: {
     title: 'Babi',
+    emoji: '🐖',
     subtitle: 'Peternakan Non-Ruminansia',
     icon: TrendingUp,
     iconColor: 'text-purple-600 bg-purple-50 border-purple-200',

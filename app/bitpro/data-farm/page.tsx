@@ -425,7 +425,7 @@ export default function DataFarmPage() {
                     : 'border-transparent text-slate-500 hover:text-slate-900 bg-slate-100/70'
                 }`}
               >
-                <IconComp size={15} />
+                <span className="text-sm leading-none">{meta.emoji}</span>
                 <span>{meta.title}</span>
                 <span
                   className={`text-[11px] font-mono px-2 py-0.5 rounded-full font-bold ${

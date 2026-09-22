@@ -492,7 +492,7 @@ export default function UnifiedSKLBPage() {
                   Bitpro
                 </Link>
                 <span className="text-slate-300">/</span>
-                <span className="text-xs font-bold text-emerald-700 whitespace-nowrap">Sertifikat SKLB &amp; Sapi PO</span>
+                <span className="text-xs font-bold text-emerald-700 whitespace-nowrap">Surat Keterangan Layak Bibit (SKLB)</span>
               </div>
               <h1 className="text-base sm:text-xl font-extrabold text-slate-900 tracking-tight leading-tight truncate">
                 Surat Keterangan Layak Bibit (SKLB)

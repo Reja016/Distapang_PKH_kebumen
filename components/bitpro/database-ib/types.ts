@@ -31,6 +31,9 @@ export type IBRecord = Insemination & {
   cattleName: string;
   ownerName: string;
   cattleId: string;
+  ibOrder?: number;
+  totalIbCount?: number;
+  allInseminations?: Insemination[];
 };
 
 export type CalvingIntervalRow = {

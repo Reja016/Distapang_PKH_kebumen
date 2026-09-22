@@ -26,16 +26,17 @@ export default function IbTableSection({
   onOpenBirth,
 }: IbTableSectionProps) {
   return (
-    <div className="bg-white rounded-2xl shadow-xs border border-slate-200 overflow-hidden">
-      <div className="p-4 sm:p-6 border-b border-slate-100 flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-white">
+    <div className="bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden transition-colors">
+      {/* Header Pencarian */}
+      <div className="p-4 sm:p-6 border-b border-slate-100 dark:border-slate-800 flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-white dark:bg-slate-900">
         <div>
-          <h2 className="text-base sm:text-lg font-bold text-slate-900 flex items-center gap-2.5">
+          <h2 className="text-base sm:text-lg font-bold text-slate-900 dark:text-white flex items-center gap-2.5">
             <span>Pelacakan Siklus Reproduksi Inseminasi Buatan</span>
-            <span className="bg-emerald-50 border border-emerald-200 text-emerald-700 px-2.5 py-0.5 rounded-full text-xs font-bold">
+            <span className="bg-emerald-50 dark:bg-emerald-950/50 border border-emerald-200 dark:border-emerald-800 text-emerald-700 dark:text-emerald-400 px-2.5 py-0.5 rounded-full text-xs font-bold">
               {filteredIB.length} Record
             </span>
           </h2>
-          <p className="text-xs text-slate-500 mt-0.5">
+          <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
             Monitoring pelaksanaan IB, verifikasi PKB 90 hari, dan estimasi kelahiran
           </p>
         </div>
@@ -47,16 +48,21 @@ export default function IbTableSection({
             placeholder="Cari sapi, peternak, petugas, straw..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full min-h-touch h-11 pl-10 pr-4 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:bg-white focus:border-emerald-600 text-xs text-slate-900 transition-colors"
+            className="w-full min-h-touch h-11 pl-10 pr-4 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:bg-white dark:focus:bg-slate-850 focus:border-emerald-600 text-xs text-slate-900 dark:text-slate-100 transition-colors"
           />
         </div>
       </div>
 
+      {/* Mobile Scroll Hint */}
+      <div className="px-4 py-2 bg-slate-50 dark:bg-slate-800/60 border-b border-slate-200 dark:border-slate-800 text-[11px] text-slate-500 dark:text-slate-400 sm:hidden flex items-center justify-between">
+        <span>👉 Geser tabel ke samping untuk melihat kolom lengkap</span>
+      </div>
+
       <div className="overflow-x-auto w-full">
         <table className="w-full text-xs sm:text-sm text-left whitespace-nowrap">
-          <thead className="bg-slate-50 text-slate-700 border-b border-slate-200 text-[11px] uppercase tracking-wider font-bold">
+          <thead className="bg-slate-50 dark:bg-slate-800/90 text-slate-700 dark:text-slate-300 border-b border-slate-200 dark:border-slate-800 text-[11px] uppercase tracking-wider font-bold">
             <tr>
-              <th className="px-5 py-4">Identitas Peternak & Sapi</th>
+              <th className="px-5 py-4">Identitas Peternak &amp; Sapi</th>
               <th className="px-5 py-4">Data IB (Awal)</th>
               <th className="px-5 py-4">Pejantan / Straw</th>
               <th className="px-5 py-4">Status PKB (90 Hari)</th>
@@ -64,12 +70,12 @@ export default function IbTableSection({
               {(canCreate ?? canEdit) && <th className="px-5 py-4 text-center">Tindakan Petugas</th>}
             </tr>
           </thead>
-          <tbody className="divide-y divide-slate-100">
+          <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
             {filteredIB.map((ib) => {
               const birthInfo = ib.pkbResult === 'Bunting' && !ib.birthDate ? estimateBirthInfo(ib) : null;
 
               return (
-                <tr key={ib.id} className="hover:bg-slate-50/80 transition-colors">
+                <tr key={ib.id} className="hover:bg-slate-50/80 dark:hover:bg-slate-800/60 transition-colors">
                   {/* 1. Sapi & Peternak */}
                   <td className="px-5 py-4">
                     <span className="font-bold text-slate-900 text-sm block mb-0.5 flex items-center gap-1.5">
@@ -86,8 +92,24 @@ export default function IbTableSection({
 
                   {/* 2. IB */}
                   <td className="px-5 py-4">
-                    <span className="font-bold text-slate-900 block">{fmtDate(ib.date)}</span>
-                    <span className="block text-xs text-slate-500 mt-0.5">Petugas: {ib.inseminatorName}</span>
+                    <div className="flex items-center gap-1.5 flex-wrap">
+                      <span className="font-bold text-slate-900 dark:text-slate-100">{fmtDate(ib.date)}</span>
+                      {ib.totalIbCount && ib.totalIbCount > 1 ? (
+                        <span className="inline-flex items-center px-2 py-0.5 rounded-md text-[11px] font-extrabold bg-amber-100 dark:bg-amber-950/60 text-amber-900 dark:text-amber-300 border border-amber-300 dark:border-amber-700">
+                          IB ke-{ib.ibOrder || ib.totalIbCount}
+                        </span>
+                      ) : (
+                        <span className="inline-flex items-center px-2 py-0.5 rounded-md text-[11px] font-bold bg-blue-50 dark:bg-blue-950/40 text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-800">
+                          IB ke-1
+                        </span>
+                      )}
+                    </div>
+                    <span className="block text-xs text-slate-500 dark:text-slate-400 mt-0.5">Petugas: {ib.inseminatorName}</span>
+                    {ib.totalIbCount && ib.totalIbCount > 1 && (
+                      <span className="block text-[10px] text-amber-700 dark:text-amber-400 font-semibold mt-0.5">
+                        Total {ib.totalIbCount}x Inseminasi
+                      </span>
+                    )}
                   </td>
 
                   {/* 3. Pejantan */}

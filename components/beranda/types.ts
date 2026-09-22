@@ -1,4 +1,4 @@
-﻿import {
+import {
   Database,
   CalendarCheck,
   Award,
@@ -68,13 +68,6 @@ export const MODULE_NAV_DATA: ModuleNavGroup[] = [
     },
     submenus: [
       {
-        id: 'database-ktt',
-        name: 'Database KTT',
-        href: '/bitpro/database-ktt',
-        icon: Database,
-        desc: 'Buku Register Kelompok Tani Ternak',
-      },
-      {
         id: 'sapitime',
         name: 'SapiTime Smart App',
         href: '/bitpro/sapitime',
@@ -82,18 +75,25 @@ export const MODULE_NAV_DATA: ModuleNavGroup[] = [
         desc: 'Siklus Estrus, IB & Kebuntingan Sapi',
       },
       {
-        id: 'sklb',
-        name: 'Sertifikat SKLB',
-        href: '/bitpro/sklb',
-        icon: Award,
-        desc: 'Surat Keterangan Layak Bibit',
-      },
-      {
         id: 'database-ib',
         name: 'Database IB',
         href: '/bitpro/database-ib',
         icon: Activity,
         desc: 'Inseminasi Buatan & Kelahiran',
+      },
+      {
+        id: 'sklb',
+        name: 'Surat Keterangan Layak Bibit (SKLB)',
+        href: '/bitpro/sklb',
+        icon: Award,
+        desc: 'Sertifikasi & Standarisasi Bibit Ternak',
+      },
+      {
+        id: 'database-ktt',
+        name: 'Database KTT',
+        href: '/bitpro/database-ktt',
+        icon: Database,
+        desc: 'Buku Register Kelompok Tani Ternak',
       },
       {
         id: 'monev-ktt',

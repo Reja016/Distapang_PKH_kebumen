@@ -62,8 +62,9 @@ export default function FarmOverviewTab({
                   </span>
                 </div>
 
-                <h3 className="text-lg sm:text-xl font-extrabold text-slate-900 group-hover:text-emerald-600 transition-colors mb-1">
-                  {meta.title}
+                <h3 className="text-lg sm:text-xl font-extrabold text-slate-900 group-hover:text-emerald-600 transition-colors mb-1 flex items-center gap-2">
+                  <span className="text-xl leading-none">{meta.emoji}</span>
+                  <span>{meta.title}</span>
                 </h3>
                 <p className="text-xs text-slate-500 font-medium">{meta.subtitle}</p>
               </div>

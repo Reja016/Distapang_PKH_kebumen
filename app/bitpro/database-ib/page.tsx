@@ -19,11 +19,13 @@ import {
 } from '@/components/bitpro/database-ib/types';
 import IbTableSection from '@/components/bitpro/database-ib/IbTableSection';
 import IbCalvingIntervalSection from '@/components/bitpro/database-ib/IbCalvingIntervalSection';
+import IbHistorySection from '@/components/bitpro/database-ib/IbHistorySection';
 import IbModals from '@/components/bitpro/database-ib/IbModals';
 
 export default function DatabaseIBPage() {
   const { isReady, canCreate, canEdit } = usePageAuth('bitpro', 'database-ib');
   const [ibList, setIbList] = useState<IBRecord[]>([]);
+  const [allIbHistory, setAllIbHistory] = useState<IBRecord[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
 
   const [showPkbModal, setShowPkbModal] = useState(false);
@@ -53,21 +55,47 @@ export default function DatabaseIBPage() {
       const res = await fetch('/api/sapitime');
       const json = await res.json();
       if (json.success && json.cattle) {
-        const allIBs: IBRecord[] = [];
+        const uniqueCattleLatestIB: IBRecord[] = [];
+        const fullHistory: IBRecord[] = [];
+
         json.cattle.forEach((cattle: any) => {
           if (cattle.inseminations && cattle.inseminations.length > 0) {
-            cattle.inseminations.forEach((ib: any) => {
-              allIBs.push({
+            // Urutkan ascending berdasarkan tanggal agar siklus IB ke-1, ke-2, dst. akurat
+            const sorted = [...cattle.inseminations].sort(
+              (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()
+            );
+
+            sorted.forEach((ib: any, idx: number) => {
+              fullHistory.push({
                 ...ib,
                 cattleName: cattle.name,
                 ownerName: cattle.ownerName || '',
                 cattleId: cattle.id,
+                ibOrder: idx + 1,
+                totalIbCount: sorted.length,
               });
+            });
+
+            // Ambil IB terbaru untuk baris sapi di tabel utama (1 baris per sapi)
+            const latest = sorted[sorted.length - 1];
+            uniqueCattleLatestIB.push({
+              ...latest,
+              cattleName: cattle.name,
+              ownerName: cattle.ownerName || '',
+              cattleId: cattle.id,
+              ibOrder: sorted.length,
+              totalIbCount: sorted.length,
+              allInseminations: sorted,
             });
           }
         });
-        allIBs.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
-        setIbList(allIBs);
+
+        // Urutkan descending berdasarkan tanggal IB terbaru agar yang teranyar di atas
+        uniqueCattleLatestIB.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+        fullHistory.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+
+        setIbList(uniqueCattleLatestIB);
+        setAllIbHistory(fullHistory);
       }
     } catch (e) {
       console.error('Gagal mengambil data IB dari database', e);
@@ -189,7 +217,7 @@ export default function DatabaseIBPage() {
     setSelectedIbForBirth(null);
   };
 
-  const calvingIntervals = useMemo(() => calculateCalvingIntervals(ibList), [ibList]);
+  const calvingIntervals = useMemo(() => calculateCalvingIntervals(allIbHistory), [allIbHistory]);
 
   const avgCalvingIntervalDays = useMemo(() => {
     if (calvingIntervals.length === 0) return null;
@@ -202,6 +230,8 @@ export default function DatabaseIBPage() {
     const dataSheet = ibList.map((ib) => {
       const birthInfo = ib.pkbResult === 'Bunting' && !ib.birthDate ? estimateBirthInfo(ib) : null;
       return {
+        'Siklus Aktif': `IB ke-${ib.ibOrder || 1}`,
+        'Total Frekuensi IB': `${ib.totalIbCount || 1}x`,
         'Nama Peternak': ib.ownerName || '-',
         'Nama Sapi': ib.cattleName,
         'ID Sapi': ib.cattleId,
@@ -234,6 +264,27 @@ export default function DatabaseIBPage() {
       };
     });
 
+    const historySheet = allIbHistory.map((ib) => ({
+      'Siklus': `IB ke-${ib.ibOrder || 1}`,
+      'Total IB Sapi': `${ib.totalIbCount || 1}x`,
+      'Nama Peternak': ib.ownerName || '-',
+      'Nama Sapi': ib.cattleName,
+      'ID Sapi': ib.cattleId,
+      Kecamatan: ib.kecamatan || '-',
+      Desa: ib.desa || '-',
+      'Tanggal IB': fmtDate(ib.date),
+      'Jam IB': ib.time || '-',
+      'Inseminator': ib.inseminatorName,
+      'Kode Straw': ib.strawCode,
+      'Nama Pejantan': ib.bullName,
+      'Ras Pejantan': ib.bullBreed,
+      'Hasil PKB': ib.pkbResult || (ib.pkbStatus === 'Tidak Diperiksa' ? 'Dilewati' : 'Menunggu'),
+      'Petugas PKB': ib.pkbOfficer || '-',
+      'Tanggal Lahir Pedet': fmtDate(ib.birthDate),
+      'Jenis Kelamin': ib.calfGender || '-',
+      'Catatan': ib.notes || '-',
+    }));
+
     const calvingSheet = calvingIntervals.map((row) => ({
       'Nama Peternak': row.ownerName || '-',
       'Nama Sapi': row.cattleName,
@@ -248,7 +299,12 @@ export default function DatabaseIBPage() {
 
     const wb = XLSX.utils.book_new();
     const ws1 = XLSX.utils.json_to_sheet(dataSheet);
-    XLSX.utils.book_append_sheet(wb, ws1, 'Data Siklus IB');
+    XLSX.utils.book_append_sheet(wb, ws1, 'Data Siklus Aktif');
+
+    if (historySheet.length > 0) {
+      const wsHist = XLSX.utils.json_to_sheet(historySheet);
+      XLSX.utils.book_append_sheet(wb, wsHist, 'Riwayat Log Semua IB');
+    }
 
     if (calvingSheet.length > 0) {
       const ws2 = XLSX.utils.json_to_sheet(calvingSheet);
@@ -274,11 +330,11 @@ export default function DatabaseIBPage() {
     <div className="min-h-screen bg-slate-50 text-slate-900 font-sans selection:bg-emerald-600 selection:text-white pb-20">
       {/* ── TOP APP BAR (Tema Hijau Bitpro) ── */}
       <header className="border-b border-emerald-100 bg-white/95 backdrop-blur-md sticky top-0 z-30 shadow-xs">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-5 min-h-[80px] sm:min-h-[88px] flex items-center justify-between gap-3">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 sm:py-5 min-h-[64px] sm:min-h-[88px] flex items-center justify-between gap-3">
           <div className="flex items-center gap-3 min-w-0 flex-1">
             <Link
               href="/bitpro"
-              className="min-h-touch min-w-touch w-11 h-11 rounded-2xl bg-emerald-600 hover:bg-emerald-700 text-white flex items-center justify-center transition-all shadow-xs shrink-0"
+              className="min-h-touch min-w-touch w-10 h-10 sm:w-11 sm:h-11 rounded-2xl bg-emerald-600 hover:bg-emerald-700 text-white flex items-center justify-center transition-all shadow-xs shrink-0"
               aria-label="Kembali ke Bitpro"
             >
               <ArrowLeft size={18} strokeWidth={2.5} />
@@ -354,6 +410,9 @@ export default function DatabaseIBPage() {
           calvingIntervals={calvingIntervals}
           avgCalvingIntervalDays={avgCalvingIntervalDays}
         />
+
+        {/* 3. LOG LENGKAP RIWAYAT IB (SEMUA TINDAKAN INSEMINASI) */}
+        <IbHistorySection allIbHistory={allIbHistory} />
       </main>
 
       {/* ── MODALS (PKB, SKIP PKB, KELAHIRAN) ── */}
