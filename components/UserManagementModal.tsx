@@ -47,11 +47,11 @@ export interface AnggotaUser {
 export const MODULES_METADATA = [
   {
     id: 'bitpro',
-    name: 'Bidang Bitpro (Perbibitan & Produksi)',
+    name: 'Tim Kerja Bitpro (Perbibitan & Produksi)',
     desc: 'Pengelolaan data perbibitan, kelompok ternak, SKLB, IB, dan populasi',
     submenus: [
       { id: 'database-ktt', name: 'Database Kelompok Tani Ternak (KTT)', path: '/bitpro/database-ktt' },
-      { id: 'sapitime', name: 'SapiTime (Siklus & Reproduksi)', path: '/bitpro/sapitime' },
+      { id: 'sapitime', name: 'SapiTime (Input IB)', path: '/bitpro/sapitime' },
       { id: 'sklb', name: 'Surat Keterangan Layak Bibit (SKLB)', path: '/bitpro/sklb' },
       { id: 'database-ib', name: 'Database Inseminasi Buatan (IB)', path: '/bitpro/database-ib' },
       { id: 'monev-ktt', name: 'Monitoring & Evaluasi KTT', path: '/bitpro/monev-ktt' },
@@ -62,7 +62,7 @@ export const MODULES_METADATA = [
   },
   {
     id: 'keswan',
-    name: 'Bidang Keswan (Kesehatan Hewan)',
+    name: 'Tim Kerja Keswan (Kesehatan Hewan)',
     desc: 'Laporan vaksinasi, lalu lintas, penyakit ternak, dan kinerja puskeswan',
     submenus: [
       { id: 'data-vaksinasi', name: 'Data Vaksinasi PMK & Penyakit Menular', path: '/keswan/data-vaksinasi' },
@@ -73,7 +73,7 @@ export const MODULES_METADATA = [
   },
   {
     id: 'kesmavet',
-    name: 'Bidang Kesmavet (Kesehatan Masyarakat Veteriner)',
+    name: 'Tim Kerja Kesmavet (Kesehatan Masyarakat Veteriner)',
     desc: 'Sertifikasi NKV, pemotongan RPH/TPH/TPU, pakan ternak, dan pasar hewan',
     submenus: [
       { id: 'nkv', name: 'Nomor Kontrol Veteriner (NKV)', path: '/kesmavet/nkv' },

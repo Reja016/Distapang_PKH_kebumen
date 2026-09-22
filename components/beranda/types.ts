@@ -51,7 +51,7 @@ export interface ModuleNavGroup {
 export const MODULE_NAV_DATA: ModuleNavGroup[] = [
   {
     id: 'bitpro',
-    name: 'Bidang Bitpro',
+    name: 'Tim Kerja Bitpro',
     shortDesc: 'Perbibitan & Produksi Ternak',
     badge: '8 Menu',
     color: {
@@ -69,7 +69,7 @@ export const MODULE_NAV_DATA: ModuleNavGroup[] = [
     submenus: [
       {
         id: 'sapitime',
-        name: 'SapiTime Smart App',
+        name: 'SapiTime (Input IB)',
         href: '/bitpro/sapitime',
         icon: CalendarCheck,
         desc: 'Siklus Estrus, IB & Kebuntingan Sapi',
@@ -127,7 +127,7 @@ export const MODULE_NAV_DATA: ModuleNavGroup[] = [
   },
   {
     id: 'keswan',
-    name: 'Bidang Keswan',
+    name: 'Tim Kerja Keswan',
     shortDesc: 'Kesehatan Hewan',
     badge: '4 Menu',
     color: {
@@ -175,7 +175,7 @@ export const MODULE_NAV_DATA: ModuleNavGroup[] = [
   },
   {
     id: 'kesmavet',
-    name: 'Bidang Kesmavet',
+    name: 'Tim Kerja Kesmavet',
     shortDesc: 'Kesehatan Masyarakat Veteriner',
     badge: '4 Menu',
     color: {

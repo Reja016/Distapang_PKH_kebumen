@@ -199,7 +199,7 @@ export default function SidebarNav({
               className={`w-10 h-10 rounded-xl p-1.5 flex items-center justify-center shrink-0 border-2 ${
                 isDark ? 'bg-slate-800 border-slate-700' : 'bg-white border-slate-300 shadow-xs'
               }`}
-              title="SiMantap PKH Kebumen"
+              title="SiMantap Kebumen"
             >
               <img
                 src="/logo-simantap.png"
@@ -246,7 +246,7 @@ export default function SidebarNav({
               </div>
               <div>
                 <h1 className="text-base font-bold tracking-tight leading-tight">
-                  SiMantap PKH
+                  SiMantap
                 </h1>
                 <p className="text-[11px] text-slate-500 font-semibold">
                   Distapang Kebumen

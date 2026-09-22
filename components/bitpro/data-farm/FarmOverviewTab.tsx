@@ -42,7 +42,6 @@ export default function FarmOverviewTab({
         {COMMODITY_ORDER.map((key) => {
           const meta = COMMODITY_META[key];
           const stats = getStats(key);
-          const IconComp = meta.icon;
           return (
             <button
               key={key}
@@ -54,17 +53,16 @@ export default function FarmOverviewTab({
             >
               <div>
                 <div className="flex items-center justify-between mb-4">
-                  <div className={`w-12 h-12 rounded-2xl flex items-center justify-center border ${meta.iconColor}`}>
-                    <IconComp size={24} />
+                  <div className={`w-12 h-12 rounded-2xl flex items-center justify-center border text-2xl ${meta.iconColor}`}>
+                    <span>{meta.emoji}</span>
                   </div>
                   <span className="text-xs font-sans font-bold px-3 py-1 rounded-full bg-slate-100 text-slate-700 border border-slate-200">
                     {meta.badge}
                   </span>
                 </div>
 
-                <h3 className="text-lg sm:text-xl font-extrabold text-slate-900 group-hover:text-emerald-600 transition-colors mb-1 flex items-center gap-2">
-                  <span className="text-xl leading-none">{meta.emoji}</span>
-                  <span>{meta.title}</span>
+                <h3 className="text-lg sm:text-xl font-extrabold text-slate-900 group-hover:text-emerald-600 transition-colors mb-1">
+                  {meta.title}
                 </h3>
                 <p className="text-xs text-slate-500 font-medium">{meta.subtitle}</p>
               </div>

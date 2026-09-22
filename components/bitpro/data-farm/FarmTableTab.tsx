@@ -27,15 +27,14 @@ export default function FarmTableTab({
 }: FarmTableTabProps) {
 
   const meta = COMMODITY_META[activeCommodity];
-  const HeaderIcon = meta.icon;
 
   return (
     <div className="space-y-6 animate-in fade-in duration-200">
       {/* Header Action Bar */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white p-5 sm:p-6 rounded-3xl border border-slate-200 shadow-sm">
         <div className="flex items-center gap-3.5">
-          <div className={`w-12 h-12 rounded-2xl flex items-center justify-center border ${meta.iconColor} shrink-0`}>
-            <HeaderIcon size={24} />
+          <div className={`w-12 h-12 rounded-2xl flex items-center justify-center border text-2xl ${meta.iconColor} shrink-0`}>
+            <span>{meta.emoji}</span>
           </div>
           <div>
             <h2 className="text-lg sm:text-xl font-extrabold text-slate-900">

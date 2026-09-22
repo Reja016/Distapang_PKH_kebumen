@@ -410,7 +410,6 @@ export default function DataFarmPage() {
             const meta = COMMODITY_META[key];
             const stats = getStats(key);
             const isActive = activeCommodity === key;
-            const IconComp = meta.icon;
 
             return (
               <button
