@@ -8,6 +8,7 @@ import {
   Download,
   Trash2,
   Eye,
+  ExternalLink,
   CheckCircle2,
   AlertCircle,
   FolderOpen,
@@ -511,7 +512,11 @@ export default function KttDocumentModal({
                         <span className="inline-block px-2 py-0.5 text-[10px] font-bold rounded-md bg-emerald-50 dark:bg-emerald-950/50 text-emerald-700 dark:text-emerald-300 border border-emerald-200/70 dark:border-emerald-800/50 mb-1">
                           {doc.category}
                         </span>
-                        <h5 className="text-xs sm:text-sm font-bold text-slate-900 dark:text-slate-100 truncate" title={doc.title || doc.original_filename}>
+                        <h5 
+                          onClick={() => window.open(doc.file_path, '_blank')}
+                          className="text-xs sm:text-sm font-bold text-slate-900 dark:text-slate-100 truncate cursor-pointer hover:text-emerald-600 dark:hover:text-emerald-400 hover:underline transition-colors" 
+                          title={`Buka "${doc.title || doc.original_filename}" di tab baru (1 layar penuh)`}
+                        >
                           {doc.title || doc.original_filename}
                         </h5>
                         <p className="text-[11px] text-slate-400 font-mono mt-0.5 flex items-center gap-2">
@@ -522,16 +527,18 @@ export default function KttDocumentModal({
                       </div>
                     </div>
 
-                    <div className="flex items-center gap-1 shrink-0 pt-1">
-                      {/* Tombol Preview Langsung */}
-                      <button
-                        type="button"
-                        onClick={() => setPreviewDoc(doc)}
-                        title="Pratinjau Dokumen"
-                        className="w-8 h-8 rounded-lg border border-slate-200 dark:border-slate-700 hover:bg-emerald-50 hover:text-emerald-700 dark:hover:bg-slate-800 flex items-center justify-center text-slate-600 dark:text-slate-400 transition-colors"
+                    <div className="flex items-center gap-1.5 shrink-0 pt-1">
+                      {/* Tombol Preview di Tab Baru (1 Layar Penuh) */}
+                      <a
+                        href={doc.file_path}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        title="Buka Dokumen di Tab Baru (Layar Penuh)"
+                        className="h-8 px-2 rounded-lg border border-emerald-200 dark:border-emerald-800 bg-emerald-50 dark:bg-emerald-950/40 hover:bg-emerald-100 text-emerald-800 dark:text-emerald-300 text-xs font-bold flex items-center gap-1.5 transition-colors cursor-pointer"
                       >
-                        <Eye size={15} />
-                      </button>
+                        <ExternalLink size={13} />
+                        <span className="text-[11px]">Buka Tab Baru</span>
+                      </a>
 
                       {/* Tombol Download */}
                       <a

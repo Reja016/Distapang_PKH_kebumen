@@ -42,3 +42,7 @@ DATABASE_MIGRATIONS.md
 .next.tar.gz
 deploy.bat
 deploy.ps1
+
+# User uploads
+/public/uploads/*
+!/public/uploads/.gitkeep
