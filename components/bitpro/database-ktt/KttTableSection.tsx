@@ -1,7 +1,5 @@
-'use client';
-
 import React from 'react';
-import { Search, User, Edit2, Trash2, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Search, User, Edit2, Trash2, ChevronLeft, ChevronRight, FolderOpen } from 'lucide-react';
 import { KelompokTani, JENIS_KELOMPOK_OPTIONS, PAGE_SIZE } from './types';
 import KelasBadge from './KelasBadge';
 
@@ -22,6 +20,8 @@ interface KttTableSectionProps {
   currentPage: number;
   setPage: React.Dispatch<React.SetStateAction<number>>;
   canEdit: boolean;
+  docCounts?: Record<number, number>;
+  onSelectKttForDocs: (ktt: KelompokTani) => void;
   onEdit: (row: KelompokTani) => void;
   onDelete: (row: KelompokTani) => void;
 }
@@ -41,6 +41,8 @@ export default function KttTableSection({
   currentPage,
   setPage,
   canEdit,
+  docCounts = {},
+  onSelectKttForDocs,
   onEdit,
   onDelete,
 }: KttTableSectionProps) {
@@ -107,79 +109,114 @@ export default function KttTableSection({
             <thead className="bg-slate-50 dark:bg-slate-800/90 text-slate-600 dark:text-slate-300 text-xs font-semibold uppercase tracking-wider border-b border-slate-200 dark:border-slate-800">
               <tr>
                 <th className="p-4 w-12 text-center">NO</th>
-                <th className="p-4">NAMA KELOMPOK &amp; REG</th>
+                <th className="p-4">NAMA KELOMPOK &amp; DOKUMEN</th>
                 <th className="p-4">LOKASI DESA / KEC</th>
                 <th className="p-4">KETUA KELOMPOK</th>
                 <th className="p-4 text-center">KELAS</th>
                 <th className="p-4 text-right">ANGGOTA</th>
-                {canEdit && <th className="p-4 text-center w-24">AKSI</th>}
+                <th className="p-4 text-center w-28">AKSI</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-200 dark:divide-slate-800 text-slate-800 dark:text-slate-200">
               {paginated.length > 0 ? (
-                paginated.map((row, idx) => (
-                  <tr key={row.id} className="hover:bg-slate-50/80 dark:hover:bg-slate-800/60 transition-colors">
-                    <td className="p-4 text-center font-sans text-slate-400 dark:text-slate-500 text-xs">
-                      {(currentPage - 1) * PAGE_SIZE + idx + 1}
-                    </td>
-                    <td className="p-4">
-                      <span className="font-bold text-slate-900 dark:text-slate-100 block text-sm">
-                        {row.namaKelompok || '-'}
-                      </span>
-                      <span className="text-xs font-sans text-slate-500 dark:text-slate-400 block">
-                        Reg: {row.nomorRegister || '-'}
-                      </span>
-                    </td>
-                    <td className="p-4">
-                      <span className="text-slate-800 dark:text-slate-200 font-medium block text-xs">
-                        {row.desa || '-'}
-                      </span>
-                      <span className="text-xs text-slate-500 dark:text-slate-400 font-sans">
-                        Kec. {row.kecamatan || '-'}
-                      </span>
-                    </td>
-                    <td className="p-4 text-slate-700 dark:text-slate-300 text-xs font-medium">
-                      <span className="flex items-center gap-1.5">
-                        <User size={13} className="text-slate-400 shrink-0" />
-                        <span>{row.namaKetuaKelompok || '-'}</span>
-                      </span>
-                    </td>
-                    <td className="p-4 text-center">
-                      <KelasBadge kelas={row.kelasKelompok} />
-                    </td>
-                    <td className="p-4 text-right font-sans text-xs">
-                      <span className="font-bold text-slate-900 dark:text-slate-100">
-                        {(row.anggotaLaki || 0) + (row.anggotaPerempuan || 0)}
-                      </span>
-                      <span className="text-slate-400 dark:text-slate-500 text-[11px] block">
-                        {row.anggotaLaki || 0}L · {row.anggotaPerempuan || 0}P
-                      </span>
-                    </td>
-                    {canEdit && (
+                paginated.map((row, idx) => {
+                  const docCount = docCounts[row.id] || 0;
+
+                  return (
+                    <tr key={row.id} className="hover:bg-slate-50/80 dark:hover:bg-slate-800/60 transition-colors group">
+                      <td className="p-4 text-center font-sans text-slate-400 dark:text-slate-500 text-xs">
+                        {(currentPage - 1) * PAGE_SIZE + idx + 1}
+                      </td>
+                      <td
+                        className="p-4 cursor-pointer"
+                        onClick={() => onSelectKttForDocs(row)}
+                        title="Klik untuk membuka arsip dokumen KTT ini"
+                      >
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <span className="font-bold text-slate-900 dark:text-slate-100 text-sm group-hover:text-emerald-700 dark:group-hover:text-emerald-400 transition-colors">
+                            {row.namaKelompok || '-'}
+                          </span>
+                          {docCount > 0 ? (
+                            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-extrabold bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-800 shrink-0 shadow-2xs">
+                              <FolderOpen size={11} />
+                              <span>{docCount} Berkas</span>
+                            </span>
+                          ) : (
+                            <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md text-[10px] font-medium bg-slate-100 text-slate-500 dark:bg-slate-800 dark:text-slate-400 border border-slate-200 dark:border-slate-700 shrink-0">
+                              <span>0 Berkas</span>
+                            </span>
+                          )}
+                        </div>
+                        <span className="text-xs font-sans text-slate-500 dark:text-slate-400 block mt-0.5">
+                          Reg: {row.nomorRegister || '-'} • <span className="text-emerald-600 font-bold hover:underline">📂 Buka Berkas &raquo;</span>
+                        </span>
+                      </td>
+                      <td className="p-4">
+                        <span className="text-slate-800 dark:text-slate-200 font-medium block text-xs">
+                          {row.desa || '-'}
+                        </span>
+                        <span className="text-xs text-slate-500 dark:text-slate-400 font-sans">
+                          Kec. {row.kecamatan || '-'}
+                        </span>
+                      </td>
+                      <td className="p-4 text-slate-700 dark:text-slate-300 text-xs font-medium">
+                        <span className="flex items-center gap-1.5">
+                          <User size={13} className="text-slate-400 shrink-0" />
+                          <span>{row.namaKetuaKelompok || '-'}</span>
+                        </span>
+                      </td>
+                      <td className="p-4 text-center">
+                        <KelasBadge kelas={row.kelasKelompok} />
+                      </td>
+                      <td className="p-4 text-right font-sans text-xs">
+                        <span className="font-bold text-slate-900 dark:text-slate-100">
+                          {(row.anggotaLaki || 0) + (row.anggotaPerempuan || 0)}
+                        </span>
+                        <span className="text-slate-400 dark:text-slate-500 text-[11px] block">
+                          {row.anggotaLaki || 0}L · {row.anggotaPerempuan || 0}P
+                        </span>
+                      </td>
                       <td className="p-4 text-center">
                         <div className="flex items-center justify-center gap-1.5">
+                          {/* Tombol Buka Berkas Dokumen */}
                           <button
-                            onClick={() => onEdit(row)}
-                            className="min-h-touch h-8 w-8 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 flex items-center justify-center transition-colors cursor-pointer"
-                            aria-label="Edit"
+                            type="button"
+                            onClick={() => onSelectKttForDocs(row)}
+                            className="min-h-touch h-8 px-2.5 rounded-lg border border-emerald-200 dark:border-emerald-800 bg-emerald-50 dark:bg-emerald-950/40 hover:bg-emerald-100 text-emerald-800 dark:text-emerald-300 text-xs font-bold flex items-center gap-1 transition-colors cursor-pointer"
+                            title="Buka Arsip Dokumen KTT"
                           >
-                            <Edit2 size={13} />
+                            <FolderOpen size={13} />
+                            <span className="hidden xl:inline">Berkas</span>
                           </button>
-                          <button
-                            onClick={() => onDelete(row)}
-                            className="min-h-touch h-8 w-8 rounded-lg border border-red-200 dark:border-red-900/50 bg-red-50 dark:bg-red-950/30 hover:bg-red-100 dark:hover:bg-red-900/50 text-red-600 dark:text-red-400 flex items-center justify-center transition-colors cursor-pointer"
-                            aria-label="Hapus"
-                          >
-                            <Trash2 size={13} />
-                          </button>
+
+                          {canEdit && (
+                            <>
+                              <button
+                                type="button"
+                                onClick={() => onEdit(row)}
+                                className="min-h-touch h-8 w-8 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 flex items-center justify-center transition-colors cursor-pointer"
+                                aria-label="Edit"
+                              >
+                                <Edit2 size={13} />
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => onDelete(row)}
+                                className="min-h-touch h-8 w-8 rounded-lg border border-red-200 dark:border-red-900/50 bg-red-50 dark:bg-red-950/30 hover:bg-red-100 dark:hover:bg-red-900/50 text-red-600 dark:text-red-400 flex items-center justify-center transition-colors cursor-pointer"
+                                aria-label="Hapus"
+                              >
+                                <Trash2 size={13} />
+                              </button>
+                            </>
+                          )}
                         </div>
                       </td>
-                    )}
-                  </tr>
-                ))
+                    </tr>
+                  );
+                })
               ) : (
                 <tr>
-                  <td colSpan={canEdit ? 7 : 6} className="p-12 text-center text-slate-400 dark:text-slate-500 font-medium text-sm">
+                  <td colSpan={7} className="p-12 text-center text-slate-400 dark:text-slate-500 font-medium text-sm">
                     Tidak ada kelompok tani yang sesuai filter.
                   </td>
                 </tr>

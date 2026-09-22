@@ -13,6 +13,7 @@
     "@splinetool/react-spline": "^4.1.0",
     "@supabase/supabase-js": "^2.108.2",
     "googleapis": "^173.0.0",
+    "jszip": "^3.10.2",
     "lucide-react": "^1.28.0",
     "mysql2": "^3.23.2",
     "next": "^14.2.5",
@@ -22,6 +23,7 @@
     "xlsx": "^0.18.5"
   },
   "devDependencies": {
+    "@types/jszip": "^3.4.0",
     "@types/node": "20.6.2",
     "@types/react": "18.2.22",
     "@types/react-dom": "18.2.7",

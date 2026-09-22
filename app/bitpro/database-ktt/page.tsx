@@ -3,7 +3,7 @@
 import { useMemo, useState, useEffect } from 'react';
 import Link from 'next/link';
 import * as XLSX from 'xlsx';
-import { ArrowLeft, Plus, Download } from 'lucide-react';
+import { ArrowLeft, Plus, Download, Archive } from 'lucide-react';
 import { usePageAuth } from '@/hooks/usePageAuth';
 
 import {
@@ -16,6 +16,8 @@ import {
 import KttSidebar from '@/components/bitpro/database-ktt/KttSidebar';
 import KttTableSection from '@/components/bitpro/database-ktt/KttTableSection';
 import KttModals from '@/components/bitpro/database-ktt/KttModals';
+import KttDocumentModal from '@/components/bitpro/database-ktt/KttDocumentModal';
+import KttBulkZipModal from '@/components/bitpro/database-ktt/KttBulkZipModal';
 
 export default function DatabaseKTTPage() {
   const [data, setData] = useState<KelompokTani[]>([]);
@@ -34,7 +36,12 @@ export default function DatabaseKTTPage() {
   const [formValues, setFormValues] = useState<KelompokTaniFormValues>(emptyFormValues);
   const [deleteTarget, setDeleteTarget] = useState<KelompokTani | null>(null);
 
-  const { isReady, canCreate, canEdit } = usePageAuth('bitpro', 'database-ktt');
+  // State Dokumen Digital KTT
+  const [docCounts, setDocCounts] = useState<Record<number, number>>({});
+  const [selectedKttForDocs, setSelectedKttForDocs] = useState<KelompokTani | null>(null);
+  const [showBulkZipModal, setShowBulkZipModal] = useState(false);
+
+  const { isReady, canCreate, canEdit, isAdmin, userRole } = usePageAuth('bitpro', 'database-ktt');
 
 
   const loadData = async () => {
@@ -58,8 +65,21 @@ export default function DatabaseKTTPage() {
     }
   };
 
+  const fetchDocStats = async () => {
+    try {
+      const res = await fetch('/api/ktt/documents?stats=true');
+      const json = await res.json();
+      if (json.success && json.counts) {
+        setDocCounts(json.counts);
+      }
+    } catch (e) {
+      console.error('Gagal memuat statistik dokumen KTT:', e);
+    }
+  };
+
   useEffect(() => {
     loadData();
+    fetchDocStats();
   }, []);
 
   const desaList = useMemo(() => {
@@ -245,6 +265,19 @@ export default function DatabaseKTTPage() {
           </div>
 
           <div className="flex items-center gap-2 shrink-0">
+            {/* Tombol Upload Arsip ZIP Massal */}
+            {canCreate && (
+              <button
+                onClick={() => setShowBulkZipModal(true)}
+                title="Upload Arsip ZIP Dokumen KTT Massal"
+                aria-label="Upload Arsip ZIP Dokumen KTT Massal"
+                className="min-h-touch min-w-touch h-11 w-11 sm:w-auto sm:px-4 rounded-xl border border-blue-200 bg-blue-50 hover:bg-blue-100 text-blue-700 text-xs sm:text-sm font-bold flex items-center justify-center sm:gap-2 transition-all shadow-xs cursor-pointer"
+              >
+                <Archive size={16} strokeWidth={2.5} />
+                <span className="hidden sm:inline">Upload ZIP Massal</span>
+              </button>
+            )}
+
             <button
               onClick={handleExportExcel}
               title="Export Excel"
@@ -266,7 +299,6 @@ export default function DatabaseKTTPage() {
                 <span className="hidden sm:inline">Tambah KTT</span>
               </button>
             )}
-
           </div>
         </div>
       </header>
@@ -300,13 +332,15 @@ export default function DatabaseKTTPage() {
             currentPage={currentPage}
             setPage={setPage}
             canEdit={canEdit}
+            docCounts={docCounts}
+            onSelectKttForDocs={(row) => setSelectedKttForDocs(row)}
             onEdit={openEditModal}
             onDelete={(row) => setDeleteTarget(row)}
           />
         </div>
       </main>
 
-      {/* Modals */}
+      {/* Modals KTT */}
       <KttModals
         formOpen={formOpen}
         formMode={formMode}
@@ -318,6 +352,25 @@ export default function DatabaseKTTPage() {
         deleteTarget={deleteTarget}
         onCloseDelete={() => setDeleteTarget(null)}
         onConfirmDelete={handleDeleteConfirm}
+      />
+
+      {/* Modal Arsip Dokumen Digital KTT (dibuka saat baris KTT diklik) */}
+      <KttDocumentModal
+        isOpen={Boolean(selectedKttForDocs)}
+        onClose={() => setSelectedKttForDocs(null)}
+        ktt={selectedKttForDocs}
+        isAdmin={isAdmin}
+        userRole={userRole}
+        onDocumentsUpdated={fetchDocStats}
+      />
+
+      {/* Modal Upload Arsip Dokumen Massal .ZIP */}
+      <KttBulkZipModal
+        isOpen={showBulkZipModal}
+        onClose={() => setShowBulkZipModal(false)}
+        allKtts={data}
+        userRole={userRole}
+        onSuccess={fetchDocStats}
       />
     </div>
   );
