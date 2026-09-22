@@ -389,7 +389,7 @@ export default function KttDocumentModal({
                   onChange={(e) => setUploadCategory(e.target.value)}
                   className="h-9 px-3 text-xs rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-800 dark:text-slate-200 font-semibold focus:outline-hidden focus:border-emerald-500"
                 >
-                  <option value="auto">✨ Auto Deteksi Kategori</option>
+                  <option value="auto">Auto Deteksi Kategori</option>
                   {STANDARD_CATEGORIES.map((cat) => (
                     <option key={cat} value={cat}>
                       {cat}

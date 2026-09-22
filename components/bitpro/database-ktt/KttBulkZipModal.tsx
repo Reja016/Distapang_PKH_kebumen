@@ -9,6 +9,7 @@ import {
   AlertTriangle,
   FolderCheck,
   FolderX,
+  Folder,
   FileText,
   Loader2,
   ArrowRight,
@@ -273,11 +274,26 @@ export default function KttBulkZipModal({
             <Info size={18} className="shrink-0 text-blue-600 dark:text-blue-400 mt-0.5" />
             <div className="space-y-1 leading-relaxed">
               <p className="font-bold">Format Struktur Folder di dalam file ZIP:</p>
-              <p className="font-mono text-[11px] bg-white/70 dark:bg-slate-900/60 p-2 rounded-lg border border-blue-200/60 dark:border-blue-800/60">
-                📁 [Nama Kecamatan]/📁 [Nama KTT]/📄 SKT.pdf, Surat Keaktifan.pdf, dll.<br />
-                <span className="text-slate-500">atau langsung:</span><br />
-                📁 [Nama KTT]/📄 SKT.pdf, Monev.pdf, dll.
-              </p>
+              <div className="font-mono text-[11px] bg-white/70 dark:bg-slate-900/60 p-2.5 rounded-lg border border-blue-200/60 dark:border-blue-800/60 space-y-1">
+                <div className="flex items-center gap-1.5 flex-wrap">
+                  <Folder size={13} className="text-amber-500 inline shrink-0" />
+                  <span className="font-semibold text-slate-700 dark:text-slate-300">[Nama Kecamatan]</span>
+                  <span className="text-slate-400">/</span>
+                  <Folder size={13} className="text-amber-500 inline shrink-0" />
+                  <span className="font-semibold text-slate-700 dark:text-slate-300">[Nama KTT]</span>
+                  <span className="text-slate-400">/</span>
+                  <FileText size={13} className="text-blue-500 inline shrink-0" />
+                  <span className="text-slate-600 dark:text-slate-400">SKT.pdf, Surat Keaktifan.pdf, dll.</span>
+                </div>
+                <div className="text-[10px] text-slate-400 pl-1">atau langsung tanpa folder kecamatan:</div>
+                <div className="flex items-center gap-1.5 flex-wrap">
+                  <Folder size={13} className="text-amber-500 inline shrink-0" />
+                  <span className="font-semibold text-slate-700 dark:text-slate-300">[Nama KTT]</span>
+                  <span className="text-slate-400">/</span>
+                  <FileText size={13} className="text-blue-500 inline shrink-0" />
+                  <span className="text-slate-600 dark:text-slate-400">SKT.pdf, Monev.pdf, dll.</span>
+                </div>
+              </div>
               <p className="text-[11px] text-blue-700 dark:text-blue-300">
                 Sistem akan membaca nama folder KTT dan mencocokkannya secara otomatis dengan database. Kategori dokumen dideteksi otomatis dari nama file.
               </p>

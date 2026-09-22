@@ -101,7 +101,10 @@ export default function KttTableSection({
       <div className="rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm overflow-hidden transition-colors">
         {/* Mobile Scroll Hint */}
         <div className="px-4 py-2 bg-slate-50 dark:bg-slate-800/60 border-b border-slate-200 dark:border-slate-800 text-[11px] text-slate-500 dark:text-slate-400 sm:hidden flex items-center justify-between">
-          <span>👉 Geser tabel ke samping untuk melihat kolom lengkap</span>
+          <span className="flex items-center gap-1">
+            <ChevronRight size={13} className="text-slate-400" />
+            Geser tabel ke samping untuk melihat kolom lengkap
+          </span>
         </div>
 
         <div className="overflow-x-auto">
@@ -148,7 +151,7 @@ export default function KttTableSection({
                           )}
                         </div>
                         <span className="text-xs font-sans text-slate-500 dark:text-slate-400 block mt-0.5">
-                          Reg: {row.nomorRegister || '-'} • <span className="text-emerald-600 font-bold hover:underline">📂 Buka Berkas &raquo;</span>
+                          Reg: {row.nomorRegister || '-'} • <span className="text-emerald-600 font-bold hover:underline inline-flex items-center gap-1"><FolderOpen size={11} /> Buka Berkas &raquo;</span>
                         </span>
                       </td>
                       <td className="p-4">

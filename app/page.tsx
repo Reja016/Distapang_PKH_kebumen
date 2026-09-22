@@ -260,24 +260,20 @@ export default function LandingPage() {
   };
 
   return (
-    <div className="public-portal min-h-screen bg-[#f1f5f9] dark:bg-slate-950 text-slate-900 dark:text-slate-100 font-sans p-0 sm:p-3 md:p-6 selection:bg-blue-600 selection:text-white flex flex-col items-center">
+    <div className="public-portal min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 font-sans selection:bg-blue-600 selection:text-white flex flex-col">
       
-      {/* ─────────────────────────────────────────────
-          MAIN DASHBOARD CONTAINER (Theme: Biru Putih & Mode Gelap)
-      ───────────────────────────────────────────── */}
-      <div className="max-w-[1360px] w-full mx-auto bg-white dark:bg-slate-900 sm:rounded-3xl lg:rounded-[32px] shadow-sm overflow-hidden flex flex-col min-h-screen sm:min-h-[94vh]">
-        
-        {/* 1. TOPBAR / HEADER */}
-        <LandingHeader
-          isDark={isDark}
-          onToggleTheme={toggleTheme}
-          onOpenLogin={() => setShowLoginModal(true)}
-          mobileMenuOpen={mobileMenuOpen}
-          setMobileMenuOpen={setMobileMenuOpen}
-        />
+      {/* 1. TOPBAR / HEADER */}
+      <LandingHeader
+        isDark={isDark}
+        onToggleTheme={toggleTheme}
+        onOpenLogin={() => setShowLoginModal(true)}
+        mobileMenuOpen={mobileMenuOpen}
+        setMobileMenuOpen={setMobileMenuOpen}
+      />
 
-        {/* 2. DASHBOARD BODY */}
-        <div className="p-3.5 sm:p-6 md:p-8 lg:p-9 space-y-6 sm:space-y-7 flex-1">
+      {/* 2. DASHBOARD BODY */}
+      <main className="flex-1 w-full">
+        <div className="max-w-[1360px] mx-auto p-3.5 sm:p-6 md:p-8 lg:p-9 space-y-6 sm:space-y-7">
           
           {/* Top Hero Banner With Module Cards */}
           <LandingHeroSection
@@ -379,11 +375,10 @@ export default function LandingPage() {
           />
 
         </div>
+      </main>
 
-        {/* 3. FOOTER */}
-        <LandingFooter />
-
-      </div>
+      {/* 3. FOOTER */}
+      <LandingFooter />
 
       {/* 4. MODAL LOGIN PETUGAS */}
       <LandingLoginModal
