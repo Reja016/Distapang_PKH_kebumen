@@ -3,6 +3,7 @@ import { pool } from '@/lib/db';
 import { DEFAULT_FULL_PERMISSIONS } from '@/lib/permissions';
 import { verifyPassword, hashPassword, isHashed } from '@/lib/password';
 import { createSessionToken } from '@/lib/session';
+import { checkRateLimit, resetRateLimit, getClientIp } from '@/lib/rate-limit';
 
 export const dynamic = 'force-dynamic';
 
@@ -53,6 +54,22 @@ async function ensureTable() {
 
 export async function POST(req: Request) {
   try {
+    const clientIp = getClientIp(req);
+    const rateLimitKey = `login:${clientIp}`;
+
+    // Proteksi Brute-Force: Maksimal 5 kali percobaan login per 5 menit
+    const rateCheck = checkRateLimit(rateLimitKey, 5, 5 * 60 * 1000);
+    if (!rateCheck.success) {
+      const minutes = Math.ceil(rateCheck.retryAfterSeconds / 60);
+      return NextResponse.json(
+        {
+          success: false,
+          error: `Terlalu banyak percobaan login. Demi keamanan, akun/perangkat Anda dibatasi sementara. Silakan coba kembali dalam ${minutes} menit.`,
+        },
+        { status: 429 }
+      );
+    }
+
     const body = await req.json();
     const { nip_username, password, captcha_token } = body;
 
@@ -160,6 +177,7 @@ export async function POST(req: Request) {
         };
 
         const sessionToken = await createSessionToken(userPayload);
+        resetRateLimit(rateLimitKey);
 
         const response = NextResponse.json({
           success: true,
@@ -196,6 +214,7 @@ export async function POST(req: Request) {
             };
 
             const sessionToken = await createSessionToken(userPayload);
+            resetRateLimit(rateLimitKey);
 
             const response = NextResponse.json({
               success: true,

@@ -122,7 +122,7 @@ export function MonevDashboardTab({
                         const allPhotos = (d.photos && d.photos.length > 0) ? d.photos : (d.photo ? [d.photo] : []);
 
                         return (
-                          <tr key={d.id} className="hover:bg-slate-50/80 transition-colors">
+                          <tr key={d.id} className="hover:bg-slate-50/80 dark:hover:bg-slate-800/60 transition-colors">
                             <td className="p-3.5 font-sans text-xs text-slate-500">
                               {d.waktuMonev || new Date(Number(d.id)).toLocaleDateString('id-ID')}
                             </td>

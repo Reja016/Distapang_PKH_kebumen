@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import pool from '@/lib/db';
+import { requireAdmin } from '@/lib/session';
 
 export const dynamic = 'force-dynamic';
 
@@ -4605,7 +4606,10 @@ const DATA_LENGKAP = [
     ],
   },
 ];
-export async function GET() {
+export async function GET(req: Request) {
+  const auth = await requireAdmin(req);
+  if ('errorResponse' in auth) return auth.errorResponse;
+
   try {
     // 1. Perintah otomatis membuat tabel di MySQL
     await pool.query(`

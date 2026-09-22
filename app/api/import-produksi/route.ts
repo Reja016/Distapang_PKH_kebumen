@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import pool from '@/lib/db';
+import { requireAdmin } from '@/lib/session';
 
 export const dynamic = 'force-dynamic';
 
@@ -30,7 +31,10 @@ const dataTelur = [
   { jenis: 'Entog', jan: 58093, feb: 52471, mar: 58093, apr: 56271, mei: 58147, jun: 56271, jul: 58147, agt: 58147, sep: 56271, okt: 59044, nov: 57139, des: 59044, total: 687138.55 },
 ];
 
-export async function GET() {
+export async function GET(req: Request) {
+  const auth = await requireAdmin(req);
+  if ('errorResponse' in auth) return auth.errorResponse;
+
   try {
     // 1. Buat tabel produksi
     await pool.query(`

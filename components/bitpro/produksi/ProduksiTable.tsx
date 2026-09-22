@@ -52,7 +52,7 @@ export default function ProduksiTable({
           </thead>
           <tbody className="divide-y divide-slate-200 text-slate-800">
             {data.map((row, i) => (
-              <tr key={i} className="hover:bg-slate-50/80 transition-colors">
+              <tr key={i} className="hover:bg-slate-50/80 dark:hover:bg-slate-800/60 transition-colors">
                 <td className="p-3.5 font-bold text-left text-slate-900 sticky left-0 bg-white z-10 border-r border-slate-100">
                   {row.jenis}
                 </td>

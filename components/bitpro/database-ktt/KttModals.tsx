@@ -39,8 +39,8 @@ export default function KttModals({
     <>
       {/* ── MODAL FORM TAMBAH/EDIT ── */}
       {formOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
-          <div className="w-full max-w-2xl max-h-[90vh] bg-white rounded-2xl border border-slate-200 shadow-2xl flex flex-col overflow-hidden animate-in zoom-in-95 duration-200">
+        <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className="w-full max-w-2xl max-h-[94vh] sm:max-h-[90vh] bg-white rounded-t-3xl sm:rounded-2xl border border-slate-200 shadow-2xl flex flex-col overflow-hidden animate-in zoom-in-95 duration-200">
             <div className="p-5 border-b border-slate-200 flex items-center justify-between bg-slate-50">
               <h3 className="font-bold text-slate-900 text-base">
                 {formMode === 'tambah' ? 'Tambah Kelompok Tani Baru' : 'Edit Data Kelompok Tani'}
@@ -152,6 +152,7 @@ export default function KttModals({
                   </label>
                   <input
                     type="number"
+                    inputMode="numeric"
                     min="0"
                     value={formValues.anggotaLaki}
                     onChange={(e) =>
@@ -167,6 +168,7 @@ export default function KttModals({
                   </label>
                   <input
                     type="number"
+                    inputMode="numeric"
                     min="0"
                     value={formValues.anggotaPerempuan}
                     onChange={(e) =>
@@ -177,7 +179,8 @@ export default function KttModals({
                 </div>
               </div>
 
-              <div className="pt-4 border-t border-slate-100 flex items-center justify-end gap-3">
+              {/* Sticky Action Footer */}
+              <div className="sticky bottom-0 bg-white/95 backdrop-blur-md pt-3.5 pb-1 border-t border-slate-100 flex items-center justify-end gap-3">
                 <button
                   type="button"
                   onClick={onCloseForm}

@@ -60,7 +60,7 @@ export default function PopulasiTable({
           <tbody className="divide-y divide-slate-100 text-slate-800">
             {savedData.length > 0 ? (
               savedData.map((d, i) => (
-                <tr key={i} className="hover:bg-slate-50/80 transition-colors">
+                <tr key={i} className="hover:bg-slate-50/80 dark:hover:bg-slate-800/60 transition-colors">
                   <td className="p-3.5 text-center font-sans text-slate-400">{i + 1}</td>
                   <td className="p-3.5 font-bold text-emerald-800">{d.tw}</td>
                   <td className="p-3.5 font-bold text-slate-900">{d.kec}</td>

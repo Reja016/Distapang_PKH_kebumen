@@ -96,13 +96,18 @@ export default function KttTableSection({
       </div>
 
       {/* Table */}
-      <div className="rounded-2xl border border-slate-200 bg-white shadow-sm overflow-hidden">
+      <div className="rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm overflow-hidden transition-colors">
+        {/* Mobile Scroll Hint */}
+        <div className="px-4 py-2 bg-slate-50 dark:bg-slate-800/60 border-b border-slate-200 dark:border-slate-800 text-[11px] text-slate-500 dark:text-slate-400 sm:hidden flex items-center justify-between">
+          <span>👉 Geser tabel ke samping untuk melihat kolom lengkap</span>
+        </div>
+
         <div className="overflow-x-auto">
           <table className="w-full text-left text-sm whitespace-nowrap">
-            <thead className="bg-slate-50 text-slate-600 text-xs font-semibold uppercase tracking-wider border-b border-slate-200">
+            <thead className="bg-slate-50 dark:bg-slate-800/90 text-slate-600 dark:text-slate-300 text-xs font-semibold uppercase tracking-wider border-b border-slate-200 dark:border-slate-800">
               <tr>
                 <th className="p-4 w-12 text-center">NO</th>
-                <th className="p-4">NAMA KELOMPOK & REG</th>
+                <th className="p-4">NAMA KELOMPOK &amp; REG</th>
                 <th className="p-4">LOKASI DESA / KEC</th>
                 <th className="p-4">KETUA KELOMPOK</th>
                 <th className="p-4 text-center">KELAS</th>
@@ -110,30 +115,30 @@ export default function KttTableSection({
                 {canEdit && <th className="p-4 text-center w-24">AKSI</th>}
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-200 text-slate-800">
+            <tbody className="divide-y divide-slate-200 dark:divide-slate-800 text-slate-800 dark:text-slate-200">
               {paginated.length > 0 ? (
                 paginated.map((row, idx) => (
-                  <tr key={row.id} className="hover:bg-slate-50/80 transition-colors">
-                    <td className="p-4 text-center font-sans text-slate-400 text-xs">
+                  <tr key={row.id} className="hover:bg-slate-50/80 dark:hover:bg-slate-800/60 transition-colors">
+                    <td className="p-4 text-center font-sans text-slate-400 dark:text-slate-500 text-xs">
                       {(currentPage - 1) * PAGE_SIZE + idx + 1}
                     </td>
                     <td className="p-4">
-                      <span className="font-bold text-slate-900 block text-sm">
+                      <span className="font-bold text-slate-900 dark:text-slate-100 block text-sm">
                         {row.namaKelompok || '-'}
                       </span>
-                      <span className="text-xs font-sans text-slate-500 block">
+                      <span className="text-xs font-sans text-slate-500 dark:text-slate-400 block">
                         Reg: {row.nomorRegister || '-'}
                       </span>
                     </td>
                     <td className="p-4">
-                      <span className="text-slate-800 font-medium block text-xs">
+                      <span className="text-slate-800 dark:text-slate-200 font-medium block text-xs">
                         {row.desa || '-'}
                       </span>
-                      <span className="text-xs text-slate-500 font-sans">
+                      <span className="text-xs text-slate-500 dark:text-slate-400 font-sans">
                         Kec. {row.kecamatan || '-'}
                       </span>
                     </td>
-                    <td className="p-4 text-slate-700 text-xs font-medium">
+                    <td className="p-4 text-slate-700 dark:text-slate-300 text-xs font-medium">
                       <span className="flex items-center gap-1.5">
                         <User size={13} className="text-slate-400 shrink-0" />
                         <span>{row.namaKetuaKelompok || '-'}</span>
@@ -143,10 +148,10 @@ export default function KttTableSection({
                       <KelasBadge kelas={row.kelasKelompok} />
                     </td>
                     <td className="p-4 text-right font-sans text-xs">
-                      <span className="font-bold text-slate-900">
+                      <span className="font-bold text-slate-900 dark:text-slate-100">
                         {(row.anggotaLaki || 0) + (row.anggotaPerempuan || 0)}
                       </span>
-                      <span className="text-slate-400 text-[11px] block">
+                      <span className="text-slate-400 dark:text-slate-500 text-[11px] block">
                         {row.anggotaLaki || 0}L · {row.anggotaPerempuan || 0}P
                       </span>
                     </td>
@@ -155,14 +160,14 @@ export default function KttTableSection({
                         <div className="flex items-center justify-center gap-1.5">
                           <button
                             onClick={() => onEdit(row)}
-                            className="min-h-touch h-8 w-8 rounded-lg border border-slate-200 bg-slate-50 hover:bg-slate-100 text-slate-600 flex items-center justify-center transition-colors cursor-pointer"
+                            className="min-h-touch h-8 w-8 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 flex items-center justify-center transition-colors cursor-pointer"
                             aria-label="Edit"
                           >
                             <Edit2 size={13} />
                           </button>
                           <button
                             onClick={() => onDelete(row)}
-                            className="min-h-touch h-8 w-8 rounded-lg border border-red-200 bg-red-50 hover:bg-red-100 text-red-600 flex items-center justify-center transition-colors cursor-pointer"
+                            className="min-h-touch h-8 w-8 rounded-lg border border-red-200 dark:border-red-900/50 bg-red-50 dark:bg-red-950/30 hover:bg-red-100 dark:hover:bg-red-900/50 text-red-600 dark:text-red-400 flex items-center justify-center transition-colors cursor-pointer"
                             aria-label="Hapus"
                           >
                             <Trash2 size={13} />
@@ -174,7 +179,7 @@ export default function KttTableSection({
                 ))
               ) : (
                 <tr>
-                  <td colSpan={canEdit ? 7 : 6} className="p-12 text-center text-slate-400 font-medium text-sm">
+                  <td colSpan={canEdit ? 7 : 6} className="p-12 text-center text-slate-400 dark:text-slate-500 font-medium text-sm">
                     Tidak ada kelompok tani yang sesuai filter.
                   </td>
                 </tr>
@@ -184,7 +189,7 @@ export default function KttTableSection({
         </div>
 
         {/* Pagination Bar */}
-        <div className="p-4 border-t border-slate-200 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs text-slate-600">
+        <div className="p-4 border-t border-slate-200 dark:border-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs text-slate-600 dark:text-slate-300">
           <span className="font-sans">
             Menampilkan {paginated.length} dari {filteredCount} kelompok terdaftar
           </span>
@@ -193,7 +198,7 @@ export default function KttTableSection({
             <button
               onClick={() => setPage((p) => Math.max(1, p - 1))}
               disabled={currentPage <= 1}
-              className="min-h-touch h-8 px-3 rounded-lg border border-slate-200 bg-slate-50 hover:bg-slate-100 disabled:opacity-40 disabled:cursor-not-allowed font-semibold flex items-center gap-1 cursor-pointer"
+              className="min-h-touch h-8 px-3 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 disabled:opacity-40 disabled:cursor-not-allowed font-semibold flex items-center gap-1 cursor-pointer"
             >
               <ChevronLeft size={14} />
               <span>Sebelumnya</span>
@@ -206,7 +211,7 @@ export default function KttTableSection({
             <button
               onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
               disabled={currentPage >= totalPages}
-              className="min-h-touch h-8 px-3 rounded-lg border border-slate-200 bg-slate-50 hover:bg-slate-100 disabled:opacity-40 disabled:cursor-not-allowed font-semibold flex items-center gap-1 cursor-pointer"
+              className="min-h-touch h-8 px-3 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 disabled:opacity-40 disabled:cursor-not-allowed font-semibold flex items-center gap-1 cursor-pointer"
             >
               <span>Selanjutnya</span>
               <ChevronRight size={14} />

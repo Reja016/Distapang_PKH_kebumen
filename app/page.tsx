@@ -265,7 +265,7 @@ export default function LandingPage() {
       {/* ─────────────────────────────────────────────
           MAIN DASHBOARD CONTAINER (Theme: Biru Putih & Mode Gelap)
       ───────────────────────────────────────────── */}
-      <div className="max-w-[1360px] w-full mx-auto bg-white dark:bg-slate-900 sm:rounded-3xl lg:rounded-[32px] shadow-sm sm:border-2 sm:border-slate-200 dark:sm:border-slate-800 overflow-hidden flex flex-col min-h-screen sm:min-h-[94vh]">
+      <div className="max-w-[1360px] w-full mx-auto bg-white dark:bg-slate-900 sm:rounded-3xl lg:rounded-[32px] shadow-sm overflow-hidden flex flex-col min-h-screen sm:min-h-[94vh]">
         
         {/* 1. TOPBAR / HEADER */}
         <LandingHeader

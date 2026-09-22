@@ -24,11 +24,11 @@ export default function LandingHeroSection({ onSelectModule }: LandingHeroSectio
           Satu Ekosistem untuk Data <span className="text-blue-600 dark:text-blue-400">Peternakan Kebumen</span>
         </h1>
         <p className="text-xs sm:text-base text-slate-700 dark:text-slate-200 leading-relaxed mb-3 sm:mb-4">
-          Sistem Informasi Manajemen Terpadu yang mengintegrasikan data Perbibitan &amp; Produksi (Bitpro), Kesehatan Hewan (Keswan), dan Kesehatan Masyarakat Veteriner (Kesmavet) langsung dari basis data resmi secara real-time.
+          Sistem Informasi Manajemen Terpadu yang mengintegrasikan data Perbibitan &amp; Produksi (Bitpro), Kesehatan Hewan (Keswan), dan Kesehatan Masyarakat Veteriner (Kesmavet).
         </p>
         
         <div className="flex items-center gap-1.5 text-xs sm:text-sm font-bold text-blue-700 dark:text-blue-400">
-          <span>Pilih kartu modul untuk membuka data</span>
+          <span>Pilih modul untuk melihat data</span>
           <ArrowRight size={14} className="shrink-0" />
         </div>
       </div>

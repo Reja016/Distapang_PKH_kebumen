@@ -71,8 +71,93 @@ export default function SidebarNav({
     }));
   };
 
+  // ── DRAGGABLE SIDEBAR RESIZER STATE ──
+  const DEFAULT_WIDTH = 300;
+  const MIN_WIDTH = 220;
+  const MAX_WIDTH = 460;
+
+  const [sidebarWidth, setSidebarWidth] = useState<number>(DEFAULT_WIDTH);
+  const [isResizing, setIsResizing] = useState(false);
+  const [isDesktop, setIsDesktop] = useState(false);
+
+  // Deteksi ukuran layar desktop
+  useEffect(() => {
+    const checkDesktop = () => setIsDesktop(window.innerWidth >= 768);
+    checkDesktop();
+    window.addEventListener('resize', checkDesktop);
+    return () => window.removeEventListener('resize', checkDesktop);
+  }, []);
+
+  // Baca preferensi lebar dari localStorage saat mount
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem('simantap_sidebar_width');
+      if (saved) {
+        const parsed = parseInt(saved, 10);
+        if (!isNaN(parsed) && parsed >= MIN_WIDTH && parsed <= MAX_WIDTH) {
+          setSidebarWidth(parsed);
+        }
+      }
+    } catch {}
+  }, []);
+
+  // Handler mulai drag resize
+  const startResizing = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsResizing(true);
+  };
+
+  // Double click pada resizer untuk reset ke lebar default
+  const resetWidth = () => {
+    setSidebarWidth(DEFAULT_WIDTH);
+    try {
+      localStorage.setItem('simantap_sidebar_width', DEFAULT_WIDTH.toString());
+    } catch {}
+  };
+
+  useEffect(() => {
+    if (!isResizing) return;
+
+    const handleMouseMove = (e: MouseEvent) => {
+      // Sidebar menempel di tepi kiri jendela (x=0), maka lebar sidebar = clientX
+      const newWidth = Math.min(Math.max(e.clientX, MIN_WIDTH), MAX_WIDTH);
+      setSidebarWidth(newWidth);
+    };
+
+    const handleMouseUp = () => {
+      setIsResizing(false);
+      setSidebarWidth((currentWidth) => {
+        try {
+          localStorage.setItem('simantap_sidebar_width', currentWidth.toString());
+        } catch {}
+        return currentWidth;
+      });
+    };
+
+    document.body.style.userSelect = 'none';
+    document.body.style.cursor = 'col-resize';
+    window.addEventListener('mousemove', handleMouseMove);
+    window.addEventListener('mouseup', handleMouseUp);
+
+    return () => {
+      document.body.style.userSelect = '';
+      document.body.style.cursor = '';
+      window.removeEventListener('mousemove', handleMouseMove);
+      window.removeEventListener('mouseup', handleMouseUp);
+    };
+  }, [isResizing]);
+
   return (
     <>
+      {/* ── FULLSCREEN DRAG SHIELD (Mencegah iframe di sebelah kanan menelan event mouse saat dragging) ── */}
+      {isResizing && (
+        <div
+          className="fixed inset-0 z-[99999] cursor-col-resize select-none bg-transparent"
+          style={{ cursor: 'col-resize' }}
+        />
+      )}
+
       {/* Mobile Sidebar Backdrop */}
       {sidebarOpen && (
         <div
@@ -81,14 +166,26 @@ export default function SidebarNav({
         />
       )}
 
-      {/* ── SIDEBAR NAVIGATION (STICKY TERKUNCI SAAT SCROLL & MINI COLLAPSE MODE) ── */}
+      {/* ── SIDEBAR NAVIGATION (STICKY TERKUNCI SAAT SCROLL, MINI COLLAPSE, & DRAGGABLE RESIZER) ── */}
       <aside
-        className={`fixed md:sticky top-0 left-0 z-50 h-screen flex flex-col shrink-0 transition-all duration-300 ease-in-out border-r-2 ${
+        style={
+          isDesktop && !isCollapsed
+            ? {
+                width: `${sidebarWidth}px`,
+                minWidth: `${sidebarWidth}px`,
+                maxWidth: `${sidebarWidth}px`,
+                transition: isResizing ? 'none' : undefined,
+              }
+            : undefined
+        }
+        className={`fixed md:sticky top-0 left-0 z-50 h-screen flex flex-col shrink-0 border-r-2 ${
+          isResizing ? '' : 'transition-all duration-300 ease-in-out'
+        } ${
           isDark
             ? 'bg-slate-900 border-slate-800 text-slate-100'
             : 'bg-slate-100 border-slate-300 text-slate-800 shadow-sm'
         } ${sidebarOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'} ${
-          isCollapsed ? 'w-72 md:w-20' : 'w-72 lg:w-80'
+          isCollapsed ? 'w-72 md:w-20' : 'w-72'
         }`}
       >
         {/* Brand Header */}
@@ -648,6 +745,27 @@ export default function SidebarNav({
                 <span>Keluar</span>
               </button>
             </div>
+          </div>
+        )}
+
+        {/* ── DRAGGABLE RESIZER HANDLE (DESKTOP ONLY) ── */}
+        {!isCollapsed && (
+          <div
+            onMouseDown={startResizing}
+            onDoubleClick={resetWidth}
+            className={`hidden md:flex absolute top-0 -right-3 w-6 h-full cursor-col-resize select-none z-50 items-center justify-center group ${
+              isResizing ? 'bg-emerald-500/10' : ''
+            }`}
+            title="Tarik ke samping untuk mengatur lebar sidebar (Klik 2x untuk reset)"
+          >
+            {/* Visual hover indicator */}
+            <div
+              className={`w-1 rounded-full transition-all duration-150 ${
+                isResizing
+                  ? 'h-28 bg-emerald-500 ring-4 ring-emerald-400/40 shadow-lg'
+                  : 'h-12 bg-slate-300 dark:bg-slate-700 opacity-0 group-hover:opacity-100 group-hover:h-20 group-hover:bg-emerald-500'
+              }`}
+            />
           </div>
         )}
       </aside>

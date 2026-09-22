@@ -70,7 +70,7 @@ export default function LandingFacilitiesSection({
           }`}
         >
           <Stethoscope size={18} className="shrink-0" />
-          <span>Unit Puskeswan (8 Unit Aktif)</span>
+          <span>Daftar Puskeswan</span>
         </button>
 
         <button
@@ -83,7 +83,7 @@ export default function LandingFacilitiesSection({
           }`}
         >
           <Building2 size={18} className="shrink-0" />
-          <span>Rumah Potong Hewan (RPH Kebumen &amp; Gombong)</span>
+          <span>Rumah Potong Hewan</span>
         </button>
       </div>
 

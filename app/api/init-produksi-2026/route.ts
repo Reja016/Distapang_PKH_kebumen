@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import pool from '@/lib/db';
+import { requireAdmin } from '@/lib/session';
 
 export const dynamic = 'force-dynamic';
 
@@ -12,7 +13,10 @@ const listTelur = [
   'Ayam Ras Petelur Produktif', 'Ayam Buras', 'Itik', 'Burung Puyuh', 'Entog'
 ];
 
-export async function GET() {
+export async function GET(req: Request) {
+  const auth = await requireAdmin(req);
+  if ('errorResponse' in auth) return auth.errorResponse;
+
   try {
     // 1. Bikin tabel khusus 2026
     await pool.query(`

@@ -7,24 +7,52 @@ export async function middleware(request: NextRequest) {
   const sessionCookie = request.cookies.get('simantap_session')?.value;
   const validSession = await verifySessionToken(sessionCookie);
 
-  // 1. Proteksi endpoint API Admin (/api/admin/*)
-  if (pathname.startsWith('/api/admin')) {
+  // 1. Proteksi endpoint khusus Administrator:
+  // - /api/admin/* (Backup database, restore, dll)
+  // - /api/anggota (Kelola pengguna dan hak akses)
+  // - /api/import-* (Skrip pembersih / seeder data awal yang ada TRUNCATE)
+  // - /api/init-* (Inisialisasi tabel)
+  const isAdminOnlyApi =
+    pathname.startsWith('/api/admin') ||
+    pathname.startsWith('/api/anggota') ||
+    pathname.startsWith('/api/import-') ||
+    pathname.startsWith('/api/init-');
+
+  if (isAdminOnlyApi) {
     if (!validSession) {
       return NextResponse.json(
-        { success: false, error: 'Akses Ditolak: Anda belum login.' },
+        { success: false, error: 'Akses Ditolak: Anda wajib login sebagai Administrator.' },
         { status: 401 }
       );
     }
     if (validSession.role !== 'Administrator') {
       return NextResponse.json(
-        { success: false, error: 'Akses Dilarang: Hanya Administrator yang berhak.' },
+        { success: false, error: 'Akses Dilarang: Fitur ini hanya untuk Administrator.' },
         { status: 403 }
       );
     }
     return NextResponse.next();
   }
 
-  // 2. Daftar route internal halaman web yang wajib login
+  // 2. Proteksi seluruh operasi modifikasi (POST, PUT, PATCH, DELETE) pada API internal
+  // Endpoint publik yang dikecualikan: /api/auth/login, /api/auth/logout, /api/ai-chat, /api/portal-stats
+  const isPublicApi =
+    pathname === '/api/auth/login' ||
+    pathname === '/api/auth/logout' ||
+    pathname === '/api/ai-chat' ||
+    pathname === '/api/portal-stats';
+
+  if (pathname.startsWith('/api/') && !isPublicApi) {
+    const isMutatingMethod = ['POST', 'PUT', 'PATCH', 'DELETE'].includes(request.method);
+    if (isMutatingMethod && !validSession) {
+      return NextResponse.json(
+        { success: false, error: 'Akses Ditolak: Operasi data ini membutuhkan autentikasi login.' },
+        { status: 401 }
+      );
+    }
+  }
+
+  // 3. Daftar route internal halaman web yang wajib login
   const protectedPages = ['/beranda', '/bitpro', '/keswan', '/kesmavet', '/aset'];
 
   const isProtectedPage = protectedPages.some((route) =>
@@ -55,6 +83,6 @@ export const config = {
     '/kesmavet/:path*',
     '/aset/:path*',
     '/login',
-    '/api/admin/:path*',
+    '/api/:path*',
   ],
 };

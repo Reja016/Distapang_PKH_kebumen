@@ -79,26 +79,26 @@ export function SklbDetailTab({
       </div>
 
       {/* Data Table Kotak */}
-      <div className="border-2 border-slate-300 bg-white overflow-hidden">
+      <div className="border-2 border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-xs whitespace-nowrap border-collapse">
-            <thead className="bg-slate-200 text-slate-800 font-bold uppercase tracking-wider border-b-2 border-slate-300">
+            <thead className="bg-slate-200 dark:bg-slate-800 text-slate-800 dark:text-slate-200 font-bold uppercase tracking-wider border-b-2 border-slate-300 dark:border-slate-700">
               <tr>
-                <th className="p-3 text-center w-10 border border-slate-300">NO</th>
-                <th className="p-3 text-left border border-slate-300">DESA LOKASI</th>
-                <th className="p-3 text-left border border-slate-300">PEMILIK</th>
-                <th className="p-3 text-left border border-slate-300">ALAMAT (DUSUN/RT/RW)</th>
-                <th className="p-3 text-left border border-slate-300">NAMA SAPI</th>
-                <th className="p-3 text-center border border-slate-300">KELAMIN</th>
-                <th className="p-3 text-center border border-slate-300">UMUR (BLN)</th>
-                <th className="p-3 text-center border border-slate-300">TINGGI (CM)</th>
-                <th className="p-3 text-center border border-slate-300">PANJANG (CM)</th>
-                <th className="p-3 text-center border border-slate-300">DADA (CM)</th>
-                <th className="p-3 text-center border border-slate-300">BERAT (KG)</th>
-                {canEdit && <th className="p-3 text-center w-20 border border-slate-300">AKSI</th>}
+                <th className="p-3 text-center w-10 border border-slate-300 dark:border-slate-700">NO</th>
+                <th className="p-3 text-left border border-slate-300 dark:border-slate-700">DESA LOKASI</th>
+                <th className="p-3 text-left border border-slate-300 dark:border-slate-700">PEMILIK</th>
+                <th className="p-3 text-left border border-slate-300 dark:border-slate-700">ALAMAT (DUSUN/RT/RW)</th>
+                <th className="p-3 text-left border border-slate-300 dark:border-slate-700">NAMA SAPI</th>
+                <th className="p-3 text-center border border-slate-300 dark:border-slate-700">KELAMIN</th>
+                <th className="p-3 text-center border border-slate-300 dark:border-slate-700">UMUR (BLN)</th>
+                <th className="p-3 text-center border border-slate-300 dark:border-slate-700">TINGGI (CM)</th>
+                <th className="p-3 text-center border border-slate-300 dark:border-slate-700">PANJANG (CM)</th>
+                <th className="p-3 text-center border border-slate-300 dark:border-slate-700">DADA (CM)</th>
+                <th className="p-3 text-center border border-slate-300 dark:border-slate-700">BERAT (KG)</th>
+                {canEdit && <th className="p-3 text-center w-20 border border-slate-300 dark:border-slate-700">AKSI</th>}
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-200 text-slate-900 font-medium">
+            <tbody className="divide-y divide-slate-200 dark:divide-slate-800 text-slate-900 dark:text-slate-100 font-medium">
               {filteredData.length === 0 ? (
                 <tr>
                   <td colSpan={canEdit ? 12 : 11} className="p-12 text-center text-slate-400 font-semibold">
@@ -107,15 +107,15 @@ export function SklbDetailTab({
                 </tr>
               ) : (
                 filteredData.map((row, idx) => (
-                  <tr key={row.id || idx} className="hover:bg-slate-50 transition-colors">
-                    <td className="p-2.5 text-center font-sans text-slate-500 border border-slate-200">{idx + 1}</td>
-                    <td className="p-2.5 font-bold text-emerald-800 border border-slate-200">{row.desa_lokasi}</td>
-                    <td className="p-2.5 font-bold text-slate-900 border border-slate-200">{row.nama_pemilik}</td>
-                    <td className="p-2.5 text-slate-700 border border-slate-200">
+                  <tr key={row.id || idx} className="hover:bg-slate-50 dark:hover:bg-slate-800/60 transition-colors">
+                    <td className="p-2.5 text-center font-sans text-slate-500 dark:text-slate-400 border border-slate-200 dark:border-slate-700">{idx + 1}</td>
+                    <td className="p-2.5 font-bold text-emerald-800 dark:text-emerald-400 border border-slate-200 dark:border-slate-700">{row.desa_lokasi}</td>
+                    <td className="p-2.5 font-bold text-slate-900 dark:text-slate-100 border border-slate-200 dark:border-slate-700">{row.nama_pemilik}</td>
+                    <td className="p-2.5 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700">
                       {row.dusun || '-'} (RT {row.rt || '-'}/RW {row.rw || '-'})
                     </td>
-                    <td className="p-2.5 font-semibold text-slate-800 border border-slate-200">{row.nama_sapi}</td>
-                    <td className="p-2.5 text-center border border-slate-200">
+                    <td className="p-2.5 font-semibold text-slate-800 dark:text-slate-200 border border-slate-200 dark:border-slate-700">{row.nama_sapi}</td>
+                    <td className="p-2.5 text-center border border-slate-200 dark:border-slate-700">
                       <span
                         className={`px-2 py-0.5 text-[10px] font-bold ${
                           row.jenis_kelamin === 'Jantan'
@@ -126,23 +126,23 @@ export function SklbDetailTab({
                         {row.jenis_kelamin}
                       </span>
                     </td>
-                    <td className="p-2.5 text-center font-sans border border-slate-200">{row.umur_bulan}</td>
-                    <td className="p-2.5 text-center font-sans border border-slate-200">{row.tinggi_pundak}</td>
-                    <td className="p-2.5 text-center font-sans border border-slate-200">{row.panjang_badan}</td>
-                    <td className="p-2.5 text-center font-sans border border-slate-200">{row.lingkar_dada}</td>
-                    <td className="p-2.5 text-center font-sans font-bold text-slate-900 border border-slate-200">{row.berat_badan}</td>
+                    <td className="p-2.5 text-center font-sans text-slate-800 dark:text-slate-200 border border-slate-200 dark:border-slate-700">{row.umur_bulan}</td>
+                    <td className="p-2.5 text-center font-sans text-slate-800 dark:text-slate-200 border border-slate-200 dark:border-slate-700">{row.tinggi_pundak}</td>
+                    <td className="p-2.5 text-center font-sans text-slate-800 dark:text-slate-200 border border-slate-200 dark:border-slate-700">{row.panjang_badan}</td>
+                    <td className="p-2.5 text-center font-sans text-slate-800 dark:text-slate-200 border border-slate-200 dark:border-slate-700">{row.lingkar_dada}</td>
+                    <td className="p-2.5 text-center font-sans font-bold text-slate-900 dark:text-slate-100 border border-slate-200 dark:border-slate-700">{row.berat_badan}</td>
                     {canEdit && (
-                      <td className="p-2.5 text-center border border-slate-200">
+                      <td className="p-2.5 text-center border border-slate-200 dark:border-slate-700">
                         <div className="flex items-center justify-center gap-1">
                           <button
                             onClick={() => onOpenModalDetail('edit', row)}
-                            className="h-7 w-7 border border-slate-300 bg-white text-slate-700 flex items-center justify-center hover:bg-slate-100 cursor-pointer"
+                            className="h-7 w-7 border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 flex items-center justify-center hover:bg-slate-100 dark:hover:bg-slate-700 cursor-pointer"
                           >
                             <Edit2 size={12} />
                           </button>
                           <button
                             onClick={() => onDeleteDetail(row.id)}
-                            className="h-7 w-7 border border-rose-300 bg-rose-50 text-rose-700 flex items-center justify-center hover:bg-rose-100 cursor-pointer"
+                            className="h-7 w-7 border border-rose-300 dark:border-rose-800 bg-rose-50 dark:bg-rose-950/40 text-rose-700 dark:text-rose-300 flex items-center justify-center hover:bg-rose-100 dark:hover:bg-rose-900/60 cursor-pointer"
                           >
                             <Trash2 size={12} />
                           </button>

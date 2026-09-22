@@ -291,11 +291,11 @@ export default function LaporanPenyakitPage() {
     <div className="min-h-screen bg-blue-50/20 text-slate-900 font-sans selection:bg-blue-600 selection:text-white pb-24">
       {/* ── TOP HEADER ── */}
       <header className="border-b border-blue-100 bg-white/95 backdrop-blur-md sticky top-0 z-30 shadow-xs print:hidden">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-5 min-h-[80px] sm:min-h-[88px] flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 sm:py-5 min-h-[64px] sm:min-h-[88px] flex items-center justify-between gap-3">
           <div className="flex items-center gap-3 min-w-0 flex-1">
             <Link
               href="/keswan"
-              className="min-h-touch min-w-touch w-11 h-11 rounded-2xl bg-blue-600 hover:bg-blue-700 text-white flex items-center justify-center transition-all shadow-xs shrink-0"
+              className="min-h-touch min-w-touch w-10 h-10 sm:w-11 sm:h-11 rounded-xl sm:rounded-2xl bg-blue-600 hover:bg-blue-700 text-white flex items-center justify-center transition-all shadow-xs shrink-0"
               aria-label="Kembali ke Modul Keswan"
             >
               <ArrowLeft size={18} strokeWidth={2.5} />
@@ -307,29 +307,33 @@ export default function LaporanPenyakitPage() {
                   Kesehatan Hewan (Keswan)
                 </Link>
                 <span className="text-slate-300">/</span>
-                <span className="text-xs font-bold text-blue-700 whitespace-nowrap">Laporan Penyakit Hewan</span>
+                <span className="text-xs font-bold text-blue-700 whitespace-nowrap">Laporan Penyakit</span>
               </div>
-              <h1 className="text-base sm:text-xl font-extrabold text-slate-900 tracking-tight leading-tight truncate">
+              <h1 className="text-sm sm:text-xl font-extrabold text-slate-900 tracking-tight leading-tight line-clamp-2 sm:line-clamp-none">
                 Peta &amp; Rekapitulasi Kasus Penyakit Hewan
               </h1>
             </div>
           </div>
 
-          <div className="flex items-center gap-2.5 shrink-0 flex-wrap">
+          <div className="flex items-center gap-1.5 sm:gap-2.5 shrink-0">
             <button
               onClick={() => window.print()}
-              className="h-10 px-3.5 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 text-xs font-bold flex items-center gap-1.5 shadow-xs transition-colors cursor-pointer"
+              title="Cetak / PDF"
+              aria-label="Cetak / PDF"
+              className="min-h-touch min-w-touch h-10 w-10 sm:w-auto sm:px-3.5 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 text-xs font-bold flex items-center justify-center sm:gap-1.5 shadow-xs transition-colors cursor-pointer"
             >
               <Printer size={15} />
-              <span>Cetak / PDF</span>
+              <span className="hidden sm:inline">Cetak / PDF</span>
             </button>
 
             <button
               onClick={handleExportExcel}
-              className="h-10 px-3.5 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 text-xs font-bold flex items-center gap-1.5 shadow-xs transition-colors cursor-pointer"
+              title="Export Excel"
+              aria-label="Export Excel"
+              className="min-h-touch min-w-touch h-10 w-10 sm:w-auto sm:px-3.5 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 text-xs font-bold flex items-center justify-center sm:gap-1.5 shadow-xs transition-colors cursor-pointer"
             >
               <Download size={15} />
-              <span>Export Excel</span>
+              <span className="hidden sm:inline">Export Excel</span>
             </button>
 
             {canCreate && (
@@ -346,10 +350,12 @@ export default function LaporanPenyakitPage() {
                   });
                   setShowAddModal(true);
                 }}
-                className="h-10 px-4 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold flex items-center gap-1.5 shadow-xs transition-colors cursor-pointer"
+                title="Tambah Kasus"
+                aria-label="Tambah Kasus"
+                className="min-h-touch min-w-touch h-10 w-10 sm:w-auto sm:px-4 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold flex items-center justify-center sm:gap-1.5 shadow-xs transition-colors cursor-pointer"
               >
                 <Plus size={15} strokeWidth={2.5} />
-                <span>Tambah Kasus</span>
+                <span className="hidden sm:inline">Tambah Kasus</span>
               </button>
             )}
           </div>

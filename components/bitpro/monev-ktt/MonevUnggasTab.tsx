@@ -936,88 +936,88 @@ export function MonevUnggasTab({
               <span>4. Petugas Monev &amp; Upload Dokumen Hasil Lapangan (PDF Maks 2 MB)</span>
             </h4>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div>
-                <label className="block text-xs font-sans font-bold uppercase tracking-wider text-slate-600 mb-1">
-                  Upload Dokumen Hasil Lapangan (PDF Maksimal 2 MB)
-                </label>
-                <input
-                  type="file"
-                  accept="application/pdf"
-                  onChange={handlePdfUpload}
-                  className="w-full text-xs text-slate-600 file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-bold file:bg-amber-600 file:text-white hover:file:bg-amber-700 cursor-pointer"
+            {/* Upload Dokumen Hasil Lapangan (PDF) */}
+            <div className="p-4 rounded-xl border border-slate-200 bg-white/90 shadow-2xs space-y-2">
+              <label className="block text-xs font-sans font-bold uppercase tracking-wider text-slate-600 mb-1">
+                Upload Dokumen Hasil Lapangan (PDF Maksimal 2 MB)
+              </label>
+              <input
+                type="file"
+                accept="application/pdf"
+                onChange={handlePdfUpload}
+                className="w-full text-xs text-slate-600 file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-bold file:bg-amber-600 file:text-white hover:file:bg-amber-700 cursor-pointer"
+              />
+              {dokumenHasilPdf && (
+                <div className="mt-2.5 flex items-center gap-2 p-2.5 bg-amber-50 border border-amber-200 rounded-xl">
+                  <FileText size={16} className="text-amber-700 shrink-0" />
+                  <span className="text-xs font-bold text-amber-800 truncate">
+                    {dokumenHasilPdfName || 'Dokumen_Hasil_Unggas.pdf'}
+                  </span>
+                  <a
+                    href={dokumenHasilPdf}
+                    download={dokumenHasilPdfName || 'Dokumen_Hasil_Unggas.pdf'}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="text-xs text-amber-700 hover:text-amber-900 font-bold underline flex items-center gap-1 ml-auto"
+                  >
+                    <Download size={12} strokeWidth={2.5} /> Unduh
+                  </a>
+                  <button
+                    type="button"
+                    onClick={removePdf}
+                    className="text-xs text-red-600 hover:text-red-800 font-bold ml-2 cursor-pointer"
+                  >
+                    Hapus
+                  </button>
+                </div>
+              )}
+              <p className="text-[11px] text-slate-500 mt-1">
+                💡 Format PDF resmi hasil kunjungan lapangan atau lembar rekap monev yang telah ditandatangani manual.
+              </p>
+            </div>
+
+            {/* Grid Tanda Tangan: Desktop Samping Kanan-Kiri, Mobile Atas-Bawah */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="p-3.5 rounded-xl border border-slate-200 bg-white/90 space-y-2.5 shadow-2xs">
+                <div>
+                  <label className="block text-xs font-sans font-bold uppercase tracking-wider text-slate-600 mb-1">
+                    Nama Petugas Monev 1
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="Nama petugas 1..."
+                    value={kondisiUnggas.namaPetugas1 || ''}
+                    onChange={(e) => updateKondisiUnggas('namaPetugas1', e.target.value)}
+                    className="w-full h-10 px-3 rounded-xl border border-slate-200 bg-white text-xs font-semibold focus:border-amber-500 outline-none"
+                  />
+                </div>
+                <DigitalSignaturePad
+                  label="Tanda Tangan Petugas 1"
+                  value={kondisiUnggas.ttdPetugas1}
+                  onChange={(val) => updateKondisiUnggas('ttdPetugas1', val)}
+                  helperText="Goreskan tanda tangan digital untuk Petugas Monev 1."
                 />
-                {dokumenHasilPdf && (
-                  <div className="mt-2.5 flex items-center gap-2 p-2.5 bg-amber-50 border border-amber-200 rounded-xl">
-                    <FileText size={16} className="text-amber-700 shrink-0" />
-                    <span className="text-xs font-bold text-amber-800 truncate">
-                      {dokumenHasilPdfName || 'Dokumen_Hasil_Unggas.pdf'}
-                    </span>
-                    <a
-                      href={dokumenHasilPdf}
-                      download={dokumenHasilPdfName || 'Dokumen_Hasil_Unggas.pdf'}
-                      target="_blank"
-                      rel="noreferrer"
-                      className="text-xs text-amber-700 hover:text-amber-900 font-bold underline flex items-center gap-1 ml-auto"
-                    >
-                      <Download size={12} strokeWidth={2.5} /> Unduh
-                    </a>
-                    <button
-                      type="button"
-                      onClick={removePdf}
-                      className="text-xs text-red-600 hover:text-red-800 font-bold ml-2 cursor-pointer"
-                    >
-                      Hapus
-                    </button>
-                  </div>
-                )}
-                <p className="text-[11px] text-slate-500 mt-1">
-                  💡 Format PDF resmi hasil kunjungan lapangan atau lembar rekap monev yang telah ditandatangani manual.
-                </p>
               </div>
 
-              <div className="space-y-4">
-                <div className="p-3.5 rounded-xl border border-slate-200 bg-white/90 space-y-2.5 shadow-2xs">
-                  <div>
-                    <label className="block text-xs font-sans font-bold uppercase tracking-wider text-slate-600 mb-1">
-                      Nama Petugas Monev 1
-                    </label>
-                    <input
-                      type="text"
-                      placeholder="Nama petugas 1..."
-                      value={kondisiUnggas.namaPetugas1 || ''}
-                      onChange={(e) => updateKondisiUnggas('namaPetugas1', e.target.value)}
-                      className="w-full h-10 px-3 rounded-xl border border-slate-200 bg-white text-xs font-semibold focus:border-amber-500 outline-none"
-                    />
-                  </div>
-                  <DigitalSignaturePad
-                    label="Tanda Tangan Petugas 1"
-                    value={kondisiUnggas.ttdPetugas1}
-                    onChange={(val) => updateKondisiUnggas('ttdPetugas1', val)}
-                    helperText="Goreskan tanda tangan digital untuk Petugas Monev 1."
+              <div className="p-3.5 rounded-xl border border-slate-200 bg-white/90 space-y-2.5 shadow-2xs">
+                <div>
+                  <label className="block text-xs font-sans font-bold uppercase tracking-wider text-slate-600 mb-1">
+                    Nama Petugas Monev 2 (Opsional)
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="Nama petugas 2..."
+                    value={kondisiUnggas.namaPetugas2 || ''}
+                    onChange={(e) => updateKondisiUnggas('namaPetugas2', e.target.value)}
+                    className="w-full h-10 px-3 rounded-xl border border-slate-200 bg-white text-xs font-semibold focus:border-amber-500 outline-none"
                   />
                 </div>
-
-                <div className="p-3.5 rounded-xl border border-slate-200 bg-white/90 space-y-2.5 shadow-2xs">
-                  <div>
-                    <label className="block text-xs font-sans font-bold uppercase tracking-wider text-slate-600 mb-1">
-                      Nama Petugas Monev 2 (Opsional)
-                    </label>
-                    <input
-                      type="text"
-                      placeholder="Nama petugas 2..."
-                      value={kondisiUnggas.namaPetugas2 || ''}
-                      onChange={(e) => updateKondisiUnggas('namaPetugas2', e.target.value)}
-                      className="w-full h-10 px-3 rounded-xl border border-slate-200 bg-white text-xs font-semibold focus:border-amber-500 outline-none"
-                    />
-                  </div>
-                  <DigitalSignaturePad
-                    label="Tanda Tangan Petugas 2 (Opsional)"
-                    value={kondisiUnggas.ttdPetugas2}
-                    onChange={(val) => updateKondisiUnggas('ttdPetugas2', val)}
-                    helperText="Goreskan tanda tangan digital untuk Petugas Monev 2."
-                  />
-                </div>
+                <DigitalSignaturePad
+                  label="Tanda Tangan Petugas 2 (Opsional)"
+                  value={kondisiUnggas.ttdPetugas2}
+                  onChange={(val) => updateKondisiUnggas('ttdPetugas2', val)}
+                  helperText="Goreskan tanda tangan digital untuk Petugas Monev 2."
+                />
               </div>
             </div>
           </div>

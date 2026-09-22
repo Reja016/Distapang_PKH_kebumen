@@ -97,7 +97,7 @@ export default function VaksinasiApbdTab({
         <div className="rounded-3xl border border-slate-200 bg-white shadow-sm overflow-hidden">
           <div className="divide-y divide-slate-100">
             {droping.map((d) => (
-              <div key={d.id} className="p-4 flex items-center justify-between hover:bg-slate-50/80 transition-colors">
+              <div key={d.id} className="p-4 flex items-center justify-between hover:bg-slate-50/80 dark:hover:bg-slate-800/60 transition-colors">
                 <div className="flex flex-col">
                   <span className="font-bold text-slate-900 text-sm">{d.merk_vaksin}</span>
                   <span className="text-xs text-slate-500">

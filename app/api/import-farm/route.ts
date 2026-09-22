@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import pool from '@/lib/db';
+import { requireAdmin } from '@/lib/session';
 
 export const dynamic = 'force-dynamic';
 
@@ -4653,7 +4654,10 @@ const initialDataGeneral: any[] = [
 // BATAS PASTE DATA
 // =========================================================================
 
-export async function GET() {
+export async function GET(req: Request) {
+  const auth = await requireAdmin(req);
+  if ('errorResponse' in auth) return auth.errorResponse;
+
   try {
     // 1. Buat tabel pintar dengan kolom JSON
     await pool.query(`

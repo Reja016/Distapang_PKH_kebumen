@@ -1,11 +1,15 @@
 import { NextResponse } from 'next/server';
 import pool from '@/lib/db';
+import { requireAdmin } from '@/lib/session';
 // Pastikan alamat import ini mengarah ke file ktt-data.ts Mas
 import kttData from '@/app/bitpro/database-ktt/data/ktt-data'; 
 
 export const dynamic = 'force-dynamic';
 
-export async function GET() {
+export async function GET(req: Request) {
+  const auth = await requireAdmin(req);
+  if ('errorResponse' in auth) return auth.errorResponse;
+
   try {
     // 1. Buat tabel ktt_master (struktur kolom profesional)
     await pool.query(`

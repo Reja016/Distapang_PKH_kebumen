@@ -1,6 +1,7 @@
 import OpenAI from "openai";
 import pool from "@/lib/db";
 import { NextResponse } from "next/server";
+import { checkRateLimit, getClientIp } from "@/lib/rate-limit";
 
 export const dynamic = 'force-dynamic';
 
@@ -258,6 +259,20 @@ async function callGroqWithRetry(params: any, retries = 2): Promise<any> {
 export async function POST(req: Request) {
   const startTime = Date.now();
   try {
+    const clientIp = getClientIp(req);
+    const rateLimitKey = `aichat:${clientIp}`;
+
+    // Rate Limit Kuota: Maksimal 15 pertanyaan AI per menit per IP
+    const rateCheck = checkRateLimit(rateLimitKey, 15, 60 * 1000);
+    if (!rateCheck.success) {
+      return NextResponse.json(
+        {
+          reply: `Batas kuota pertanyaan AI tercapai (maksimal 15 pesan per menit). Silakan tunggu sekitar ${rateCheck.retryAfterSeconds} detik sebelum mengirim pertanyaan lagi.`,
+        },
+        { status: 429 }
+      );
+    }
+
     const { messages } = await req.json();
     console.log("=== Mulai proses AI (Groq) ===");
 

@@ -60,7 +60,7 @@ export function SapiTimeSummaryTab({ cattleList }: SapiTimeSummaryTabProps) {
                   }
 
                   return (
-                    <tr key={cattleData.id} className="hover:bg-slate-50/80 transition-colors">
+                    <tr key={cattleData.id} className="hover:bg-slate-50/80 dark:hover:bg-slate-800/60 transition-colors">
                       <td className="px-6 py-4 font-bold text-emerald-700 text-xs">{idx + 1}</td>
                       <td className="px-6 py-4">
                         <div className="flex flex-col">

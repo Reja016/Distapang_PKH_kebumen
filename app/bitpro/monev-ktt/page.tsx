@@ -298,10 +298,30 @@ export default function MonevKTT() {
     const L = (window as any).L;
     const mapContainer = document.getElementById('map-dashboard');
     if (mapContainer && !mapInstanceRef.current) {
-      const map = L.map('map-dashboard').setView([-7.668, 109.651], 10);
+      const isTouch = typeof window !== 'undefined' && ('ontouchstart' in window || navigator.maxTouchPoints > 0);
+      const map = L.map('map-dashboard', {
+        scrollWheelZoom: false,
+      }).setView([-7.668, 109.651], 10);
+
       L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
         attribution: '© OpenStreetMap',
       }).addTo(map);
+
+      // Mode sentuh dua jari di smartphone agar scrolling halaman tidak tersangkut (scroll-trap)
+      if (isTouch) {
+        map.dragging.disable();
+        mapContainer.addEventListener('touchstart', (e: TouchEvent) => {
+          if (e.touches.length >= 2) {
+            map.dragging.enable();
+          } else {
+            map.dragging.disable();
+          }
+        }, { passive: true });
+        mapContainer.addEventListener('touchend', () => {
+          map.dragging.disable();
+        }, { passive: true });
+      }
+
       mapInstanceRef.current = map;
       markersLayerRef.current = L.layerGroup().addTo(map);
     }

@@ -400,10 +400,10 @@ export default function UserManagementModal({
   });
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/70 backdrop-blur-md animate-in fade-in duration-200">
+    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-slate-950/70 backdrop-blur-md animate-in fade-in duration-200">
       
       {/* ── CONTAINER UTAMA MANAJEMEN ANGGOTA ── */}
-      <div className="bg-white rounded-3xl w-full max-w-5xl shadow-2xl border border-slate-200 overflow-hidden flex flex-col max-h-[90vh]">
+      <div className="bg-white rounded-t-3xl sm:rounded-3xl w-full max-w-5xl shadow-2xl border border-slate-200 overflow-hidden flex flex-col max-h-[94vh] sm:max-h-[90vh]">
         
         {/* Header Modal */}
         <div className="px-6 py-5 border-b border-slate-100 flex items-center justify-between bg-slate-50/70 shrink-0">
@@ -497,7 +497,7 @@ export default function UserManagementModal({
                         : DEFAULT_FULL_PERMISSIONS;
 
                     return (
-                      <tr key={m.id} className="hover:bg-slate-50/80 transition-colors">
+                      <tr key={m.id} className="hover:bg-slate-50/80 dark:hover:bg-slate-800/60 transition-colors">
                         <td className="p-3.5 text-center font-sans text-slate-400">{idx + 1}</td>
                         <td className="p-3.5">
                           <div className="font-bold text-slate-900 text-sm">{m.nama}</div>
@@ -615,8 +615,8 @@ export default function UserManagementModal({
 
       {/* ── MODAL SUB-FORM: TAMBAH / EDIT ANGGOTA & HAK AKSES ── */}
       {showFormModal && (
-        <div className="fixed inset-0 z-60 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-sm animate-in fade-in duration-150">
-          <div className="bg-white rounded-3xl w-full max-w-3xl shadow-2xl border border-slate-200 overflow-hidden flex flex-col max-h-[92vh]">
+        <div className="fixed inset-0 z-60 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-slate-950/80 backdrop-blur-sm animate-in fade-in duration-150">
+          <div className="bg-white rounded-t-3xl sm:rounded-3xl w-full max-w-3xl shadow-2xl border border-slate-200 overflow-hidden flex flex-col max-h-[94vh] sm:max-h-[92vh]">
             
             {/* Header Form */}
             <div className="px-6 py-4.5 border-b border-slate-100 flex items-center justify-between bg-slate-50/80 shrink-0">
@@ -935,8 +935,8 @@ export default function UserManagementModal({
                 </div>
               </div>
 
-              {/* Bottom Actions inside form */}
-              <div className="pt-4 border-t border-slate-100 flex items-center justify-end gap-2.5">
+              {/* Bottom Actions inside form (Sticky on Desktop & Mobile) */}
+              <div className="sticky bottom-0 bg-white/95 backdrop-blur-md pt-3.5 pb-2 border-t border-slate-100 flex items-center justify-end gap-2.5">
                 <button
                   type="button"
                   onClick={() => setShowFormModal(false)}

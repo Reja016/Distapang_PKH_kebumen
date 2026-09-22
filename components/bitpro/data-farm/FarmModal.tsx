@@ -44,10 +44,10 @@ export default function FarmModal({
   if (!isModalOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs animate-in fade-in duration-200">
-      <div className="w-full max-w-2xl max-h-[92vh] bg-white rounded-3xl border border-slate-200 shadow-2xl flex flex-col overflow-hidden animate-in zoom-in-95 duration-200">
+    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-slate-900/60 backdrop-blur-xs animate-in fade-in duration-200">
+      <div className="w-full max-w-2xl max-h-[90vh] sm:max-h-[92vh] bg-white rounded-t-3xl sm:rounded-3xl border border-slate-200 shadow-2xl flex flex-col overflow-hidden animate-in zoom-in-95 duration-200">
         {/* Modal Header */}
-        <div className="p-5 sm:p-6 border-b border-slate-100 flex items-center justify-between bg-slate-50/80">
+        <div className="p-4 sm:p-6 border-b border-slate-100 flex items-center justify-between bg-slate-50/80 shrink-0">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-xl bg-emerald-100 text-emerald-800 flex items-center justify-center font-black">
               <Building2 size={20} />
@@ -71,8 +71,9 @@ export default function FarmModal({
         </div>
 
         {/* Modal Body Form */}
-        <form onSubmit={handleSubmit} className="p-6 overflow-y-auto space-y-5 text-xs">
-          {/* Bagian 1: Identitas Usaha */}
+        <form onSubmit={handleSubmit} className="flex flex-col flex-1 min-h-0 overflow-hidden text-xs">
+          <div className="p-5 sm:p-6 overflow-y-auto space-y-5 flex-1">
+            {/* Bagian 1: Identitas Usaha */}
           <div className="space-y-3 bg-slate-50 p-4 rounded-2xl border border-slate-200">
             <h4 className="font-extrabold text-slate-900 uppercase tracking-wider text-[11px] flex items-center gap-1.5">
               <span className="w-2 h-2 rounded-full bg-emerald-600" />
@@ -261,6 +262,7 @@ export default function FarmModal({
                 <label className="block font-bold text-slate-700 mb-1">Kapasitas Kandang (Ekor/Tahun)</label>
                 <input
                   type="text"
+                  inputMode="numeric"
                   name="kapasitas_kandang"
                   placeholder="Contoh: 10.000"
                   value={formValues.kapasitas_kandang || ''}
@@ -273,6 +275,7 @@ export default function FarmModal({
                 <label className="block font-bold text-slate-700 mb-1">Jumlah Populasi Aktif (Ekor)</label>
                 <input
                   type="text"
+                  inputMode="numeric"
                   name="jumlah_populasi"
                   placeholder="Contoh: 8.500"
                   value={formValues.jumlah_populasi || formValues.populasi_total || ''}
@@ -292,6 +295,7 @@ export default function FarmModal({
                     </label>
                     <input
                       type="text"
+                      inputMode="numeric"
                       name="jumlah_produksi"
                       placeholder="Contoh: 50.000"
                       value={formValues.jumlah_produksi || ''}
@@ -319,6 +323,7 @@ export default function FarmModal({
                     <label className="block font-bold text-slate-700 mb-1">Produksi Telur Konsumsi (Kg/Tahun)</label>
                     <input
                       type="text"
+                      inputMode="numeric"
                       name="produksi_telur_kg_tahun"
                       placeholder="Contoh: 45.000"
                       value={formValues.produksi_telur_kg_tahun || ''}
@@ -330,6 +335,7 @@ export default function FarmModal({
                     <label className="block font-bold text-slate-700 mb-1">Konsumsi Pakan (Gram/Ekor/Hari)</label>
                     <input
                       type="text"
+                      inputMode="numeric"
                       name="konsumsi_pakan"
                       placeholder="Contoh: 110"
                       value={formValues.konsumsi_pakan || ''}
@@ -353,13 +359,14 @@ export default function FarmModal({
               </div>
             </div>
           </div>
+          </div>
 
-          {/* Modal Footer Buttons */}
-          <div className="pt-3 border-t border-slate-100 flex items-center justify-end gap-2.5">
+          {/* Modal Footer Buttons (Sticky at bottom) */}
+          <div className="p-4 sm:p-5 border-t border-slate-100 bg-slate-50/80 flex items-center justify-end gap-2.5 shrink-0">
             <button
               type="button"
               onClick={closeModal}
-              className="min-h-touch h-11 px-5 rounded-xl border border-slate-200 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold transition-colors cursor-pointer"
+              className="min-h-touch h-11 px-5 rounded-xl border border-slate-200 bg-white hover:bg-slate-100 text-slate-700 text-xs font-bold transition-colors cursor-pointer"
             >
               Batal
             </button>
