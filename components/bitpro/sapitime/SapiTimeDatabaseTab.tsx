@@ -3,7 +3,7 @@
 import React from 'react';
 import { useRouter } from 'next/navigation';
 import { Plus, Edit2, Search, Syringe, User, Trash2 } from 'lucide-react';
-import { Cattle, calculateAge } from './types';
+import { Cattle, calculateAge, KECAMATAN_LIST, getDesaListForKecamatan } from './types';
 
 interface SapiTimeDatabaseTabProps {
   cattleList: Cattle[];
@@ -39,6 +39,7 @@ export function SapiTimeDatabaseTab({
   onOpenIBModal,
 }: SapiTimeDatabaseTabProps) {
   const router = useRouter();
+  const desaList = getDesaListForKecamatan(formData.kecamatan);
 
   return (
     <div className="animate-in fade-in space-y-6">
@@ -102,24 +103,40 @@ export function SapiTimeDatabaseTab({
               />
             </div>
             <div>
-              <label className="block text-xs font-bold mb-1 text-slate-700">Desa <span className="text-red-500">*</span></label>
-              <input
-                type="text"
-                className="w-full min-h-touch h-10 px-3.5 border border-slate-200 rounded-xl bg-slate-50 focus:bg-white focus:outline-none focus:border-emerald-600 text-xs font-medium text-slate-900"
-                value={formData.desa || ''}
-                onChange={(e) => setFormData({ ...formData, desa: e.target.value })}
-                placeholder="Desa"
-              />
+              <label className="block text-xs font-bold mb-1 text-slate-700">Kecamatan <span className="text-red-500">*</span></label>
+              <select
+                className="w-full min-h-touch h-10 px-3.5 border border-slate-200 rounded-xl bg-slate-50 focus:bg-white focus:outline-none focus:border-emerald-600 text-xs font-medium text-slate-900 cursor-pointer"
+                value={formData.kecamatan ? formData.kecamatan.toUpperCase() : ''}
+                onChange={(e) => setFormData({ ...formData, kecamatan: e.target.value, desa: '' })}
+              >
+                <option value="">-- Pilih Kecamatan --</option>
+                {KECAMATAN_LIST.map((kec) => (
+                  <option key={kec} value={kec}>
+                    {kec}
+                  </option>
+                ))}
+              </select>
             </div>
             <div>
-              <label className="block text-xs font-bold mb-1 text-slate-700">Kecamatan <span className="text-red-500">*</span></label>
-              <input
-                type="text"
-                className="w-full min-h-touch h-10 px-3.5 border border-slate-200 rounded-xl bg-slate-50 focus:bg-white focus:outline-none focus:border-emerald-600 text-xs font-medium text-slate-900"
-                value={formData.kecamatan || ''}
-                onChange={(e) => setFormData({ ...formData, kecamatan: e.target.value })}
-                placeholder="Kecamatan"
-              />
+              <label className="block text-xs font-bold mb-1 text-slate-700">Desa <span className="text-red-500">*</span></label>
+              <select
+                className="w-full min-h-touch h-10 px-3.5 border border-slate-200 rounded-xl bg-slate-50 focus:bg-white focus:outline-none focus:border-emerald-600 text-xs font-medium text-slate-900 cursor-pointer disabled:bg-slate-100 disabled:text-slate-400 disabled:cursor-not-allowed"
+                value={formData.desa || ''}
+                onChange={(e) => setFormData({ ...formData, desa: e.target.value })}
+                disabled={!formData.kecamatan}
+              >
+                <option value="">
+                  {formData.kecamatan ? '-- Pilih Desa / Kelurahan --' : '-- Pilih Kecamatan Dahulu --'}
+                </option>
+                {desaList.map((d) => (
+                  <option key={d} value={d}>
+                    {d}
+                  </option>
+                ))}
+                {formData.desa && !desaList.includes(formData.desa) && (
+                  <option value={formData.desa}>{formData.desa}</option>
+                )}
+              </select>
             </div>
             <div>
               <label className="block text-xs font-bold mb-1 text-slate-700">Ras Sapi</label>

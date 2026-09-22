@@ -2,6 +2,8 @@ import { NextResponse } from 'next/server';
 import pool from '@/lib/db';
 import { PuskeswanProfil, initialPuskeswanProfiles, DEFAULT_JADWAL_HARIAN } from '@/lib/puskeswanData';
 
+export const dynamic = 'force-dynamic';
+
 async function ensureTable() {
   try {
     await pool.execute(`

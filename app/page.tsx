@@ -298,7 +298,6 @@ export default function LandingPage() {
             totalProdDagingTon={totalProdDagingTon}
             totalProdTelurTon={totalProdTelurTon}
             totalSapiPo={totalSapiPo}
-            puskeswanCount={puskeswanList.length}
             topUnggas={topUnggas}
             topDaging={topDaging}
             topTelur={topTelur}
@@ -307,10 +306,6 @@ export default function LandingPage() {
               setSubTabProd(subTab);
               setDetailView('populasi');
               scrollToSection('modul');
-            }}
-            onScrollToPuskeswan={() => {
-              setFacilityTab('puskeswan');
-              scrollToSection('puskeswan');
             }}
           />
 

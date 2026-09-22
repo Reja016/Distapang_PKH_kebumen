@@ -1,5 +1,5 @@
-import React from 'react';
-import { Search, User, Edit2, Trash2, ChevronLeft, ChevronRight, FolderOpen } from 'lucide-react';
+import React, { useState } from 'react';
+import { Search, User, Edit2, Trash2, ChevronLeft, ChevronRight, ChevronDown, FolderOpen, MapPin, Users, X } from 'lucide-react';
 import { KelompokTani, JENIS_KELOMPOK_OPTIONS, PAGE_SIZE } from './types';
 import KelasBadge from './KelasBadge';
 
@@ -46,10 +46,12 @@ export default function KttTableSection({
   onEdit,
   onDelete,
 }: KttTableSectionProps) {
+  const [expandedId, setExpandedId] = useState<number | null>(null);
+
   return (
-    <div className="space-y-4">
+    <div className="min-w-0 w-full space-y-3.5 sm:space-y-4">
       {/* Filter & Search Bar */}
-      <div className="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+      <div className="bg-white dark:bg-slate-900 p-3 sm:p-4 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-2.5 sm:gap-3 transition-colors">
         <div className="relative flex-1">
           <Search size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
           <input
@@ -60,8 +62,21 @@ export default function KttTableSection({
               setSearch(e.target.value);
               setPage(1);
             }}
-            className="w-full min-h-touch h-10 pl-9 pr-4 rounded-xl border border-slate-200 bg-slate-50 text-xs text-slate-900 focus:outline-none focus:border-emerald-500 focus:bg-white transition-colors"
+            className="w-full min-h-touch h-10 pl-9 pr-9 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-xs text-slate-900 dark:text-slate-100 placeholder:text-slate-400 focus:outline-none focus:border-emerald-500 focus:bg-white dark:focus:bg-slate-900 transition-colors"
           />
+          {search && (
+            <button
+              type="button"
+              onClick={() => {
+                setSearch('');
+                setPage(1);
+              }}
+              className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 p-1"
+              title="Hapus pencarian"
+            >
+              <X size={14} />
+            </button>
+          )}
         </div>
 
         <div className="flex flex-wrap items-center gap-2">
@@ -72,7 +87,7 @@ export default function KttTableSection({
                 setFilterDesa(e.target.value);
                 setPage(1);
               }}
-              className="min-h-touch h-10 px-3 rounded-xl border border-slate-200 bg-slate-50 text-xs text-slate-700 focus:border-emerald-500 outline-none"
+              className="min-h-touch h-10 px-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-xs text-slate-700 dark:text-slate-200 focus:border-emerald-500 outline-none flex-1 sm:flex-none"
             >
               <option value="">Semua Desa ({filterKecamatan})</option>
               {desaList.map((d) => (
@@ -87,7 +102,7 @@ export default function KttTableSection({
               setFilterJenis(e.target.value);
               setPage(1);
             }}
-            className="min-h-touch h-10 px-3 rounded-xl border border-slate-200 bg-slate-50 text-xs text-slate-700 focus:border-emerald-500 outline-none"
+            className="min-h-touch h-10 px-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-xs text-slate-700 dark:text-slate-200 focus:border-emerald-500 outline-none flex-1 sm:flex-none"
           >
             <option value="">Semua Jenis</option>
             {JENIS_KELOMPOK_OPTIONS.map((j) => (
@@ -97,124 +112,258 @@ export default function KttTableSection({
         </div>
       </div>
 
-      {/* Table */}
+      {/* ── UNIFIED RESPONSIVE MASTER ACCORDION TABLE VIEW ── */}
       <div className="rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm overflow-hidden transition-colors">
-        {/* Mobile Scroll Hint */}
-        <div className="px-4 py-2 bg-slate-50 dark:bg-slate-800/60 border-b border-slate-200 dark:border-slate-800 text-[11px] text-slate-500 dark:text-slate-400 sm:hidden flex items-center justify-between">
-          <span className="flex items-center gap-1">
-            <ChevronRight size={13} className="text-slate-400" />
-            Geser tabel ke samping untuk melihat kolom lengkap
-          </span>
-        </div>
-
         <div className="overflow-x-auto">
-          <table className="w-full text-left text-sm whitespace-nowrap">
-            <thead className="bg-slate-50 dark:bg-slate-800/90 text-slate-600 dark:text-slate-300 text-xs font-semibold uppercase tracking-wider border-b border-slate-200 dark:border-slate-800">
+          <table className="w-full text-left text-xs sm:text-sm table-fixed md:table-auto">
+            <thead className="bg-slate-50 dark:bg-slate-800/90 text-slate-600 dark:text-slate-300 text-[11px] font-semibold uppercase tracking-wider border-b border-slate-200 dark:border-slate-800">
               <tr>
-                <th className="p-4 w-12 text-center">NO</th>
-                <th className="p-4">NAMA KELOMPOK &amp; DOKUMEN</th>
-                <th className="p-4">LOKASI DESA / KEC</th>
-                <th className="p-4">KETUA KELOMPOK</th>
-                <th className="p-4 text-center">KELAS</th>
-                <th className="p-4 text-right">ANGGOTA</th>
-                <th className="p-4 text-center w-28">AKSI</th>
+                <th className="pl-3 pr-1 py-2.5 sm:px-3 sm:py-3 w-10 sm:w-12 text-center whitespace-nowrap">NO</th>
+                <th className="px-2 sm:px-3.5 py-2.5 sm:py-3 min-w-0">
+                  <span className="md:hidden">Kelompok</span>
+                  <span className="hidden md:inline whitespace-nowrap">NAMA KELOMPOK &amp; DOKUMEN</span>
+                </th>
+                <th className="hidden md:table-cell px-3 py-3 whitespace-nowrap">LOKASI DESA / KEC</th>
+                <th className="hidden md:table-cell px-3 py-3 whitespace-nowrap">KETUA KELOMPOK</th>
+                <th className="px-1 sm:px-3 py-2.5 sm:py-3 text-center w-[84px] md:w-auto whitespace-nowrap">KELAS</th>
+                <th className="hidden md:table-cell px-3 py-3 text-right whitespace-nowrap">ANGGOTA</th>
+                <th className="hidden md:table-cell px-3 py-3 text-center w-24 whitespace-nowrap">AKSI</th>
+                <th className="md:hidden pr-3 pl-1 py-2.5 w-9 text-center" aria-label="Toggle"></th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-200 dark:divide-slate-800 text-slate-800 dark:text-slate-200">
               {paginated.length > 0 ? (
                 paginated.map((row, idx) => {
                   const docCount = docCounts[row.id] || 0;
+                  const totalAnggota = (row.anggotaLaki || 0) + (row.anggotaPerempuan || 0);
+                  const isExpanded = expandedId === row.id;
 
                   return (
-                    <tr key={row.id} className="hover:bg-slate-50/80 dark:hover:bg-slate-800/60 transition-colors group">
-                      <td className="p-4 text-center font-sans text-slate-400 dark:text-slate-500 text-xs">
-                        {(currentPage - 1) * PAGE_SIZE + idx + 1}
-                      </td>
-                      <td
-                        className="p-4 cursor-pointer"
-                        onClick={() => onSelectKttForDocs(row)}
-                        title="Klik untuk membuka arsip dokumen KTT ini"
+                    <React.Fragment key={row.id}>
+                      {/* Main Table Row */}
+                      <tr
+                        onClick={() => setExpandedId(isExpanded ? null : row.id)}
+                        className={`transition-colors group cursor-pointer md:cursor-default ${
+                          isExpanded
+                            ? 'bg-emerald-50/50 dark:bg-emerald-950/20'
+                            : 'hover:bg-slate-50/80 dark:hover:bg-slate-800/60'
+                        }`}
                       >
-                        <div className="flex items-center gap-2 flex-wrap">
-                          <span className="font-bold text-slate-900 dark:text-slate-100 text-sm group-hover:text-emerald-700 dark:group-hover:text-emerald-400 transition-colors">
-                            {row.namaKelompok || '-'}
-                          </span>
-                          {docCount > 0 ? (
-                            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-extrabold bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-800 shrink-0 shadow-2xs">
-                              <FolderOpen size={11} />
-                              <span>{docCount} Berkas</span>
-                            </span>
-                          ) : (
-                            <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md text-[10px] font-medium bg-slate-100 text-slate-500 dark:bg-slate-800 dark:text-slate-400 border border-slate-200 dark:border-slate-700 shrink-0">
-                              <span>0 Berkas</span>
-                            </span>
-                          )}
-                        </div>
-                        <span className="text-xs font-sans text-slate-500 dark:text-slate-400 block mt-0.5">
-                          Reg: {row.nomorRegister || '-'} • <span className="text-emerald-600 font-bold hover:underline inline-flex items-center gap-1"><FolderOpen size={11} /> Buka Berkas &raquo;</span>
-                        </span>
-                      </td>
-                      <td className="p-4">
-                        <span className="text-slate-800 dark:text-slate-200 font-medium block text-xs">
-                          {row.desa || '-'}
-                        </span>
-                        <span className="text-xs text-slate-500 dark:text-slate-400 font-sans">
-                          Kec. {row.kecamatan || '-'}
-                        </span>
-                      </td>
-                      <td className="p-4 text-slate-700 dark:text-slate-300 text-xs font-medium">
-                        <span className="flex items-center gap-1.5">
-                          <User size={13} className="text-slate-400 shrink-0" />
-                          <span>{row.namaKetuaKelompok || '-'}</span>
-                        </span>
-                      </td>
-                      <td className="p-4 text-center">
-                        <KelasBadge kelas={row.kelasKelompok} />
-                      </td>
-                      <td className="p-4 text-right font-sans text-xs">
-                        <span className="font-bold text-slate-900 dark:text-slate-100">
-                          {(row.anggotaLaki || 0) + (row.anggotaPerempuan || 0)}
-                        </span>
-                        <span className="text-slate-400 dark:text-slate-500 text-[11px] block">
-                          {row.anggotaLaki || 0}L · {row.anggotaPerempuan || 0}P
-                        </span>
-                      </td>
-                      <td className="p-4 text-center">
-                        <div className="flex items-center justify-center gap-1.5">
-                          {/* Tombol Buka Berkas Dokumen */}
-                          <button
-                            type="button"
-                            onClick={() => onSelectKttForDocs(row)}
-                            className="min-h-touch h-8 px-2.5 rounded-lg border border-emerald-200 dark:border-emerald-800 bg-emerald-50 dark:bg-emerald-950/40 hover:bg-emerald-100 text-emerald-800 dark:text-emerald-300 text-xs font-bold flex items-center gap-1 transition-colors cursor-pointer"
-                            title="Buka Arsip Dokumen KTT"
-                          >
-                            <FolderOpen size={13} />
-                            <span className="hidden xl:inline">Berkas</span>
-                          </button>
+                        {/* 1. NO */}
+                        <td className="pl-3 pr-1 py-3 text-center font-sans text-slate-400 dark:text-slate-500 text-xs font-bold shrink-0">
+                          {(currentPage - 1) * PAGE_SIZE + idx + 1}
+                        </td>
 
-                          {canEdit && (
-                            <>
-                              <button
-                                type="button"
-                                onClick={() => onEdit(row)}
-                                className="min-h-touch h-8 w-8 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 flex items-center justify-center transition-colors cursor-pointer"
-                                aria-label="Edit"
-                              >
-                                <Edit2 size={13} />
-                              </button>
-                              <button
-                                type="button"
-                                onClick={() => onDelete(row)}
-                                className="min-h-touch h-8 w-8 rounded-lg border border-red-200 dark:border-red-900/50 bg-red-50 dark:bg-red-950/30 hover:bg-red-100 dark:hover:bg-red-900/50 text-red-600 dark:text-red-400 flex items-center justify-center transition-colors cursor-pointer"
-                                aria-label="Hapus"
-                              >
-                                <Trash2 size={13} />
-                              </button>
-                            </>
-                          )}
-                        </div>
-                      </td>
-                    </tr>
+                        {/* 2. NAMA KELOMPOK */}
+                        <td className="px-2 sm:px-3.5 py-3 min-w-0 overflow-hidden">
+                          <div className="flex items-center gap-1.5 min-w-0">
+                            <span
+                              onClick={(e) => {
+                                if (typeof window !== 'undefined' && window.innerWidth >= 768) {
+                                  e.stopPropagation();
+                                  onSelectKttForDocs(row);
+                                }
+                              }}
+                              className="font-bold text-slate-900 dark:text-slate-100 text-xs sm:text-sm group-hover:text-emerald-700 dark:group-hover:text-emerald-400 transition-colors leading-snug cursor-pointer truncate"
+                              title={row.namaKelompok || '-'}
+                            >
+                              {row.namaKelompok || '-'}
+                            </span>
+                            {docCount > 0 ? (
+                              <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-extrabold bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-800 shrink-0">
+                                <FolderOpen size={10} />
+                                <span>{docCount}</span>
+                              </span>
+                            ) : (
+                              <span className="hidden md:inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-medium bg-slate-100 text-slate-500 dark:bg-slate-800 dark:text-slate-400 border border-slate-200 dark:border-slate-700 shrink-0">
+                                0
+                              </span>
+                            )}
+                          </div>
+
+                          {/* Detail Ringkas Lokasi di Mobile */}
+                          <p className="md:hidden text-[11px] text-slate-500 dark:text-slate-400 truncate mt-0.5">
+                            {row.desa || '-'}, Kec. {row.kecamatan || '-'}
+                          </p>
+
+                          {/* Nomor Register di Desktop */}
+                          <span className="hidden md:block text-[11px] font-mono text-slate-400 dark:text-slate-500 mt-0.5">
+                            Reg: {row.nomorRegister || '-'}
+                          </span>
+                        </td>
+
+                        {/* 3. LOKASI (Desktop) */}
+                        <td className="hidden md:table-cell px-3 py-3 whitespace-nowrap">
+                          <span className="text-slate-800 dark:text-slate-200 font-medium block text-xs">
+                            {row.desa || '-'}
+                          </span>
+                          <span className="text-[11px] text-slate-500 dark:text-slate-400 font-sans">
+                            Kec. {row.kecamatan || '-'}
+                          </span>
+                        </td>
+
+                        {/* 4. KETUA KELOMPOK (Desktop) */}
+                        <td className="hidden md:table-cell px-3 py-3 text-slate-700 dark:text-slate-300 text-xs font-medium whitespace-nowrap">
+                          <span className="flex items-center gap-1.5">
+                            <User size={13} className="text-slate-400 shrink-0" />
+                            <span>{row.namaKetuaKelompok || '-'}</span>
+                          </span>
+                        </td>
+
+                        {/* 5. KELAS (Mobile & Desktop) */}
+                        <td className="px-2.5 sm:px-3 py-3 text-center whitespace-nowrap">
+                          <KelasBadge kelas={row.kelasKelompok} />
+                        </td>
+
+                        {/* 6. ANGGOTA (Desktop) */}
+                        <td className="hidden md:table-cell px-3 py-3 text-right font-sans text-xs whitespace-nowrap">
+                          <span className="font-bold text-slate-900 dark:text-slate-100">
+                            {totalAnggota}
+                          </span>
+                          <span className="text-slate-400 dark:text-slate-500 text-[10px] block">
+                            {row.anggotaLaki || 0}L · {row.anggotaPerempuan || 0}P
+                          </span>
+                        </td>
+
+                        {/* 7. AKSI (Desktop) */}
+                        <td className="hidden md:table-cell px-3 py-3 text-center whitespace-nowrap">
+                          <div className="flex items-center justify-center gap-1">
+                            <button
+                              type="button"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                onSelectKttForDocs(row);
+                              }}
+                              className="h-7 px-2 rounded-lg border border-emerald-200 dark:border-emerald-800 bg-emerald-50 dark:bg-emerald-950/40 hover:bg-emerald-100 text-emerald-800 dark:text-emerald-300 text-[11px] font-bold flex items-center gap-1 transition-colors cursor-pointer"
+                              title="Buka Arsip Dokumen KTT"
+                            >
+                              <FolderOpen size={12} />
+                              <span>Berkas</span>
+                            </button>
+
+                            {canEdit && (
+                              <>
+                                <button
+                                  type="button"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    onEdit(row);
+                                  }}
+                                  className="h-7 w-7 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 flex items-center justify-center transition-colors cursor-pointer"
+                                  aria-label="Edit KTT"
+                                  title="Edit Data KTT"
+                                >
+                                  <Edit2 size={12} />
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    onDelete(row);
+                                  }}
+                                  className="h-7 w-7 rounded-lg border border-red-200 dark:border-red-900/50 bg-red-50 dark:bg-red-950/30 hover:bg-red-100 dark:hover:bg-red-900/50 text-red-600 dark:text-red-400 flex items-center justify-center transition-colors cursor-pointer"
+                                  aria-label="Hapus KTT"
+                                  title="Hapus Data KTT"
+                                >
+                                  <Trash2 size={12} />
+                                </button>
+                              </>
+                            )}
+                          </div>
+                        </td>
+
+                        {/* 8. CHEVRON ACCORDION TOGGLE (Mobile Only) */}
+                        <td className="md:hidden px-2 py-3 text-center">
+                          <div className={`w-6 h-6 rounded-md mx-auto flex items-center justify-center transition-colors ${
+                            isExpanded
+                              ? 'bg-emerald-100 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-300'
+                              : 'bg-slate-100 dark:bg-slate-800 text-slate-400 dark:text-slate-500'
+                          }`}>
+                            <ChevronDown
+                              size={14}
+                              className={`transition-transform duration-200 ${isExpanded ? 'rotate-180' : ''}`}
+                            />
+                          </div>
+                        </td>
+                      </tr>
+
+                      {/* Accordion Sub-Row on Mobile */}
+                      {isExpanded && (
+                        <tr className="md:hidden bg-slate-50/90 dark:bg-slate-800/50 border-b border-slate-200 dark:border-slate-800">
+                          <td colSpan={4} className="px-3.5 py-3">
+                            <div className="space-y-2.5 text-xs">
+                              <div className="grid grid-cols-2 gap-2">
+                                <div>
+                                  <span className="text-[10px] text-slate-400 dark:text-slate-500 block uppercase font-semibold">No. Register</span>
+                                  <span className="font-mono text-[11px] text-slate-800 dark:text-slate-200 font-semibold">{row.nomorRegister || '-'}</span>
+                                </div>
+                                <div>
+                                  <span className="text-[10px] text-slate-400 dark:text-slate-500 block uppercase font-semibold">Jenis Usaha</span>
+                                  <span className="text-[11px] text-slate-800 dark:text-slate-200 font-medium">{row.jenisKelompok || '-'}</span>
+                                </div>
+                                <div>
+                                  <span className="text-[10px] text-slate-400 dark:text-slate-500 block uppercase font-semibold">Ketua Kelompok</span>
+                                  <span className="text-[11px] text-slate-800 dark:text-slate-200 font-medium">{row.namaKetuaKelompok || '-'}</span>
+                                </div>
+                                <div>
+                                  <span className="text-[10px] text-slate-400 dark:text-slate-500 block uppercase font-semibold">Anggota ({totalAnggota})</span>
+                                  <span className="text-[11px] text-slate-700 dark:text-slate-300 font-medium">
+                                    {row.anggotaLaki || 0}L · {row.anggotaPerempuan || 0}P
+                                  </span>
+                                  {row.luasLahanHa ? (
+                                    <span className="text-[10px] text-slate-500 block">Lahan: {row.luasLahanHa} Ha</span>
+                                  ) : null}
+                                </div>
+                              </div>
+
+                              {/* Action buttons inside accordion row */}
+                              <div className="flex items-center gap-2 pt-2 border-t border-slate-200/70 dark:border-slate-700/60">
+                                <button
+                                  type="button"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    onSelectKttForDocs(row);
+                                  }}
+                                  className="flex-1 min-h-touch h-8.5 px-3 rounded-xl border border-emerald-300 dark:border-emerald-800 bg-emerald-50 dark:bg-emerald-950/50 hover:bg-emerald-100 text-emerald-800 dark:text-emerald-300 text-xs font-bold flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
+                                >
+                                  <FolderOpen size={13} />
+                                  <span>{docCount > 0 ? `${docCount} Berkas Arsip` : 'Buka Berkas'}</span>
+                                </button>
+
+                                {canEdit && (
+                                  <>
+                                    <button
+                                      type="button"
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                        onEdit(row);
+                                      }}
+                                      className="min-h-touch min-w-touch h-8.5 w-8.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 flex items-center justify-center transition-colors cursor-pointer shrink-0"
+                                      aria-label="Edit KTT"
+                                      title="Edit Data KTT"
+                                    >
+                                      <Edit2 size={13} />
+                                    </button>
+                                    <button
+                                      type="button"
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                        onDelete(row);
+                                      }}
+                                      className="min-h-touch min-w-touch h-8.5 w-8.5 rounded-xl border border-red-200 dark:border-red-900/50 bg-red-50 dark:bg-red-950/40 hover:bg-red-100 text-red-600 dark:text-red-400 flex items-center justify-center transition-colors cursor-pointer shrink-0"
+                                      aria-label="Hapus KTT"
+                                      title="Hapus Data KTT"
+                                    >
+                                      <Trash2 size={13} />
+                                    </button>
+                                  </>
+                                )}
+                              </div>
+                            </div>
+                          </td>
+                        </tr>
+                      )}
+                    </React.Fragment>
                   );
                 })
               ) : (
@@ -227,36 +376,36 @@ export default function KttTableSection({
             </tbody>
           </table>
         </div>
+      </div>
 
-        {/* Pagination Bar */}
-        <div className="p-4 border-t border-slate-200 dark:border-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs text-slate-600 dark:text-slate-300">
-          <span className="font-sans">
-            Menampilkan {paginated.length} dari {filteredCount} kelompok terdaftar
+      {/* Pagination Bar (Unified for both Mobile Card View & Desktop Table) */}
+      <div className="bg-white dark:bg-slate-900 p-3.5 sm:p-4 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs text-slate-600 dark:text-slate-300 transition-colors">
+        <span className="font-sans text-center sm:text-left">
+          Menampilkan <b className="text-slate-900 dark:text-slate-100">{paginated.length}</b> dari <b className="text-slate-900 dark:text-slate-100">{filteredCount}</b> kelompok terdaftar
+        </span>
+
+        <div className="flex items-center justify-center gap-2">
+          <button
+            onClick={() => setPage((p) => Math.max(1, p - 1))}
+            disabled={currentPage <= 1}
+            className="min-h-touch h-8 px-3 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 disabled:opacity-40 disabled:cursor-not-allowed font-semibold flex items-center gap-1 cursor-pointer"
+          >
+            <ChevronLeft size={14} />
+            <span>Sebelumnya</span>
+          </button>
+
+          <span className="font-sans px-2 font-bold text-slate-800 dark:text-slate-200">
+            {currentPage} / {totalPages}
           </span>
 
-          <div className="flex items-center gap-2">
-            <button
-              onClick={() => setPage((p) => Math.max(1, p - 1))}
-              disabled={currentPage <= 1}
-              className="min-h-touch h-8 px-3 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 disabled:opacity-40 disabled:cursor-not-allowed font-semibold flex items-center gap-1 cursor-pointer"
-            >
-              <ChevronLeft size={14} />
-              <span>Sebelumnya</span>
-            </button>
-
-            <span className="font-sans px-2">
-              {currentPage} / {totalPages}
-            </span>
-
-            <button
-              onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
-              disabled={currentPage >= totalPages}
-              className="min-h-touch h-8 px-3 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 disabled:opacity-40 disabled:cursor-not-allowed font-semibold flex items-center gap-1 cursor-pointer"
-            >
-              <span>Selanjutnya</span>
-              <ChevronRight size={14} />
-            </button>
-          </div>
+          <button
+            onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+            disabled={currentPage >= totalPages}
+            className="min-h-touch h-8 px-3 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 disabled:opacity-40 disabled:cursor-not-allowed font-semibold flex items-center gap-1 cursor-pointer"
+          >
+            <span>Selanjutnya</span>
+            <ChevronRight size={14} />
+          </button>
         </div>
       </div>
     </div>

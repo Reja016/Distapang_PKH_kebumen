@@ -3,7 +3,6 @@
 import React from 'react';
 import { useRouter } from 'next/navigation';
 import {
-  Stethoscope,
   ChevronRight,
   Activity,
   TrendingUp,
@@ -17,13 +16,13 @@ interface LandingStatsSectionProps {
   totalProdDagingTon: number;
   totalProdTelurTon: number;
   totalSapiPo: number;
-  puskeswanCount: number;
+  puskeswanCount?: number;
   topUnggas: { komoditas: string; total: number };
   topDaging: { jenis: string; ton: number };
   topTelur: { jenis: string; ton: number };
   sapiPotongPop: number;
   onOpenPopulasi: (subTab: 'populasi' | 'daging' | 'telur') => void;
-  onScrollToPuskeswan: () => void;
+  onScrollToPuskeswan?: () => void;
 }
 
 export default function LandingStatsSection({
@@ -32,36 +31,24 @@ export default function LandingStatsSection({
   totalProdDagingTon,
   totalProdTelurTon,
   totalSapiPo,
-  puskeswanCount,
   topUnggas,
   topDaging,
   topTelur,
   sapiPotongPop,
   onOpenPopulasi,
-  onScrollToPuskeswan,
 }: LandingStatsSectionProps) {
   const router = useRouter();
 
   return (
     <section className="space-y-3.5 sm:space-y-4">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 sm:gap-3">
-        <div className="flex items-center flex-wrap gap-2 sm:gap-3">
-          <div>
-            <h2 className="text-lg sm:text-2xl font-extrabold text-slate-900 dark:text-white tracking-tight">
-              Ringkasan Wilayah
-            </h2>
-            <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-300 font-medium">
-              Rekapitulasi data resmi peternakan dan kesehatan hewan Kabupaten Kebumen
-            </p>
-          </div>
-          <button
-            onClick={onScrollToPuskeswan}
-            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-sky-50 dark:bg-sky-950/50 hover:bg-sky-100 dark:hover:bg-sky-900/60 border-2 border-sky-200 dark:border-sky-800 text-sky-800 dark:text-sky-300 text-xs sm:text-sm font-bold shadow-2xs transition-all cursor-pointer active:scale-95 shrink-0"
-            title="Lihat Unit Puskeswan Aktif"
-          >
-            <Stethoscope size={14} className="text-sky-600 dark:text-sky-400" />
-            <span>{puskeswanCount} Puskeswan Aktif</span>
-          </button>
+        <div>
+          <h2 className="text-lg sm:text-2xl font-extrabold text-slate-900 dark:text-white tracking-tight">
+            Ringkasan Wilayah
+          </h2>
+          <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-300 font-medium">
+            Rekapitulasi data resmi peternakan dan kesehatan hewan Kabupaten Kebumen
+          </p>
         </div>
 
         <button

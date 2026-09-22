@@ -304,8 +304,8 @@ export default function DatabaseKTTPage() {
       </header>
 
       {/* ── MAIN WORKSPACE ── */}
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 sm:py-12">
-        <div className="grid grid-cols-1 lg:grid-cols-[260px_1fr] gap-6 items-start">
+      <main className="max-w-[1440px] mx-auto px-3 sm:px-6 lg:px-8 py-4 sm:py-7 lg:py-8 pb-28 sm:pb-12">
+        <div className="grid grid-cols-1 lg:grid-cols-[260px_minmax(0,1fr)] gap-6 items-start">
           {/* Left Sidebar: Indeks Kecamatan */}
           <KttSidebar
             totalCount={data.length}
@@ -315,28 +315,30 @@ export default function DatabaseKTTPage() {
           />
 
           {/* Right Main: Master Table */}
-          <KttTableSection
-            dataCount={data.length}
-            paginated={paginated}
-            filteredCount={filtered.length}
-            search={search}
-            setSearch={setSearch}
-            filterKecamatan={filterKecamatan}
-            filterDesa={filterDesa}
-            setFilterDesa={setFilterDesa}
-            filterJenis={filterJenis}
-            setFilterJenis={setFilterJenis}
-            desaList={desaList}
-            page={page}
-            totalPages={totalPages}
-            currentPage={currentPage}
-            setPage={setPage}
-            canEdit={canEdit}
-            docCounts={docCounts}
-            onSelectKttForDocs={(row) => setSelectedKttForDocs(row)}
-            onEdit={openEditModal}
-            onDelete={(row) => setDeleteTarget(row)}
-          />
+          <div className="min-w-0 w-full">
+            <KttTableSection
+              dataCount={data.length}
+              paginated={paginated}
+              filteredCount={filtered.length}
+              search={search}
+              setSearch={setSearch}
+              filterKecamatan={filterKecamatan}
+              filterDesa={filterDesa}
+              setFilterDesa={setFilterDesa}
+              filterJenis={filterJenis}
+              setFilterJenis={setFilterJenis}
+              desaList={desaList}
+              page={page}
+              totalPages={totalPages}
+              currentPage={currentPage}
+              setPage={setPage}
+              canEdit={canEdit}
+              docCounts={docCounts}
+              onSelectKttForDocs={(row) => setSelectedKttForDocs(row)}
+              onEdit={openEditModal}
+              onDelete={(row) => setDeleteTarget(row)}
+            />
+          </div>
         </div>
       </main>
 

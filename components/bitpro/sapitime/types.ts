@@ -77,3 +77,12 @@ export function getCattleStatusData(c: Cattle) {
   }
   return { ...c, eventType: 'safe', colorHex: '#6B7280', bgHex: '#F3F4F6' };
 }
+
+export { KECAMATAN_DESA_MAP, KECAMATAN_LIST } from '@/components/bitpro/data-farm/types';
+import { KECAMATAN_DESA_MAP } from '@/components/bitpro/data-farm/types';
+
+export function getDesaListForKecamatan(kecamatan?: string): string[] {
+  if (!kecamatan) return [];
+  const normalized = kecamatan.trim().toUpperCase();
+  return KECAMATAN_DESA_MAP[normalized] || [];
+}

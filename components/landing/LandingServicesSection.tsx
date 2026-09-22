@@ -4,7 +4,6 @@ import React from 'react';
 import {
   Activity,
   Building2,
-  Stethoscope,
   Syringe,
   CheckCircle2,
   Search,
@@ -22,14 +21,14 @@ interface LandingServicesSectionProps {
   telurList: ProduksiItemSimple[];
   sebaranFarmList: FarmSebaranItem[];
   totalFarm: number;
-  puskeswanCount: number;
+  puskeswanCount?: number;
   vaksinasiList: any[];
   searchVaksin: string;
   setSearchVaksin: (val: string) => void;
   filteredVaksinasi: any[];
   rphList: any[];
   nkvList: any[];
-  onSelectPuskeswanTab: () => void;
+  onSelectPuskeswanTab?: () => void;
 }
 
 export default function LandingServicesSection({
@@ -81,7 +80,6 @@ export default function LandingServicesSection({
               <h3 className="text-sm sm:text-lg font-bold text-slate-900 dark:text-white">
                 {detailView === 'populasi' && 'Data Lengkap Sensus Populasi & Produksi Ternak'}
                 {detailView === 'farm' && 'Data Kelompok Tani Ternak (KTT) & Poktan Terdaftar'}
-                {detailView === 'puskeswan' && 'Ringkasan Wilayah & Data Unit Puskeswan Aktif'}
                 {detailView === 'vaksinasi' && 'Data Realisasi Vaksinasi PMK & LSD Kabupaten Kebumen'}
                 {detailView === 'rph_tph' && 'Data RPH & TPH/TPU Terbina'}
                 {detailView === 'nkv' && 'Data Sertifikasi Nomor Kontrol Veteriner (NKV)'}
@@ -400,21 +398,7 @@ export default function LandingServicesSection({
             </div>
           </div>
 
-          {/* 3. Puskeswan Aktif */}
-          <div
-            onClick={onSelectPuskeswanTab}
-            className="p-3.5 sm:p-5 rounded-2xl border-2 border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:border-blue-400 dark:hover:border-blue-500 hover:shadow-xs transition-all flex items-center gap-3 sm:gap-3.5 cursor-pointer group active:scale-[0.99]"
-          >
-            <div className="w-11 h-11 sm:w-12 sm:h-12 rounded-xl bg-sky-50 dark:bg-sky-950/60 border-2 border-sky-200 dark:border-sky-800 text-sky-600 dark:text-sky-400 flex items-center justify-center shrink-0 sm:group-hover:scale-105 transition-transform">
-              <Stethoscope className="w-5 h-5 sm:w-5.5 sm:h-5.5" />
-            </div>
-            <div className="min-w-0 flex-1">
-              <p className="font-extrabold text-sm sm:text-lg text-slate-900 dark:text-white truncate">Puskeswan Aktif</p>
-              <p className="text-xs sm:text-sm font-semibold text-slate-500 dark:text-slate-400 truncate">{puskeswanCount} unit pelayanan 26 kecamatan</p>
-            </div>
-          </div>
-
-          {/* 4. Vaksinasi PMK */}
+          {/* 3. Vaksinasi PMK */}
           <div
             onClick={() => setDetailView('vaksinasi')}
             className="p-3.5 sm:p-5 rounded-2xl border-2 border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:border-blue-400 dark:hover:border-blue-500 hover:shadow-xs transition-all flex items-center gap-3 sm:gap-3.5 cursor-pointer group active:scale-[0.99]"

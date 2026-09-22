@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { Sparkles, Syringe } from 'lucide-react';
-import { Cattle } from './types';
+import { Cattle, KECAMATAN_LIST, getDesaListForKecamatan } from './types';
 
 interface ModalEstrusInfoProps {
   showEstrusModal: boolean;
@@ -70,6 +70,8 @@ export function ModalCattleForm({
 }: ModalCattleFormProps) {
   if (!isOpen) return null;
 
+  const desaList = getDesaListForKecamatan(formData.kecamatan);
+
   return (
     <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center z-50 p-4 animate-in fade-in duration-200">
       <div className="bg-white rounded-3xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto p-6 sm:p-8">
@@ -107,24 +109,40 @@ export function ModalCattleForm({
             />
           </div>
           <div>
-            <label className="block text-xs font-bold mb-1 text-slate-700">Desa</label>
-            <input
-              type="text"
-              className="w-full min-h-touch h-11 px-3.5 border border-slate-200 rounded-xl bg-slate-50 focus:bg-white focus:outline-none focus:border-emerald-600 text-xs text-slate-900"
-              value={formData.desa || ''}
-              onChange={(e) => setFormData({ ...formData, desa: e.target.value })}
-              placeholder="Desa"
-            />
+            <label className="block text-xs font-bold mb-1 text-slate-700">Kecamatan <span className="text-red-500">*</span></label>
+            <select
+              className="w-full min-h-touch h-11 px-3.5 border border-slate-200 rounded-xl bg-slate-50 focus:bg-white focus:outline-none focus:border-emerald-600 text-xs text-slate-900 font-medium cursor-pointer"
+              value={formData.kecamatan ? formData.kecamatan.toUpperCase() : ''}
+              onChange={(e) => setFormData({ ...formData, kecamatan: e.target.value, desa: '' })}
+            >
+              <option value="">-- Pilih Kecamatan --</option>
+              {KECAMATAN_LIST.map((kec) => (
+                <option key={kec} value={kec}>
+                  {kec}
+                </option>
+              ))}
+            </select>
           </div>
           <div>
-            <label className="block text-xs font-bold mb-1 text-slate-700">Kecamatan</label>
-            <input
-              type="text"
-              className="w-full min-h-touch h-11 px-3.5 border border-slate-200 rounded-xl bg-slate-50 focus:bg-white focus:outline-none focus:border-emerald-600 text-xs text-slate-900"
-              value={formData.kecamatan || ''}
-              onChange={(e) => setFormData({ ...formData, kecamatan: e.target.value })}
-              placeholder="Kecamatan"
-            />
+            <label className="block text-xs font-bold mb-1 text-slate-700">Desa <span className="text-red-500">*</span></label>
+            <select
+              className="w-full min-h-touch h-11 px-3.5 border border-slate-200 rounded-xl bg-slate-50 focus:bg-white focus:outline-none focus:border-emerald-600 text-xs text-slate-900 font-medium cursor-pointer disabled:bg-slate-100 disabled:text-slate-400 disabled:cursor-not-allowed"
+              value={formData.desa || ''}
+              onChange={(e) => setFormData({ ...formData, desa: e.target.value })}
+              disabled={!formData.kecamatan}
+            >
+              <option value="">
+                {formData.kecamatan ? '-- Pilih Desa / Kelurahan --' : '-- Pilih Kecamatan Dahulu --'}
+              </option>
+              {desaList.map((d) => (
+                <option key={d} value={d}>
+                  {d}
+                </option>
+              ))}
+              {formData.desa && !desaList.includes(formData.desa) && (
+                <option value={formData.desa}>{formData.desa}</option>
+              )}
+            </select>
           </div>
           <div>
             <label className="block text-xs font-bold mb-1 text-slate-700">Ras Sapi</label>
@@ -221,6 +239,8 @@ export function ModalCatatIB({
 }: ModalCatatIBProps) {
   if (!showIBModal || !selectedCattleForIB) return null;
 
+  const ibDesaList = getDesaListForKecamatan(ibFormData.kecamatan);
+
   return (
     <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center z-50 p-4 animate-in fade-in duration-200">
       <div className="bg-white rounded-3xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto p-6 sm:p-8">
@@ -258,21 +278,39 @@ export function ModalCatatIB({
           </div>
           <div>
             <label className="block text-xs font-bold mb-1 text-slate-700">Kecamatan</label>
-            <input
-              type="text"
-              className="w-full min-h-touch h-11 px-3.5 border border-slate-200 rounded-xl bg-slate-50 focus:bg-white focus:outline-none focus:border-emerald-600 text-xs text-slate-900"
-              value={ibFormData.kecamatan || ''}
-              onChange={(e) => setIbFormData({ ...ibFormData, kecamatan: e.target.value })}
-            />
+            <select
+              className="w-full min-h-touch h-11 px-3.5 border border-slate-200 rounded-xl bg-slate-50 focus:bg-white focus:outline-none focus:border-emerald-600 text-xs text-slate-900 font-medium cursor-pointer"
+              value={ibFormData.kecamatan ? ibFormData.kecamatan.toUpperCase() : ''}
+              onChange={(e) => setIbFormData({ ...ibFormData, kecamatan: e.target.value, desa: '' })}
+            >
+              <option value="">-- Pilih Kecamatan --</option>
+              {KECAMATAN_LIST.map((kec) => (
+                <option key={kec} value={kec}>
+                  {kec}
+                </option>
+              ))}
+            </select>
           </div>
           <div>
             <label className="block text-xs font-bold mb-1 text-slate-700">Desa</label>
-            <input
-              type="text"
-              className="w-full min-h-touch h-11 px-3.5 border border-slate-200 rounded-xl bg-slate-50 focus:bg-white focus:outline-none focus:border-emerald-600 text-xs text-slate-900"
+            <select
+              className="w-full min-h-touch h-11 px-3.5 border border-slate-200 rounded-xl bg-slate-50 focus:bg-white focus:outline-none focus:border-emerald-600 text-xs text-slate-900 font-medium cursor-pointer disabled:bg-slate-100 disabled:text-slate-400 disabled:cursor-not-allowed"
               value={ibFormData.desa || ''}
               onChange={(e) => setIbFormData({ ...ibFormData, desa: e.target.value })}
-            />
+              disabled={!ibFormData.kecamatan}
+            >
+              <option value="">
+                {ibFormData.kecamatan ? '-- Pilih Desa / Kelurahan --' : '-- Pilih Kecamatan Dahulu --'}
+              </option>
+              {ibDesaList.map((d) => (
+                <option key={d} value={d}>
+                  {d}
+                </option>
+              ))}
+              {ibFormData.desa && !ibDesaList.includes(ibFormData.desa) && (
+                <option value={ibFormData.desa}>{ibFormData.desa}</option>
+              )}
+            </select>
           </div>
           <div className="sm:col-span-2">
             <label className="block text-xs font-bold mb-1 text-slate-700">Nama Petugas Inseminator</label>
