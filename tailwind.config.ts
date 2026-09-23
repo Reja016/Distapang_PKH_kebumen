@@ -50,8 +50,8 @@ const config: Config = {
         radiant: '#eab308',
       },
       fontFamily: {
-        sans: ['var(--font-sans)', 'system-ui', '-apple-system', 'Segoe UI', 'Roboto', 'sans-serif'],
-        editorial: ['var(--font-sans)', 'system-ui', 'sans-serif'],
+        sans: ['Poppins', 'var(--font-sans)', 'system-ui', '-apple-system', 'Segoe UI', 'Roboto', 'sans-serif'],
+        editorial: ['Poppins', 'var(--font-sans)', 'system-ui', 'sans-serif'],
       },
       minHeight: {
         touch: '44px',

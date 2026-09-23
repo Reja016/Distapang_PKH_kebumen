@@ -30,8 +30,14 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="id" className={poppins.variable} suppressHydrationWarning>
+    <html lang="id" className={`${poppins.variable} ${poppins.className}`} suppressHydrationWarning>
       <head>
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+        <link
+          href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,400;1,600&display=swap"
+          rel="stylesheet"
+        />
         <script
           dangerouslySetInnerHTML={{
             __html: `(function() {
@@ -47,7 +53,7 @@ export default function RootLayout({
           }}
         />
       </head>
-      <body className="font-sans antialiased text-slate-900 bg-slate-50 selection:bg-blue-600 selection:text-white" suppressHydrationWarning>
+      <body className={`${poppins.className} font-sans antialiased text-slate-900 bg-slate-50 selection:bg-blue-600 selection:text-white`} suppressHydrationWarning>
         {children}
         <AiChatWidget />
       </body>
