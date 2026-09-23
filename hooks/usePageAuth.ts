@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { supabase } from '@/lib/supabase';
 import {
   getAuthSession,
   clearAuthSession,
@@ -54,10 +53,9 @@ export function usePageAuth(
   useEffect(() => {
     const check = async () => {
       const localUser = getAuthSession();
-      const { data: supaData } = await supabase.auth.getSession();
 
       // Tidak ada sesi sama sekali → redirect login
-      if (!localUser && !supaData.session) {
+      if (!localUser) {
         router.push('/login');
         return;
       }
@@ -80,22 +78,14 @@ export function usePageAuth(
       let isUserAdmin = false;
       let userCanCreate = false;
 
-      if (localUser) {
-        const role = localUser.role || 'Petugas Teknis';
-        setUserName(localUser.nama || localUser.nip_username);
-        setUserRole(role);
-        isUserAdmin = role === 'Administrator';
+      const role = localUser.role || 'Petugas Teknis';
+      setUserName(localUser.nama || localUser.nip_username);
+      setUserRole(role);
+      isUserAdmin = role === 'Administrator';
 
-        // Hak akses tambah data: Administrator ATAU mode izin edit
-        const mode = getSubmenuPermissionMode(moduleKey, submenuKey);
-        userCanCreate = isUserAdmin || mode === 'edit';
-      } else if (supaData.session) {
-        const email = supaData.session.user?.email || '';
-        setUserName(email);
-        isUserAdmin = email.toLowerCase().includes('admin');
-        setUserRole(isUserAdmin ? 'Administrator' : 'Petugas Teknis');
-        userCanCreate = true;
-      }
+      // Hak akses tambah data: Administrator ATAU mode izin edit
+      const mode = getSubmenuPermissionMode(moduleKey, submenuKey);
+      userCanCreate = isUserAdmin || mode === 'edit';
 
       setIsAdmin(isUserAdmin);
       setCanCreate(userCanCreate);
@@ -149,7 +139,7 @@ export function usePageAuth(
   const handleLogout = async () => {
     clearAuthSession();
     try {
-      await supabase.auth.signOut();
+      await fetch('/api/auth/logout', { method: 'POST' });
     } catch {}
     router.push('/login');
   };

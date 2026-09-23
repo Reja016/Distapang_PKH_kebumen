@@ -4,7 +4,7 @@ const cspHeader = `
   style-src 'self' 'unsafe-inline' https://unpkg.com;
   img-src 'self' data: blob: https: http:;
   font-src 'self' data: https:;
-  connect-src 'self' https://challenges.cloudflare.com https://*.supabase.co https://empty-yak-8.hooks.n8n.cloud https://nominatim.openstreetmap.org https://docs.google.com https://*.tile.openstreetmap.org;
+  connect-src 'self' https://challenges.cloudflare.com https://empty-yak-8.hooks.n8n.cloud https://nominatim.openstreetmap.org https://docs.google.com https://*.tile.openstreetmap.org;
   frame-src 'self' https://challenges.cloudflare.com;
   frame-ancestors 'self';
   object-src 'none';

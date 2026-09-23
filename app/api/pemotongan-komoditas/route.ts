@@ -6,8 +6,38 @@ export const dynamic = 'force-dynamic';
 const DEFAULT_KOMODITAS = ['Sapi Potong', 'Kuda', 'Babi', 'Kambing', 'Domba'];
 const DEFAULT_LOKASI = ['RPH Kebumen', 'Luar RPH Kebumen', 'RPH Gombong', 'Luar RPH Gombong'];
 
+async function ensureTable() {
+  try {
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS pemotongan_komoditas_bulanan (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        tahun INT NOT NULL,
+        nama_pemotongan VARCHAR(100) NOT NULL,
+        komoditas VARCHAR(100) NOT NULL,
+        jan_jantan INT DEFAULT 0, jan_betina INT DEFAULT 0,
+        feb_jantan INT DEFAULT 0, feb_betina INT DEFAULT 0,
+        mar_jantan INT DEFAULT 0, mar_betina INT DEFAULT 0,
+        apr_jantan INT DEFAULT 0, apr_betina INT DEFAULT 0,
+        mei_jantan INT DEFAULT 0, mei_betina INT DEFAULT 0,
+        jun_jantan INT DEFAULT 0, jun_betina INT DEFAULT 0,
+        jul_jantan INT DEFAULT 0, jul_betina INT DEFAULT 0,
+        agu_jantan INT DEFAULT 0, agu_betina INT DEFAULT 0,
+        sep_jantan INT DEFAULT 0, sep_betina INT DEFAULT 0,
+        okt_jantan INT DEFAULT 0, okt_betina INT DEFAULT 0,
+        nov_jantan INT DEFAULT 0, nov_betina INT DEFAULT 0,
+        des_jantan INT DEFAULT 0, des_betina INT DEFAULT 0,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        UNIQUE KEY uq_thn_lok_kom (tahun, nama_pemotongan, komoditas)
+      ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+    `);
+  } catch (e) {
+    console.warn('ensureTable pemotongan_komoditas_bulanan warning:', e);
+  }
+}
+
 export async function GET(req: Request) {
   try {
+    await ensureTable();
     const { searchParams } = new URL(req.url);
     const action = searchParams.get('action');
 
@@ -65,6 +95,7 @@ export async function GET(req: Request) {
 
 export async function POST(req: Request) {
   try {
+    await ensureTable();
     const body = await req.json();
     const { action, tahun, data } = body;
 

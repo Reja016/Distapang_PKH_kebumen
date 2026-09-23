@@ -2,7 +2,6 @@
 
 import { useEffect, useState, useRef } from 'react';
 import { useRouter } from 'next/navigation';
-import { supabase } from '@/lib/supabase';
 import {
   getAuthSession,
   clearAuthSession,
@@ -107,28 +106,19 @@ export default function BerandaPage() {
     const checkSession = async () => {
       try {
         const localUser = getAuthSession();
-        const { data: supaData } = await supabase.auth.getSession();
 
-        if (!localUser && !supaData.session) {
+        if (!localUser) {
           router.push('/');
           return;
         }
 
-        if (localUser) {
-          setUserDisplay(
-            localUser.nama
-              ? `${localUser.nama} (${localUser.nip_username})`
-              : localUser.nip_username
-          );
-          setUserRole(localUser.role || 'Petugas Teknis');
-          setIsAdmin(localUser.role === 'Administrator');
-        } else if (supaData.session) {
-          const email = supaData.session.user?.email || '';
-          setUserDisplay(email);
-          const adminCheck = email.toLowerCase().includes('admin');
-          setUserRole(adminCheck ? 'Administrator' : 'Petugas Teknis');
-          setIsAdmin(adminCheck);
-        }
+        setUserDisplay(
+          localUser.nama
+            ? `${localUser.nama} (${localUser.nip_username})`
+            : localUser.nip_username
+        );
+        setUserRole(localUser.role || 'Petugas Teknis');
+        setIsAdmin(localUser.role === 'Administrator');
 
         // Restore active submenu from URL search query (?tab=xxx) if valid
         const params = new URLSearchParams(window.location.search);
@@ -211,7 +201,7 @@ export default function BerandaPage() {
   const handleLogout = async () => {
     clearAuthSession();
     try {
-      await supabase.auth.signOut();
+      await fetch('/api/auth/logout', { method: 'POST' });
     } catch {}
     router.push('/login');
   };

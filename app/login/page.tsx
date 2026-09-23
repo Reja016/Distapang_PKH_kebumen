@@ -3,7 +3,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { supabase } from '@/lib/supabase';
 import { saveAuthSession } from '@/lib/auth';
 import { CloudflareTurnstile, CloudflareTurnstileRef } from '@/components/common/CloudflareTurnstile';
 import {
@@ -71,17 +70,6 @@ export default function LoginPage() {
       if (data.success && data.user) {
         // Simpan sesi login petugas ke localStorage
         saveAuthSession(data.user);
-
-        // Opsional: Jika user memasukkan email, coba sinkronisasi sesi Supabase di background
-        if (trimmedId.includes('@')) {
-          try {
-            await supabase.auth.signInWithPassword({
-              email: trimmedId,
-              password: trimmedPass,
-            });
-          } catch {}
-        }
-
         setLoading(false);
         window.location.href = '/beranda';
         return;
@@ -93,28 +81,6 @@ export default function LoginPage() {
         turnstileRef.current?.reset();
         setLoading(false);
         return;
-      }
-
-      // 3. Fallback jika coba auth Supabase
-      if (trimmedId.includes('@')) {
-        const { data: supaData, error: supaErr } = await supabase.auth.signInWithPassword({
-          email: trimmedId,
-          password: trimmedPass,
-        });
-
-        if (!supaErr && supaData.session) {
-          saveAuthSession({
-            id: 1,
-            nama: supaData.user?.email || 'Petugas Dinas',
-            nip_username: trimmedId,
-            role: trimmedId.toLowerCase().includes('admin') ? 'Administrator' : 'Petugas Teknis',
-            status: 'Aktif',
-            permissions: (await import('@/lib/permissions')).DEFAULT_FULL_PERMISSIONS,
-          });
-          setLoading(false);
-          window.location.href = '/beranda';
-          return;
-        }
       }
 
       setErrorMsg('Login gagal. Periksa kembali ID Petugas atau kata sandi Anda.');

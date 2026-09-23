@@ -1,16 +1,5 @@
 import { NextResponse } from 'next/server';
-import mysql from 'mysql2/promise';
-
-// Koneksi Database
-const pool = mysql.createPool({
-  host: 'localhost',
-  user: 'root',
-  password: '',
-  database: 'simantap_db',
-  waitForConnections: true,
-  connectionLimit: 10,
-  queueLimit: 0
-});
+import pool from '@/lib/db';
 
 // Fungsi pembantu untuk memecah CSV
 function parseCSVLine(line: string) {

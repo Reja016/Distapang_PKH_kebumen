@@ -2,8 +2,7 @@
 
 import { useState, useEffect, useMemo, useRef } from 'react';
 import { useRouter } from 'next/navigation';
-import { supabase } from '@/lib/supabase';
-import { saveAuthSession } from '@/lib/auth';
+import { saveAuthSession, getAuthSession } from '@/lib/auth';
 import { CloudflareTurnstileRef } from '@/components/common/CloudflareTurnstile';
 
 import {
@@ -133,13 +132,8 @@ export default function LandingPage() {
 
   // Cek sesi login
   useEffect(() => {
-    const checkSession = async () => {
-      const {
-        data: { session },
-      } = await supabase.auth.getSession();
-      if (session) router.push('/beranda');
-    };
-    checkSession();
+    const session = getAuthSession();
+    if (session) router.push('/beranda');
   }, [router]);
 
   // Handler Login Petugas
@@ -169,37 +163,11 @@ export default function LandingPage() {
         return;
       }
 
-      if (json && json.error) {
-        setError(json.error);
-        turnstileRef.current?.reset();
-        setIsLoading(false);
-        return;
-      }
-
-      // Fallback Supabase jika login via email
-      if (loginId.includes('@')) {
-        const { error: signInError } = await supabase.auth.signInWithPassword({
-          email: loginId,
-          password,
-        });
-
-        if (signInError) {
-          setError('Akses ditolak. Periksa kembali ID Petugas/NIP atau kata sandi Anda.');
-          turnstileRef.current?.reset();
-          setIsLoading(false);
-          return;
-        } else {
-          window.location.href = '/beranda';
-          return;
-        }
-      }
-
-      setError('ID Petugas / NIP / Username atau kata sandi salah.');
+      setError(json?.error || 'Akses ditolak. Periksa kembali ID Petugas/NIP atau kata sandi Anda.');
       turnstileRef.current?.reset();
       setIsLoading(false);
-    } catch (err: any) {
-      console.error('Login error:', err);
-      setError('Terjadi kesalahan saat memproses login. Silakan coba kembali.');
+    } catch {
+      setError('Terjadi kendala jaringan. Silakan coba kembali.');
       turnstileRef.current?.reset();
       setIsLoading(false);
     }
