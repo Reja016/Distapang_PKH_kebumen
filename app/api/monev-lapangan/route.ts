@@ -1,5 +1,7 @@
 import { NextResponse } from 'next/server';
 import pool from '@/lib/db';
+import { getSessionFromRequest } from '@/lib/session';
+import { logActivity } from '@/lib/auditLog';
 
 export const dynamic = 'force-dynamic';
 
@@ -59,6 +61,9 @@ async function ensureTable() {
 
 export async function POST(request: Request) {
   try {
+    const session = await getSessionFromRequest(request as any);
+    const userName = session?.nama || session?.nip_username || 'System';
+
     await ensureTable();
     const body = await request.json();
     const items = Array.isArray(body) ? body : (body?.items && Array.isArray(body.items) ? body.items : null);
@@ -105,6 +110,16 @@ export async function POST(request: Request) {
             itemCatatan,
           ]
         );
+
+        await logActivity({
+          module: 'bitpro',
+          submenu: 'monev-ktt',
+          tableName: 'monev_lapangan',
+          recordId: itemId,
+          action: 'CREATE',
+          userName,
+          details: item,
+        });
       }
       return NextResponse.json({ status: 'success', count: items.length });
     }
@@ -120,11 +135,31 @@ export async function POST(request: Request) {
         `UPDATE monev_lapangan SET tahun=?, kec=?, desa=?, namaKtt=?, alamat=?, kegiatan=?, jenis=?, waktuMonev=?, kondisi=?, lat=?, lng=?, photo=?, catatan=? WHERE id=?`,
         [tahun || '2026', kec || '-', desa || '-', namaKtt || 'KTT', alamat || '', kegiatan || '', jenis || 'Sapi', waktuMonev || '', finalKondisi, finalLat, finalLng, photo || null, catatan || '', id]
       );
+
+      await logActivity({
+        module: 'bitpro',
+        submenu: 'monev-ktt',
+        tableName: 'monev_lapangan',
+        recordId: id,
+        action: 'UPDATE',
+        userName,
+        details: body,
+      });
     } else {
       await pool.query(
         `INSERT INTO monev_lapangan (id, tahun, kec, desa, namaKtt, alamat, kegiatan, jenis, waktuMonev, kondisi, lat, lng, photo, catatan) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
         [id, tahun || '2026', kec || '-', desa || '-', namaKtt || 'KTT', alamat || '', kegiatan || '', jenis || 'Sapi', waktuMonev || '', finalKondisi, finalLat, finalLng, photo || null, catatan || '']
       );
+
+      await logActivity({
+        module: 'bitpro',
+        submenu: 'monev-ktt',
+        tableName: 'monev_lapangan',
+        recordId: id,
+        action: 'CREATE',
+        userName,
+        details: body,
+      });
     }
     return NextResponse.json({ status: 'success' });
   } catch (error: any) {
@@ -138,13 +173,39 @@ export async function POST(request: Request) {
 
 export async function DELETE(request: Request) {
   try {
+    const session = await getSessionFromRequest(request as any);
+    const userName = session?.nama || session?.nip_username || 'System';
+
     const { searchParams } = new URL(request.url);
     const id = searchParams.get('id');
     if (id === 'all') {
       await pool.query('TRUNCATE TABLE monev_lapangan');
+      
+      await logActivity({
+        module: 'bitpro',
+        submenu: 'monev-ktt',
+        tableName: 'monev_lapangan',
+        recordId: 'all',
+        action: 'DELETE',
+        userName,
+        details: { message: 'Truncated all data' },
+      });
+      
       return NextResponse.json({ status: 'success', message: 'Seluruh data monev lapangan berhasil dikosongkan' });
     }
-    if (id) await pool.query('DELETE FROM monev_lapangan WHERE id=?', [id]);
+    if (id) {
+      await pool.query('DELETE FROM monev_lapangan WHERE id=?', [id]);
+
+      await logActivity({
+        module: 'bitpro',
+        submenu: 'monev-ktt',
+        tableName: 'monev_lapangan',
+        recordId: id,
+        action: 'DELETE',
+        userName,
+        details: { id },
+      });
+    }
     return NextResponse.json({ status: 'success' });
   } catch (error) {
     return NextResponse.json({ error: 'Gagal menghapus' }, { status: 500 });

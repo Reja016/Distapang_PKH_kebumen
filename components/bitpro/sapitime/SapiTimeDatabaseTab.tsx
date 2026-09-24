@@ -20,6 +20,7 @@ interface SapiTimeDatabaseTabProps {
   handleEditCattle: (c: Cattle) => void;
   handleDeleteCattle: (id: string) => void;
   onOpenIBModal: (c: Cattle) => void;
+  onShowHistory?: (row: any) => void;
 }
 
 export function SapiTimeDatabaseTab({
@@ -37,6 +38,7 @@ export function SapiTimeDatabaseTab({
   handleEditCattle,
   handleDeleteCattle,
   onOpenIBModal,
+  onShowHistory,
 }: SapiTimeDatabaseTabProps) {
   const router = useRouter();
   const desaList = getDesaListForKecamatan(formData.kecamatan);
@@ -325,6 +327,15 @@ export function SapiTimeDatabaseTab({
                   >
                     <Syringe size={13} />
                     <span>Catat IB</span>
+                  </button>
+                )}
+                {onShowHistory && (
+                  <button
+                    onClick={() => onShowHistory(cattle)}
+                    title="Riwayat"
+                    className="min-h-touch h-10 w-10 bg-blue-50 text-blue-600 rounded-xl border border-blue-200 hover:bg-blue-100 transition-colors flex items-center justify-center shrink-0 cursor-pointer"
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-clock"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
                   </button>
                 )}
                 {canEdit && (

@@ -18,6 +18,7 @@ import KttTableSection from '@/components/bitpro/database-ktt/KttTableSection';
 import KttModals from '@/components/bitpro/database-ktt/KttModals';
 import KttDocumentModal from '@/components/bitpro/database-ktt/KttDocumentModal';
 import KttBulkZipModal from '@/components/bitpro/database-ktt/KttBulkZipModal';
+import { UniversalAuditModal } from '@/components/common/UniversalAuditModal';
 
 export default function DatabaseKTTPage() {
   const [data, setData] = useState<KelompokTani[]>([]);
@@ -40,6 +41,10 @@ export default function DatabaseKTTPage() {
   const [docCounts, setDocCounts] = useState<Record<number, number>>({});
   const [selectedKttForDocs, setSelectedKttForDocs] = useState<KelompokTani | null>(null);
   const [showBulkZipModal, setShowBulkZipModal] = useState(false);
+
+  // State Audit & Koreksi
+  const [showAuditModal, setShowAuditModal] = useState(false);
+  const [auditTarget, setAuditTarget] = useState<KelompokTani | null>(null);
 
   const { isReady, canCreate, canEdit, isAdmin, userRole } = usePageAuth('bitpro', 'database-ktt');
 
@@ -337,6 +342,10 @@ export default function DatabaseKTTPage() {
               onSelectKttForDocs={(row) => setSelectedKttForDocs(row)}
               onEdit={openEditModal}
               onDelete={(row) => setDeleteTarget(row)}
+              onShowHistory={(row) => {
+                setAuditTarget(row);
+                setShowAuditModal(true);
+              }}
             />
           </div>
         </div>
@@ -362,6 +371,7 @@ export default function DatabaseKTTPage() {
         onClose={() => setSelectedKttForDocs(null)}
         ktt={selectedKttForDocs}
         isAdmin={isAdmin}
+        canEdit={canEdit}
         userRole={userRole}
         onDocumentsUpdated={fetchDocStats}
       />
@@ -372,7 +382,24 @@ export default function DatabaseKTTPage() {
         onClose={() => setShowBulkZipModal(false)}
         allKtts={data}
         userRole={userRole}
+        canEdit={canEdit}
         onSuccess={fetchDocStats}
+      />
+
+      {/* Universal Audit Modal */}
+      <UniversalAuditModal
+        isOpen={showAuditModal}
+        onClose={() => setShowAuditModal(false)}
+        recordId={auditTarget?.id ?? null}
+        recordTitle={auditTarget?.namaKelompok ? `KTT: ${auditTarget.namaKelompok} (${auditTarget.desa})` : ''}
+        tableName="ktt_master"
+        moduleKey="bitpro"
+        submenuKey="database-ktt"
+        availableFields={[
+          'nama_kelompok', 'kecamatan', 'desa', 'nomor_register', 
+          'jenis_kelompok', 'kelas_kelompok', 'luas_lahan_ha', 
+          'anggota_laki', 'anggota_perempuan', 'nama_ketua'
+        ]}
       />
     </div>
   );

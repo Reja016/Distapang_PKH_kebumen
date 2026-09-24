@@ -22,6 +22,7 @@ interface PenyakitTableTabProps {
   setFormValues: (vals: any) => void;
   setShowAddModal: (show: boolean) => void;
   handleDeleteCase: (id: number) => Promise<void>;
+  onShowHistory?: (row: any) => void;
 }
 
 export default function PenyakitTableTab({
@@ -39,6 +40,7 @@ export default function PenyakitTableTab({
   setFormValues,
   setShowAddModal,
   handleDeleteCase,
+  onShowHistory,
 }: PenyakitTableTabProps) {
   return (
     <div className="space-y-4">
@@ -168,6 +170,15 @@ export default function PenyakitTableTab({
                                 title="Hapus"
                               >
                                 <Trash2 size={13} />
+                              </button>
+                            )}
+                            {onShowHistory && (
+                              <button
+                                onClick={() => onShowHistory(row)}
+                                className="w-7 h-7 rounded-lg border border-blue-200 bg-blue-50 text-blue-600 hover:bg-blue-100 flex items-center justify-center transition-colors cursor-pointer"
+                                title="Riwayat"
+                              >
+                                <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-clock"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
                               </button>
                             )}
                           </div>

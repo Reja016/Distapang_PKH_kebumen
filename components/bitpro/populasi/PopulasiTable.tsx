@@ -9,6 +9,7 @@ interface PopulasiTableProps {
   handleDelete: (idx: number) => Promise<void>;
   getConciseSummary: (vals: Record<string, string>) => { name: string; total: number }[];
   year: string;
+  onShowHistory?: (row: any) => void;
 }
 
 export default function PopulasiTable({
@@ -19,6 +20,7 @@ export default function PopulasiTable({
   handleDelete,
   getConciseSummary,
   year,
+  onShowHistory,
 }: PopulasiTableProps) {
   return (
     <div className="rounded-3xl border border-slate-200 bg-white shadow-sm overflow-hidden space-y-0">
@@ -131,6 +133,15 @@ export default function PopulasiTable({
                         >
                           <Trash2 size={13} strokeWidth={2.5} />
                         </button>
+                        {onShowHistory && d.id && (
+                          <button
+                            onClick={() => onShowHistory(d)}
+                            className="min-h-touch h-8 w-8 rounded-lg border border-blue-200 bg-blue-50 hover:bg-blue-100 text-blue-600 flex items-center justify-center transition-colors cursor-pointer"
+                            title="Riwayat Perubahan"
+                          >
+                            <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-clock"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                          </button>
+                        )}
                       </div>
                     </td>
                   )}

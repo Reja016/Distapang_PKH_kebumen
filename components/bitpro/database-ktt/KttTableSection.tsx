@@ -24,6 +24,7 @@ interface KttTableSectionProps {
   onSelectKttForDocs: (ktt: KelompokTani) => void;
   onEdit: (row: KelompokTani) => void;
   onDelete: (row: KelompokTani) => void;
+  onShowHistory?: (row: KelompokTani) => void;
 }
 
 export default function KttTableSection({
@@ -45,6 +46,7 @@ export default function KttTableSection({
   onSelectKttForDocs,
   onEdit,
   onDelete,
+  onShowHistory,
 }: KttTableSectionProps) {
   const [expandedId, setExpandedId] = useState<number | null>(null);
 
@@ -241,6 +243,20 @@ export default function KttTableSection({
                               <span>Berkas</span>
                             </button>
 
+                            {onShowHistory && (
+                              <button
+                                type="button"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  onShowHistory(row);
+                                }}
+                                className="h-7 w-7 rounded-lg border border-blue-200 bg-blue-50 hover:bg-blue-100 text-blue-600 flex items-center justify-center transition-colors cursor-pointer"
+                                title="Riwayat & Koreksi"
+                              >
+                                <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-clock"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                              </button>
+                            )}
+
                             {canEdit && (
                               <>
                                 <button
@@ -329,6 +345,20 @@ export default function KttTableSection({
                                   <FolderOpen size={13} />
                                   <span>{docCount > 0 ? `${docCount} Berkas Arsip` : 'Buka Berkas'}</span>
                                 </button>
+
+                                {onShowHistory && (
+                                  <button
+                                    type="button"
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      onShowHistory(row);
+                                    }}
+                                    className="min-h-touch min-w-touch h-8.5 w-8.5 rounded-xl border border-blue-200 bg-blue-50 hover:bg-blue-100 text-blue-600 flex items-center justify-center transition-colors cursor-pointer shrink-0"
+                                    title="Riwayat & Koreksi"
+                                  >
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-clock"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                                  </button>
+                                )}
 
                                 {canEdit && (
                                   <>

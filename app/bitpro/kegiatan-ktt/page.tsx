@@ -29,6 +29,7 @@ import {
   KegiatanCameraModal,
   KegiatanPreviewPhotoModal,
 } from '@/components/bitpro/kegiatan-ktt/KegiatanModals';
+import { AuditHistoryModal } from '@/components/bitpro/kegiatan-ktt/AuditHistoryModal';
 
 export default function KegiatanKTTPage() {
   const { isReady, canCreate, canEdit } = usePageAuth('bitpro', 'kegiatan-ktt');
@@ -50,6 +51,7 @@ export default function KegiatanKTTPage() {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [isGettingLocation, setIsGettingLocation] = useState(false);
   const [showKttSuggestions, setShowKttSuggestions] = useState(false);
+  const [historyTarget, setHistoryTarget] = useState<KegiatanKTT | null>(null);
 
   // Tab State: Log & Kalender vs Peta Sebaran
   const [activeTab, setActiveTab] = useState<'log' | 'peta'>('log');
@@ -710,6 +712,7 @@ export default function KegiatanKTTPage() {
               onEdit={handleEdit}
               onDelete={handleDelete}
               setPreviewPhotoModal={setPreviewPhotoModal}
+              onShowHistory={(item) => setHistoryTarget(item)}
             />
           </div>
         )}
@@ -728,6 +731,15 @@ export default function KegiatanKTTPage() {
           />
         )}
       </main>
+
+      {/* ── MODAL RIWAYAT & KOREKSI ── */}
+      <AuditHistoryModal
+        isOpen={Boolean(historyTarget)}
+        onClose={() => setHistoryTarget(null)}
+        kegiatan={historyTarget}
+        moduleKey="bitpro"
+        submenuKey="kegiatan-ktt"
+      />
 
       {/* ── MODAL KAMERA ── */}
       <KegiatanCameraModal

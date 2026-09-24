@@ -125,6 +125,28 @@ export async function POST(req: Request) {
   if ('errorResponse' in auth) return auth.errorResponse;
 
   try {
+    // Verifikasi izin edit di database (hindari admin pelihat melakukan restore)
+    const [userRows]: any = await pool.query('SELECT permissions FROM anggota_users WHERE id = ?', [auth.session.id]);
+    if (userRows && userRows.length > 0) {
+      const permsData = userRows[0].permissions;
+      const perms = typeof permsData === 'string' ? JSON.parse(permsData) : permsData;
+      let hasEditAccess = false;
+      if (perms) {
+        Object.keys(perms).forEach((modKey) => {
+          const mod = perms[modKey];
+          if (mod && mod.mode === 'edit') hasEditAccess = true;
+          if (mod && mod.submenus) {
+            Object.values(mod.submenus).forEach((sub: any) => {
+              if (sub.mode === 'edit') hasEditAccess = true;
+            });
+          }
+        });
+      }
+      if (!hasEditAccess) {
+        return NextResponse.json({ success: false, error: 'Akses Ditolak: Anda berstatus Pelihat sehingga tidak diizinkan melakukan pemulihan (restore) database.' }, { status: 403 });
+      }
+    }
+
     const formData = await req.formData();
     const file = formData.get('file') as File | null;
 

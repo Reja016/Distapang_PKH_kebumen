@@ -1,6 +1,9 @@
 import { NextResponse } from 'next/server';
 import pool from '@/lib/db';
 
+import { getSessionFromRequest } from '@/lib/session';
+import { logActivity } from '@/lib/auditLog';
+
 export const dynamic = 'force-dynamic';
 
 async function ensureTable() {
@@ -55,6 +58,9 @@ export async function GET(request: Request) {
 // POST: Simpan 1 desa atau banyak desa (Bulk)
 export async function POST(request: Request) {
   try {
+    const session = await getSessionFromRequest(request);
+    const userName = session?.nama || 'Unknown User';
+    
     await ensureTable();
     const body = await request.json();
 
@@ -63,11 +69,21 @@ export async function POST(request: Request) {
       for (const item of body) {
         const { tw = 'TW 1', kec, desa, values = {}, grandTotal = 0 } = item;
         if (kec && desa) {
-          await pool.query(
+          const [result]: any = await pool.query(
             `INSERT INTO populasi_2026 (tw, kecamatan, desa, data_v, grand_total)
              VALUES (?, ?, ?, ?, ?)`,
             [tw, kec, desa, JSON.stringify(values), grandTotal]
           );
+          
+          await logActivity({
+            module: 'bitpro',
+            submenu: 'populasi-dan-produksi',
+            tableName: 'populasi_2026',
+            recordId: result.insertId,
+            action: 'CREATE',
+            userName,
+            details: item,
+          });
         }
       }
       return NextResponse.json({ success: true, message: `Berhasil menyimpan ${body.length} data desa ke database!` });
@@ -86,6 +102,17 @@ export async function POST(request: Request) {
         `UPDATE populasi_2026 SET tw = ?, kecamatan = ?, desa = ?, data_v = ?, grand_total = ? WHERE id = ?`,
         [tw, kec, desa, JSON.stringify(values), grandTotal, id]
       );
+      
+      await logActivity({
+        module: 'bitpro',
+        submenu: 'populasi-dan-produksi',
+        tableName: 'populasi_2026',
+        recordId: id,
+        action: 'UPDATE',
+        userName,
+        details: body,
+      });
+      
       return NextResponse.json({ success: true, message: 'Data populasi desa berhasil diperbarui!' });
     } else {
       // Tambah baru
@@ -94,6 +121,17 @@ export async function POST(request: Request) {
          VALUES (?, ?, ?, ?, ?)`,
         [tw, kec, desa, JSON.stringify(values), grandTotal]
       );
+      
+      await logActivity({
+        module: 'bitpro',
+        submenu: 'populasi-dan-produksi',
+        tableName: 'populasi_2026',
+        recordId: result.insertId,
+        action: 'CREATE',
+        userName,
+        details: body,
+      });
+      
       return NextResponse.json({ success: true, insertId: result.insertId, message: 'Data populasi desa berhasil disimpan ke database!' });
     }
   } catch (error: any) {
@@ -105,6 +143,9 @@ export async function POST(request: Request) {
 // DELETE: Hapus data populasi desa
 export async function DELETE(request: Request) {
   try {
+    const session = await getSessionFromRequest(request as any);
+    const userName = session?.nama || session?.nip_username || 'Unknown User';
+    
     await ensureTable();
     const { searchParams } = new URL(request.url);
     const id = searchParams.get('id');
@@ -114,6 +155,17 @@ export async function DELETE(request: Request) {
     }
 
     await pool.query('DELETE FROM populasi_2026 WHERE id = ?', [id]);
+    
+    await logActivity({
+      module: 'bitpro',
+      submenu: 'populasi-dan-produksi',
+      tableName: 'populasi_2026',
+      recordId: id,
+      action: 'DELETE',
+      userName,
+      details: { id },
+    });
+    
     return NextResponse.json({ success: true, message: 'Data populasi berhasil dihapus dari database!' });
   } catch (error: any) {
     return NextResponse.json({ success: false, error: error.message }, { status: 500 });

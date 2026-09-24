@@ -26,6 +26,7 @@ import { PenyakitFormValues } from '@/components/keswan/laporan-penyakit/types';
 import PenyakitPetaTab from '@/components/keswan/laporan-penyakit/PenyakitPetaTab';
 import PenyakitTableTab from '@/components/keswan/laporan-penyakit/PenyakitTableTab';
 import PenyakitModals from '@/components/keswan/laporan-penyakit/PenyakitModals';
+import { UniversalAuditModal } from '@/components/common/UniversalAuditModal';
 
 export default function LaporanPenyakitPage() {
   const { isReady, canCreate, canEdit, isAdmin: isAuthAdmin, userRole } = usePageAuth('keswan', 'laporan-penyakit');
@@ -72,6 +73,10 @@ export default function LaporanPenyakitPage() {
     keterangan: '',
   });
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
+
+  // Audit State
+  const [showAuditModal, setShowAuditModal] = useState(false);
+  const [auditTarget, setAuditTarget] = useState<any | null>(null);
 
   // ── LOAD AVAILABLE YEARS ──
   const loadAvailableYears = async () => {
@@ -501,6 +506,10 @@ export default function LaporanPenyakitPage() {
             setFormValues={setFormValues}
             setShowAddModal={setShowAddModal}
             handleDeleteCase={handleDeleteCase}
+            onShowHistory={(row) => {
+              setAuditTarget(row);
+              setShowAuditModal(true);
+            }}
           />
         )}
       </main>
@@ -522,6 +531,26 @@ export default function LaporanPenyakitPage() {
         handleAddYearSubmit={handleAddYearSubmit}
         isAddingYear={isAddingYear}
       />
+
+      {showAuditModal && auditTarget && (
+        <UniversalAuditModal
+          isOpen={showAuditModal}
+          onClose={() => setShowAuditModal(false)}
+          recordId={auditTarget.id}
+          tableName="keswan_laporan_penyakit"
+          moduleKey="keswan"
+          submenuKey="laporan-penyakit"
+          availableFields={[
+            { key: 'tahun', label: 'Tahun', type: 'number' },
+            { key: 'kecamatan_nama', label: 'Kecamatan' },
+            { key: 'puskeswan_id', label: 'Puskeswan' },
+            { key: 'diagnosa_nama', label: 'Diagnosa Penyakit' },
+            { key: 'kategori_penyakit', label: 'Kategori Penyakit' },
+            { key: 'jumlah_kasus', label: 'Jumlah Kasus', type: 'number' },
+            { key: 'keterangan', label: 'Keterangan' },
+          ]}
+        />
+      )}
     </div>
   );
 }

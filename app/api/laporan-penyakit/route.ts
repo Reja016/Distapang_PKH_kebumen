@@ -1,5 +1,7 @@
 import { NextResponse } from 'next/server';
 import pool from '@/lib/db';
+import { getSessionFromRequest } from '@/lib/session';
+import { logActivity } from '@/lib/auditLog';
 
 export const dynamic = 'force-dynamic';
 
@@ -105,6 +107,18 @@ export async function POST(req: Request) {
         keterangan || null,
       ]
     );
+    const session = await getSessionFromRequest(req as any);
+    const userName = session?.nama || session?.nip_username || 'Sistem';
+
+    await logActivity({
+      module: 'keswan',
+      submenu: 'laporan-penyakit',
+      tableName: 'keswan_laporan_penyakit',
+      recordId: insertResult.insertId,
+      action: 'CREATE',
+      userName,
+      details: { tahun, kecamatan_nama, puskeswan_id, diagnosa_nama, jumlah_kasus },
+    });
 
     return NextResponse.json({
       success: true,

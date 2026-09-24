@@ -15,6 +15,7 @@ import {
   Server,
   Layers,
 } from 'lucide-react';
+import { getAuthSession } from '@/lib/auth';
 
 interface DatabaseBackupModalProps {
   isOpen: boolean;
@@ -28,11 +29,31 @@ export default function DatabaseBackupModal({ isOpen, onClose }: DatabaseBackupM
   const [isRestoring, setIsRestoring] = useState(false);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [restoreStatus, setRestoreStatus] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
+  const [isReadOnlyAdmin, setIsReadOnlyAdmin] = useState(false);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     if (isOpen) {
+      const user = getAuthSession();
+      if (user && user.role === 'Administrator') {
+        const perms = user.permissions;
+        let hasEditAccess = false;
+        if (perms) {
+          Object.keys(perms).forEach((modKey) => {
+            const mod = perms[modKey as keyof typeof perms];
+            if (mod && mod.mode === 'edit') hasEditAccess = true;
+            if (mod && mod.submenus) {
+              Object.values(mod.submenus).forEach((sub) => {
+                if (sub.mode === 'edit') hasEditAccess = true;
+              });
+            }
+          });
+        }
+        setIsReadOnlyAdmin(!hasEditAccess);
+      } else {
+        setIsReadOnlyAdmin(true);
+      }
       loadDbInfo();
       setRestoreStatus(null);
       setSelectedFile(null);
@@ -282,64 +303,73 @@ export default function DatabaseBackupModal({ isOpen, onClose }: DatabaseBackupM
           </div>
 
           {/* Card 2: Restore Database */}
-          <div className="p-5 rounded-2xl border-2 border-slate-200 bg-slate-50/60 space-y-3">
-            <div className="flex items-center gap-2.5">
-              <div className="w-8 h-8 rounded-lg bg-indigo-600 text-white flex items-center justify-center">
-                <Upload size={16} />
+          {!isReadOnlyAdmin ? (
+            <div className="p-5 rounded-2xl border-2 border-slate-200 bg-slate-50/60 space-y-3">
+              <div className="flex items-center gap-2.5">
+                <div className="w-8 h-8 rounded-lg bg-indigo-600 text-white flex items-center justify-center">
+                  <Upload size={16} />
+                </div>
+                <div>
+                  <h3 className="text-sm font-black text-slate-900">2. Pulihkan Database (Restore)</h3>
+                  <p className="text-[11px] text-slate-500">
+                    Unggah file cadangan <code className="font-mono bg-slate-200 px-1 py-0.5 rounded text-slate-800">.sql</code> yang pernah diunduh untuk mengembalikan data.
+                  </p>
+                </div>
               </div>
-              <div>
-                <h3 className="text-sm font-black text-slate-900">2. Pulihkan Database (Restore)</h3>
-                <p className="text-[11px] text-slate-500">
-                  Unggah file cadangan <code className="font-mono bg-slate-200 px-1 py-0.5 rounded text-slate-800">.sql</code> yang pernah diunduh untuk mengembalikan data.
+
+              <div className="space-y-3 pt-2">
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept=".sql"
+                  onChange={handleFileChange}
+                  className="hidden"
+                  id="restore-sql-file-input"
+                />
+
+                <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+                  <label
+                    htmlFor="restore-sql-file-input"
+                    className="flex-1 min-h-touch h-10 px-4 rounded-xl border-2 border-dashed border-indigo-300 hover:border-indigo-500 bg-white hover:bg-indigo-50/50 text-xs font-bold text-slate-700 flex items-center justify-center sm:justify-start gap-2 cursor-pointer transition-all truncate"
+                  >
+                    <FileCode size={16} className="text-indigo-600 shrink-0" />
+                    <span className="truncate">
+                      {selectedFile ? selectedFile.name : 'Pilih file backup .sql dari komputer...'}
+                    </span>
+                  </label>
+
+                  <button
+                    onClick={handleRestoreDatabase}
+                    disabled={!selectedFile || isRestoring}
+                    className="min-h-touch h-10 px-5 rounded-xl bg-indigo-600 hover:bg-indigo-700 disabled:bg-slate-300 disabled:cursor-not-allowed text-white text-xs font-bold flex items-center justify-center gap-2 transition-all shadow-xs shrink-0 cursor-pointer"
+                  >
+                    {isRestoring ? (
+                      <>
+                        <RefreshCw size={14} className="animate-spin" />
+                        <span>Memulihkan...</span>
+                      </>
+                    ) : (
+                      <>
+                        <Upload size={14} />
+                        <span>Mulai Restore</span>
+                      </>
+                    )}
+                  </button>
+                </div>
+
+                <p className="text-[11px] text-slate-500 leading-normal">
+                  * Pastikan file SQL berasal dari cadangan resmi SiMantap PKH untuk menghindari inkonsistensi skema tabel.
                 </p>
               </div>
             </div>
-
-            <div className="space-y-3 pt-2">
-              <input
-                ref={fileInputRef}
-                type="file"
-                accept=".sql"
-                onChange={handleFileChange}
-                className="hidden"
-                id="restore-sql-file-input"
-              />
-
-              <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
-                <label
-                  htmlFor="restore-sql-file-input"
-                  className="flex-1 min-h-touch h-10 px-4 rounded-xl border-2 border-dashed border-indigo-300 hover:border-indigo-500 bg-white hover:bg-indigo-50/50 text-xs font-bold text-slate-700 flex items-center justify-center sm:justify-start gap-2 cursor-pointer transition-all truncate"
-                >
-                  <FileCode size={16} className="text-indigo-600 shrink-0" />
-                  <span className="truncate">
-                    {selectedFile ? selectedFile.name : 'Pilih file backup .sql dari komputer...'}
-                  </span>
-                </label>
-
-                <button
-                  onClick={handleRestoreDatabase}
-                  disabled={!selectedFile || isRestoring}
-                  className="min-h-touch h-10 px-5 rounded-xl bg-indigo-600 hover:bg-indigo-700 disabled:bg-slate-300 disabled:cursor-not-allowed text-white text-xs font-bold flex items-center justify-center gap-2 transition-all shadow-xs shrink-0 cursor-pointer"
-                >
-                  {isRestoring ? (
-                    <>
-                      <RefreshCw size={14} className="animate-spin" />
-                      <span>Memulihkan...</span>
-                    </>
-                  ) : (
-                    <>
-                      <Upload size={14} />
-                      <span>Mulai Restore</span>
-                    </>
-                  )}
-                </button>
+          ) : (
+            <div className="p-4 rounded-2xl border-2 border-dashed border-slate-200 bg-slate-50/50 flex flex-col items-center justify-center text-center gap-2">
+              <ShieldCheck size={20} className="text-slate-400" />
+              <div className="text-xs text-slate-500 font-medium max-w-sm">
+                Akses pemulihan database (restore) dikunci. Hubungi Administrator Pengelola untuk mengembalikan data.
               </div>
-
-              <p className="text-[11px] text-slate-500 leading-normal">
-                * Pastikan file SQL berasal dari cadangan resmi SiMantap PKH untuk menghindari inkonsistensi skema tabel.
-              </p>
             </div>
-          </div>
+          )}
         </div>
 
         {/* Modal Footer */}

@@ -12,6 +12,7 @@ interface FarmTableTabProps {
   openAddModal: (cat: CommodityKey) => void;
   openEditModal: (item: any, cat: CommodityKey) => void;
   handleDelete: (item: any) => Promise<void>;
+  onShowHistory?: (row: any) => void;
 }
 
 export default function FarmTableTab({
@@ -24,6 +25,7 @@ export default function FarmTableTab({
   openAddModal,
   openEditModal,
   handleDelete,
+  onShowHistory,
 }: FarmTableTabProps) {
 
   const meta = COMMODITY_META[activeCommodity];
@@ -159,6 +161,16 @@ export default function FarmTableTab({
                             <Trash2 size={13} className="text-rose-600" />
                             <span>Hapus</span>
                           </button>
+                          {onShowHistory && (
+                            <button
+                              onClick={() => onShowHistory(item)}
+                              title="Riwayat Perubahan"
+                              className="min-h-touch h-8 px-2.5 rounded-xl border border-blue-200 bg-blue-50 hover:bg-blue-100 text-blue-600 text-xs font-bold inline-flex items-center gap-1.5 transition-colors shadow-2xs cursor-pointer"
+                            >
+                              <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-clock"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                              <span>Riwayat</span>
+                            </button>
+                          )}
                         </div>
                       </td>
                     )}

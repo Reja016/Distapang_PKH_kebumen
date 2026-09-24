@@ -1,5 +1,7 @@
 import { NextResponse } from 'next/server';
 import pool from '@/lib/db';
+import { getSessionFromRequest } from '@/lib/session';
+import { logActivity } from '@/lib/auditLog';
 
 export const dynamic = 'force-dynamic';
 
@@ -40,6 +42,19 @@ export async function PUT(
       ]
     );
 
+    const session = await getSessionFromRequest(req as any);
+    const userName = session?.nama || session?.nip_username || 'Sistem';
+
+    await logActivity({
+      module: 'keswan',
+      submenu: 'laporan-penyakit',
+      tableName: 'keswan_laporan_penyakit',
+      recordId: id,
+      action: 'UPDATE',
+      userName,
+      details: { tahun, kecamatan_nama, puskeswan_id, diagnosa_nama, jumlah_kasus, keterangan },
+    });
+
     return NextResponse.json({ success: true, message: 'Data kasus penyakit berhasil diperbarui' });
   } catch (error: any) {
     console.error('Error PUT laporan-penyakit:', error);
@@ -57,7 +72,20 @@ export async function DELETE(
       return NextResponse.json({ success: false, error: 'ID tidak valid' }, { status: 400 });
     }
 
+    const session = await getSessionFromRequest(req as any);
+    const userName = session?.nama || session?.nip_username || 'Sistem';
+
     await pool.query(`DELETE FROM keswan_laporan_penyakit WHERE id = ?`, [id]);
+
+    await logActivity({
+      module: 'keswan',
+      submenu: 'laporan-penyakit',
+      tableName: 'keswan_laporan_penyakit',
+      recordId: id,
+      action: 'DELETE',
+      userName,
+      details: { deleted_id: id },
+    });
 
     return NextResponse.json({ success: true, message: 'Data kasus penyakit berhasil dihapus' });
   } catch (error: any) {

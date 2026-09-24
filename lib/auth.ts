@@ -70,10 +70,9 @@ export function clearAuthSession() {
 export function checkModuleAccess(moduleKey: 'bitpro' | 'keswan' | 'kesmavet' | 'aset'): boolean {
   const user = getAuthSession();
   if (!user) return true; // Default fallback if no session
-  if (user.role === 'Administrator') return true;
 
   const perms = user.permissions;
-  if (!perms || !perms[moduleKey]) return true;
+  if (!perms || !perms[moduleKey]) return user.role === 'Administrator';
 
   return perms[moduleKey].enabled === true;
 }
@@ -85,10 +84,9 @@ export function checkSubmenuAccess(
 ): boolean {
   const user = getAuthSession();
   if (!user) return true;
-  if (user.role === 'Administrator') return true;
 
   const perms = user.permissions;
-  if (!perms || !perms[moduleKey]) return true;
+  if (!perms || !perms[moduleKey]) return user.role === 'Administrator';
   if (!perms[moduleKey].enabled) return false;
 
   const sub = perms[moduleKey].submenus?.[submenuKey];
@@ -104,10 +102,9 @@ export function getSubmenuPermissionMode(
 ): 'edit' | 'view' {
   const user = getAuthSession();
   if (!user) return 'edit';
-  if (user.role === 'Administrator') return 'edit';
 
   const perms = user.permissions;
-  if (!perms || !perms[moduleKey]) return 'edit';
+  if (!perms || !perms[moduleKey]) return user.role === 'Administrator' ? 'edit' : 'edit';
 
   const sub = perms[moduleKey].submenus?.[submenuKey];
   if (!sub) return perms[moduleKey].mode || 'edit';

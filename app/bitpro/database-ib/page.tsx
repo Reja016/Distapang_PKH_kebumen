@@ -21,6 +21,7 @@ import IbTableSection from '@/components/bitpro/database-ib/IbTableSection';
 import IbCalvingIntervalSection from '@/components/bitpro/database-ib/IbCalvingIntervalSection';
 import IbHistorySection from '@/components/bitpro/database-ib/IbHistorySection';
 import IbModals from '@/components/bitpro/database-ib/IbModals';
+import { UniversalAuditModal } from '@/components/common/UniversalAuditModal';
 
 export default function DatabaseIBPage() {
   const { isReady, canCreate, canEdit } = usePageAuth('bitpro', 'database-ib');
@@ -48,6 +49,9 @@ export default function DatabaseIBPage() {
     gender: 'Jantan' | 'Betina';
     notes: string;
   }>({ date: '', gender: 'Jantan', notes: '' });
+
+  const [showAuditModal, setShowAuditModal] = useState(false);
+  const [auditTarget, setAuditTarget] = useState<any | null>(null);
 
   // 1. Tarik Data dari MySQL (API)
   const loadData = async () => {
@@ -403,6 +407,10 @@ export default function DatabaseIBPage() {
             setSelectedIbForBirth(ib);
             setShowBirthModal(true);
           }}
+          onShowHistory={(row) => {
+            setAuditTarget(row);
+            setShowAuditModal(true);
+          }}
         />
 
         {/* 2. ANALISIS CALVING INTERVAL (JARAK BERANAK) */}
@@ -436,6 +444,30 @@ export default function DatabaseIBPage() {
         onCloseBirth={() => setShowBirthModal(false)}
         onSaveBirth={handleSaveBirth}
       />
+
+      {showAuditModal && auditTarget && (
+        <UniversalAuditModal
+          isOpen={showAuditModal}
+          onClose={() => {
+            setShowAuditModal(false);
+            setAuditTarget(null);
+          }}
+          recordId={auditTarget.id}
+          tableName="sapitime_ib"
+          moduleKey="bitpro"
+          submenuKey="database-ib"
+          availableFields={[
+            { key: 'cattleName', label: 'Nama Sapi', type: 'text' },
+            { key: 'ownerName', label: 'Peternak', type: 'text' },
+            { key: 'inseminatorName', label: 'Petugas', type: 'text' },
+            { key: 'date', label: 'Tanggal IB', type: 'date' },
+            { key: 'pkbDateActual', label: 'Tanggal PKB', type: 'date' },
+            { key: 'pkbResult', label: 'Hasil PKB', type: 'text' },
+            { key: 'birthDate', label: 'Tanggal Lahir', type: 'date' },
+            { key: 'calfGender', label: 'Kelamin Pedet', type: 'text' },
+          ]}
+        />
+      )}
     </div>
   );
 }

@@ -27,6 +27,7 @@ import VaksinasiHarianTab from '@/components/keswan/data-vaksinasi/VaksinasiHari
 import VaksinasiBulananTab from '@/components/keswan/data-vaksinasi/VaksinasiBulananTab';
 import VaksinasiApbdTab from '@/components/keswan/data-vaksinasi/VaksinasiApbdTab';
 import VaksinasiModals from '@/components/keswan/data-vaksinasi/VaksinasiModals';
+import { UniversalAuditModal } from '@/components/common/UniversalAuditModal';
 
 export default function DataVaksinasiPMKPage() {
   const { isReady, canCreate, canEdit } = usePageAuth('keswan', 'data-vaksinasi');
@@ -77,6 +78,9 @@ export default function DataVaksinasiPMKPage() {
     tanggal: '2027-01-01',
     jumlah: 0,
   });
+
+  const [showAuditModal, setShowAuditModal] = useState(false);
+  const [auditTarget, setAuditTarget] = useState<any | null>(null);
 
   const showToast = (type: 'success' | 'error', msg: string) => {
     setToast({ type, msg });
@@ -633,6 +637,10 @@ export default function DataVaksinasiPMKPage() {
             setFormHarianManual={setFormHarianManual}
             setModalHarianManual={setModalHarianManual}
             fetchAll={fetchAll}
+            onShowHistory={(row) => {
+              setAuditTarget(row);
+              setShowAuditModal(true);
+            }}
           />
         )}
 
@@ -699,6 +707,16 @@ export default function DataVaksinasiPMKPage() {
         formDroping={formDroping}
         setFormDroping={setFormDroping}
         submitDroping={submitDroping}
+      />
+
+      <UniversalAuditModal
+        isOpen={showAuditModal}
+        onClose={() => setShowAuditModal(false)}
+        tableName="vaksinasi_pmk_harian"
+        recordId={auditTarget?.id}
+        moduleKey="keswan"
+        submenuKey="data-vaksinasi"
+        availableFields={['puskeswan', 'tanggal', 'jumlah']}
       />
     </div>
   );

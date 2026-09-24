@@ -1,5 +1,7 @@
 import { NextResponse } from 'next/server';
 import pool from '@/lib/db';
+import { getSessionFromRequest } from '@/lib/session';
+import { logActivity } from '@/lib/auditLog';
 
 export const dynamic = 'force-dynamic';
 
@@ -100,6 +102,8 @@ export async function POST(request: Request) {
     const body = await request.json();
     const { kategori = 'general', data } = body;
 
+    const userName = await getSessionFromRequest(request);
+
     if (!data) {
       return NextResponse.json({ success: false, error: 'Data farm tidak boleh kosong!' }, { status: 400 });
     }
@@ -131,8 +135,19 @@ export async function POST(request: Request) {
         data.tujuan || '',
       ]
     );
+    const insertId = result.insertId;
 
-    return NextResponse.json({ success: true, insertId: result.insertId, message: 'Data farm berhasil disimpan ke database!' });
+    await logActivity({
+      module: 'bitpro',
+      submenu: 'data-farm',
+      tableName: 'data_farm',
+      recordId: insertId,
+      action: 'CREATE',
+      userName: typeof userName === 'string' ? userName : (userName?.nama || userName?.nip_username || 'Sistem'),
+      details: data,
+    });
+
+    return NextResponse.json({ success: true, insertId, message: 'Data farm berhasil disimpan ke database!' });
   } catch (error: any) {
     console.error('Error POST data_farm:', error);
     return NextResponse.json({ success: false, error: error.message }, { status: 500 });
@@ -145,6 +160,9 @@ export async function PUT(request: Request) {
     await ensureTable();
     const body = await request.json();
     const { id, kategori = 'general', data } = body;
+
+    const session = await getSessionFromRequest(request as any);
+    const userName = session?.nama || session?.nip_username || 'Sistem';
 
     if (!id || !data) {
       return NextResponse.json({ success: false, error: 'ID dan data farm wajib disertakan!' }, { status: 400 });
@@ -179,6 +197,16 @@ export async function PUT(request: Request) {
       ]
     );
 
+    await logActivity({
+      module: 'bitpro',
+      submenu: 'data-farm',
+      tableName: 'data_farm',
+      recordId: id,
+      action: 'UPDATE',
+      userName,
+      details: data,
+    });
+
     return NextResponse.json({ success: true, message: 'Data farm berhasil diperbarui di database!' });
   } catch (error: any) {
     console.error('Error PUT data_farm:', error);
@@ -193,11 +221,25 @@ export async function DELETE(request: Request) {
     const { searchParams } = new URL(request.url);
     const id = searchParams.get('id');
 
+    const session = await getSessionFromRequest(request as any);
+    const userName = session?.nama || session?.nip_username || 'Sistem';
+
     if (!id) {
       return NextResponse.json({ success: false, error: 'ID data farm wajib disertakan!' }, { status: 400 });
     }
 
     await pool.query('DELETE FROM data_farm WHERE id = ?', [id]);
+
+    await logActivity({
+      module: 'bitpro',
+      submenu: 'data-farm',
+      tableName: 'data_farm',
+      recordId: id,
+      action: 'DELETE',
+      userName,
+      details: { id },
+    });
+
     return NextResponse.json({ success: true, message: 'Data farm berhasil dihapus dari database!' });
   } catch (error: any) {
     console.error('Error DELETE data_farm:', error);

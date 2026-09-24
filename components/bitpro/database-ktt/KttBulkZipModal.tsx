@@ -23,6 +23,7 @@ interface KttBulkZipModalProps {
   onClose: () => void;
   allKtts: KelompokTani[];
   userRole?: string;
+  canEdit?: boolean;
   onSuccess: () => void;
 }
 
@@ -52,6 +53,7 @@ export default function KttBulkZipModal({
   onClose,
   allKtts,
   userRole = 'Petugas',
+  canEdit = true,
   onSuccess,
 }: KttBulkZipModalProps) {
   const [zipFile, setZipFile] = useState<File | null>(null);
@@ -63,7 +65,7 @@ export default function KttBulkZipModal({
   const [parsedItems, setParsedItems] = useState<ParsedZipItem[]>([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  if (!isOpen) return null;
+  if (!isOpen || !canEdit) return null;
 
   // Baca & ekstrak struktur folder di dalam file ZIP
   const handleZipSelected = async (file: File | null) => {

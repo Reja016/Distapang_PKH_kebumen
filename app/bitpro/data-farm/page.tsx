@@ -21,6 +21,7 @@ import {
 import FarmOverviewTab from '@/components/bitpro/data-farm/FarmOverviewTab';
 import FarmTableTab from '@/components/bitpro/data-farm/FarmTableTab';
 import FarmModal from '@/components/bitpro/data-farm/FarmModal';
+import { UniversalAuditModal } from '@/components/common/UniversalAuditModal';
 
 export default function DataFarmPage() {
   const { isReady, canCreate, canEdit } = usePageAuth('bitpro', 'data-farm');
@@ -38,6 +39,10 @@ export default function DataFarmPage() {
   const [editingItem, setEditingItem] = useState<any | null>(null);
   const [targetCategory, setTargetCategory] = useState<CommodityKey>('broiler');
   const [formValues, setFormValues] = useState<any>({});
+
+  // Audit Logs State
+  const [showAuditModal, setShowAuditModal] = useState(false);
+  const [auditTarget, setAuditTarget] = useState<any | null>(null);
 
   // GPS Geolocation state
   const [gpsLoading, setGpsLoading] = useState(false);
@@ -460,6 +465,10 @@ export default function DataFarmPage() {
             openAddModal={openAddModal}
             openEditModal={openEditModal}
             handleDelete={handleDelete}
+            onShowHistory={(row) => {
+              setAuditTarget(row);
+              setShowAuditModal(true);
+            }}
           />
 
         )}
@@ -479,6 +488,33 @@ export default function DataFarmPage() {
         gpsStatus={gpsStatus}
         currentDesaList={currentDesaList}
         handleSubmit={handleSubmit}
+      />
+
+      {/* ── MODAL AUDIT LOGS ── */}
+      <UniversalAuditModal
+        isOpen={showAuditModal}
+        onClose={() => setShowAuditModal(false)}
+        tableName="data_farm"
+        recordId={auditTarget?.db_id || auditTarget?.id}
+        recordName={auditTarget?.nama_unit_farm || auditTarget?.nama_badan_usaha || auditTarget?.nama_peternak || 'Data Farm'}
+        moduleKey="bitpro"
+        submenuKey="data-farm"
+        availableFields={[
+          { key: 'kategori', label: 'Kategori' },
+          { key: 'hewan', label: 'Hewan/Jenis Ternak' },
+          { key: 'kecamatan', label: 'Kecamatan' },
+          { key: 'desa', label: 'Desa/Kelurahan' },
+          { key: 'nama_badan_usaha', label: 'Nama Badan Usaha' },
+          { key: 'nama_unit_farm', label: 'Nama Unit Farm' },
+          { key: 'mandiri_kemitraan', label: 'Status Kepemilikan' },
+          { key: 'alamat', label: 'Alamat' },
+          { key: 'lintang', label: 'Lintang' },
+          { key: 'bujur', label: 'Bujur' },
+          { key: 'telp_hp', label: 'No Telp/HP' },
+          { key: 'kapasitas_gudang', label: 'Kapasitas Gudang/Kandang' },
+          { key: 'jumlah_populasi', label: 'Jumlah Populasi' },
+          { key: 'status', label: 'Status' }
+        ]}
       />
     </div>
   );

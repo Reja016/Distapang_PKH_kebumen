@@ -54,6 +54,7 @@ interface KttDocumentModalProps {
   onClose: () => void;
   ktt: KelompokTani | null;
   isAdmin: boolean;
+  canEdit?: boolean;
   userRole?: string;
   onDocumentsUpdated?: () => void;
 }
@@ -63,6 +64,7 @@ export default function KttDocumentModal({
   onClose,
   ktt,
   isAdmin,
+  canEdit = true,
   userRole = 'Petugas',
   onDocumentsUpdated,
 }: KttDocumentModalProps) {
@@ -371,70 +373,72 @@ export default function KttDocumentModal({
           </div>
 
           {/* Area Form Upload Dokumen Per-KTT */}
-          <div className="bg-white dark:bg-slate-900 rounded-2xl p-4 sm:p-5 border-2 border-dashed border-emerald-200 dark:border-emerald-800/60 hover:border-emerald-400 transition-colors">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-3">
-              <div>
-                <h4 className="text-xs sm:text-sm font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
-                  <Upload size={16} className="text-emerald-600" />
-                  <span>Unggah Berkas Baru ke KTT Ini</span>
-                </h4>
-                <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">
-                  Dapat mengunggah file PDF, Foto/Scan, Word, Excel, maupun file <span className="font-bold text-emerald-600">.ZIP</span> khusus KTT ini.
-                </p>
+          {canEdit && (
+            <div className="bg-white dark:bg-slate-900 rounded-2xl p-4 sm:p-5 border-2 border-dashed border-emerald-200 dark:border-emerald-800/60 hover:border-emerald-400 transition-colors">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-3">
+                <div>
+                  <h4 className="text-xs sm:text-sm font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
+                    <Upload size={16} className="text-emerald-600" />
+                    <span>Unggah Berkas Baru ke KTT Ini</span>
+                  </h4>
+                  <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">
+                    Dapat mengunggah file PDF, Foto/Scan, Word, Excel, maupun file <span className="font-bold text-emerald-600">.ZIP</span> khusus KTT ini.
+                  </p>
+                </div>
+
+                <div className="flex items-center gap-2">
+                  <select
+                    value={uploadCategory}
+                    onChange={(e) => setUploadCategory(e.target.value)}
+                    className="h-9 px-3 text-xs rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-800 dark:text-slate-200 font-semibold focus:outline-hidden focus:border-emerald-500"
+                  >
+                    <option value="auto">Auto Deteksi Kategori</option>
+                    {STANDARD_CATEGORIES.map((cat) => (
+                      <option key={cat} value={cat}>
+                        {cat}
+                      </option>
+                    ))}
+                  </select>
+
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    multiple
+                    accept=".pdf,.jpg,.jpeg,.png,.webp,.doc,.docx,.xls,.xlsx,.zip"
+                    onChange={(e) => handleFilesSelected(e.target.files)}
+                    className="hidden"
+                    id="ktt-single-upload"
+                  />
+
+                  <label
+                    htmlFor="ktt-single-upload"
+                    className={`min-h-touch h-9 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-700 active:scale-95 text-white text-xs font-bold flex items-center justify-center gap-1.5 shadow-xs cursor-pointer transition-all ${
+                      isUploading ? 'opacity-50 pointer-events-none' : ''
+                    }`}
+                  >
+                    {isUploading ? (
+                      <>
+                        <Loader2 size={14} className="animate-spin" />
+                        <span>Mengunggah...</span>
+                      </>
+                    ) : (
+                      <>
+                        <Plus size={14} />
+                        <span>Pilih / Drop File</span>
+                      </>
+                    )}
+                  </label>
+                </div>
               </div>
 
-              <div className="flex items-center gap-2">
-                <select
-                  value={uploadCategory}
-                  onChange={(e) => setUploadCategory(e.target.value)}
-                  className="h-9 px-3 text-xs rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-800 dark:text-slate-200 font-semibold focus:outline-hidden focus:border-emerald-500"
-                >
-                  <option value="auto">Auto Deteksi Kategori</option>
-                  {STANDARD_CATEGORIES.map((cat) => (
-                    <option key={cat} value={cat}>
-                      {cat}
-                    </option>
-                  ))}
-                </select>
-
-                <input
-                  ref={fileInputRef}
-                  type="file"
-                  multiple
-                  accept=".pdf,.jpg,.jpeg,.png,.webp,.doc,.docx,.xls,.xlsx,.zip"
-                  onChange={(e) => handleFilesSelected(e.target.files)}
-                  className="hidden"
-                  id="ktt-single-upload"
-                />
-
-                <label
-                  htmlFor="ktt-single-upload"
-                  className={`min-h-touch h-9 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-700 active:scale-95 text-white text-xs font-bold flex items-center justify-center gap-1.5 shadow-xs cursor-pointer transition-all ${
-                    isUploading ? 'opacity-50 pointer-events-none' : ''
-                  }`}
-                >
-                  {isUploading ? (
-                    <>
-                      <Loader2 size={14} className="animate-spin" />
-                      <span>Mengunggah...</span>
-                    </>
-                  ) : (
-                    <>
-                      <Plus size={14} />
-                      <span>Pilih / Drop File</span>
-                    </>
-                  )}
-                </label>
-              </div>
+              {isUploading && (
+                <div className="mt-3 p-3 rounded-xl bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800 text-xs text-emerald-800 dark:text-emerald-300 flex items-center gap-2">
+                  <Loader2 size={16} className="animate-spin shrink-0" />
+                  <span>{uploadProgress || 'Sedang memproses berkas...'}</span>
+                </div>
+              )}
             </div>
-
-            {isUploading && (
-              <div className="mt-3 p-3 rounded-xl bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800 text-xs text-emerald-800 dark:text-emerald-300 flex items-center gap-2">
-                <Loader2 size={16} className="animate-spin shrink-0" />
-                <span>{uploadProgress || 'Sedang memproses berkas...'}</span>
-              </div>
-            )}
-          </div>
+          )}
 
           {/* Filter & Daftar Dokumen */}
           <div className="space-y-3">
@@ -552,12 +556,12 @@ export default function KttDocumentModal({
                         <Download size={15} />
                       </a>
 
-                      {/* Tombol Hapus Khusus Administrator */}
-                      {isAdmin && (
+                      {/* Tombol Hapus Khusus Administrator yang Punya Akses Edit */}
+                      {canEdit && (
                         <button
                           type="button"
                           onClick={() => handleDeleteDocument(doc)}
-                          title="Hapus Berkas (Administrator Only)"
+                          title="Hapus Berkas"
                           className="w-8 h-8 rounded-lg border border-red-200 dark:border-red-900/60 hover:bg-red-50 text-red-600 dark:text-red-400 dark:hover:bg-red-950/40 flex items-center justify-center transition-colors"
                         >
                           <Trash2 size={15} />

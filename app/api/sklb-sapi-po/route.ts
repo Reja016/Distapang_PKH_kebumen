@@ -1,5 +1,7 @@
 import { NextResponse } from 'next/server';
 import pool from '@/lib/db';
+import { getSessionFromRequest } from '@/lib/session';
+import { logActivity } from '@/lib/auditLog';
 
 export const dynamic = 'force-dynamic';
 
@@ -94,12 +96,25 @@ export async function POST(req: Request) {
     const cleanKecId = String(kecamatan_id).toLowerCase().replace('k_', '');
     const cleanPop = Number(populasi) || 0;
 
+    const session = await getSessionFromRequest(req as any);
+    const userName = session?.nama || session?.nip_username || 'Unknown';
+
     await pool.query(
       `INSERT INTO bitpro_sklb_populasi_sapi_po (tahun, kecamatan_id, kecamatan_nama, populasi, triwulan, keterangan)
        VALUES (?, ?, ?, ?, ?, ?)
        ON DUPLICATE KEY UPDATE populasi = VALUES(populasi), kecamatan_nama = VALUES(kecamatan_nama), triwulan = VALUES(triwulan), keterangan = VALUES(keterangan)`,
       [Number(tahun), cleanKecId, kecamatan_nama || cleanKecId, cleanPop, triwulan || 'Triwulan 2', keterangan || null]
     );
+
+    await logActivity({
+      module: 'bitpro',
+      submenu: 'sklb',
+      tableName: 'sklb_sapi_po',
+      recordId: `${tahun}_${cleanKecId}`,
+      action: 'UPDATE',
+      userName,
+      details: { tahun, kecamatan_id: cleanKecId, kecamatan_nama, populasi: cleanPop, triwulan, keterangan },
+    });
 
     return NextResponse.json({ success: true, message: 'Data populasi Sapi PO berhasil disimpan' });
   } catch (error: any) {

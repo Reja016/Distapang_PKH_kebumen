@@ -18,6 +18,7 @@ import {
   ShieldCheck,
   CheckCircle2,
   Truck,
+  Clock,
 } from 'lucide-react';
 import { ModuleNavGroup, SubmenuItem, MODULE_NAV_DATA } from './types';
 import { checkModuleAccess, checkSubmenuAccess } from '@/lib/auth';
@@ -79,6 +80,34 @@ export default function SidebarNav({
   const [sidebarWidth, setSidebarWidth] = useState<number>(DEFAULT_WIDTH);
   const [isResizing, setIsResizing] = useState(false);
   const [isDesktop, setIsDesktop] = useState(false);
+  const [pendingCount, setPendingCount] = useState<number>(0);
+
+  // Ambil jumlah request pending secara periodik untuk notifikasi admin
+  useEffect(() => {
+    if (!isAdmin) return;
+
+    let isMounted = true;
+    const fetchPendingCount = async () => {
+      try {
+        const res = await fetch('/api/correction-requests?status=PENDING&countOnly=true');
+        if (res.ok) {
+          const data = await res.json();
+          if (isMounted && typeof data.count === 'number') {
+            setPendingCount(data.count);
+          }
+        }
+      } catch {
+        // Abaikan error jaringan saat polling di background
+      }
+    };
+
+    fetchPendingCount();
+    const interval = setInterval(fetchPendingCount, 20000);
+    return () => {
+      isMounted = false;
+      clearInterval(interval);
+    };
+  }, [isAdmin]);
 
   // Deteksi ukuran layar desktop
   useEffect(() => {
@@ -627,6 +656,23 @@ export default function SidebarNav({
           >
             {isAdmin && (
               <>
+                <Link
+                  href="/admin/pusat-koreksi"
+                  className={`relative w-10 h-10 rounded-xl border-2 flex items-center justify-center transition-colors cursor-pointer ${
+                    isDark
+                      ? 'bg-slate-800 border-slate-700 text-slate-300 hover:bg-slate-700'
+                      : 'bg-white border-slate-300 text-slate-700 hover:bg-slate-50 shadow-2xs'
+                  }`}
+                  title="Riwayat"
+                >
+                  <Clock size={16} />
+                  {pendingCount > 0 && (
+                    <span className="absolute -top-1.5 -right-1.5 min-w-[18px] h-[18px] px-1 rounded-full text-[10px] font-black bg-red-500 text-white flex items-center justify-center ring-2 ring-slate-100 dark:ring-slate-900 shadow-xs">
+                      {pendingCount > 99 ? '99+' : pendingCount}
+                    </span>
+                  )}
+                </Link>
+
                 <button
                   onClick={onOpenUserModal}
                   className={`w-10 h-10 rounded-xl border-2 flex items-center justify-center transition-colors cursor-pointer ${
@@ -693,32 +739,54 @@ export default function SidebarNav({
           >
             {/* Admin Extras */}
             {isAdmin && (
-              <div className="grid grid-cols-2 gap-2 pb-0.5">
-                <button
-                  onClick={onOpenUserModal}
-                  className={`w-full py-2 px-2.5 rounded-xl border-2 text-[11px] font-bold flex items-center justify-center gap-1.5 transition-colors cursor-pointer ${
+              <div className="space-y-1.5 pb-0.5">
+                <Link
+                  href="/admin/pusat-koreksi"
+                  className={`w-full py-2 px-2.5 rounded-xl border-2 text-[11px] font-bold flex items-center justify-between gap-1.5 transition-colors cursor-pointer ${
                     isDark
                       ? 'bg-slate-800 border-slate-700 text-slate-200 hover:bg-slate-700'
                       : 'bg-white border-slate-300 text-slate-800 hover:bg-slate-50 shadow-2xs'
                   }`}
-                  title="Kelola Akun & Hak Akses"
+                  title="Riwayat"
                 >
-                  <Users size={14} className="text-emerald-600" />
-                  <span className="truncate">Anggota</span>
-                </button>
+                  <div className="flex items-center gap-1.5 min-w-0">
+                    <Clock size={14} className="text-slate-500 shrink-0" />
+                    <span className="truncate">Riwayat</span>
+                  </div>
+                  {pendingCount > 0 && (
+                    <span className="px-1.5 py-0.5 rounded-full text-[10px] font-black bg-red-500 text-white min-w-5 h-5 flex items-center justify-center shadow-xs">
+                      {pendingCount > 99 ? '99+' : pendingCount}
+                    </span>
+                  )}
+                </Link>
 
-                <button
-                  onClick={onOpenBackupModal}
-                  className={`w-full py-2 px-2.5 rounded-xl border-2 text-[11px] font-bold flex items-center justify-center gap-1.5 transition-colors cursor-pointer ${
-                    isDark
-                      ? 'bg-slate-800 border-slate-700 text-slate-200 hover:bg-slate-700'
-                      : 'bg-white border-slate-300 text-slate-800 hover:bg-slate-50 shadow-2xs'
-                  }`}
-                  title="Cadangkan Database MySQL"
-                >
-                  <Database size={14} className="text-blue-600" />
-                  <span className="truncate">Backup DB</span>
-                </button>
+                <div className="grid grid-cols-2 gap-1.5">
+                  <button
+                    onClick={onOpenUserModal}
+                    className={`w-full py-2 px-2 rounded-xl border-2 text-[11px] font-bold flex items-center justify-center gap-1.5 transition-colors cursor-pointer ${
+                      isDark
+                        ? 'bg-slate-800 border-slate-700 text-slate-200 hover:bg-slate-700'
+                        : 'bg-white border-slate-300 text-slate-800 hover:bg-slate-50 shadow-2xs'
+                    }`}
+                    title="Kelola Akun & Hak Akses"
+                  >
+                    <Users size={14} className="text-emerald-600 shrink-0" />
+                    <span className="truncate">Anggota</span>
+                  </button>
+
+                  <button
+                    onClick={onOpenBackupModal}
+                    className={`w-full py-2 px-2 rounded-xl border-2 text-[11px] font-bold flex items-center justify-center gap-1.5 transition-colors cursor-pointer ${
+                      isDark
+                        ? 'bg-slate-800 border-slate-700 text-slate-200 hover:bg-slate-700'
+                        : 'bg-white border-slate-300 text-slate-800 hover:bg-slate-50 shadow-2xs'
+                    }`}
+                    title="Cadangkan Database MySQL"
+                  >
+                    <Database size={14} className="text-blue-600 shrink-0" />
+                    <span className="truncate">Backup DB</span>
+                  </button>
+                </div>
               </div>
             )}
 

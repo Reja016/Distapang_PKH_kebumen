@@ -21,6 +21,7 @@ interface MonevDashboardTabProps {
   canEdit?: boolean;
   onEdit: (data: FieldData) => void;
   onDelete: (id: string) => void;
+  onShowHistory?: (row: any) => void;
 }
 
 export function MonevDashboardTab({
@@ -33,6 +34,7 @@ export function MonevDashboardTab({
   canEdit,
   onEdit,
   onDelete,
+  onShowHistory,
 }: MonevDashboardTabProps) {
   return (
     <div className="space-y-6 animate-in fade-in duration-200">
@@ -222,6 +224,15 @@ export function MonevDashboardTab({
                             {canEdit && (
                               <td className="p-3.5 text-center">
                                 <div className="flex items-center justify-center gap-1">
+                                  {onShowHistory && (
+                                    <button
+                                      onClick={() => onShowHistory(d)}
+                                      className="min-h-touch h-8 w-8 rounded-lg border border-blue-200 bg-blue-50 hover:bg-blue-100 text-blue-600 flex items-center justify-center transition-colors cursor-pointer"
+                                      aria-label="Riwayat"
+                                    >
+                                      <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-clock"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                                    </button>
+                                  )}
                                   <button
                                     onClick={() => onEdit(d)}
                                     className="min-h-touch h-8 w-8 rounded-lg border border-slate-200 bg-slate-50 hover:bg-slate-100 text-slate-600 flex items-center justify-center transition-colors cursor-pointer"

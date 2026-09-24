@@ -23,6 +23,7 @@ import {
   ModalCattleForm,
   ModalCatatIB,
 } from '@/components/bitpro/sapitime/SapiTimeModals';
+import { UniversalAuditModal } from '@/components/common/UniversalAuditModal';
 
 export default function SapiTimePage() {
   const router = useRouter();
@@ -50,6 +51,9 @@ export default function SapiTimePage() {
   const [selectedCattleForIB, setSelectedCattleForIB] = useState<Cattle | null>(null);
   const [ibFormData, setIbFormData] = useState<any>({});
   const [showEstrusModal, setShowEstrusModal] = useState(false);
+
+  const [showAuditModal, setShowAuditModal] = useState(false);
+  const [auditTarget, setAuditTarget] = useState<any | null>(null);
 
   // 1. Tarik Data dari MySQL API
   const fetchData = async () => {
@@ -345,6 +349,10 @@ export default function SapiTimePage() {
               setIbFormData({ ...ibFormData, kecamatan: cattle.kecamatan, desa: cattle.desa });
               setShowIBModal(true);
             }}
+            onShowHistory={(cattle) => {
+              setAuditTarget(cattle);
+              setShowAuditModal(true);
+            }}
           />
         )}
 
@@ -395,6 +403,23 @@ export default function SapiTimePage() {
         ibFormData={ibFormData}
         setIbFormData={setIbFormData}
         handleAddInsemination={handleAddInsemination}
+      />
+
+      <UniversalAuditModal
+        isOpen={showAuditModal}
+        onClose={() => setShowAuditModal(false)}
+        recordId={auditTarget?.id}
+        tableName="sapitime"
+        moduleKey="bitpro"
+        submenuKey="sapitime"
+        availableFields={[
+          { key: 'name', label: 'Nama Sapi' },
+          { key: 'ownerName', label: 'Nama Peternak' },
+          { key: 'breed', label: 'Ras' },
+          { key: 'kecamatan', label: 'Kecamatan' },
+          { key: 'desa', label: 'Desa' },
+          { key: 'status', label: 'Status' }
+        ]}
       />
     </div>
   );

@@ -83,15 +83,17 @@ export function usePageAuth(
       setUserRole(role);
       isUserAdmin = role === 'Administrator';
 
-      // Hak akses tambah data: Administrator ATAU mode izin edit
+      // Hak akses tambah data: (Admin & mode edit) ATAU mode izin edit
       const mode = getSubmenuPermissionMode(moduleKey, submenuKey);
-      userCanCreate = isUserAdmin || mode === 'edit';
+      userCanCreate = (isUserAdmin && mode === 'edit') || mode === 'edit';
 
       setIsAdmin(isUserAdmin);
       setCanCreate(userCanCreate);
-      // ATURAN TEGAS: HANYA ADMINISTRATOR YANG BISA EDIT DAN DELETE
-      setCanEdit(isUserAdmin);
-      setCanDelete(isUserAdmin);
+      
+      // Administrator bisa Edit dan Delete JIKA mode-nya adalah 'edit' (bukan pelihat)
+      const adminCanEditDelete = isUserAdmin && mode === 'edit';
+      setCanEdit(adminCanEditDelete);
+      setCanDelete(adminCanEditDelete);
 
       setIsReady(true);
     };

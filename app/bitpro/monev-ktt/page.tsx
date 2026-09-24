@@ -33,11 +33,15 @@ import { MonevFormTab } from '@/components/bitpro/monev-ktt/MonevFormTab';
 import { MonevUnggasTab } from '@/components/bitpro/monev-ktt/MonevUnggasTab';
 import { MonevDashboardTab } from '@/components/bitpro/monev-ktt/MonevDashboardTab';
 import { MonevCameraModal, MonevPreviewPhotoModal } from '@/components/bitpro/monev-ktt/MonevModals';
+import { UniversalAuditModal } from '@/components/common/UniversalAuditModal';
 
 export default function MonevKTT() {
   const { isReady, canCreate, canEdit, isAdmin } = usePageAuth('bitpro', 'monev-ktt');
   const [isClient, setIsClient] = useState(false);
   const [leafletLoaded, setLeafletLoaded] = useState(false);
+
+  const [showAuditModal, setShowAuditModal] = useState(false);
+  const [auditTarget, setAuditTarget] = useState<any | null>(null);
 
   // TABS: 'ruminansia' | 'unggas' | 'dashboard'
   const [activeTab, setActiveTab] = useState<'ruminansia' | 'unggas' | 'dashboard'>('ruminansia');
@@ -983,6 +987,10 @@ export default function MonevKTT() {
             canEdit={canEdit}
             onEdit={handleEditClick}
             onDelete={handleDeleteClick}
+            onShowHistory={(row) => {
+              setAuditTarget(row);
+              setShowAuditModal(true);
+            }}
           />
         )}
       </main>
@@ -1000,6 +1008,35 @@ export default function MonevKTT() {
       <MonevPreviewPhotoModal
         previewPhotoModal={previewPhotoModal}
         onClose={() => setPreviewPhotoModal(null)}
+      />
+
+      <UniversalAuditModal
+        isOpen={showAuditModal}
+        onClose={() => {
+          setShowAuditModal(false);
+          setAuditTarget(null);
+        }}
+        tableName="monev_lapangan"
+        recordId={auditTarget?.id}
+        moduleKey="bitpro"
+        submenuKey="monev-ktt"
+        availableFields={[
+          'id',
+          'tahun',
+          'sumberDana',
+          'kec',
+          'desa',
+          'namaKtt',
+          'namaKetua',
+          'alamat',
+          'kegiatan',
+          'jenis',
+          'kategori',
+          'waktuMonev',
+          'lat',
+          'lng',
+          'catatan'
+        ]}
       />
     </div>
   );

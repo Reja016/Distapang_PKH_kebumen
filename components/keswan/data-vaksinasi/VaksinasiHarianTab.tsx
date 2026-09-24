@@ -24,6 +24,7 @@ interface VaksinasiHarianTabProps {
   setFormHarianManual: (form: { puskeswan: string; tanggal: string; jumlah: number }) => void;
   setModalHarianManual: (show: boolean) => void;
   fetchAll: (yr: number) => void;
+  onShowHistory?: (row: any) => void;
 }
 
 export default function VaksinasiHarianTab({
@@ -48,6 +49,7 @@ export default function VaksinasiHarianTab({
   setFormHarianManual,
   setModalHarianManual,
   fetchAll,
+  onShowHistory,
 }: VaksinasiHarianTabProps) {
   return (
     <div className="space-y-6 animate-in fade-in duration-200">
@@ -205,9 +207,24 @@ export default function VaksinasiHarianTab({
                           }`}
                         >
                           {val && val > 0 ? (
-                            <span className="inline-block py-0.5 px-1.5 rounded-md bg-blue-600 text-white font-mono font-black shadow-2xs">
-                              {val}
-                            </span>
+                            <div className="flex items-center justify-center gap-1">
+                              <span className="inline-block py-0.5 px-1.5 rounded-md bg-blue-600 text-white font-mono font-black shadow-2xs">
+                                {val}
+                              </span>
+                              <button
+                                type="button"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  if (onShowHistory) {
+                                    onShowHistory(harianMap[row.puskeswan][dateStr]);
+                                  }
+                                }}
+                                className="p-1 border border-blue-200 bg-blue-50 text-blue-600 hover:bg-blue-100 rounded-md transition-colors"
+                                title="Riwayat"
+                              >
+                                <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-clock"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                              </button>
+                            </div>
                           ) : (
                             '-'
                           )}

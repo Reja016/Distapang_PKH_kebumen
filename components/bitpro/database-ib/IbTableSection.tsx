@@ -13,6 +13,7 @@ interface IbTableSectionProps {
   onOpenPkb: (ib: IBRecord) => void;
   onOpenSkipPkb: (ib: IBRecord) => void;
   onOpenBirth: (ib: IBRecord) => void;
+  onShowHistory?: (row: any) => void;
 }
 
 export default function IbTableSection({
@@ -24,6 +25,7 @@ export default function IbTableSection({
   onOpenPkb,
   onOpenSkipPkb,
   onOpenBirth,
+  onShowHistory,
 }: IbTableSectionProps) {
   return (
     <div className="bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden transition-colors">
@@ -223,12 +225,22 @@ export default function IbTableSection({
                           </button>
                         )}
                         {ib.pkbResult === 'Tidak Bunting' && (
-                          <span className="text-xs text-slate-400 font-medium">Siklus Selesai</span>
+                          <span className="text-xs text-slate-400 font-medium block mb-1">Siklus Selesai</span>
                         )}
                         {ib.birthDate && (
-                          <span className="text-xs text-emerald-700 font-bold bg-emerald-50 border border-emerald-200 px-2 py-1 rounded-lg">
+                          <span className="text-xs text-emerald-700 font-bold bg-emerald-50 border border-emerald-200 px-2 py-1 rounded-lg block mb-1">
                             Siklus Sukses
                           </span>
+                        )}
+                        {onShowHistory && (
+                          <button
+                            onClick={() => onShowHistory(ib)}
+                            title="Riwayat Perubahan"
+                            className="h-7 px-3 bg-blue-50 text-blue-600 hover:bg-blue-100 border border-blue-200 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center justify-center gap-1.5 w-full"
+                          >
+                            <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-clock"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                            <span>Riwayat</span>
+                          </button>
                         )}
                       </div>
                     </td>

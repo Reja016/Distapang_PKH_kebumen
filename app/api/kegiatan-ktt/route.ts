@@ -1,39 +1,13 @@
 import { NextResponse } from 'next/server';
 import pool from '@/lib/db';
+import { logActivity } from '@/lib/auditLog';
 
 export const dynamic = 'force-dynamic';
 
 // GET: Ambil semua riwayat log aktivitas KTT
 export async function GET() {
   try {
-    await pool.query(`
-      CREATE TABLE IF NOT EXISTS kegiatan_ktt (
-        id VARCHAR(50) PRIMARY KEY,
-        tanggal DATE,
-        ktt_id VARCHAR(50),
-        nama_ktt VARCHAR(255),
-        kecamatan VARCHAR(100),
-        desa VARCHAR(100),
-        tim_pelaksana VARCHAR(255),
-        nama_kegiatan VARCHAR(255),
-        hasil_kegiatan TEXT,
-        lat DECIMAL(10, 8) NULL,
-        lng DECIMAL(11, 8) NULL,
-        photo LONGTEXT NULL,
-        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-      )
-    `);
-
-    // Pastikan kolom lat, lng, photo ada jika tabel lama belum punya
-    try {
-      await pool.query('ALTER TABLE kegiatan_ktt ADD COLUMN IF NOT EXISTS lat DECIMAL(10, 8) NULL');
-      await pool.query('ALTER TABLE kegiatan_ktt ADD COLUMN IF NOT EXISTS lng DECIMAL(11, 8) NULL');
-      await pool.query('ALTER TABLE kegiatan_ktt ADD COLUMN IF NOT EXISTS photo LONGTEXT NULL');
-    } catch {
-      // Abaikan jika MySQL versi lama tidak support IF NOT EXISTS di ALTER
-    }
-
-    const [rows]: any = await pool.query('SELECT * FROM kegiatan_ktt ORDER BY tanggal DESC, id DESC');
+    const [rows]: any = await pool.query('SELECT id_kegiatan AS id, id_ktt AS ktt_id, tanggal, nama_ktt, kecamatan, desa, tim_pelaksana, nama_kegiatan, hasil_kegiatan, lat, lng, photo, created_at FROM kegiatan_ktt ORDER BY tanggal DESC, id_kegiatan DESC');
     return NextResponse.json(rows);
   } catch (error) {
     console.error('Gagal mengambil data kegiatan KTT:', error);
@@ -48,27 +22,49 @@ export async function POST(request: Request) {
     const { id, tanggal, ktt_id, nama_ktt, kecamatan, desa, tim_pelaksana, nama_kegiatan, hasil_kegiatan, lat, lng, photo, isEdit } = body;
 
     const finalId = id || `ACT-${Date.now()}`;
+    const safeKttId = (ktt_id && !isNaN(Number(ktt_id))) ? Number(ktt_id) : null;
 
     if (isEdit) {
       await pool.query(
         `UPDATE kegiatan_ktt 
-         SET tanggal=?, ktt_id=?, nama_ktt=?, kecamatan=?, desa=?, tim_pelaksana=?, nama_kegiatan=?, hasil_kegiatan=?, lat=?, lng=?, photo=? 
-         WHERE id=?`,
-        [tanggal, ktt_id || '', nama_ktt, kecamatan || '', desa || '', tim_pelaksana, nama_kegiatan, hasil_kegiatan, lat || null, lng || null, photo || null, finalId]
+         SET tanggal=?, id_ktt=?, nama_ktt=?, kecamatan=?, desa=?, tim_pelaksana=?, nama_kegiatan=?, hasil_kegiatan=?, lat=?, lng=?, photo=? 
+         WHERE id_kegiatan=?`,
+        [tanggal, safeKttId, nama_ktt, kecamatan || '', desa || '', tim_pelaksana, nama_kegiatan, hasil_kegiatan, lat || null, lng || null, photo || null, finalId]
       );
+      
+      await logActivity({
+        module: 'bitpro',
+        submenu: 'kegiatan-ktt',
+        tableName: 'kegiatan_ktt',
+        recordId: finalId,
+        action: 'UPDATE',
+        userName: 'Petugas',
+        details: { nama_kegiatan, hasil_kegiatan },
+      });
+
     } else {
       await pool.query(
         `INSERT INTO kegiatan_ktt 
-         (id, tanggal, ktt_id, nama_ktt, kecamatan, desa, tim_pelaksana, nama_kegiatan, hasil_kegiatan, lat, lng, photo) 
+         (id_kegiatan, tanggal, id_ktt, nama_ktt, kecamatan, desa, tim_pelaksana, nama_kegiatan, hasil_kegiatan, lat, lng, photo) 
          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-        [finalId, tanggal, ktt_id || '', nama_ktt, kecamatan || '', desa || '', tim_pelaksana, nama_kegiatan, hasil_kegiatan, lat || null, lng || null, photo || null]
+        [finalId, tanggal, safeKttId, nama_ktt, kecamatan || '', desa || '', tim_pelaksana, nama_kegiatan, hasil_kegiatan, lat || null, lng || null, photo || null]
       );
+      
+      await logActivity({
+        module: 'bitpro',
+        submenu: 'kegiatan-ktt',
+        tableName: 'kegiatan_ktt',
+        recordId: finalId,
+        action: 'CREATE',
+        userName: 'Petugas',
+        details: { nama_kegiatan, hasil_kegiatan },
+      });
     }
 
     return NextResponse.json({ status: 'success', id: finalId });
-  } catch (error) {
+  } catch (error: any) {
     console.error('Gagal menyimpan kegiatan KTT:', error);
-    return NextResponse.json({ error: 'Gagal menyimpan data ke MySQL' }, { status: 500 });
+    return NextResponse.json({ error: 'Gagal menyimpan data ke MySQL', detail: error?.message }, { status: 500 });
   }
 }
 
@@ -78,11 +74,20 @@ export async function DELETE(request: Request) {
     const { searchParams } = new URL(request.url);
     const id = searchParams.get('id');
     if (id) {
-      await pool.query('DELETE FROM kegiatan_ktt WHERE id=?', [id]);
+      await pool.query('DELETE FROM kegiatan_ktt WHERE id_kegiatan=?', [id]);
+      await logActivity({
+        module: 'bitpro',
+        submenu: 'kegiatan-ktt',
+        tableName: 'kegiatan_ktt',
+        recordId: id,
+        action: 'DELETE',
+        userName: 'Administrator',
+        details: { id },
+      });
     }
     return NextResponse.json({ status: 'success' });
-  } catch (error) {
+  } catch (error: any) {
     console.error('Gagal menghapus kegiatan KTT:', error);
-    return NextResponse.json({ error: 'Gagal menghapus data dari MySQL' }, { status: 500 });
+    return NextResponse.json({ error: 'Gagal menghapus data dari MySQL', detail: error?.message }, { status: 500 });
   }
 }

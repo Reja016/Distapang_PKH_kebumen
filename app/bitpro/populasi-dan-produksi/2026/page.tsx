@@ -21,6 +21,7 @@ import {
 import PopulasiForm from '@/components/bitpro/populasi/PopulasiForm';
 import PopulasiTable from '@/components/bitpro/populasi/PopulasiTable';
 import BulkUploadModal from '@/components/bitpro/populasi/BulkUploadModal';
+import { UniversalAuditModal } from '@/components/common/UniversalAuditModal';
 
 function InputPopulasi2026Content() {
   const { isReady, canCreate, canEdit } = usePageAuth('bitpro', 'populasi-dan-produksi');
@@ -35,6 +36,9 @@ function InputPopulasi2026Content() {
   const [editIdx, setEditIdx] = useState<number | null>(null);
   const [showBulkUpload, setShowBulkUpload] = useState(false);
   const [isLoadingData, setIsLoadingData] = useState(false);
+
+  const [showAuditModal, setShowAuditModal] = useState(false);
+  const [auditTarget, setAuditTarget] = useState<any | null>(null);
 
   // Fungsi kalkulasi otomatis total per jenis ternak ruminansia
   const calculateTotal = (prefix: string) => {
@@ -457,7 +461,6 @@ function InputPopulasi2026Content() {
           />
         )}
 
-        {/* Tabel Data Rekapitulasi */}
         <PopulasiTable
           savedData={savedData}
           handleDownload={handleDownload}
@@ -466,8 +469,33 @@ function InputPopulasi2026Content() {
           getConciseSummary={getConciseSummary}
           year={year}
           canEdit={canEdit}
+          onShowHistory={(row) => {
+            setAuditTarget(row);
+            setShowAuditModal(true);
+          }}
         />
       </main>
+
+      {showAuditModal && auditTarget && (
+        <UniversalAuditModal
+          isOpen={showAuditModal}
+          onClose={() => {
+            setShowAuditModal(false);
+            setAuditTarget(null);
+          }}
+          recordId={auditTarget.id}
+          tableName="populasi_2026"
+          moduleKey="bitpro"
+          submenuKey="populasi-dan-produksi"
+          availableFields={{
+            tw: 'Triwulan',
+            kecamatan: 'Kecamatan',
+            desa: 'Desa',
+            data_v: 'Data Rincian',
+            grand_total: 'Total Ternak'
+          }}
+        />
+      )}
 
       {/* Modal Bulk Upload */}
       <BulkUploadModal

@@ -21,6 +21,7 @@ interface SklbPetaSectionProps {
   canEdit: boolean;
   topKecamatan: { nama: string; pop: number };
   onOpenEditSapiPO: (kec: any) => void;
+  onShowHistory?: (row: any) => void;
 }
 
 export function SklbPetaSection({
@@ -35,6 +36,7 @@ export function SklbPetaSection({
   canEdit,
   topKecamatan,
   onOpenEditSapiPO,
+  onShowHistory,
 }: SklbPetaSectionProps) {
   return (
     <section className="bg-white rounded-3xl border border-slate-200/90 shadow-xs p-5 sm:p-8 space-y-6 relative overflow-hidden">
@@ -215,13 +217,24 @@ export function SklbPetaSection({
               </div>
 
               {canEdit && (
-                <button
-                  onClick={() => onOpenEditSapiPO(selectedKecamatan)}
-                  className="h-9 px-3.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold flex items-center gap-1.5 shadow-xs cursor-pointer"
-                >
-                  <Edit2 size={13} />
-                  <span>Edit Data Kec. {selectedKecamatan.nama}</span>
-                </button>
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={() => onOpenEditSapiPO(selectedKecamatan)}
+                    className="h-9 px-3.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold flex items-center gap-1.5 shadow-xs cursor-pointer"
+                  >
+                    <Edit2 size={13} />
+                    <span>Edit Data Kec. {selectedKecamatan.nama}</span>
+                  </button>
+                  {onShowHistory && (
+                    <button
+                      onClick={() => onShowHistory(selectedKecamatan)}
+                      className="h-9 px-3.5 rounded-xl border border-blue-200 bg-blue-50 text-blue-600 hover:bg-blue-100 text-xs font-bold flex items-center gap-1.5 shadow-xs cursor-pointer"
+                    >
+                      <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-clock"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                      <span>Riwayat</span>
+                    </button>
+                  )}
+                </div>
               )}
             </div>
           )}

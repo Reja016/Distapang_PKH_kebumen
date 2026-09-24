@@ -26,6 +26,7 @@ import {
   ModalRekap,
   ModalDetail,
 } from '@/components/bitpro/sklb/SklbModals';
+import { UniversalAuditModal } from '@/components/common/UniversalAuditModal';
 
 export default function UnifiedSKLBPage() {
   const { isReady, canCreate, canEdit } = usePageAuth('bitpro', 'sklb');
@@ -59,6 +60,10 @@ export default function UnifiedSKLBPage() {
     keterangan: '',
   });
   const [isSavingSapiPO, setIsSavingSapiPO] = useState<boolean>(false);
+
+  // ── AUDIT MODAL STATE ──
+  const [showAuditModal, setShowAuditModal] = useState(false);
+  const [auditTarget, setAuditTarget] = useState<any | null>(null);
 
   // ── EXISTING SKLB TABS & DATA STATE ──
   const [activeTab, setActiveTab] = useState<'rekap' | 'detail'>('rekap');
@@ -590,6 +595,10 @@ export default function UnifiedSKLBPage() {
             });
             setModalSapiPO({ open: true, item: kec });
           }}
+          onShowHistory={(kec) => {
+            setAuditTarget(kec);
+            setShowAuditModal(true);
+          }}
         />
 
         {/* 2. TABEL CAPAIAN SKLB & DETAIL TERNAK */}
@@ -718,6 +727,19 @@ export default function UnifiedSKLBPage() {
         handleSaveDetail={handleSaveDetail}
       />
 
+      <UniversalAuditModal
+        isOpen={showAuditModal}
+        onClose={() => {
+          setShowAuditModal(false);
+          setAuditTarget(null);
+        }}
+        recordId={auditTarget?.id || auditTarget?.db_id || (auditTarget?.id ? String(auditTarget.id) : null)}
+        recordTitle={auditTarget?.nama || auditTarget?.kecamatan_nama ? `Sapi PO: Kecamatan ${auditTarget?.nama || auditTarget?.kecamatan_nama}` : 'Data SKLB Sapi PO'}
+        tableName="sklb_sapi_po"
+        moduleKey="bitpro"
+        submenuKey="sklb"
+        availableFields={['tahun', 'kecamatan_nama', 'populasi', 'triwulan', 'keterangan']}
+      />
     </div>
   );
 }

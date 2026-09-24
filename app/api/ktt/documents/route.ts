@@ -2,8 +2,34 @@ import { NextRequest, NextResponse } from 'next/server';
 import pool from '@/lib/db';
 import fs from 'fs/promises';
 import path from 'path';
+import { requireAdmin } from '@/lib/session';
 
 export const dynamic = 'force-dynamic';
+
+// Helper function to check read-only admin
+async function checkAdminEditAccess(userId: number): Promise<boolean> {
+  try {
+    const [userRows]: any = await pool.query('SELECT permissions FROM anggota_users WHERE id = ?', [userId]);
+    if (userRows && userRows.length > 0) {
+      const permsData = userRows[0].permissions;
+      const perms = typeof permsData === 'string' ? JSON.parse(permsData) : permsData;
+      let hasEditAccess = false;
+      if (perms) {
+        Object.keys(perms).forEach((modKey) => {
+          const mod = perms[modKey];
+          if (mod && mod.mode === 'edit') hasEditAccess = true;
+          if (mod && mod.submenus) {
+            Object.values(mod.submenus).forEach((sub: any) => {
+              if (sub.mode === 'edit') hasEditAccess = true;
+            });
+          }
+        });
+      }
+      return hasEditAccess;
+    }
+  } catch {}
+  return true; // Fallback
+}
 
 // Pastikan tabel ktt_documents ada di MySQL
 let tableEnsured = false;
@@ -94,12 +120,21 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   await ensureDocumentsTable();
 
+  // Double-Lock Security: Validasi role Administrator
+  const auth = await requireAdmin(request as any);
+  if ('errorResponse' in auth) return auth.errorResponse;
+
+  if (!(await checkAdminEditAccess(auth.session.id))) {
+    return NextResponse.json({ error: 'Akses Ditolak: Anda berstatus Pelihat (Read-Only) sehingga tidak dapat mengunggah dokumen KTT.' }, { status: 403 });
+  }
+
   try {
     const formData = await request.formData();
     const kttId = formData.get('ktt_id');
     const categoryCustom = formData.get('category')?.toString();
     const titleCustom = formData.get('title')?.toString();
-    const uploadedBy = formData.get('uploaded_by')?.toString() || 'Petugas';
+    // Gunakan nama dari session!
+    const uploadedBy = auth.session.nama || 'Administrator';
     
     // Bisa single file atau multiple files
     const files = formData.getAll('files') as File[];
@@ -184,30 +219,24 @@ export async function POST(request: NextRequest) {
 }
 
 // ============================================================
-// 3. DELETE: Hapus berkas KTT (HANYA ADMINISTRATOR)
+// 3. DELETE: Hapus berkas KTT (HANYA ADMINISTRATOR PENGELOLA)
 // ============================================================
 export async function DELETE(request: NextRequest) {
   await ensureDocumentsTable();
 
+  const auth = await requireAdmin(request as any);
+  if ('errorResponse' in auth) return auth.errorResponse;
+
+  if (!(await checkAdminEditAccess(auth.session.id))) {
+    return NextResponse.json({ error: 'Akses Ditolak: Anda berstatus Pelihat (Read-Only) sehingga tidak dapat menghapus dokumen KTT.' }, { status: 403 });
+  }
+
   try {
     const { searchParams } = new URL(request.url);
     const docId = searchParams.get('id');
-    const userRole = request.headers.get('x-user-role') || searchParams.get('role');
 
     if (!docId) {
       return NextResponse.json({ error: 'Parameter id dokumen diperlukan' }, { status: 400 });
-    }
-
-    // Double-Lock Security: Validasi role Administrator
-    const isAdmin =
-      userRole?.toLowerCase() === 'administrator' ||
-      userRole?.toLowerCase() === 'admin';
-
-    if (!isAdmin) {
-      return NextResponse.json(
-        { error: 'Akses ditolak: Hanya Administrator yang diizinkan menghapus dokumen arsip KTT' },
-        { status: 403 }
-      );
     }
 
     // Ambil info file untuk menghapus file fisik di disk

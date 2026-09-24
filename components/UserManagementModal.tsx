@@ -23,14 +23,15 @@ import {
   Layers,
   ChevronDown,
   ChevronRight,
-  AlertCircle,
   Check,
+  AlertCircle,
 } from 'lucide-react';
 import {
   UserPermissions,
   DEFAULT_FULL_PERMISSIONS,
   DEFAULT_VIEW_ONLY_PERMISSIONS,
 } from '@/lib/permissions';
+import { getAuthSession } from '@/lib/auth';
 
 export interface AnggotaUser {
   id: number;
@@ -107,6 +108,7 @@ export default function UserManagementModal({
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
   const [selectedRoleFilter, setSelectedRoleFilter] = useState('Semua');
+  const [isReadOnlyAdmin, setIsReadOnlyAdmin] = useState(false);
   
   // State Form Modal
   const [showFormModal, setShowFormModal] = useState(false);
@@ -143,6 +145,26 @@ export default function UserManagementModal({
 
   useEffect(() => {
     if (isOpen) {
+      const user = getAuthSession();
+      if (user && user.role === 'Administrator') {
+        // Cek apakah admin ini adalah Pelihat (semua modul diset mode: 'view' atau tidak punya akses edit sama sekali)
+        const perms = user.permissions;
+        let hasEditAccess = false;
+        if (perms) {
+          Object.keys(perms).forEach((modKey) => {
+            const mod = perms[modKey as keyof typeof perms];
+            if (mod && mod.mode === 'edit') hasEditAccess = true;
+            if (mod && mod.submenus) {
+              Object.values(mod.submenus).forEach((sub) => {
+                if (sub.mode === 'edit') hasEditAccess = true;
+              });
+            }
+          });
+        }
+        setIsReadOnlyAdmin(!hasEditAccess);
+      } else {
+        setIsReadOnlyAdmin(true); // Non-admin shouldn't even be here, but just in case
+      }
       fetchMembers();
     }
   }, [isOpen]);
@@ -457,13 +479,15 @@ export default function UserManagementModal({
             </select>
           </div>
 
-          <button
-            onClick={handleOpenCreate}
-            className="min-h-touch h-10 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-700 active:scale-95 text-white text-xs font-bold flex items-center gap-2 transition-all shadow-xs cursor-pointer shrink-0"
-          >
-            <UserPlus size={16} strokeWidth={2.5} />
-            <span>Tambah Anggota Baru</span>
-          </button>
+          {!isReadOnlyAdmin && (
+            <button
+              onClick={handleOpenCreate}
+              className="min-h-touch h-10 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-700 active:scale-95 text-white text-xs font-bold flex items-center gap-2 transition-all shadow-xs cursor-pointer shrink-0"
+            >
+              <UserPlus size={16} strokeWidth={2.5} />
+              <span>Tambah Anggota Baru</span>
+            </button>
+          )}
         </div>
 
         {/* Tabel Rekap Anggota (Scrollable) */}
@@ -569,24 +593,28 @@ export default function UserManagementModal({
                           </div>
                         </td>
                         <td className="p-3.5 text-center">
-                          <div className="flex items-center justify-center gap-1.5">
-                            <button
-                              onClick={() => handleOpenEdit(m)}
-                              className="min-h-touch h-8 px-2.5 rounded-lg border border-slate-200 bg-white hover:bg-slate-100 text-slate-700 font-bold text-xs flex items-center gap-1 transition-colors cursor-pointer shadow-2xs"
-                              title="Edit Anggota & Hak Akses"
-                            >
-                              <Edit2 size={13} strokeWidth={2.5} />
-                              <span>Edit</span>
-                            </button>
-                            <button
-                              onClick={() => handleDeleteMember(m.id, m.nama)}
-                              disabled={m.nip_username === currentUserEmail}
-                              className="min-h-touch h-8 w-8 rounded-lg border border-red-200 bg-red-50 hover:bg-red-100 disabled:opacity-30 text-red-600 flex items-center justify-center transition-colors cursor-pointer"
-                              title="Hapus Anggota"
-                            >
-                              <Trash2 size={13} strokeWidth={2.5} />
-                            </button>
-                          </div>
+                          {!isReadOnlyAdmin ? (
+                            <div className="flex items-center justify-center gap-1.5">
+                              <button
+                                onClick={() => handleOpenEdit(m)}
+                                className="min-h-touch h-8 px-2.5 rounded-lg border border-slate-200 bg-white hover:bg-slate-100 text-slate-700 font-bold text-xs flex items-center gap-1 transition-colors cursor-pointer shadow-2xs"
+                                title="Edit Anggota & Hak Akses"
+                              >
+                                <Edit2 size={13} strokeWidth={2.5} />
+                                <span>Edit</span>
+                              </button>
+                              <button
+                                onClick={() => handleDeleteMember(m.id, m.nama)}
+                                disabled={m.nip_username === currentUserEmail}
+                                className="min-h-touch h-8 w-8 rounded-lg border border-red-200 bg-red-50 hover:bg-red-100 disabled:opacity-30 text-red-600 flex items-center justify-center transition-colors cursor-pointer"
+                                title="Hapus Anggota"
+                              >
+                                <Trash2 size={13} strokeWidth={2.5} />
+                              </button>
+                            </div>
+                          ) : (
+                            <div className="text-[10px] text-slate-400 font-medium italic">Hanya Lihat</div>
+                          )}
                         </td>
                       </tr>
                     );

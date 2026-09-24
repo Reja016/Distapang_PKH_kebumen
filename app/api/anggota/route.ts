@@ -128,10 +128,38 @@ export async function GET(req: Request) {
   }));
 }
 
+async function checkAdminEditAccess(userId: number): Promise<boolean> {
+  try {
+    const [userRows]: any = await pool.query('SELECT permissions FROM anggota_users WHERE id = ?', [userId]);
+    if (userRows && userRows.length > 0) {
+      const permsData = userRows[0].permissions;
+      const perms = typeof permsData === 'string' ? JSON.parse(permsData) : permsData;
+      let hasEditAccess = false;
+      if (perms) {
+        Object.keys(perms).forEach((modKey) => {
+          const mod = perms[modKey];
+          if (mod && mod.mode === 'edit') hasEditAccess = true;
+          if (mod && mod.submenus) {
+            Object.values(mod.submenus).forEach((sub: any) => {
+              if (sub.mode === 'edit') hasEditAccess = true;
+            });
+          }
+        });
+      }
+      return hasEditAccess;
+    }
+  } catch {}
+  return true; // Fallback
+}
+
 // POST: Tambah anggota baru (Wajib Admin, Password otomatis di-hash)
 export async function POST(req: Request) {
   const auth = await requireAdmin(req);
   if ('errorResponse' in auth) return auth.errorResponse;
+
+  if (!(await checkAdminEditAccess(auth.session.id))) {
+    return NextResponse.json({ error: 'Akses Ditolak: Anda berstatus Pelihat (Read-Only).' }, { status: 403 });
+  }
 
   try {
     const body = await req.json();
@@ -168,6 +196,10 @@ export async function POST(req: Request) {
 export async function PUT(req: Request) {
   const auth = await requireAdmin(req);
   if ('errorResponse' in auth) return auth.errorResponse;
+
+  if (!(await checkAdminEditAccess(auth.session.id))) {
+    return NextResponse.json({ error: 'Akses Ditolak: Anda berstatus Pelihat (Read-Only).' }, { status: 403 });
+  }
 
   try {
     const body = await req.json();
@@ -220,6 +252,10 @@ export async function PUT(req: Request) {
 export async function DELETE(req: Request) {
   const auth = await requireAdmin(req);
   if ('errorResponse' in auth) return auth.errorResponse;
+
+  if (!(await checkAdminEditAccess(auth.session.id))) {
+    return NextResponse.json({ error: 'Akses Ditolak: Anda berstatus Pelihat (Read-Only).' }, { status: 403 });
+  }
 
   try {
     const { searchParams } = new URL(req.url);

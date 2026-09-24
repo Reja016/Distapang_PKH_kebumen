@@ -28,6 +28,7 @@ interface KegiatanTableProps {
   onEdit: (item: KegiatanKTT) => void;
   onDelete: (id: string) => void;
   setPreviewPhotoModal: (val: { url: string; title: string } | null) => void;
+  onShowHistory?: (item: KegiatanKTT) => void;
 }
 
 export function KegiatanTable({
@@ -46,6 +47,7 @@ export function KegiatanTable({
   onEdit,
   onDelete,
   setPreviewPhotoModal,
+  onShowHistory,
 }: KegiatanTableProps) {
   return (
     <section className="space-y-4">
@@ -161,6 +163,16 @@ export function KegiatanTable({
                     <Clock size={13} strokeWidth={2.5} />
                     {item.tanggal ? item.tanggal.substring(0, 10) : '-'}
                   </span>
+
+                  {onShowHistory && (
+                    <button
+                      onClick={() => onShowHistory(item)}
+                      className="w-8 h-8 ml-1 rounded-lg border border-blue-200 bg-blue-50 hover:bg-blue-100 text-blue-600 flex items-center justify-center transition-colors cursor-pointer"
+                      title="Riwayat & Koreksi"
+                    >
+                      <Clock size={14} strokeWidth={2.5} />
+                    </button>
+                  )}
 
                   {canEdit && (
                     <div className="flex items-center gap-1 ml-2">
