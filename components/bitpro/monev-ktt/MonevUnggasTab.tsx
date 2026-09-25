@@ -17,6 +17,7 @@ import {
   Download,
   Printer,
   FileText,
+  Clock,
 } from 'lucide-react';
 import {
   DATA_WILAYAH,
@@ -43,6 +44,7 @@ interface MonevUnggasTabProps {
   onDelete: (id: string) => void;
   setPreviewPhotoModal: (val: { url: string; title: string } | null) => void;
   kttMasterList: Array<{ id: any; namaKelompok: string; kecamatan: string; desa: string; ketua?: string }>;
+  onShowHistory?: (data: FieldData) => void;
 }
 
 export function MonevUnggasTab({
@@ -56,6 +58,7 @@ export function MonevUnggasTab({
   onDelete,
   setPreviewPhotoModal,
   kttMasterList,
+  onShowHistory,
 }: MonevUnggasTabProps) {
   // ── FILTER KECAMATAN ──
   const [filterKecamatan, setFilterKecamatan] = useState<string>('Semua Kecamatan');
@@ -492,6 +495,16 @@ export function MonevUnggasTab({
                         >
                           <Printer size={13} strokeWidth={2.5} />
                         </button>
+                        {onShowHistory && (
+                          <button
+                            type="button"
+                            onClick={() => onShowHistory(d)}
+                            className="w-8 h-8 rounded-lg border border-blue-200 bg-blue-50 hover:bg-blue-100 text-blue-600 flex items-center justify-center transition-colors cursor-pointer shadow-2xs"
+                            title="Riwayat & Ajukan Koreksi"
+                          >
+                            <Clock size={13} strokeWidth={2.5} />
+                          </button>
+                        )}
                         {canEdit && (
                           <>
                             <button
@@ -795,13 +808,13 @@ export function MonevUnggasTab({
 
           {/* Bagian 3: GPS (Wajib) & Foto Dokumentasi Unggas */}
           <div className="p-5 rounded-2xl border border-slate-200 bg-slate-50/70 space-y-4">
-            <h4 className="font-sans text-xs font-bold uppercase tracking-wider text-slate-700 flex items-center justify-between">
-              <span className="flex items-center gap-1.5">
-                <MapPin size={16} strokeWidth={2.5} className="text-amber-600" />
+            <h4 className="font-sans text-xs font-bold uppercase tracking-wider text-slate-700 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+              <span className="flex items-start sm:items-center gap-1.5">
+                <MapPin size={16} strokeWidth={2.5} className="text-amber-600 shrink-0 mt-0.5 sm:mt-0" />
                 <span>3. Titik Koordinat GPS (Wajib) &amp; Foto Dokumentasi Unggas</span>
               </span>
-              <span className="text-xs font-bold text-red-600 flex items-center gap-1">
-                <AlertCircle size={13} /> GPS Wajib Diisi
+              <span className="text-xs font-bold text-red-600 flex items-center gap-1 self-start sm:self-auto bg-red-50 border border-red-200 px-2.5 py-0.5 rounded-md">
+                <AlertCircle size={13} className="shrink-0" /> GPS Wajib Diisi
               </span>
             </h4>
 
@@ -931,47 +944,53 @@ export function MonevUnggasTab({
 
           {/* Bagian 4: Petugas Monev & Upload Dokumen Hasil Lapangan (PDF) */}
           <div className="p-5 rounded-2xl border border-slate-200 bg-slate-50/70 space-y-4">
-            <h4 className="font-sans text-xs font-bold uppercase tracking-wider text-slate-700 flex items-center gap-1.5">
-              <FileCheck size={16} strokeWidth={2.5} className="text-amber-600" />
+            <h4 className="font-sans text-xs font-bold uppercase tracking-wider text-slate-700 flex items-start sm:items-center gap-2">
+              <FileCheck size={16} strokeWidth={2.5} className="text-amber-600 shrink-0 mt-0.5 sm:mt-0" />
               <span>4. Petugas Monev &amp; Upload Dokumen Hasil Lapangan (PDF Maks 2 MB)</span>
             </h4>
 
             {/* Upload Dokumen Hasil Lapangan (PDF) */}
-            <div className="p-4 rounded-xl border border-slate-200 bg-white/90 shadow-2xs space-y-2">
-              <label className="block text-xs font-sans font-bold uppercase tracking-wider text-slate-600 mb-1">
+            <div className="p-4 rounded-xl border border-slate-200 bg-white/90 shadow-2xs space-y-2.5">
+              <label className="block text-xs font-sans font-bold uppercase tracking-wider text-slate-600">
                 Upload Dokumen Hasil Lapangan (PDF Maksimal 2 MB)
               </label>
-              <input
-                type="file"
-                accept="application/pdf"
-                onChange={handlePdfUpload}
-                className="w-full text-xs text-slate-600 file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-bold file:bg-amber-600 file:text-white hover:file:bg-amber-700 cursor-pointer"
-              />
+              <div className="p-2 sm:p-2.5 bg-slate-50 rounded-xl border border-slate-200">
+                <input
+                  type="file"
+                  accept="application/pdf"
+                  onChange={handlePdfUpload}
+                  className="w-full text-xs text-slate-600 file:mr-3 file:py-2 file:px-3 sm:file:px-4 file:rounded-lg file:border-0 file:text-xs file:font-bold file:bg-amber-600 file:text-white hover:file:bg-amber-700 cursor-pointer"
+                />
+              </div>
               {dokumenHasilPdf && (
-                <div className="mt-2.5 flex items-center gap-2 p-2.5 bg-amber-50 border border-amber-200 rounded-xl">
-                  <FileText size={16} className="text-amber-700 shrink-0" />
-                  <span className="text-xs font-bold text-amber-800 truncate">
-                    {dokumenHasilPdfName || 'Dokumen_Hasil_Unggas.pdf'}
-                  </span>
-                  <a
-                    href={dokumenHasilPdf}
-                    download={dokumenHasilPdfName || 'Dokumen_Hasil_Unggas.pdf'}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="text-xs text-amber-700 hover:text-amber-900 font-bold underline flex items-center gap-1 ml-auto"
-                  >
-                    <Download size={12} strokeWidth={2.5} /> Unduh
-                  </a>
-                  <button
-                    type="button"
-                    onClick={removePdf}
-                    className="text-xs text-red-600 hover:text-red-800 font-bold ml-2 cursor-pointer"
-                  >
-                    Hapus
-                  </button>
+                <div className="mt-2.5 flex items-center justify-between gap-2 p-2.5 bg-amber-50 border border-amber-200 rounded-xl">
+                  <div className="flex items-center gap-2 min-w-0">
+                    <FileText size={16} className="text-amber-700 shrink-0" />
+                    <span className="text-xs font-bold text-amber-800 truncate">
+                      {dokumenHasilPdfName || 'Dokumen_Hasil_Unggas.pdf'}
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-2 shrink-0 ml-auto">
+                    <a
+                      href={dokumenHasilPdf}
+                      download={dokumenHasilPdfName || 'Dokumen_Hasil_Unggas.pdf'}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="text-xs text-amber-700 hover:text-amber-900 font-bold underline flex items-center gap-1 shrink-0"
+                    >
+                      <Download size={12} strokeWidth={2.5} /> Unduh
+                    </a>
+                    <button
+                      type="button"
+                      onClick={removePdf}
+                      className="text-xs text-red-600 hover:text-red-800 font-bold ml-1 cursor-pointer shrink-0"
+                    >
+                      Hapus
+                    </button>
+                  </div>
                 </div>
               )}
-              <p className="text-[11px] text-slate-500 mt-1">
+              <p className="text-[11px] text-slate-500">
                 💡 Format PDF resmi hasil kunjungan lapangan atau lembar rekap monev yang telah ditandatangani manual.
               </p>
             </div>
@@ -1023,11 +1042,11 @@ export function MonevUnggasTab({
           </div>
 
           {/* Submit Buttons */}
-          <div className="flex flex-wrap gap-3 pt-2">
+          <div className="flex flex-col sm:flex-row flex-wrap gap-2.5 sm:gap-3 pt-2">
             <button
               type="button"
               onClick={resetForm}
-              className="min-h-touch h-11 px-5 rounded-xl border border-slate-200 bg-slate-100 hover:bg-slate-200 text-xs font-bold text-slate-700 transition-colors cursor-pointer"
+              className="w-full sm:w-auto min-h-touch h-11 px-5 rounded-xl border border-slate-200 bg-slate-100 hover:bg-slate-200 text-xs font-bold text-slate-700 transition-colors cursor-pointer"
             >
               Reset Form
             </button>
@@ -1099,7 +1118,7 @@ export function MonevUnggasTab({
                   kttMasterList
                 );
               }}
-              className="min-h-touch h-11 px-5 rounded-xl border border-amber-300 bg-amber-50 hover:bg-amber-100 text-xs font-bold text-amber-800 transition-colors flex items-center justify-center gap-1.5 cursor-pointer shadow-2xs"
+              className="w-full sm:w-auto min-h-touch h-11 px-5 rounded-xl border border-amber-300 bg-amber-50 hover:bg-amber-100 text-xs font-bold text-amber-800 transition-colors flex items-center justify-center gap-1.5 cursor-pointer shadow-2xs"
               title="Cetak Laporan PDF Unggas sesuai template resmi"
             >
               <Printer size={15} strokeWidth={2.5} />
@@ -1107,7 +1126,7 @@ export function MonevUnggasTab({
             </button>
             <button
               type="submit"
-              className="min-h-touch h-11 px-6 rounded-xl bg-amber-600 hover:bg-amber-700 text-white text-xs sm:text-sm font-bold shadow-xs transition-all flex-1 cursor-pointer"
+              className="w-full sm:flex-1 min-h-touch h-11 px-6 rounded-xl bg-amber-600 hover:bg-amber-700 text-white text-xs sm:text-sm font-bold shadow-xs transition-all cursor-pointer"
             >
               {editingId ? 'Perbarui Data Monev Unggas' : 'Simpan Data Monev Unggas'}
             </button>

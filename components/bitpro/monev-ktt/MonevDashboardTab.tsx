@@ -8,6 +8,7 @@ import {
   FileText,
   Edit2,
   Trash2,
+  Clock,
 } from 'lucide-react';
 import { FieldData, hitungKondisi } from './types';
 
@@ -110,7 +111,7 @@ export function MonevDashboardTab({
                         <th className="p-3.5 text-right">SISA</th>
                         <th className="p-3.5 text-right">TOTAL ASET</th>
                         <th className="p-3.5 text-center">GPS, FOTO &amp; DOKUMEN</th>
-                        {canEdit && <th className="p-3.5 text-center w-24">AKSI</th>}
+                        {(canEdit || onShowHistory) && <th className="p-3.5 text-center w-24">AKSI</th>}
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-slate-200 text-slate-800">
@@ -221,32 +222,39 @@ export function MonevDashboardTab({
                                 )}
                               </div>
                             </td>
-                            {canEdit && (
+                            {(canEdit || onShowHistory) && (
                               <td className="p-3.5 text-center">
                                 <div className="flex items-center justify-center gap-1">
                                   {onShowHistory && (
                                     <button
                                       onClick={() => onShowHistory(d)}
                                       className="min-h-touch h-8 w-8 rounded-lg border border-blue-200 bg-blue-50 hover:bg-blue-100 text-blue-600 flex items-center justify-center transition-colors cursor-pointer"
+                                      title="Riwayat & Ajukan Koreksi"
                                       aria-label="Riwayat"
                                     >
-                                      <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-clock"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                                      <Clock size={13} strokeWidth={2.5} />
                                     </button>
                                   )}
-                                  <button
-                                    onClick={() => onEdit(d)}
-                                    className="min-h-touch h-8 w-8 rounded-lg border border-slate-200 bg-slate-50 hover:bg-slate-100 text-slate-600 flex items-center justify-center transition-colors cursor-pointer"
-                                    aria-label="Edit"
-                                  >
-                                    <Edit2 size={13} strokeWidth={2.5} />
-                                  </button>
-                                  <button
-                                    onClick={() => onDelete(d.id)}
-                                    className="min-h-touch h-8 w-8 rounded-lg border border-red-200 bg-red-50 hover:bg-red-100 text-red-600 flex items-center justify-center transition-colors cursor-pointer"
-                                    aria-label="Hapus"
-                                  >
-                                    <Trash2 size={13} strokeWidth={2.5} />
-                                  </button>
+                                  {canEdit && (
+                                    <>
+                                      <button
+                                        onClick={() => onEdit(d)}
+                                        className="min-h-touch h-8 w-8 rounded-lg border border-slate-200 bg-slate-50 hover:bg-slate-100 text-slate-600 flex items-center justify-center transition-colors cursor-pointer"
+                                        aria-label="Edit"
+                                        title="Edit Data"
+                                      >
+                                        <Edit2 size={13} strokeWidth={2.5} />
+                                      </button>
+                                      <button
+                                        onClick={() => onDelete(d.id)}
+                                        className="min-h-touch h-8 w-8 rounded-lg border border-red-200 bg-red-50 hover:bg-red-100 text-red-600 flex items-center justify-center transition-colors cursor-pointer"
+                                        aria-label="Hapus"
+                                        title="Hapus Data"
+                                      >
+                                        <Trash2 size={13} strokeWidth={2.5} />
+                                      </button>
+                                    </>
+                                  )}
                                 </div>
                               </td>
                             )}

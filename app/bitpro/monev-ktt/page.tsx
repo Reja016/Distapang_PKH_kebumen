@@ -809,7 +809,7 @@ export default function MonevKTT() {
       </header>
 
       {/* ── MAIN WORKSPACE ── */}
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-10 space-y-6 sm:space-y-8">
+      <main className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 pt-4 sm:pt-10 pb-28 sm:pb-12 space-y-6 sm:space-y-8">
         {/* KPI Stat Cards (Solid Icon Styling) */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
           <div className="p-3.5 sm:p-5 rounded-2xl border border-slate-200 bg-white shadow-sm flex items-center gap-3.5 sm:gap-4">
@@ -955,6 +955,10 @@ export default function MonevKTT() {
             fetchDatabase={fetchDatabase}
             onEdit={handleEditClick}
             onDelete={handleDeleteClick}
+            onShowHistory={(row) => {
+              setAuditTarget(row);
+              setShowAuditModal(true);
+            }}
             kttMasterList={kttMasterList}
           />
         )}
@@ -970,6 +974,10 @@ export default function MonevKTT() {
             onSaveUnggas={handleSaveUnggas}
             onEdit={handleEditClick}
             onDelete={handleDeleteClick}
+            onShowHistory={(row) => {
+              setAuditTarget(row);
+              setShowAuditModal(true);
+            }}
             setPreviewPhotoModal={setPreviewPhotoModal}
             kttMasterList={kttMasterList}
           />

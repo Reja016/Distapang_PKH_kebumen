@@ -280,8 +280,22 @@ export default function KegiatanKTTPage() {
         setIsGettingLocation(false);
       },
       () => {
-        alert('Gagal mengambil titik GPS. Pastikan izin lokasi diizinkan di browser Anda.');
-        setIsGettingLocation(false);
+        // Fallback: coba akurasi standar (WiFi/Cellular) jika satelit murni timeout/lemah
+        navigator.geolocation.getCurrentPosition(
+          (posFallback) => {
+            setFormData((prev) => ({
+              ...prev,
+              lat: Number(posFallback.coords.latitude.toFixed(6)),
+              lng: Number(posFallback.coords.longitude.toFixed(6)),
+            }));
+            setIsGettingLocation(false);
+          },
+          () => {
+            alert('Gagal mengambil titik GPS. Pastikan izin lokasi diizinkan di browser Anda dan GPS ponsel aktif.');
+            setIsGettingLocation(false);
+          },
+          { enableHighAccuracy: false, timeout: 15000 }
+        );
       },
       { enableHighAccuracy: true, timeout: 10000 }
     );

@@ -174,16 +174,19 @@ export function DigitalSignaturePad({
               className="max-h-full max-w-full object-contain filter contrast-125"
             />
           </div>
-          <div className="mt-2 flex items-center justify-between text-xs pt-1">
-            <span className="text-[11px] text-slate-500 font-medium">Tanda Tangan Digital Aktif</span>
-            <div className="flex gap-2">
+          <div className="mt-2.5 flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 text-xs pt-2 border-t border-slate-100">
+            <span className="text-[11px] text-slate-500 font-medium flex items-center gap-1.5">
+              <span className="w-2 h-2 rounded-full bg-emerald-500 shrink-0 inline-block animate-pulse" />
+              Tanda Tangan Digital Aktif
+            </span>
+            <div className="flex items-center gap-2 w-full sm:w-auto">
               <button
                 type="button"
                 onClick={() => {
                   setIsEditing(true);
                   setHasDrawn(false);
                 }}
-                className="px-2.5 py-1 text-[11px] font-bold text-emerald-700 bg-emerald-50 hover:bg-emerald-100 rounded-lg border border-emerald-200 transition-colors flex items-center gap-1 cursor-pointer"
+                className="flex-1 sm:flex-none px-3 py-1.5 text-[11px] font-bold text-emerald-700 bg-emerald-50 hover:bg-emerald-100 rounded-lg border border-emerald-200 transition-colors flex items-center justify-center gap-1.5 cursor-pointer"
               >
                 <PenTool size={12} /> Ubah / TTD Ulang
               </button>
@@ -194,7 +197,7 @@ export function DigitalSignaturePad({
                   setIsEditing(true);
                   setHasDrawn(false);
                 }}
-                className="px-2.5 py-1 text-[11px] font-bold text-red-600 bg-red-50 hover:bg-red-100 rounded-lg border border-red-200 transition-colors flex items-center gap-1 cursor-pointer"
+                className="flex-1 sm:flex-none px-3 py-1.5 text-[11px] font-bold text-red-600 bg-red-50 hover:bg-red-100 rounded-lg border border-red-200 transition-colors flex items-center justify-center gap-1.5 cursor-pointer"
               >
                 <Trash2 size={12} /> Hapus
               </button>

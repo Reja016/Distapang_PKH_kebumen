@@ -26,13 +26,67 @@ async function ensureTable() {
       created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
     ) ENGINE=InnoDB;
   `);
+
+  try {
+    const [cols]: any = await pool.query(`SHOW COLUMNS FROM master_detail_ternak`);
+    const existing = (cols || []).map((c: any) => c.Field.toLowerCase());
+
+    const neededCols = [
+      { name: 'id', def: 'VARCHAR(100)' },
+      { name: 'desa_lokasi', def: 'VARCHAR(100)' },
+      { name: 'no', def: 'INT DEFAULT 1' },
+      { name: 'nama_pemilik', def: 'VARCHAR(255)' },
+      { name: 'rt', def: 'VARCHAR(20)' },
+      { name: 'rw', def: 'VARCHAR(20)' },
+      { name: 'dusun', def: 'VARCHAR(100)' },
+      { name: 'nama_sapi', def: 'VARCHAR(100)' },
+      { name: 'jenis_kelamin', def: 'VARCHAR(50)' },
+      { name: 'kode_bapak', def: 'VARCHAR(50)' },
+      { name: 'kode_induk', def: 'VARCHAR(50)' },
+      { name: 'umur_bulan', def: 'DECIMAL(10,2) DEFAULT 0' },
+      { name: 'tinggi_pundak', def: 'DECIMAL(10,2) DEFAULT 0' },
+      { name: 'panjang_badan', def: 'DECIMAL(10,2) DEFAULT 0' },
+      { name: 'lingkar_dada', def: 'DECIMAL(10,2) DEFAULT 0' },
+      { name: 'berat_badan', def: 'DECIMAL(10,2) DEFAULT 0' },
+      { name: 'created_at', def: 'TIMESTAMP DEFAULT CURRENT_TIMESTAMP' },
+    ];
+
+    for (const c of neededCols) {
+      if (!existing.includes(c.name.toLowerCase())) {
+        try {
+          await pool.query(`ALTER TABLE master_detail_ternak ADD COLUMN ${c.name} ${c.def}`);
+        } catch {}
+      }
+    }
+
+    // Jika ada kolom lama 'desa' tapi 'desa_lokasi' masih kosong, salin otomatis
+    if (existing.includes('desa') && existing.includes('desa_lokasi')) {
+      try {
+        await pool.query(`UPDATE master_detail_ternak SET desa_lokasi = desa WHERE (desa_lokasi IS NULL OR desa_lokasi = '') AND desa IS NOT NULL`);
+      } catch {}
+    }
+    // Jika ada kolom lama 'peternak' tapi 'nama_pemilik' masih kosong, salin otomatis
+    if (existing.includes('peternak') && existing.includes('nama_pemilik')) {
+      try {
+        await pool.query(`UPDATE master_detail_ternak SET nama_pemilik = peternak WHERE (nama_pemilik IS NULL OR nama_pemilik = '') AND peternak IS NOT NULL`);
+      } catch {}
+    }
+  } catch (err: any) {
+    console.warn('ensureTable migration warning:', err.message);
+  }
 }
 
 // GET: Ambil semua data detail sapi dari MySQL
 export async function GET() {
   try {
     await ensureTable();
-    const [rows] = await pool.query('SELECT * FROM master_detail_ternak ORDER BY desa_lokasi ASC, no ASC');
+    const [cols]: any = await pool.query(`SHOW COLUMNS FROM master_detail_ternak`);
+    const existing = (cols || []).map((c: any) => c.Field.toLowerCase());
+
+    const orderDesa = existing.includes('desa_lokasi') ? 'desa_lokasi' : (existing.includes('desa') ? 'desa' : 'id');
+    const orderNo = existing.includes('no') ? 'no' : (existing.includes('id_sapi') ? 'id_sapi' : 'id');
+
+    const [rows] = await pool.query(`SELECT * FROM master_detail_ternak ORDER BY ${orderDesa} ASC, ${orderNo} ASC`);
     return NextResponse.json({ success: true, data: rows });
   } catch (error: any) {
     console.error('Error GET sync-sklb-detail:', error);
