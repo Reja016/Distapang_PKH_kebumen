@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useRef, useImperativeHandle, forwardRef } from 'react';
+import React, { useEffect, useRef, useState, useImperativeHandle, forwardRef } from 'react';
 
 declare global {
   interface Window {
@@ -39,9 +39,26 @@ export const CloudflareTurnstile = forwardRef<CloudflareTurnstileRef, Cloudflare
     const containerRef = useRef<HTMLDivElement>(null);
     const widgetIdRef = useRef<string | null>(null);
 
-    const isCustomKey = Boolean(process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY);
-    const siteKey =
-      process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY || DEFAULT_TEST_SITE_KEY;
+    const [siteKey, setSiteKey] = useState<string>(
+      process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY || DEFAULT_TEST_SITE_KEY
+    );
+
+    // Ambil site key aktual secara dinamis dari API server runtime (.env di server)
+    useEffect(() => {
+      let isMounted = true;
+      fetch('/api/auth/turnstile-config')
+        .then((res) => res.json())
+        .then((data) => {
+          if (isMounted && data.siteKey) {
+            setSiteKey(data.siteKey);
+          }
+        })
+        .catch(() => {});
+
+      return () => {
+        isMounted = false;
+      };
+    }, []);
 
     useImperativeHandle(ref, () => ({
       reset: () => {
@@ -54,31 +71,12 @@ export const CloudflareTurnstile = forwardRef<CloudflareTurnstileRef, Cloudflare
             window.turnstile.reset(widgetIdRef.current);
           } catch {}
         }
-        const isLocal =
-          typeof window !== 'undefined' &&
-          (window.location.hostname === 'localhost' ||
-            window.location.hostname === '127.0.0.1');
-        if (!isCustomKey && !isLocal) {
-          onChange('bypass');
-        } else {
-          onChange(null);
-        }
+        onChange(null);
       },
     }));
 
     useEffect(() => {
       let isMounted = true;
-      const isLocal =
-        typeof window !== 'undefined' &&
-        (window.location.hostname === 'localhost' ||
-          window.location.hostname === '127.0.0.1');
-
-      // Jika di domain publik (misal simantap.cloud) dan belum ada key resmi Cloudflare,
-      // jangan render widget dummy yang akan diblokir Cloudflare; otomatis loloskan.
-      if (!isCustomKey && !isLocal) {
-        onChange('bypass');
-        return;
-      }
 
       const renderWidget = () => {
         if (!containerRef.current || !window.turnstile) return;
@@ -95,13 +93,7 @@ export const CloudflareTurnstile = forwardRef<CloudflareTurnstileRef, Cloudflare
               if (isMounted) onChange(null);
             },
             'error-callback': () => {
-              if (isMounted) {
-                if (!isCustomKey) {
-                  onChange('bypass');
-                } else {
-                  onChange(null);
-                }
-              }
+              if (isMounted) onChange(null);
             },
           });
           widgetIdRef.current = id;
