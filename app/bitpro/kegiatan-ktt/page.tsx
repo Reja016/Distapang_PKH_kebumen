@@ -265,11 +265,31 @@ export default function KegiatanKTTPage() {
 
   // Geolocation
   const handleGetLocation = () => {
-    if (!navigator.geolocation) {
-      alert('Perangkat Anda tidak mendukung Geolocation.');
+    if (typeof window !== 'undefined' && !window.isSecureContext && location.protocol !== 'https:' && location.hostname !== 'localhost') {
+      alert('Fitur deteksi GPS memerlukan sambungan aman (HTTPS). Pastikan situs diakses menggunakan https://');
       return;
     }
+
+    if (!navigator.geolocation) {
+      alert('Perangkat atau browser Anda tidak mendukung fitur Geolocation / GPS.');
+      return;
+    }
+
     setIsGettingLocation(true);
+
+    const getGpsErrorMessage = (err: GeolocationPositionError) => {
+      switch (err.code) {
+        case err.PERMISSION_DENIED:
+          return 'Izin akses lokasi ditolak oleh browser/perangkat. Silakan ketuk ikon gembok / setelan situs pada bilah alamat browser Anda dan ubah izin Lokasi menjadi "Izinkan / Allow".';
+        case err.POSITION_UNAVAILABLE:
+          return 'Sinyal lokasi tidak tersedia. Pastikan tombol Lokasi/GPS fisik pada bilah notifikasi HP Anda sudah AKTIF.';
+        case err.TIMEOUT:
+          return 'Waktu pencarian GPS habis. Silakan klik tombol GPS sekali lagi, atau buka aplikasi Google Maps sebentar agar HP mengunci satelit GPS.';
+        default:
+          return `Gagal mendeteksi lokasi GPS: ${err.message || 'Kesalahan perangkat'}.`;
+      }
+    };
+
     navigator.geolocation.getCurrentPosition(
       (pos) => {
         setFormData((prev) => ({
@@ -279,8 +299,14 @@ export default function KegiatanKTTPage() {
         }));
         setIsGettingLocation(false);
       },
-      () => {
-        // Fallback: coba akurasi standar (WiFi/Cellular) jika satelit murni timeout/lemah
+      (errPrimary) => {
+        if (errPrimary.code === errPrimary.PERMISSION_DENIED) {
+          alert(getGpsErrorMessage(errPrimary));
+          setIsGettingLocation(false);
+          return;
+        }
+
+        // Fallback: coba akurasi standar (WiFi/Cellular/Cache) jika satelit murni timeout/lemah
         navigator.geolocation.getCurrentPosition(
           (posFallback) => {
             setFormData((prev) => ({
@@ -290,14 +316,14 @@ export default function KegiatanKTTPage() {
             }));
             setIsGettingLocation(false);
           },
-          () => {
-            alert('Gagal mengambil titik GPS. Pastikan izin lokasi diizinkan di browser Anda dan GPS ponsel aktif.');
+          (errFallback) => {
+            alert(getGpsErrorMessage(errFallback || errPrimary));
             setIsGettingLocation(false);
           },
-          { enableHighAccuracy: false, timeout: 15000 }
+          { enableHighAccuracy: false, timeout: 15000, maximumAge: 120000 }
         );
       },
-      { enableHighAccuracy: true, timeout: 10000 }
+      { enableHighAccuracy: true, timeout: 12000, maximumAge: 30000 }
     );
   };
 

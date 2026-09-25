@@ -5,10 +5,32 @@ import { logActivity } from '@/lib/auditLog';
 
 export const dynamic = 'force-dynamic';
 
+async function ensureCorrectionRequestsTable() {
+  await pool.query(`
+    CREATE TABLE IF NOT EXISTS correction_requests (
+      id INT AUTO_INCREMENT PRIMARY KEY,
+      module VARCHAR(100) NOT NULL,
+      submenu VARCHAR(100) NOT NULL,
+      table_name VARCHAR(100) NOT NULL,
+      record_id VARCHAR(100) NOT NULL,
+      requested_by VARCHAR(255) NOT NULL,
+      proposed_changes LONGTEXT NOT NULL,
+      reason TEXT,
+      status VARCHAR(20) DEFAULT 'PENDING',
+      admin_note TEXT,
+      handled_by VARCHAR(255),
+      handled_at DATETIME,
+      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+  `);
+}
+
 // GET: Ambil daftar pengajuan (Khusus Admin)
 export async function GET(request: NextRequest) {
   const auth = await requireAdmin(request as any);
   if ('errorResponse' in auth) return auth.errorResponse;
+
+  await ensureCorrectionRequestsTable();
 
   const { searchParams } = new URL(request.url);
   const status = searchParams.get('status') || 'PENDING';
@@ -49,8 +71,10 @@ export async function POST(request: NextRequest) {
   try {
     const session = await getSessionFromRequest(request as any);
     if (!session) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+      return NextResponse.json({ error: 'Unauthorized: Sesi login Anda telah berakhir. Silakan login kembali.' }, { status: 401 });
     }
+
+    await ensureCorrectionRequestsTable();
 
     const body = await request.json();
     const { module, submenu, table_name, record_id, proposed_changes, reason } = body;

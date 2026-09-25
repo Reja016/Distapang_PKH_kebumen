@@ -165,6 +165,11 @@ export default function DataFarmPage() {
 
   // Ambil titik lokasi koordinat GPS secara otomatis dari device/browser
   const handleGetGpsLocation = () => {
+    if (typeof window !== 'undefined' && !window.isSecureContext && location.protocol !== 'https:' && location.hostname !== 'localhost') {
+      alert('Fitur deteksi GPS memerlukan sambungan aman (HTTPS). Pastikan situs diakses menggunakan https://');
+      return;
+    }
+
     if (!navigator.geolocation) {
       alert('Browser / Perangkat Anda tidak mendukung fitur Geolocation / GPS.');
       return;
@@ -172,56 +177,72 @@ export default function DataFarmPage() {
     setGpsLoading(true);
     setGpsStatus('Mencari sinyal satelit GPS...');
 
-    navigator.geolocation.getCurrentPosition(
-      async (position) => {
-        const lat = position.coords.latitude.toFixed(6);
-        const lng = position.coords.longitude.toFixed(6);
+    const processPosition = async (position: GeolocationPosition) => {
+      const lat = position.coords.latitude.toFixed(6);
+      const lng = position.coords.longitude.toFixed(6);
 
-        setFormValues((prev: any) => ({
-          ...prev,
-          lintang: lat,
-          bujur: lng,
-        }));
+      setFormValues((prev: any) => ({
+        ...prev,
+        lintang: lat,
+        bujur: lng,
+      }));
 
-        setGpsStatus(`GPS Terkunci: ${lat}, ${lng}`);
+      setGpsStatus(`GPS Terkunci: ${lat}, ${lng}`);
 
-        // Reverse Geocoding via OpenStreetMap Nominatim
-        try {
-          const res = await fetch(
-            `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&zoom=18&addressdetails=1`,
-            { headers: { 'Accept-Language': 'id' } }
-          );
-          if (res.ok) {
-            const data = await res.json();
-            if (data && data.display_name) {
-              setFormValues((prev: any) => ({
-                ...prev,
-                alamat: prev.alamat || data.display_name,
-              }));
-              const locName = data.address?.village || data.address?.suburb || data.address?.road || 'Lokasi Terdeteksi';
-              setGpsStatus(`GPS Sukses: ${lat}, ${lng} (${locName})`);
-            }
+      // Reverse Geocoding via OpenStreetMap Nominatim
+      try {
+        const res = await fetch(
+          `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&zoom=18&addressdetails=1`,
+          { headers: { 'Accept-Language': 'id' } }
+        );
+        if (res.ok) {
+          const data = await res.json();
+          if (data && data.display_name) {
+            setFormValues((prev: any) => ({
+              ...prev,
+              alamat: prev.alamat || data.display_name,
+            }));
+            const locName = data.address?.village || data.address?.suburb || data.address?.road || 'Lokasi Terdeteksi';
+            setGpsStatus(`GPS Sukses: ${lat}, ${lng} (${locName})`);
           }
-        } catch {
-          // Tetap simpan lintang & bujur jika reverse geocoding gagal
-        } finally {
-          setGpsLoading(false);
         }
-      },
-      (error) => {
-        console.warn('GPS Geolocation Error:', error);
+      } catch {
+        // Tetap simpan lintang & bujur jika reverse geocoding gagal
+      } finally {
         setGpsLoading(false);
-        if (error.code === error.PERMISSION_DENIED) {
-          setGpsStatus('Izin akses lokasi ditolak. Silakan ketik alamat & koordinat secara manual.');
-        } else if (error.code === error.POSITION_UNAVAILABLE) {
-          setGpsStatus('Sinyal GPS tidak terdeteksi. Silakan ketik manual.');
-        } else if (error.code === error.TIMEOUT) {
-          setGpsStatus('Waktu pencarian GPS habis. Silakan ketik manual.');
-        } else {
-          setGpsStatus('Gagal mengambil GPS. Silakan gunakan input manual.');
+      }
+    };
+
+    navigator.geolocation.getCurrentPosition(
+      processPosition,
+      (errorPrimary) => {
+        if (errorPrimary.code === errorPrimary.PERMISSION_DENIED) {
+          setGpsLoading(false);
+          setGpsStatus('Izin akses lokasi ditolak di browser. Silakan aktifkan izin lokasi di setelan browser.');
+          return;
         }
+
+        // Fallback ke akurasi standar (BTS/Wi-Fi/Cache)
+        navigator.geolocation.getCurrentPosition(
+          processPosition,
+          (errorFallback) => {
+            const err = errorFallback || errorPrimary;
+            console.warn('GPS Geolocation Error:', err);
+            setGpsLoading(false);
+            if (err.code === err.PERMISSION_DENIED) {
+              setGpsStatus('Izin akses lokasi ditolak. Silakan izinkan akses lokasi.');
+            } else if (err.code === err.POSITION_UNAVAILABLE) {
+              setGpsStatus('Sinyal GPS fisik tidak aktif. Silakan nyalakan lokasi di HP Anda.');
+            } else if (err.code === err.TIMEOUT) {
+              setGpsStatus('Waktu pencarian GPS habis. Silakan coba klik kembali atau buka Google Maps sebentar.');
+            } else {
+              setGpsStatus('Gagal mengambil GPS. Silakan gunakan input manual.');
+            }
+          },
+          { enableHighAccuracy: false, timeout: 15000, maximumAge: 120000 }
+        );
       },
-      { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+      { enableHighAccuracy: true, timeout: 12000, maximumAge: 30000 }
     );
   };
 

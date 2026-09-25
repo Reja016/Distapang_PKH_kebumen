@@ -135,32 +135,59 @@ export function MonevUnggasTab({
 
   // GPS Location Handler with low-accuracy fallback (prevents browser lock & lag)
   const handleGetLocation = () => {
-    if (!navigator.geolocation) {
-      alert('Browser tidak mendukung pendeteksian lokasi GPS.');
+    if (typeof window !== 'undefined' && !window.isSecureContext && location.protocol !== 'https:' && location.hostname !== 'localhost') {
+      alert('Fitur deteksi GPS memerlukan sambungan aman (HTTPS). Pastikan situs diakses menggunakan https://');
       return;
     }
+
+    if (!navigator.geolocation) {
+      alert('Perangkat atau browser Anda tidak mendukung fitur Geolocation / GPS.');
+      return;
+    }
+
     setIsGettingLocation(true);
+
+    const getGpsErrorMessage = (err: GeolocationPositionError) => {
+      switch (err.code) {
+        case err.PERMISSION_DENIED:
+          return 'Izin akses lokasi ditolak oleh browser/perangkat. Silakan ketuk ikon gembok / setelan situs pada bilah alamat browser Anda dan ubah izin Lokasi menjadi "Izinkan / Allow".';
+        case err.POSITION_UNAVAILABLE:
+          return 'Sinyal lokasi tidak tersedia. Pastikan tombol Lokasi/GPS fisik pada bilah notifikasi HP Anda sudah AKTIF.';
+        case err.TIMEOUT:
+          return 'Waktu pencarian GPS habis. Silakan klik tombol GPS sekali lagi, atau buka aplikasi Google Maps sebentar agar HP mengunci satelit GPS.';
+        default:
+          return `Gagal mendeteksi lokasi GPS: ${err.message || 'Kesalahan perangkat'}.`;
+      }
+    };
+
     navigator.geolocation.getCurrentPosition(
       (pos) => {
         setFormLat(Number(pos.coords.latitude.toFixed(6)));
         setFormLng(Number(pos.coords.longitude.toFixed(6)));
         setIsGettingLocation(false);
       },
-      () => {
+      (errPrimary) => {
+        if (errPrimary.code === errPrimary.PERMISSION_DENIED) {
+          alert(getGpsErrorMessage(errPrimary));
+          setIsGettingLocation(false);
+          return;
+        }
+
+        // Fallback: Mode jaringan / BTS / Wi-Fi atau cache lokasi terbaru
         navigator.geolocation.getCurrentPosition(
           (posFallback) => {
             setFormLat(Number(posFallback.coords.latitude.toFixed(6)));
             setFormLng(Number(posFallback.coords.longitude.toFixed(6)));
             setIsGettingLocation(false);
           },
-          (err) => {
-            alert('Gagal mendeteksi lokasi GPS: ' + err.message);
+          (errFallback) => {
+            alert(getGpsErrorMessage(errFallback || errPrimary));
             setIsGettingLocation(false);
           },
-          { enableHighAccuracy: false, timeout: 5000, maximumAge: 60000 }
+          { enableHighAccuracy: false, timeout: 15000, maximumAge: 120000 }
         );
       },
-      { enableHighAccuracy: true, timeout: 5000, maximumAge: 30000 }
+      { enableHighAccuracy: true, timeout: 12000, maximumAge: 30000 }
     );
   };
 

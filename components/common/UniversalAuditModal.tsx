@@ -248,7 +248,7 @@ export function UniversalAuditModal({
         setShowCorrectionForm(false);
         fetchLogs(); 
       } else {
-        alert('Gagal: ' + json.error);
+        alert('Gagal: ' + (json.detail ? `${json.error} (${json.detail})` : json.error));
       }
     } catch (e) {
       alert('Terjadi kesalahan sistem.');

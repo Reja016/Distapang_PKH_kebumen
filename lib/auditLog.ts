@@ -10,6 +10,30 @@ export interface LogActivityParams {
   details?: any;
 }
 
+let tableInitialized = false;
+
+async function ensureActivityLogsTable() {
+  if (tableInitialized) return;
+  try {
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS activity_logs (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        module VARCHAR(100) NOT NULL,
+        submenu VARCHAR(100) NOT NULL,
+        table_name VARCHAR(100) NOT NULL,
+        record_id VARCHAR(100) NOT NULL,
+        action VARCHAR(50) NOT NULL,
+        user_name VARCHAR(255) NOT NULL DEFAULT 'Sistem',
+        details LONGTEXT,
+        timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+    `);
+    tableInitialized = true;
+  } catch (e: any) {
+    console.warn('[AuditLog Warning] Could not ensure activity_logs table:', e.message);
+  }
+}
+
 /**
  * Helper terpusat untuk mencatat aktivitas log ke tabel `activity_logs`.
  * Bersifat NON-BLOCKING: Jika logging gagal, fungsi ini tidak akan menggagalkan
@@ -25,6 +49,7 @@ export async function logActivity({
   details = {},
 }: LogActivityParams): Promise<void> {
   try {
+    await ensureActivityLogsTable();
     const detailsStr = typeof details === 'string' ? details : JSON.stringify(details || {});
     await pool.query(
       `INSERT INTO activity_logs (module, submenu, table_name, record_id, action, user_name, details)

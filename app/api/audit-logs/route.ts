@@ -4,6 +4,22 @@ import { getSessionFromRequest } from '@/lib/session';
 
 export const dynamic = 'force-dynamic';
 
+async function ensureActivityLogsTable() {
+  await pool.query(`
+    CREATE TABLE IF NOT EXISTS activity_logs (
+      id INT AUTO_INCREMENT PRIMARY KEY,
+      module VARCHAR(100) NOT NULL,
+      submenu VARCHAR(100) NOT NULL,
+      table_name VARCHAR(100) NOT NULL,
+      record_id VARCHAR(100) NOT NULL,
+      action VARCHAR(50) NOT NULL,
+      user_name VARCHAR(255) NOT NULL DEFAULT 'Sistem',
+      details LONGTEXT,
+      timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+  `);
+}
+
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
   const tableName = searchParams.get('table_name');
@@ -16,6 +32,7 @@ export async function GET(request: NextRequest) {
   }
 
   try {
+    await ensureActivityLogsTable();
     let query = 'SELECT * FROM activity_logs WHERE record_id = ?';
     const params: any[] = [String(recordId)];
 
