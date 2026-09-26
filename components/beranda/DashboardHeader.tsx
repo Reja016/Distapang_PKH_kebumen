@@ -10,11 +10,7 @@ import {
   Maximize2,
   ArrowLeft,
   Clock,
-  Users,
-  Database,
   ExternalLink,
-  Sun,
-  Moon,
 } from 'lucide-react';
 import { SubmenuItem } from './types';
 
@@ -119,7 +115,7 @@ export default function DashboardHeader({
         </div>
       </div>
 
-      <div className="flex items-center gap-1 sm:gap-2 shrink-0">
+      <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
         {/* Pintasan Riwayat / Pusat Koreksi (Tampil di Desktop & Mobile untuk Admin) */}
         {isAdmin && (
           <Link
@@ -141,62 +137,18 @@ export default function DashboardHeader({
           </Link>
         )}
 
-        {/* Pintasan Khusus Mobile: Anggota, Backup DB, Portal Publik, Ganti Tema */}
-        <div className="flex md:hidden items-center gap-1">
-          {isAdmin && onOpenUserModal && (
-            <button
-              onClick={onOpenUserModal}
-              className={`p-1.5 rounded-lg border transition-colors cursor-pointer ${
-                isDark
-                  ? 'bg-slate-800/90 border-slate-700 text-emerald-400 hover:bg-slate-700'
-                  : 'bg-white border-slate-200 text-emerald-600 hover:bg-slate-50 shadow-2xs'
-              }`}
-              title="Kelola Akun & Hak Akses Anggota"
-            >
-              <Users size={15} />
-            </button>
-          )}
-
-          {isAdmin && onOpenBackupModal && (
-            <button
-              onClick={onOpenBackupModal}
-              className={`p-1.5 rounded-lg border transition-colors cursor-pointer ${
-                isDark
-                  ? 'bg-slate-800/90 border-slate-700 text-blue-400 hover:bg-slate-700'
-                  : 'bg-white border-slate-200 text-blue-600 hover:bg-slate-50 shadow-2xs'
-              }`}
-              title="Cadangkan Database MySQL"
-            >
-              <Database size={15} />
-            </button>
-          )}
-
-          <Link
-            href="/"
-            className={`p-1.5 rounded-lg border transition-colors ${
-              isDark
-                ? 'bg-slate-800/90 border-slate-700 text-slate-300 hover:bg-slate-700'
-                : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50 shadow-2xs'
-            }`}
-            title="Buka Portal Publik"
-          >
-            <ExternalLink size={15} />
-          </Link>
-
-          {toggleTheme && (
-            <button
-              onClick={toggleTheme}
-              className={`p-1.5 rounded-lg border transition-colors cursor-pointer ${
-                isDark
-                  ? 'bg-slate-800/90 border-slate-700 text-amber-300 hover:bg-slate-700'
-                  : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50 shadow-2xs'
-              }`}
-              title={isDark ? 'Tema Terang' : 'Tema Gelap'}
-            >
-              {isDark ? <Sun size={15} /> : <Moon size={15} />}
-            </button>
-          )}
-        </div>
+        {/* Pintasan Portal Publik Khusus Mobile */}
+        <Link
+          href="/"
+          className={`md:hidden p-1.5 rounded-lg border transition-colors ${
+            isDark
+              ? 'bg-slate-800/90 border-slate-700 text-slate-300 hover:bg-slate-700'
+              : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50 shadow-2xs'
+          }`}
+          title="Buka Portal Publik"
+        >
+          <ExternalLink size={15} />
+        </Link>
 
         {/* Separator jika ada kontrol iframe */}
         {activeSubmenu && (
@@ -218,12 +170,12 @@ export default function DashboardHeader({
               <RefreshCw size={14} className={isIframeLoading ? 'animate-spin' : ''} />
             </button>
 
-            {/* Buka di Tab Baru */}
+            {/* Buka di Tab Baru (Desktop only) */}
             <a
               href={activeSubmenu.href}
               target="_blank"
               rel="noreferrer"
-              className={`p-1.5 rounded-lg border transition-colors ${
+              className={`hidden sm:flex p-1.5 rounded-lg border transition-colors ${
                 isDark
                   ? 'bg-slate-800 border-slate-700 text-slate-300 hover:text-white'
                   : 'bg-slate-100 border-slate-200 text-slate-600 hover:text-slate-900'
@@ -236,7 +188,7 @@ export default function DashboardHeader({
             {/* Tombol Kembali ke Overview */}
             <button
               onClick={onBackToOverview}
-              className={`text-xs font-semibold px-2.5 py-1.5 rounded-lg border flex items-center gap-1 transition-colors cursor-pointer ${
+              className={`text-xs font-semibold px-2 sm:px-2.5 py-1.5 rounded-lg border flex items-center gap-1 transition-colors cursor-pointer ${
                 isDark
                   ? 'bg-slate-800 border-slate-700 text-slate-200 hover:bg-slate-700'
                   : 'bg-slate-100 border-slate-200 text-slate-700 hover:bg-slate-200'

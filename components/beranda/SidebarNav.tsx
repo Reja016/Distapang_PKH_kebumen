@@ -722,9 +722,9 @@ export default function SidebarNav({
               isDark ? 'border-slate-800 bg-slate-900' : 'border-slate-300 bg-slate-100'
             }`}
           >
-            {/* Admin Extras (Desktop only di sidebar, mobile sudah ada di header) */}
+            {/* Admin Extras (Tampil di Desktop & Mobile Drawer) */}
             {isAdmin && (
-              <div className="hidden md:block pb-0.5">
+              <div className="pb-0.5">
                 <div className="grid grid-cols-2 gap-1.5">
                   <button
                     onClick={onOpenUserModal}
@@ -755,7 +755,7 @@ export default function SidebarNav({
               </div>
             )}
 
-            {/* Portal Publik & Logout (Mobile: Hanya tombol Keluar yang besar dan bersih) */}
+            {/* Portal Publik & Logout */}
             <div className="flex items-center gap-2">
               <Link
                 href="/"
@@ -775,7 +775,7 @@ export default function SidebarNav({
                 title="Keluar dari Akun"
               >
                 <LogOut size={15} />
-                <span>Keluar dari Akun</span>
+                <span>Keluar</span>
               </button>
             </div>
           </div>
