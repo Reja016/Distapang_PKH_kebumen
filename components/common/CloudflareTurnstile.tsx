@@ -39,21 +39,32 @@ export const CloudflareTurnstile = forwardRef<CloudflareTurnstileRef, Cloudflare
     const containerRef = useRef<HTMLDivElement>(null);
     const widgetIdRef = useRef<string | null>(null);
 
-    const [siteKey, setSiteKey] = useState<string>(
-      process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY || DEFAULT_TEST_SITE_KEY
+    const [siteKey, setSiteKey] = useState<string | null>(
+      process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY || null
+    );
+    const [isLoadingKey, setIsLoadingKey] = useState<boolean>(
+      !process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY
     );
 
     // Ambil site key aktual secara dinamis dari API server runtime (.env di server)
     useEffect(() => {
       let isMounted = true;
-      fetch('/api/auth/turnstile-config')
-        .then((res) => res.json())
-        .then((data) => {
-          if (isMounted && data.siteKey) {
-            setSiteKey(data.siteKey);
-          }
-        })
-        .catch(() => {});
+      if (!process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY) {
+        fetch('/api/auth/turnstile-config')
+          .then((res) => res.json())
+          .then((data) => {
+            if (isMounted) {
+              setSiteKey(data.siteKey || DEFAULT_TEST_SITE_KEY);
+              setIsLoadingKey(false);
+            }
+          })
+          .catch(() => {
+            if (isMounted) {
+              setSiteKey(DEFAULT_TEST_SITE_KEY);
+              setIsLoadingKey(false);
+            }
+          });
+      }
 
       return () => {
         isMounted = false;
@@ -76,6 +87,9 @@ export const CloudflareTurnstile = forwardRef<CloudflareTurnstileRef, Cloudflare
     }));
 
     useEffect(() => {
+      // Jangan render sebelum siteKey valid tersedia agar tidak muncul flash test key
+      if (!siteKey) return;
+
       let isMounted = true;
 
       const renderWidget = () => {
@@ -142,8 +156,16 @@ export const CloudflareTurnstile = forwardRef<CloudflareTurnstileRef, Cloudflare
     }, [siteKey, theme, onChange]);
 
     return (
-      <div className={`flex justify-center my-2 ${className}`}>
-        <div ref={containerRef} />
+      <div className={`flex justify-center my-2 min-h-[65px] items-center ${className}`}>
+        {isLoadingKey && (
+          <div className="w-[300px] h-[65px] bg-slate-50 dark:bg-slate-800/60 rounded-lg border border-slate-200 dark:border-slate-700/60 flex items-center justify-center gap-2.5 animate-pulse shadow-sm">
+            <span className="w-3.5 h-3.5 border-2 border-emerald-600 border-t-transparent rounded-full animate-spin"></span>
+            <span className="text-xs text-slate-500 dark:text-slate-400 font-medium">
+              Memverifikasi keamanan...
+            </span>
+          </div>
+        )}
+        <div ref={containerRef} className={isLoadingKey ? 'hidden' : 'block'} />
       </div>
     );
   }
