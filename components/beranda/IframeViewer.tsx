@@ -30,7 +30,7 @@ const IframeViewer = forwardRef<HTMLIFrameElement, IframeViewerProps>(
           ref={ref}
           src={activeSubmenu.href}
           onLoad={onIframeLoad}
-          allow="geolocation; camera; microphone; clipboard-read; clipboard-write"
+          allow="geolocation *; camera *; microphone *; clipboard-read *; clipboard-write *"
           className={`w-full h-full border-0 flex-1 ${isDark ? 'bg-slate-950' : 'bg-white'}`}
           title={activeSubmenu.name}
         />

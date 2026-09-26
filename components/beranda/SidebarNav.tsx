@@ -207,7 +207,7 @@ export default function SidebarNav({
               }
             : undefined
         }
-        className={`fixed md:sticky top-0 left-0 z-50 h-screen flex flex-col shrink-0 border-r-2 ${
+        className={`fixed md:sticky top-0 left-0 z-50 h-[100dvh] max-h-[100dvh] md:h-screen flex flex-col shrink-0 border-r-2 ${
           isResizing ? '' : 'transition-all duration-300 ease-in-out'
         } ${
           isDark
@@ -363,7 +363,7 @@ export default function SidebarNav({
         )}
 
         {/* Navigation Menus (Scrollable secara internal, sidebar tetap sticky) */}
-        <div className="flex-1 overflow-y-auto px-2 md:px-3 py-3 space-y-2 custom-scrollbar">
+        <div className="flex-1 min-h-0 overflow-y-auto px-2 md:px-3 py-3 space-y-2 custom-scrollbar">
           {/* Tombol Beranda Utama (Overview) */}
           {isCollapsed ? (
             <button
@@ -733,7 +733,7 @@ export default function SidebarNav({
           </div>
         ) : (
           <div
-            className={`p-3 border-t-2 shrink-0 space-y-2 ${
+            className={`p-3 pb-5 md:pb-3 border-t-2 shrink-0 space-y-2 ${
               isDark ? 'border-slate-800 bg-slate-900' : 'border-slate-300 bg-slate-100'
             }`}
           >

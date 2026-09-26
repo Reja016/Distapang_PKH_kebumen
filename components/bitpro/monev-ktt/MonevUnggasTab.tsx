@@ -148,13 +148,14 @@ export function MonevUnggasTab({
     setIsGettingLocation(true);
 
     const getGpsErrorMessage = (err: GeolocationPositionError) => {
+      const sysDetail = err.message ? `\n[Info sistem: ${err.message}]` : '';
       switch (err.code) {
         case err.PERMISSION_DENIED:
-          return 'Izin akses lokasi ditolak oleh browser/perangkat. Silakan ketuk ikon gembok / setelan situs pada bilah alamat browser Anda dan ubah izin Lokasi menjadi "Izinkan / Allow".';
+          return `Izin akses lokasi ditolak oleh browser/perangkat.${sysDetail}\n\nSolusi cepat:\n1. Coba buka halaman ini langsung di tab baru: https://simantap.cloud/bitpro/monev-ktt\n2. Atau isi angka Latitude & Longitude secara manual di bawah.`;
         case err.POSITION_UNAVAILABLE:
-          return 'Sinyal lokasi tidak tersedia. Pastikan tombol Lokasi/GPS fisik pada bilah notifikasi HP Anda sudah AKTIF.';
+          return `Sinyal lokasi tidak tersedia.${sysDetail}\n\nPastikan tombol Lokasi/GPS fisik pada bilah notifikasi HP Anda sudah AKTIF.`;
         case err.TIMEOUT:
-          return 'Waktu pencarian GPS habis. Silakan klik tombol GPS sekali lagi, atau buka aplikasi Google Maps sebentar agar HP mengunci satelit GPS.';
+          return `Waktu pencarian GPS habis.${sysDetail}\n\nSilakan klik tombol GPS sekali lagi, atau buka aplikasi Google Maps sebentar agar HP mengunci satelit GPS.`;
         default:
           return `Gagal mendeteksi lokasi GPS: ${err.message || 'Kesalahan perangkat'}.`;
       }

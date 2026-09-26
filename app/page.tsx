@@ -130,12 +130,6 @@ export default function LandingPage() {
     loadPortalData();
   }, []);
 
-  // Cek sesi login
-  useEffect(() => {
-    const session = getAuthSession();
-    if (session) router.push('/beranda');
-  }, [router]);
-
   // Handler Login Petugas
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();

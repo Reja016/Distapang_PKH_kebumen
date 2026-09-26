@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   ArrowRight,
   Menu,
@@ -29,6 +29,12 @@ export default function LandingHeader({
   mobileMenuOpen,
   setMobileMenuOpen,
 }: LandingHeaderProps) {
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+
+  useEffect(() => {
+    setIsLoggedIn(Boolean(getAuthSession()));
+  }, []);
+
   const handleLoginClick = () => {
     const current = getAuthSession();
     if (current) {
@@ -95,10 +101,14 @@ export default function LandingHeader({
 
               <button
                 onClick={handleLoginClick}
-                className="h-9 sm:h-10 px-3 xs:px-3.5 sm:px-5 rounded-full bg-blue-600 text-white font-bold text-xs sm:text-sm flex items-center gap-1.5 sm:gap-2 shadow-xs hover:bg-blue-700 active:scale-[0.98] transition-all cursor-pointer shrink-0"
+                className={`h-9 sm:h-10 px-3 xs:px-3.5 sm:px-5 rounded-full text-white font-bold text-xs sm:text-sm flex items-center gap-1.5 sm:gap-2 shadow-xs active:scale-[0.98] transition-all cursor-pointer shrink-0 ${
+                  isLoggedIn
+                    ? 'bg-emerald-600 hover:bg-emerald-700'
+                    : 'bg-blue-600 hover:bg-blue-700'
+                }`}
               >
-                <span className="inline sm:hidden">Masuk</span>
-                <span className="hidden sm:inline">Masuk Petugas</span>
+                <span className="inline sm:hidden">{isLoggedIn ? 'Dashboard' : 'Masuk'}</span>
+                <span className="hidden sm:inline">{isLoggedIn ? 'Ke Dashboard' : 'Masuk Petugas'}</span>
                 <ArrowRight size={14} className="hidden xs:inline" />
               </button>
 
