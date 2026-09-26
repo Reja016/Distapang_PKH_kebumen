@@ -18,7 +18,6 @@ import {
   ShieldCheck,
   CheckCircle2,
   Truck,
-  Clock,
 } from 'lucide-react';
 import { ModuleNavGroup, SubmenuItem, MODULE_NAV_DATA } from './types';
 import { checkModuleAccess, checkSubmenuAccess } from '@/lib/auth';
@@ -39,6 +38,7 @@ interface SidebarNavProps {
   onOpenBackupModal: () => void;
   onLogout: () => void;
   toggleTheme: () => void;
+  pendingCount?: number;
 }
 
 export default function SidebarNav({
@@ -56,6 +56,7 @@ export default function SidebarNav({
   onOpenBackupModal,
   onLogout,
   toggleTheme,
+  pendingCount: propPendingCount,
 }: SidebarNavProps) {
   const [flyoutModule, setFlyoutModule] = useState<string | null>(null);
   const [expandedModules, setExpandedModules] = useState<Record<string, boolean>>({
@@ -80,11 +81,12 @@ export default function SidebarNav({
   const [sidebarWidth, setSidebarWidth] = useState<number>(DEFAULT_WIDTH);
   const [isResizing, setIsResizing] = useState(false);
   const [isDesktop, setIsDesktop] = useState(false);
-  const [pendingCount, setPendingCount] = useState<number>(0);
+  const [internalPendingCount, setInternalPendingCount] = useState<number>(0);
+  const pendingCount = propPendingCount !== undefined ? propPendingCount : internalPendingCount;
 
-  // Ambil jumlah request pending secara periodik untuk notifikasi admin
+  // Ambil jumlah request pending secara periodik untuk notifikasi admin (jika tidak diprovide dari parent)
   useEffect(() => {
-    if (!isAdmin) return;
+    if (!isAdmin || propPendingCount !== undefined) return;
 
     let isMounted = true;
     const fetchPendingCount = async () => {
@@ -93,7 +95,7 @@ export default function SidebarNav({
         if (res.ok) {
           const data = await res.json();
           if (isMounted && typeof data.count === 'number') {
-            setPendingCount(data.count);
+            setInternalPendingCount(data.count);
           }
         }
       } catch {
@@ -107,7 +109,7 @@ export default function SidebarNav({
       isMounted = false;
       clearInterval(interval);
     };
-  }, [isAdmin]);
+  }, [isAdmin, propPendingCount]);
 
   // Deteksi ukuran layar desktop
   useEffect(() => {
@@ -656,23 +658,6 @@ export default function SidebarNav({
           >
             {isAdmin && (
               <>
-                <Link
-                  href="/admin/pusat-koreksi"
-                  className={`relative w-10 h-10 rounded-xl border-2 flex items-center justify-center transition-colors cursor-pointer ${
-                    isDark
-                      ? 'bg-slate-800 border-slate-700 text-slate-300 hover:bg-slate-700'
-                      : 'bg-white border-slate-300 text-slate-700 hover:bg-slate-50 shadow-2xs'
-                  }`}
-                  title="Riwayat"
-                >
-                  <Clock size={16} />
-                  {pendingCount > 0 && (
-                    <span className="absolute -top-1.5 -right-1.5 min-w-[18px] h-[18px] px-1 rounded-full text-[10px] font-black bg-red-500 text-white flex items-center justify-center ring-2 ring-slate-100 dark:ring-slate-900 shadow-xs">
-                      {pendingCount > 99 ? '99+' : pendingCount}
-                    </span>
-                  )}
-                </Link>
-
                 <button
                   onClick={onOpenUserModal}
                   className={`w-10 h-10 rounded-xl border-2 flex items-center justify-center transition-colors cursor-pointer ${
@@ -737,29 +722,9 @@ export default function SidebarNav({
               isDark ? 'border-slate-800 bg-slate-900' : 'border-slate-300 bg-slate-100'
             }`}
           >
-            {/* Admin Extras */}
+            {/* Admin Extras (Desktop only di sidebar, mobile sudah ada di header) */}
             {isAdmin && (
-              <div className="space-y-1.5 pb-0.5">
-                <Link
-                  href="/admin/pusat-koreksi"
-                  className={`w-full py-2 px-2.5 rounded-xl border-2 text-[11px] font-bold flex items-center justify-between gap-1.5 transition-colors cursor-pointer ${
-                    isDark
-                      ? 'bg-slate-800 border-slate-700 text-slate-200 hover:bg-slate-700'
-                      : 'bg-white border-slate-300 text-slate-800 hover:bg-slate-50 shadow-2xs'
-                  }`}
-                  title="Riwayat"
-                >
-                  <div className="flex items-center gap-1.5 min-w-0">
-                    <Clock size={14} className="text-slate-500 shrink-0" />
-                    <span className="truncate">Riwayat</span>
-                  </div>
-                  {pendingCount > 0 && (
-                    <span className="px-1.5 py-0.5 rounded-full text-[10px] font-black bg-red-500 text-white min-w-5 h-5 flex items-center justify-center shadow-xs">
-                      {pendingCount > 99 ? '99+' : pendingCount}
-                    </span>
-                  )}
-                </Link>
-
+              <div className="hidden md:block pb-0.5">
                 <div className="grid grid-cols-2 gap-1.5">
                   <button
                     onClick={onOpenUserModal}
@@ -790,11 +755,11 @@ export default function SidebarNav({
               </div>
             )}
 
-            {/* Portal Publik & Logout */}
+            {/* Portal Publik & Logout (Mobile: Hanya tombol Keluar yang besar dan bersih) */}
             <div className="flex items-center gap-2">
               <Link
                 href="/"
-                className="flex-1 py-2 px-3 rounded-xl border-2 border-emerald-700 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold flex items-center justify-center gap-1.5 transition-all shadow-xs"
+                className="hidden md:flex flex-1 py-2 px-3 rounded-xl border-2 border-emerald-700 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold items-center justify-center gap-1.5 transition-all shadow-xs"
               >
                 <ExternalLink size={14} />
                 <span>Portal Publik</span>
@@ -802,15 +767,15 @@ export default function SidebarNav({
 
               <button
                 onClick={onLogout}
-                className={`py-2 px-3 rounded-xl border-2 text-xs font-bold flex items-center justify-center gap-1.5 transition-colors cursor-pointer ${
+                className={`w-full md:w-auto flex-1 md:flex-initial py-2.5 md:py-2 px-3 rounded-xl border-2 text-xs font-bold flex items-center justify-center gap-2 transition-colors cursor-pointer ${
                   isDark
                     ? 'bg-red-950/40 border-red-800 text-red-300 hover:bg-red-900/60'
                     : 'bg-red-50 border-red-300 text-red-700 hover:bg-red-100 shadow-2xs'
                 }`}
                 title="Keluar dari Akun"
               >
-                <LogOut size={14} />
-                <span>Keluar</span>
+                <LogOut size={15} />
+                <span>Keluar dari Akun</span>
               </button>
             </div>
           </div>

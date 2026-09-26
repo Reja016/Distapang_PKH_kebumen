@@ -1,6 +1,7 @@
 'use client';
 
 import React from 'react';
+import Link from 'next/link';
 import {
   Menu,
   PanelLeftOpen,
@@ -8,6 +9,12 @@ import {
   RefreshCw,
   Maximize2,
   ArrowLeft,
+  Clock,
+  Users,
+  Database,
+  ExternalLink,
+  Sun,
+  Moon,
 } from 'lucide-react';
 import { SubmenuItem } from './types';
 
@@ -21,6 +28,11 @@ interface DashboardHeaderProps {
   onRefreshIframe: () => void;
   isIframeLoading: boolean;
   currentDateStr: string;
+  isAdmin?: boolean;
+  pendingCount?: number;
+  onOpenUserModal?: () => void;
+  onOpenBackupModal?: () => void;
+  toggleTheme?: () => void;
 }
 
 export default function DashboardHeader({
@@ -33,6 +45,11 @@ export default function DashboardHeader({
   onRefreshIframe,
   isIframeLoading,
   currentDateStr,
+  isAdmin,
+  pendingCount,
+  onOpenUserModal,
+  onOpenBackupModal,
+  toggleTheme,
 }: DashboardHeaderProps) {
   return (
     <header
@@ -102,7 +119,90 @@ export default function DashboardHeader({
         </div>
       </div>
 
-      <div className="flex items-center gap-2">
+      <div className="flex items-center gap-1 sm:gap-2 shrink-0">
+        {/* Pintasan Riwayat / Pusat Koreksi (Tampil di Desktop & Mobile untuk Admin) */}
+        {isAdmin && (
+          <Link
+            href="/admin/pusat-koreksi"
+            className={`relative p-1.5 sm:px-2.5 sm:py-1.5 rounded-lg border text-xs font-bold flex items-center gap-1.5 transition-colors cursor-pointer ${
+              isDark
+                ? 'bg-slate-800/90 border-slate-700 text-slate-200 hover:bg-slate-700 hover:text-white'
+                : 'bg-white border-slate-200 text-slate-700 hover:bg-slate-50 hover:text-slate-900 shadow-2xs'
+            }`}
+            title="Pusat Koreksi & Riwayat"
+          >
+            <Clock size={15} className="text-slate-500 shrink-0" />
+            <span className="hidden sm:inline">Riwayat</span>
+            {typeof pendingCount === 'number' && pendingCount > 0 && (
+              <span className="px-1.5 py-0.5 rounded-full text-[10px] font-black bg-red-500 text-white min-w-4 h-4 flex items-center justify-center shadow-xs">
+                {pendingCount > 99 ? '99+' : pendingCount}
+              </span>
+            )}
+          </Link>
+        )}
+
+        {/* Pintasan Khusus Mobile: Anggota, Backup DB, Portal Publik, Ganti Tema */}
+        <div className="flex md:hidden items-center gap-1">
+          {isAdmin && onOpenUserModal && (
+            <button
+              onClick={onOpenUserModal}
+              className={`p-1.5 rounded-lg border transition-colors cursor-pointer ${
+                isDark
+                  ? 'bg-slate-800/90 border-slate-700 text-emerald-400 hover:bg-slate-700'
+                  : 'bg-white border-slate-200 text-emerald-600 hover:bg-slate-50 shadow-2xs'
+              }`}
+              title="Kelola Akun & Hak Akses Anggota"
+            >
+              <Users size={15} />
+            </button>
+          )}
+
+          {isAdmin && onOpenBackupModal && (
+            <button
+              onClick={onOpenBackupModal}
+              className={`p-1.5 rounded-lg border transition-colors cursor-pointer ${
+                isDark
+                  ? 'bg-slate-800/90 border-slate-700 text-blue-400 hover:bg-slate-700'
+                  : 'bg-white border-slate-200 text-blue-600 hover:bg-slate-50 shadow-2xs'
+              }`}
+              title="Cadangkan Database MySQL"
+            >
+              <Database size={15} />
+            </button>
+          )}
+
+          <Link
+            href="/"
+            className={`p-1.5 rounded-lg border transition-colors ${
+              isDark
+                ? 'bg-slate-800/90 border-slate-700 text-slate-300 hover:bg-slate-700'
+                : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50 shadow-2xs'
+            }`}
+            title="Buka Portal Publik"
+          >
+            <ExternalLink size={15} />
+          </Link>
+
+          {toggleTheme && (
+            <button
+              onClick={toggleTheme}
+              className={`p-1.5 rounded-lg border transition-colors cursor-pointer ${
+                isDark
+                  ? 'bg-slate-800/90 border-slate-700 text-amber-300 hover:bg-slate-700'
+                  : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50 shadow-2xs'
+              }`}
+              title={isDark ? 'Tema Terang' : 'Tema Gelap'}
+            >
+              {isDark ? <Sun size={15} /> : <Moon size={15} />}
+            </button>
+          )}
+        </div>
+
+        {/* Separator jika ada kontrol iframe */}
+        {activeSubmenu && (
+          <div className="h-4 w-px bg-slate-200 dark:bg-slate-700 mx-0.5" />
+        )}
+
         {activeSubmenu && (
           <>
             {/* Refresh View Iframe */}

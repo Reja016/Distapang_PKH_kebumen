@@ -27,9 +27,37 @@ export default function BerandaPage() {
   const [userDisplay, setUserDisplay] = useState('');
   const [userRole, setUserRole] = useState('Petugas Teknis');
   const [isAdmin, setIsAdmin] = useState(false);
+  const [pendingCount, setPendingCount] = useState<number>(0);
   const [showUserModal, setShowUserModal] = useState(false);
   const [showBackupModal, setShowBackupModal] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+
+  // Ambil jumlah permohonan koreksi pending secara periodik untuk notifikasi admin
+  useEffect(() => {
+    if (!isAdmin) return;
+
+    let isMounted = true;
+    const fetchPendingCount = async () => {
+      try {
+        const res = await fetch('/api/correction-requests?status=PENDING&countOnly=true');
+        if (res.ok) {
+          const data = await res.json();
+          if (isMounted && typeof data.count === 'number') {
+            setPendingCount(data.count);
+          }
+        }
+      } catch {
+        // Abaikan error jaringan saat polling di background
+      }
+    };
+
+    fetchPendingCount();
+    const interval = setInterval(fetchPendingCount, 20000);
+    return () => {
+      isMounted = false;
+      clearInterval(interval);
+    };
+  }, [isAdmin]);
 
   // Theme state
   const [isDark, setIsDark] = useState(false);
@@ -315,6 +343,7 @@ export default function BerandaPage() {
         onOpenBackupModal={() => setShowBackupModal(true)}
         onLogout={handleLogout}
         toggleTheme={toggleTheme}
+        pendingCount={pendingCount}
       />
 
       {/* ── AREA KONTEN UTAMA (KANAN) ── */}
@@ -330,6 +359,11 @@ export default function BerandaPage() {
           onRefreshIframe={handleRefreshIframe}
           isIframeLoading={isIframeLoading}
           currentDateStr={currentDateStr}
+          isAdmin={isAdmin}
+          pendingCount={pendingCount}
+          onOpenUserModal={() => setShowUserModal(true)}
+          onOpenBackupModal={() => setShowBackupModal(true)}
+          toggleTheme={toggleTheme}
         />
 
         {/* Dynamic Content: Iframe Viewer vs Overview */}
