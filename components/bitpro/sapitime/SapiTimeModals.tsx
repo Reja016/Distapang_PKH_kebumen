@@ -1,8 +1,9 @@
 'use client';
 
-import React from 'react';
-import { Sparkles, Syringe } from 'lucide-react';
+import React, { useEffect } from 'react';
+import { Sparkles, Syringe, MapPin } from 'lucide-react';
 import { Cattle, KECAMATAN_LIST, getDesaListForKecamatan } from './types';
+import { useUserAreaRestriction } from '@/hooks/useUserAreaRestriction';
 
 interface ModalEstrusInfoProps {
   showEstrusModal: boolean;
@@ -68,9 +69,19 @@ export function ModalCattleForm({
   setFormData,
   onSubmit,
 }: ModalCattleFormProps) {
-  if (!isOpen) return null;
+  const { isAdmin, filterKecamatanList, allowedKecamatan } = useUserAreaRestriction();
+  const availableKecamatanList = filterKecamatanList(KECAMATAN_LIST);
 
-  const desaList = getDesaListForKecamatan(formData.kecamatan);
+  const desaList = getDesaListForKecamatan(formData?.kecamatan);
+
+  // Auto-set jika petugas hanya memiliki 1 wilayah kerja dan belum memilih
+  useEffect(() => {
+    if (isOpen && !isAdmin && availableKecamatanList.length === 1 && !formData?.kecamatan) {
+      setFormData((prev: any) => ({ ...prev, kecamatan: availableKecamatanList[0] }));
+    }
+  }, [isOpen, isAdmin, availableKecamatanList, formData?.kecamatan, setFormData]);
+
+  if (!isOpen) return null;
 
   return (
     <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center z-50 p-4 animate-in fade-in duration-200">
@@ -86,6 +97,15 @@ export function ModalCattleForm({
             &times;
           </button>
         </div>
+
+        {!isAdmin && allowedKecamatan.length > 0 && (
+          <div className="mb-4 p-3 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-medium flex items-center gap-2">
+            <MapPin size={16} className="text-emerald-600 shrink-0" />
+            <span>
+              Wilayah Wewenang Anda: <strong>{allowedKecamatan.join(', ')}</strong>
+            </span>
+          </div>
+        )}
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
@@ -116,7 +136,7 @@ export function ModalCattleForm({
               onChange={(e) => setFormData({ ...formData, kecamatan: e.target.value, desa: '' })}
             >
               <option value="">-- Pilih Kecamatan --</option>
-              {KECAMATAN_LIST.map((kec) => (
+              {availableKecamatanList.map((kec) => (
                 <option key={kec} value={kec}>
                   {kec}
                 </option>
@@ -237,9 +257,19 @@ export function ModalCatatIB({
   setIbFormData,
   handleAddInsemination,
 }: ModalCatatIBProps) {
-  if (!showIBModal || !selectedCattleForIB) return null;
+  const { isAdmin, filterKecamatanList, allowedKecamatan } = useUserAreaRestriction();
+  const availableIbKecamatanList = filterKecamatanList(KECAMATAN_LIST);
 
-  const ibDesaList = getDesaListForKecamatan(ibFormData.kecamatan);
+  const ibDesaList = getDesaListForKecamatan(ibFormData?.kecamatan);
+
+  // Auto-set jika petugas hanya memiliki 1 wilayah kerja dan belum memilih
+  useEffect(() => {
+    if (showIBModal && selectedCattleForIB && !isAdmin && availableIbKecamatanList.length === 1 && !ibFormData?.kecamatan) {
+      setIbFormData((prev: any) => ({ ...prev, kecamatan: availableIbKecamatanList[0] }));
+    }
+  }, [showIBModal, selectedCattleForIB, isAdmin, availableIbKecamatanList, ibFormData?.kecamatan, setIbFormData]);
+
+  if (!showIBModal || !selectedCattleForIB) return null;
 
   return (
     <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center z-50 p-4 animate-in fade-in duration-200">
@@ -256,6 +286,15 @@ export function ModalCatatIB({
             &times;
           </button>
         </div>
+
+        {!isAdmin && allowedKecamatan.length > 0 && (
+          <div className="mb-4 p-3 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-medium flex items-center gap-2">
+            <MapPin size={16} className="text-emerald-600 shrink-0" />
+            <span>
+              Wilayah Wewenang Anda: <strong>{allowedKecamatan.join(', ')}</strong>
+            </span>
+          </div>
+        )}
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
@@ -284,7 +323,7 @@ export function ModalCatatIB({
               onChange={(e) => setIbFormData({ ...ibFormData, kecamatan: e.target.value, desa: '' })}
             >
               <option value="">-- Pilih Kecamatan --</option>
-              {KECAMATAN_LIST.map((kec) => (
+              {availableIbKecamatanList.map((kec) => (
                 <option key={kec} value={kec}>
                   {kec}
                 </option>

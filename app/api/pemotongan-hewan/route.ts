@@ -1,5 +1,7 @@
 import { NextResponse } from 'next/server';
 import { pool } from '@/lib/db';
+import { getSessionFromRequest } from '@/lib/session';
+import { logActivity } from '@/lib/auditLog';
 
 export const dynamic = 'force-dynamic';
 
@@ -16,6 +18,9 @@ export async function GET() {
 // FUNGSI POST: Menambah data baru
 export async function POST(request: Request) {
   try {
+    const session = await getSessionFromRequest(request as any);
+    const userName = session ? (session.nama || session.nip_username) : 'Sistem';
+
     const body = await request.json();
     const {
       nama_usaha,
@@ -54,6 +59,16 @@ export async function POST(request: Request) {
       ]
     );
 
+    await logActivity({
+      module: 'kesmavet',
+      submenu: 'rph-tph-tpu',
+      tableName: 'pemotongan_hewan',
+      recordId: result.insertId,
+      action: 'CREATE',
+      userName,
+      details: body,
+    });
+
     return NextResponse.json({ success: true, insertId: result.insertId, message: 'Data RPH/TPH berhasil ditambahkan ke database!' });
   } catch (error: any) {
     return NextResponse.json({ success: false, error: error.message }, { status: 500 });
@@ -63,6 +78,9 @@ export async function POST(request: Request) {
 // FUNGSI PUT: Edit data
 export async function PUT(request: Request) {
   try {
+    const session = await getSessionFromRequest(request as any);
+    const userName = session ? (session.nama || session.nip_username) : 'Sistem';
+
     const body = await request.json();
     const {
       id,
@@ -103,6 +121,16 @@ export async function PUT(request: Request) {
       ]
     );
 
+    await logActivity({
+      module: 'kesmavet',
+      submenu: 'rph-tph-tpu',
+      tableName: 'pemotongan_hewan',
+      recordId: id,
+      action: 'UPDATE',
+      userName,
+      details: body,
+    });
+
     return NextResponse.json({ success: true, message: 'Data RPH/TPH berhasil diperbarui di database!' });
   } catch (error: any) {
     return NextResponse.json({ success: false, error: error.message }, { status: 500 });
@@ -112,6 +140,9 @@ export async function PUT(request: Request) {
 // FUNGSI DELETE: Hapus data
 export async function DELETE(request: Request) {
   try {
+    const session = await getSessionFromRequest(request as any);
+    const userName = session ? (session.nama || session.nip_username) : 'Sistem';
+
     const { searchParams } = new URL(request.url);
     const id = searchParams.get('id');
 
@@ -120,6 +151,17 @@ export async function DELETE(request: Request) {
     }
 
     await pool.query('DELETE FROM pemotongan_hewan WHERE id = ?', [id]);
+
+    await logActivity({
+      module: 'kesmavet',
+      submenu: 'rph-tph-tpu',
+      tableName: 'pemotongan_hewan',
+      recordId: id,
+      action: 'DELETE',
+      userName,
+      details: { id },
+    });
+
     return NextResponse.json({ success: true, message: 'Data RPH/TPH berhasil dihapus dari database!' });
   } catch (error: any) {
     return NextResponse.json({ success: false, error: error.message }, { status: 500 });

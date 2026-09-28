@@ -18,6 +18,16 @@ export async function PUT(
     const body = await req.json();
     const { tahun, kecamatan_id, kecamatan_nama, puskeswan_id, diagnosa_nama, kategori_penyakit, jumlah_kasus, keterangan } = body;
 
+    // Validasi Pembatasan Wilayah Kerja Petugas (Role-Based Area Restriction)
+    if (kecamatan_nama || kecamatan_id || puskeswan_id) {
+      const { validateAreaAccess } = await import('@/lib/areaRestriction');
+      const targetKec = kecamatan_nama || kecamatan_id;
+      const areaCheck = await validateAreaAccess(req, targetKec, puskeswan_id);
+      if (!areaCheck.allowed && areaCheck.errorResponse) {
+        return areaCheck.errorResponse;
+      }
+    }
+
     await pool.query(
       `UPDATE keswan_laporan_penyakit SET
         tahun = COALESCE(?, tahun),

@@ -1,6 +1,7 @@
 import React from 'react';
 import { Calendar, Plus } from 'lucide-react';
 import { Bulanan, BULAN_LABEL, BULAN_LONG, daysInMonth } from './types';
+import { useUserAreaRestriction } from '@/hooks/useUserAreaRestriction';
 
 interface VaksinasiHarianTabProps {
   selectedYear: number;
@@ -51,6 +52,8 @@ export default function VaksinasiHarianTab({
   fetchAll,
   onShowHistory,
 }: VaksinasiHarianTabProps) {
+  const { isAdmin, isPuskeswanAllowed } = useUserAreaRestriction();
+
   return (
     <div className="space-y-6 animate-in fade-in duration-200">
       {/* Control Bar: Selector Tahun & Tambah Tahun (Centered) */}
@@ -89,8 +92,9 @@ export default function VaksinasiHarianTab({
 
             <button
               onClick={() => {
+                const allowedList = isAdmin ? bulanan : bulanan.filter(b => isPuskeswanAllowed(b.puskeswan));
                 setFormHarianManual({
-                  puskeswan: bulanan[0]?.puskeswan || 'MIRIT',
+                  puskeswan: allowedList[0]?.puskeswan || bulanan[0]?.puskeswan || 'MIRIT',
                   tanggal: `${selectedYear}-${String(activeMonth).padStart(2, '0')}-01`,
                   jumlah: 0,
                 });
@@ -195,15 +199,23 @@ export default function VaksinasiHarianTab({
                         );
                       }
 
+                      const isAllowed = isAdmin || isPuskeswanAllowed(row.puskeswan);
+
                       return (
                         <td
                           key={d}
-                          onClick={() => startEditHarian(row.puskeswan, dateStr)}
-                          title={`Klik untuk ubah dosis ${row.puskeswan} tgl ${d}`}
-                          className={`p-1.5 text-center font-sans border-r-2 border-slate-400 cursor-pointer select-none transition-all ${
-                            val && val > 0
-                              ? 'bg-blue-100 text-blue-950 font-black hover:bg-blue-200'
-                              : 'bg-white hover:bg-blue-100/60 text-slate-400 hover:text-blue-900 font-bold'
+                          onClick={() => {
+                            if (!isAllowed) {
+                              alert(`Akses Ditolak: Anda tidak memiliki wewenang untuk mengisi/mengubah data ${row.puskeswan}`);
+                              return;
+                            }
+                            startEditHarian(row.puskeswan, dateStr);
+                          }}
+                          title={!isAllowed ? `Wilayah ${row.puskeswan} di luar wewenang tugas Anda` : `Klik untuk ubah dosis ${row.puskeswan} tgl ${d}`}
+                          className={`p-1.5 text-center font-sans border-r-2 border-slate-400 select-none transition-all ${
+                            !isAllowed
+                              ? 'bg-slate-100/80 text-slate-300 cursor-not-allowed'
+                              : 'cursor-pointer ' + (val && val > 0 ? 'bg-blue-100 text-blue-950 font-black hover:bg-blue-200' : 'bg-white hover:bg-blue-100/60 text-slate-400 hover:text-blue-900 font-bold')
                           }`}
                         >
                           {val && val > 0 ? (

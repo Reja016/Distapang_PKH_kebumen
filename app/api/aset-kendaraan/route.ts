@@ -1,5 +1,7 @@
 import { NextResponse } from 'next/server';
 import { pool } from '@/lib/db';
+import { getSessionFromRequest } from '@/lib/session';
+import { logActivity } from '@/lib/auditLog';
 
 // GET: Ambil semua data kendaraan dari database
 export async function GET() {
@@ -16,6 +18,9 @@ export async function GET() {
 // POST: Tambah kendaraan baru
 export async function POST(request: Request) {
   try {
+    const session = await getSessionFromRequest(request as any);
+    const userName = session ? (session.nama || session.nip_username) : 'Sistem';
+
     const body = await request.json();
     const { nama_pemegang, merk_type, tahun, nopol_lama, nopol_baru, nomor_mesin, nomor_rangka, keterangan } = body;
 
@@ -29,6 +34,16 @@ export async function POST(request: Request) {
       [nama_pemegang, merk_type, tahun || null, nopol_lama || null, nopol_baru, nomor_mesin || '', nomor_rangka || '']
     );
 
+    await logActivity({
+      module: 'aset',
+      submenu: 'inventaris-kendaraan',
+      tableName: 'aset_kendaraan',
+      recordId: result.insertId,
+      action: 'CREATE',
+      userName,
+      details: body,
+    });
+
     return NextResponse.json({ success: true, insertId: result.insertId, message: 'Data kendaraan berhasil ditambahkan!' });
   } catch (error: any) {
     return NextResponse.json({ success: false, error: error.message }, { status: 500 });
@@ -38,6 +53,9 @@ export async function POST(request: Request) {
 // PUT: Edit data kendaraan
 export async function PUT(request: Request) {
   try {
+    const session = await getSessionFromRequest(request as any);
+    const userName = session ? (session.nama || session.nip_username) : 'Sistem';
+
     const body = await request.json();
     const { id_aset, nama_pemegang, merk_type, tahun, nopol_lama, nopol_baru, nomor_mesin, nomor_rangka, keterangan } = body;
 
@@ -51,6 +69,16 @@ export async function PUT(request: Request) {
       [nama_pemegang, merk_type, tahun || null, nopol_lama || null, nopol_baru, nomor_mesin || '', nomor_rangka || '', id_aset]
     );
 
+    await logActivity({
+      module: 'aset',
+      submenu: 'inventaris-kendaraan',
+      tableName: 'aset_kendaraan',
+      recordId: id_aset,
+      action: 'UPDATE',
+      userName,
+      details: body,
+    });
+
     return NextResponse.json({ success: true, message: 'Data kendaraan berhasil diperbarui!' });
   } catch (error: any) {
     return NextResponse.json({ success: false, error: error.message }, { status: 500 });
@@ -60,6 +88,9 @@ export async function PUT(request: Request) {
 // DELETE: Hapus data kendaraan
 export async function DELETE(request: Request) {
   try {
+    const session = await getSessionFromRequest(request as any);
+    const userName = session ? (session.nama || session.nip_username) : 'Sistem';
+
     const { searchParams } = new URL(request.url);
     const id = searchParams.get('id');
 
@@ -68,6 +99,17 @@ export async function DELETE(request: Request) {
     }
 
     await pool.execute('DELETE FROM aset_kendaraan WHERE id_aset = ?', [id]);
+
+    await logActivity({
+      module: 'aset',
+      submenu: 'inventaris-kendaraan',
+      tableName: 'aset_kendaraan',
+      recordId: id,
+      action: 'DELETE',
+      userName,
+      details: { id_aset: id },
+    });
+
     return NextResponse.json({ success: true, message: 'Data kendaraan berhasil dihapus!' });
   } catch (error: any) {
     return NextResponse.json({ success: false, error: error.message }, { status: 500 });

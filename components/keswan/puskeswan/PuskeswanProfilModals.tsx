@@ -21,6 +21,7 @@ import {
 } from 'lucide-react';
 import { PuskeswanProfil, DEFAULT_JADWAL_HARIAN } from '@/lib/puskeswanData';
 import { ProfilFormData } from './types';
+import { useUserAreaRestriction } from '@/hooks/useUserAreaRestriction';
 
 interface PuskeswanProfilDetailModalProps {
   selectedProfil: PuskeswanProfil | null;
@@ -45,7 +46,10 @@ export function PuskeswanProfilDetailModal({
   onEditProfil,
   onDeleteProfil,
 }: PuskeswanProfilDetailModalProps) {
+  const { isAdmin, isPuskeswanAllowed } = useUserAreaRestriction();
   if (!selectedProfil) return null;
+
+  const isAllowed = isAdmin || isPuskeswanAllowed(selectedProfil.nama) || isPuskeswanAllowed(selectedProfil.kode);
 
   const photos =
     selectedProfil.galeri_foto && selectedProfil.galeri_foto.length > 0
@@ -101,7 +105,7 @@ export function PuskeswanProfilDetailModal({
               <h3 className="text-xl sm:text-2xl font-black tracking-tight">{selectedProfil.nama}</h3>
             </div>
 
-            {canEdit && (
+            {canEdit && isAllowed && (
               <button
                 onClick={() => {
                   const p = selectedProfil;
@@ -288,7 +292,7 @@ export function PuskeswanProfilDetailModal({
 
         {/* Modal Footer */}
         <div className="flex items-center justify-between p-5 border-t border-slate-100 bg-slate-50 shrink-0">
-          {canEdit ? (
+          {canEdit && isAllowed ? (
             <div className="flex items-center gap-2">
               <button
                 onClick={() => {
@@ -301,13 +305,15 @@ export function PuskeswanProfilDetailModal({
                 <Edit2 size={14} />
                 <span>Edit Profil &amp; Foto</span>
               </button>
-              <button
-                onClick={() => onDeleteProfil(selectedProfil.id, selectedProfil.nama)}
-                className="min-h-touch h-10 px-4 rounded-xl bg-red-50 hover:bg-red-100 text-red-600 text-xs font-bold flex items-center gap-1.5 transition-colors cursor-pointer"
-              >
-                <Trash2 size={14} />
-                <span>Hapus</span>
-              </button>
+              {isAdmin && (
+                <button
+                  onClick={() => onDeleteProfil(selectedProfil.id, selectedProfil.nama)}
+                  className="min-h-touch h-10 px-4 rounded-xl bg-red-50 hover:bg-red-100 text-red-600 text-xs font-bold flex items-center gap-1.5 transition-colors cursor-pointer"
+                >
+                  <Trash2 size={14} />
+                  <span>Hapus</span>
+                </button>
+              )}
             </div>
           ) : (
             <div />

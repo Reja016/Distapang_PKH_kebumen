@@ -686,34 +686,34 @@ export default function SidebarNav({
 
             <Link
               href="/"
-              className="w-10 h-10 rounded-xl border-2 border-emerald-700 bg-emerald-600 hover:bg-emerald-700 text-white flex items-center justify-center transition-colors shadow-xs"
+              className="w-10 h-10 rounded-xl border-2 border-emerald-700 bg-emerald-600 hover:bg-emerald-700 text-white flex items-center justify-center transition-colors shadow-xs shrink-0"
               title="Buka Portal Publik"
             >
-              <ExternalLink size={16} />
+              <ExternalLink size={16} className="shrink-0" />
             </Link>
 
             <button
               onClick={toggleTheme}
-              className={`w-10 h-10 rounded-xl border-2 flex items-center justify-center transition-colors cursor-pointer ${
+              className={`w-10 h-10 rounded-xl border-2 flex items-center justify-center transition-colors cursor-pointer shrink-0 ${
                 isDark
                   ? 'bg-slate-800 border-slate-700 text-amber-300 hover:bg-slate-700'
                   : 'bg-white border-slate-300 text-slate-600 hover:bg-slate-50 shadow-2xs'
               }`}
               title={isDark ? 'Tema Terang' : 'Tema Gelap'}
             >
-              {isDark ? <Sun size={16} /> : <Moon size={16} />}
+              {isDark ? <Sun size={16} className="shrink-0" /> : <Moon size={16} className="shrink-0" />}
             </button>
 
             <button
               onClick={onLogout}
-              className={`w-10 h-10 rounded-xl border-2 flex items-center justify-center transition-colors cursor-pointer ${
+              className={`w-10 h-10 rounded-xl border-2 flex items-center justify-center transition-colors cursor-pointer shrink-0 ${
                 isDark
                   ? 'bg-red-950/40 border-red-800 text-red-300 hover:bg-red-900/60'
                   : 'bg-red-50 border-red-300 text-red-700 hover:bg-red-100 shadow-2xs'
               }`}
               title="Keluar dari Akun"
             >
-              <LogOut size={16} />
+              <LogOut size={16} className="shrink-0" />
             </button>
           </div>
         ) : (
@@ -756,25 +756,25 @@ export default function SidebarNav({
             )}
 
             {/* Portal Publik & Logout */}
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 min-w-0">
               <Link
                 href="/"
-                className="hidden md:flex flex-1 py-2 px-3 rounded-xl border-2 border-emerald-700 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold items-center justify-center gap-1.5 transition-all shadow-xs"
+                className="hidden md:flex flex-1 min-w-0 py-2 px-3 rounded-xl border-2 border-emerald-700 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold items-center justify-center gap-1.5 transition-all shadow-xs"
               >
-                <ExternalLink size={14} />
-                <span>Portal Publik</span>
+                <ExternalLink size={14} className="shrink-0" />
+                <span className="truncate">Portal Publik</span>
               </Link>
 
               <button
                 onClick={onLogout}
-                className={`w-full md:w-auto flex-1 md:flex-initial py-2.5 md:py-2 px-3 rounded-xl border-2 text-xs font-bold flex items-center justify-center gap-2 transition-colors cursor-pointer ${
+                className={`w-full md:w-auto flex-1 md:flex-initial py-2.5 md:py-2 px-3 rounded-xl border-2 text-xs font-bold flex items-center justify-center gap-2 transition-colors cursor-pointer shrink-0 ${
                   isDark
                     ? 'bg-red-950/40 border-red-800 text-red-300 hover:bg-red-900/60'
                     : 'bg-red-50 border-red-300 text-red-700 hover:bg-red-100 shadow-2xs'
                 }`}
                 title="Keluar dari Akun"
               >
-                <LogOut size={15} />
+                <LogOut size={15} className="shrink-0" />
                 <span>Keluar</span>
               </button>
             </div>

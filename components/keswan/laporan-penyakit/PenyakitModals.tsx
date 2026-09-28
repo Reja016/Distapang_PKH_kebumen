@@ -1,7 +1,8 @@
-import React from 'react';
-import { X, Loader2, CheckCircle2, Plus } from 'lucide-react';
+import React, { useEffect } from 'react';
+import { X, Loader2, CheckCircle2, Plus, MapPin } from 'lucide-react';
 import { KECAMATAN_MAP_ITEMS, DIAGNOSA_LIST, getZoneByKecamatanId } from '@/lib/penyakitData';
 import { PenyakitFormValues } from './types';
+import { useUserAreaRestriction } from '@/hooks/useUserAreaRestriction';
 
 interface PenyakitModalsProps {
   showAddModal: boolean;
@@ -37,6 +38,26 @@ export default function PenyakitModals({
   handleAddYearSubmit,
   isAddingYear,
 }: PenyakitModalsProps) {
+  const { isAdmin, filterKecamatanList, allowedKecamatan } = useUserAreaRestriction();
+  const availableKecamatanItems = filterKecamatanList(KECAMATAN_MAP_ITEMS);
+
+  // Auto-set kecamatan jika pilihan saat ini tidak ada di daftar wewenang petugas
+  useEffect(() => {
+    if (!isAdmin && availableKecamatanItems.length > 0) {
+      const isCurrentAllowed = availableKecamatanItems.some((k) => k.id === formValues.kecamatan_id);
+      if (!isCurrentAllowed && availableKecamatanItems[0]) {
+        const first = availableKecamatanItems[0];
+        const zone = getZoneByKecamatanId(first.id);
+        setFormValues((prev) => ({
+          ...prev,
+          kecamatan_id: first.id,
+          kecamatan_nama: first.nama,
+          puskeswan_id: zone ? zone.id : prev.puskeswan_id,
+        }));
+      }
+    }
+  }, [isAdmin, availableKecamatanItems, formValues.kecamatan_id, setFormValues]);
+
   return (
     <>
       {/* ── MODAL: TAMBAH / EDIT KASUS PENYAKIT ── */}
@@ -53,9 +74,18 @@ export default function PenyakitModals({
             <h3 className="text-lg font-bold text-slate-900 mb-1">
               {editingItem ? 'Edit Laporan Kasus Penyakit' : 'Tambah Laporan Kasus Penyakit Baru'}
             </h3>
-            <p className="text-xs text-slate-500 mb-5">
+            <p className="text-xs text-slate-500 mb-3">
               Input data kasus diagnosa penyakit hewan per kecamatan tahun {selectedYear}.
             </p>
+
+            {!isAdmin && allowedKecamatan.length > 0 && (
+              <div className="mb-4 p-3 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-medium flex items-center gap-2">
+                <MapPin size={16} className="text-emerald-600 shrink-0" />
+                <span>
+                  Wilayah Wewenang Anda: <strong>{allowedKecamatan.join(', ')}</strong>
+                </span>
+              </div>
+            )}
 
             <form onSubmit={handleCaseSubmit} className="space-y-4 text-xs font-semibold text-slate-700">
               <div className="grid grid-cols-2 gap-3">
@@ -66,7 +96,7 @@ export default function PenyakitModals({
                   <select
                     value={formValues.kecamatan_id}
                     onChange={(e) => {
-                      const kec = KECAMATAN_MAP_ITEMS.find((k) => k.id === e.target.value);
+                      const kec = availableKecamatanItems.find((k) => k.id === e.target.value);
                       const zone = getZoneByKecamatanId(e.target.value);
                       setFormValues({
                         ...formValues,
@@ -75,9 +105,9 @@ export default function PenyakitModals({
                         puskeswan_id: zone ? zone.id : formValues.puskeswan_id,
                       });
                     }}
-                    className="w-full h-10 px-3 rounded-xl border border-slate-200 bg-white font-bold text-slate-800 focus:outline-none focus:border-blue-600"
+                    className="w-full h-10 px-3 rounded-xl border border-slate-200 bg-white font-bold text-slate-800 focus:outline-none focus:border-blue-600 cursor-pointer"
                   >
-                    {KECAMATAN_MAP_ITEMS.map((k) => (
+                    {availableKecamatanItems.map((k) => (
                       <option key={k.id} value={k.id}>
                         {k.nama}
                       </option>

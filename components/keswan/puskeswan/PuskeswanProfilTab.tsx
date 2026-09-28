@@ -12,6 +12,7 @@ import {
   Trash2,
 } from 'lucide-react';
 import { PuskeswanProfil } from '@/lib/puskeswanData';
+import { useUserAreaRestriction } from '@/hooks/useUserAreaRestriction';
 
 interface PuskeswanProfilTabProps {
   filteredProfilList: PuskeswanProfil[];
@@ -34,6 +35,8 @@ export function PuskeswanProfilTab({
   onEditProfil,
   onDeleteProfil,
 }: PuskeswanProfilTabProps) {
+  const { isAdmin, isPuskeswanAllowed } = useUserAreaRestriction();
+
   return (
     <div className="space-y-8 animate-in fade-in duration-200">
       {/* Header & Search Bar */}
@@ -147,7 +150,7 @@ export function PuskeswanProfilTab({
                     <ChevronRight size={14} className="group-hover:translate-x-1 transition-transform" />
                   </span>
 
-                  {canEdit && (
+                  {canEdit && (isAdmin || isPuskeswanAllowed(p.nama) || isPuskeswanAllowed(p.kode)) && (
                     <div className="flex items-center gap-1" onClick={(e) => e.stopPropagation()}>
                       <button
                         onClick={(e) => onEditProfil(p, e)}
@@ -156,13 +159,15 @@ export function PuskeswanProfilTab({
                       >
                         <Edit2 size={12} strokeWidth={2.5} />
                       </button>
-                      <button
-                        onClick={(e) => onDeleteProfil(p.id, p.nama, e)}
-                        title="Hapus Profil"
-                        className="w-7 h-7 rounded-lg bg-red-50 hover:bg-red-100 text-red-600 flex items-center justify-center transition-colors"
-                      >
-                        <Trash2 size={12} strokeWidth={2.5} />
-                      </button>
+                      {isAdmin && (
+                        <button
+                          onClick={(e) => onDeleteProfil(p.id, p.nama, e)}
+                          title="Hapus Profil"
+                          className="w-7 h-7 rounded-lg bg-red-50 hover:bg-red-100 text-red-600 flex items-center justify-center transition-colors"
+                        >
+                          <Trash2 size={12} strokeWidth={2.5} />
+                        </button>
+                      )}
                     </div>
                   )}
                 </div>

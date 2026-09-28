@@ -92,6 +92,14 @@ export async function POST(req: Request) {
       return NextResponse.json({ success: false, error: 'Kecamatan dan Diagnosa Penyakit wajib diisi' }, { status: 400 });
     }
 
+    // Validasi Pembatasan Wilayah Kerja Petugas (Role-Based Area Restriction)
+    const targetKec = kecamatan_nama || kecamatan_id;
+    const { validateAreaAccess } = await import('@/lib/areaRestriction');
+    const areaCheck = await validateAreaAccess(req, targetKec, puskeswan_id);
+    if (!areaCheck.allowed && areaCheck.errorResponse) {
+      return areaCheck.errorResponse;
+    }
+
     const [insertResult]: any = await pool.query(
       `INSERT INTO keswan_laporan_penyakit (
         tahun, kecamatan_id, kecamatan_nama, puskeswan_id, diagnosa_nama, kategori_penyakit, jumlah_kasus, keterangan

@@ -1,6 +1,7 @@
 import React from 'react';
 import { Plus, Edit2, Trash2 } from 'lucide-react';
 import { Bulanan, BULAN_LABEL, BULAN_KEY, n } from './types';
+import { useUserAreaRestriction } from '@/hooks/useUserAreaRestriction';
 
 interface VaksinasiBulananTabProps {
   selectedYear: number;
@@ -37,6 +38,7 @@ export default function VaksinasiBulananTab({
   openEditBulanan,
   deleteBulanan,
 }: VaksinasiBulananTabProps) {
+  const { isAdmin, isPuskeswanAllowed } = useUserAreaRestriction();
 
   return (
     <div className="space-y-6 animate-in fade-in duration-200">
@@ -49,7 +51,7 @@ export default function VaksinasiBulananTab({
             Target dan realisasi droping vaksin per puskeswan tahun {selectedYear} &bull; Klik kotak Target / Ambil untuk edit langsung
           </p>
         </div>
-        {(canCreate ?? canEdit) && (
+        {isAdmin && (canCreate ?? canEdit) && (
           <button
             onClick={openAddBulanan}
             className="min-h-touch h-10 px-4 rounded-xl bg-blue-600 text-white text-xs font-bold flex items-center gap-1.5 hover:bg-blue-700 transition-all shadow-xs cursor-pointer"
@@ -80,6 +82,7 @@ export default function VaksinasiBulananTab({
             </thead>
             <tbody className="divide-y-2 divide-slate-400 text-slate-900 font-medium">
               {bulanan.map((row) => {
+                const isAllowed = isAdmin || isPuskeswanAllowed(row.puskeswan);
                 const isEditingTarget = editingBulananCell?.id === row.id && editingBulananCell?.field === 'target';
                 const isEditingAmbil = editingBulananCell?.id === row.id && editingBulananCell?.field === 'pengambilan';
 
@@ -94,8 +97,16 @@ export default function VaksinasiBulananTab({
 
                     {/* Editable Target */}
                     <td
-                      onClick={() => startEditBulananCell(row.id, 'target', row.target)}
-                      className="p-2 text-right font-sans border-r-2 border-slate-400 cursor-pointer"
+                      onClick={() => {
+                        if (!isAllowed) {
+                          alert(`Akses Ditolak: Anda tidak memiliki wewenang untuk ${row.puskeswan}`);
+                          return;
+                        }
+                        startEditBulananCell(row.id, 'target', row.target);
+                      }}
+                      className={`p-2 text-right font-sans border-r-2 border-slate-400 ${
+                        !isAllowed ? 'opacity-60 bg-slate-100/60 cursor-not-allowed' : 'cursor-pointer'
+                      }`}
                     >
                       {isEditingTarget ? (
                         <input
@@ -119,8 +130,16 @@ export default function VaksinasiBulananTab({
 
                     {/* Editable Pengambilan */}
                     <td
-                      onClick={() => startEditBulananCell(row.id, 'pengambilan', row.pengambilan)}
-                      className="p-2 text-right font-sans border-r-2 border-slate-400 cursor-pointer"
+                      onClick={() => {
+                        if (!isAllowed) {
+                          alert(`Akses Ditolak: Anda tidak memiliki wewenang untuk ${row.puskeswan}`);
+                          return;
+                        }
+                        startEditBulananCell(row.id, 'pengambilan', row.pengambilan);
+                      }}
+                      className={`p-2 text-right font-sans border-r-2 border-slate-400 ${
+                        !isAllowed ? 'opacity-60 bg-slate-100/60 cursor-not-allowed' : 'cursor-pointer'
+                      }`}
                     >
                       {isEditingAmbil ? (
                         <input
@@ -155,20 +174,24 @@ export default function VaksinasiBulananTab({
                     ))}
                     {canEdit && (
                       <td className="p-3 text-center border-l-2 border-slate-400">
-                        <div className="flex items-center justify-center gap-1">
-                          <button
-                            onClick={() => openEditBulanan(row)}
-                            className="h-7 w-7 border border-slate-300 bg-white text-slate-700 hover:bg-blue-50 hover:text-blue-600 flex items-center justify-center cursor-pointer"
-                          >
-                            <Edit2 size={12} />
-                          </button>
-                          <button
-                            onClick={() => deleteBulanan(row)}
-                            className="h-7 w-7 border border-rose-300 bg-rose-50 text-rose-700 hover:bg-rose-100 flex items-center justify-center cursor-pointer"
-                          >
-                            <Trash2 size={12} />
-                          </button>
-                        </div>
+                        {isAllowed ? (
+                          <div className="flex items-center justify-center gap-1">
+                            <button
+                              onClick={() => openEditBulanan(row)}
+                              className="h-7 w-7 border border-slate-300 bg-white text-slate-700 hover:bg-blue-50 hover:text-blue-600 flex items-center justify-center cursor-pointer"
+                            >
+                              <Edit2 size={12} />
+                            </button>
+                            <button
+                              onClick={() => deleteBulanan(row)}
+                              className="h-7 w-7 border border-rose-300 bg-rose-50 text-rose-700 hover:bg-rose-100 flex items-center justify-center cursor-pointer"
+                            >
+                              <Trash2 size={12} />
+                            </button>
+                          </div>
+                        ) : (
+                          <span className="text-[10px] text-slate-400 font-semibold">-</span>
+                        )}
                       </td>
                     )}
                   </tr>

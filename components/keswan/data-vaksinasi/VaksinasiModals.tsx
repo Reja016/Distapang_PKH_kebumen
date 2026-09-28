@@ -1,6 +1,7 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Calendar } from 'lucide-react';
 import { Bulanan, Droping } from './types';
+import { useUserAreaRestriction } from '@/hooks/useUserAreaRestriction';
 
 interface VaksinasiModalsProps {
   showAddYearModal: boolean;
@@ -60,6 +61,17 @@ export default function VaksinasiModals({
   setFormDroping,
   submitDroping,
 }: VaksinasiModalsProps) {
+  const { isAdmin, isPuskeswanAllowed } = useUserAreaRestriction();
+  const allowedBulanan = isAdmin ? bulanan : bulanan.filter((b) => isPuskeswanAllowed(b.puskeswan));
+
+  useEffect(() => {
+    if (modalHarianManual && !isAdmin && allowedBulanan.length > 0) {
+      if (!isPuskeswanAllowed(formHarianManual.puskeswan)) {
+        setFormHarianManual((prev) => ({ ...prev, puskeswan: allowedBulanan[0].puskeswan }));
+      }
+    }
+  }, [modalHarianManual, isAdmin, allowedBulanan, formHarianManual.puskeswan, isPuskeswanAllowed, setFormHarianManual]);
+
   return (
     <>
       {/* ── MODAL TAMBAH TAHUN BARU ── */}
@@ -159,15 +171,22 @@ export default function VaksinasiModals({
 
             <form onSubmit={submitHarianManual} className="space-y-4 text-xs">
               <div>
-                <label className="block text-xs font-bold text-slate-700 mb-1">
-                  Puskeswan <span className="text-red-500">*</span>
-                </label>
+                <div className="flex items-center justify-between mb-1">
+                  <label className="block text-xs font-bold text-slate-700">
+                    Puskeswan <span className="text-red-500">*</span>
+                  </label>
+                  {!isAdmin && (
+                    <span className="text-[10px] font-semibold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-md border border-emerald-200">
+                      Wilayah Wewenang Anda
+                    </span>
+                  )}
+                </div>
                 <select
                   value={formHarianManual.puskeswan}
                   onChange={(e) => setFormHarianManual({ ...formHarianManual, puskeswan: e.target.value })}
                   className="w-full min-h-touch h-10 px-3 rounded-xl border border-slate-200 bg-white font-bold text-slate-900 focus:border-blue-600 outline-none"
                 >
-                  {bulanan.map((b) => (
+                  {allowedBulanan.map((b) => (
                     <option key={b.id || b.puskeswan} value={b.puskeswan}>
                       {b.puskeswan}
                     </option>

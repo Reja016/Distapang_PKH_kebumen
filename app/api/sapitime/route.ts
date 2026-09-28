@@ -36,11 +36,21 @@ export async function GET() {
     return NextResponse.json({ success: false, error: err.message }, { status: 500 });
   }
 }
+import { validateAreaAccess } from '@/lib/areaRestriction';
+
 export async function POST(req: Request) {
   try {
     const { action, payload, history } = await req.json();
     const session = await getSessionFromRequest(req as any);
     const userName = session?.nama || session?.nip_username || 'Unknown';
+
+    // Validasi Pembatasan Wilayah Kerja Petugas (Role-Based Area Restriction)
+    if (payload?.kecamatan) {
+      const areaCheck = await validateAreaAccess(req, payload.kecamatan);
+      if (!areaCheck.allowed && areaCheck.errorResponse) {
+        return areaCheck.errorResponse;
+      }
+    }
     
     // 1. Simpan Riwayat / History Aktivitas
     if (history) {

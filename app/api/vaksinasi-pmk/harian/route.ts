@@ -36,6 +36,13 @@ export async function POST(request: Request) {
       return NextResponse.json({ success: false, error: 'Puskeswan dan tanggal wajib diisi.' }, { status: 400 });
     }
 
+    // Validasi Pembatasan Wilayah Kerja Petugas (Role-Based Area Restriction)
+    const { validateAreaAccess } = await import('@/lib/areaRestriction');
+    const areaCheck = await validateAreaAccess(request, null, puskeswan);
+    if (!areaCheck.allowed && areaCheck.errorResponse) {
+      return areaCheck.errorResponse;
+    }
+
     const jumlahVal = Number(jumlah) || 0;
 
     if (jumlahVal <= 0) {

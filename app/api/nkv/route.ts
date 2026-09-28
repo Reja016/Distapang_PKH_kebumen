@@ -1,5 +1,7 @@
 import { NextResponse } from 'next/server';
 import { pool } from '@/lib/db';
+import { getSessionFromRequest } from '@/lib/session';
+import { logActivity } from '@/lib/auditLog';
 
 // GET: Ambil semua data pembinaan NKV dari database
 export async function GET() {
@@ -16,6 +18,9 @@ export async function GET() {
 // POST: Tambah data NKV baru
 export async function POST(request: Request) {
   try {
+    const session = await getSessionFromRequest(request as any);
+    const userName = session ? (session.nama || session.nip_username) : 'Sistem';
+
     const body = await request.json();
     const { nama_usaha, jenis_usaha, proses, pembinaan_1, hasil_1, pembinaan_2, hasil_2, pelatihan_higiene, pengeluaran_rekomendasi, keterangan } = body;
 
@@ -29,6 +34,16 @@ export async function POST(request: Request) {
       [nama_usaha, jenis_usaha || '', proses || '', pembinaan_1 || '', hasil_1 || '', pembinaan_2 || '', hasil_2 || '', pelatihan_higiene || '', pengeluaran_rekomendasi || '', keterangan || '']
     );
 
+    await logActivity({
+      module: 'kesmavet',
+      submenu: 'nkv',
+      tableName: 'pembinaan_nkv',
+      recordId: result.insertId,
+      action: 'CREATE',
+      userName,
+      details: body,
+    });
+
     return NextResponse.json({ success: true, insertId: result.insertId, message: 'Data NKV berhasil ditambahkan!' });
   } catch (error: any) {
     return NextResponse.json({ success: false, error: error.message }, { status: 500 });
@@ -38,6 +53,9 @@ export async function POST(request: Request) {
 // PUT: Edit data NKV
 export async function PUT(request: Request) {
   try {
+    const session = await getSessionFromRequest(request as any);
+    const userName = session ? (session.nama || session.nip_username) : 'Sistem';
+
     const body = await request.json();
     const { id_pembinaan, nama_usaha, jenis_usaha, proses, pembinaan_1, hasil_1, pembinaan_2, hasil_2, pelatihan_higiene, pengeluaran_rekomendasi, keterangan } = body;
 
@@ -51,6 +69,16 @@ export async function PUT(request: Request) {
       [nama_usaha, jenis_usaha || '', proses || '', pembinaan_1 || '', hasil_1 || '', pembinaan_2 || '', hasil_2 || '', pelatihan_higiene || '', pengeluaran_rekomendasi || '', keterangan || '', id_pembinaan]
     );
 
+    await logActivity({
+      module: 'kesmavet',
+      submenu: 'nkv',
+      tableName: 'pembinaan_nkv',
+      recordId: id_pembinaan,
+      action: 'UPDATE',
+      userName,
+      details: body,
+    });
+
     return NextResponse.json({ success: true, message: 'Data NKV berhasil diperbarui!' });
   } catch (error: any) {
     return NextResponse.json({ success: false, error: error.message }, { status: 500 });
@@ -60,6 +88,9 @@ export async function PUT(request: Request) {
 // DELETE: Hapus data NKV
 export async function DELETE(request: Request) {
   try {
+    const session = await getSessionFromRequest(request as any);
+    const userName = session ? (session.nama || session.nip_username) : 'Sistem';
+
     const { searchParams } = new URL(request.url);
     const id = searchParams.get('id');
 
@@ -68,6 +99,17 @@ export async function DELETE(request: Request) {
     }
 
     await pool.execute('DELETE FROM pembinaan_nkv WHERE id_pembinaan = ?', [id]);
+
+    await logActivity({
+      module: 'kesmavet',
+      submenu: 'nkv',
+      tableName: 'pembinaan_nkv',
+      recordId: id,
+      action: 'DELETE',
+      userName,
+      details: { id_pembinaan: id },
+    });
+
     return NextResponse.json({ success: true, message: 'Data NKV berhasil dihapus!' });
   } catch (error: any) {
     return NextResponse.json({ success: false, error: error.message }, { status: 500 });

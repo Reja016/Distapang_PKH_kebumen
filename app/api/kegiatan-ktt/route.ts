@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import pool from '@/lib/db';
 import { logActivity } from '@/lib/auditLog';
+import { getSessionFromRequest } from '@/lib/session';
 
 export const dynamic = 'force-dynamic';
 
@@ -18,6 +19,9 @@ export async function GET() {
 // POST: Tambah atau edit log kegiatan KTT
 export async function POST(request: Request) {
   try {
+    const session = await getSessionFromRequest(request as any);
+    const userName = session ? (session.nama || session.nip_username) : 'Petugas';
+
     const body = await request.json();
     const { id, tanggal, ktt_id, nama_ktt, kecamatan, desa, tim_pelaksana, nama_kegiatan, hasil_kegiatan, lat, lng, photo, isEdit } = body;
 
@@ -38,8 +42,8 @@ export async function POST(request: Request) {
         tableName: 'kegiatan_ktt',
         recordId: finalId,
         action: 'UPDATE',
-        userName: 'Petugas',
-        details: { nama_kegiatan, hasil_kegiatan },
+        userName,
+        details: { nama_ktt, nama_kegiatan, hasil_kegiatan, tanggal, tim_pelaksana, kecamatan, desa },
       });
 
     } else {
@@ -56,8 +60,8 @@ export async function POST(request: Request) {
         tableName: 'kegiatan_ktt',
         recordId: finalId,
         action: 'CREATE',
-        userName: 'Petugas',
-        details: { nama_kegiatan, hasil_kegiatan },
+        userName,
+        details: { nama_ktt, nama_kegiatan, hasil_kegiatan, tanggal, tim_pelaksana, kecamatan, desa },
       });
     }
 
@@ -71,6 +75,9 @@ export async function POST(request: Request) {
 // DELETE: Hapus log kegiatan KTT
 export async function DELETE(request: Request) {
   try {
+    const session = await getSessionFromRequest(request as any);
+    const userName = session ? (session.nama || session.nip_username) : 'Administrator';
+
     const { searchParams } = new URL(request.url);
     const id = searchParams.get('id');
     if (id) {
@@ -81,7 +88,7 @@ export async function DELETE(request: Request) {
         tableName: 'kegiatan_ktt',
         recordId: id,
         action: 'DELETE',
-        userName: 'Administrator',
+        userName,
         details: { id },
       });
     }

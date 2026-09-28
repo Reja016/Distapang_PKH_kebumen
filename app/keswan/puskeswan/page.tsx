@@ -4,6 +4,7 @@ import { useState, useEffect, useRef, useMemo } from 'react';
 import Link from 'next/link';
 import * as XLSX from 'xlsx';
 import { usePageAuth } from '@/hooks/usePageAuth';
+import { useUserAreaRestriction } from '@/hooks/useUserAreaRestriction';
 import { compressImageFile } from '@/lib/file-compressor';
 import {
   ArrowLeft,
@@ -37,6 +38,7 @@ import { PuskeswanRekapTab } from '@/components/keswan/puskeswan/PuskeswanRekapT
 
 export default function LaporanPuskeswanPage() {
   const { isReady, canCreate, canEdit } = usePageAuth('keswan', 'puskeswan');
+  const { isAdmin, isPuskeswanAllowed } = useUserAreaRestriction();
 
   // Navigasi Dua Menu / Tab (Default Menu 1: Rekapitulasi Kinerja Bulanan)
   const [currentTab, setCurrentTab] = useState<'rekap' | 'profil'>('rekap');
@@ -160,6 +162,10 @@ export default function LaporanPuskeswanPage() {
 
   // ── HANDLER CRUD PROFIL PUSKESWAN ──
   const handleOpenAddProfil = () => {
+    if (!isAdmin) {
+      alert('Akses Ditolak: Hanya Administrator yang dapat menambahkan profil Puskeswan baru.');
+      return;
+    }
     setEditingProfilId(null);
     setProfilForm({
       nama: '',
@@ -182,6 +188,10 @@ export default function LaporanPuskeswanPage() {
 
   const handleOpenEditProfil = (item: PuskeswanProfil, e?: React.MouseEvent) => {
     if (e) e.stopPropagation();
+    if (!isAdmin && !isPuskeswanAllowed(item.nama) && !isPuskeswanAllowed(item.kode)) {
+      alert(`Akses Ditolak: Anda tidak memiliki wewenang untuk wilayah ${item.nama}.`);
+      return;
+    }
     setEditingProfilId(String(item.id));
     setProfilForm({
       nama: item.nama,
@@ -228,6 +238,10 @@ export default function LaporanPuskeswanPage() {
 
     try {
       if (editingProfilId) {
+        if (!isAdmin && !isPuskeswanAllowed(profilForm.nama) && !isPuskeswanAllowed(profilForm.kode)) {
+          alert('Akses Ditolak: Anda tidak memiliki wewenang untuk mengubah profil Puskeswan ini!');
+          return;
+        }
         if (!canEdit) {
           alert('Hanya Administrator yang memiliki hak akses untuk mengubah (edit) profil puskeswan!');
           return;
@@ -246,6 +260,10 @@ export default function LaporanPuskeswanPage() {
         });
         showToast('success', 'Profil Puskeswan berhasil diperbarui!');
       } else {
+        if (!isAdmin) {
+          alert('Akses Ditolak: Hanya Administrator yang berwenang menambah puskeswan baru!');
+          return;
+        }
         if (!canCreate) {
           alert('Anda tidak memiliki hak akses untuk menambah puskeswan baru!');
           return;
@@ -275,8 +293,8 @@ export default function LaporanPuskeswanPage() {
 
   const handleDeleteProfil = async (id: string | number, nama: string, e?: React.MouseEvent) => {
     if (e) e.stopPropagation();
-    if (!canEdit) {
-      alert('Hanya Administrator yang memiliki hak akses untuk menghapus profil puskeswan!');
+    if (!isAdmin) {
+      alert('Akses Ditolak: Hanya Administrator yang memiliki hak akses untuk menghapus profil puskeswan!');
       return;
     }
     if (!confirm(`Apakah Anda yakin ingin menghapus data ${nama}?`)) return;
@@ -319,6 +337,10 @@ export default function LaporanPuskeswanPage() {
 
   const handleStartEdit = (bulan: string, puskeswan: string, field: string, currentValue: any, tahun: string = '2026') => {
     if (!canEdit) return;
+    if (!isAdmin && !isPuskeswanAllowed(puskeswan)) {
+      showToast('error', `Akses ditolak: Anda tidak memiliki wewenang untuk ${puskeswan}`);
+      return;
+    }
     setEditingCell({ bulan, puskeswan, field, tahun });
     setEditValue(String(currentValue ?? 0));
   };
