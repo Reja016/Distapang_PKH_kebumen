@@ -3,6 +3,7 @@ import pool from '@/lib/db';
 import fs from 'fs/promises';
 import path from 'path';
 import { requireAdmin } from '@/lib/session';
+import { logActivity } from '@/lib/auditLog';
 
 export const dynamic = 'force-dynamic';
 
@@ -195,6 +196,16 @@ export async function POST(request: NextRequest) {
         ]
       );
 
+      await logActivity({
+        module: 'bitpro',
+        submenu: 'database-ktt',
+        tableName: 'ktt_documents',
+        recordId: result.insertId,
+        action: 'CREATE',
+        userName: uploadedBy,
+        details: { ktt_id: Number(kttId), category, title, originalName, file_path: webPath },
+      });
+
       insertedDocs.push({
         id: result.insertId,
         ktt_id: Number(kttId),
@@ -258,6 +269,16 @@ export async function DELETE(request: NextRequest) {
 
     // Hapus dari database
     await pool.query('DELETE FROM ktt_documents WHERE id = ?', [docId]);
+
+    await logActivity({
+      module: 'bitpro',
+      submenu: 'database-ktt',
+      tableName: 'ktt_documents',
+      recordId: docId,
+      action: 'DELETE',
+      userName: auth.session.nama || 'Administrator',
+      details: { ktt_id: doc.ktt_id, title: doc.title, filename: doc.original_filename },
+    });
 
     return NextResponse.json({
       success: true,

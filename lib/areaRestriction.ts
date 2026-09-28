@@ -85,51 +85,101 @@ export async function getUserAreaAccess(session: SessionPayload | null): Promise
       const officer = officerRows[0];
       officerName = officer.nama_petugas || userName;
 
-      // Ambil Wilayah Binaan Utama
-      if (officer.id_wilayah_binaan) {
-        const [mainRows]: any = await pool.query(
-          `SELECT id_wilayah_binaan, id_puskeswan, id_kecamatan, nama_puskeswan, binaan 
-           FROM wilayah_binaan WHERE id_wilayah_binaan = ?`,
+      // Ambil Puskeswan Binaan Utama & seluruh kecamatan di bawah Puskeswan tersebut
+      let mainPuskeswanName = officer.wilayah_puskeswan;
+      if (!mainPuskeswanName && officer.id_wilayah_binaan) {
+        const [mPusk]: any = await pool.query(
+          `SELECT nama_puskeswan, binaan FROM wilayah_binaan WHERE id_wilayah_binaan = ? LIMIT 1`,
           [officer.id_wilayah_binaan]
         );
-        if (mainRows && mainRows.length > 0) {
-          const m = mainRows[0];
-          const normKec = normalizeKecamatanName(m.binaan);
-          allowedKecamatanSet.add(normKec);
-          allowedPuskeswanSet.add(m.nama_puskeswan);
-          allowedPuskeswanIdSet.add(Number(m.id_puskeswan));
-          mainKecamatan = normKec;
+        if (mPusk && mPusk.length > 0) {
+          mainPuskeswanName = mPusk[0].nama_puskeswan;
+          mainKecamatan = normalizeKecamatanName(mPusk[0].binaan);
         }
       }
 
-      // Ambil Wilayah Kerja Tambahan dari wt1 - wt5
+      if (mainPuskeswanName) {
+        allowedPuskeswanSet.add(mainPuskeswanName);
+        const [mainPuskRows]: any = await pool.query(
+          `SELECT DISTINCT id_puskeswan, binaan FROM wilayah_binaan WHERE LOWER(nama_puskeswan) = LOWER(?)`,
+          [mainPuskeswanName]
+        );
+        for (const r of mainPuskRows) {
+          const normKec = normalizeKecamatanName(r.binaan);
+          allowedKecamatanSet.add(normKec);
+          allowedPuskeswanIdSet.add(Number(r.id_puskeswan));
+          if (!mainKecamatan) mainKecamatan = normKec;
+        }
+      }
+
+      // Ambil Wilayah Puskeswan Kerja Tambahan dari wt1 - wt5
       const wtIds = [officer.wt1, officer.wt2, officer.wt3, officer.wt4, officer.wt5].filter(Boolean);
       if (wtIds.length > 0) {
         const [wtRows]: any = await pool.query(
           `SELECT DISTINCT id_wilayah_binaan, id_puskeswan, id_kecamatan, nama_puskeswan, binaan 
-           FROM wilayah_binaan WHERE id_kecamatan IN (?) OR id_wilayah_binaan IN (?)`,
-          [wtIds, wtIds]
+           FROM wilayah_binaan 
+           WHERE id_puskeswan IN (?) OR id_kecamatan IN (?) OR id_wilayah_binaan IN (?)`,
+          [wtIds, wtIds, wtIds]
         );
         for (const row of wtRows) {
           const normKec = normalizeKecamatanName(row.binaan);
           allowedKecamatanSet.add(normKec);
           allowedPuskeswanSet.add(row.nama_puskeswan);
           allowedPuskeswanIdSet.add(Number(row.id_puskeswan));
-          additionalKecamatan.push(normKec);
+          if (!additionalKecamatan.includes(normKec)) additionalKecamatan.push(normKec);
         }
       }
 
-      // Parse teks `wilayah_kerja_tambahan` jika ada (contoh: "Kec. Rowokele, Kec. Buayan")
+      // Parse teks `wilayah_kerja_tambahan` jika ada (contoh: "Puskeswan Gombong, Puskeswan Buayan" atau nama kecamatan)
       if (officer.wilayah_kerja_tambahan) {
         const parts = officer.wilayah_kerja_tambahan.split(/[,;\/]/);
         for (const p of parts) {
-          const clean = normalizeKecamatanName(p);
-          if (clean) {
-            allowedKecamatanSet.add(clean);
-            if (!additionalKecamatan.includes(clean)) additionalKecamatan.push(clean);
+          const trimmed = p.trim();
+          if (!trimmed) continue;
+
+          // Cek jika bagian ini adalah nama Puskeswan
+          const [matchPusk]: any = await pool.query(
+            `SELECT DISTINCT id_puskeswan, nama_puskeswan, binaan FROM wilayah_binaan 
+             WHERE LOWER(nama_puskeswan) LIKE LOWER(?)`,
+            [`%${trimmed}%`]
+          );
+          if (matchPusk && matchPusk.length > 0) {
+            for (const mp of matchPusk) {
+              const normKec = normalizeKecamatanName(mp.binaan);
+              allowedKecamatanSet.add(normKec);
+              allowedPuskeswanSet.add(mp.nama_puskeswan);
+              allowedPuskeswanIdSet.add(Number(mp.id_puskeswan));
+              if (!additionalKecamatan.includes(normKec)) additionalKecamatan.push(normKec);
+            }
+          } else {
+            // Jika nama kecamatan langsung
+            const clean = normalizeKecamatanName(trimmed);
+            if (clean) {
+              allowedKecamatanSet.add(clean);
+              if (!additionalKecamatan.includes(clean)) additionalKecamatan.push(clean);
+            }
           }
         }
       }
+      // Jika petugas tidak memiliki penugasan Puskeswan maupun wilayah tambahan (Admin memilih tidak membatasi)
+      if (!mainPuskeswanName && wtIds.length === 0 && !officer.wilayah_kerja_tambahan) {
+        return {
+          isAdmin: true,
+          allowedKecamatan: [],
+          allowedPuskeswan: [],
+          allowedPuskeswanIds: [],
+          officerName: officer.nama_petugas || userName,
+        };
+      }
+    } else {
+      // Jika user tidak terhubung ke penugasan spesifik petugas_ib -> Akses penuh tingkat kabupaten
+      return {
+        isAdmin: true,
+        allowedKecamatan: [],
+        allowedPuskeswan: [],
+        allowedPuskeswanIds: [],
+        officerName: session.nama || userName,
+      };
     }
 
     // 2. Cek apakah nama akun / username mengindikasikan Puskeswan tertentu (misal akun 'Puskeswan Buayan')

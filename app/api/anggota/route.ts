@@ -6,6 +6,7 @@ import {
 } from '@/lib/permissions';
 import { hashPassword } from '@/lib/password';
 import { requireAdmin } from '@/lib/session';
+import { logActivity } from '@/lib/auditLog';
 
 export const dynamic = 'force-dynamic';
 
@@ -105,8 +106,18 @@ export async function GET(req: Request) {
   try {
     await ensureTable();
     // JANGAN PERNAH SELECT password untuk dikirim ke client
+    // LEFT JOIN petugas_ib untuk mengambil data wilayah penugasan Puskeswan
     const [rows]: any = await pool.execute(
-      `SELECT id, nama, nip_username, role, status, permissions, created_at, updated_at FROM anggota_users ORDER BY id ASC`
+      `SELECT 
+        u.id, u.nama, u.nip_username, u.role, u.status, u.permissions, u.created_at, u.updated_at,
+        p.id_kompetensi,
+        p.kompetensi,
+        p.wilayah_puskeswan AS puskeswan_utama,
+        p.wilayah_kerja_tambahan AS puskeswan_tambahan,
+        p.wt1, p.wt2, p.wt3, p.wt4, p.wt5
+      FROM anggota_users u
+      LEFT JOIN petugas_ib p ON p.id_user = u.id
+      ORDER BY u.id ASC`
     );
     if (Array.isArray(rows) && rows.length > 0) {
       const parsed = rows.map((r: any) => ({
@@ -152,6 +163,139 @@ async function checkAdminEditAccess(userId: number): Promise<boolean> {
   return true; // Fallback
 }
 
+// Sinkronisasi wilayah kerja ke tabel petugas_ib
+async function syncPetugasIb(
+  userId: number,
+  nama: string,
+  role: string,
+  isRestricted: boolean,
+  puskeswanUtama?: string | null,
+  wt1?: number | string | null,
+  wt2?: number | string | null,
+  wt3?: number | string | null,
+  wt4?: number | string | null,
+  wt5?: number | string | null,
+  kompetensi?: string
+) {
+  // Cek apakah data di petugas_ib sudah ada
+  const [existing]: any = await pool.query(
+    `SELECT id_kompetensi FROM petugas_ib WHERE id_user = ? OR LOWER(nama_petugas) = LOWER(?) LIMIT 1`,
+    [userId, nama]
+  );
+
+  const komp = kompetensi || (role.toLowerCase() === 'puskeswan' ? 'Keswan' : 'IB');
+
+  // Jika admin memilih TIDAK dibatasi wilayahnya
+  if (!isRestricted || !puskeswanUtama) {
+    if (existing && existing.length > 0) {
+      await pool.query(
+        `UPDATE petugas_ib SET 
+          id_user = ?,
+          nama_petugas = ?,
+          wilayah_puskeswan = NULL,
+          id_wilayah_binaan = NULL,
+          wilayah_kerja_tambahan = NULL,
+          wt1 = NULL, wt2 = NULL, wt3 = NULL, wt4 = NULL, wt5 = NULL,
+          kompetensi = COALESCE(?, kompetensi)
+        WHERE id_kompetensi = ?`,
+        [userId, nama, komp, existing[0].id_kompetensi]
+      );
+    }
+    return;
+  }
+
+  // Jika DIBATASI wilayahnya:
+  const pUtama = puskeswanUtama.trim();
+
+  // Cari default id_wilayah_binaan untuk puskeswanUtama
+  let defaultWbId: number | null = null;
+  const [wbRows]: any = await pool.query(
+    `SELECT id_wilayah_binaan FROM wilayah_binaan WHERE LOWER(nama_puskeswan) = LOWER(?) LIMIT 1`,
+    [pUtama]
+  );
+  if (wbRows && wbRows.length > 0) {
+    defaultWbId = wbRows[0].id_wilayah_binaan;
+  }
+
+  // Parse wt1 s/d wt5 sebagai id_kecamatan
+  const parseWt = (val: any): number | null => {
+    if (val === null || val === undefined || val === '' || val === 0 || val === '0') return null;
+    const num = Number(val);
+    return isNaN(num) ? null : num;
+  };
+
+  const finalWt1 = parseWt(wt1);
+  const finalWt2 = parseWt(wt2);
+  const finalWt3 = parseWt(wt3);
+  const finalWt4 = parseWt(wt4);
+  const finalWt5 = parseWt(wt5);
+
+  const activeKecIds = [finalWt1, finalWt2, finalWt3, finalWt4, finalWt5].filter((id): id is number => id !== null);
+
+  let wtStr = '';
+  if (activeKecIds.length > 0) {
+    const [kecRows]: any = await pool.query(
+      `SELECT DISTINCT id_kecamatan, binaan FROM wilayah_binaan WHERE id_kecamatan IN (?)`,
+      [activeKecIds]
+    );
+    const kecMap = new Map<number, string>();
+    if (Array.isArray(kecRows)) {
+      kecRows.forEach((r: any) => {
+        const titleCase = r.binaan.charAt(0).toUpperCase() + r.binaan.slice(1).toLowerCase();
+        kecMap.set(Number(r.id_kecamatan), titleCase);
+      });
+    }
+    const kecNames = activeKecIds
+      .map((id) => kecMap.get(id))
+      .filter(Boolean)
+      .map((k) => `Kec. ${k}`);
+    wtStr = Array.from(new Set(kecNames)).join(', ');
+  }
+
+  if (existing && existing.length > 0) {
+    await pool.query(
+      `UPDATE petugas_ib SET 
+        id_user = ?,
+        nama_petugas = ?,
+        wilayah_puskeswan = ?,
+        id_wilayah_binaan = COALESCE(?, id_wilayah_binaan),
+        wilayah_kerja_tambahan = ?,
+        wt1 = ?, wt2 = ?, wt3 = ?, wt4 = ?, wt5 = ?,
+        kompetensi = COALESCE(?, kompetensi)
+      WHERE id_kompetensi = ?`,
+      [
+        userId,
+        nama,
+        pUtama,
+        defaultWbId,
+        wtStr || null,
+        finalWt1, finalWt2, finalWt3, finalWt4, finalWt5,
+        komp,
+        existing[0].id_kompetensi,
+      ]
+    );
+  } else {
+    const [maxRows]: any = await pool.query(`SELECT COALESCE(MAX(no_urut), 0) + 1 AS next_no FROM petugas_ib`);
+    const nextNo = maxRows?.[0]?.next_no || 1;
+
+    await pool.query(
+      `INSERT INTO petugas_ib 
+        (id_user, no_urut, nama_petugas, kompetensi, wilayah_puskeswan, id_wilayah_binaan, wilayah_kerja_tambahan, wt1, wt2, wt3, wt4, wt5)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      [
+        userId,
+        nextNo,
+        nama,
+        komp,
+        pUtama,
+        defaultWbId,
+        wtStr || null,
+        finalWt1, finalWt2, finalWt3, finalWt4, finalWt5,
+      ]
+    );
+  }
+}
+
 // POST: Tambah anggota baru (Wajib Admin, Password otomatis di-hash)
 export async function POST(req: Request) {
   const auth = await requireAdmin(req);
@@ -163,7 +307,22 @@ export async function POST(req: Request) {
 
   try {
     const body = await req.json();
-    const { nama, nip_username, password, role, status, permissions } = body;
+    const {
+      nama,
+      nip_username,
+      password,
+      role,
+      status,
+      permissions,
+      is_restricted,
+      puskeswan_utama,
+      wt1,
+      wt2,
+      wt3,
+      wt4,
+      wt5,
+      kompetensi,
+    } = body;
 
     if (!nama || !nip_username || !password) {
       return NextResponse.json({ error: 'Nama, NIP/Username, dan Password wajib diisi!' }, { status: 400 });
@@ -171,7 +330,7 @@ export async function POST(req: Request) {
 
     const hashedPassword = hashPassword(password);
     const permStr = typeof permissions === 'object' ? JSON.stringify(permissions) : JSON.stringify(DEFAULT_FULL_PERMISSIONS);
-    const userRole = role || 'Petugas Teknis';
+    const userRole = role || 'Petugas Lapangan';
     const userStatus = status || 'Aktif';
 
     try {
@@ -180,7 +339,42 @@ export async function POST(req: Request) {
         `INSERT INTO anggota_users (nama, nip_username, password, role, status, permissions) VALUES (?, ?, ?, ?, ?, ?)`,
         [nama, nip_username, hashedPassword, userRole, userStatus, permStr]
       );
-      return NextResponse.json({ success: true, id: res.insertId, message: 'Anggota berhasil ditambahkan dengan password terenkripsi hash!' });
+      const newUserId = res.insertId;
+
+      // Sinkronkan wilayah kerja ke petugas_ib
+      try {
+        await syncPetugasIb(
+          newUserId,
+          nama,
+          userRole,
+          is_restricted ?? Boolean(puskeswan_utama),
+          puskeswan_utama,
+          wt1,
+          wt2,
+          wt3,
+          wt4,
+          wt5,
+          kompetensi
+        );
+      } catch (syncErr: any) {
+        console.error('[syncPetugasIb Error]:', syncErr.message);
+      }
+
+      await logActivity({
+        module: 'admin',
+        submenu: 'anggota',
+        tableName: 'anggota_users',
+        recordId: newUserId,
+        action: 'CREATE',
+        userName: auth.session.nama || 'Administrator',
+        details: { nama, nip_username, role: userRole, status: userStatus },
+      });
+
+      return NextResponse.json({
+        success: true,
+        id: newUserId,
+        message: 'Anggota berhasil ditambahkan dan disinkronkan dengan wilayah kerja!',
+      });
     } catch (dbErr: any) {
       if (dbErr.code === 'ER_DUP_ENTRY') {
         return NextResponse.json({ error: 'NIP/Username sudah terdaftar! Gunakan NIP/Username lain.' }, { status: 409 });
@@ -203,13 +397,31 @@ export async function PUT(req: Request) {
 
   try {
     const body = await req.json();
-    const { id, nama, nip_username, password, role, status, permissions } = body;
+    const {
+      id,
+      nama,
+      nip_username,
+      password,
+      role,
+      status,
+      permissions,
+      is_restricted,
+      puskeswan_utama,
+      wt1,
+      wt2,
+      wt3,
+      wt4,
+      wt5,
+      kompetensi,
+    } = body;
 
     if (!id || !nama || !nip_username) {
       return NextResponse.json({ error: 'ID, Nama, dan NIP/Username wajib diisi!' }, { status: 400 });
     }
 
     const permStr = typeof permissions === 'object' ? JSON.stringify(permissions) : null;
+    const userRole = role || 'Petugas Lapangan';
+    const userStatus = status || 'Aktif';
 
     try {
       await ensureTable();
@@ -218,28 +430,58 @@ export async function PUT(req: Request) {
         if (permStr) {
           await pool.execute(
             `UPDATE anggota_users SET nama = ?, nip_username = ?, password = ?, role = ?, status = ?, permissions = ? WHERE id = ?`,
-            [nama, nip_username, hashedPassword, role, status, permStr, id]
+            [nama, nip_username, hashedPassword, userRole, userStatus, permStr, id]
           );
         } else {
           await pool.execute(
             `UPDATE anggota_users SET nama = ?, nip_username = ?, password = ?, role = ?, status = ? WHERE id = ?`,
-            [nama, nip_username, hashedPassword, role, status, id]
+            [nama, nip_username, hashedPassword, userRole, userStatus, id]
           );
         }
       } else {
         if (permStr) {
           await pool.execute(
             `UPDATE anggota_users SET nama = ?, nip_username = ?, role = ?, status = ?, permissions = ? WHERE id = ?`,
-            [nama, nip_username, role, status, permStr, id]
+            [nama, nip_username, userRole, userStatus, permStr, id]
           );
         } else {
           await pool.execute(
             `UPDATE anggota_users SET nama = ?, nip_username = ?, role = ?, status = ? WHERE id = ?`,
-            [nama, nip_username, role, status, id]
+            [nama, nip_username, userRole, userStatus, id]
           );
         }
       }
-      return NextResponse.json({ success: true, message: 'Data anggota berhasil diperbarui' });
+
+      // Sinkronkan update ke petugas_ib
+      try {
+        await syncPetugasIb(
+          id,
+          nama,
+          userRole,
+          is_restricted ?? Boolean(puskeswan_utama),
+          puskeswan_utama,
+          wt1,
+          wt2,
+          wt3,
+          wt4,
+          wt5,
+          kompetensi
+        );
+      } catch (syncErr: any) {
+        console.error('[syncPetugasIb Error]:', syncErr.message);
+      }
+
+      await logActivity({
+        module: 'admin',
+        submenu: 'anggota',
+        tableName: 'anggota_users',
+        recordId: id,
+        action: 'UPDATE',
+        userName: auth.session.nama || 'Administrator',
+        details: { id, nama, nip_username, role: userRole, status: userStatus },
+      });
+
+      return NextResponse.json({ success: true, message: 'Data anggota dan wilayah penugasan berhasil diperbarui' });
     } catch {
       return NextResponse.json({ success: true, message: 'Data anggota diperbarui (Mode Lokal)' });
     }
@@ -268,6 +510,17 @@ export async function DELETE(req: Request) {
     try {
       await ensureTable();
       await pool.execute(`DELETE FROM anggota_users WHERE id = ?`, [id]);
+
+      await logActivity({
+        module: 'admin',
+        submenu: 'anggota',
+        tableName: 'anggota_users',
+        recordId: id,
+        action: 'DELETE',
+        userName: auth.session.nama || 'Administrator',
+        details: { id },
+      });
+
       return NextResponse.json({ success: true, message: 'Anggota berhasil dihapus' });
     } catch {
       return NextResponse.json({ success: true, message: 'Anggota dihapus (Mode Lokal)' });

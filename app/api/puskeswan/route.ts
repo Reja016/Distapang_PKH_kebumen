@@ -1,5 +1,7 @@
 import { NextResponse } from 'next/server';
 import { pool } from '@/lib/db';
+import { getSessionFromRequest } from '@/lib/session';
+import { logActivity } from '@/lib/auditLog';
 
 // Fallback data awal jika database belum dibuat oleh rekan user
 const fallbackData = [
@@ -19,14 +21,13 @@ const VALID_FIELDS = [
   'pmk_vaks', 'lsd_vaks', 'retribusi', 'no_urut', 'puskeswan', 'bulan'
 ];
 
-export async function GET() {
+async function ensureTable() {
   try {
-    // 1. Pastikan tabel ada jika belum dibuat
     await pool.execute(`
       CREATE TABLE IF NOT EXISTS laporan_puskeswan (
         id INT AUTO_INCREMENT PRIMARY KEY,
         bulan VARCHAR(50) NOT NULL,
-        no_urut INT NOT NULL,
+        no_urut INT NOT NULL DEFAULT 1,
         puskeswan VARCHAR(100) NOT NULL,
         bef INT DEFAULT 0,
         cacingan INT DEFAULT 0,
@@ -47,6 +48,22 @@ export async function GET() {
         UNIQUE KEY uq_bulan_puskeswan (bulan, puskeswan)
       ) ENGINE=InnoDB;
     `);
+
+    const cols = ['bef', 'cacingan', 'scabies', 'orf', 'pmk_diag', 'lsd_diag', 'aktif', 'semi_aktif', 'pasif', 'pusling', 'ib', 'pkb', 'pmk_vaks', 'lsd_vaks', 'retribusi'];
+    for (const c of cols) {
+      try {
+        await pool.execute(`ALTER TABLE laporan_puskeswan ADD COLUMN IF NOT EXISTS ${c} ${c === 'retribusi' ? 'BIGINT' : 'INT'} DEFAULT 0`);
+      } catch {}
+    }
+  } catch (e: any) {
+    console.warn('Gagal memastikan tabel laporan_puskeswan:', e.message);
+  }
+}
+
+export async function GET() {
+  try {
+    // 1. Pastikan tabel & kolom ada
+    await ensureTable();
 
     // 2. Ambil data dari database
     const [rows]: any = await pool.execute(`
@@ -70,25 +87,43 @@ export async function GET() {
         no_urut ASC
     `);
 
-    // Jika database masih kosong, lakukan auto-seeding data awal
-    if (!rows || rows.length === 0) {
-      for (const item of fallbackData) {
-        await pool.execute(
-          `INSERT INTO laporan_puskeswan 
-          (bulan, no_urut, puskeswan, bef, cacingan, scabies, orf, pmk_diag, lsd_diag, aktif, semi_aktif, pasif, pusling, ib, pkb, pmk_vaks, lsd_vaks, retribusi)
-          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-          ON DUPLICATE KEY UPDATE no_urut=VALUES(no_urut)`,
-          [
-            item.bulan, item.no, item.puskeswan, item.bef, item.cacingan, item.scabies,
-            item.orf, item.pmk_diag, item.lsd_diag, item.aktif, item.semi_aktif, item.pasif,
-            item.pusling, item.ib, item.pkb, item.pmk_vaks, item.lsd_vaks, item.retribusi
-          ]
-        );
-      }
-      return NextResponse.json({ success: true, data: fallbackData });
+    // Pastikan seluruh 8 Puskeswan lengkap di database (tidak hanya 3)
+    for (const item of fallbackData) {
+      await pool.execute(
+        `INSERT INTO laporan_puskeswan 
+        (bulan, no_urut, puskeswan, bef, cacingan, scabies, orf, pmk_diag, lsd_diag, aktif, semi_aktif, pasif, pusling, ib, pkb, pmk_vaks, lsd_vaks, retribusi)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        ON DUPLICATE KEY UPDATE no_urut=VALUES(no_urut)`,
+        [
+          item.bulan, item.no, item.puskeswan, item.bef, item.cacingan, item.scabies,
+          item.orf, item.pmk_diag, item.lsd_diag, item.aktif, item.semi_aktif, item.pasif,
+          item.pusling, item.ib, item.pkb, item.pmk_vaks, item.lsd_vaks, item.retribusi
+        ]
+      );
     }
 
-    const dataFormatted = rows.map((r: any) => ({
+    const [allRows]: any = await pool.execute(`
+      SELECT * FROM laporan_puskeswan 
+      ORDER BY 
+        CASE 
+          WHEN bulan = 'JANUARI' THEN 1
+          WHEN bulan = 'FEBRUARI' THEN 2
+          WHEN bulan = 'MARET' THEN 3
+          WHEN bulan = 'APRIL' THEN 4
+          WHEN bulan = 'MEI' THEN 5
+          WHEN bulan = 'JUNI' THEN 6
+          WHEN bulan = 'JULI' THEN 7
+          WHEN bulan = 'AGUSTUS' THEN 8
+          WHEN bulan = 'SEPTEMBER' THEN 9
+          WHEN bulan = 'OKTOBER' THEN 10
+          WHEN bulan = 'NOVEMBER' THEN 11
+          WHEN bulan = 'DESEMBER' THEN 12
+          ELSE 13
+        END,
+        no_urut ASC
+    `);
+
+    const dataFormatted = (allRows || []).map((r: any) => ({
       ...r,
       no: Number(r.no_urut || r.no || 0),
       bef: Number(r.bef || 0),
@@ -138,31 +173,7 @@ export async function PATCH(request: Request) {
     const numValue = Number(value) || 0;
 
     try {
-      await pool.execute(`
-        CREATE TABLE IF NOT EXISTS laporan_puskeswan (
-          id INT AUTO_INCREMENT PRIMARY KEY,
-          bulan VARCHAR(50) NOT NULL,
-          no_urut INT NOT NULL DEFAULT 1,
-          puskeswan VARCHAR(100) NOT NULL,
-          bef INT DEFAULT 0,
-          cacingan INT DEFAULT 0,
-          scabies INT DEFAULT 0,
-          orf INT DEFAULT 0,
-          pmk_diag INT DEFAULT 0,
-          lsd_diag INT DEFAULT 0,
-          aktif INT DEFAULT 0,
-          semi_aktif INT DEFAULT 0,
-          pasif INT DEFAULT 0,
-          pusling INT DEFAULT 0,
-          ib INT DEFAULT 0,
-          pkb INT DEFAULT 0,
-          pmk_vaks INT DEFAULT 0,
-          lsd_vaks INT DEFAULT 0,
-          retribusi BIGINT DEFAULT 0,
-          updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-          UNIQUE KEY uq_bulan_puskeswan (bulan, puskeswan)
-        ) ENGINE=InnoDB;
-      `);
+      await ensureTable();
 
       await pool.execute(
         `INSERT INTO laporan_puskeswan (bulan, puskeswan, ${field})
@@ -171,10 +182,29 @@ export async function PATCH(request: Request) {
         [bulan, puskeswan, numValue]
       );
 
+      const session = await getSessionFromRequest(request as any);
+      const userName = session?.nama || session?.nip_username || request.headers.get('x-user-name') || 'Petugas';
+
+      await logActivity({
+        module: 'keswan',
+        submenu: 'puskeswan',
+        tableName: 'laporan_puskeswan',
+        recordId: `${bulan}-${puskeswan}`,
+        action: 'UPDATE',
+        userName,
+        details: {
+          bulan,
+          puskeswan,
+          field,
+          nilai_baru: numValue,
+          keterangan: `Pembaruan data indikator ${field.toUpperCase()} untuk Puskeswan ${puskeswan} (${bulan})`,
+        },
+      });
+
       return NextResponse.json({ success: true, message: 'Data berhasil diperbarui di database.' });
     } catch (dbErr: any) {
-      console.warn('DB belum aktif saat PATCH:', dbErr.message);
-      return NextResponse.json({ success: true, message: 'Data diperbarui di memori lokal.', isFallback: true });
+      console.error('Gagal menyimpan data puskeswan:', dbErr.message);
+      return NextResponse.json({ success: false, error: dbErr.message }, { status: 500 });
     }
   } catch (error: any) {
     return NextResponse.json({ success: false, error: error.message }, { status: 500 });

@@ -1,6 +1,8 @@
 import { NextResponse } from 'next/server';
 import pool from '@/lib/db';
 import { KapasitasPakanKecamatan, INITIAL_KAPASITAS_PAKAN } from '@/lib/pakanData';
+import { getSessionFromRequest } from '@/lib/session';
+import { logActivity } from '@/lib/auditLog';
 
 export const dynamic = 'force-dynamic';
 
@@ -144,6 +146,19 @@ export async function PUT(req: Request) {
       [potPakan, kapTampung, jmlTernak, potPenambahan, status, keterangan || '', id, Number(tahun)]
     );
 
+    const session = await getSessionFromRequest(req as any);
+    const userName = session?.nama || session?.nip_username || req.headers.get('x-user-name') || 'Petugas';
+
+    await logActivity({
+      module: 'kesmavet',
+      submenu: 'pakan-ternak',
+      tableName: 'kesmavet_kapasitas_pakan',
+      recordId: `${tahun}-${id}`,
+      action: 'UPDATE',
+      userName,
+      details: { id, tahun, potensi_pakan_kg: potPakan, kapasitas_tampung_ekor: kapTampung, jumlah_ternak_st: jmlTernak, status },
+    });
+
     return NextResponse.json({
       success: true,
       data: { id, tahun, potensi_pakan_kg: potPakan, kapasitas_tampung_ekor: kapTampung, jumlah_ternak_st: jmlTernak, potensi_penambahan_st: potPenambahan, status },
@@ -161,6 +176,9 @@ export async function POST(req: Request) {
     const { action, tahun, copyFromYear, id, corelId, nama, potensi_pakan_kg, kapasitas_tampung_ekor, jumlah_ternak_st, keterangan } = body;
 
     await ensureTable();
+
+    const session = await getSessionFromRequest(req as any);
+    const userName = session?.nama || session?.nip_username || req.headers.get('x-user-name') || 'Petugas';
 
     // Action 1: Add New Year (Salin dari tahun sebelumnya atau inisialisasi baru)
     if (action === 'add_year') {
@@ -213,6 +231,16 @@ export async function POST(req: Request) {
         );
       }
 
+      await logActivity({
+        module: 'kesmavet',
+        submenu: 'pakan-ternak',
+        tableName: 'kesmavet_kapasitas_pakan',
+        recordId: String(newYear),
+        action: 'CREATE',
+        userName,
+        details: { action: 'add_year', newYear, sourceYear },
+      });
+
       return NextResponse.json({ success: true, message: `Tahun ${newYear} berhasil ditambahkan!` });
     }
 
@@ -242,6 +270,16 @@ export async function POST(req: Request) {
          keterangan=VALUES(keterangan)`,
       [itemId, itemYear, corelId || nama, nama, potPakan, kapTampung, jmlTernak, potPenambahan, status, keterangan || '']
     );
+
+    await logActivity({
+      module: 'kesmavet',
+      submenu: 'pakan-ternak',
+      tableName: 'kesmavet_kapasitas_pakan',
+      recordId: `${itemYear}-${itemId}`,
+      action: 'UPDATE',
+      userName,
+      details: { itemId, itemYear, nama, potPakan, kapTampung, jmlTernak, status },
+    });
 
     return NextResponse.json({ success: true, message: 'Data kapasitas pakan berhasil disimpan.' });
   } catch (error: any) {

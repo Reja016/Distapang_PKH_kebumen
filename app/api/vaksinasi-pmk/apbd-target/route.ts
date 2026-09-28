@@ -1,5 +1,7 @@
 import { NextResponse } from 'next/server';
 import { pool } from '@/lib/db';
+import { getSessionFromRequest } from '@/lib/session';
+import { logActivity } from '@/lib/auditLog';
 
 export async function GET() {
   try {
@@ -31,6 +33,25 @@ export async function POST(request: Request) {
        VALUES (?,?,?,?,?,?,?,?,?)`,
       [no_urut, puskeswan.trim(), target_lsd, target_ndai, target_rabies, target_aphtovaks, pengambilan_ndai, pengambilan_aphtovaks, catatan]
     );
+
+    const session = await getSessionFromRequest(request as any);
+    const userName = session?.nama || session?.nip_username || request.headers.get('x-user-name') || 'Petugas';
+
+    await logActivity({
+      module: 'keswan',
+      submenu: 'data-vaksinasi',
+      tableName: 'vaksin_apbd_target',
+      recordId: result.insertId,
+      action: 'CREATE',
+      userName,
+      details: {
+        puskeswan: puskeswan.trim(),
+        target_lsd,
+        target_ndai,
+        target_rabies,
+        target_aphtovaks,
+      },
+    });
 
     return NextResponse.json({ success: true, message: 'Target APBD Puskeswan berhasil ditambahkan.', id: result.insertId });
   } catch (error: any) {

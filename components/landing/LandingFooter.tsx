@@ -88,7 +88,7 @@ export function LandingFooter() {
           {/* KOLOM 1: IDENTITAS DINAS & PROFIL APLIKASI (Span 5 Kolom) */}
           <div className="lg:col-span-5 space-y-3 sm:space-y-4">
             <div className="flex items-center gap-3">
-              <div className="w-11 h-11 sm:w-12 sm:h-12 rounded-xl p-1.5 bg-white border border-blue-200/80 dark:bg-white/10 dark:border-white/20 flex items-center justify-center shrink-0 backdrop-blur-xs shadow-xs">
+              <div className="w-11 h-11 sm:w-12 sm:h-12 rounded-xl p-0.5 bg-white border border-slate-200 dark:border-slate-700 flex items-center justify-center shrink-0 shadow-xs overflow-hidden">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
                   src="/logo-simantap.png"

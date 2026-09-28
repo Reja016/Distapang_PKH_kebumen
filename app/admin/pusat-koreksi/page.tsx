@@ -84,6 +84,7 @@ const formatModuleLabel = (moduleKey: string, submenuKey: string) => {
     keswan: 'Keswan',
     kesmavet: 'Kesmavet',
     aset: 'Aset',
+    admin: 'Administrator',
   };
   const subMap: Record<string, string> = {
     'database-ktt': 'Database KTT',
@@ -101,6 +102,8 @@ const formatModuleLabel = (moduleKey: string, submenuKey: string) => {
     'pakan-ternak': 'Pakan Ternak',
     'rph-tph-tpu': 'RPH / TPH / TPU',
     'inventaris-kendaraan': 'Inventaris Kendaraan',
+    'anggota': 'Kelola Anggota',
+    'petugas-wilayah': 'Wilayah Kerja Petugas',
   };
 
   const m = modMap[moduleKey?.toLowerCase()] || moduleKey || 'Sistem';
@@ -160,8 +163,8 @@ const getActionBadge = (action: string) => {
 export default function PusatKoreksiPage() {
   const { isReady, isAdmin, userName, userRole, handleLogout } = usePageAuth('bitpro', 'pusat-koreksi');
 
-  // Navigation tab: 'audit' (Riwayat Perubahan), 'corrections' (Pengajuan Koreksi), or 'territory' (Wilayah Kerja Petugas)
-  const [activeTab, setActiveTab] = useState<'audit' | 'corrections' | 'territory'>('audit');
+  // Navigation tab: 'audit' (Riwayat Perubahan) or 'corrections' (Pengajuan Koreksi)
+  const [activeTab, setActiveTab] = useState<'audit' | 'corrections'>('audit');
 
   // State Pengajuan Koreksi
   const [requests, setRequests] = useState<any[]>([]);
@@ -188,29 +191,6 @@ export default function PusatKoreksiPage() {
   const [selectedLog, setSelectedLog] = useState<any | null>(null);
   const [detailModalTab, setDetailModalTab] = useState<'formatted' | 'raw'>('formatted');
 
-  // State Wilayah Kerja Petugas (Territory Management)
-  const [petugasList, setPetugasList] = useState<any[]>([]);
-  const [wilayahList, setWilayahList] = useState<any[]>([]);
-  const [usersList, setUsersList] = useState<any[]>([]);
-  const [isLoadingTerritory, setIsLoadingTerritory] = useState(true);
-  const [territorySearch, setTerritorySearch] = useState('');
-  const [isEditTerritoryModalOpen, setIsEditTerritoryModalOpen] = useState(false);
-  const [selectedPetugas, setSelectedPetugas] = useState<any | null>(null);
-  const [territoryForm, setTerritoryForm] = useState({
-    id_kompetensi: 0,
-    id_user: '',
-    id_wilayah_binaan: '',
-    wt1: '',
-    wt2: '',
-    wt3: '',
-    wt4: '',
-    wt5: '',
-    kompetensi: '',
-    wilayah_puskeswan: '',
-  });
-  const [isSavingTerritory, setIsSavingTerritory] = useState(false);
-  const [territoryToast, setTerritoryToast] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
-
   // Fetch Pengajuan Koreksi
   const fetchRequests = async () => {
     setIsLoadingRequests(true);
@@ -226,97 +206,6 @@ export default function PusatKoreksiPage() {
       setIsLoadingRequests(false);
     }
   };
-
-  // Fetch Wilayah Kerja Petugas
-  const fetchTerritoryData = async () => {
-    setIsLoadingTerritory(true);
-    try {
-      const res = await fetch('/api/admin/petugas-wilayah');
-      const json = await res.json();
-      if (json.success) {
-        setPetugasList(json.petugas || []);
-        setWilayahList(json.wilayah || []);
-        setUsersList(json.users || []);
-      }
-    } catch (e) {
-      console.error('Gagal mengambil data wilayah kerja petugas:', e);
-    } finally {
-      setIsLoadingTerritory(false);
-    }
-  };
-
-  const handleOpenEditTerritory = (p: any) => {
-    setSelectedPetugas(p);
-    setTerritoryForm({
-      id_kompetensi: p.id_kompetensi,
-      id_user: p.id_user ? String(p.id_user) : '',
-      id_wilayah_binaan: p.id_wilayah_binaan ? String(p.id_wilayah_binaan) : '',
-      wt1: p.wt1 ? String(p.wt1) : '',
-      wt2: p.wt2 ? String(p.wt2) : '',
-      wt3: p.wt3 ? String(p.wt3) : '',
-      wt4: p.wt4 ? String(p.wt4) : '',
-      wt5: p.wt5 ? String(p.wt5) : '',
-      kompetensi: p.kompetensi || '',
-      wilayah_puskeswan: p.wilayah_puskeswan || '',
-    });
-    setIsEditTerritoryModalOpen(true);
-  };
-
-  const handleSaveTerritory = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsSavingTerritory(true);
-    try {
-      const res = await fetch('/api/admin/petugas-wilayah', {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(territoryForm),
-      });
-      const json = await res.json();
-      if (json.success) {
-        setTerritoryToast({ type: 'success', message: json.message || 'Wilayah penugasan berhasil disimpan!' });
-        setTimeout(() => setTerritoryToast(null), 4000);
-        setIsEditTerritoryModalOpen(false);
-        fetchTerritoryData();
-      } else {
-        alert('Gagal: ' + (json.error || 'Terjadi kesalahan'));
-      }
-    } catch (err: any) {
-      alert('Gagal menyimpan perubahan: ' + err.message);
-    } finally {
-      setIsSavingTerritory(false);
-    }
-  };
-
-  const uniqueKecamatan = useMemo(() => {
-    const map = new Map();
-    wilayahList.forEach((w) => {
-      if (!map.has(w.id_kecamatan)) {
-        map.set(w.id_kecamatan, {
-          id_kecamatan: w.id_kecamatan,
-          binaan: w.binaan,
-          nama_puskeswan: w.nama_puskeswan,
-        });
-      }
-    });
-    return Array.from(map.values()).sort((a: any, b: any) => a.binaan.localeCompare(b.binaan));
-  }, [wilayahList]);
-
-  const filteredPetugasList = useMemo(() => {
-    if (!territorySearch.trim()) return petugasList;
-    const q = territorySearch.toLowerCase();
-    return petugasList.filter((p) => {
-      return (
-        (p.nama_petugas && p.nama_petugas.toLowerCase().includes(q)) ||
-        (p.nik && String(p.nik).includes(q)) ||
-        (p.kecamatan_utama && p.kecamatan_utama.toLowerCase().includes(q)) ||
-        (p.puskeswan_utama && p.puskeswan_utama.toLowerCase().includes(q)) ||
-        (p.wilayah_puskeswan && p.wilayah_puskeswan.toLowerCase().includes(q)) ||
-        (p.wilayah_kerja_tambahan && p.wilayah_kerja_tambahan.toLowerCase().includes(q)) ||
-        (p.user_nama && p.user_nama.toLowerCase().includes(q)) ||
-        (p.nip_username && p.nip_username.toLowerCase().includes(q))
-      );
-    });
-  }, [petugasList, territorySearch]);
 
   // Fetch Audit Logs
   const fetchAuditLogs = async (targetPage = page) => {
@@ -357,7 +246,6 @@ export default function PusatKoreksiPage() {
     if (isReady && isAdmin) {
       fetchRequests();
       fetchAuditLogs(1);
-      fetchTerritoryData();
     }
   }, [isReady, isAdmin]);
 
@@ -563,23 +451,6 @@ export default function PusatKoreksiPage() {
                 </span>
               )}
             </button>
-
-            <button
-              onClick={() => setActiveTab('territory')}
-              className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all ${
-                activeTab === 'territory'
-                  ? 'bg-white dark:bg-slate-800 text-blue-600 dark:text-blue-400 shadow-sm'
-                  : 'text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white'
-              }`}
-            >
-              <MapPin size={15} />
-              <span>Wilayah Kerja Petugas</span>
-              {petugasList.length > 0 && (
-                <span className="px-2 py-0.5 rounded-full text-[10px] bg-blue-100 dark:bg-blue-900/60 text-blue-700 dark:text-blue-300 font-extrabold">
-                  {petugasList.length}
-                </span>
-              )}
-            </button>
           </div>
         </div>
       </header>
@@ -670,6 +541,7 @@ export default function PusatKoreksiPage() {
                     <option value="keswan">Keswan (Kesehatan Hewan)</option>
                     <option value="kesmavet">Kesmavet</option>
                     <option value="aset">Aset</option>
+                    <option value="admin">Administrator (Anggota & Wilayah)</option>
                   </select>
                 </div>
 
@@ -1091,202 +963,6 @@ export default function PusatKoreksiPage() {
             </div>
           </div>
         )}
-
-        {/* ======================================================== */}
-        {/* TAB 3: WILAYAH KERJA PETUGAS (TERRITORY MANAGEMENT)     */}
-        {/* ======================================================== */}
-        {activeTab === 'territory' && (
-          <div className="space-y-6">
-            {territoryToast && (
-              <div className={`p-4 rounded-2xl flex items-center justify-between shadow-md animate-in fade-in slide-in-from-top-2 duration-200 ${
-                territoryToast.type === 'success'
-                  ? 'bg-emerald-600 text-white'
-                  : 'bg-red-600 text-white'
-              }`}>
-                <div className="flex items-center gap-2 text-sm font-bold">
-                  <CheckCircle size={18} />
-                  <span>{territoryToast.message}</span>
-                </div>
-                <button
-                  onClick={() => setTerritoryToast(null)}
-                  className="p-1 hover:bg-white/20 rounded-lg text-white"
-                >
-                  <X size={16} />
-                </button>
-              </div>
-            )}
-
-            {/* Summary Cards */}
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-              <div className="p-5 rounded-3xl bg-white dark:bg-slate-800 border border-slate-200/80 dark:border-slate-700 shadow-xs flex items-center gap-4">
-                <div className="p-3.5 rounded-2xl bg-blue-50 dark:bg-blue-950/50 text-blue-600 dark:text-blue-400">
-                  <User size={24} />
-                </div>
-                <div>
-                  <div className="text-xs text-slate-500 dark:text-slate-400 font-semibold">Total Petugas Teknis</div>
-                  <div className="text-2xl font-black text-slate-900 dark:text-white mt-0.5">{petugasList.length} Orang</div>
-                </div>
-              </div>
-
-              <div className="p-5 rounded-3xl bg-white dark:bg-slate-800 border border-slate-200/80 dark:border-slate-700 shadow-xs flex items-center gap-4">
-                <div className="p-3.5 rounded-2xl bg-emerald-50 dark:bg-emerald-950/50 text-emerald-600 dark:text-emerald-400">
-                  <Link2 size={24} />
-                </div>
-                <div>
-                  <div className="text-xs text-slate-500 dark:text-slate-400 font-semibold">Terhubung Akun Login</div>
-                  <div className="text-2xl font-black text-emerald-600 dark:text-emerald-400 mt-0.5">
-                    {petugasList.filter((p) => p.id_user).length} Petugas
-                  </div>
-                </div>
-              </div>
-
-              <div className="p-5 rounded-3xl bg-white dark:bg-slate-800 border border-slate-200/80 dark:border-slate-700 shadow-xs flex items-center gap-4">
-                <div className="p-3.5 rounded-2xl bg-purple-50 dark:bg-purple-950/50 text-purple-600 dark:text-purple-400">
-                  <MapPin size={24} />
-                </div>
-                <div>
-                  <div className="text-xs text-slate-500 dark:text-slate-400 font-semibold">Cakupan Wilayah</div>
-                  <div className="text-2xl font-black text-purple-600 dark:text-purple-400 mt-0.5">26 Kecamatan / 8 Puskeswan</div>
-                </div>
-              </div>
-            </div>
-
-            {/* Filter & Search Bar */}
-            <div className="bg-white dark:bg-slate-800 p-4 rounded-2xl border border-slate-200/80 dark:border-slate-700 shadow-xs flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
-              <div className="relative flex-1">
-                <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
-                <input
-                  type="text"
-                  placeholder="Cari nama petugas, NIP, wilayah binaan utama, atau wilayah tambahan..."
-                  value={territorySearch}
-                  onChange={(e) => setTerritorySearch(e.target.value)}
-                  className="w-full h-10 pl-10 pr-4 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900/50 text-xs font-semibold text-slate-900 dark:text-white focus:outline-none focus:border-blue-600 transition-colors"
-                />
-              </div>
-
-              <button
-                onClick={fetchTerritoryData}
-                disabled={isLoadingTerritory}
-                className="h-10 px-4 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-700/60 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 text-xs font-bold flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
-              >
-                <RefreshCw size={14} className={isLoadingTerritory ? 'animate-spin' : ''} />
-                <span>Segarkan Data</span>
-              </button>
-            </div>
-
-            {/* Table */}
-            <div className="bg-white dark:bg-slate-800 rounded-3xl border border-slate-200/80 dark:border-slate-700 shadow-sm overflow-hidden">
-              <div className="p-4 sm:p-5 border-b border-slate-100 dark:border-slate-700 flex flex-wrap items-center justify-between gap-2">
-                <div>
-                  <h3 className="font-extrabold text-base text-slate-900 dark:text-white">
-                    Daftar Penugasan Wilayah Kerja Petugas
-                  </h3>
-                  <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-                    Petugas hanya dapat menginput data IB dan Keswan sesuai wilayah wewenang utama &amp; tambahan
-                  </p>
-                </div>
-                <span className="text-xs font-bold text-slate-500 dark:text-slate-400 bg-slate-100 dark:bg-slate-700 px-3 py-1 rounded-full">
-                  Menampilkan {filteredPetugasList.length} dari {petugasList.length} petugas
-                </span>
-              </div>
-
-              <div className="overflow-x-auto">
-                {isLoadingTerritory ? (
-                  <div className="p-16 text-center text-slate-400 space-y-2">
-                    <div className="w-8 h-8 border-3 border-blue-600 border-t-transparent rounded-full animate-spin mx-auto"></div>
-                    <p className="text-xs">Memuat daftar penugasan wilayah petugas...</p>
-                  </div>
-                ) : filteredPetugasList.length === 0 ? (
-                  <div className="p-16 text-center text-slate-500 dark:text-slate-400">
-                    <User size={48} className="mx-auto text-slate-300 dark:text-slate-600 mb-3" />
-                    <p className="font-bold text-slate-700 dark:text-slate-200">Petugas tidak ditemukan.</p>
-                    <p className="text-xs text-slate-400 mt-1">Coba gunakan kata kunci pencarian yang lain.</p>
-                  </div>
-                ) : (
-                  <table className="w-full text-left border-collapse text-xs">
-                    <thead>
-                      <tr className="bg-slate-100/75 dark:bg-slate-700/50 border-b border-slate-200 dark:border-slate-700 text-[11px] font-extrabold text-slate-600 dark:text-slate-300 uppercase tracking-wider">
-                        <th className="p-4 text-center w-12">No</th>
-                        <th className="p-4 whitespace-nowrap">Nama Petugas &amp; NIP</th>
-                        <th className="p-4 whitespace-nowrap">Akun Login Terhubung</th>
-                        <th className="p-4 whitespace-nowrap">Wilayah Binaan Utama</th>
-                        <th className="p-4 min-w-[200px]">Wilayah Kerja Tambahan</th>
-                        <th className="p-4 whitespace-nowrap">Kompetensi</th>
-                        <th className="p-4 whitespace-nowrap text-center">Aksi</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-slate-100 dark:divide-slate-700/50">
-                      {filteredPetugasList.map((p, idx) => (
-                        <tr key={p.id_kompetensi || idx} className="hover:bg-blue-50/40 dark:hover:bg-slate-750 transition-colors">
-                          <td className="p-4 text-center font-bold text-slate-400">
-                            {p.no_urut || idx + 1}
-                          </td>
-
-                          <td className="p-4">
-                            <div className="font-extrabold text-slate-900 dark:text-white text-sm">
-                              {p.nama_petugas}
-                            </div>
-                            <div className="text-[11px] text-slate-500 dark:text-slate-400 font-mono mt-0.5">
-                              NIK/NIP: {p.nik || '-'}
-                            </div>
-                          </td>
-
-                          <td className="p-4">
-                            {p.id_user ? (
-                              <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800 text-emerald-700 dark:text-emerald-300 font-bold">
-                                <Link2 size={12} />
-                                <span>{p.user_nama || p.nip_username}</span>
-                              </div>
-                            ) : (
-                              <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-400 text-[11px] font-medium border border-slate-200 dark:border-slate-700">
-                                Belum Terhubung
-                              </span>
-                            )}
-                          </td>
-
-                          <td className="p-4">
-                            <div className="font-bold text-blue-900 dark:text-blue-300">
-                              Kec. {p.kecamatan_utama ? p.kecamatan_utama.charAt(0) + p.kecamatan_utama.slice(1).toLowerCase() : '-'}
-                            </div>
-                            <div className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">
-                              {p.puskeswan_utama || p.wilayah_puskeswan || '-'}
-                            </div>
-                          </td>
-
-                          <td className="p-4">
-                            {p.wilayah_kerja_tambahan ? (
-                              <span className="px-2.5 py-1 rounded-lg bg-blue-50 dark:bg-blue-950/50 text-blue-800 dark:text-blue-300 text-xs font-semibold border border-blue-200 dark:border-blue-800/60 inline-block">
-                                {p.wilayah_kerja_tambahan}
-                              </span>
-                            ) : (
-                              <span className="text-slate-400 text-[11px] italic">Tidak ada wilayah tambahan</span>
-                            )}
-                          </td>
-
-                          <td className="p-4">
-                            <span className="px-2 py-0.5 rounded-md bg-slate-100 dark:bg-slate-750 text-slate-700 dark:text-slate-300 font-bold text-[10px] uppercase tracking-wider">
-                              {p.kompetensi || 'IB'}
-                            </span>
-                          </td>
-
-                          <td className="p-4 text-center">
-                            <button
-                              onClick={() => handleOpenEditTerritory(p)}
-                              className="px-3.5 py-1.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs flex items-center gap-1.5 transition-colors shadow-xs mx-auto cursor-pointer"
-                            >
-                              <Edit3 size={13} />
-                              <span>Atur Wilayah</span>
-                            </button>
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                )}
-              </div>
-            </div>
-          </div>
-        )}
       </main>
 
       {/* ======================================================== */}
@@ -1487,170 +1163,6 @@ export default function PusatKoreksiPage() {
                 Tutup
               </button>
             </div>
-          </div>
-        </div>
-      )}
-
-      {/* ======================================================== */}
-      {/* MODAL PENGATURAN WILAYAH KERJA PETUGAS                   */}
-      {/* ======================================================== */}
-      {isEditTerritoryModalOpen && selectedPetugas && (
-        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4 overflow-y-auto animate-in fade-in duration-200">
-          <div className="bg-white dark:bg-slate-800 rounded-3xl max-w-xl w-full border border-slate-200 dark:border-slate-700 shadow-2xl overflow-hidden my-8">
-            <div className="p-5 border-b border-slate-100 dark:border-slate-700 flex justify-between items-center bg-slate-50/70 dark:bg-slate-800/80">
-              <div className="flex items-center gap-3">
-                <div className="p-2.5 rounded-2xl bg-blue-600 text-white">
-                  <MapPin size={20} />
-                </div>
-                <div>
-                  <h3 className="font-extrabold text-base text-slate-900 dark:text-white">
-                    Atur Wilayah Kerja Petugas
-                  </h3>
-                  <p className="text-xs text-slate-500 dark:text-slate-400">
-                    {selectedPetugas.nama_petugas} (NIK: {selectedPetugas.nik || '-'})
-                  </p>
-                </div>
-              </div>
-              <button
-                onClick={() => setIsEditTerritoryModalOpen(false)}
-                className="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 dark:bg-slate-700 text-slate-500 flex items-center justify-center font-bold cursor-pointer"
-              >
-                ✕
-              </button>
-            </div>
-
-            <form onSubmit={handleSaveTerritory} className="p-6 space-y-4 text-xs">
-              {/* Hubungkan Akun Pengguna */}
-              <div>
-                <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1 flex items-center justify-between">
-                  <span>Hubungkan Akun Login Petugas (anggota_users)</span>
-                  <span className="text-[10px] text-slate-400 font-normal">Opsional</span>
-                </label>
-                <select
-                  value={territoryForm.id_user}
-                  onChange={(e) => setTerritoryForm({ ...territoryForm, id_user: e.target.value })}
-                  className="w-full h-10 px-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 font-bold text-slate-900 dark:text-white focus:border-blue-600 outline-none"
-                >
-                  <option value="">-- Belum Dihubungkan ke Akun Login --</option>
-                  {usersList.map((u) => (
-                    <option key={u.id} value={u.id}>
-                      {u.nama} ({u.nip_username}) - Role: {u.role}
-                    </option>
-                  ))}
-                </select>
-                <p className="text-[11px] text-slate-500 mt-1">
-                  Saat user ini login, sistem secara otomatis menerapkan pembatasan wilayah kerja ini pada Form IB dan Keswan.
-                </p>
-              </div>
-
-              {/* Wilayah Binaan Utama */}
-              <div>
-                <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
-                  Wilayah Binaan Utama (Kecamatan &amp; Puskeswan) <span className="text-red-500">*</span>
-                </label>
-                <select
-                  required
-                  value={territoryForm.id_wilayah_binaan}
-                  onChange={(e) => {
-                    const selId = e.target.value;
-                    const found = wilayahList.find((w) => String(w.id_wilayah_binaan) === selId);
-                    setTerritoryForm({
-                      ...territoryForm,
-                      id_wilayah_binaan: selId,
-                      wilayah_puskeswan: found?.nama_puskeswan || territoryForm.wilayah_puskeswan,
-                    });
-                  }}
-                  className="w-full h-10 px-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 font-bold text-slate-900 dark:text-white focus:border-blue-600 outline-none"
-                >
-                  <option value="">-- Pilih Wilayah Binaan Utama --</option>
-                  {wilayahList.map((w) => (
-                    <option key={w.id_wilayah_binaan} value={w.id_wilayah_binaan}>
-                      Kec. {w.binaan} ({w.nama_puskeswan})
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              {/* Wilayah Kerja Tambahan wt1-wt5 */}
-              <div className="space-y-2 pt-2 border-t border-slate-100 dark:border-slate-700">
-                <label className="block text-xs font-bold text-slate-700 dark:text-slate-300">
-                  Wilayah Kerja Tambahan (wt1 s/d wt5)
-                </label>
-                <p className="text-[11px] text-slate-500 dark:text-slate-400">
-                  Pilih kecamatan tambahan yang juga menjadi wewenang tugas petugas ini
-                </p>
-
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-                  {[
-                    { label: 'Wilayah Tambahan 1 (wt1)', field: 'wt1' },
-                    { label: 'Wilayah Tambahan 2 (wt2)', field: 'wt2' },
-                    { label: 'Wilayah Tambahan 3 (wt3)', field: 'wt3' },
-                    { label: 'Wilayah Tambahan 4 (wt4)', field: 'wt4' },
-                    { label: 'Wilayah Tambahan 5 (wt5)', field: 'wt5' },
-                  ].map((item) => (
-                    <div key={item.field} className={item.field === 'wt5' ? 'sm:col-span-2' : ''}>
-                      <span className="text-[10px] font-bold text-slate-500 dark:text-slate-400 block mb-0.5">
-                        {item.label}
-                      </span>
-                      <select
-                        value={(territoryForm as any)[item.field]}
-                        onChange={(e) => setTerritoryForm({ ...territoryForm, [item.field]: e.target.value })}
-                        className="w-full h-9 px-3 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-xs font-semibold text-slate-900 dark:text-white focus:border-blue-600 outline-none"
-                      >
-                        <option value="">-- Tidak Ada Tambahan --</option>
-                        {uniqueKecamatan.map((k: any) => (
-                          <option key={k.id_kecamatan} value={k.id_kecamatan}>
-                            Kec. {k.binaan}
-                          </option>
-                        ))}
-                      </select>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              {/* Kompetensi */}
-              <div>
-                <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
-                  Kompetensi Petugas
-                </label>
-                <input
-                  type="text"
-                  value={territoryForm.kompetensi}
-                  onChange={(e) => setTerritoryForm({ ...territoryForm, kompetensi: e.target.value })}
-                  placeholder="Contoh: IB, ATR, PKB"
-                  className="w-full h-10 px-3.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 font-bold text-slate-900 dark:text-white focus:border-blue-600 outline-none"
-                />
-              </div>
-
-              {/* Modal Buttons */}
-              <div className="flex gap-2 pt-3 border-t border-slate-100 dark:border-slate-700">
-                <button
-                  type="button"
-                  onClick={() => setIsEditTerritoryModalOpen(false)}
-                  className="flex-1 h-11 rounded-xl border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 text-xs font-bold hover:bg-slate-50 dark:hover:bg-slate-700 cursor-pointer"
-                >
-                  Batal
-                </button>
-                <button
-                  type="submit"
-                  disabled={isSavingTerritory}
-                  className="flex-1 h-11 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold transition-colors shadow-xs flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-50"
-                >
-                  {isSavingTerritory ? (
-                    <>
-                      <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                      <span>Menyimpan...</span>
-                    </>
-                  ) : (
-                    <>
-                      <Check size={14} />
-                      <span>Simpan Wilayah Kerja</span>
-                    </>
-                  )}
-                </button>
-              </div>
-            </form>
           </div>
         </div>
       )}

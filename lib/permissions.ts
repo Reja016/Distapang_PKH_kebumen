@@ -103,3 +103,53 @@ export const DEFAULT_VIEW_ONLY_PERMISSIONS: UserPermissions = {
     },
   },
 };
+
+export function getDefaultPermissionsForRole(role: string): UserPermissions {
+  const r = (role || '').toLowerCase();
+  if (r === 'administrator' || r === 'admin' || r === 'superadmin') {
+    return JSON.parse(JSON.stringify(DEFAULT_FULL_PERMISSIONS));
+  }
+
+  const base: UserPermissions = JSON.parse(JSON.stringify(DEFAULT_VIEW_ONLY_PERMISSIONS));
+
+  if (r === 'tim bitpro') {
+    base.bitpro.enabled = true;
+    base.bitpro.mode = 'edit';
+    Object.keys(base.bitpro.submenus).forEach((s) => {
+      base.bitpro.submenus[s] = { enabled: true, mode: 'edit' };
+    });
+  } else if (r === 'tim keswan') {
+    base.keswan.enabled = true;
+    base.keswan.mode = 'edit';
+    Object.keys(base.keswan.submenus).forEach((s) => {
+      base.keswan.submenus[s] = { enabled: true, mode: 'edit' };
+    });
+  } else if (r === 'tim kesmavet') {
+    base.kesmavet.enabled = true;
+    base.kesmavet.mode = 'edit';
+    Object.keys(base.kesmavet.submenus).forEach((s) => {
+      base.kesmavet.submenus[s] = { enabled: true, mode: 'edit' };
+    });
+  } else if (r === 'puskeswan') {
+    base.keswan.enabled = true;
+    base.keswan.mode = 'edit';
+    base.keswan.submenus['puskeswan'] = { enabled: true, mode: 'edit' };
+    base.keswan.submenus['data-vaksinasi'] = { enabled: true, mode: 'edit' };
+    base.keswan.submenus['laporan-penyakit'] = { enabled: true, mode: 'edit' };
+    base.keswan.submenus['lalu-lintas-ternak'] = { enabled: true, mode: 'edit' };
+  } else if (r === 'petugas lapangan') {
+    // Form IB & Keswan
+    base.bitpro.enabled = true;
+    base.bitpro.mode = 'edit';
+    base.bitpro.submenus['sapitime'] = { enabled: true, mode: 'edit' };
+    base.bitpro.submenus['database-ib'] = { enabled: true, mode: 'edit' };
+
+    base.keswan.enabled = true;
+    base.keswan.mode = 'edit';
+    base.keswan.submenus['data-vaksinasi'] = { enabled: true, mode: 'edit' };
+    base.keswan.submenus['laporan-penyakit'] = { enabled: true, mode: 'edit' };
+    base.keswan.submenus['puskeswan'] = { enabled: true, mode: 'edit' };
+  }
+
+  return base;
+}

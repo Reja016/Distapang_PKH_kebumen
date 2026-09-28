@@ -1,5 +1,7 @@
 import { NextResponse } from 'next/server';
 import { pool } from '@/lib/db';
+import { getSessionFromRequest } from '@/lib/session';
+import { logActivity } from '@/lib/auditLog';
 
 // GET → ambil rekap bulanan, realisasi/kekurangan/Jan-Des dihitung otomatis
 // dari SUM data harian di tabel vaksinasi_harian sesuai tahun yang dipilih
@@ -65,6 +67,23 @@ export async function POST(request: Request) {
       'INSERT INTO vaksinasi_bulanan (no_urut, puskeswan, target, pengambilan) VALUES (?,?,?,?)',
       [no_urut, puskeswan.trim(), target, pengambilan]
     );
+
+    const session = await getSessionFromRequest(request as any);
+    const userName = session?.nama || session?.nip_username || request.headers.get('x-user-name') || 'Petugas';
+
+    await logActivity({
+      module: 'keswan',
+      submenu: 'data-vaksinasi',
+      tableName: 'vaksinasi_bulanan',
+      recordId: result.insertId,
+      action: 'CREATE',
+      userName,
+      details: {
+        puskeswan: puskeswan.trim(),
+        target,
+        pengambilan,
+      },
+    });
 
     return NextResponse.json({ success: true, message: 'Puskeswan berhasil ditambahkan.', id: result.insertId });
   } catch (error: any) {

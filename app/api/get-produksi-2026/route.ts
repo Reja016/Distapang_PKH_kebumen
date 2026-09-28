@@ -1,5 +1,7 @@
 import { NextResponse } from 'next/server';
 import pool from '@/lib/db';
+import { getSessionFromRequest } from '@/lib/session';
+import { logActivity } from '@/lib/auditLog';
 
 export const dynamic = 'force-dynamic';
 
@@ -107,6 +109,19 @@ export async function POST(request: Request) {
       [kategori, jenis, Number(jan) || 0, Number(feb) || 0, Number(mar) || 0, Number(apr) || 0, Number(mei) || 0, Number(jun) || 0, Number(jul) || 0, Number(agt) || 0, Number(sep) || 0, Number(okt) || 0, Number(nov) || 0, Number(des) || 0, total]
     );
 
+    const session = await getSessionFromRequest(request as any);
+    const userName = session?.nama || session?.nip_username || request.headers.get('x-user-name') || 'Petugas';
+
+    await logActivity({
+      module: 'bitpro',
+      submenu: 'populasi-dan-produksi',
+      tableName: 'produksi_2026',
+      recordId: result.insertId,
+      action: 'CREATE',
+      userName,
+      details: { kategori, jenis, total },
+    });
+
     return NextResponse.json({ success: true, insertId: result.insertId, message: 'Data produksi 2026 berhasil ditambahkan' });
   } catch (error: any) {
     console.error('Error POST produksi_2026:', error);
@@ -124,6 +139,20 @@ export async function DELETE(request: Request) {
     }
 
     await pool.query('DELETE FROM produksi_2026 WHERE id = ?', [id]);
+
+    const session = await getSessionFromRequest(request as any);
+    const userName = session?.nama || session?.nip_username || request.headers.get('x-user-name') || 'Petugas';
+
+    await logActivity({
+      module: 'bitpro',
+      submenu: 'populasi-dan-produksi',
+      tableName: 'produksi_2026',
+      recordId: id,
+      action: 'DELETE',
+      userName,
+      details: { id },
+    });
+
     return NextResponse.json({ success: true, message: 'Data produksi berhasil dihapus' });
   } catch (error: any) {
     return NextResponse.json({ success: false, error: error.message }, { status: 500 });

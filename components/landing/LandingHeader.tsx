@@ -50,7 +50,7 @@ export default function LandingHeader({
         <div className="max-w-[1360px] mx-auto px-4 sm:px-6 md:px-8 py-3.5 sm:py-5 flex items-center justify-between">
           {/* Logo Brand */}
           <div className="flex items-center gap-2.5 sm:gap-3">
-            <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-blue-50/60 dark:bg-blue-950/40 border-2 border-blue-200 dark:border-blue-800 p-1 flex items-center justify-center shrink-0 shadow-2xs">
+            <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-xl bg-white border border-slate-200 dark:border-slate-700 p-0.5 flex items-center justify-center shrink-0 shadow-xs overflow-hidden">
               <img
                 src="/logo-simantap.png"
                 alt="Logo SiMantap"

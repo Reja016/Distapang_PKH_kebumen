@@ -112,7 +112,7 @@ export default function LoginPage() {
         
         {/* Brand & Identity */}
         <div className="text-center mb-8 space-y-2">
-          <div className="w-14 h-14 rounded-2xl bg-white border border-slate-200 p-2 mx-auto flex items-center justify-center shadow-xs">
+          <div className="w-14 h-14 rounded-2xl bg-white border border-slate-200 p-1 mx-auto flex items-center justify-center shadow-xs overflow-hidden">
             <img
               src="/logo-simantap.png"
               alt="Logo SiMantap"

@@ -1,6 +1,8 @@
 import { NextResponse } from 'next/server';
 import pool from '@/lib/db';
 import { PuskeswanProfil, initialPuskeswanProfiles, DEFAULT_JADWAL_HARIAN } from '@/lib/puskeswanData';
+import { getSessionFromRequest } from '@/lib/session';
+import { logActivity } from '@/lib/auditLog';
 
 export const dynamic = 'force-dynamic';
 
@@ -150,6 +152,25 @@ export async function POST(req: Request) {
       ]
     );
 
+    const session = await getSessionFromRequest(req as any);
+    const userName = session?.nama || session?.nip_username || req.headers.get('x-user-name') || 'Petugas';
+
+    await logActivity({
+      module: 'keswan',
+      submenu: 'puskeswan',
+      tableName: 'puskeswan_profil',
+      recordId: String(result.insertId),
+      action: 'CREATE',
+      userName,
+      details: {
+        nama,
+        kode: kodePuskeswan,
+        wilayah_binaan,
+        alamat,
+        dokter_hewan,
+      },
+    });
+
     return NextResponse.json({
       success: true,
       data: {
@@ -227,6 +248,26 @@ export async function PUT(req: Request) {
       ]
     );
 
+    const session = await getSessionFromRequest(req as any);
+    const userName = session?.nama || session?.nip_username || req.headers.get('x-user-name') || 'Petugas';
+
+    await logActivity({
+      module: 'keswan',
+      submenu: 'puskeswan',
+      tableName: 'puskeswan_profil',
+      recordId: String(id),
+      action: 'UPDATE',
+      userName,
+      details: {
+        id,
+        nama,
+        kode: kode || nama.toUpperCase().replace(/[^A-Z0-9]/g, '_'),
+        wilayah_binaan,
+        alamat,
+        dokter_hewan,
+      },
+    });
+
     return NextResponse.json({ success: true, message: 'Profil Puskeswan berhasil diperbarui.' });
   } catch (error: any) {
     return NextResponse.json({ success: false, error: error.message }, { status: 500 });
@@ -244,6 +285,19 @@ export async function DELETE(req: Request) {
 
     await ensureTable();
     await pool.execute(`DELETE FROM puskeswan_profil WHERE id=?`, [id]);
+
+    const session = await getSessionFromRequest(req as any);
+    const userName = session?.nama || session?.nip_username || req.headers.get('x-user-name') || 'Petugas';
+
+    await logActivity({
+      module: 'keswan',
+      submenu: 'puskeswan',
+      tableName: 'puskeswan_profil',
+      recordId: String(id),
+      action: 'DELETE',
+      userName,
+      details: { id },
+    });
 
     return NextResponse.json({ success: true, message: 'Profil Puskeswan berhasil dihapus.' });
   } catch (error: any) {

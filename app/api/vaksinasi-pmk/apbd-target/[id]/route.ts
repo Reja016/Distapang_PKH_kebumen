@@ -1,5 +1,7 @@
 import { NextResponse } from 'next/server';
 import { pool } from '@/lib/db';
+import { getSessionFromRequest } from '@/lib/session';
+import { logActivity } from '@/lib/auditLog';
 
 const EDITABLE_FIELDS = [
   'no_urut', 'puskeswan', 'target_lsd', 'target_ndai', 'target_rabies',
@@ -29,6 +31,19 @@ export async function PUT(request: Request, { params }: { params: { id: string }
       return NextResponse.json({ success: false, error: 'Data tidak ditemukan.' }, { status: 404 });
     }
 
+    const session = await getSessionFromRequest(request as any);
+    const userName = session?.nama || session?.nip_username || request.headers.get('x-user-name') || 'Petugas';
+
+    await logActivity({
+      module: 'keswan',
+      submenu: 'data-vaksinasi',
+      tableName: 'vaksin_apbd_target',
+      recordId: id,
+      action: 'UPDATE',
+      userName,
+      details: body,
+    });
+
     return NextResponse.json({ success: true, message: 'Target APBD berhasil diperbarui.' });
   } catch (error: any) {
     return NextResponse.json({ success: false, error: error.message }, { status: 500 });
@@ -43,6 +58,19 @@ export async function DELETE(request: Request, { params }: { params: { id: strin
     if (result.affectedRows === 0) {
       return NextResponse.json({ success: false, error: 'Data tidak ditemukan.' }, { status: 404 });
     }
+
+    const session = await getSessionFromRequest(request as any);
+    const userName = session?.nama || session?.nip_username || request.headers.get('x-user-name') || 'Petugas';
+
+    await logActivity({
+      module: 'keswan',
+      submenu: 'data-vaksinasi',
+      tableName: 'vaksin_apbd_target',
+      recordId: id,
+      action: 'DELETE',
+      userName,
+      details: { id },
+    });
 
     return NextResponse.json({ success: true, message: 'Data target APBD berhasil dihapus.' });
   } catch (error: any) {

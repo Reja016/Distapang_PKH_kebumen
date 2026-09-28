@@ -1,5 +1,7 @@
 import { NextResponse } from 'next/server';
 import { pool } from '@/lib/db';
+import { getSessionFromRequest } from '@/lib/session';
+import { logActivity } from '@/lib/auditLog';
 
 const EDITABLE_FIELDS = ['no_urut', 'puskeswan', 'target', 'pengambilan'];
 
@@ -26,6 +28,19 @@ export async function PUT(request: Request, { params }: { params: { id: string }
       return NextResponse.json({ success: false, error: 'Data tidak ditemukan.' }, { status: 404 });
     }
 
+    const session = await getSessionFromRequest(request as any);
+    const userName = session?.nama || session?.nip_username || request.headers.get('x-user-name') || 'Petugas';
+
+    await logActivity({
+      module: 'keswan',
+      submenu: 'data-vaksinasi',
+      tableName: 'vaksinasi_bulanan',
+      recordId: id,
+      action: 'UPDATE',
+      userName,
+      details: body,
+    });
+
     return NextResponse.json({ success: true, message: 'Data berhasil diperbarui.' });
   } catch (error: any) {
     if (error.code === 'ER_DUP_ENTRY') {
@@ -51,6 +66,19 @@ export async function DELETE(request: Request, { params }: { params: { id: strin
     await conn.execute('DELETE FROM vaksinasi_harian WHERE puskeswan = ?', [puskeswanName]);
     await conn.execute('DELETE FROM vaksinasi_bulanan WHERE id = ?', [id]);
     await conn.commit();
+
+    const session = await getSessionFromRequest(request as any);
+    const userName = session?.nama || session?.nip_username || request.headers.get('x-user-name') || 'Petugas';
+
+    await logActivity({
+      module: 'keswan',
+      submenu: 'data-vaksinasi',
+      tableName: 'vaksinasi_bulanan',
+      recordId: id,
+      action: 'DELETE',
+      userName,
+      details: { puskeswan: puskeswanName },
+    });
 
     return NextResponse.json({ success: true, message: 'Puskeswan & seluruh data hariannya berhasil dihapus.' });
   } catch (error: any) {

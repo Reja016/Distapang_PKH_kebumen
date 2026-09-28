@@ -227,9 +227,7 @@ export default function SidebarNav({
             }`}
           >
             <div
-              className={`w-10 h-10 rounded-xl p-1.5 flex items-center justify-center shrink-0 border-2 ${
-                isDark ? 'bg-slate-800 border-slate-700' : 'bg-white border-slate-300 shadow-xs'
-              }`}
+              className="w-10 h-10 rounded-xl p-0.5 flex items-center justify-center shrink-0 border border-slate-200 dark:border-slate-700 bg-white shadow-xs overflow-hidden"
               title="SiMantap Kebumen"
             >
               <img
@@ -255,11 +253,7 @@ export default function SidebarNav({
           >
             <div className="flex items-center gap-3">
               <div
-                className={`w-10 h-10 rounded-xl p-1.5 flex items-center justify-center shrink-0 border-2 ${
-                  isDark
-                    ? 'bg-slate-800 border-slate-700'
-                    : 'bg-white border-slate-300 shadow-xs'
-                }`}
+                className="w-10 h-10 rounded-xl p-0.5 flex items-center justify-center shrink-0 border border-slate-200 dark:border-slate-700 bg-white shadow-xs overflow-hidden"
               >
                 <img
                   src="/logo-simantap.png"
@@ -658,17 +652,17 @@ export default function SidebarNav({
           >
             {isAdmin && (
               <>
-                <button
-                  onClick={onOpenUserModal}
+                <Link
+                  href="/admin/anggota"
                   className={`w-10 h-10 rounded-xl border-2 flex items-center justify-center transition-colors cursor-pointer ${
                     isDark
                       ? 'bg-slate-800 border-slate-700 text-emerald-400 hover:bg-slate-700'
                       : 'bg-white border-slate-300 text-emerald-600 hover:bg-slate-50 shadow-2xs'
                   }`}
-                  title="Kelola Akun & Hak Akses"
+                  title="Kelola Anggota & Wilayah Kerja"
                 >
                   <Users size={16} />
-                </button>
+                </Link>
 
                 <button
                   onClick={onOpenBackupModal}
@@ -726,18 +720,18 @@ export default function SidebarNav({
             {isAdmin && (
               <div className="pb-0.5">
                 <div className="grid grid-cols-2 gap-1.5">
-                  <button
-                    onClick={onOpenUserModal}
+                  <Link
+                    href="/admin/anggota"
                     className={`w-full py-2 px-2 rounded-xl border-2 text-[11px] font-bold flex items-center justify-center gap-1.5 transition-colors cursor-pointer ${
                       isDark
                         ? 'bg-slate-800 border-slate-700 text-slate-200 hover:bg-slate-700'
                         : 'bg-white border-slate-300 text-slate-800 hover:bg-slate-50 shadow-2xs'
                     }`}
-                    title="Kelola Akun & Hak Akses"
+                    title="Kelola Anggota & Wilayah Kerja"
                   >
                     <Users size={14} className="text-emerald-600 shrink-0" />
                     <span className="truncate">Anggota</span>
-                  </button>
+                  </Link>
 
                   <button
                     onClick={onOpenBackupModal}
