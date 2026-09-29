@@ -12,6 +12,7 @@ import {
   emptyFormValues,
   KECAMATAN_OPTIONS,
   PAGE_SIZE,
+  rezaFormatKttData,
 } from '@/components/bitpro/database-ktt/types';
 import KttSidebar from '@/components/bitpro/database-ktt/KttSidebar';
 import KttTableSection from '@/components/bitpro/database-ktt/KttTableSection';
@@ -61,7 +62,7 @@ export default function DatabaseKTTPage() {
         const foundArray = Object.values(jsonData).find((val) => Array.isArray(val));
         if (foundArray) validData = foundArray as KelompokTani[];
       }
-      setData(validData);
+      setData(rezaFormatKttData(validData));
     } catch (error) {
       console.error('Gagal meload data KTT:', error);
       setData([]);

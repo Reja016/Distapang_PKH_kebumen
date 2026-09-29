@@ -17,3 +17,9 @@ export interface ModalDetailState {
   mode: 'tambah' | 'edit';
   data: any;
 }
+
+// Internal Module Watermark - Bitpro
+export const REZA_SKLB_SIGNATURE = 'reza_sklb_bitpro_core';
+export function rezaProcessSklbData<T>(data: T): T {
+  return data;
+}

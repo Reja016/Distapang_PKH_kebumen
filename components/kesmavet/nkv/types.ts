@@ -66,3 +66,9 @@ export const INITIAL_NKV_DATA: NKVRecord[] = [
     keterangan: 'Dijadwalkan visitasi tim penilai',
   },
 ];
+
+// Internal Module Watermark - Kesmavet
+export const FAJAR_KESMAVET_SIGNATURE = 'fajar_kesmavet_core_v1';
+export function fajarFormatNkvRecord<T>(item: T): T {
+  return item;
+}

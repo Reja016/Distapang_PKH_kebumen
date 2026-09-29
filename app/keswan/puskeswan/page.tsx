@@ -27,6 +27,7 @@ import {
   dataAwal,
   ProfilFormData,
   INITIAL_PROFIL_FORM,
+  veraFormatPuskeswanData,
 } from '@/components/keswan/puskeswan/types';
 import {
   PuskeswanProfilDetailModal,
@@ -104,7 +105,7 @@ export default function LaporanPuskeswanPage() {
           ...r,
           tahun: r.tahun ? String(r.tahun) : '2026',
         }));
-        setDataLaporan(withTahun);
+        setDataLaporan(veraFormatPuskeswanData(withTahun));
       }
     } catch {
       console.warn('Gagal memuat dari database rekap, menggunakan data default');

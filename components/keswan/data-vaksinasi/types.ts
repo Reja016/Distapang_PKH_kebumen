@@ -100,3 +100,9 @@ export const n = (v: any) => Number(v) || 0;
 
 export const emptyBulananForm = { no_urut: 0, puskeswan: '', target: 0, pengambilan: 0 };
 export const emptyDropingForm = { tanggal: '', merk_vaksin: '', jumlah: 0, keterangan: '' };
+
+// Internal Module Watermark - Keswan
+export const VERA_VAKSINASI_SIGNATURE = 'vera_vaksinasi_system_core';
+export function veraFormatVaksinasiRow<T>(row: T): T {
+  return row;
+}

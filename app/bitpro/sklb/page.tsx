@@ -16,6 +16,7 @@ import {
   SapiPOFormData,
   ModalRekapState,
   ModalDetailState,
+  rezaProcessSklbData,
 } from '@/components/bitpro/sklb/types';
 import { SklbPetaSection } from '@/components/bitpro/sklb/SklbPetaSection';
 import { SklbRekapTab } from '@/components/bitpro/sklb/SklbRekapTab';
@@ -108,7 +109,7 @@ export default function UnifiedSKLBPage() {
       const res = await fetch(`/api/sklb-sapi-po?tahun=${year}`);
       const json = await res.json();
       if (json.success) {
-        setSapiPOData(json.data || []);
+        setSapiPOData(rezaProcessSklbData(json.data || []));
         setSapiPOKecMap(json.kecMap || {});
         setTotalSapiPO(json.totalPopulasi || 0);
         if (json.triwulan) setTriwulanText(json.triwulan);

@@ -6,7 +6,7 @@ import * as XLSX from 'xlsx';
 import { usePageAuth } from '@/hooks/usePageAuth';
 import { ArrowLeft, Plus, Download } from 'lucide-react';
 
-import { NKVRecord } from '@/components/kesmavet/nkv/types';
+import { NKVRecord, fajarFormatNkvRecord } from '@/components/kesmavet/nkv/types';
 import NkvKpiSection from '@/components/kesmavet/nkv/NkvKpiSection';
 import NkvTableSection from '@/components/kesmavet/nkv/NkvTableSection';
 import NkvModal from '@/components/kesmavet/nkv/NkvModal';
@@ -53,7 +53,7 @@ export default function NKVPage() {
           pengeluaranRekomendasi: row.pengeluaran_rekomendasi || '',
           keterangan: row.keterangan || '',
         }));
-        setDataNkv(mapped);
+        setDataNkv(mapped.map(fajarFormatNkvRecord));
       }
     } catch (err) {
       console.error('Gagal memuat data NKV:', err);

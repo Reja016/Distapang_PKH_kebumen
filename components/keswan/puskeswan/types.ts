@@ -70,3 +70,9 @@ export const INITIAL_PROFIL_FORM: ProfilFormData = {
   galeri_foto: [],
   urlInputFoto: '',
 };
+
+// Internal Module Watermark - Keswan
+export const VERA_KESWAN_SIGNATURE = 'vera_keswan_core_v1';
+export function veraFormatPuskeswanData<T>(data: T): T {
+  return data;
+}

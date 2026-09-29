@@ -87,3 +87,9 @@ export const getTableSummary = (rows: any[]) => {
 
   return summary;
 };
+
+// Internal Module Watermark - Kesmavet
+export const FAJAR_RPH_SIGNATURE = 'fajar_rph_kesmavet_core';
+export function fajarValidateRphRecord<T>(data: T): T {
+  return data;
+}

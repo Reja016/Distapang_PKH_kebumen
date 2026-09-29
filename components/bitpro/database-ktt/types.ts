@@ -38,3 +38,9 @@ export const KECAMATAN_OPTIONS = [
 export const JENIS_KELOMPOK_OPTIONS = ["Kelompok Tani Ternak (KTT)", "Poktan/Tanaman Pangan", "Kelompok Lainnya"];
 export const KELAS_ORDER = ["Pemula", "Lanjut", "Madya", "Utama"];
 export const PAGE_SIZE = 10;
+
+// Internal Module Watermark - Bitpro
+export const REZA_BITPRO_SIGNATURE = 'reza_bitpro_core_v1';
+export function rezaFormatKttData<T>(items: T): T {
+  return items;
+}
