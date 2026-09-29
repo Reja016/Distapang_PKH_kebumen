@@ -13,126 +13,213 @@ function formatAnimalName(name: string) {
 
 export async function GET() {
   try {
-    // 1. QUERY POPULASI MURNI DARI DATABASE MYSQL (Triwulan Terakhir)
+    // 1. QUERY POPULASI DARI DATABASE MYSQL (Direct Columns from `populasi`)
     let populasi16: { komoditas: string; total: number }[] = [];
     let populasiTernak8: { komoditas: string; total: number }[] = [];
     let populasiUnggas8: { komoditas: string; total: number }[] = [];
 
-    const [popRows]: any = await pool.query(`
-      SELECT 
-        h.jenis_hewan,
-        COALESCE(SUM(p.total), 0) AS total
-      FROM populasi p
-      JOIN hewan h ON p.id_hewan = h.id_hewan
-      WHERE p.tahun = (SELECT COALESCE(MAX(tahun), 2025) FROM populasi)
-        AND p.triwulan = (SELECT COALESCE(MAX(triwulan), 4) FROM populasi WHERE tahun = (SELECT COALESCE(MAX(tahun), 2025) FROM populasi))
-      GROUP BY h.id_hewan, h.jenis_hewan
-    `);
+    try {
+      const [popRows]: any = await pool.query(`
+        SELECT 
+          COALESCE(SUM(total_sapi_potong), 0) AS sapi_potong,
+          COALESCE(SUM(total_sapi_perah), 0) AS sapi_perah,
+          COALESCE(SUM(total_kerbau), 0) AS kerbau,
+          COALESCE(SUM(total_kuda), 0) AS kuda,
+          COALESCE(SUM(total_kambing), 0) AS kambing,
+          COALESCE(SUM(total_domba), 0) AS domba,
+          COALESCE(SUM(total_babi), 0) AS babi,
+          COALESCE(SUM(ayam_kampung), 0) AS ayam_kampung,
+          COALESCE(SUM(ayam_petelur), 0) AS ayam_petelur,
+          COALESCE(SUM(ayam_broiller), 0) AS ayam_broiler,
+          COALESCE(SUM(puyuh), 0) AS puyuh,
+          COALESCE(SUM(itik), 0) AS itik,
+          COALESCE(SUM(entog), 0) AS entog,
+          COALESCE(SUM(angsa), 0) AS angsa,
+          COALESCE(SUM(merpati), 0) AS merpati,
+          COALESCE(SUM(kelinci), 0) AS kelinci
+        FROM populasi
+        WHERE tahun = (SELECT COALESCE(MAX(tahun), 2025) FROM populasi)
+          AND triwulan = (SELECT COALESCE(MAX(triwulan), 4) FROM populasi WHERE tahun = (SELECT COALESCE(MAX(tahun), 2025) FROM populasi))
+      `);
 
-    const popMap: Record<string, number> = {};
-    if (popRows && popRows.length > 0) {
-      popRows.forEach((r: any) => {
-        popMap[String(r.jenis_hewan || '').toLowerCase()] = Number(r.total) || 0;
-      });
+      let popMap: Record<string, number> = {};
+      if (popRows && popRows.length > 0) {
+        const r = popRows[0];
+        popMap = {
+          sapi_potong: Number(r.sapi_potong) || 0,
+          sapi_perah: Number(r.sapi_perah) || 0,
+          kerbau: Number(r.kerbau) || 0,
+          kuda: Number(r.kuda) || 0,
+          kambing: Number(r.kambing) || 0,
+          domba: Number(r.domba) || 0,
+          babi: Number(r.babi) || 0,
+          ayam_kampung: Number(r.ayam_kampung) || 0,
+          ayam_petelur: Number(r.ayam_petelur) || 0,
+          ayam_broiler: Number(r.ayam_broiler) || 0,
+          puyuh: Number(r.puyuh) || 0,
+          itik: Number(r.itik) || 0,
+          entog: Number(r.entog) || 0,
+          angsa: Number(r.angsa) || 0,
+          merpati: Number(r.merpati) || 0,
+          kelinci: Number(r.kelinci) || 0,
+        };
+      }
+
+      // Fallback jika triwulan terakhir belum ada data sama sekali, ambil seluruh tahun terakhir
+      const totalAll = Object.values(popMap).reduce((a, b) => a + b, 0);
+      if (totalAll === 0) {
+        const [fallbackPop]: any = await pool.query(`
+          SELECT 
+            COALESCE(SUM(total_sapi_potong), 0) AS sapi_potong,
+            COALESCE(SUM(total_sapi_perah), 0) AS sapi_perah,
+            COALESCE(SUM(total_kerbau), 0) AS kerbau,
+            COALESCE(SUM(total_kuda), 0) AS kuda,
+            COALESCE(SUM(total_kambing), 0) AS kambing,
+            COALESCE(SUM(total_domba), 0) AS domba,
+            COALESCE(SUM(total_babi), 0) AS babi,
+            COALESCE(SUM(ayam_kampung), 0) AS ayam_kampung,
+            COALESCE(SUM(ayam_petelur), 0) AS ayam_petelur,
+            COALESCE(SUM(ayam_broiller), 0) AS ayam_broiler,
+            COALESCE(SUM(puyuh), 0) AS puyuh,
+            COALESCE(SUM(itik), 0) AS itik,
+            COALESCE(SUM(entog), 0) AS entog,
+            COALESCE(SUM(angsa), 0) AS angsa,
+            COALESCE(SUM(merpati), 0) AS merpati,
+            COALESCE(SUM(kelinci), 0) AS kelinci
+          FROM populasi
+          WHERE tahun = (SELECT COALESCE(MAX(tahun), 2025) FROM populasi)
+        `);
+        if (fallbackPop && fallbackPop.length > 0) {
+          const r = fallbackPop[0];
+          popMap = {
+            sapi_potong: Number(r.sapi_potong) || 0,
+            sapi_perah: Number(r.sapi_perah) || 0,
+            kerbau: Number(r.kerbau) || 0,
+            kuda: Number(r.kuda) || 0,
+            kambing: Number(r.kambing) || 0,
+            domba: Number(r.domba) || 0,
+            babi: Number(r.babi) || 0,
+            ayam_kampung: Number(r.ayam_kampung) || 0,
+            ayam_petelur: Number(r.ayam_petelur) || 0,
+            ayam_broiler: Number(r.ayam_broiler) || 0,
+            puyuh: Number(r.puyuh) || 0,
+            itik: Number(r.itik) || 0,
+            entog: Number(r.entog) || 0,
+            angsa: Number(r.angsa) || 0,
+            merpati: Number(r.merpati) || 0,
+            kelinci: Number(r.kelinci) || 0,
+          };
+        }
+      }
+
+      populasi16 = [
+        { komoditas: 'Sapi Potong', total: popMap['sapi_potong'] || 0 },
+        { komoditas: 'Sapi Perah', total: popMap['sapi_perah'] || 0 },
+        { komoditas: 'Kerbau', total: popMap['kerbau'] || 0 },
+        { komoditas: 'Kuda', total: popMap['kuda'] || 0 },
+        { komoditas: 'Kambing', total: popMap['kambing'] || 0 },
+        { komoditas: 'Domba', total: popMap['domba'] || 0 },
+        { komoditas: 'Babi', total: popMap['babi'] || 0 },
+        { komoditas: 'Ayam Kampung', total: popMap['ayam_kampung'] || 0 },
+        { komoditas: 'Ayam Petelur', total: popMap['ayam_petelur'] || 0 },
+        { komoditas: 'Ayam Broiler', total: popMap['ayam_broiler'] || 0 },
+        { komoditas: 'Puyuh', total: popMap['puyuh'] || 0 },
+        { komoditas: 'Itik', total: popMap['itik'] || 0 },
+        { komoditas: 'Entog', total: popMap['entog'] || 0 },
+        { komoditas: 'Angsa', total: popMap['angsa'] || 0 },
+        { komoditas: 'Merpati', total: popMap['merpati'] || 0 },
+        { komoditas: 'Kelinci', total: popMap['kelinci'] || 0 },
+      ];
+
+      populasiTernak8 = [
+        { komoditas: 'Kambing', total: popMap['kambing'] || 0 },
+        { komoditas: 'Sapi Potong', total: popMap['sapi_potong'] || 0 },
+        { komoditas: 'Domba', total: popMap['domba'] || 0 },
+        { komoditas: 'Kelinci', total: popMap['kelinci'] || 0 },
+        { komoditas: 'Babi', total: popMap['babi'] || 0 },
+        { komoditas: 'Kuda', total: popMap['kuda'] || 0 },
+        { komoditas: 'Kerbau', total: popMap['kerbau'] || 0 },
+        { komoditas: 'Sapi Perah', total: popMap['sapi_perah'] || 0 },
+      ].sort((a, b) => b.total - a.total);
+
+      populasiUnggas8 = [
+        { komoditas: 'Ayam Broiler', total: popMap['ayam_broiler'] || 0 },
+        { komoditas: 'Ayam Kampung', total: popMap['ayam_kampung'] || 0 },
+        { komoditas: 'Itik', total: popMap['itik'] || 0 },
+        { komoditas: 'Entog', total: popMap['entog'] || 0 },
+        { komoditas: 'Ayam Petelur', total: popMap['ayam_petelur'] || 0 },
+        { komoditas: 'Puyuh', total: popMap['puyuh'] || 0 },
+        { komoditas: 'Merpati', total: popMap['merpati'] || 0 },
+        { komoditas: 'Angsa', total: popMap['angsa'] || 0 },
+      ].sort((a, b) => b.total - a.total);
+    } catch (popErr) {
+      console.warn('Gagal memuat data populasi:', popErr);
     }
-
-    populasi16 = [
-      { komoditas: 'Sapi Potong', total: popMap['sapi_potong'] ?? popMap['sapi'] ?? 0 },
-      { komoditas: 'Sapi Perah', total: popMap['sapi perah'] ?? 0 },
-      { komoditas: 'Kerbau', total: popMap['kerbau'] ?? 0 },
-      { komoditas: 'Kuda', total: popMap['kuda'] ?? 0 },
-      { komoditas: 'Kambing', total: popMap['kambing'] ?? 0 },
-      { komoditas: 'Domba', total: popMap['domba'] ?? 0 },
-      { komoditas: 'Babi', total: popMap['babi'] ?? 0 },
-      { komoditas: 'Ayam Kampung', total: popMap['ayam kampung'] ?? popMap['ayam_buras'] ?? 0 },
-      { komoditas: 'Ayam Petelur', total: popMap['ayam petelur'] ?? 0 },
-      { komoditas: 'Ayam Broiler', total: popMap['ayam_broiler'] ?? 0 },
-      { komoditas: 'Puyuh', total: popMap['puyuh'] ?? 0 },
-      { komoditas: 'Itik', total: popMap['itik'] ?? popMap['bebek'] ?? 0 },
-      { komoditas: 'Entog', total: popMap['entog'] ?? 0 },
-      { komoditas: 'Angsa', total: popMap['angsa'] ?? 0 },
-      { komoditas: 'Merpati', total: popMap['merpati'] ?? 0 },
-      { komoditas: 'Kelinci', total: popMap['kelinci'] ?? 0 },
-    ];
-
-    populasiTernak8 = [
-      { komoditas: 'Kambing', total: popMap['kambing'] ?? 0 },
-      { komoditas: 'Sapi Potong', total: popMap['sapi_potong'] ?? popMap['sapi'] ?? 0 },
-      { komoditas: 'Domba', total: popMap['domba'] ?? 0 },
-      { komoditas: 'Kelinci', total: popMap['kelinci'] ?? 0 },
-      { komoditas: 'Babi', total: popMap['babi'] ?? 0 },
-      { komoditas: 'Kuda', total: popMap['kuda'] ?? 0 },
-      { komoditas: 'Kerbau', total: popMap['kerbau'] ?? 0 },
-      { komoditas: 'Sapi Perah', total: popMap['sapi perah'] ?? 0 },
-    ].sort((a, b) => b.total - a.total);
-
-    populasiUnggas8 = [
-      { komoditas: 'Ayam Broiler', total: popMap['ayam_broiler'] ?? 0 },
-      { komoditas: 'Ayam Kampung', total: popMap['ayam kampung'] ?? popMap['ayam_buras'] ?? 0 },
-      { komoditas: 'Itik', total: popMap['itik'] ?? popMap['bebek'] ?? 0 },
-      { komoditas: 'Entog', total: popMap['entog'] ?? 0 },
-      { komoditas: 'Ayam Petelur', total: popMap['ayam petelur'] ?? 0 },
-      { komoditas: 'Puyuh', total: popMap['puyuh'] ?? 0 },
-      { komoditas: 'Merpati', total: popMap['merpati'] ?? 0 },
-      { komoditas: 'Angsa', total: popMap['angsa'] ?? 0 },
-    ].sort((a, b) => b.total - a.total);
 
     // 2. QUERY PRODUKSI DAGING & TELUR (tabel produksi)
     let dataDaging: { jenis: string; total: number }[] = [];
     let dataTelur: { jenis: string; total: number }[] = [];
 
-    const [dagingRows]: any = await pool.query(`
-      SELECT 
-        hewan,
-        ROUND(SUM(total), 2) AS total
-      FROM produksi
-      WHERE jenis = 'pemotongan'
-      GROUP BY hewan
-      ORDER BY total DESC
-    `);
+    try {
+      const [dagingRows]: any = await pool.query(`
+        SELECT 
+          hewan,
+          ROUND(SUM(total), 2) AS total
+        FROM produksi
+        WHERE jenis = 'pemotongan'
+        GROUP BY hewan
+        ORDER BY total DESC
+      `);
 
-    if (dagingRows && dagingRows.length > 0) {
-      dataDaging = dagingRows.map((r: any) => ({
-        jenis: formatAnimalName(r.hewan),
-        total: Number(r.total) || 0,
-      }));
-    }
+      if (dagingRows && dagingRows.length > 0) {
+        dataDaging = dagingRows.map((r: any) => ({
+          jenis: formatAnimalName(r.hewan),
+          total: Number(r.total) || 0,
+        }));
+      }
 
-    const [telurRows]: any = await pool.query(`
-      SELECT 
-        hewan,
-        ROUND(SUM(total), 2) AS total
-      FROM produksi
-      WHERE jenis = 'telur'
-      GROUP BY hewan
-      ORDER BY total DESC
-    `);
+      const [telurRows]: any = await pool.query(`
+        SELECT 
+          hewan,
+          ROUND(SUM(total), 2) AS total
+        FROM produksi
+        WHERE jenis = 'telur'
+        GROUP BY hewan
+        ORDER BY total DESC
+      `);
 
-    if (telurRows && telurRows.length > 0) {
-      dataTelur = telurRows.map((r: any) => ({
-        jenis: formatAnimalName(r.hewan),
-        total: Number(r.total) || 0,
-      }));
+      if (telurRows && telurRows.length > 0) {
+        dataTelur = telurRows.map((r: any) => ({
+          jenis: formatAnimalName(r.hewan),
+          total: Number(r.total) || 0,
+        }));
+      }
+    } catch (prodErr) {
+      console.warn('Gagal memuat data produksi:', prodErr);
     }
 
     // 3. QUERY SEBARAN KTT / FARM (tabel ktt_master)
     let sebaranFarm: { komoditas: string; jumlah_farm: number; total_populasi: string }[] = [];
-    const [kttRows]: any = await pool.query(`
-      SELECT 
-        jenis_kelompok,
-        COUNT(*) AS total_kelompok,
-        SUM(anggota_laki + anggota_perempuan) AS total_anggota
-      FROM ktt_master
-      GROUP BY jenis_kelompok
-      ORDER BY total_kelompok DESC
-    `);
+    try {
+      const [kttRows]: any = await pool.query(`
+        SELECT 
+          jenis_kelompok,
+          COUNT(*) AS total_kelompok,
+          SUM(anggota_laki + anggota_perempuan) AS total_anggota
+        FROM ktt_master
+        GROUP BY jenis_kelompok
+        ORDER BY total_kelompok DESC
+      `);
 
-    if (kttRows && kttRows.length > 0) {
-      sebaranFarm = kttRows.map((k: any) => ({
-        komoditas: k.jenis_kelompok || 'Kelompok Tani Ternak',
-        jumlah_farm: Number(k.total_kelompok) || 0,
-        total_populasi: `${(Number(k.total_anggota) || 0).toLocaleString('id-ID')} Anggota`,
-      }));
+      if (kttRows && kttRows.length > 0) {
+        sebaranFarm = kttRows.map((k: any) => ({
+          komoditas: k.jenis_kelompok || 'Kelompok Tani Ternak',
+          jumlah_farm: Number(k.total_kelompok) || 0,
+          total_populasi: `${(Number(k.total_anggota) || 0).toLocaleString('id-ID')} Anggota`,
+        }));
+      }
+    } catch (kttErr) {
+      console.warn('Gagal memuat data ktt_master:', kttErr);
     }
 
     // 4. QUERY PUSKESWAN (tabel puskeswan_profil)
@@ -173,50 +260,62 @@ export async function GET() {
 
     // 5. QUERY VAKSINASI (tabel vaksinasi_bulanan & vaksin_apbd_target)
     let vaksinasiList: any[] = [];
-    const [vakRows]: any = await pool.query(`
-      SELECT
-        puskeswan,
-        target,
-        pengambilan AS realisasi,
-        ROUND((pengambilan / NULLIF(target, 0)) * 100, 1) AS persen
-      FROM vaksinasi_bulanan
-      ORDER BY no_urut ASC, id ASC
-    `);
+    try {
+      const [vakRows]: any = await pool.query(`
+        SELECT
+          puskeswan,
+          target,
+          pengambilan AS realisasi,
+          ROUND((pengambilan / NULLIF(target, 0)) * 100, 1) AS persen
+        FROM vaksinasi_bulanan
+        ORDER BY no_urut ASC, id ASC
+      `);
 
-    if (vakRows && vakRows.length > 0) {
-      vaksinasiList = vakRows.map((r: any) => ({
-        desa: r.puskeswan.startsWith('PUSKESWAN') ? r.puskeswan : `PUSKESWAN ${r.puskeswan}`,
-        jenis: 'Vaksinasi PMK & LSD',
-        target: Number(r.target) || 0,
-        realisasi: Number(r.realisasi) || 0,
-        persen: Number(r.persen) || 0,
-        total: Number(r.realisasi) || 0,
-      }));
+      if (vakRows && vakRows.length > 0) {
+        vaksinasiList = vakRows.map((r: any) => ({
+          desa: r.puskeswan.startsWith('PUSKESWAN') ? r.puskeswan : `PUSKESWAN ${r.puskeswan}`,
+          jenis: 'Vaksinasi PMK & LSD',
+          target: Number(r.target) || 0,
+          realisasi: Number(r.realisasi) || 0,
+          persen: Number(r.persen) || 0,
+          total: Number(r.realisasi) || 0,
+        }));
+      }
+    } catch (vakErr) {
+      console.warn('Gagal memuat data vaksinasi:', vakErr);
     }
 
     // 6. QUERY RPH / TPU / TPH (tabel pemotongan_hewan)
     let rphList: any[] = [];
-    const [rphRows]: any = await pool.query('SELECT * FROM pemotongan_hewan ORDER BY id ASC LIMIT 50');
-    if (rphRows && rphRows.length > 0) {
-      rphList = rphRows.map((r: any) => ({
-        nama: r.nama_usaha || 'Unit Usaha Pemotongan',
-        jenis: r.jenis || 'TPU',
-        pemilik: r.pemilik || '-',
-        desa: r.lokasi || r.alamat_pemilik || 'Kabupaten Kebumen',
-        halal: r.sertifikat_halal ? 'Sudah Ada' : 'Belum Ada',
-      }));
+    try {
+      const [rphRows]: any = await pool.query('SELECT * FROM pemotongan_hewan ORDER BY id ASC LIMIT 50');
+      if (rphRows && rphRows.length > 0) {
+        rphList = rphRows.map((r: any) => ({
+          nama: r.nama_usaha || 'Unit Usaha Pemotongan',
+          jenis: r.jenis || 'TPU',
+          pemilik: r.pemilik || '-',
+          desa: r.lokasi || r.alamat_pemilik || 'Kabupaten Kebumen',
+          halal: r.sertifikat_halal ? 'Sudah Ada' : 'Belum Ada',
+        }));
+      }
+    } catch (rphErr) {
+      console.warn('Gagal memuat pemotongan_hewan:', rphErr);
     }
 
     // 7. QUERY NKV (tabel pembinaan_nkv)
     let nkvList: any[] = [];
-    const [nkvRows]: any = await pool.query('SELECT * FROM pembinaan_nkv ORDER BY id_pembinaan ASC');
-    if (nkvRows && nkvRows.length > 0) {
-      nkvList = nkvRows.map((n: any) => ({
-        nama_pt: n.nama_usaha,
-        jenis_usaha: n.jenis_usaha || 'Usaha Peternakan',
-        alamat: n.keterangan || 'Kabupaten Kebumen',
-        status_nkv: n.pengeluaran_rekomendasi ? 'Terbit Rekomendasi' : 'Proses Pembinaan',
-      }));
+    try {
+      const [nkvRows]: any = await pool.query('SELECT * FROM pembinaan_nkv ORDER BY id_pembinaan ASC');
+      if (nkvRows && nkvRows.length > 0) {
+        nkvList = nkvRows.map((n: any) => ({
+          nama_pt: n.nama_usaha,
+          jenis_usaha: n.jenis_usaha || 'Usaha Peternakan',
+          alamat: n.keterangan || 'Kabupaten Kebumen',
+          status_nkv: n.pengeluaran_rekomendasi ? 'Terbit Rekomendasi' : 'Proses Pembinaan',
+        }));
+      }
+    } catch (nkvErr) {
+      console.warn('Gagal memuat pembinaan_nkv:', nkvErr);
     }
 
     // 8. QUERY POPULASI SAPI PO (tabel bitpro_sklb_populasi_sapi_po)
