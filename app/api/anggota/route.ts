@@ -186,11 +186,12 @@ export async function GET(req: Request) {
           u.id, u.nama, u.nip_username, u.role, u.status, u.permissions, u.created_at, u.updated_at,
           p.id_kompetensi,
           p.kompetensi,
-          p.wilayah_puskeswan AS puskeswan_utama,
+          COALESCE(p.wilayah_puskeswan, wb_utama.nama_puskeswan) AS puskeswan_utama,
           p.wilayah_kerja_tambahan AS puskeswan_tambahan,
           p.wt1, p.wt2, p.wt3, p.wt4, p.wt5
         FROM anggota_users u
         LEFT JOIN petugas_ib p ON p.id_user = u.id
+        LEFT JOIN wilayah_binaan wb_utama ON p.id_wilayah_binaan = wb_utama.id_wilayah_binaan
         ORDER BY u.id ASC`
       );
 

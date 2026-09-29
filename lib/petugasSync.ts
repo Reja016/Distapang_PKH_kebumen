@@ -380,6 +380,28 @@ export async function ensurePetugasIbTable(): Promise<void> {
     } catch (seedErr: any) {
       console.warn('[Puskeswan Seed Warning]:', seedErr.message);
     }
+
+    // 8. Sinkronisasi dua arah wilayah_puskeswan <-> id_wilayah_binaan pada baris yang ada
+    try {
+      await pool.query(`
+        UPDATE petugas_ib p
+        JOIN wilayah_binaan wb ON p.id_wilayah_binaan = wb.id_wilayah_binaan
+        SET p.wilayah_puskeswan = wb.nama_puskeswan
+        WHERE p.wilayah_puskeswan IS NULL OR p.wilayah_puskeswan = ''
+      `);
+      await pool.query(`
+        UPDATE petugas_ib p
+        JOIN (
+          SELECT LOWER(nama_puskeswan) as l_nama, MIN(id_wilayah_binaan) as def_wb
+          FROM wilayah_binaan
+          GROUP BY LOWER(nama_puskeswan)
+        ) wb ON LOWER(TRIM(p.wilayah_puskeswan)) = wb.l_nama
+        SET p.id_wilayah_binaan = wb.def_wb
+        WHERE p.id_wilayah_binaan IS NULL AND p.wilayah_puskeswan IS NOT NULL AND p.wilayah_puskeswan != ''
+      `);
+    } catch (syncColsErr: any) {
+      console.warn('[petugas_ib 2-Way Sync Warning]:', syncColsErr.message);
+    }
   } catch (err: any) {
     console.warn('[ensurePetugasIbTable Error]:', err.message);
   }
