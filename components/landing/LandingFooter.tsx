@@ -100,7 +100,7 @@ export function LandingFooter() {
                 <h3 className="text-base sm:text-lg font-black tracking-tight text-slate-900 dark:text-white flex items-center gap-1.5">
                   <span>SiMantap</span>
                   <span className="text-xs px-2 py-0.5 rounded-md font-bold bg-blue-100 text-blue-700 border border-blue-200 dark:bg-blue-500/20 dark:text-blue-400 dark:border-blue-500/30">
-                    PKH
+                    PKH (Website ini masih versi Beta)
                   </span>
                 </h3>
                 <p className="text-xs font-medium text-slate-500 dark:text-slate-400">

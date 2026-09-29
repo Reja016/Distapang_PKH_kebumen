@@ -80,7 +80,12 @@ export async function POST(req: Request) {
       );
     }
 
-    const turnstileSecret = process.env.TURNSTILE_SECRET_KEY;
+    const turnstileSecret =
+      process.env.TURNSTILE_SECRET_KEY ||
+      process.env.TURNSTILE_SECRET ||
+      process.env.CLOUDFLARE_TURNSTILE_SECRET_KEY ||
+      process.env.CLOUDFLARE_SECRET_KEY ||
+      process.env.TURNSTILE_SECRETKEY;
     const isProductionSecret = Boolean(turnstileSecret && turnstileSecret !== '1x0000000000000000000000000000000AA');
 
     // Jika menggunakan key resmi Cloudflare, lakukan verifikasi ketat
