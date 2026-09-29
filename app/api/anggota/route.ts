@@ -7,6 +7,7 @@ import {
 import { hashPassword } from '@/lib/password';
 import { requireAdmin } from '@/lib/session';
 import { logActivity } from '@/lib/auditLog';
+import { ensurePetugasIbTable, syncPetugasIbRecord } from '@/lib/petugasSync';
 
 export const dynamic = 'force-dynamic';
 
@@ -93,27 +94,8 @@ async function ensureTable() {
       ) ENGINE=InnoDB;
     `);
 
-    // 2. Pastikan tabel penugasan wilayah petugas_ib ada agar LEFT JOIN & fitur wilayah aman
-    try {
-      await pool.execute(`
-        CREATE TABLE IF NOT EXISTS petugas_ib (
-          id_kompetensi INT AUTO_INCREMENT PRIMARY KEY,
-          id_user INT,
-          no_urut INT DEFAULT 1,
-          nama_petugas VARCHAR(150),
-          kompetensi VARCHAR(100) DEFAULT 'IB',
-          wilayah_puskeswan VARCHAR(100),
-          id_wilayah_binaan INT,
-          wilayah_kerja_tambahan TEXT,
-          wt1 INT,
-          wt2 INT,
-          wt3 INT,
-          wt4 INT,
-          wt5 INT,
-          created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-        ) ENGINE=InnoDB;
-      `);
-    } catch {}
+    // 2. Pastikan tabel penugasan wilayah petugas_ib ada, kolom lengkap, dan 8 Puskeswan terhubung
+    await ensurePetugasIbTable();
 
     // 3. Pastikan akun admin utama '0001' selalu ada di anggota_users
     try {
@@ -285,123 +267,19 @@ async function syncPetugasIb(
   wt5?: number | string | null,
   kompetensi?: string
 ) {
-  // Cek apakah data di petugas_ib sudah ada
-  const [existing]: any = await pool.query(
-    `SELECT id_kompetensi FROM petugas_ib WHERE id_user = ? OR LOWER(nama_petugas) = LOWER(?) LIMIT 1`,
-    [userId, nama]
+  return await syncPetugasIbRecord(
+    userId,
+    nama,
+    role,
+    isRestricted,
+    puskeswanUtama,
+    wt1,
+    wt2,
+    wt3,
+    wt4,
+    wt5,
+    kompetensi
   );
-
-  const komp = kompetensi || (role.toLowerCase() === 'puskeswan' ? 'Keswan' : 'IB');
-
-  // Jika admin memilih TIDAK dibatasi wilayahnya
-  if (!isRestricted || !puskeswanUtama) {
-    if (existing && existing.length > 0) {
-      await pool.query(
-        `UPDATE petugas_ib SET 
-          id_user = ?,
-          nama_petugas = ?,
-          wilayah_puskeswan = NULL,
-          id_wilayah_binaan = NULL,
-          wilayah_kerja_tambahan = NULL,
-          wt1 = NULL, wt2 = NULL, wt3 = NULL, wt4 = NULL, wt5 = NULL,
-          kompetensi = COALESCE(?, kompetensi)
-        WHERE id_kompetensi = ?`,
-        [userId, nama, komp, existing[0].id_kompetensi]
-      );
-    }
-    return;
-  }
-
-  // Jika DIBATASI wilayahnya:
-  const pUtama = puskeswanUtama.trim();
-
-  // Cari default id_wilayah_binaan untuk puskeswanUtama
-  let defaultWbId: number | null = null;
-  const [wbRows]: any = await pool.query(
-    `SELECT id_wilayah_binaan FROM wilayah_binaan WHERE LOWER(nama_puskeswan) = LOWER(?) LIMIT 1`,
-    [pUtama]
-  );
-  if (wbRows && wbRows.length > 0) {
-    defaultWbId = wbRows[0].id_wilayah_binaan;
-  }
-
-  // Parse wt1 s/d wt5 sebagai id_kecamatan
-  const parseWt = (val: any): number | null => {
-    if (val === null || val === undefined || val === '' || val === 0 || val === '0') return null;
-    const num = Number(val);
-    return isNaN(num) ? null : num;
-  };
-
-  const finalWt1 = parseWt(wt1);
-  const finalWt2 = parseWt(wt2);
-  const finalWt3 = parseWt(wt3);
-  const finalWt4 = parseWt(wt4);
-  const finalWt5 = parseWt(wt5);
-
-  const activeKecIds = [finalWt1, finalWt2, finalWt3, finalWt4, finalWt5].filter((id): id is number => id !== null);
-
-  let wtStr = '';
-  if (activeKecIds.length > 0) {
-    const [kecRows]: any = await pool.query(
-      `SELECT DISTINCT id_kecamatan, binaan FROM wilayah_binaan WHERE id_kecamatan IN (?)`,
-      [activeKecIds]
-    );
-    const kecMap = new Map<number, string>();
-    if (Array.isArray(kecRows)) {
-      kecRows.forEach((r: any) => {
-        const titleCase = r.binaan.charAt(0).toUpperCase() + r.binaan.slice(1).toLowerCase();
-        kecMap.set(Number(r.id_kecamatan), titleCase);
-      });
-    }
-    const kecNames = activeKecIds
-      .map((id) => kecMap.get(id))
-      .filter(Boolean)
-      .map((k) => `Kec. ${k}`);
-    wtStr = Array.from(new Set(kecNames)).join(', ');
-  }
-
-  if (existing && existing.length > 0) {
-    await pool.query(
-      `UPDATE petugas_ib SET 
-        id_user = ?,
-        nama_petugas = ?,
-        wilayah_puskeswan = ?,
-        id_wilayah_binaan = COALESCE(?, id_wilayah_binaan),
-        wilayah_kerja_tambahan = ?,
-        wt1 = ?, wt2 = ?, wt3 = ?, wt4 = ?, wt5 = ?,
-        kompetensi = COALESCE(?, kompetensi)
-      WHERE id_kompetensi = ?`,
-      [
-        userId,
-        nama,
-        pUtama,
-        defaultWbId,
-        wtStr || null,
-        finalWt1, finalWt2, finalWt3, finalWt4, finalWt5,
-        komp,
-        existing[0].id_kompetensi,
-      ]
-    );
-  } else {
-    const [maxRows]: any = await pool.query(`SELECT COALESCE(MAX(no_urut), 0) + 1 AS next_no FROM petugas_ib`);
-    const nextNo = maxRows?.[0]?.next_no || 1;
-
-    await pool.query(
-      `INSERT INTO petugas_ib 
-        (id_user, no_urut, nama_petugas, kompetensi, wilayah_puskeswan, id_wilayah_binaan, wilayah_kerja_tambahan, wt1, wt2, wt3, wt4, wt5)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-      [
-        userId,
-        nextNo,
-        nama,
-        komp,
-        pUtama,
-        defaultWbId,
-        wtStr || null,
-        finalWt1, finalWt2, finalWt3, finalWt4, finalWt5,
-      ]
-    );
-  }
 }
 
 // POST: Tambah anggota baru (Wajib Admin, Password otomatis di-hash)

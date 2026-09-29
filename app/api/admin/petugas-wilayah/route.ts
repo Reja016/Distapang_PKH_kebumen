@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import pool from '@/lib/db';
 import { requireAdmin } from '@/lib/session';
 import { logActivity } from '@/lib/auditLog';
+import { ensurePetugasIbTable } from '@/lib/petugasSync';
 
 export const dynamic = 'force-dynamic';
 
@@ -11,6 +12,8 @@ export async function GET(req: Request) {
   if ('errorResponse' in auth) return auth.errorResponse;
 
   try {
+    await ensurePetugasIbTable();
+
     // 1. Ambil seluruh data petugas_ib disertai relasi anggota_users
     const [petugasRows]: any = await pool.query(`
       SELECT 
@@ -67,6 +70,8 @@ export async function PUT(req: Request) {
   if ('errorResponse' in auth) return auth.errorResponse;
 
   try {
+    await ensurePetugasIbTable();
+
     const body = await req.json();
     const {
       id_kompetensi,
