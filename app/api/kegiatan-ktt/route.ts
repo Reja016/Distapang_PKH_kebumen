@@ -57,12 +57,24 @@ export async function POST(request: Request) {
     const finalId = id || `ACT-${Date.now()}`;
     const safeKttId = (ktt_id && !isNaN(Number(ktt_id))) ? Number(ktt_id) : null;
 
+    let verifiedKttId: number | null = null;
+    if (safeKttId) {
+      try {
+        const [kttCheck]: any = await pool.query('SELECT id FROM ktt_master WHERE id = ? OR id_ktt = ? LIMIT 1', [safeKttId, safeKttId]);
+        if (kttCheck && kttCheck.length > 0) {
+          verifiedKttId = safeKttId;
+        }
+      } catch {
+        verifiedKttId = null;
+      }
+    }
+
     if (isEdit) {
       await pool.query(
         `UPDATE kegiatan_ktt 
          SET tanggal=?, id_ktt=?, nama_ktt=?, kecamatan=?, desa=?, tim_pelaksana=?, nama_kegiatan=?, hasil_kegiatan=?, lat=?, lng=?, photo=? 
          WHERE id_kegiatan=?`,
-        [tanggal, safeKttId, nama_ktt, kecamatan || '', desa || '', tim_pelaksana, nama_kegiatan, hasil_kegiatan, lat || null, lng || null, photo || null, finalId]
+        [tanggal, verifiedKttId, nama_ktt, kecamatan || '', desa || '', tim_pelaksana, nama_kegiatan, hasil_kegiatan, lat || null, lng || null, photo || null, finalId]
       );
       
       await logActivity({
@@ -80,7 +92,7 @@ export async function POST(request: Request) {
         `INSERT INTO kegiatan_ktt 
          (id_kegiatan, tanggal, id_ktt, nama_ktt, kecamatan, desa, tim_pelaksana, nama_kegiatan, hasil_kegiatan, lat, lng, photo) 
          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-        [finalId, tanggal, safeKttId, nama_ktt, kecamatan || '', desa || '', tim_pelaksana, nama_kegiatan, hasil_kegiatan, lat || null, lng || null, photo || null]
+        [finalId, tanggal, verifiedKttId, nama_ktt, kecamatan || '', desa || '', tim_pelaksana, nama_kegiatan, hasil_kegiatan, lat || null, lng || null, photo || null]
       );
       
       await logActivity({

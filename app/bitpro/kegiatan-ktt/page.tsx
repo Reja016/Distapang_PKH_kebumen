@@ -412,16 +412,18 @@ export default function KegiatanKTTPage() {
         }),
       });
 
+      const resData = await res.json().catch(() => ({}));
+
       if (res.ok) {
         alert(editingId ? 'Log kegiatan berhasil diperbarui!' : 'Log kegiatan berhasil dicatat ke database!');
         setShowModal(false);
         resetForm();
         fetchData();
       } else {
-        alert('Gagal menyimpan data kegiatan.');
+        alert(`Gagal menyimpan data kegiatan: ${resData.detail || resData.error || res.statusText || 'Error server ' + res.status}`);
       }
     } catch {
-      alert('Terjadi kesalahan koneksi.');
+      alert('Terjadi kesalahan koneksi jaringan.');
     }
   };
 

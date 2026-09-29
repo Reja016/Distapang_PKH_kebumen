@@ -15,7 +15,7 @@ const INITIAL_FALLBACK_MEMBERS = [
   {
     id: 1,
     nama: 'Administrator Distapang',
-    nip_username: 'admin@kebumen.go.id',
+    nip_username: '0001',
     password: hashPassword('password123'),
     role: 'Administrator',
     status: 'Aktif',
@@ -23,6 +23,15 @@ const INITIAL_FALLBACK_MEMBERS = [
   },
   {
     id: 2,
+    nama: 'Admin Dinas (Email)',
+    nip_username: 'admin@kebumen.go.id',
+    password: hashPassword('password123'),
+    role: 'Administrator',
+    status: 'Aktif',
+    permissions: JSON.stringify(DEFAULT_FULL_PERMISSIONS),
+  },
+  {
+    id: 3,
     nama: 'Drh. Ahmad Fauzi (Petugas Keswan)',
     nip_username: 'ahmad.keswan@kebumen.go.id',
     password: hashPassword('password123'),
@@ -41,7 +50,7 @@ const INITIAL_FALLBACK_MEMBERS = [
     }),
   },
   {
-    id: 3,
+    id: 4,
     nama: 'Budi Santoso (Enumerator Bitpro)',
     nip_username: 'budi.bitpro@kebumen.go.id',
     password: hashPassword('password123'),
@@ -69,6 +78,7 @@ const INITIAL_FALLBACK_MEMBERS = [
 
 async function ensureTable() {
   try {
+    // 1. Pastikan tabel anggota_users ada
     await pool.execute(`
       CREATE TABLE IF NOT EXISTS anggota_users (
         id INT AUTO_INCREMENT PRIMARY KEY,
@@ -83,16 +93,97 @@ async function ensureTable() {
       ) ENGINE=InnoDB;
     `);
 
-    // Cek apakah tabel kosong
-    const [countRows]: any = await pool.execute(`SELECT COUNT(*) as total FROM anggota_users`);
-    if (countRows && countRows[0]?.total === 0) {
-      for (const m of INITIAL_FALLBACK_MEMBERS) {
+    // 2. Pastikan tabel penugasan wilayah petugas_ib ada agar LEFT JOIN & fitur wilayah aman
+    try {
+      await pool.execute(`
+        CREATE TABLE IF NOT EXISTS petugas_ib (
+          id_kompetensi INT AUTO_INCREMENT PRIMARY KEY,
+          id_user INT,
+          no_urut INT DEFAULT 1,
+          nama_petugas VARCHAR(150),
+          kompetensi VARCHAR(100) DEFAULT 'IB',
+          wilayah_puskeswan VARCHAR(100),
+          id_wilayah_binaan INT,
+          wilayah_kerja_tambahan TEXT,
+          wt1 INT,
+          wt2 INT,
+          wt3 INT,
+          wt4 INT,
+          wt5 INT,
+          created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        ) ENGINE=InnoDB;
+      `);
+    } catch {}
+
+    // 3. Pastikan akun admin utama '0001' selalu ada di anggota_users
+    try {
+      const [adminRows]: any = await pool.execute(
+        `SELECT id FROM anggota_users WHERE nip_username = '0001' LIMIT 1`
+      );
+      if (!adminRows || adminRows.length === 0) {
         await pool.execute(
           `INSERT INTO anggota_users (nama, nip_username, password, role, status, permissions) VALUES (?, ?, ?, ?, ?, ?)`,
-          [m.nama, m.nip_username, m.password, m.role, m.status, m.permissions]
+          [
+            'Administrator Distapang',
+            '0001',
+            hashPassword('password123'),
+            'Administrator',
+            'Aktif',
+            JSON.stringify(DEFAULT_FULL_PERMISSIONS),
+          ]
         );
       }
+    } catch {}
+
+    // 4. Cek apakah tabel anggota_users masih kosong (hanya ada admin atau kosong sama sekali)
+    const [countRows]: any = await pool.execute(`SELECT COUNT(*) as total FROM anggota_users`);
+    if (countRows && countRows[0]?.total <= 1) {
+      for (const m of INITIAL_FALLBACK_MEMBERS) {
+        try {
+          await pool.execute(
+            `INSERT IGNORE INTO anggota_users (nama, nip_username, password, role, status, permissions) VALUES (?, ?, ?, ?, ?, ?)`,
+            [m.nama, m.nip_username, m.password, m.role, m.status, m.permissions]
+          );
+        } catch {}
+      }
     }
+
+    // 5. Sinkronkan otomatis akun-akun petugas lama dari tabel `users` (jika ada) ke `anggota_users`
+    try {
+      const [legacyUsers]: any = await pool.execute(`SELECT * FROM users`);
+      if (Array.isArray(legacyUsers) && legacyUsers.length > 0) {
+        for (const lu of legacyUsers) {
+          const username = (lu.email || lu.username || '').trim();
+          if (!username) continue;
+
+          const [exists]: any = await pool.execute(
+            `SELECT id FROM anggota_users WHERE LOWER(nip_username) = LOWER(?) LIMIT 1`,
+            [username]
+          );
+
+          if (!exists || exists.length === 0) {
+            const nama = lu.nama || lu.name || username;
+            const isAdm = lu.role === 'admin' || username.toLowerCase().includes('admin');
+            const role = isAdm
+              ? 'Administrator'
+              : (lu.role === 'enumerator' ? 'Enumerator' : 'Petugas Teknis');
+            const perms = isAdm ? DEFAULT_FULL_PERMISSIONS : DEFAULT_VIEW_ONLY_PERMISSIONS;
+
+            await pool.execute(
+              `INSERT INTO anggota_users (nama, nip_username, password, role, status, permissions) VALUES (?, ?, ?, ?, ?, ?)`,
+              [
+                nama,
+                username,
+                lu.password || hashPassword('password123'),
+                role,
+                'Aktif',
+                JSON.stringify(perms),
+              ]
+            );
+          }
+        }
+      }
+    } catch {}
   } catch (err) {
     // Database connection may not be ready, handle silently
   }
@@ -105,26 +196,43 @@ export async function GET(req: Request) {
 
   try {
     await ensureTable();
-    // JANGAN PERNAH SELECT password untuk dikirim ke client
-    // LEFT JOIN petugas_ib untuk mengambil data wilayah penugasan Puskeswan
-    const [rows]: any = await pool.execute(
-      `SELECT 
-        u.id, u.nama, u.nip_username, u.role, u.status, u.permissions, u.created_at, u.updated_at,
-        p.id_kompetensi,
-        p.kompetensi,
-        p.wilayah_puskeswan AS puskeswan_utama,
-        p.wilayah_kerja_tambahan AS puskeswan_tambahan,
-        p.wt1, p.wt2, p.wt3, p.wt4, p.wt5
-      FROM anggota_users u
-      LEFT JOIN petugas_ib p ON p.id_user = u.id
-      ORDER BY u.id ASC`
-    );
-    if (Array.isArray(rows) && rows.length > 0) {
-      const parsed = rows.map((r: any) => ({
-        ...r,
-        permissions: typeof r.permissions === 'string' ? JSON.parse(r.permissions) : r.permissions,
-      }));
-      return NextResponse.json(parsed);
+
+    // Coba ambil data lengkap beserta wilayah kerja dari petugas_ib
+    try {
+      const [rows]: any = await pool.execute(
+        `SELECT 
+          u.id, u.nama, u.nip_username, u.role, u.status, u.permissions, u.created_at, u.updated_at,
+          p.id_kompetensi,
+          p.kompetensi,
+          p.wilayah_puskeswan AS puskeswan_utama,
+          p.wilayah_kerja_tambahan AS puskeswan_tambahan,
+          p.wt1, p.wt2, p.wt3, p.wt4, p.wt5
+        FROM anggota_users u
+        LEFT JOIN petugas_ib p ON p.id_user = u.id
+        ORDER BY u.id ASC`
+      );
+
+      if (Array.isArray(rows) && rows.length > 0) {
+        const parsed = rows.map((r: any) => ({
+          ...r,
+          permissions: typeof r.permissions === 'string' ? JSON.parse(r.permissions) : r.permissions,
+        }));
+        return NextResponse.json(parsed);
+      }
+    } catch (joinErr) {
+      // Fallback query langsung dari anggota_users jika join petugas_ib mengalami kendala
+      try {
+        const [simpleRows]: any = await pool.execute(
+          `SELECT id, nama, nip_username, role, status, permissions, created_at, updated_at FROM anggota_users ORDER BY id ASC`
+        );
+        if (Array.isArray(simpleRows) && simpleRows.length > 0) {
+          const parsed = simpleRows.map((r: any) => ({
+            ...r,
+            permissions: typeof r.permissions === 'string' ? JSON.parse(r.permissions) : r.permissions,
+          }));
+          return NextResponse.json(parsed);
+        }
+      } catch {}
     }
   } catch {
     // Fallback if db offline
