@@ -63,7 +63,10 @@ export async function DELETE(request: Request, { params }: { params: { id: strin
     const puskeswanName = rows[0].puskeswan;
 
     await conn.beginTransaction();
-    await conn.execute('DELETE FROM vaksinasi_harian WHERE puskeswan = ?', [puskeswanName]);
+    await conn.execute(
+      'DELETE FROM vaksinasi WHERE puskeswan = ? OR puskeswan = ? OR UPPER(TRIM(REPLACE(puskeswan, "Puskeswan ", ""))) = ?',
+      [puskeswanName, `Puskeswan ${puskeswanName}`, puskeswanName]
+    );
     await conn.execute('DELETE FROM vaksinasi_bulanan WHERE id = ?', [id]);
     await conn.commit();
 

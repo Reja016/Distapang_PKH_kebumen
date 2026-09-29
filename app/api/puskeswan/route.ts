@@ -87,12 +87,12 @@ export async function GET() {
         no_urut ASC
     `);
 
-    // Pastikan seluruh 8 Puskeswan lengkap di database (tidak hanya 3)
+    // Pastikan seluruh 8 Puskeswan lengkap di database untuk ke-12 bulan
     for (const item of fallbackData) {
       await pool.execute(
         `INSERT INTO laporan_puskeswan 
-        (bulan, no_urut, puskeswan, bef, cacingan, scabies, orf, pmk_diag, lsd_diag, aktif, semi_aktif, pasif, pusling, ib, pkb, pmk_vaks, lsd_vaks, retribusi)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        (tahun, bulan, no_urut, puskeswan, bef, cacingan, scabies, orf, pmk_diag, lsd_diag, aktif, semi_aktif, pasif, pusling, ib, pkb, pmk_vaks, lsd_vaks, retribusi)
+        VALUES ('2026', ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         ON DUPLICATE KEY UPDATE no_urut=VALUES(no_urut)`,
         [
           item.bulan, item.no, item.puskeswan, item.bef, item.cacingan, item.scabies,
@@ -100,6 +100,27 @@ export async function GET() {
           item.pusling, item.ib, item.pkb, item.pmk_vaks, item.lsd_vaks, item.retribusi
         ]
       );
+    }
+
+    const ALL_MONTHS = [
+      'JANUARI', 'FEBRUARI', 'MARET', 'APRIL', 'MEI', 'JUNI',
+      'JULI', 'AGUSTUS', 'SEPTEMBER', 'OKTOBER', 'NOVEMBER', 'DESEMBER'
+    ];
+    const DAFTAR_PUSKESWAN_8 = [
+      'MIRIT', 'KLIRONG', 'GOMBONG', 'BUAYAN',
+      'ALIAN', 'PREMBUN', 'KEBUMEN', 'KARANGANYAR'
+    ];
+
+    for (const bln of ALL_MONTHS) {
+      for (let i = 0; i < DAFTAR_PUSKESWAN_8.length; i++) {
+        const pusk = DAFTAR_PUSKESWAN_8[i];
+        await pool.execute(
+          `INSERT INTO laporan_puskeswan (tahun, bulan, no_urut, puskeswan)
+           VALUES ('2026', ?, ?, ?)
+           ON DUPLICATE KEY UPDATE no_urut = VALUES(no_urut)`,
+          [bln, i + 1, pusk]
+        );
+      }
     }
 
     const [allRows]: any = await pool.execute(`

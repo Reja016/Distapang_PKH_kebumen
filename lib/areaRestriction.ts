@@ -101,18 +101,29 @@ export async function getUserAreaAccess(session: SessionPayload | null): Promise
     }
 
     // 2. Cek apakah user terdaftar di tabel `petugas_ib` (sebagai petugas individual atau penugasan akun)
-    const [officerRows]: any = await pool.query(
-      `SELECT * FROM petugas_ib 
-       WHERE id_user = ? 
-          OR LOWER(nama_petugas) = LOWER(?) 
-          OR LOWER(nama_petugas) LIKE LOWER(?) 
-          OR LOWER(wilayah_puskeswan) LIKE LOWER(?) 
-       LIMIT 1`,
-      [userId, userName, `%${userName}%`, `%${cleanUser}%`]
-    );
+    let officer: any = null;
 
-    if (officerRows && officerRows.length > 0) {
-      const officer = officerRows[0];
+    if (userId) {
+      const [byUserId]: any = await pool.query(
+        `SELECT * FROM petugas_ib WHERE id_user = ? LIMIT 1`,
+        [userId]
+      );
+      if (byUserId && byUserId.length > 0) {
+        officer = byUserId[0];
+      }
+    }
+
+    if (!officer && userName) {
+      const [byName]: any = await pool.query(
+        `SELECT * FROM petugas_ib WHERE LOWER(nama_petugas) = LOWER(?) LIMIT 1`,
+        [userName]
+      );
+      if (byName && byName.length > 0) {
+        officer = byName[0];
+      }
+    }
+
+    if (officer) {
       if (officer.nama_petugas) officerName = officer.nama_petugas;
 
       // Ambil Puskeswan Binaan Utama & seluruh kecamatan di bawah Puskeswan tersebut

@@ -3,58 +3,124 @@ import { pool } from '@/lib/db';
 import { getSessionFromRequest } from '@/lib/session';
 import { logActivity } from '@/lib/auditLog';
 
-// GET → ambil rekap bulanan, realisasi/kekurangan/Jan-Des dihitung otomatis
-// dari SUM data harian di tabel vaksinasi_harian sesuai tahun yang dipilih
+const DEFAULT_PUSKESWAN_LIST = [
+  { no: 1, nama: 'MIRIT', target: 3000, pengambilan: 1500 },
+  { no: 2, nama: 'KLIRONG', target: 3000, pengambilan: 1500 },
+  { no: 3, nama: 'GOMBONG', target: 3000, pengambilan: 1500 },
+  { no: 4, nama: 'BUAYAN', target: 3000, pengambilan: 1500 },
+  { no: 5, nama: 'ALIAN', target: 3000, pengambilan: 1500 },
+  { no: 6, nama: 'PREMBUN', target: 3000, pengambilan: 1500 },
+  { no: 7, nama: 'KEBUMEN', target: 3000, pengambilan: 1500 },
+  { no: 8, nama: 'KARANGANYAR', target: 3000, pengambilan: 1500 },
+];
+
+const MONTH_KEYS: Record<string, string> = {
+  januari: 'jan',
+  februari: 'feb',
+  maret: 'mar',
+  april: 'apr',
+  mei: 'mei',
+  juni: 'jun',
+  juli: 'jul',
+  agustus: 'agu',
+  september: 'sep',
+  oktober: 'okt',
+  november: 'nov',
+  desember: 'des',
+};
+
+// GET → ambil rekap bulanan di mana realisasi Jan-Des dihitung otomatis dari SUM(jumlah) tabel `vaksinasi`
 export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url);
-    const tahun = searchParams.get('tahun') || '2027';
+    const tahun = searchParams.get('tahun') || '2026';
 
-    const [rows]: any = await pool.execute(`
-      SELECT
-        b.id, b.no_urut, b.puskeswan, b.target, b.pengambilan,
-        COALESCE(SUM(h.jumlah), 0) AS realisasi,
-        b.target - COALESCE(SUM(h.jumlah), 0) AS kekurangan,
-        COALESCE(SUM(CASE WHEN MONTH(h.tanggal)=1 THEN h.jumlah END), 0) AS jan,
-        COALESCE(SUM(CASE WHEN MONTH(h.tanggal)=2 THEN h.jumlah END), 0) AS feb,
-        COALESCE(SUM(CASE WHEN MONTH(h.tanggal)=3 THEN h.jumlah END), 0) AS mar,
-        COALESCE(SUM(CASE WHEN MONTH(h.tanggal)=4 THEN h.jumlah END), 0) AS apr,
-        COALESCE(SUM(CASE WHEN MONTH(h.tanggal)=5 THEN h.jumlah END), 0) AS mei,
-        COALESCE(SUM(CASE WHEN MONTH(h.tanggal)=6 THEN h.jumlah END), 0) AS jun,
-        COALESCE(SUM(CASE WHEN MONTH(h.tanggal)=7 THEN h.jumlah END), 0) AS jul,
-        COALESCE(SUM(CASE WHEN MONTH(h.tanggal)=8 THEN h.jumlah END), 0) AS agu,
-        COALESCE(SUM(CASE WHEN MONTH(h.tanggal)=9 THEN h.jumlah END), 0) AS sep,
-        COALESCE(SUM(CASE WHEN MONTH(h.tanggal)=10 THEN h.jumlah END), 0) AS okt,
-        COALESCE(SUM(CASE WHEN MONTH(h.tanggal)=11 THEN h.jumlah END), 0) AS nov,
-        COALESCE(SUM(CASE WHEN MONTH(h.tanggal)=12 THEN h.jumlah END), 0) AS des
-      FROM vaksinasi_bulanan b
-      LEFT JOIN vaksinasi_harian h ON h.puskeswan = b.puskeswan AND YEAR(h.tanggal) = ?
-      GROUP BY b.id
-      ORDER BY b.no_urut ASC
-    `, [tahun]);
+    // 1. Ambil target & pengambilan dari tabel `vaksinasi_bulanan` jika ada
+    let bulananRows: any[] = [];
+    try {
+      const [bRows]: any = await pool.query('SELECT * FROM vaksinasi_bulanan ORDER BY no_urut ASC');
+      bulananRows = bRows || [];
+    } catch {
+      bulananRows = [];
+    }
 
-    // PENTING: SUM() dari MySQL dikirim sebagai string oleh driver mysql2.
-    // Konversi paksa ke Number di sini supaya penjumlahan di frontend tidak "nyambung" jadi teks.
-    const data = rows.map((r: any) => ({
-      id: r.id,
-      no_urut: Number(r.no_urut),
-      puskeswan: r.puskeswan,
-      target: Number(r.target),
-      pengambilan: Number(r.pengambilan),
-      realisasi: Number(r.realisasi),
-      kekurangan: Number(r.kekurangan),
-      jan: Number(r.jan), feb: Number(r.feb), mar: Number(r.mar), apr: Number(r.apr),
-      mei: Number(r.mei), jun: Number(r.jun), jul: Number(r.jul), agu: Number(r.agu),
-      sep: Number(r.sep), okt: Number(r.okt), nov: Number(r.nov), des: Number(r.des),
-    }));
+    // 2. Ambil realisasi bulanan langsung dari tabel asli `vaksinasi`
+    let aggRows: any[] = [];
+    try {
+      const [vRows]: any = await pool.query(
+        `SELECT 
+           UPPER(TRIM(REPLACE(puskeswan, 'Puskeswan ', ''))) as pusk_clean, 
+           LOWER(TRIM(bulan)) as bulan_clean, 
+           SUM(jumlah) as total_dosis 
+         FROM vaksinasi 
+         WHERE tahun = ? 
+         GROUP BY pusk_clean, bulan_clean`,
+        [String(tahun)]
+      );
+      aggRows = vRows || [];
+    } catch (err: any) {
+      console.warn('Gagal query agregasi vaksinasi:', err.message);
+      aggRows = [];
+    }
 
-    return NextResponse.json({ success: true, data });
+    // Buat lookup map realisasi: { "MIRIT": { "jan": 120, "feb": 50, ... } }
+    const realisasiMap: Record<string, Record<string, number>> = {};
+    for (const r of aggRows) {
+      const pusk = r.pusk_clean || '';
+      const bln = r.bulan_clean || '';
+      const key = MONTH_KEYS[bln];
+      if (!realisasiMap[pusk]) realisasiMap[pusk] = {};
+      if (key) {
+        realisasiMap[pusk][key] = (realisasiMap[pusk][key] || 0) + Number(r.total_dosis || 0);
+      }
+    }
+
+    // 3. Gabungkan 8 Puskeswan standar dengan target dan agregasi bulanan
+    const result = DEFAULT_PUSKESWAN_LIST.map((item, idx) => {
+      const existingInBulanan = bulananRows.find(
+        (b: any) =>
+          (b.puskeswan || '').toUpperCase().replace(/^PUSKESWAN\s+/i, '').trim() === item.nama
+      );
+
+      const target = existingInBulanan ? Number(existingInBulanan.target || 0) : item.target;
+      const pengambilan = existingInBulanan ? Number(existingInBulanan.pengambilan || 0) : item.pengambilan;
+
+      const puskData = realisasiMap[item.nama] || {};
+      const jan = puskData['jan'] || 0;
+      const feb = puskData['feb'] || 0;
+      const mar = puskData['mar'] || 0;
+      const apr = puskData['apr'] || 0;
+      const mei = puskData['mei'] || 0;
+      const jun = puskData['jun'] || 0;
+      const jul = puskData['jul'] || 0;
+      const agu = puskData['agu'] || 0;
+      const sep = puskData['sep'] || 0;
+      const okt = puskData['okt'] || 0;
+      const nov = puskData['nov'] || 0;
+      const des = puskData['des'] || 0;
+
+      const realisasi = jan + feb + mar + apr + mei + jun + jul + agu + sep + okt + nov + des;
+      const kekurangan = Math.max(0, target - realisasi);
+
+      return {
+        id: existingInBulanan ? existingInBulanan.id : idx + 1,
+        no_urut: item.no,
+        puskeswan: item.nama,
+        target,
+        pengambilan,
+        realisasi,
+        kekurangan,
+        jan, feb, mar, apr, mei, jun, jul, agu, sep, okt, nov, des,
+      };
+    });
+
+    return NextResponse.json({ success: true, data: result });
   } catch (error: any) {
     return NextResponse.json({ success: false, error: error.message }, { status: 500 });
   }
 }
 
-// POST → tambah puskeswan baru (target & pengambilan saja; realisasi dari input harian nanti)
+// POST → simpan atau perbarui target & pengambilan puskeswan
 export async function POST(request: Request) {
   try {
     const { no_urut, puskeswan, target = 0, pengambilan = 0 } = await request.json();
@@ -63,33 +129,33 @@ export async function POST(request: Request) {
       return NextResponse.json({ success: false, error: 'Nama Puskeswan wajib diisi.' }, { status: 400 });
     }
 
-    const [result]: any = await pool.execute(
-      'INSERT INTO vaksinasi_bulanan (no_urut, puskeswan, target, pengambilan) VALUES (?,?,?,?)',
-      [no_urut, puskeswan.trim(), target, pengambilan]
+    const cleanPusk = puskeswan.toUpperCase().replace(/^PUSKESWAN\s+/i, '').trim();
+
+    await pool.execute(
+      `INSERT INTO vaksinasi_bulanan (no_urut, puskeswan, target, pengambilan)
+       VALUES (?, ?, ?, ?)
+       ON DUPLICATE KEY UPDATE 
+         target = VALUES(target), 
+         pengambilan = VALUES(pengambilan),
+         no_urut = VALUES(no_urut)`,
+      [no_urut || 1, cleanPusk, Number(target) || 0, Number(pengambilan) || 0]
     );
 
     const session = await getSessionFromRequest(request as any);
-    const userName = session?.nama || session?.nip_username || request.headers.get('x-user-name') || 'Petugas';
+    const userName = session?.nama || session?.nip_username || 'Petugas';
 
     await logActivity({
       module: 'keswan',
       submenu: 'data-vaksinasi',
       tableName: 'vaksinasi_bulanan',
-      recordId: result.insertId,
-      action: 'CREATE',
+      recordId: cleanPusk,
+      action: 'UPDATE',
       userName,
-      details: {
-        puskeswan: puskeswan.trim(),
-        target,
-        pengambilan,
-      },
+      details: { puskeswan: cleanPusk, target, pengambilan },
     });
 
-    return NextResponse.json({ success: true, message: 'Puskeswan berhasil ditambahkan.', id: result.insertId });
+    return NextResponse.json({ success: true, message: 'Target & Pengambilan berhasil diperbarui.' });
   } catch (error: any) {
-    if (error.code === 'ER_DUP_ENTRY') {
-      return NextResponse.json({ success: false, error: 'Nama Puskeswan sudah ada.' }, { status: 409 });
-    }
     return NextResponse.json({ success: false, error: error.message }, { status: 500 });
   }
 }
