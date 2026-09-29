@@ -185,7 +185,7 @@ export default function AdminAnggotaPage() {
   const fetchMembers = async () => {
     setLoadingMembers(true);
     try {
-      const res = await fetch('/api/anggota');
+      const res = await fetch('/api/anggota', { cache: 'no-store' });
       const data = await res.json();
       if (Array.isArray(data)) {
         setMembers(data);

@@ -181,7 +181,7 @@ export async function GET(req: Request) {
 
     // Coba ambil data lengkap beserta wilayah kerja dari petugas_ib
     try {
-      const [rows]: any = await pool.execute(
+      const [rows]: any = await pool.query(
         `SELECT 
           u.id, u.nama, u.nip_username, u.role, u.status, u.permissions, u.created_at, u.updated_at,
           p.id_kompetensi,
@@ -190,7 +190,7 @@ export async function GET(req: Request) {
           p.wilayah_kerja_tambahan AS puskeswan_tambahan,
           p.wt1, p.wt2, p.wt3, p.wt4, p.wt5
         FROM anggota_users u
-        LEFT JOIN petugas_ib p ON p.id_user = u.id
+        LEFT JOIN petugas_ib p ON (p.id_user = u.id OR LOWER(TRIM(p.nama_petugas)) = LOWER(TRIM(u.nama)))
         LEFT JOIN wilayah_binaan wb_utama ON p.id_wilayah_binaan = wb_utama.id_wilayah_binaan
         ORDER BY u.id ASC`
       );
@@ -200,12 +200,17 @@ export async function GET(req: Request) {
           ...r,
           permissions: typeof r.permissions === 'string' ? JSON.parse(r.permissions) : r.permissions,
         }));
-        return NextResponse.json(parsed);
+        return NextResponse.json(parsed, {
+          headers: {
+            'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate',
+          },
+        });
       }
-    } catch (joinErr) {
+    } catch (joinErr: any) {
+      console.error('[GET /api/anggota Join Error]:', joinErr?.message || joinErr);
       // Fallback query langsung dari anggota_users jika join petugas_ib mengalami kendala
       try {
-        const [simpleRows]: any = await pool.execute(
+        const [simpleRows]: any = await pool.query(
           `SELECT id, nama, nip_username, role, status, permissions, created_at, updated_at FROM anggota_users ORDER BY id ASC`
         );
         if (Array.isArray(simpleRows) && simpleRows.length > 0) {
@@ -213,9 +218,15 @@ export async function GET(req: Request) {
             ...r,
             permissions: typeof r.permissions === 'string' ? JSON.parse(r.permissions) : r.permissions,
           }));
-          return NextResponse.json(parsed);
+          return NextResponse.json(parsed, {
+            headers: {
+              'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate',
+            },
+          });
         }
-      } catch {}
+      } catch (simpleErr: any) {
+        console.error('[GET /api/anggota Simple Error]:', simpleErr?.message || simpleErr);
+      }
     }
   } catch {
     // Fallback if db offline
