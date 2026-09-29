@@ -1,8 +1,9 @@
 'use client';
 
 import React from 'react';
-import { Filter, Search, Plus, X } from 'lucide-react';
+import { Filter, Search, Plus, X, Lock, Unlock, Info, AlertTriangle } from 'lucide-react';
 import { DAFTAR_BULAN } from './types';
+import { checkMonthlyDeadline } from '@/lib/deadlineCheck';
 
 interface PuskeswanRekapTabProps {
   filteredData: any[];
@@ -17,6 +18,8 @@ interface PuskeswanRekapTabProps {
   totalRetribusi: number;
   totalLayanan: number;
   canEdit: boolean;
+  isAdmin?: boolean;
+  isPuskeswanAllowed?: (puskes: string) => boolean;
   editingCell: { bulan: string; puskeswan: string; field: string; tahun?: string } | null;
   editValue: string;
   setEditValue: (val: string) => void;
@@ -46,6 +49,8 @@ export function PuskeswanRekapTab({
   totalRetribusi,
   totalLayanan,
   canEdit,
+  isAdmin = false,
+  isPuskeswanAllowed,
   editingCell,
   editValue,
   setEditValue,
@@ -92,17 +97,31 @@ export function PuskeswanRekapTab({
       );
     }
 
+    const isAllowed = isAdmin || (isPuskeswanAllowed ? isPuskeswanAllowed(row.puskeswan) : false);
+    const deadline = checkMonthlyDeadline(row.bulan, rowYear, isAdmin);
+    const isLocked = !isAdmin && deadline.isLocked;
+    const isCellEditable = isAllowed && !isLocked;
+
+    let tooltip = 'Klik untuk mengubah angka';
+    let cellStyle = 'cursor-pointer hover:bg-blue-50 hover:text-blue-700';
+
+    if (!isAllowed) {
+      tooltip = `Akses Ditolak: Puskeswan ${row.puskeswan} di luar wilayah penugasan Anda.`;
+      cellStyle = 'bg-slate-50/80 text-slate-400 cursor-not-allowed';
+    } else if (isLocked) {
+      tooltip = deadline.reason || `Periode ${row.bulan} ${rowYear} telah dikunci (Batas waktu 3 hari berakhir). Hubungi Administrator.`;
+      cellStyle = 'bg-slate-100/90 text-slate-500 cursor-not-allowed';
+    }
+
     return (
       <td
         onClick={() => onStartEdit(row.bulan, row.puskeswan, field, value, rowYear)}
-        title={canEdit ? 'Klik untuk mengubah angka' : undefined}
-        className={`p-3 border-r border-slate-100 font-sans ${
-          canEdit ? 'cursor-pointer hover:bg-blue-50 hover:text-blue-700' : ''
-        } transition-colors group select-none ${
+        title={tooltip}
+        className={`p-3 border-r border-slate-100 font-sans transition-colors group select-none ${cellStyle} ${
           isCurrency ? 'text-right font-medium text-slate-900' : 'text-center'
         } ${extraClass}`}
       >
-        <span className={canEdit ? 'group-hover:underline decoration-blue-400 underline-offset-2' : ''}>
+        <span className={isCellEditable ? 'group-hover:underline decoration-blue-400 underline-offset-2' : ''}>
           {isCurrency ? `Rp ${formatRp(value)}` : (value ?? 0)}
         </span>
       </td>
@@ -199,21 +218,44 @@ export function PuskeswanRekapTab({
           Tidak ada data rekapitulasi yang cocok dengan filter yang dipilih.
         </div>
       ) : (
-        (Object.entries(groupedData) as [string, any[]][]).map(([groupTitle, rows]) => (
-          <div key={groupTitle} className="bg-white rounded-3xl border border-slate-200 shadow-sm overflow-hidden space-y-0">
-            <div className="p-5 border-b border-slate-200 bg-slate-50/70 flex items-center justify-between">
-              <div className="flex items-center gap-2.5">
-                <div className="w-8 h-8 rounded-xl bg-blue-600 text-white flex items-center justify-center font-bold text-xs">
-                  {groupTitle.split(' - ')[1]?.slice(0, 3)}
+        (Object.entries(groupedData) as [string, any[]][]).map(([groupTitle, rows]) => {
+          const [grpYear, grpMonth] = groupTitle.split(' - ');
+          const deadline = checkMonthlyDeadline(grpMonth, grpYear, isAdmin);
+          const isGroupLocked = !isAdmin && deadline.isLocked;
+
+          return (
+            <div key={groupTitle} className="bg-white rounded-3xl border border-slate-200 shadow-sm overflow-hidden space-y-0">
+              <div className="p-4 sm:p-5 border-b border-slate-200 bg-slate-50/70 flex flex-wrap items-center justify-between gap-3">
+                <div className="flex items-center gap-2.5">
+                  <div className="w-8 h-8 rounded-xl bg-blue-600 text-white flex items-center justify-center font-bold text-xs shadow-xs">
+                    {grpMonth?.slice(0, 3)}
+                  </div>
+                  <div>
+                    <h3 className="font-black text-slate-900 text-sm sm:text-base tracking-tight flex items-center gap-2">
+                      <span>Lembar Kerja Rekapitulasi: Bulan {groupTitle}</span>
+                      {isGroupLocked ? (
+                        <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-extrabold bg-amber-100 text-amber-900 border border-amber-300">
+                          <Lock size={12} className="text-amber-700" />
+                          <span>Terkunci</span>
+                        </span>
+                      ) : (
+                        <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-extrabold bg-emerald-100 text-emerald-800 border border-emerald-300">
+                          <Unlock size={12} className="text-emerald-700" />
+                          <span>Dapat Diisi</span>
+                        </span>
+                      )}
+                    </h3>
+                    <p className="text-[11px] font-medium text-slate-500">
+                      {isGroupLocked
+                        ? 'Batas toleransi pengisian 3 hari telah berakhir. Hanya Administrator yang dapat mengubah data.'
+                        : 'Form aktif: Petugas berwenang dapat langsung mengklik sel angka untuk menginput data.'}
+                    </p>
+                  </div>
                 </div>
-                <h3 className="font-black text-slate-900 text-sm sm:text-base tracking-tight">
-                  Lembar Kerja Rekapitulasi: Bulan {groupTitle}
-                </h3>
+                <span className="text-xs font-bold text-slate-500 font-sans">
+                  {rows.length} Puskeswan Terdata
+                </span>
               </div>
-              <span className="text-xs font-bold text-slate-500 font-sans">
-                {rows.length} Puskeswan Terdata
-              </span>
-            </div>
 
             <div className="overflow-x-auto">
               <table className="w-full text-xs text-left whitespace-nowrap border-collapse">
@@ -292,7 +334,8 @@ export function PuskeswanRekapTab({
               </table>
             </div>
           </div>
-        ))
+        );
+      })
       )}
 
       {/* ── MODAL TAMBAH PERIODE BULAN BARU ── */}

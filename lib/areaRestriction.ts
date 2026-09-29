@@ -75,15 +75,45 @@ export async function getUserAreaAccess(session: SessionPayload | null): Promise
   const additionalKecamatan: string[] = [];
 
   try {
-    // 1. Cek apakah user terdaftar di tabel `petugas_ib`
+    // 1. Cek apakah nama akun / username / nama user mengindikasikan Puskeswan tertentu (misal akun 'Puskeswan Mirit' atau '1005')
+    const [allWb]: any = await pool.query(
+      `SELECT DISTINCT id_wilayah_binaan, id_puskeswan, nama_puskeswan, binaan FROM wilayah_binaan`
+    );
+
+    const cleanUser = userName.toUpperCase().replace(/^PUSKESWAN\s+/i, '').trim();
+
+    for (const wb of allWb) {
+      const pName = wb.nama_puskeswan.toUpperCase();
+      const pCore = pName.replace(/^PUSKESWAN\s+/i, '').trim();
+
+      if (
+        userName.toUpperCase() === pName ||
+        userName.toUpperCase().includes(pName) ||
+        pName.includes(userName.toUpperCase()) ||
+        cleanUser === pCore ||
+        (cleanUser.length >= 4 && pCore.includes(cleanUser))
+      ) {
+        allowedPuskeswanSet.add(wb.nama_puskeswan);
+        allowedPuskeswanIdSet.add(Number(wb.id_puskeswan));
+        allowedKecamatanSet.add(normalizeKecamatanName(wb.binaan));
+        if (!mainKecamatan) mainKecamatan = normalizeKecamatanName(wb.binaan);
+      }
+    }
+
+    // 2. Cek apakah user terdaftar di tabel `petugas_ib` (sebagai petugas individual atau penugasan akun)
     const [officerRows]: any = await pool.query(
-      `SELECT * FROM petugas_ib WHERE id_user = ? OR LOWER(nama_petugas) = LOWER(?) LIMIT 1`,
-      [userId, userName]
+      `SELECT * FROM petugas_ib 
+       WHERE id_user = ? 
+          OR LOWER(nama_petugas) = LOWER(?) 
+          OR LOWER(nama_petugas) LIKE LOWER(?) 
+          OR LOWER(wilayah_puskeswan) LIKE LOWER(?) 
+       LIMIT 1`,
+      [userId, userName, `%${userName}%`, `%${cleanUser}%`]
     );
 
     if (officerRows && officerRows.length > 0) {
       const officer = officerRows[0];
-      officerName = officer.nama_petugas || userName;
+      if (officer.nama_petugas) officerName = officer.nama_petugas;
 
       // Ambil Puskeswan Binaan Utama & seluruh kecamatan di bawah Puskeswan tersebut
       let mainPuskeswanName = officer.wilayah_puskeswan;
@@ -94,7 +124,7 @@ export async function getUserAreaAccess(session: SessionPayload | null): Promise
         );
         if (mPusk && mPusk.length > 0) {
           mainPuskeswanName = mPusk[0].nama_puskeswan;
-          mainKecamatan = normalizeKecamatanName(mPusk[0].binaan);
+          if (!mainKecamatan) mainKecamatan = normalizeKecamatanName(mPusk[0].binaan);
         }
       }
 
@@ -161,51 +191,44 @@ export async function getUserAreaAccess(session: SessionPayload | null): Promise
           }
         }
       }
-      // Jika petugas tidak memiliki penugasan Puskeswan maupun wilayah tambahan (Admin memilih tidak membatasi)
-      if (!mainPuskeswanName && wtIds.length === 0 && !officer.wilayah_kerja_tambahan) {
-        return {
-          isAdmin: true,
-          allowedKecamatan: [],
-          allowedPuskeswan: [],
-          allowedPuskeswanIds: [],
-          officerName: officer.nama_petugas || userName,
-        };
-      }
-    } else {
-      // Jika user tidak terhubung ke penugasan spesifik petugas_ib -> Akses penuh tingkat kabupaten
+    }
+
+    // Jika setelah dicek user memiliki wewenang wilayah binaan atau puskeswan
+    if (allowedPuskeswanSet.size > 0 || allowedKecamatanSet.size > 0) {
       return {
-        isAdmin: true,
-        allowedKecamatan: [],
-        allowedPuskeswan: [],
-        allowedPuskeswanIds: [],
-        officerName: session.nama || userName,
+        isAdmin: false,
+        allowedKecamatan: Array.from(allowedKecamatanSet),
+        allowedPuskeswan: Array.from(allowedPuskeswanSet),
+        allowedPuskeswanIds: Array.from(allowedPuskeswanIdSet),
+        officerName,
+        mainKecamatan,
+        additionalKecamatan,
       };
     }
 
-    // 2. Cek apakah nama akun / username mengindikasikan Puskeswan tertentu (misal akun 'Puskeswan Buayan')
-    const [allWb]: any = await pool.query(`SELECT DISTINCT nama_puskeswan, id_puskeswan, binaan FROM wilayah_binaan`);
-    for (const wb of allWb) {
-      const pName = wb.nama_puskeswan.toUpperCase();
-      if (userName.toUpperCase().includes(pName) || pName.includes(userName.toUpperCase())) {
-        allowedPuskeswanSet.add(wb.nama_puskeswan);
-        allowedPuskeswanIdSet.add(Number(wb.id_puskeswan));
-        allowedKecamatanSet.add(normalizeKecamatanName(wb.binaan));
-      }
-    }
-
+    // Jika user tidak terhubung ke penugasan wilayah spesifik dan bukan admin
+    // Tetap tandai bukan admin agar tidak bisa bypass
+    return {
+      isAdmin: false,
+      allowedKecamatan: [],
+      allowedPuskeswan: [],
+      allowedPuskeswanIds: [],
+      officerName: session.nama || userName,
+      mainKecamatan: '',
+      additionalKecamatan: [],
+    };
   } catch (err: any) {
     console.error('[AreaRestriction Error] Gagal memuat wilayah tugas:', err.message);
+    return {
+      isAdmin: false,
+      allowedKecamatan: [],
+      allowedPuskeswan: [],
+      allowedPuskeswanIds: [],
+      officerName: session.nama || userName,
+      mainKecamatan: '',
+      additionalKecamatan: [],
+    };
   }
-
-  return {
-    isAdmin: false,
-    allowedKecamatan: Array.from(allowedKecamatanSet),
-    allowedPuskeswan: Array.from(allowedPuskeswanSet),
-    allowedPuskeswanIds: Array.from(allowedPuskeswanIdSet),
-    officerName,
-    mainKecamatan,
-    additionalKecamatan,
-  };
 }
 
 /**
@@ -214,7 +237,8 @@ export async function getUserAreaAccess(session: SessionPayload | null): Promise
 export async function validateAreaAccess(
   req: Request,
   targetKecamatan?: string | null,
-  targetPuskeswan?: string | null
+  targetPuskeswan?: string | null,
+  deadlineOptions?: { bulan?: string | number; tahun?: string | number; tanggal?: string }
 ): Promise<{ allowed: boolean; errorResponse?: NextResponse }> {
   const session = await getSessionFromRequest(req);
   if (!session) {
@@ -230,6 +254,41 @@ export async function validateAreaAccess(
   const access = await getUserAreaAccess(session);
   if (access.isAdmin) {
     return { allowed: true };
+  }
+
+  // 1. Validasi Batas Waktu 3 Hari (Grace Period) untuk Petugas Non-Admin
+  if (deadlineOptions) {
+    const { checkMonthlyDeadline, checkDailyDeadline } = await import('@/lib/deadlineCheck');
+    if (deadlineOptions.tanggal) {
+      const check = checkDailyDeadline(deadlineOptions.tanggal, false);
+      if (check.isLocked) {
+        return {
+          allowed: false,
+          errorResponse: NextResponse.json(
+            {
+              success: false,
+              error: check.reason || 'Pengisian data tanggal ini telah dikunci (Batas waktu 3 hari berakhir). Silakan hubungi Administrator.',
+            },
+            { status: 403 }
+          ),
+        };
+      }
+    }
+    if (deadlineOptions.bulan && deadlineOptions.tahun) {
+      const check = checkMonthlyDeadline(deadlineOptions.bulan, deadlineOptions.tahun, false);
+      if (check.isLocked) {
+        return {
+          allowed: false,
+          errorResponse: NextResponse.json(
+            {
+              success: false,
+              error: check.reason || 'Periode ini telah dikunci (Batas waktu 3 hari berakhir). Silakan hubungi Administrator.',
+            },
+            { status: 403 }
+          ),
+        };
+      }
+    }
   }
 
   // Jika tidak memiliki wilayah binaan terdaftar
@@ -270,9 +329,13 @@ export async function validateAreaAccess(
   // Validasi Puskeswan jika parameter targetPuskeswan diberikan
   if (targetPuskeswan) {
     const normTargetPuskeswan = normalizePuskeswanName(targetPuskeswan);
-    const isPuskeswanAllowed = access.allowedPuskeswan.some(
-      (p) => normalizePuskeswanName(p) === normTargetPuskeswan
-    );
+    const targetCore = (targetPuskeswan || '').toUpperCase().replace(/^PUSKESWAN\s+/i, '').trim();
+
+    const isPuskeswanAllowed = access.allowedPuskeswan.some((p) => {
+      const normP = normalizePuskeswanName(p);
+      const pCore = p.toUpperCase().replace(/^PUSKESWAN\s+/i, '').trim();
+      return normP === normTargetPuskeswan || pCore === targetCore || normP.includes(normTargetPuskeswan) || normTargetPuskeswan.includes(normP);
+    });
 
     if (!isPuskeswanAllowed) {
       return {

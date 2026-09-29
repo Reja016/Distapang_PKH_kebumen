@@ -153,15 +153,18 @@ export async function GET() {
 export async function PATCH(request: Request) {
   try {
     const body = await request.json();
-    const { bulan, puskeswan, field, value } = body;
+    const { bulan, puskeswan, field, value, tahun } = body;
 
     if (!bulan || !puskeswan || !field) {
       return NextResponse.json({ success: false, error: 'Data tidak lengkap.' }, { status: 400 });
     }
 
-    // Validasi Pembatasan Wilayah Kerja Petugas (Role-Based Area Restriction)
+    // Validasi Pembatasan Wilayah Kerja Petugas & Batas Waktu 3 Hari (Grace Period)
     const { validateAreaAccess } = await import('@/lib/areaRestriction');
-    const areaCheck = await validateAreaAccess(request, null, puskeswan);
+    const areaCheck = await validateAreaAccess(request, null, puskeswan, {
+      bulan,
+      tahun: tahun || '2026',
+    });
     if (!areaCheck.allowed && areaCheck.errorResponse) {
       return areaCheck.errorResponse;
     }

@@ -35,6 +35,7 @@ import {
 } from '@/components/keswan/puskeswan/PuskeswanProfilModals';
 import { PuskeswanProfilTab } from '@/components/keswan/puskeswan/PuskeswanProfilTab';
 import { PuskeswanRekapTab } from '@/components/keswan/puskeswan/PuskeswanRekapTab';
+import { checkMonthlyDeadline } from '@/lib/deadlineCheck';
 
 export default function LaporanPuskeswanPage() {
   const { isReady, canCreate, canEdit } = usePageAuth('keswan', 'puskeswan');
@@ -336,10 +337,16 @@ export default function LaporanPuskeswanPage() {
   const sum = (rows: any[], key: string) => rows.reduce((acc, row) => acc + (Number(row[key]) || 0), 0);
 
   const handleStartEdit = (bulan: string, puskeswan: string, field: string, currentValue: any, tahun: string = '2026') => {
-    if (!canEdit) return;
-    if (!isAdmin && !isPuskeswanAllowed(puskeswan)) {
-      showToast('error', `Akses ditolak: Anda tidak memiliki wewenang untuk ${puskeswan}`);
-      return;
+    if (!isAdmin) {
+      if (!isPuskeswanAllowed(puskeswan)) {
+        showToast('error', `Akses ditolak: Anda tidak memiliki wewenang untuk ${puskeswan}`);
+        return;
+      }
+      const deadline = checkMonthlyDeadline(bulan, tahun, false);
+      if (deadline.isLocked) {
+        showToast('error', deadline.reason || `Periode ${bulan} ${tahun} telah dikunci (Batas waktu 3 hari berakhir). Hubungi Administrator.`);
+        return;
+      }
     }
     setEditingCell({ bulan, puskeswan, field, tahun });
     setEditValue(String(currentValue ?? 0));
@@ -672,6 +679,8 @@ export default function LaporanPuskeswanPage() {
             totalRetribusi={totalRetribusi}
             totalLayanan={totalLayanan}
             canEdit={canEdit}
+            isAdmin={isAdmin}
+            isPuskeswanAllowed={isPuskeswanAllowed}
             editingCell={editingCell}
             editValue={editValue}
             setEditValue={setEditValue}

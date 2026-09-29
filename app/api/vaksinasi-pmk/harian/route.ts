@@ -36,9 +36,9 @@ export async function POST(request: Request) {
       return NextResponse.json({ success: false, error: 'Puskeswan dan tanggal wajib diisi.' }, { status: 400 });
     }
 
-    // Validasi Pembatasan Wilayah Kerja Petugas (Role-Based Area Restriction)
+    // Validasi Pembatasan Wilayah Kerja Petugas & Batas Waktu 3 Hari (Grace Period)
     const { validateAreaAccess } = await import('@/lib/areaRestriction');
-    const areaCheck = await validateAreaAccess(request, null, puskeswan);
+    const areaCheck = await validateAreaAccess(request, null, puskeswan, { tanggal });
     if (!areaCheck.allowed && areaCheck.errorResponse) {
       return areaCheck.errorResponse;
     }

@@ -28,9 +28,12 @@ import VaksinasiBulananTab from '@/components/keswan/data-vaksinasi/VaksinasiBul
 import VaksinasiApbdTab from '@/components/keswan/data-vaksinasi/VaksinasiApbdTab';
 import VaksinasiModals from '@/components/keswan/data-vaksinasi/VaksinasiModals';
 import { UniversalAuditModal } from '@/components/common/UniversalAuditModal';
+import { useUserAreaRestriction } from '@/hooks/useUserAreaRestriction';
+import { checkDailyDeadline } from '@/lib/deadlineCheck';
 
 export default function DataVaksinasiPMKPage() {
   const { isReady, canCreate, canEdit } = usePageAuth('keswan', 'data-vaksinasi');
+  const { isAdmin, isPuskeswanAllowed } = useUserAreaRestriction();
 
   // Posisi default: Matriks Input Harian
   const [activeTab, setActiveTab] = useState<'harian' | 'bulanan' | 'apbd'>('harian');
@@ -172,15 +175,40 @@ export default function DataVaksinasiPMKPage() {
 
   // ── INLINE EDIT HARIAN (PERSISTEN KE DATABASE) ──
   const startEditHarian = (puskeswan: string, tanggal: string) => {
-    if (!canEdit) return;
+    if (!isAdmin) {
+      if (!isPuskeswanAllowed(puskeswan)) {
+        showToast('error', `Akses Ditolak: Anda tidak memiliki wewenang untuk ${puskeswan}`);
+        return;
+      }
+      const deadline = checkDailyDeadline(tanggal, false);
+      if (deadline.isLocked) {
+        showToast('error', deadline.reason || `Pengisian tanggal ${tanggal} telah dikunci (Batas waktu 3 hari berakhir). Hubungi Administrator.`);
+        return;
+      }
+    }
     const existing = harianMap[puskeswan]?.[tanggal];
     setEditingHarian({ puskeswan, tanggal });
     setEditHarianValue(existing && existing.jumlah > 0 ? String(existing.jumlah) : '');
   };
 
   const saveEditHarian = async () => {
-    if (!editingHarian || !canEdit) return;
+    if (!editingHarian) return;
     const { puskeswan, tanggal } = editingHarian;
+
+    if (!isAdmin) {
+      if (!isPuskeswanAllowed(puskeswan)) {
+        showToast('error', `Akses Ditolak: Anda tidak memiliki wewenang untuk ${puskeswan}`);
+        setEditingHarian(null);
+        return;
+      }
+      const deadline = checkDailyDeadline(tanggal, false);
+      if (deadline.isLocked) {
+        showToast('error', deadline.reason || `Pengisian tanggal ${tanggal} telah dikunci.`);
+        setEditingHarian(null);
+        return;
+      }
+    }
+
     const jumlahVal = Number(editHarianValue) || 0;
 
     // Optimistic Update pada state harian
@@ -228,6 +256,8 @@ export default function DataVaksinasiPMKPage() {
       const json = await res.json();
       if (json.success) {
         showToast('success', `${puskeswan} (${tanggal}): ${jumlahVal} dosis tersimpan di database.`);
+      } else {
+        showToast('error', json.error || 'Gagal menyimpan ke database.');
       }
     } catch {
       showToast('success', 'Perubahan dosis harian dicatat.');
@@ -236,7 +266,11 @@ export default function DataVaksinasiPMKPage() {
 
   // ── INLINE EDIT BULANAN (TARGET & PENGAMBILAN) ──
   const startEditBulananCell = (id: number, field: 'target' | 'pengambilan', currentVal: number) => {
-    if (!canEdit) return;
+    const row = bulanan.find((b) => b.id === id);
+    if (row && !isAdmin && !isPuskeswanAllowed(row.puskeswan)) {
+      showToast('error', `Akses Ditolak: Anda tidak memiliki wewenang untuk ${row.puskeswan}`);
+      return;
+    }
     setEditingBulananCell({ id, field });
     setEditBulananValue(String(currentVal || 0));
   };

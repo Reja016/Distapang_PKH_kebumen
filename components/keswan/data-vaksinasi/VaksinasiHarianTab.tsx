@@ -2,6 +2,7 @@ import React from 'react';
 import { Calendar, Plus } from 'lucide-react';
 import { Bulanan, BULAN_LABEL, BULAN_LONG, daysInMonth } from './types';
 import { useUserAreaRestriction } from '@/hooks/useUserAreaRestriction';
+import { checkDailyDeadline } from '@/lib/deadlineCheck';
 
 interface VaksinasiHarianTabProps {
   selectedYear: number;
@@ -200,6 +201,20 @@ export default function VaksinasiHarianTab({
                       }
 
                       const isAllowed = isAdmin || isPuskeswanAllowed(row.puskeswan);
+                      const deadline = checkDailyDeadline(dateStr, isAdmin);
+                      const isLocked = !isAdmin && deadline.isLocked;
+                      const isCellEditable = isAllowed && !isLocked;
+
+                      let cellTitle = `Klik untuk ubah dosis ${row.puskeswan} tgl ${d}`;
+                      let cellClass = 'cursor-pointer ' + (val && val > 0 ? 'bg-blue-100 text-blue-950 font-black hover:bg-blue-200' : 'bg-white hover:bg-blue-100/60 text-slate-400 hover:text-blue-900 font-bold');
+
+                      if (!isAllowed) {
+                        cellTitle = `Akses Ditolak: Wilayah ${row.puskeswan} di luar wewenang tugas Anda`;
+                        cellClass = 'bg-slate-100/80 text-slate-300 cursor-not-allowed';
+                      } else if (isLocked) {
+                        cellTitle = deadline.reason || `Tanggal ${dateStr} telah dikunci (Batas waktu 3 hari berakhir). Hubungi Administrator.`;
+                        cellClass = 'bg-slate-100/90 text-slate-400 cursor-not-allowed';
+                      }
 
                       return (
                         <td
@@ -209,14 +224,14 @@ export default function VaksinasiHarianTab({
                               alert(`Akses Ditolak: Anda tidak memiliki wewenang untuk mengisi/mengubah data ${row.puskeswan}`);
                               return;
                             }
+                            if (isLocked) {
+                              alert(deadline.reason || `Pengisian tanggal ${dateStr} telah dikunci (Batas toleransi 3 hari berakhir). Hubungi Administrator jika ada perbaikan data.`);
+                              return;
+                            }
                             startEditHarian(row.puskeswan, dateStr);
                           }}
-                          title={!isAllowed ? `Wilayah ${row.puskeswan} di luar wewenang tugas Anda` : `Klik untuk ubah dosis ${row.puskeswan} tgl ${d}`}
-                          className={`p-1.5 text-center font-sans border-r-2 border-slate-400 select-none transition-all ${
-                            !isAllowed
-                              ? 'bg-slate-100/80 text-slate-300 cursor-not-allowed'
-                              : 'cursor-pointer ' + (val && val > 0 ? 'bg-blue-100 text-blue-950 font-black hover:bg-blue-200' : 'bg-white hover:bg-blue-100/60 text-slate-400 hover:text-blue-900 font-bold')
-                          }`}
+                          title={cellTitle}
+                          className={`p-1.5 text-center font-sans border-r-2 border-slate-400 select-none transition-all ${cellClass}`}
                         >
                           {val && val > 0 ? (
                             <div className="flex items-center justify-center gap-1">

@@ -87,7 +87,12 @@ export function useUserAreaRestriction(): UserAreaRestrictionResult {
     if (isAdmin) return true;
     if (allowedPuskeswan.length === 0) return false;
     const clean = (puskes || '').toUpperCase().trim();
-    return allowedPuskeswan.some((p) => p.toUpperCase().includes(clean) || clean.includes(p.toUpperCase()));
+    const cleanCore = clean.replace(/^PUSKESWAN\s+/i, '').trim();
+    return allowedPuskeswan.some((p) => {
+      const pClean = p.toUpperCase().trim();
+      const pCore = pClean.replace(/^PUSKESWAN\s+/i, '').trim();
+      return pClean === clean || pCore === cleanCore || pClean.includes(clean) || clean.includes(pClean);
+    });
   };
 
   const filterKecamatanList = <T extends string | { id?: string | number; nama: string; [key: string]: any }>(
