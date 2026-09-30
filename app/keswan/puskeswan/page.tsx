@@ -117,7 +117,13 @@ export default function LaporanPuskeswanPage() {
   // Muat Data Rekapitulasi dari Database
   const loadDataFromDB = async () => {
     try {
-      const res = await fetch('/api/puskeswan');
+      const res = await fetch(`/api/puskeswan?t=${Date.now()}`, {
+        cache: 'no-store',
+        headers: {
+          'Cache-Control': 'no-cache, no-store, must-revalidate',
+          Pragma: 'no-cache',
+        },
+      });
       const result = await res.json();
       if (result.success && Array.isArray(result.data) && result.data.length > 0) {
         const withTahun = result.data.map((r: any) => ({
@@ -436,11 +442,14 @@ export default function LaporanPuskeswanPage() {
       const result = await res.json();
       if (result.success) {
         showToast('success', `${puskeswan} (${bulan} ${tahun || '2026'}): ${field.toUpperCase()} diperbarui`);
+        loadDataFromDB();
       } else {
         showToast('error', result.error || 'Gagal menyimpan perubahan');
+        loadDataFromDB();
       }
     } catch {
       showToast('error', 'Gagal menyimpan perubahan ke database');
+      loadDataFromDB();
     }
   };
 

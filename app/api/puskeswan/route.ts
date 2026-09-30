@@ -4,6 +4,9 @@ import { getSessionFromRequest } from '@/lib/session';
 import { logActivity } from '@/lib/auditLog';
 import { DIAGNOSA_LIST } from '@/lib/penyakitData';
 
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
 // Fallback data awal jika database belum siap
 const fallbackData = [
   { id: 1, bulan: 'JANUARI', no: 1, puskeswan: 'MIRIT', bef: 2, cacingan: 70, scabies: 0, orf: 0, pmk_diag: 0, lsd_diag: 5, aktif: 127, semi_aktif: 5, pasif: 0, pusling: 127, ib: 160, pkb: 12, pmk_vaks: 0, lsd_vaks: 0, retribusi: 1750000 },
@@ -149,8 +152,8 @@ const PUSKESWAN_BINAAN_MAP: Record<number, { id_kecamatan: number; nama_kecamata
 };
 
 async function ensureTable() {
+  // 1. Pastikan tabel laporan_puskeswan ada
   try {
-    // 1. Pastikan tabel laporan_puskeswan ada
     await pool.execute(`
       CREATE TABLE IF NOT EXISTS laporan_puskeswan (
         id INT AUTO_INCREMENT PRIMARY KEY,
@@ -172,12 +175,21 @@ async function ensureTable() {
         UNIQUE KEY uq_bulan_puskeswan (bulan, puskeswan)
       ) ENGINE=InnoDB;
     `);
+  } catch (e: any) {
+    console.warn('ensureTable laporan_puskeswan:', e.message);
+  }
 
+  try {
+    await pool.execute('ALTER TABLE laporan_puskeswan ADD COLUMN id_puskeswan INT');
+  } catch {}
+  for (const col of ['bef', 'cacingan', 'scabies', 'orf', 'pmk_diag', 'lsd_diag']) {
     try {
-      await pool.execute('ALTER TABLE laporan_puskeswan ADD COLUMN id_puskeswan INT');
+      await pool.execute(`ALTER TABLE laporan_puskeswan ADD COLUMN ${col} INT DEFAULT 0`);
     } catch {}
+  }
 
-    // 2. Pastikan tabel keswan_laporan_penyakit ada
+  // 2. Pastikan tabel keswan_laporan_penyakit ada
+  try {
     await pool.execute(`
       CREATE TABLE IF NOT EXISTS keswan_laporan_penyakit (
         id_laporan_penyakit INT AUTO_INCREMENT PRIMARY KEY,
@@ -193,16 +205,20 @@ async function ensureTable() {
         updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
       ) ENGINE=InnoDB;
     `);
+  } catch (e: any) {
+    console.warn('ensureTable keswan_laporan_penyakit:', e.message);
+  }
 
-    try {
-      await pool.execute('ALTER TABLE keswan_laporan_penyakit ADD COLUMN id_kecamatan INT NULL AFTER id_puskeswan');
-    } catch {}
-    try {
-      await pool.execute('ALTER TABLE keswan_laporan_penyakit MODIFY COLUMN kecamatan_id VARCHAR(50) NULL');
-      await pool.execute('ALTER TABLE keswan_laporan_penyakit MODIFY COLUMN kecamatan_nama VARCHAR(100) NULL');
-    } catch {}
+  try {
+    await pool.execute('ALTER TABLE keswan_laporan_penyakit ADD COLUMN id_kecamatan INT NULL AFTER id_puskeswan');
+  } catch {}
+  try {
+    await pool.execute('ALTER TABLE keswan_laporan_penyakit MODIFY COLUMN kecamatan_id VARCHAR(50) NULL');
+    await pool.execute('ALTER TABLE keswan_laporan_penyakit MODIFY COLUMN kecamatan_nama VARCHAR(100) NULL');
+  } catch {}
 
-    // 3. Pastikan tabel laporan_puskeswan_kecamatan ada (menyimpan rincian layanan per kecamatan)
+  // 3. Pastikan tabel laporan_puskeswan_kecamatan ada (menyimpan rincian layanan per kecamatan)
+  try {
     await pool.execute(`
       CREATE TABLE IF NOT EXISTS laporan_puskeswan_kecamatan (
         id INT AUTO_INCREMENT PRIMARY KEY,
@@ -223,8 +239,12 @@ async function ensureTable() {
         UNIQUE KEY uq_bln_pusk_kec (tahun, bulan, id_puskeswan, id_kecamatan)
       ) ENGINE=InnoDB;
     `);
+  } catch (e: any) {
+    console.warn('ensureTable laporan_puskeswan_kecamatan:', e.message);
+  }
 
-    // 4. Pastikan tabel diagnosa ada dan berisi seluruh jenis diagnosa standar
+  // 4. Pastikan tabel diagnosa ada dan berisi seluruh jenis diagnosa standar
+  try {
     await pool.execute(`
       CREATE TABLE IF NOT EXISTS diagnosa (
         id_diagnosa INT AUTO_INCREMENT PRIMARY KEY,
@@ -236,20 +256,17 @@ async function ensureTable() {
         UNIQUE KEY uq_diag_nama (diagnosa_nama)
       ) ENGINE=InnoDB;
     `);
-
-    try {
-      const [diagCount]: any = await pool.query('SELECT COUNT(*) as c FROM diagnosa');
-      if (!diagCount || diagCount[0]?.c === 0) {
-        for (const d of DIAGNOSA_LIST) {
-          await pool.query(
-            'INSERT IGNORE INTO diagnosa (diagnosa_nama, kategori_penyakit) VALUES (?, ?)',
-            [d.nama, d.kategori || 'Umum']
-          );
-        }
+    const [diagCount]: any = await pool.query('SELECT COUNT(*) as c FROM diagnosa');
+    if (!diagCount || diagCount[0]?.c === 0) {
+      for (const d of DIAGNOSA_LIST) {
+        await pool.query(
+          'INSERT IGNORE INTO diagnosa (diagnosa_nama, kategori_penyakit) VALUES (?, ?)',
+          [d.nama, d.kategori || 'Umum']
+        );
       }
-    } catch {}
+    }
   } catch (e: any) {
-    console.warn('Gagal memastikan tabel laporan_puskeswan / keswan_laporan_penyakit:', e.message);
+    console.warn('ensureTable diagnosa:', e.message);
   }
 }
 
@@ -365,7 +382,8 @@ export async function GET() {
           // Tentukan id puskeswan (angka 1-8)
           let idP = Number(r.id_puskeswan) || 0;
           if (!idP && r.puskeswan_id) {
-            idP = PUSKESWAN_ID_MAP[String(r.puskeswan_id).toUpperCase()] || 0;
+            const rawPusk = String(r.puskeswan_id).toUpperCase().replace(/^PUSK_/, '').trim();
+            idP = PUSKESWAN_ID_MAP[rawPusk] || PUSKESWAN_ID_MAP[String(r.puskeswan_id).toUpperCase()] || Number(r.puskeswan_id) || 0;
           }
 
           // Tentukan id kecamatan (angka 1-26 atau 0 untuk umum)
@@ -440,41 +458,46 @@ export async function GET() {
 
       // Sub-baris untuk Tanpa Kecamatan / Umum (id_kecamatan = 0)
       const unassignedKs = kecServiceMap[`${rowYear}_${rowMonth}_${idPusk}_0`] || {};
-      const getUnassignedDiag = (diagKey: string) => {
-        return diseaseMap[`${rowYear}_${rowMonth}_${idPusk}_0_${diagKey}`] || 0;
+
+      const getUnassignedDiag = (diagKey: string, parentCol: string) => {
+        const fromMap = diseaseMap[`${rowYear}_${rowMonth}_${idPusk}_0_${diagKey}`];
+        if (fromMap !== undefined && fromMap !== null) {
+          return Number(fromMap) || 0;
+        }
+        const subSum = (subRows as any[]).reduce((a: number, b: any) => a + (Number(b[diagKey] ?? b[`${diagKey}_diag`] ?? 0)), 0);
+        const parentVal = Number(r[diagKey] ?? r[`${diagKey}_diag`] ?? r[parentCol] ?? 0);
+        return Math.max(0, parentVal - subSum);
       };
 
-      // Cek apakah ada data legacy di parent row laporan_puskeswan saat belum dipecah ke kecamatan
-      const subRowsSumBef = subRows.reduce((a, b) => a + b.bef, 0);
-      const subRowsSumAktif = subRows.reduce((a, b) => a + b.aktif, 0);
-
-      const unassignedBef = getUnassignedDiag('bef') || (subRowsSumBef === 0 ? Number(r.bef || 0) : 0);
-      const unassignedCacing = getUnassignedDiag('cacingan') || (subRows.reduce((a, b) => a + b.cacingan, 0) === 0 ? Number(r.cacingan || 0) : 0);
-      const unassignedScabies = getUnassignedDiag('scabies') || (subRows.reduce((a, b) => a + b.scabies, 0) === 0 ? Number(r.scabies || 0) : 0);
-      const unassignedOrf = getUnassignedDiag('orf') || (subRows.reduce((a, b) => a + b.orf, 0) === 0 ? Number(r.orf || 0) : 0);
-      const unassignedPmk = getUnassignedDiag('pmk') || (subRows.reduce((a, b) => a + b.pmk_diag, 0) === 0 ? Number(r.pmk_diag || 0) : 0);
-      const unassignedLsd = getUnassignedDiag('lsd') || (subRows.reduce((a, b) => a + b.lsd_diag, 0) === 0 ? Number(r.lsd_diag || 0) : 0);
+      const getUnassignedService = (field: string) => {
+        const subSum = (subRows as any[]).reduce((a: number, b: any) => a + (Number(b[field]) || 0), 0);
+        if (unassignedKs[field] !== undefined && unassignedKs[field] !== null) {
+          return Number(unassignedKs[field]) || 0;
+        }
+        const parentVal = Number(r[field] ?? r[`sispel_${field}`] ?? 0);
+        return Math.max(0, parentVal - subSum);
+      };
 
       const unassignedRow = {
         id_kecamatan: 0,
         nama_kecamatan: 'Tanpa Kecamatan / Umum',
         code: '',
         isUnassigned: true,
-        bef: unassignedBef,
-        cacingan: unassignedCacing,
-        scabies: unassignedScabies,
-        orf: unassignedOrf,
-        pmk_diag: unassignedPmk,
-        lsd_diag: unassignedLsd,
-        aktif: Number(unassignedKs.aktif ?? (subRowsSumAktif === 0 ? (r.aktif ?? r.sispel_aktif ?? 0) : 0)),
-        semi_aktif: Number(unassignedKs.semi_aktif ?? (subRows.reduce((a, b) => a + b.semi_aktif, 0) === 0 ? (r.semi_aktif ?? r.sispel_semi_aktif ?? 0) : 0)),
-        pasif: Number(unassignedKs.pasif ?? (subRows.reduce((a, b) => a + b.pasif, 0) === 0 ? (r.pasif ?? r.sispel_pasif ?? 0) : 0)),
-        pusling: Number(unassignedKs.pusling ?? (subRows.reduce((a, b) => a + b.pusling, 0) === 0 ? (r.pusling || 0) : 0)),
-        ib: Number(unassignedKs.ib ?? (subRows.reduce((a, b) => a + b.ib, 0) === 0 ? (r.ib || 0) : 0)),
-        pkb: Number(unassignedKs.pkb ?? (subRows.reduce((a, b) => a + b.pkb, 0) === 0 ? (r.pkb || 0) : 0)),
-        pmk_vaks: Number(unassignedKs.pmk_vaks ?? (subRows.reduce((a, b) => a + b.pmk_vaks, 0) === 0 ? (r.pmk_vaks || 0) : 0)),
-        lsd_vaks: Number(unassignedKs.lsd_vaks ?? (subRows.reduce((a, b) => a + b.lsd_vaks, 0) === 0 ? (r.lsd_vaks || 0) : 0)),
-        retribusi: Number(unassignedKs.retribusi ?? (subRows.reduce((a, b) => a + b.retribusi, 0) === 0 ? (r.retribusi || 0) : 0)),
+        bef: getUnassignedDiag('bef', 'bef'),
+        cacingan: getUnassignedDiag('cacingan', 'cacingan'),
+        scabies: getUnassignedDiag('scabies', 'scabies'),
+        orf: getUnassignedDiag('orf', 'orf'),
+        pmk_diag: getUnassignedDiag('pmk', 'pmk_diag'),
+        lsd_diag: getUnassignedDiag('lsd', 'lsd_diag'),
+        aktif: getUnassignedService('aktif'),
+        semi_aktif: getUnassignedService('semi_aktif'),
+        pasif: getUnassignedService('pasif'),
+        pusling: getUnassignedService('pusling'),
+        ib: getUnassignedService('ib'),
+        pkb: getUnassignedService('pkb'),
+        pmk_vaks: getUnassignedService('pmk_vaks'),
+        lsd_vaks: getUnassignedService('lsd_vaks'),
+        retribusi: getUnassignedService('retribusi'),
       };
 
       // Total akumulasi Puskeswan = Penjumlahan seluruh sub-baris kecamatan binaan + umum
@@ -507,10 +530,28 @@ export async function GET() {
       };
     });
 
-    return NextResponse.json({ success: true, data: dataFormatted });
+    return NextResponse.json(
+      { success: true, data: dataFormatted },
+      {
+        headers: {
+          'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate',
+          'Pragma': 'no-cache',
+          'Expires': '0',
+        },
+      }
+    );
   } catch (error: any) {
     console.warn('DB belum aktif atau gagal koneksi, menggunakan fallback:', error.message);
-    return NextResponse.json({ success: true, data: fallbackData, isFallback: true });
+    return NextResponse.json(
+      { success: true, data: fallbackData, isFallback: true },
+      {
+        headers: {
+          'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate',
+          'Pragma': 'no-cache',
+          'Expires': '0',
+        },
+      }
+    );
   }
 }
 
@@ -576,21 +617,21 @@ export async function PATCH(request: Request) {
         if (kecIdNum > 0) {
           const [rows]: any = await pool.query(
             `SELECT ${pkCol} as id_row FROM keswan_laporan_penyakit 
-             WHERE tahun = ? AND UPPER(bulan) = ? 
-               AND LOWER(puskeswan_id) = ? 
+             WHERE (tahun = ? OR tahun IS NULL) AND UPPER(bulan) = ? 
+               AND (LOWER(puskeswan_id) = ? OR LOWER(puskeswan_id) = ? OR puskeswan_id = ?) 
                AND (kecamatan_id = ? OR kecamatan_id = ?) 
                AND (LOWER(diagnosa_nama) = LOWER(?) OR LOWER(diagnosa_nama) LIKE ?) LIMIT 1`,
-            [Number(tahunStr), cleanBulan, puskCode, kecCode, kecCode?.replace(/^k_/, ''), diagNamaTarget, `%${diagNamaTarget.toLowerCase()}%`]
+            [Number(tahunStr), cleanBulan, puskCode, `pusk_${puskCode}`, String(idPuskeswan), kecCode, kecCode?.replace(/^k_/, ''), diagNamaTarget, `%${diagNamaTarget.toLowerCase()}%`]
           );
           existing = rows;
         } else {
           const [rows]: any = await pool.query(
             `SELECT ${pkCol} as id_row FROM keswan_laporan_penyakit 
-             WHERE tahun = ? AND UPPER(bulan) = ? 
-               AND LOWER(puskeswan_id) = ? 
+             WHERE (tahun = ? OR tahun IS NULL) AND UPPER(bulan) = ? 
+               AND (LOWER(puskeswan_id) = ? OR LOWER(puskeswan_id) = ? OR puskeswan_id = ?) 
                AND (kecamatan_id IS NULL OR kecamatan_id = '' OR kecamatan_id = '0' OR kecamatan_id = 'umum') 
                AND (LOWER(diagnosa_nama) = LOWER(?) OR LOWER(diagnosa_nama) LIKE ?) LIMIT 1`,
-            [Number(tahunStr), cleanBulan, puskCode, diagNamaTarget, `%${diagNamaTarget.toLowerCase()}%`]
+            [Number(tahunStr), cleanBulan, puskCode, `pusk_${puskCode}`, String(idPuskeswan), diagNamaTarget, `%${diagNamaTarget.toLowerCase()}%`]
           );
           existing = rows;
         }
@@ -604,7 +645,7 @@ export async function PATCH(request: Request) {
           await pool.query(
             `INSERT INTO keswan_laporan_penyakit (tahun, bulan, puskeswan_id, kecamatan_id, kecamatan_nama, diagnosa_nama, kategori_penyakit, jumlah_kasus) 
              VALUES (?, ?, ?, ?, ?, ?, 'Umum', ?)`,
-            [Number(tahunStr), cleanBulan, puskCode, kecCode, kecNama, diagNamaTarget, numValue]
+            [Number(tahunStr), cleanBulan, puskCode, kecCode || 'umum', kecNama || 'Umum', diagNamaTarget, numValue]
           );
         }
       } else {
@@ -630,14 +671,14 @@ export async function PATCH(request: Request) {
         if (kecIdNum > 0) {
           const [rows]: any = await pool.query(
             `SELECT ${pkCol} as id_row FROM keswan_laporan_penyakit 
-             WHERE tahun = ? AND UPPER(bulan) = ? AND id_puskeswan = ? AND id_kecamatan = ? AND id_diagnosa = ? LIMIT 1`,
+             WHERE (tahun = ? OR tahun IS NULL) AND UPPER(bulan) = ? AND id_puskeswan = ? AND id_kecamatan = ? AND id_diagnosa = ? LIMIT 1`,
             [Number(tahunStr), cleanBulan, idPuskeswan, kecIdNum, idDiagnosa]
           );
           existing = rows;
         } else {
           const [rows]: any = await pool.query(
             `SELECT ${pkCol} as id_row FROM keswan_laporan_penyakit 
-             WHERE tahun = ? AND UPPER(bulan) = ? AND id_puskeswan = ? AND (id_kecamatan IS NULL OR id_kecamatan = 0) AND id_diagnosa = ? LIMIT 1`,
+             WHERE (tahun = ? OR tahun IS NULL) AND UPPER(bulan) = ? AND id_puskeswan = ? AND (id_kecamatan IS NULL OR id_kecamatan = 0) AND id_diagnosa = ? LIMIT 1`,
             [Number(tahunStr), cleanBulan, idPuskeswan, idDiagnosa]
           );
           existing = rows;
@@ -656,6 +697,14 @@ export async function PATCH(request: Request) {
           );
         }
       }
+
+      // Sync penyakit ke laporan_puskeswan jika kolomnya ada
+      try {
+        await pool.execute(
+          `UPDATE laporan_puskeswan SET ${field} = ?, id_puskeswan = ? WHERE UPPER(bulan) = ? AND UPPER(puskeswan) = ?`,
+          [numValue, idPuskeswan, cleanBulan, cleanPusk]
+        );
+      } catch {}
 
       await logActivity({
         module: 'keswan',
@@ -678,30 +727,63 @@ export async function PATCH(request: Request) {
     }
 
     // ── KONDISI 2: JIKA YANG DIEDIT ADALAH INDIKATOR PELAYANAN ──
-    // Simpan ke tabel laporan_puskeswan_kecamatan
-    await pool.execute(
-      `INSERT INTO laporan_puskeswan_kecamatan (tahun, bulan, id_puskeswan, id_kecamatan, ${field})
-       VALUES (?, ?, ?, ?, ?)
-       ON DUPLICATE KEY UPDATE ${field} = VALUES(${field})`,
-      [tahunStr, cleanBulan, idPuskeswan, kecIdNum, numValue]
-    );
+    // 1. Simpan ke tabel laporan_puskeswan_kecamatan (terisolasi try-catch)
+    try {
+      await pool.execute(
+        `INSERT INTO laporan_puskeswan_kecamatan (tahun, bulan, id_puskeswan, id_kecamatan, ${field})
+         VALUES (?, ?, ?, ?, ?)
+         ON DUPLICATE KEY UPDATE ${field} = VALUES(${field})`,
+        [tahunStr, cleanBulan, idPuskeswan, kecIdNum, numValue]
+      );
+    } catch (e: any) {
+      console.warn('Gagal simpan laporan_puskeswan_kecamatan:', e?.message || e);
+    }
 
-    // Hitung ulang total akumulasi seluruh kecamatan untuk puskeswan ini pada bulan tersebut
+    // 2. Hitung total akumulasi seluruh kecamatan untuk puskeswan ini pada bulan tersebut
+    let newTotal = numValue;
     try {
       const [sumRows]: any = await pool.query(
-        `SELECT SUM(${field}) as total_val FROM laporan_puskeswan_kecamatan WHERE tahun = ? AND UPPER(bulan) = ? AND id_puskeswan = ?`,
+        `SELECT SUM(${field}) as total_val FROM laporan_puskeswan_kecamatan WHERE (tahun = ? OR tahun IS NULL) AND UPPER(bulan) = ? AND id_puskeswan = ?`,
         [tahunStr, cleanBulan, idPuskeswan]
       );
-      const newTotal = Number(sumRows?.[0]?.total_val) || numValue;
+      if (sumRows?.[0]?.total_val !== null && sumRows?.[0]?.total_val !== undefined) {
+        newTotal = Number(sumRows[0].total_val) || 0;
+      }
+    } catch (e: any) {
+      console.warn('Gagal sum laporan_puskeswan_kecamatan:', e?.message || e);
+    }
 
-      await pool.execute(
-        `INSERT INTO laporan_puskeswan (tahun, bulan, puskeswan, id_puskeswan, ${field})
-         VALUES (?, ?, ?, ?, ?)
-         ON DUPLICATE KEY UPDATE ${field} = VALUES(${field}), id_puskeswan = VALUES(id_puskeswan)`,
-        [tahunStr, cleanBulan, cleanPusk, idPuskeswan, newTotal]
+    // 3. Simpan / Perbarui secara PASTI ke tabel laporan_puskeswan
+    try {
+      // Prioritas 1: Langsung UPDATE baris yang sudah ada
+      const [updRes]: any = await pool.execute(
+        `UPDATE laporan_puskeswan 
+         SET ${field} = ?, id_puskeswan = ? 
+         WHERE (tahun = ? OR tahun IS NULL) AND UPPER(bulan) = ? AND UPPER(puskeswan) = ?`,
+        [newTotal, idPuskeswan, tahunStr, cleanBulan, cleanPusk]
       );
-    } catch (e) {
-      console.warn('Gagal sync total laporan_puskeswan:', e);
+
+      if (!updRes || updRes.affectedRows === 0) {
+        // Coba UPDATE tanpa filter tahun (jika tahun di DB berbeda)
+        const [updNoYear]: any = await pool.execute(
+          `UPDATE laporan_puskeswan 
+           SET ${field} = ?, id_puskeswan = ? 
+           WHERE UPPER(bulan) = ? AND UPPER(puskeswan) = ?`,
+          [newTotal, idPuskeswan, cleanBulan, cleanPusk]
+        );
+
+        if (!updNoYear || updNoYear.affectedRows === 0) {
+          // Baris belum ada di database, lakukan INSERT
+          await pool.execute(
+            `INSERT INTO laporan_puskeswan (tahun, bulan, puskeswan, id_puskeswan, ${field})
+             VALUES (?, ?, ?, ?, ?)
+             ON DUPLICATE KEY UPDATE ${field} = VALUES(${field}), id_puskeswan = VALUES(id_puskeswan)`,
+            [tahunStr, cleanBulan, cleanPusk, idPuskeswan, newTotal]
+          );
+        }
+      }
+    } catch (e: any) {
+      console.warn('Gagal simpan total laporan_puskeswan:', e?.message || e);
     }
 
     await logActivity({
