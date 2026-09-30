@@ -69,8 +69,9 @@ export default function LandingHeader({
               <span className="font-extrabold text-lg sm:text-2xl text-blue-600 dark:text-blue-400 tracking-tight">
                 SiMantap
                 <br />
-                  <span className="text-xs sm:text-sm font-normal text-gray-500"></span>
-                    (Website ini masih versi Beta)
+                  <span className="text-xs sm:text-sm font-normal text-gray-500">
+                    (Beta Version)
+                  </span>
               </span>
             </div>
           </div>
