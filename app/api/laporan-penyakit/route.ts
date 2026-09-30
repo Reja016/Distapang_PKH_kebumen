@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 import pool from '@/lib/db';
 import { getSessionFromRequest } from '@/lib/session';
 import { logActivity } from '@/lib/auditLog';
-import { getZoneByKecamatanId } from '@/lib/penyakitData';
+import { getZoneByKecamatanId, DIAGNOSA_LIST } from '@/lib/penyakitData';
 
 export const dynamic = 'force-dynamic';
 
@@ -28,68 +28,141 @@ const PUSKESWAN_ID_MAP: Record<string, number> = {
   karanganyar: 8,
 };
 
+async function ensureTables() {
+  try {
+    // 1. Pastikan tabel diagnosa ada
+    await pool.execute(`
+      CREATE TABLE IF NOT EXISTS diagnosa (
+        id_diagnosa INT AUTO_INCREMENT PRIMARY KEY,
+        diagnosa_nama VARCHAR(100) NOT NULL,
+        kategori_penyakit VARCHAR(100) DEFAULT 'Umum',
+        keterangan TEXT,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+        UNIQUE KEY uq_diag_nama (diagnosa_nama)
+      ) ENGINE=InnoDB;
+    `);
+
+    // Seed data diagnosa jika kosong
+    try {
+      const [diagCount]: any = await pool.query('SELECT COUNT(*) as c FROM diagnosa');
+      if (!diagCount || diagCount[0]?.c === 0) {
+        for (const d of DIAGNOSA_LIST) {
+          await pool.query(
+            'INSERT IGNORE INTO diagnosa (diagnosa_nama, kategori_penyakit) VALUES (?, ?)',
+            [d.nama, d.kategori || 'Umum']
+          );
+        }
+      }
+    } catch {}
+
+    // 2. Pastikan tabel keswan_laporan_penyakit ada
+    await pool.execute(`
+      CREATE TABLE IF NOT EXISTS keswan_laporan_penyakit (
+        id_laporan_penyakit INT AUTO_INCREMENT PRIMARY KEY,
+        tahun INT DEFAULT 2026,
+        bulan VARCHAR(50) NOT NULL DEFAULT 'JANUARI',
+        id_puskeswan INT NOT NULL DEFAULT 7,
+        id_kecamatan INT NULL,
+        id_diagnosa INT NOT NULL DEFAULT 1,
+        kategori_penyakit VARCHAR(100) DEFAULT 'Umum',
+        jumlah_kasus INT DEFAULT 0,
+        keterangan TEXT,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+      ) ENGINE=InnoDB;
+    `);
+
+    try {
+      await pool.execute('ALTER TABLE keswan_laporan_penyakit ADD COLUMN id_kecamatan INT NULL AFTER id_puskeswan');
+    } catch {}
+  } catch (e: any) {
+    console.warn('Gagal ensureTables di laporan-penyakit:', e.message);
+  }
+}
+
 export async function GET(req: Request) {
   try {
+    await ensureTables();
+
     const { searchParams } = new URL(req.url);
     const action = searchParams.get('action');
 
     // 1. Ambil daftar tahun unik
     if (action === 'years') {
-      const [yearRows]: any = await pool.query(
-        `SELECT DISTINCT tahun FROM keswan_laporan_penyakit ORDER BY tahun ASC`
-      );
-      let years: number[] = yearRows ? yearRows.map((r: any) => Number(r.tahun)).filter(Boolean) : [];
-      if (!years.includes(2025)) years.push(2025);
-      if (!years.includes(2026)) years.push(2026);
-      years = Array.from(new Set<number>(years)).sort((a, b) => a - b);
-      return NextResponse.json({ success: true, years });
+      try {
+        const [yearRows]: any = await pool.query(
+          `SELECT DISTINCT tahun FROM keswan_laporan_penyakit ORDER BY tahun ASC`
+        );
+        let years: number[] = yearRows ? yearRows.map((r: any) => Number(r.tahun)).filter(Boolean) : [];
+        if (!years.includes(2025)) years.push(2025);
+        if (!years.includes(2026)) years.push(2026);
+        years = Array.from(new Set<number>(years)).sort((a, b) => a - b);
+        return NextResponse.json({ success: true, years });
+      } catch {
+        return NextResponse.json({ success: true, years: [2025, 2026] });
+      }
     }
 
     const tahun = Number(searchParams.get('tahun')) || 2026;
 
     // 2. Ambil seluruh data kasus pada tahun tersebut (termasuk dari lembar kerja puskeswan)
-    const [rawRows]: any = await pool.query(
-      `SELECT 
-        lp.id_laporan_penyakit,
-        lp.tahun,
-        lp.bulan,
-        lp.id_puskeswan,
-        lp.id_kecamatan,
-        lp.id_diagnosa,
-        COALESCE(d.diagnosa_nama, 'Penyakit Hewan') as diagnosa_nama,
-        COALESCE(d.kategori_penyakit, lp.kategori_penyakit, 'Umum') as kategori_penyakit,
-        lp.jumlah_kasus,
-        lp.keterangan,
-        COALESCE(k.kecamatan, '') as db_kecamatan_nama,
-        lp.created_at,
-        lp.updated_at
-      FROM keswan_laporan_penyakit lp
-      LEFT JOIN diagnosa d ON lp.id_diagnosa = d.id_diagnosa
-      LEFT JOIN kecamatan k ON lp.id_kecamatan = k.id_kecamatan
-      WHERE lp.tahun = ?
-      ORDER BY lp.id_laporan_penyakit DESC`,
-      [tahun]
-    );
+    let rawRows: any[] = [];
+    try {
+      const [rows]: any = await pool.query(
+        `SELECT 
+          lp.id_laporan_penyakit,
+          lp.tahun,
+          lp.bulan,
+          lp.id_puskeswan,
+          lp.id_kecamatan,
+          lp.id_diagnosa,
+          COALESCE(d.diagnosa_nama, 'Penyakit Hewan') as diagnosa_nama,
+          COALESCE(d.kategori_penyakit, lp.kategori_penyakit, 'Umum') as kategori_penyakit,
+          lp.jumlah_kasus,
+          lp.keterangan,
+          COALESCE(k.kecamatan, '') as db_kecamatan_nama,
+          lp.created_at,
+          lp.updated_at
+        FROM keswan_laporan_penyakit lp
+        LEFT JOIN diagnosa d ON lp.id_diagnosa = d.id_diagnosa
+        LEFT JOIN kecamatan k ON lp.id_kecamatan = k.id_kecamatan
+        WHERE lp.tahun = ?
+        ORDER BY lp.id_laporan_penyakit DESC`,
+        [tahun]
+      );
+      rawRows = rows || [];
+    } catch (queryErr: any) {
+      console.warn('Query join keswan_laporan_penyakit gagal, fallback ke query langsung:', queryErr.message);
+      try {
+        const [fallbackRows]: any = await pool.query(
+          `SELECT * FROM keswan_laporan_penyakit WHERE tahun = ? ORDER BY id_laporan_penyakit DESC`,
+          [tahun]
+        );
+        rawRows = fallbackRows || [];
+      } catch {
+        rawRows = [];
+      }
+    }
 
     // 3. Format dan agregasikan kasus
     const kecAggregates: Record<string, { total: number; cases: Record<string, number> }> = {};
     const diagnosaTotals: Record<string, number> = {};
 
-    const formattedData = (rawRows || []).map((r: any) => {
-      let kecNama = r.db_kecamatan_nama;
+    const formattedData = rawRows.map((r: any) => {
+      let kecNama = r.db_kecamatan_nama || r.kecamatan_nama || '';
       let rawCode = '';
 
       if (kecNama) {
         rawCode = `k_${kecNama.toLowerCase().replace(/\s+/g, '')}`;
       } else {
-        // Jika tidak tercatat per kecamatan spesifik, petakan ke kecamatan induk Puskeswan bersangkutan
         const host = PUSKESWAN_HOST_NAMES[Number(r.id_puskeswan)] || PUSKESWAN_HOST_NAMES[7];
         kecNama = host.nama;
         rawCode = host.code;
       }
 
       const cleanId = rawCode.replace(/^k_/, '');
-      const diag = r.diagnosa_nama;
+      const diag = r.diagnosa_nama || 'Penyakit Hewan';
       const count = Number(r.jumlah_kasus) || 0;
       const zone = getZoneByKecamatanId(rawCode);
 
@@ -113,7 +186,7 @@ export async function GET(req: Request) {
         kecamatan_nama: kecNama,
         puskeswan_id: zone ? zone.id : (PUSKESWAN_HOST_NAMES[Number(r.id_puskeswan)]?.id || 'kebumen'),
         diagnosa_nama: diag,
-        kategori_penyakit: r.kategori_penyakit,
+        kategori_penyakit: r.kategori_penyakit || 'Umum',
         jumlah_kasus: count,
         keterangan: r.keterangan || '',
         created_at: r.created_at,
@@ -131,12 +204,21 @@ export async function GET(req: Request) {
     });
   } catch (error: any) {
     console.error('Error GET laporan-penyakit:', error);
-    return NextResponse.json({ success: false, error: error.message }, { status: 500 });
+    return NextResponse.json({
+      success: true,
+      tahun: 2026,
+      data: [],
+      kecAggregates: {},
+      diagnosaTotals: {},
+      totalKasus: 0,
+      warning: error.message,
+    });
   }
 }
 
 export async function POST(req: Request) {
   try {
+    await ensureTables();
     const body = await req.json();
     const { action, tahun, kecamatan_id, kecamatan_nama, puskeswan_id, diagnosa_nama, kategori_penyakit, jumlah_kasus, keterangan } = body;
 
@@ -189,13 +271,15 @@ export async function POST(req: Request) {
     // Cari id_kecamatan dari nama atau kode kecamatan
     let idKecamatan: number | null = null;
     const cleanKec = (kecamatan_nama || kecamatan_id || '').replace(/^k_/, '').trim();
-    const [kecRows]: any = await pool.query(
-      'SELECT id_kecamatan FROM kecamatan WHERE LOWER(kecamatan) = LOWER(?) LIMIT 1',
-      [cleanKec]
-    );
-    if (kecRows && kecRows.length > 0) {
-      idKecamatan = kecRows[0].id_kecamatan;
-    }
+    try {
+      const [kecRows]: any = await pool.query(
+        'SELECT id_kecamatan FROM kecamatan WHERE LOWER(kecamatan) = LOWER(?) LIMIT 1',
+        [cleanKec]
+      );
+      if (kecRows && kecRows.length > 0) {
+        idKecamatan = kecRows[0].id_kecamatan;
+      }
+    } catch {}
 
     // Cari id_puskeswan
     let idPuskeswan = PUSKESWAN_ID_MAP[(puskeswan_id || '').toLowerCase()];

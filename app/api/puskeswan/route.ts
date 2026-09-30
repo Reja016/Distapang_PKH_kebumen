@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { pool } from '@/lib/db';
 import { getSessionFromRequest } from '@/lib/session';
 import { logActivity } from '@/lib/auditLog';
+import { DIAGNOSA_LIST } from '@/lib/penyakitData';
 
 // Fallback data awal jika database belum siap
 const fallbackData = [
@@ -161,11 +162,28 @@ async function ensureTable() {
       ) ENGINE=InnoDB;
     `);
 
-    // 4. Pastikan diagnosa ORF terdaftar di tabel diagnosa
+    // 4. Pastikan tabel diagnosa ada dan berisi seluruh jenis diagnosa standar
+    await pool.execute(`
+      CREATE TABLE IF NOT EXISTS diagnosa (
+        id_diagnosa INT AUTO_INCREMENT PRIMARY KEY,
+        diagnosa_nama VARCHAR(100) NOT NULL,
+        kategori_penyakit VARCHAR(100) DEFAULT 'Umum',
+        keterangan TEXT,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+        UNIQUE KEY uq_diag_nama (diagnosa_nama)
+      ) ENGINE=InnoDB;
+    `);
+
     try {
-      const [orfRows]: any = await pool.query("SELECT id_diagnosa FROM diagnosa WHERE LOWER(diagnosa_nama) = 'orf'");
-      if (!orfRows || orfRows.length === 0) {
-        await pool.query("INSERT INTO diagnosa (diagnosa_nama, kategori_penyakit) VALUES ('ORF', 'Umum')");
+      const [diagCount]: any = await pool.query('SELECT COUNT(*) as c FROM diagnosa');
+      if (!diagCount || diagCount[0]?.c === 0) {
+        for (const d of DIAGNOSA_LIST) {
+          await pool.query(
+            'INSERT IGNORE INTO diagnosa (diagnosa_nama, kategori_penyakit) VALUES (?, ?)',
+            [d.nama, d.kategori || 'Umum']
+          );
+        }
       }
     } catch {}
   } catch (e: any) {
