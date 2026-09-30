@@ -469,18 +469,18 @@ export async function GET() {
         retribusi: Number(unassignedKs.retribusi ?? (subRows.reduce((a, b) => a + b.retribusi, 0) === 0 ? (r.retribusi || 0) : 0)),
       };
 
-      const allSubRows = [...subRows, unassignedRow];
-
-      // Total akumulasi Puskeswan = Penjumlahan seluruh sub-baris kecamatan + umum
+      // Total akumulasi Puskeswan = Penjumlahan seluruh sub-baris kecamatan binaan + umum
       const sumSub = (key: keyof typeof unassignedRow) => {
-        return allSubRows.reduce((acc, s) => acc + (Number(s[key]) || 0), 0);
+        const subSum = subRows.reduce((acc, s) => acc + (Number(s[key]) || 0), 0);
+        return subSum + (Number(unassignedRow[key]) || 0);
       };
 
       return {
         ...r,
         no: Number(r.no_urut || r.no || 0),
         id_puskeswan: idPusk,
-        subRows: allSubRows,
+        subRows: subRows, // HANYA kecamatan binaan resmi (tanpa Tanpa Kecamatan/Umum)
+        unassigned: unassignedRow,
         bef: sumSub('bef'),
         cacingan: sumSub('cacingan'),
         scabies: sumSub('scabies'),

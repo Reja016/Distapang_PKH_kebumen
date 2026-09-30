@@ -389,23 +389,30 @@ export default function LaporanPuskeswanPage() {
       prev.map((row) => {
         const matchYear = !tahun || (row.tahun || '2026') === tahun;
         if (row.bulan === bulan && row.puskeswan === puskeswan && matchYear) {
-          let updatedSubRows = row.subRows;
-          if (row.subRows && Array.isArray(row.subRows)) {
-            updatedSubRows = row.subRows.map((sub: any) => {
+          let updatedSubRows = row.subRows || [];
+          let updatedUnassigned = { ...(row.unassigned || {}) };
+
+          if (targetKecId === 0) {
+            updatedUnassigned[field] = numValue;
+          } else {
+            updatedSubRows = updatedSubRows.map((sub: any) => {
               if (sub.id_kecamatan === targetKecId) {
                 return { ...sub, [field]: numValue };
               }
               return sub;
             });
-            // Total akumulasi Puskeswan otomatis menjumlahkan seluruh kecamatan + umum
-            const newSum = updatedSubRows.reduce((a: number, b: any) => a + (Number(b[field]) || 0), 0);
-            return {
-              ...row,
-              subRows: updatedSubRows,
-              [field]: newSum,
-            };
           }
-          return { ...row, [field]: numValue };
+
+          const sumKec = updatedSubRows.reduce((a: number, b: any) => a + (Number(b[field]) || 0), 0);
+          const unassignedVal = Number(updatedUnassigned[field]) || 0;
+          const newSum = sumKec + unassignedVal;
+
+          return {
+            ...row,
+            subRows: updatedSubRows,
+            unassigned: updatedUnassigned,
+            [field]: newSum,
+          };
         }
         return row;
       })

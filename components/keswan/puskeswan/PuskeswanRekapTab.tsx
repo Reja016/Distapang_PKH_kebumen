@@ -83,25 +83,77 @@ export function PuskeswanRekapTab({
   const formatRp = (val: number) =>
     new Intl.NumberFormat('id-ID', { minimumFractionDigits: 0 }).format(Number(val) || 0);
 
-  // Render sel nilai total Puskeswan (Parent Row)
+  // Render sel nilai total Puskeswan (Parent Row) - Menampilkan total akumulasi, dan dapat diedit untuk input data umum/tanpa kecamatan
   const renderParentCell = (row: any, field: string, isCurrency = false, extraClass = '') => {
-    const value = row[field] ?? 0;
     const rowYear = row.tahun ? String(row.tahun) : '2026';
-    const rowKey = `${rowYear}-${row.bulan}-${row.puskeswan}`;
+    const totalValue = row[field] ?? 0;
+    const unassignedValue = row.unassigned?.[field] ?? 0;
+
+    const isEditing =
+      editingCell?.bulan === row.bulan &&
+      editingCell?.puskeswan === row.puskeswan &&
+      editingCell?.field === field &&
+      (!editingCell?.tahun || editingCell.tahun === rowYear) &&
+      (editingCell?.id_kecamatan === 0 || editingCell?.id_kecamatan === undefined || editingCell?.id_kecamatan === null);
+
+    if (isEditing) {
+      return (
+        <td className={`p-1 border-r border-blue-400 bg-blue-50/90 font-sans ${extraClass}`}>
+          <div className="flex flex-col items-center">
+            <input
+              ref={inputRef}
+              type="number"
+              value={editValue}
+              onChange={(e) => setEditValue(e.target.value)}
+              onBlur={onSaveEdit}
+              onKeyDown={onKeyDown}
+              className="w-full text-center py-1 px-1.5 text-xs font-black font-sans bg-white border-2 border-blue-600 rounded focus:outline-none focus:ring-2 focus:ring-blue-400 text-slate-900 shadow-md"
+              placeholder="0"
+            />
+            <span className="text-[9px] font-bold text-blue-600 mt-0.5 tracking-tight">Umum</span>
+          </div>
+        </td>
+      );
+    }
+
+    const isAllowed = isAdmin || (isPuskeswanAllowed ? isPuskeswanAllowed(row.puskeswan) : false);
+    const deadline = checkMonthlyDeadline(row.bulan, rowYear, isAdmin);
+    const isLocked = !isAdmin && deadline.isLocked;
+    const isCellEditable = isAllowed && !isLocked;
+
+    const subTotal = (row.subRows || []).reduce((acc: number, s: any) => acc + (Number(s[field]) || 0), 0);
+    let tooltip = `Total: ${isCurrency ? `Rp ${formatRp(totalValue)}` : totalValue}`;
+    if (subTotal > 0 || unassignedValue > 0) {
+      tooltip += ` (Umum: ${unassignedValue}, Rincian Kec: ${subTotal})`;
+    }
+    if (isCellEditable) {
+      tooltip += ` - Klik untuk ubah data umum/tanpa kecamatan`;
+    }
+
+    let cellStyle = 'cursor-pointer hover:bg-blue-100/70 hover:text-blue-900';
+    if (!isAllowed) {
+      tooltip = `Akses Ditolak: Puskeswan ${row.puskeswan} di luar wilayah penugasan Anda.`;
+      cellStyle = 'bg-slate-50/80 text-slate-400 cursor-not-allowed';
+    } else if (isLocked) {
+      tooltip = deadline.reason || `Periode ${row.bulan} ${rowYear} telah dikunci (Batas waktu 3 hari berakhir). Hubungi Administrator.`;
+      cellStyle = 'bg-slate-100/90 text-slate-500 cursor-not-allowed';
+    }
 
     return (
       <td
         onClick={() => {
-          if (!expandedPuskeswan[rowKey]) {
-            togglePuskeswan(rowKey);
+          if (isCellEditable) {
+            onStartEdit(row.bulan, row.puskeswan, field, unassignedValue, rowYear, 0);
           }
         }}
-        title="Total akumulasi kecamatan binaan + umum (Klik untuk buka rincian)"
-        className={`p-3 border-r border-slate-200 font-sans text-center select-none font-black cursor-pointer hover:bg-blue-50/70 transition-colors ${
+        title={tooltip}
+        className={`p-3 border-r border-slate-200 font-sans text-center select-none font-black transition-colors group ${cellStyle} ${
           isCurrency ? 'text-right text-blue-900' : 'text-slate-900'
         } ${extraClass}`}
       >
-        <span>{isCurrency ? `Rp ${formatRp(value)}` : (value ?? 0)}</span>
+        <span className={isCellEditable ? 'group-hover:underline decoration-blue-600 underline-offset-2' : ''}>
+          {isCurrency ? `Rp ${formatRp(totalValue)}` : totalValue}
+        </span>
       </td>
     );
   };
@@ -303,7 +355,7 @@ export function PuskeswanRekapTab({
                     <p className="text-[11px] font-medium text-slate-500">
                       {isGroupLocked
                         ? 'Batas toleransi pengisian 3 hari telah berakhir. Hanya Administrator yang dapat mengubah data.'
-                        : 'Klik nama Puskeswan untuk membuka rincian kecamatan binaan. Angka Puskeswan otomatis menjumlahkan seluruh kecamatan.'}
+                        : 'Klik nama Puskeswan untuk membuka rincian kecamatan. Klik angka di baris atas untuk mengisi data umum/tanpa kecamatan.'}
                     </p>
                   </div>
                 </div>
@@ -361,7 +413,7 @@ export function PuskeswanRekapTab({
                                   <span className="text-xs uppercase tracking-tight">{row.puskeswan}</span>
                                 </button>
                                 <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-slate-100 text-slate-500 font-sans">
-                                  {(row.subRows || []).length} wilayah
+                                  {(row.subRows || []).length} kecamatan
                                 </span>
                               </div>
                             </td>
@@ -394,14 +446,9 @@ export function PuskeswanRekapTab({
                               <td className="p-2.5 font-bold text-slate-800 border-r border-slate-100 sticky left-0 bg-slate-50/95 z-10 shadow-2xs pl-6">
                                 <div className="flex items-center gap-1.5">
                                   <span className="text-blue-500 font-mono text-xs">↳</span>
-                                  <span className={sub.isUnassigned ? 'italic text-slate-600 font-semibold' : 'text-slate-900'}>
+                                  <span className="text-slate-900 font-semibold">
                                     {sub.nama_kecamatan}
                                   </span>
-                                  {sub.isUnassigned && (
-                                    <span className="text-[9px] px-1.5 py-0.2 rounded bg-amber-100 text-amber-800 font-bold ml-1">
-                                      Bebas
-                                    </span>
-                                  )}
                                 </div>
                               </td>
                               {renderEditableSubCell(row, sub, 'bef')}
