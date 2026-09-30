@@ -68,7 +68,7 @@ export default function LaporanPenyakitPage() {
     kecamatan_id: 'k_alian',
     kecamatan_nama: 'Alian',
     puskeswan_id: 'alian',
-    diagnosa_nama: 'Scabies',
+    diagnosa_nama: 'Pink Eye',
     jumlah_kasus: 1,
     keterangan: '',
   });

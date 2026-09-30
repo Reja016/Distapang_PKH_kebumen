@@ -62,18 +62,37 @@ export default function LaporanPuskeswanPage() {
   const [isSyncing, setIsSyncing] = useState(false);
   const [toast, setToast] = useState<{ type: 'success' | 'error'; msg: string } | null>(null);
 
+  // Bulan Berjalan (Current Month)
+  const CURRENT_MONTH = useMemo(() => {
+    const mIdx = new Date().getMonth();
+    return DAFTAR_BULAN[mIdx] || 'JANUARI';
+  }, []);
+
   // Filter & Search State Rekap (Tahun & Bulan)
   const [filterTahun, setFilterTahun] = useState<string>('2026');
   const [filterBulan, setFilterBulan] = useState<string>('');
   const [searchQuery, setSearchQuery] = useState<string>('');
+
+  // Jika bukan admin (Petugas), kunci filterBulan ke bulan berjalan
+  useEffect(() => {
+    if (isReady && !isAdmin) {
+      setFilterBulan(CURRENT_MONTH);
+    }
+  }, [isReady, isAdmin, CURRENT_MONTH]);
 
   // Modal Tambah Periode Baru
   const [showAddModal, setShowAddModal] = useState<boolean>(false);
   const [addTahun, setAddTahun] = useState<string>('2026');
   const [addBulan, setAddBulan] = useState<string>('FEBRUARI');
 
-  // State untuk Inline Editing Rekap
-  const [editingCell, setEditingCell] = useState<{ bulan: string; puskeswan: string; field: string; tahun?: string } | null>(null);
+  // State untuk Inline Editing Rekap (mendukung level Puskeswan dan Kecamatan)
+  const [editingCell, setEditingCell] = useState<{
+    bulan: string;
+    puskeswan: string;
+    field: string;
+    tahun?: string;
+    id_kecamatan?: number;
+  } | null>(null);
   const [editValue, setEditValue] = useState<string>('');
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -337,7 +356,14 @@ export default function LaporanPuskeswanPage() {
   // ── HELPER & LOGIKA REKAPITULASI ──
   const sum = (rows: any[], key: string) => rows.reduce((acc, row) => acc + (Number(row[key]) || 0), 0);
 
-  const handleStartEdit = (bulan: string, puskeswan: string, field: string, currentValue: any, tahun: string = '2026') => {
+  const handleStartEdit = (
+    bulan: string,
+    puskeswan: string,
+    field: string,
+    currentValue: any,
+    tahun: string = '2026',
+    id_kecamatan?: number
+  ) => {
     if (!isAdmin) {
       if (!isPuskeswanAllowed(puskeswan)) {
         showToast('error', `Akses ditolak: Anda tidak memiliki wewenang untuk ${puskeswan}`);
@@ -349,19 +375,36 @@ export default function LaporanPuskeswanPage() {
         return;
       }
     }
-    setEditingCell({ bulan, puskeswan, field, tahun });
+    setEditingCell({ bulan, puskeswan, field, tahun, id_kecamatan });
     setEditValue(String(currentValue ?? 0));
   };
 
   const handleSaveEdit = async () => {
     if (!editingCell) return;
-    const { bulan, puskeswan, field, tahun } = editingCell;
+    const { bulan, puskeswan, field, tahun, id_kecamatan } = editingCell;
     const numValue = Number(editValue) || 0;
+    const targetKecId = id_kecamatan !== undefined ? id_kecamatan : 0;
 
     setDataLaporan((prev) =>
       prev.map((row) => {
         const matchYear = !tahun || (row.tahun || '2026') === tahun;
         if (row.bulan === bulan && row.puskeswan === puskeswan && matchYear) {
+          let updatedSubRows = row.subRows;
+          if (row.subRows && Array.isArray(row.subRows)) {
+            updatedSubRows = row.subRows.map((sub: any) => {
+              if (sub.id_kecamatan === targetKecId) {
+                return { ...sub, [field]: numValue };
+              }
+              return sub;
+            });
+            // Total akumulasi Puskeswan otomatis menjumlahkan seluruh kecamatan + umum
+            const newSum = updatedSubRows.reduce((a: number, b: any) => a + (Number(b[field]) || 0), 0);
+            return {
+              ...row,
+              subRows: updatedSubRows,
+              [field]: newSum,
+            };
+          }
           return { ...row, [field]: numValue };
         }
         return row;
@@ -374,11 +417,20 @@ export default function LaporanPuskeswanPage() {
       const res = await fetch('/api/puskeswan', {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ bulan, puskeswan, field, value: numValue, tahun: tahun || '2026' }),
+        body: JSON.stringify({
+          bulan,
+          puskeswan,
+          field,
+          value: numValue,
+          tahun: tahun || '2026',
+          id_kecamatan: targetKecId,
+        }),
       });
       const result = await res.json();
       if (result.success) {
         showToast('success', `${puskeswan} (${bulan} ${tahun || '2026'}): ${field.toUpperCase()} diperbarui`);
+      } else {
+        showToast('error', result.error || 'Gagal menyimpan perubahan');
       }
     } catch {
       showToast('error', 'Gagal menyimpan perubahan ke database');
@@ -472,12 +524,18 @@ export default function LaporanPuskeswanPage() {
 
   const groupedData: Record<string, any[]> = useMemo(() => {
     return filteredData.reduce((acc: Record<string, any[]>, row: any) => {
-      const key = `${row.tahun || '2026'} - ${row.bulan}`;
+      const yr = row.tahun ? String(row.tahun) : '2026';
+      const bln = String(row.bulan || '').toUpperCase().trim();
+      // Untuk petugas, strictly hanya tampilkan data bulan berjalan
+      if (!isAdmin && bln !== CURRENT_MONTH) {
+        return acc;
+      }
+      const key = `${yr} - ${bln}`;
       if (!acc[key]) acc[key] = [];
       acc[key].push(row);
       return acc;
     }, {});
-  }, [filteredData]);
+  }, [filteredData, isAdmin, CURRENT_MONTH]);
 
   const totalRetribusi = sum(filteredData, 'retribusi');
   const totalLayanan = sum(filteredData, 'aktif') + sum(filteredData, 'semi_aktif') + sum(filteredData, 'pasif');
@@ -673,6 +731,7 @@ export default function LaporanPuskeswanPage() {
             setFilterTahun={setFilterTahun}
             filterBulan={filterBulan}
             setFilterBulan={setFilterBulan}
+            currentActiveMonth={CURRENT_MONTH}
             searchQuery={searchQuery}
             setSearchQuery={setSearchQuery}
             availableYears={availableYears}

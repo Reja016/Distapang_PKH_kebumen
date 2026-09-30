@@ -36,7 +36,7 @@ export const PUSKESWAN_ZONES: Record<string, PuskeswanZone> = {
     nama: 'Puskeswan Karanganyar',
     colorHex: '#312E81', // Biru Tua Keunguan / Indigo
     textColor: '#FFFFFF',
-    kecamatanList: ['k_karanganyar', 'k_karanggayam', 'k_sruweng', 'k_pejagoan', 'k_adimulyo'],
+    kecamatanList: ['k_karanganyar', 'k_karanggayam', 'k_sruweng', 'k_pejagoan'],
     puskeswanX: 5218,
     puskeswanY: 13324,
   },
@@ -54,7 +54,7 @@ export const PUSKESWAN_ZONES: Record<string, PuskeswanZone> = {
     nama: 'Puskeswan Klirong',
     colorHex: '#CA8A04', // Kuning Emas
     textColor: '#FFFFFF',
-    kecamatanList: ['k_klirong', 'k_petanahan'],
+    kecamatanList: ['k_klirong', 'k_petanahan', 'k_adimulyo'],
     puskeswanX: 10920,
     puskeswanY: 17200,
   },
@@ -63,7 +63,7 @@ export const PUSKESWAN_ZONES: Record<string, PuskeswanZone> = {
     nama: 'Puskeswan Kebumen',
     colorHex: '#D97706', // Coklat Muda / Krem
     textColor: '#FFFFFF',
-    kecamatanList: ['k_kebumen', 'k_buluspesantren'],
+    kecamatanList: ['k_kebumen', 'k_buluspesantren', 'k_poncowarno'],
     puskeswanX: 12200,
     puskeswanY: 16500,
   },

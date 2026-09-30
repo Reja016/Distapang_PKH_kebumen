@@ -122,15 +122,26 @@ export default function PenyakitModals({
                   <select
                     value={formValues.diagnosa_nama}
                     onChange={(e) => setFormValues({ ...formValues, diagnosa_nama: e.target.value })}
-                    className="w-full h-10 px-3 rounded-xl border border-slate-200 bg-white font-bold text-slate-800 focus:outline-none focus:border-blue-600"
+                    className="w-full h-10 px-3 rounded-xl border border-slate-200 bg-white font-bold text-slate-800 focus:outline-none focus:border-blue-600 cursor-pointer"
                   >
-                    {DIAGNOSA_LIST.map((d) => (
+                    {DIAGNOSA_LIST.filter(
+                      (d) => !['BEF', 'Cacingan', 'Scabies', 'ORF', 'PMK', 'LSD'].some(
+                        (p) => p.toLowerCase() === d.nama.toLowerCase()
+                      )
+                    ).map((d) => (
                       <option key={d.nama} value={d.nama}>
                         {d.nama}
                       </option>
                     ))}
                   </select>
                 </div>
+              </div>
+
+              <div className="p-2.5 rounded-xl bg-amber-50 border border-amber-200 text-amber-900 text-[11px] leading-relaxed flex items-start gap-2">
+                <span className="font-bold shrink-0 text-amber-700">ℹ️ Info:</span>
+                <span>
+                  Diagnosa <strong>BEF, Cacingan, Scabies, ORF, PMK, dan LSD</strong> diinput melalui menu <strong>Pusat Kesehatan Hewan</strong> (Lembar Kerja Rekapitulasi) dan otomatis tersinkronisasi ke peta ini.
+                </span>
               </div>
 
               <div>
