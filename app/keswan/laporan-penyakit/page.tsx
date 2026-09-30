@@ -395,7 +395,7 @@ export default function LaporanPenyakitPage() {
               className="h-9 px-3.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold flex items-center gap-1.5 shadow-xs transition-colors cursor-pointer"
             >
               <Plus size={14} />
-              <span>+ Tambah Tahun Baru</span>
+              <span>Tambah Tahun Baru</span>
             </button>
           )}
         </div>
