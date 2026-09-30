@@ -83,26 +83,76 @@ export async function POST() {
         // 👇 SIMPAN DATA UNTUK DITAMPILKAN DI LAYAR
         data_hasil.push(dataRow);
 
-        // Kodingan SQL Sakti (Insert jika belum ada, Update jika sudah ada)
+        // Simpan data pelayanan ke laporan_puskeswan
+        const puskIdMap: Record<string, number> = {
+          MIRIT: 1, KLIRONG: 2, GOMBONG: 3, BUAYAN: 4,
+          ALIAN: 5, PREMBUN: 6, KEBUMEN: 7, KARANGANYAR: 8
+        };
+        const idPuskeswan = puskIdMap[dataRow.puskeswan.toUpperCase()] || dataRow.no_urut;
+
         const query = `
           INSERT INTO laporan_puskeswan 
-          (bulan, no_urut, puskeswan, bef, cacingan, scabies, orf, pmk_diag, lsd_diag, aktif, semi_aktif, pasif, pusling, ib, pkb, pmk_vaks, lsd_vaks, retribusi)
-          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+          (tahun, bulan, no_urut, puskeswan, id_puskeswan, aktif, semi_aktif, pasif, pusling, ib, pkb, pmk_vaks, lsd_vaks, retribusi)
+          VALUES ('2026', ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
           ON DUPLICATE KEY UPDATE
-          no_urut = VALUES(no_urut), bef = VALUES(bef), cacingan = VALUES(cacingan), scabies = VALUES(scabies), 
-          orf = VALUES(orf), pmk_diag = VALUES(pmk_diag), lsd_diag = VALUES(lsd_diag), aktif = VALUES(aktif), 
+          no_urut = VALUES(no_urut), id_puskeswan = VALUES(id_puskeswan), aktif = VALUES(aktif), 
           semi_aktif = VALUES(semi_aktif), pasif = VALUES(pasif), pusling = VALUES(pusling), ib = VALUES(ib), 
           pkb = VALUES(pkb), pmk_vaks = VALUES(pmk_vaks), lsd_vaks = VALUES(lsd_vaks), retribusi = VALUES(retribusi)
         `;
 
         const values = [
-          dataRow.bulan, dataRow.no_urut, dataRow.puskeswan, dataRow.bef, dataRow.cacingan, dataRow.scabies, 
-          dataRow.orf, dataRow.pmk_diag, dataRow.lsd_diag, dataRow.aktif, dataRow.semi_aktif, dataRow.pasif, 
+          dataRow.bulan, dataRow.no_urut, dataRow.puskeswan, idPuskeswan, dataRow.aktif, dataRow.semi_aktif, dataRow.pasif, 
           dataRow.pusling, dataRow.ib, dataRow.pkb, dataRow.pmk_vaks, dataRow.lsd_vaks, dataRow.retribusi
         ];
 
-        // Eksekusi query ke MySQL
         await connection.execute(query, values);
+
+        // Simpan data penyakit ke keswan_laporan_penyakit
+        const diseasesToSync = [
+          { name: 'BEF', val: dataRow.bef },
+          { name: 'Cacingan', val: dataRow.cacingan },
+          { name: 'Scabies', val: dataRow.scabies },
+          { name: 'ORF', val: dataRow.orf },
+          { name: 'PMK', val: dataRow.pmk_diag },
+          { name: 'LSD', val: dataRow.lsd_diag },
+        ];
+
+        for (const dis of diseasesToSync) {
+          try {
+            const [dRows]: any = await connection.query(
+              'SELECT id_diagnosa FROM diagnosa WHERE LOWER(diagnosa_nama) = LOWER(?) LIMIT 1',
+              [dis.name]
+            );
+            let idDiag = 1;
+            if (dRows && dRows.length > 0) {
+              idDiag = dRows[0].id_diagnosa;
+            } else {
+              const [insD]: any = await connection.query(
+                'INSERT INTO diagnosa (diagnosa_nama, kategori_penyakit) VALUES (?, "Umum")',
+                [dis.name]
+              );
+              idDiag = insD.insertId;
+            }
+
+            const [ex]: any = await connection.query(
+              'SELECT id_laporan_penyakit FROM keswan_laporan_penyakit WHERE tahun = 2026 AND UPPER(bulan) = ? AND id_puskeswan = ? AND id_diagnosa = ? LIMIT 1',
+              [dataRow.bulan.toUpperCase(), idPuskeswan, idDiag]
+            );
+
+            if (ex && ex.length > 0) {
+              await connection.query(
+                'UPDATE keswan_laporan_penyakit SET jumlah_kasus = ?, updated_at = NOW() WHERE id_laporan_penyakit = ?',
+                [dis.val, ex[0].id_laporan_penyakit]
+              );
+            } else {
+              await connection.query(
+                'INSERT INTO keswan_laporan_penyakit (tahun, bulan, id_puskeswan, id_diagnosa, kategori_penyakit, jumlah_kasus) VALUES (2026, ?, ?, ?, "Umum", ?)',
+                [dataRow.bulan.toUpperCase(), idPuskeswan, idDiag, dis.val]
+              );
+            }
+          } catch {}
+        }
+
         totalMasuk++;
       }
     }
