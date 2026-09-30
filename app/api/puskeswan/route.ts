@@ -34,15 +34,73 @@ const DIAG_NAME_MAP: Record<string, string> = {
 };
 
 const PUSKESWAN_ID_MAP: Record<string, number> = {
-  MIRIT: 1,
-  KLIRONG: 2,
-  GOMBONG: 3,
-  BUAYAN: 4,
-  ALIAN: 5,
-  PREMBUN: 6,
-  KEBUMEN: 7,
-  KARANGANYAR: 8,
+  MIRIT: 1, mirit: 1,
+  KLIRONG: 2, klirong: 2,
+  GOMBONG: 3, gombong: 3,
+  BUAYAN: 4, buayan: 4,
+  ALIAN: 5, alian: 5,
+  PREMBUN: 6, prembun: 6,
+  KEBUMEN: 7, kebumen: 7,
+  KARANGANYAR: 8, karanganyar: 8,
 };
+
+const KECAMATAN_CODE_TO_ID: Record<string, number> = {
+  k_ayah: 1, ayah: 1,
+  k_buayan: 2, buayan: 2,
+  k_puring: 3, puring: 3,
+  k_petanahan: 4, petanahan: 4,
+  k_klirong: 5, klirong: 5,
+  k_buluspesantren: 6, buluspesantren: 6,
+  k_ambal: 7, ambal: 7,
+  k_mirit: 8, mirit: 8,
+  k_bonorowo: 9, bonorowo: 9,
+  k_prembun: 10, prembun: 10,
+  k_padureso: 11, padureso: 11,
+  k_kutowinangun: 12, kutowinangun: 12,
+  k_alian: 13, alian: 13,
+  k_poncowarno: 14, poncowarno: 14,
+  k_kebumen: 15, kebumen: 15,
+  k_pejagoan: 16, pejagoan: 16,
+  k_sruweng: 17, sruweng: 17,
+  k_adimulyo: 18, adimulyo: 18,
+  k_kuwarasan: 19, kuwarasan: 19,
+  k_rowokele: 20, rowokele: 20,
+  k_sempor: 21, sempor: 21,
+  k_gombong: 22, gombong: 22,
+  k_karanganyar: 23, karanganyar: 23,
+  k_karanggayam: 24, karanggayam: 24,
+  k_sadang: 25, sadang: 25,
+  k_karangsambung: 26, karangsambung: 26,
+};
+
+const DIAG_ID_TO_NAME: Record<number, string> = {
+  1: 'Anthrax',
+  2: 'Brucellosis',
+  3: 'Rabies',
+  4: 'Avian Influenza',
+  5: 'Surra',
+  6: 'Salmonellosis',
+  7: 'BVD',
+  8: 'IBR',
+  9: 'PMK',
+  10: 'LSD',
+  11: 'PPR',
+  12: 'BEF',
+  13: 'Cacingan',
+  14: 'Scabies',
+  15: 'ORF',
+};
+
+function normalizeDiseaseKey(name: string): string {
+  const s = (name || '').toLowerCase();
+  if (s.includes('bef')) return 'bef';
+  if (s.includes('cacing')) return 'cacingan';
+  if (s.includes('scabies')) return 'scabies';
+  if (s.includes('orf')) return 'orf';
+  if (s.includes('pmk') || s.includes('mulut')) return 'pmk';
+  if (s.includes('lsd') || s.includes('lumpy')) return 'lsd';
+  return s;
+}
 
 // Pemetaan 26 Kecamatan Binaan Resmi per Puskeswan di Kebumen
 const PUSKESWAN_BINAAN_MAP: Record<number, { id_kecamatan: number; nama_kecamatan: string; code: string }[]> = {
@@ -291,30 +349,41 @@ export async function GET() {
       console.warn('Gagal membaca laporan_puskeswan_kecamatan:', e);
     }
 
-    // 3. Ambil data penyakit dari tabel keswan_laporan_penyakit
+    // 3. Ambil data penyakit dari tabel keswan_laporan_penyakit (Adaptive skema Flat dan Relasional)
     let diseaseMap: Record<string, number> = {};
     try {
-      const [disRows]: any = await pool.query(`
-        SELECT 
-          lp.tahun,
-          UPPER(TRIM(lp.bulan)) as bulan,
-          lp.id_puskeswan,
-          COALESCE(lp.id_kecamatan, 0) as id_kecamatan,
-          LOWER(TRIM(d.diagnosa_nama)) as diagnosa_nama,
-          SUM(lp.jumlah_kasus) as total_kasus
-        FROM keswan_laporan_penyakit lp
-        JOIN diagnosa d ON lp.id_diagnosa = d.id_diagnosa
-        GROUP BY lp.tahun, UPPER(TRIM(lp.bulan)), lp.id_puskeswan, COALESCE(lp.id_kecamatan, 0), LOWER(TRIM(d.diagnosa_nama))
-      `);
-
+      const [disRows]: any = await pool.query(`SELECT * FROM keswan_laporan_penyakit`);
       if (disRows && disRows.length > 0) {
         for (const r of disRows) {
           const yr = String(r.tahun || '2026');
           const bln = String(r.bulan || '').toUpperCase().trim();
-          const idP = Number(r.id_puskeswan) || 0;
-          const idK = Number(r.id_kecamatan) || 0;
-          const diag = String(r.diagnosa_nama || '').toLowerCase().trim();
-          diseaseMap[`${yr}_${bln}_${idP}_${idK}_${diag}`] = Number(r.total_kasus) || 0;
+
+          // Tentukan id puskeswan (angka 1-8)
+          let idP = Number(r.id_puskeswan) || 0;
+          if (!idP && r.puskeswan_id) {
+            idP = PUSKESWAN_ID_MAP[String(r.puskeswan_id).toUpperCase()] || 0;
+          }
+
+          // Tentukan id kecamatan (angka 1-26 atau 0)
+          let idK = Number(r.id_kecamatan) || 0;
+          if (!idK && r.kecamatan_id) {
+            const rawKec = String(r.kecamatan_id).toLowerCase().trim();
+            idK = KECAMATAN_CODE_TO_ID[rawKec] || KECAMATAN_CODE_TO_ID[`k_${rawKec.replace(/^k_/, '')}`] || 0;
+          }
+
+          // Tentukan diagnosa
+          let rawDiag = '';
+          if (r.diagnosa_nama) {
+            rawDiag = String(r.diagnosa_nama).trim();
+          } else if (r.id_diagnosa) {
+            rawDiag = DIAG_ID_TO_NAME[Number(r.id_diagnosa)] || '';
+          }
+
+          if (rawDiag) {
+            const normDiag = normalizeDiseaseKey(rawDiag);
+            const key = `${yr}_${bln}_${idP}_${idK}_${normDiag}`;
+            diseaseMap[key] = (diseaseMap[key] || 0) + (Number(r.jumlah_kasus) || 0);
+          }
         }
       }
     } catch (e) {
@@ -473,52 +542,111 @@ export async function PATCH(request: Request) {
     const userName = session?.nama || session?.nip_username || request.headers.get('x-user-name') || 'Petugas';
 
     // ── KONDISI 1: JIKA YANG DIEDIT ADALAH KASUS PENYAKIT (BEF, Cacingan, Scabies, ORF, PMK, LSD) ──
-    // Simpan ke tabel keswan_laporan_penyakit dengan id_kecamatan
+    // Simpan ke tabel keswan_laporan_penyakit dengan id_kecamatan (Adaptive skema Flat dan Relasional)
     if (DISEASE_FIELDS.includes(field)) {
       const diagNamaTarget = DIAG_NAME_MAP[field] || field;
 
-      // Cari atau buat id_diagnosa
-      let idDiagnosa = 1;
-      const [diagRows]: any = await pool.query(
-        'SELECT id_diagnosa FROM diagnosa WHERE LOWER(diagnosa_nama) = LOWER(?) LIMIT 1',
-        [diagNamaTarget]
-      );
-      if (diagRows && diagRows.length > 0) {
-        idDiagnosa = diagRows[0].id_diagnosa;
-      } else {
-        const [insDiag]: any = await pool.query(
-          'INSERT INTO diagnosa (diagnosa_nama, kategori_penyakit) VALUES (?, "Umum")',
-          [diagNamaTarget]
-        );
-        idDiagnosa = insDiag.insertId;
-      }
+      let hasDiagNama = false;
+      let pkCol = 'id';
+      try {
+        const [descRows]: any = await pool.query('DESCRIBE keswan_laporan_penyakit');
+        const fields = (descRows || []).map((f: any) => f.Field);
+        hasDiagNama = fields.includes('diagnosa_nama');
+        if (fields.includes('id_laporan_penyakit')) {
+          pkCol = 'id_laporan_penyakit';
+        }
+      } catch {}
 
-      // Cek apakah record sudah ada di keswan_laporan_penyakit
-      let existing: any = [];
-      if (kecIdNum > 0) {
-        const [rows]: any = await pool.query(
-          'SELECT id_laporan_penyakit FROM keswan_laporan_penyakit WHERE tahun = ? AND UPPER(bulan) = ? AND id_puskeswan = ? AND id_kecamatan = ? AND id_diagnosa = ? LIMIT 1',
-          [Number(tahunStr), cleanBulan, idPuskeswan, kecIdNum, idDiagnosa]
-        );
-        existing = rows;
-      } else {
-        const [rows]: any = await pool.query(
-          'SELECT id_laporan_penyakit FROM keswan_laporan_penyakit WHERE tahun = ? AND UPPER(bulan) = ? AND id_puskeswan = ? AND (id_kecamatan IS NULL OR id_kecamatan = 0) AND id_diagnosa = ? LIMIT 1',
-          [Number(tahunStr), cleanBulan, idPuskeswan, idDiagnosa]
-        );
-        existing = rows;
-      }
+      const puskCode = cleanPusk.toLowerCase();
+      const kecEntry = PUSKESWAN_BINAAN_MAP[idPuskeswan]?.find(k => k.id_kecamatan === kecIdNum);
+      const kecCode = kecEntry ? kecEntry.code : (kecIdNum > 0 ? `k_${kecIdNum}` : null);
+      const kecNama = kecEntry ? kecEntry.nama_kecamatan : (kecIdNum > 0 ? `Kecamatan ${kecIdNum}` : null);
 
-      if (existing && existing.length > 0) {
-        await pool.query(
-          'UPDATE keswan_laporan_penyakit SET jumlah_kasus = ?, updated_at = NOW() WHERE id_laporan_penyakit = ?',
-          [numValue, existing[0].id_laporan_penyakit]
-        );
+      if (hasDiagNama) {
+        // Skema flat (Online cPanel)
+        let existing: any = [];
+        if (kecIdNum > 0) {
+          const [rows]: any = await pool.query(
+            `SELECT ${pkCol} as id_row FROM keswan_laporan_penyakit 
+             WHERE tahun = ? AND UPPER(bulan) = ? 
+               AND LOWER(puskeswan_id) = ? 
+               AND (kecamatan_id = ? OR kecamatan_id = ?) 
+               AND (LOWER(diagnosa_nama) = LOWER(?) OR LOWER(diagnosa_nama) LIKE ?) LIMIT 1`,
+            [Number(tahunStr), cleanBulan, puskCode, kecCode, kecCode?.replace(/^k_/, ''), diagNamaTarget, `%${diagNamaTarget.toLowerCase()}%`]
+          );
+          existing = rows;
+        } else {
+          const [rows]: any = await pool.query(
+            `SELECT ${pkCol} as id_row FROM keswan_laporan_penyakit 
+             WHERE tahun = ? AND UPPER(bulan) = ? 
+               AND LOWER(puskeswan_id) = ? 
+               AND (kecamatan_id IS NULL OR kecamatan_id = '' OR kecamatan_id = '0') 
+               AND (LOWER(diagnosa_nama) = LOWER(?) OR LOWER(diagnosa_nama) LIKE ?) LIMIT 1`,
+            [Number(tahunStr), cleanBulan, puskCode, diagNamaTarget, `%${diagNamaTarget.toLowerCase()}%`]
+          );
+          existing = rows;
+        }
+
+        if (existing && existing.length > 0) {
+          await pool.query(
+            `UPDATE keswan_laporan_penyakit SET jumlah_kasus = ?, updated_at = NOW() WHERE ${pkCol} = ?`,
+            [numValue, existing[0].id_row]
+          );
+        } else {
+          await pool.query(
+            `INSERT INTO keswan_laporan_penyakit (tahun, bulan, puskeswan_id, kecamatan_id, kecamatan_nama, diagnosa_nama, kategori_penyakit, jumlah_kasus) 
+             VALUES (?, ?, ?, ?, ?, ?, 'Umum', ?)`,
+            [Number(tahunStr), cleanBulan, puskCode, kecCode, kecNama, diagNamaTarget, numValue]
+          );
+        }
       } else {
-        await pool.query(
-          'INSERT INTO keswan_laporan_penyakit (tahun, bulan, id_puskeswan, id_kecamatan, id_diagnosa, kategori_penyakit, jumlah_kasus) VALUES (?, ?, ?, ?, ?, "Umum", ?)',
-          [Number(tahunStr), cleanBulan, idPuskeswan, kecIdNum > 0 ? kecIdNum : null, idDiagnosa, numValue]
-        );
+        // Skema relasional (Offline local)
+        let idDiagnosa = 1;
+        try {
+          const [diagRows]: any = await pool.query(
+            'SELECT id_diagnosa FROM diagnosa WHERE LOWER(diagnosa_nama) = LOWER(?) OR LOWER(diagnosa_nama) LIKE ? LIMIT 1',
+            [diagNamaTarget, `%${diagNamaTarget.toLowerCase()}%`]
+          );
+          if (diagRows && diagRows.length > 0) {
+            idDiagnosa = diagRows[0].id_diagnosa;
+          } else {
+            const [insDiag]: any = await pool.query(
+              'INSERT INTO diagnosa (diagnosa_nama, kategori_penyakit) VALUES (?, "Umum")',
+              [diagNamaTarget]
+            );
+            idDiagnosa = insDiag.insertId;
+          }
+        } catch {}
+
+        let existing: any = [];
+        if (kecIdNum > 0) {
+          const [rows]: any = await pool.query(
+            `SELECT ${pkCol} as id_row FROM keswan_laporan_penyakit 
+             WHERE tahun = ? AND UPPER(bulan) = ? AND id_puskeswan = ? AND id_kecamatan = ? AND id_diagnosa = ? LIMIT 1`,
+            [Number(tahunStr), cleanBulan, idPuskeswan, kecIdNum, idDiagnosa]
+          );
+          existing = rows;
+        } else {
+          const [rows]: any = await pool.query(
+            `SELECT ${pkCol} as id_row FROM keswan_laporan_penyakit 
+             WHERE tahun = ? AND UPPER(bulan) = ? AND id_puskeswan = ? AND (id_kecamatan IS NULL OR id_kecamatan = 0) AND id_diagnosa = ? LIMIT 1`,
+            [Number(tahunStr), cleanBulan, idPuskeswan, idDiagnosa]
+          );
+          existing = rows;
+        }
+
+        if (existing && existing.length > 0) {
+          await pool.query(
+            `UPDATE keswan_laporan_penyakit SET jumlah_kasus = ?, updated_at = NOW() WHERE ${pkCol} = ?`,
+            [numValue, existing[0].id_row]
+          );
+        } else {
+          await pool.query(
+            `INSERT INTO keswan_laporan_penyakit (tahun, bulan, id_puskeswan, id_kecamatan, id_diagnosa, kategori_penyakit, jumlah_kasus) 
+             VALUES (?, ?, ?, ?, ?, 'Umum', ?)`,
+            [Number(tahunStr), cleanBulan, idPuskeswan, kecIdNum > 0 ? kecIdNum : null, idDiagnosa, numValue]
+          );
+        }
       }
 
       await logActivity({

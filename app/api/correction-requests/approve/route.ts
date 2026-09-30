@@ -60,6 +60,13 @@ export async function POST(request: NextRequest) {
 
       let pkCol = 'id';
       if (targetTable === 'kegiatan_ktt') pkCol = 'id_kegiatan';
+      if (targetTable === 'keswan_laporan_penyakit') {
+        try {
+          const [descRows]: any = await pool.query('DESCRIBE keswan_laporan_penyakit');
+          const fields = (descRows || []).map((f: any) => f.Field);
+          if (fields.includes('id_laporan_penyakit')) pkCol = 'id_laporan_penyakit';
+        } catch {}
+      }
 
       if (proposed.ACTION === 'DELETE_REQUEST') {
         // Eksekusi DELETE dari tabel target
