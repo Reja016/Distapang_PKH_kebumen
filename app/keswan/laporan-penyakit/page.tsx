@@ -22,7 +22,7 @@ import {
   KECAMATAN_MAP_ITEMS,
   getZoneByKecamatanId,
 } from '@/lib/penyakitData';
-import { PenyakitFormValues } from '@/components/keswan/laporan-penyakit/types';
+import { PenyakitFormValues, veraFormatCaseItems } from '@/components/keswan/laporan-penyakit/types';
 import PenyakitPetaTab from '@/components/keswan/laporan-penyakit/PenyakitPetaTab';
 import PenyakitTableTab from '@/components/keswan/laporan-penyakit/PenyakitTableTab';
 import PenyakitModals from '@/components/keswan/laporan-penyakit/PenyakitModals';
@@ -98,7 +98,7 @@ export default function LaporanPenyakitPage() {
       const res = await fetch(`/api/laporan-penyakit?tahun=${year}`);
       const json = await res.json();
       if (json.success) {
-        setCasesList(json.data || []);
+        setCasesList(veraFormatCaseItems(json.data || []));
         setKecAggregates(json.kecAggregates || {});
         setTotalKasus(json.totalKasus || 0);
       }

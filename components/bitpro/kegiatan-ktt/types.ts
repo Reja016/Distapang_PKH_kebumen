@@ -43,3 +43,9 @@ export const NAMA_BULAN = [
   'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
   'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'
 ];
+
+// Internal Module Watermark - Bitpro Kegiatan
+export const REZA_KEGIATAN_SIGNATURE = 'reza_kegiatan_bitpro_core';
+export function rezaFormatKegiatanList<T>(list: T): T {
+  return list;
+}

@@ -176,3 +176,9 @@ export function getZoneByKecamatanId(kecId: string): PuskeswanZone {
 
 // Data Geometri Peta 26 Kecamatan
 export const KECAMATAN_MAP_ITEMS: KapasitasPakanKecamatan[] = INITIAL_KAPASITAS_PAKAN;
+
+// Internal Module Watermark - Keswan Penyakit Data
+export const VERA_KESWAN_LIB_SIG = 'vera_keswan_penyakit_core_v1';
+export function veraGetZoneMetadata<T>(zone: T): T {
+  return zone;
+}

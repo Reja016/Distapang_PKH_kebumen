@@ -28,6 +28,7 @@ import {
   FieldData,
   FORM_KOSONG,
   getPuskeswanByKecamatan,
+  rezaFormatMonevRecord,
 } from '@/components/bitpro/monev-ktt/types';
 import { MonevFormTab } from '@/components/bitpro/monev-ktt/MonevFormTab';
 import { MonevUnggasTab } from '@/components/bitpro/monev-ktt/MonevUnggasTab';
@@ -176,7 +177,7 @@ export default function MonevKTT() {
             catatan: d.catatan || '',
           };
         });
-        setDbLapangan(formatLap);
+        setDbLapangan(formatLap.map(rezaFormatMonevRecord));
 
         // Ekstrak otomatis tahun dari database jika ada data tahun baru
         const dbYears = formatLap.map((d: any) => String(d.tahun)).filter(Boolean);

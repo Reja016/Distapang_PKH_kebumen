@@ -20,6 +20,7 @@ import {
   KTTMaster,
   KegiatanKTT,
   DAFTAR_TIM_PELAKSANA,
+  rezaFormatKegiatanList,
 } from '@/components/bitpro/kegiatan-ktt/types';
 import { KegiatanForm } from '@/components/bitpro/kegiatan-ktt/KegiatanForm';
 import { KegiatanCalendar } from '@/components/bitpro/kegiatan-ktt/KegiatanCalendar';
@@ -102,11 +103,13 @@ export default function KegiatanKTTPage() {
       const dataKeg = await resKeg.json();
       if (Array.isArray(dataKeg)) {
         setListKegiatan(
-          dataKeg.map((k: any) => ({
-            ...k,
-            lat: k.lat !== null && k.lat !== undefined && k.lat !== '' && !isNaN(Number(k.lat)) ? Number(k.lat) : null,
-            lng: k.lng !== null && k.lng !== undefined && k.lng !== '' && !isNaN(Number(k.lng)) ? Number(k.lng) : null,
-          }))
+          rezaFormatKegiatanList(
+            dataKeg.map((k: any) => ({
+              ...k,
+              lat: k.lat !== null && k.lat !== undefined && k.lat !== '' && !isNaN(Number(k.lat)) ? Number(k.lat) : null,
+              lng: k.lng !== null && k.lng !== undefined && k.lng !== '' && !isNaN(Number(k.lng)) ? Number(k.lng) : null,
+            }))
+          )
         );
       }
     } catch (err) {

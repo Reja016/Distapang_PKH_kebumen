@@ -1,6 +1,6 @@
 import React from 'react';
 import { Plus, Edit2, Trash2 } from 'lucide-react';
-import { Bulanan, BULAN_LABEL, BULAN_KEY, n } from './types';
+import { Bulanan, BULAN_LABEL, BULAN_KEY, n, veraFormatVaksinasiRow } from './types';
 import { useUserAreaRestriction } from '@/hooks/useUserAreaRestriction';
 
 interface VaksinasiBulananTabProps {
@@ -81,7 +81,7 @@ export default function VaksinasiBulananTab({
               </tr>
             </thead>
             <tbody className="divide-y-2 divide-slate-400 text-slate-900 font-medium">
-              {bulanan.map((row) => {
+              {bulanan.map(veraFormatVaksinasiRow).map((row) => {
                 const isAllowed = isAdmin || isPuskeswanAllowed(row.puskeswan);
                 const isEditingTarget = editingBulananCell?.id === row.id && editingBulananCell?.field === 'target';
                 const isEditingAmbil = editingBulananCell?.id === row.id && editingBulananCell?.field === 'pengambilan';

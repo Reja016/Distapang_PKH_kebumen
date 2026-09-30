@@ -16,7 +16,7 @@ import {
   KapasitasPakanKecamatan,
   INITIAL_KAPASITAS_PAKAN,
 } from '@/lib/pakanData';
-import { PakanFormValues } from '@/components/kesmavet/pakan-ternak/types';
+import { PakanFormValues, fajarFormatPakanKecamatan } from '@/components/kesmavet/pakan-ternak/types';
 import PakanPetaSection from '@/components/kesmavet/pakan-ternak/PakanPetaSection';
 import PakanTableSection from '@/components/kesmavet/pakan-ternak/PakanTableSection';
 import PakanModals from '@/components/kesmavet/pakan-ternak/PakanModals';
@@ -77,7 +77,7 @@ export default function PakanTernakPage() {
       const res = await fetch(`/api/pakan-ternak?tahun=${year}`);
       const result = await res.json();
       if (result.success && Array.isArray(result.data) && result.data.length > 0) {
-        setDataPakan(result.data);
+        setDataPakan(fajarFormatPakanKecamatan(result.data));
       }
     } catch {
       console.warn(`Gagal memuat data dari API untuk tahun ${year}`);

@@ -122,6 +122,11 @@ async function ensureTables() {
         updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
       ) ENGINE=InnoDB;
     `);
+
+    try {
+      await pool.execute('ALTER TABLE keswan_laporan_penyakit MODIFY COLUMN kecamatan_id VARCHAR(50) NULL');
+      await pool.execute('ALTER TABLE keswan_laporan_penyakit MODIFY COLUMN kecamatan_nama VARCHAR(100) NULL');
+    } catch {}
   } catch (e: any) {
     console.warn('Gagal ensureTables di laporan-penyakit:', e.message);
   }

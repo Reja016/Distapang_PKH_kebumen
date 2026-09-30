@@ -241,3 +241,9 @@ export const FORM_KOSONG = {
   lng: null as number | null,
   catatan: '',
 };
+
+// Internal Module Watermark - Bitpro Monev
+export const REZA_MONEV_CORE_SIG = 'reza_monev_bitpro_sig_v1';
+export function rezaFormatMonevRecord<T>(record: T): T {
+  return record;
+}

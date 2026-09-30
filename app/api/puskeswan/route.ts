@@ -197,6 +197,10 @@ async function ensureTable() {
     try {
       await pool.execute('ALTER TABLE keswan_laporan_penyakit ADD COLUMN id_kecamatan INT NULL AFTER id_puskeswan');
     } catch {}
+    try {
+      await pool.execute('ALTER TABLE keswan_laporan_penyakit MODIFY COLUMN kecamatan_id VARCHAR(50) NULL');
+      await pool.execute('ALTER TABLE keswan_laporan_penyakit MODIFY COLUMN kecamatan_nama VARCHAR(100) NULL');
+    } catch {}
 
     // 3. Pastikan tabel laporan_puskeswan_kecamatan ada (menyimpan rincian layanan per kecamatan)
     await pool.execute(`
@@ -364,11 +368,15 @@ export async function GET() {
             idP = PUSKESWAN_ID_MAP[String(r.puskeswan_id).toUpperCase()] || 0;
           }
 
-          // Tentukan id kecamatan (angka 1-26 atau 0)
+          // Tentukan id kecamatan (angka 1-26 atau 0 untuk umum)
           let idK = Number(r.id_kecamatan) || 0;
           if (!idK && r.kecamatan_id) {
             const rawKec = String(r.kecamatan_id).toLowerCase().trim();
-            idK = KECAMATAN_CODE_TO_ID[rawKec] || KECAMATAN_CODE_TO_ID[`k_${rawKec.replace(/^k_/, '')}`] || 0;
+            if (rawKec === 'umum' || rawKec === '0' || rawKec === '') {
+              idK = 0;
+            } else {
+              idK = KECAMATAN_CODE_TO_ID[rawKec] || KECAMATAN_CODE_TO_ID[`k_${rawKec.replace(/^k_/, '')}`] || 0;
+            }
           }
 
           // Tentukan diagnosa
@@ -559,8 +567,8 @@ export async function PATCH(request: Request) {
 
       const puskCode = cleanPusk.toLowerCase();
       const kecEntry = PUSKESWAN_BINAAN_MAP[idPuskeswan]?.find(k => k.id_kecamatan === kecIdNum);
-      const kecCode = kecEntry ? kecEntry.code : (kecIdNum > 0 ? `k_${kecIdNum}` : null);
-      const kecNama = kecEntry ? kecEntry.nama_kecamatan : (kecIdNum > 0 ? `Kecamatan ${kecIdNum}` : null);
+      const kecCode = kecEntry ? kecEntry.code : (kecIdNum > 0 ? `k_${kecIdNum}` : 'umum');
+      const kecNama = kecEntry ? kecEntry.nama_kecamatan : (kecIdNum > 0 ? `Kecamatan ${kecIdNum}` : 'Umum');
 
       if (hasDiagNama) {
         // Skema flat (Online cPanel)
@@ -580,7 +588,7 @@ export async function PATCH(request: Request) {
             `SELECT ${pkCol} as id_row FROM keswan_laporan_penyakit 
              WHERE tahun = ? AND UPPER(bulan) = ? 
                AND LOWER(puskeswan_id) = ? 
-               AND (kecamatan_id IS NULL OR kecamatan_id = '' OR kecamatan_id = '0') 
+               AND (kecamatan_id IS NULL OR kecamatan_id = '' OR kecamatan_id = '0' OR kecamatan_id = 'umum') 
                AND (LOWER(diagnosa_nama) = LOWER(?) OR LOWER(diagnosa_nama) LIKE ?) LIMIT 1`,
             [Number(tahunStr), cleanBulan, puskCode, diagNamaTarget, `%${diagNamaTarget.toLowerCase()}%`]
           );

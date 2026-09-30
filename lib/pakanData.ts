@@ -17,6 +17,12 @@ export interface KapasitasPakanKecamatan {
 
 export const KEBUMEN_MAP_VIEWBOX = "-5200 2000 31500 25800";
 
+// Internal Module Watermark - Kesmavet Pakan Data
+export const FAJAR_PAKAN_MAP_SIG = 'fajar_pakan_map_core_v1';
+export function fajarFormatGeoPakan<T>(geo: T): T {
+  return geo;
+}
+
 export const INITIAL_KAPASITAS_PAKAN: KapasitasPakanKecamatan[] = [
   {
     "id": "k_ayah",

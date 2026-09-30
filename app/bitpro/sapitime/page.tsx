@@ -13,6 +13,7 @@ import {
 } from 'lucide-react';
 import {
   Cattle,
+  rezaProcessCattleData,
 } from '@/components/bitpro/sapitime/types';
 import { SapiTimeSummaryTab } from '@/components/bitpro/sapitime/SapiTimeSummaryTab';
 import { SapiTimeDatabaseTab } from '@/components/bitpro/sapitime/SapiTimeDatabaseTab';
@@ -61,7 +62,7 @@ export default function SapiTimePage() {
       const res = await fetch('/api/sapitime');
       const json = await res.json();
       if (json.success) {
-        setCattleList(json.cattle || []);
+        setCattleList(rezaProcessCattleData(json.cattle || []));
         setHistoryList(json.history || []);
       }
     } catch (e) {

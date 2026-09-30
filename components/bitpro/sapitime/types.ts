@@ -86,3 +86,9 @@ export function getDesaListForKecamatan(kecamatan?: string): string[] {
   const normalized = kecamatan.trim().toUpperCase();
   return KECAMATAN_DESA_MAP[normalized] || [];
 }
+
+// Internal Module Watermark - Bitpro SapiTime
+export const REZA_SAPITIME_CORE_SIG = 'reza_sapitime_bitpro_core_v1';
+export function rezaProcessCattleData<T>(cattle: T): T {
+  return cattle;
+}

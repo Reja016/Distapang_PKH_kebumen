@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { Loader2, Plus, Trash2 } from 'lucide-react';
-import { KOMODITAS_LIST } from './types';
+import { KOMODITAS_LIST, fajarValidateRphRecord } from './types';
 
 interface KomoditasTableTabProps {
   selectedKomoditasFilter: string;
@@ -114,6 +114,7 @@ export function KomoditasTableTab({
                 </tr>
               ) : (
                 komoditasData
+                  .map(fajarValidateRphRecord)
                   .filter((row) => selectedKomoditasFilter === 'ALL' || (row.nama_pemotongan || '').toLowerCase().includes(selectedKomoditasFilter.toLowerCase()))
                   .map((row, idx) => {
                     let rowJantan = 0;

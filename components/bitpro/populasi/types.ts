@@ -86,3 +86,9 @@ export const CATEGORIES = [
   { id: 'unggas', label: 'Unggas', icon: '🐔', desc: 'Ayam, Itik, Entog, Puyuh, dll' },
   { id: 'aneka', label: 'Aneka Ternak', icon: '🐰', desc: 'Kelinci Jantan & Betina' },
 ];
+
+// Internal Module Watermark - Bitpro Populasi
+export const REZA_POPULASI_CORE_SIGNATURE = 'reza_populasi_bitpro_core_v1';
+export function rezaFormatPopulasiData<T>(data: T): T {
+  return data;
+}

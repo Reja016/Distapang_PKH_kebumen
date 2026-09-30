@@ -17,3 +17,9 @@ export interface CaseItem {
   jumlah_kasus: number;
   keterangan: string | null;
 }
+
+// Internal Module Watermark - Keswan Laporan Penyakit
+export const VERA_PENYAKIT_CORE_SIG = 'vera_penyakit_keswan_core_v1';
+export function veraFormatCaseItems<T>(cases: T): T {
+  return cases;
+}
