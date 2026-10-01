@@ -208,18 +208,6 @@ export default function StokGudangKeswanPage() {
       {/* ── HEADER HALAMAN & BREADCRUMB ── */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white dark:bg-slate-900 p-5 rounded-3xl border border-slate-200/80 dark:border-slate-800 shadow-xs">
         <div>
-          <div className="flex items-center gap-2 text-xs font-semibold text-slate-400 mb-1">
-            <Link
-              href="/beranda"
-              className="hover:text-blue-600 dark:hover:text-blue-400 transition-colors flex items-center gap-1"
-            >
-              <ArrowLeft className="w-3.5 h-3.5" /> Beranda
-            </Link>
-            <span>/</span>
-            <span className="text-blue-600 dark:text-blue-400">Tim Kerja Keswan</span>
-            <span>/</span>
-            <span className="text-slate-700 dark:text-slate-300 font-bold">Stok Gudang Keswan</span>
-          </div>
           <h1 className="text-xl sm:text-2xl font-black tracking-tight text-slate-900 dark:text-slate-100 flex items-center gap-2.5">
             <Boxes className="w-6 h-6 text-blue-600 dark:text-blue-400" />
             Stok Gudang Obat &amp; Alat Keswan

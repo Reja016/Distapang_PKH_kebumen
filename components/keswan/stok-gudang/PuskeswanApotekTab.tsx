@@ -171,7 +171,7 @@ export default function PuskeswanApotekTab({
               className="flex items-center gap-1.5 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold rounded-xl shadow-md transition-all cursor-pointer"
             >
               <Plus className="w-4 h-4" />
-              + Catat Pemakaian Obat
+              Catat Pemakaian Obat
             </button>
           )}
         </div>

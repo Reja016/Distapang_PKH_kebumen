@@ -147,6 +147,36 @@ async function ensureGudangTables() {
     console.warn('ensureTable stok_puskeswan:', e.message);
   }
 
+  // Lengkapi kolom tabel stok_puskeswan jika skema lama sudah ada
+  const alterStokPuskCols = [
+    'ALTER TABLE stok_puskeswan ADD COLUMN nama_puskeswan VARCHAR(100) NULL',
+    'ALTER TABLE stok_puskeswan ADD COLUMN satuan_kemasan VARCHAR(100) DEFAULT "Botol"',
+    'ALTER TABLE stok_puskeswan ADD COLUMN sumber_anggaran VARCHAR(100) DEFAULT "APBD Kabupaten"',
+    'ALTER TABLE stok_puskeswan ADD COLUMN tahun_anggaran VARCHAR(10) DEFAULT "2026"',
+    'ALTER TABLE stok_puskeswan ADD COLUMN stok_masuk INT DEFAULT 0',
+    'ALTER TABLE stok_puskeswan ADD COLUMN stok_keluar INT DEFAULT 0',
+    'ALTER TABLE stok_puskeswan ADD COLUMN sisa_stok INT DEFAULT 0',
+    'ALTER TABLE stok_puskeswan MODIFY COLUMN kode_barang VARCHAR(50) NULL DEFAULT ""',
+    'ALTER TABLE stok_puskeswan MODIFY COLUMN kategori VARCHAR(100) NULL DEFAULT "obat"',
+    'ALTER TABLE stok_puskeswan MODIFY COLUMN satuan VARCHAR(50) NULL DEFAULT "Botol"',
+    'ALTER TABLE stok_puskeswan MODIFY COLUMN nama_barang VARCHAR(255) NULL',
+  ];
+  for (const q of alterStokPuskCols) {
+    try { await pool.execute(q); } catch {}
+  }
+
+  try {
+    await pool.execute('ALTER TABLE stok_puskeswan ADD UNIQUE KEY uq_pusk_batch (id_puskeswan, id_barang, nomor_batch)');
+  } catch {}
+
+  try {
+    await pool.execute("UPDATE stok_puskeswan SET nama_puskeswan = CASE id_puskeswan WHEN 1 THEN 'Puskeswan Mirit' WHEN 2 THEN 'Puskeswan Klirong' WHEN 3 THEN 'Puskeswan Gombong' WHEN 4 THEN 'Puskeswan Buayan' WHEN 5 THEN 'Puskeswan Alian' WHEN 6 THEN 'Puskeswan Prembun' WHEN 7 THEN 'Puskeswan Kebumen' WHEN 8 THEN 'Puskeswan Karanganyar' ELSE CONCAT('Puskeswan ', id_puskeswan) END WHERE nama_puskeswan IS NULL OR nama_puskeswan = ''");
+    await pool.execute("UPDATE stok_puskeswan SET satuan_kemasan = satuan WHERE (satuan_kemasan IS NULL OR satuan_kemasan = '') AND satuan IS NOT NULL");
+    await pool.execute("UPDATE stok_puskeswan SET sisa_stok = jumlah_stok WHERE (sisa_stok IS NULL OR sisa_stok = 0) AND jumlah_stok > 0");
+    await pool.execute("UPDATE stok_puskeswan SET jumlah_stok = sisa_stok WHERE (jumlah_stok IS NULL OR jumlah_stok = 0) AND sisa_stok > 0");
+    await pool.execute("UPDATE stok_puskeswan SET satuan = satuan_kemasan WHERE (satuan IS NULL OR satuan = '') AND satuan_kemasan IS NOT NULL");
+  } catch {}
+
   // 5. Pastikan tabel penggunaan_obat_puskeswan (Sistem Apotek / Pengurangan Real-time)
   try {
     await pool.execute(`
@@ -311,9 +341,14 @@ export async function GET(request: Request) {
       };
     });
 
-    // 5. Stok per Puskeswan
+    // 5. Stok per Puskeswan (Adaptif id_stock_keswan vs id_stok_puskeswan dan nama_puskeswan)
     let puskStockQuery = `
-      SELECT sp.*, b.satuan_kemasan 
+      SELECT sp.*, 
+        COALESCE(sp.id_stok_puskeswan, sp.id_stock_keswan) as id_stok_puskeswan,
+        COALESCE(sp.nama_puskeswan, CASE sp.id_puskeswan WHEN 1 THEN 'Puskeswan Mirit' WHEN 2 THEN 'Puskeswan Klirong' WHEN 3 THEN 'Puskeswan Gombong' WHEN 4 THEN 'Puskeswan Buayan' WHEN 5 THEN 'Puskeswan Alian' WHEN 6 THEN 'Puskeswan Prembun' WHEN 7 THEN 'Puskeswan Kebumen' WHEN 8 THEN 'Puskeswan Karanganyar' ELSE CONCAT('Puskeswan ', sp.id_puskeswan) END) as nama_puskeswan,
+        COALESCE(sp.nama_barang, b.nama_barang, b.merk, 'Barang') as nama_barang,
+        COALESCE(sp.satuan_kemasan, sp.satuan, b.satuan_kemasan, b.satuan, 'Botol') as satuan_kemasan,
+        COALESCE(sp.sisa_stok, sp.jumlah_stok, 0) as sisa_stok
       FROM stok_puskeswan sp
       LEFT JOIN barang b ON sp.id_barang = b.id_barang
     `;
@@ -322,7 +357,7 @@ export async function GET(request: Request) {
       puskStockQuery += ` WHERE sp.id_puskeswan = ? `;
       puskStockParams.push(Number(idPuskeswan));
     }
-    puskStockQuery += ` ORDER BY sp.nama_puskeswan ASC, sp.nama_barang ASC `;
+    puskStockQuery += ` ORDER BY sp.id_puskeswan ASC, sp.id_barang ASC `;
     const [stokPuskeswan]: any = await pool.query(puskStockQuery, puskStockParams);
 
     // 6. Laporan Penggunaan Obat Puskeswan (7 Kolom)
@@ -618,29 +653,63 @@ export async function POST(request: Request) {
 
       // Otomatis masukkan / tambah ke stok puskeswan terkait
       const batchKey = nomor_batch || 'BATCH-DEFAULT';
-      await pool.execute(
-        `INSERT INTO stok_puskeswan 
-          (id_puskeswan, nama_puskeswan, id_barang, nama_barang, nomor_batch, tanggal_kadaluarsa, sumber_anggaran, tahun_anggaran, satuan_kemasan, stok_masuk, stok_keluar, sisa_stok)
-         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 0, ?)
-         ON DUPLICATE KEY UPDATE 
-          stok_masuk = stok_masuk + VALUES(stok_masuk),
-          sisa_stok = sisa_stok + VALUES(stok_masuk),
-          tanggal_kadaluarsa = COALESCE(VALUES(tanggal_kadaluarsa), tanggal_kadaluarsa),
-          sumber_anggaran = VALUES(sumber_anggaran)`,
-        [
-          id_puskeswan,
-          nama_puskeswan,
-          id_barang,
-          itemNama,
-          batchKey,
-          tanggal_kadaluarsa || null,
-          sumber_anggaran || 'APBD Kabupaten',
-          String(tahun_anggaran || '2026'),
-          satuan_kemasan || 'Botol',
-          numJumlah,
-          numJumlah,
-        ]
-      );
+      const satPusk = satuan_kemasan || 'Botol';
+      try {
+        await pool.execute(
+          `INSERT INTO stok_puskeswan 
+            (id_puskeswan, nama_puskeswan, id_barang, nama_barang, nomor_batch, tanggal_kadaluarsa, sumber_anggaran, tahun_anggaran, satuan_kemasan, satuan, stok_masuk, stok_keluar, sisa_stok, jumlah_stok)
+           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 0, ?, ?)
+           ON DUPLICATE KEY UPDATE 
+            stok_masuk = stok_masuk + VALUES(stok_masuk),
+            sisa_stok = sisa_stok + VALUES(stok_masuk),
+            jumlah_stok = sisa_stok,
+            tanggal_kadaluarsa = COALESCE(VALUES(tanggal_kadaluarsa), tanggal_kadaluarsa),
+            sumber_anggaran = VALUES(sumber_anggaran),
+            satuan_kemasan = VALUES(satuan_kemasan),
+            satuan = VALUES(satuan)`,
+          [
+            id_puskeswan,
+            nama_puskeswan,
+            id_barang,
+            itemNama,
+            batchKey,
+            tanggal_kadaluarsa || null,
+            sumber_anggaran || 'APBD Kabupaten',
+            String(tahun_anggaran || '2026'),
+            satPusk,
+            satPusk,
+            numJumlah,
+            numJumlah,
+            numJumlah,
+          ]
+        );
+      } catch (errPusk) {
+        try {
+          await pool.execute(
+            `INSERT INTO stok_puskeswan 
+              (id_puskeswan, nama_puskeswan, id_barang, nama_barang, nomor_batch, tanggal_kadaluarsa, sumber_anggaran, tahun_anggaran, satuan_kemasan, stok_masuk, stok_keluar, sisa_stok)
+             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 0, ?)
+             ON DUPLICATE KEY UPDATE 
+              stok_masuk = stok_masuk + VALUES(stok_masuk),
+              sisa_stok = sisa_stok + VALUES(stok_masuk)`,
+            [
+              id_puskeswan,
+              nama_puskeswan,
+              id_barang,
+              itemNama,
+              batchKey,
+              tanggal_kadaluarsa || null,
+              sumber_anggaran || 'APBD Kabupaten',
+              String(tahun_anggaran || '2026'),
+              satPusk,
+              numJumlah,
+              numJumlah,
+            ]
+          );
+        } catch (eFallback: any) {
+          console.warn('Fallback insert stok_puskeswan:', eFallback?.message);
+        }
+      }
 
       await logActivity({
         module: 'keswan',
@@ -721,7 +790,7 @@ export async function POST(request: Request) {
       }
 
       const currentPuskStock = puskStockRows[0];
-      const sisaSaatIni = Number(currentPuskStock.sisa_stok || 0);
+      const sisaSaatIni = Number(currentPuskStock.sisa_stok ?? currentPuskStock.jumlah_stok ?? 0);
 
       if (sisaSaatIni < numUsed) {
         return NextResponse.json({
@@ -755,11 +824,13 @@ export async function POST(request: Request) {
       );
 
       // 2. Kurangi stok puskeswan secara real-time (boleh sampai 0)
+      const pkCol = currentPuskStock.id_stok_puskeswan ? 'id_stok_puskeswan' : 'id_stock_keswan';
+      const pkVal = currentPuskStock.id_stok_puskeswan ?? currentPuskStock.id_stock_keswan;
       await pool.execute(
         `UPDATE stok_puskeswan 
-         SET stok_keluar = stok_keluar + ?, sisa_stok = sisa_stok - ? 
-         WHERE id_stok_puskeswan = ?`,
-        [numUsed, numUsed, currentPuskStock.id_stok_puskeswan]
+         SET stok_keluar = stok_keluar + ?, sisa_stok = GREATEST(0, sisa_stok - ?), jumlah_stok = GREATEST(0, sisa_stok - ?) 
+         WHERE ${pkCol} = ?`,
+        [numUsed, numUsed, pkVal]
       );
 
       await logActivity({
@@ -819,9 +890,9 @@ export async function DELETE(request: Request) {
         try {
           await pool.execute(
             `UPDATE stok_puskeswan 
-             SET stok_masuk = GREATEST(0, stok_masuk - ?), sisa_stok = GREATEST(0, sisa_stok - ?)
+             SET stok_masuk = GREATEST(0, stok_masuk - ?), sisa_stok = GREATEST(0, sisa_stok - ?), jumlah_stok = GREATEST(0, sisa_stok - ?)
              WHERE id_puskeswan = ? AND id_barang = ? AND nomor_batch = ?`,
-            [d.jumlah, d.jumlah, d.id_puskeswan, d.id_barang, d.nomor_batch]
+            [d.jumlah, d.jumlah, d.jumlah, d.id_puskeswan, d.id_barang, d.nomor_batch]
           );
         } catch {}
       }
@@ -836,9 +907,9 @@ export async function DELETE(request: Request) {
         try {
           await pool.execute(
             `UPDATE stok_puskeswan 
-             SET stok_keluar = GREATEST(0, stok_keluar - ?), sisa_stok = sisa_stok + ?
+             SET stok_keluar = GREATEST(0, stok_keluar - ?), sisa_stok = sisa_stok + ?, jumlah_stok = sisa_stok + ?
              WHERE id_puskeswan = ? AND id_barang = ? AND nomor_batch = ?`,
-            [p.jumlah_penggunaan, p.jumlah_penggunaan, p.id_puskeswan, p.id_barang, p.nomor_batch]
+            [p.jumlah_penggunaan, p.jumlah_penggunaan, p.jumlah_penggunaan, p.id_puskeswan, p.id_barang, p.nomor_batch]
           );
         } catch {}
       }
