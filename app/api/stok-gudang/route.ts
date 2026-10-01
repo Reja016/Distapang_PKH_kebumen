@@ -26,17 +26,31 @@ async function ensureGudangTables() {
     console.warn('ensureTable barang:', e.message);
   }
 
-  // Lengkapi kolom tabel barang jika belum ada
+  // Lengkapi kolom tabel barang jika belum ada (kompatibel skema baru & skema lama dinas)
   const alterBarangCols = [
+    'ALTER TABLE barang ADD COLUMN nama_barang VARCHAR(255) NULL',
     'ALTER TABLE barang ADD COLUMN kode_barang VARCHAR(50) NULL',
     'ALTER TABLE barang ADD COLUMN kategori VARCHAR(100) DEFAULT "Obat"',
     'ALTER TABLE barang ADD COLUMN satuan_kemasan VARCHAR(100) DEFAULT "Botol"',
     'ALTER TABLE barang ADD COLUMN min_stok_dinas INT DEFAULT 10',
     'ALTER TABLE barang ADD COLUMN keterangan TEXT NULL',
+    'ALTER TABLE barang MODIFY COLUMN merk VARCHAR(100) NULL',
+    'ALTER TABLE barang MODIFY COLUMN jenis_barang ENUM("Vaksin","Obat","Straw","Alat") NULL DEFAULT "Obat"',
+    'ALTER TABLE barang MODIFY COLUMN satuan VARCHAR(50) NULL DEFAULT "Botol"',
   ];
   for (const q of alterBarangCols) {
     try { await pool.execute(q); } catch {}
   }
+
+  // Sinkronisasi otomatis data eksisting antara merk <-> nama_barang, jenis_barang <-> kategori, satuan <-> satuan_kemasan
+  try {
+    await pool.execute("UPDATE barang SET nama_barang = merk WHERE (nama_barang IS NULL OR nama_barang = '') AND merk IS NOT NULL AND merk != ''");
+    await pool.execute("UPDATE barang SET merk = nama_barang WHERE (merk IS NULL OR merk = '') AND nama_barang IS NOT NULL AND nama_barang != ''");
+    await pool.execute("UPDATE barang SET kategori = jenis_barang WHERE (kategori IS NULL OR kategori = '') AND jenis_barang IS NOT NULL");
+    await pool.execute("UPDATE barang SET jenis_barang = kategori WHERE (jenis_barang IS NULL) AND kategori IN ('Vaksin','Obat','Straw','Alat')");
+    await pool.execute("UPDATE barang SET satuan_kemasan = satuan WHERE (satuan_kemasan IS NULL OR satuan_kemasan = '') AND satuan IS NOT NULL");
+    await pool.execute("UPDATE barang SET satuan = satuan_kemasan WHERE (satuan IS NULL OR satuan = '') AND satuan_kemasan IS NOT NULL");
+  } catch {}
 
   // 2. Pastikan tabel dropping_dinas ada & memiliki kolom batch, tgl expired, sumber anggaran
   try {
@@ -168,18 +182,33 @@ export async function GET(request: Request) {
     const view = searchParams.get('view') || 'all';
     const idPuskeswan = searchParams.get('id_puskeswan');
 
-    // 1. Master Barang
+    // 1. Master Barang (Adaptif nama_barang vs merk)
+    let orderCol = 'b.id_barang';
+    try {
+      const [desc]: any = await pool.query('DESCRIBE barang');
+      const fields = (desc || []).map((f: any) => f.Field);
+      if (fields.includes('nama_barang')) {
+        orderCol = 'b.nama_barang';
+      } else if (fields.includes('merk')) {
+        orderCol = 'b.merk';
+      }
+    } catch {}
+
     const [barangs]: any = await pool.query(`
       SELECT b.*, 
-        COALESCE(b.satuan_kemasan, 'Botol') as satuan_kemasan,
+        COALESCE(b.nama_barang, b.merk, 'Barang') as nama_barang,
+        COALESCE(b.satuan_kemasan, b.satuan, 'Botol') as satuan_kemasan,
+        COALESCE(b.kategori, b.jenis_barang, 'Obat') as kategori,
         COALESCE(b.min_stok_dinas, 10) as min_stok_dinas
       FROM barang b
-      ORDER BY b.nama_barang ASC
+      ORDER BY ${orderCol} ASC
     `);
 
     // 2. Dropping Masuk ke Dinas
     const [droppings]: any = await pool.query(`
-      SELECT d.*, b.nama_barang, COALESCE(d.satuan_kemasan, b.satuan_kemasan, 'Botol') as satuan_kemasan
+      SELECT d.*, 
+        COALESCE(b.nama_barang, b.merk, 'Barang') as nama_barang, 
+        COALESCE(d.satuan_kemasan, b.satuan_kemasan, b.satuan, 'Botol') as satuan_kemasan
       FROM dropping_dinas d
       LEFT JOIN barang b ON d.id_barang = b.id_barang
       ORDER BY d.id_dropping_dinas DESC
@@ -351,15 +380,64 @@ export async function POST(request: Request) {
         return NextResponse.json({ success: false, error: 'Nama barang wajib diisi.' }, { status: 400 });
       }
 
+      // Pastikan kolom baru siap di tabel barang
+      try { await pool.execute('ALTER TABLE barang ADD COLUMN nama_barang VARCHAR(255) NULL'); } catch {}
+      try { await pool.execute('ALTER TABLE barang ADD COLUMN kategori VARCHAR(100) DEFAULT "Obat"'); } catch {}
+      try { await pool.execute('ALTER TABLE barang ADD COLUMN satuan_kemasan VARCHAR(100) DEFAULT "Botol"'); } catch {}
+      try { await pool.execute('ALTER TABLE barang ADD COLUMN min_stok_dinas INT DEFAULT 10'); } catch {}
+      try { await pool.execute('ALTER TABLE barang ADD COLUMN keterangan TEXT NULL'); } catch {}
+      try { await pool.execute('ALTER TABLE barang MODIFY COLUMN merk VARCHAR(100) NULL'); } catch {}
+      try { await pool.execute('ALTER TABLE barang MODIFY COLUMN jenis_barang ENUM("Vaksin","Obat","Straw","Alat") NULL DEFAULT "Obat"'); } catch {}
+      try { await pool.execute('ALTER TABLE barang MODIFY COLUMN satuan VARCHAR(50) NULL DEFAULT "Botol"'); } catch {}
+
+      let cols: string[] = [];
+      try {
+        const [desc]: any = await pool.query('DESCRIBE barang');
+        cols = (desc || []).map((c: any) => c.Field);
+      } catch {}
+
+      const hasMerk = cols.includes('merk');
+      const hasJenis = cols.includes('jenis_barang');
+      const hasSatuan = cols.includes('satuan');
+      const hasNamaBarang = cols.includes('nama_barang');
+
+      const katVal = kategori || 'Obat';
+      const satVal = satuan_kemasan || 'Botol';
+      const minVal = Number(min_stok_dinas ?? 10);
+      const ketVal = keterangan || '';
+
       if (id_barang) {
-        await pool.execute(
-          `UPDATE barang SET nama_barang = ?, kategori = ?, satuan_kemasan = ?, min_stok_dinas = ?, keterangan = ? WHERE id_barang = ?`,
-          [nama_barang, kategori || 'Obat', satuan_kemasan || 'Botol', Number(min_stok_dinas ?? 10), keterangan || '', id_barang]
-        );
+        const updateSets: string[] = [];
+        const updateParams: any[] = [];
+
+        if (hasNamaBarang) { updateSets.push('nama_barang = ?'); updateParams.push(nama_barang); }
+        if (hasMerk) { updateSets.push('merk = ?'); updateParams.push(nama_barang); }
+        if (cols.includes('kategori')) { updateSets.push('kategori = ?'); updateParams.push(katVal); }
+        if (hasJenis && ['Vaksin', 'Obat', 'Straw', 'Alat'].includes(katVal)) { updateSets.push('jenis_barang = ?'); updateParams.push(katVal); }
+        if (cols.includes('satuan_kemasan')) { updateSets.push('satuan_kemasan = ?'); updateParams.push(satVal); }
+        if (hasSatuan) { updateSets.push('satuan = ?'); updateParams.push(satVal); }
+        if (cols.includes('min_stok_dinas')) { updateSets.push('min_stok_dinas = ?'); updateParams.push(minVal); }
+        if (cols.includes('keterangan')) { updateSets.push('keterangan = ?'); updateParams.push(ketVal); }
+
+        updateParams.push(id_barang);
+        await pool.execute(`UPDATE barang SET ${updateSets.join(', ')} WHERE id_barang = ?`, updateParams);
       } else {
+        const insertCols: string[] = [];
+        const insertPlaceholders: string[] = [];
+        const insertParams: any[] = [];
+
+        if (hasNamaBarang) { insertCols.push('nama_barang'); insertPlaceholders.push('?'); insertParams.push(nama_barang); }
+        if (hasMerk) { insertCols.push('merk'); insertPlaceholders.push('?'); insertParams.push(nama_barang); }
+        if (cols.includes('kategori')) { insertCols.push('kategori'); insertPlaceholders.push('?'); insertParams.push(katVal); }
+        if (hasJenis) { insertCols.push('jenis_barang'); insertPlaceholders.push('?'); insertParams.push(['Vaksin', 'Obat', 'Straw', 'Alat'].includes(katVal) ? katVal : 'Obat'); }
+        if (cols.includes('satuan_kemasan')) { insertCols.push('satuan_kemasan'); insertPlaceholders.push('?'); insertParams.push(satVal); }
+        if (hasSatuan) { insertCols.push('satuan'); insertPlaceholders.push('?'); insertParams.push(satVal); }
+        if (cols.includes('min_stok_dinas')) { insertCols.push('min_stok_dinas'); insertPlaceholders.push('?'); insertParams.push(minVal); }
+        if (cols.includes('keterangan')) { insertCols.push('keterangan'); insertPlaceholders.push('?'); insertParams.push(ketVal); }
+
         await pool.execute(
-          `INSERT INTO barang (nama_barang, kategori, satuan_kemasan, min_stok_dinas, keterangan) VALUES (?, ?, ?, ?, ?)`,
-          [nama_barang, kategori || 'Obat', satuan_kemasan || 'Botol', Number(min_stok_dinas ?? 10), keterangan || '']
+          `INSERT INTO barang (${insertCols.join(', ')}) VALUES (${insertPlaceholders.join(', ')})`,
+          insertParams
         );
       }
 
@@ -479,7 +557,7 @@ export async function POST(request: Request) {
         [id_barang]
       );
       const [barangRow]: any = await pool.query(
-        `SELECT nama_barang, min_stok_dinas, satuan_kemasan FROM barang WHERE id_barang = ?`,
+        `SELECT COALESCE(nama_barang, merk, 'Barang') as nama_barang, min_stok_dinas, satuan_kemasan FROM barang WHERE id_barang = ?`,
         [id_barang]
       );
 
@@ -721,6 +799,11 @@ export async function DELETE(request: Request) {
 
     if (!type || !id) {
       return NextResponse.json({ success: false, error: 'Tipe dan ID wajib disertakan.' }, { status: 400 });
+    }
+
+    if (type === 'barang') {
+      await pool.execute(`DELETE FROM barang WHERE id_barang = ?`, [id]);
+      return NextResponse.json({ success: true, message: 'Data master barang berhasil dihapus.' });
     }
 
     if (type === 'dropping') {
