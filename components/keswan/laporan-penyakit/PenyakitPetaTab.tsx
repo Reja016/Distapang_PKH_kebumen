@@ -183,35 +183,51 @@ export default function PenyakitPetaTab({
               </div>
 
               <div className="pt-2">
-                <p className="text-xs font-bold text-slate-600 mb-2">Diagnosa Penyakit Terlaporkan:</p>
-                {Object.keys(
-                  (
+                {(() => {
+                  const targetAgg = 
                     kecAggregates[selectedKecamatan.id.toLowerCase()] ||
-                    kecAggregates[selectedKecamatan.id.toLowerCase().replace('k_', '')]
-                  )?.cases || {}
-                ).length === 0 ? (
-                  <p className="text-xs text-slate-400 italic">Belum ada laporan penyakit pada tahun {selectedYear}.</p>
-                ) : (
-                  <div className="flex flex-wrap gap-2">
-                    {Object.keys(
-                      (
-                        kecAggregates[selectedKecamatan.id.toLowerCase()] ||
-                        kecAggregates[selectedKecamatan.id.toLowerCase().replace('k_', '')]
-                      ).cases
-                    ).map((diag) => (
-                      <span
-                        key={diag}
-                        className="px-3 py-1.5 rounded-xl text-xs font-bold flex items-center gap-2 border border-slate-200 bg-slate-50 text-slate-800 shadow-2xs"
-                      >
-                        <span
-                          className="w-3 h-3 rounded-full"
-                          style={{ backgroundColor: DIAGNOSA_COLOR_MAP[diag] || '#64748B' }}
-                        />
-                        <span>{diag}</span>
-                      </span>
-                    ))}
-                  </div>
-                )}
+                    kecAggregates[selectedKecamatan.id.toLowerCase().replace('k_', '')];
+                  const rawCases: Record<string, number> = targetAgg?.cases || {};
+                  const validCaseEntries = Object.entries(rawCases).filter(([_, cnt]) => Number(cnt) > 0);
+                  const totalKecKasus = validCaseEntries.reduce((acc, [_, cnt]) => acc + Number(cnt), 0);
+
+                  if (validCaseEntries.length === 0) {
+                    return (
+                      <div>
+                        <p className="text-xs font-bold text-slate-600 mb-1">Diagnosa Penyakit Terlaporkan:</p>
+                        <p className="text-xs text-slate-400 italic">Belum ada laporan penyakit pada tahun {selectedYear}.</p>
+                      </div>
+                    );
+                  }
+
+                  return (
+                    <div>
+                      <div className="flex items-center justify-between mb-2">
+                        <p className="text-xs font-bold text-slate-700">Diagnosa Penyakit Terlaporkan:</p>
+                        <span className="text-[11px] font-black text-rose-700 bg-rose-50 px-2 py-0.5 rounded-lg border border-rose-200">
+                          Total: {totalKecKasus} Kasus
+                        </span>
+                      </div>
+                      <div className="flex flex-wrap gap-2">
+                        {validCaseEntries.map(([diag, count]) => (
+                          <span
+                            key={diag}
+                            className="px-3 py-1.5 rounded-xl text-xs font-bold flex items-center gap-2 border border-slate-200 bg-slate-50 text-slate-800 shadow-2xs"
+                          >
+                            <span
+                              className="w-3 h-3 rounded-full shrink-0"
+                              style={{ backgroundColor: DIAGNOSA_COLOR_MAP[diag] || '#64748B' }}
+                            />
+                            <span>{diag}:</span>
+                            <span className="font-mono font-black text-blue-700 bg-blue-100/70 px-1.5 py-0.5 rounded-md">
+                              {Number(count)} Kasus
+                            </span>
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  );
+                })()}
               </div>
             </div>
           )}

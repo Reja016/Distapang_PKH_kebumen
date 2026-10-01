@@ -146,7 +146,7 @@ export default function PemasukanDinasTab({
               className="flex items-center gap-1.5 px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-xl shadow-md transition-all cursor-pointer shrink-0"
             >
               <Plus className="w-4 h-4" />
-              + Catat Dropping Masuk
+              Catat Dropping Masuk
             </button>
           )}
         </div>

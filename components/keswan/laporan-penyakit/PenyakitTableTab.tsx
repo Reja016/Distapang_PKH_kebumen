@@ -139,7 +139,7 @@ export default function PenyakitTableTab({
                         <span>{row.diagnosa_nama}</span>
                       </td>
                       <td className="p-3.5 text-center font-mono font-bold text-slate-900">
-                        {row.jumlah_kasus || 1} Ekor
+                        {Number(row.jumlah_kasus ?? 0)} Ekor
                       </td>
                       <td className="p-3.5 text-slate-500 max-w-xs truncate">{row.keterangan || '-'}</td>
                       {(isAdmin || canEdit) && (

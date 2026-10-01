@@ -94,7 +94,7 @@ export default function DistribusiBatab({
             className="px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-semibold text-slate-700 dark:text-slate-200 outline-none cursor-pointer"
           >
             <option value="ALL">Semua Jenis Distribusi</option>
-            <option value="DROPING_TERENCANA">Droping Terencana</option>
+            <option value="DROPING_TERENCANA">Dropping Terencana</option>
             <option value="AMPRAHAN_INSIDENTAL">Amprahan Insidental</option>
             <option value="DARURAT">Khusus Status Darurat</option>
           </select>
@@ -106,7 +106,7 @@ export default function DistribusiBatab({
                 className="flex items-center gap-1.5 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold rounded-xl shadow-md transition-all cursor-pointer shrink-0"
               >
                 <Plus className="w-4 h-4" />
-                + Droping Terencana
+                Dropping Terencana
               </button>
               <button
                 onClick={() => onOpenCreateDistribusi(true)}
@@ -195,7 +195,7 @@ export default function DistribusiBatab({
                         </span>
                       ) : (
                         <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-blue-100 dark:bg-blue-950/60 text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-800">
-                          DROPING TERENCANA
+                          DROPPING TERENCANA
                         </span>
                       )}
                     </td>

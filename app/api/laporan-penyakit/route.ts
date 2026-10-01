@@ -127,6 +127,11 @@ async function ensureTables() {
       await pool.execute('ALTER TABLE keswan_laporan_penyakit MODIFY COLUMN kecamatan_id VARCHAR(50) NULL');
       await pool.execute('ALTER TABLE keswan_laporan_penyakit MODIFY COLUMN kecamatan_nama VARCHAR(100) NULL');
     } catch {}
+
+    // Bersihkan data dengan jumlah kasus 0 atau negatif jika pernah tersimpan
+    try {
+      await pool.execute('DELETE FROM keswan_laporan_penyakit WHERE jumlah_kasus <= 0');
+    } catch {}
   } catch (e: any) {
     console.warn('Gagal ensureTables di laporan-penyakit:', e.message);
   }
@@ -143,7 +148,7 @@ export async function GET(req: Request) {
     if (action === 'years') {
       try {
         const [yearRows]: any = await pool.query(
-          `SELECT DISTINCT tahun FROM keswan_laporan_penyakit ORDER BY 1 ASC`
+          `SELECT DISTINCT tahun FROM keswan_laporan_penyakit WHERE (jumlah_kasus > 0 OR jumlah_kasus IS NULL) ORDER BY 1 ASC`
         );
         let years: number[] = yearRows ? yearRows.map((r: any) => Number(r.tahun)).filter(Boolean) : [];
         if (!years.includes(2025)) years.push(2025);
@@ -157,23 +162,29 @@ export async function GET(req: Request) {
 
     const tahun = Number(searchParams.get('tahun')) || 2026;
 
-    // 2. Ambil seluruh data kasus pada tahun tersebut secara adaptif (SELECT * tanpa mengunci nama kolom ID)
+    // 2. Ambil seluruh data kasus pada tahun tersebut secara adaptif (hanya yang jumlah kasus > 0)
     let rawRows: any[] = [];
     try {
       const [rows]: any = await pool.query(
-        `SELECT * FROM keswan_laporan_penyakit WHERE tahun = ? ORDER BY 1 DESC`,
+        `SELECT * FROM keswan_laporan_penyakit WHERE tahun = ? AND (jumlah_kasus > 0 OR jumlah_kasus IS NULL) ORDER BY 1 DESC`,
         [tahun]
       );
       rawRows = rows || [];
     } catch (e1: any) {
       console.warn('Gagal query keswan_laporan_penyakit dengan tahun, mencoba query semua baris:', e1.message);
       try {
-        const [fallbackAll]: any = await pool.query(`SELECT * FROM keswan_laporan_penyakit ORDER BY 1 DESC`);
+        const [fallbackAll]: any = await pool.query(`SELECT * FROM keswan_laporan_penyakit WHERE (jumlah_kasus > 0 OR jumlah_kasus IS NULL) ORDER BY 1 DESC`);
         rawRows = (fallbackAll || []).filter((r: any) => !r.tahun || Number(r.tahun) === tahun);
       } catch {
         rawRows = [];
       }
     }
+
+    // Filter ketat: Hanya masukkan kasus yang > 0 (tidak kosong / 0)
+    rawRows = rawRows.filter((r: any) => {
+      const cnt = r.jumlah_kasus !== null && r.jumlah_kasus !== undefined ? Number(r.jumlah_kasus) : 1;
+      return cnt > 0;
+    });
 
     // Ambil kamus diagnosa jika tabel diagnosa ada (untuk skema yang menggunakan id_diagnosa)
     let idToDiagMap: Record<number, string> = {};
@@ -204,19 +215,23 @@ export async function GET(req: Request) {
       let rawCode = '';
       let kecNama = r.kecamatan_nama || r.db_kecamatan_nama || '';
 
-      if (r.kecamatan_id) {
-        const c = String(r.kecamatan_id).toLowerCase().trim();
-        rawCode = c.startsWith('k_') ? c : `k_${c}`;
-        if (!kecNama) {
+      const rawKecId = String(r.kecamatan_id || '').toLowerCase().trim();
+      const isUmum = !rawKecId || ['umum', 'k_umum', '0', ''].includes(rawKecId);
+
+      if (!isUmum) {
+        rawCode = rawKecId.startsWith('k_') ? rawKecId : `k_${rawKecId}`;
+        if (!kecNama || kecNama.toLowerCase() === 'umum') {
           const kecIdNum = KECAMATAN_CODE_TO_ID[rawCode] || 0;
           kecNama = KECAMATAN_ID_TO_NAMA[kecIdNum] || rawCode.replace(/^k_/, '');
         }
-      } else if (r.id_kecamatan) {
+      } else if (r.id_kecamatan && Number(r.id_kecamatan) > 0) {
         const kId = Number(r.id_kecamatan);
         rawCode = KECAMATAN_ID_TO_CODE[kId] || `k_${kId}`;
         kecNama = KECAMATAN_ID_TO_NAMA[kId] || `Kecamatan ${kId}`;
       } else {
-        const idPuskNum = Number(r.id_puskeswan) || PUSKESWAN_ID_MAP[String(r.puskeswan_id || '').toLowerCase()] || 7;
+        // Baris induk Puskeswan tanpa kecamatan spesifik -> petakan ke host kecamatan puskeswan bersangkutan
+        const puskStr = String(r.puskeswan_id || '').toLowerCase().replace(/^pusk_/, '').trim();
+        const idPuskNum = Number(r.id_puskeswan) || PUSKESWAN_ID_MAP[puskStr] || 7;
         const host = PUSKESWAN_HOST_NAMES[idPuskNum] || PUSKESWAN_HOST_NAMES[7];
         rawCode = host.code;
         kecNama = host.nama;

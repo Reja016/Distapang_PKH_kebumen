@@ -155,10 +155,10 @@ export default function GudangDashboardTab({
           </div>
           <div>
             <h4 className="font-bold text-sm text-slate-900 dark:text-slate-100">
-              Protokol Safety Stock (Penyangga Darurat) Dinas
+              Protokol Safety Stock Dinas
             </h4>
             <p className="text-xs text-slate-600 dark:text-slate-300 mt-0.5">
-              Stok di gudang dinas tidak boleh sampai 0. Bila stok tersisa di bawah ambang batas (default: 10 unit), tombol distribusi reguler terkunci dan hanya dapat disalurkan melalui jalur <strong>Pengambilan Darurat</strong> dengan otorisasi Administrator.
+              Stok di gudang dinas tidak boleh sampai 0. Bila stok tersisa di bawah ambang batas, tombol distribusi reguler terkunci dan hanya dapat disalurkan melalui jalur <strong>Pengambilan Darurat</strong> dengan otorisasi Administrator.
             </p>
           </div>
         </div>
@@ -168,7 +168,7 @@ export default function GudangDashboardTab({
             className="shrink-0 flex items-center gap-1.5 px-4 py-2 bg-amber-600 hover:bg-amber-700 text-white font-bold rounded-xl text-xs shadow-md transition-all cursor-pointer"
           >
             <AlertTriangle className="w-4 h-4" />
-            Ambil Darurat (Amprahan)
+            Ambil Darurat
           </button>
         )}
       </div>
@@ -218,7 +218,7 @@ export default function GudangDashboardTab({
           <div className="flex items-center gap-2">
             <Layers className="w-5 h-5 text-blue-600 dark:text-blue-400" />
             <h3 className="font-bold text-slate-800 dark:text-slate-100 text-sm sm:text-base">
-              Inventaris Master Gudang Dinas (Ledger Tunggal)
+              Inventaris Master Gudang Dinas
             </h3>
           </div>
           <span className="text-xs text-slate-400 font-medium">

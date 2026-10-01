@@ -607,9 +607,11 @@ export async function PATCH(request: Request) {
       } catch {}
 
       const puskCode = cleanPusk.toLowerCase();
+      const hostKec = PUSKESWAN_BINAAN_MAP[idPuskeswan]?.[0];
       const kecEntry = PUSKESWAN_BINAAN_MAP[idPuskeswan]?.find(k => k.id_kecamatan === kecIdNum);
-      const kecCode = kecEntry ? kecEntry.code : (kecIdNum > 0 ? `k_${kecIdNum}` : 'umum');
-      const kecNama = kecEntry ? kecEntry.nama_kecamatan : (kecIdNum > 0 ? `Kecamatan ${kecIdNum}` : 'Umum');
+      const finalKecCode = kecEntry ? kecEntry.code : (hostKec ? hostKec.code : (kecIdNum > 0 ? `k_${kecIdNum}` : 'k_kebumen'));
+      const finalKecNama = kecEntry ? kecEntry.nama_kecamatan : (hostKec ? hostKec.nama_kecamatan : (kecIdNum > 0 ? `Kecamatan ${kecIdNum}` : 'Kebumen'));
+      const finalKecIdNum = kecEntry ? kecEntry.id_kecamatan : (hostKec ? hostKec.id_kecamatan : kecIdNum);
 
       if (hasDiagNama) {
         // Skema flat (Online cPanel)
@@ -620,33 +622,48 @@ export async function PATCH(request: Request) {
              WHERE (tahun = ? OR tahun IS NULL) AND UPPER(bulan) = ? 
                AND (LOWER(puskeswan_id) = ? OR LOWER(puskeswan_id) = ? OR puskeswan_id = ?) 
                AND (kecamatan_id = ? OR kecamatan_id = ?) 
-               AND (LOWER(diagnosa_nama) = LOWER(?) OR LOWER(diagnosa_nama) LIKE ?) LIMIT 1`,
-            [Number(tahunStr), cleanBulan, puskCode, `pusk_${puskCode}`, String(idPuskeswan), kecCode, kecCode?.replace(/^k_/, ''), diagNamaTarget, `%${diagNamaTarget.toLowerCase()}%`]
+               AND (LOWER(diagnosa_nama) = LOWER(?) OR LOWER(diagnosa_nama) LIKE ?)`,
+            [Number(tahunStr), cleanBulan, puskCode, `pusk_${puskCode}`, String(idPuskeswan), finalKecCode, finalKecCode.replace(/^k_/, ''), diagNamaTarget, `%${diagNamaTarget.toLowerCase()}%`]
           );
           existing = rows;
         } else {
+          // Parent puskeswan level: matches finalKecCode, clean finalKecCode, or previously tagged umum/empty/0
           const [rows]: any = await pool.query(
             `SELECT ${pkCol} as id_row FROM keswan_laporan_penyakit 
              WHERE (tahun = ? OR tahun IS NULL) AND UPPER(bulan) = ? 
                AND (LOWER(puskeswan_id) = ? OR LOWER(puskeswan_id) = ? OR puskeswan_id = ?) 
-               AND (kecamatan_id IS NULL OR kecamatan_id = '' OR kecamatan_id = '0' OR kecamatan_id = 'umum') 
-               AND (LOWER(diagnosa_nama) = LOWER(?) OR LOWER(diagnosa_nama) LIKE ?) LIMIT 1`,
-            [Number(tahunStr), cleanBulan, puskCode, `pusk_${puskCode}`, String(idPuskeswan), diagNamaTarget, `%${diagNamaTarget.toLowerCase()}%`]
+               AND (kecamatan_id = ? OR kecamatan_id = ? OR kecamatan_id IS NULL OR kecamatan_id = '' OR kecamatan_id = '0' OR kecamatan_id = 'umum') 
+               AND (LOWER(diagnosa_nama) = LOWER(?) OR LOWER(diagnosa_nama) LIKE ?)`,
+            [Number(tahunStr), cleanBulan, puskCode, `pusk_${puskCode}`, String(idPuskeswan), finalKecCode, finalKecCode.replace(/^k_/, ''), diagNamaTarget, `%${diagNamaTarget.toLowerCase()}%`]
           );
           existing = rows;
         }
 
-        if (existing && existing.length > 0) {
-          await pool.query(
-            `UPDATE keswan_laporan_penyakit SET jumlah_kasus = ?, updated_at = NOW() WHERE ${pkCol} = ?`,
-            [numValue, existing[0].id_row]
-          );
+        if (numValue <= 0) {
+          // JIKA DIHAPUS / NILAI <= 0: HAPUS DARI keswan_laporan_penyakit!
+          if (existing && existing.length > 0) {
+            for (const r of existing) {
+              await pool.query(`DELETE FROM keswan_laporan_penyakit WHERE ${pkCol} = ?`, [r.id_row]);
+            }
+          }
         } else {
-          await pool.query(
-            `INSERT INTO keswan_laporan_penyakit (tahun, bulan, puskeswan_id, kecamatan_id, kecamatan_nama, diagnosa_nama, kategori_penyakit, jumlah_kasus) 
-             VALUES (?, ?, ?, ?, ?, ?, 'Umum', ?)`,
-            [Number(tahunStr), cleanBulan, puskCode, kecCode || 'umum', kecNama || 'Umum', diagNamaTarget, numValue]
-          );
+          if (existing && existing.length > 0) {
+            await pool.query(
+              `UPDATE keswan_laporan_penyakit SET jumlah_kasus = ?, kecamatan_id = ?, kecamatan_nama = ?, updated_at = NOW() WHERE ${pkCol} = ?`,
+              [numValue, finalKecCode, finalKecNama, existing[0].id_row]
+            );
+            if (existing.length > 1) {
+              for (let i = 1; i < existing.length; i++) {
+                await pool.query(`DELETE FROM keswan_laporan_penyakit WHERE ${pkCol} = ?`, [existing[i].id_row]);
+              }
+            }
+          } else {
+            await pool.query(
+              `INSERT INTO keswan_laporan_penyakit (tahun, bulan, puskeswan_id, kecamatan_id, kecamatan_nama, diagnosa_nama, kategori_penyakit, jumlah_kasus) 
+               VALUES (?, ?, ?, ?, ?, ?, 'Umum', ?)`,
+              [Number(tahunStr), cleanBulan, puskCode, finalKecCode, finalKecNama, diagNamaTarget, numValue]
+            );
+          }
         }
       } else {
         // Skema relasional (Offline local)
@@ -671,30 +688,44 @@ export async function PATCH(request: Request) {
         if (kecIdNum > 0) {
           const [rows]: any = await pool.query(
             `SELECT ${pkCol} as id_row FROM keswan_laporan_penyakit 
-             WHERE (tahun = ? OR tahun IS NULL) AND UPPER(bulan) = ? AND id_puskeswan = ? AND id_kecamatan = ? AND id_diagnosa = ? LIMIT 1`,
+             WHERE (tahun = ? OR tahun IS NULL) AND UPPER(bulan) = ? AND id_puskeswan = ? AND id_kecamatan = ? AND id_diagnosa = ?`,
             [Number(tahunStr), cleanBulan, idPuskeswan, kecIdNum, idDiagnosa]
           );
           existing = rows;
         } else {
           const [rows]: any = await pool.query(
             `SELECT ${pkCol} as id_row FROM keswan_laporan_penyakit 
-             WHERE (tahun = ? OR tahun IS NULL) AND UPPER(bulan) = ? AND id_puskeswan = ? AND (id_kecamatan IS NULL OR id_kecamatan = 0) AND id_diagnosa = ? LIMIT 1`,
-            [Number(tahunStr), cleanBulan, idPuskeswan, idDiagnosa]
+             WHERE (tahun = ? OR tahun IS NULL) AND UPPER(bulan) = ? AND id_puskeswan = ? 
+               AND (id_kecamatan = ? OR id_kecamatan IS NULL OR id_kecamatan = 0) AND id_diagnosa = ?`,
+            [Number(tahunStr), cleanBulan, idPuskeswan, finalKecIdNum, idDiagnosa]
           );
           existing = rows;
         }
 
-        if (existing && existing.length > 0) {
-          await pool.query(
-            `UPDATE keswan_laporan_penyakit SET jumlah_kasus = ?, updated_at = NOW() WHERE ${pkCol} = ?`,
-            [numValue, existing[0].id_row]
-          );
+        if (numValue <= 0) {
+          if (existing && existing.length > 0) {
+            for (const r of existing) {
+              await pool.query(`DELETE FROM keswan_laporan_penyakit WHERE ${pkCol} = ?`, [r.id_row]);
+            }
+          }
         } else {
-          await pool.query(
-            `INSERT INTO keswan_laporan_penyakit (tahun, bulan, id_puskeswan, id_kecamatan, id_diagnosa, kategori_penyakit, jumlah_kasus) 
-             VALUES (?, ?, ?, ?, ?, 'Umum', ?)`,
-            [Number(tahunStr), cleanBulan, idPuskeswan, kecIdNum > 0 ? kecIdNum : null, idDiagnosa, numValue]
-          );
+          if (existing && existing.length > 0) {
+            await pool.query(
+              `UPDATE keswan_laporan_penyakit SET jumlah_kasus = ?, id_kecamatan = ?, updated_at = NOW() WHERE ${pkCol} = ?`,
+              [numValue, finalKecIdNum, existing[0].id_row]
+            );
+            if (existing.length > 1) {
+              for (let i = 1; i < existing.length; i++) {
+                await pool.query(`DELETE FROM keswan_laporan_penyakit WHERE ${pkCol} = ?`, [existing[i].id_row]);
+              }
+            }
+          } else {
+            await pool.query(
+              `INSERT INTO keswan_laporan_penyakit (tahun, bulan, id_puskeswan, id_kecamatan, id_diagnosa, kategori_penyakit, jumlah_kasus) 
+               VALUES (?, ?, ?, ?, ?, 'Umum', ?)`,
+              [Number(tahunStr), cleanBulan, idPuskeswan, finalKecIdNum > 0 ? finalKecIdNum : null, idDiagnosa, numValue]
+            );
+          }
         }
       }
 
@@ -702,7 +733,7 @@ export async function PATCH(request: Request) {
       try {
         await pool.execute(
           `UPDATE laporan_puskeswan SET ${field} = ?, id_puskeswan = ? WHERE UPPER(bulan) = ? AND UPPER(puskeswan) = ?`,
-          [numValue, idPuskeswan, cleanBulan, cleanPusk]
+          [numValue <= 0 ? 0 : numValue, idPuskeswan, cleanBulan, cleanPusk]
         );
       } catch {}
 
@@ -711,7 +742,7 @@ export async function PATCH(request: Request) {
         submenu: 'puskeswan',
         tableName: 'keswan_laporan_penyakit',
         recordId: `${cleanBulan}-${cleanPusk}-${diagNamaTarget}-kec${kecIdNum}`,
-        action: 'UPDATE',
+        action: numValue <= 0 ? 'DELETE' : 'UPDATE',
         userName,
         details: {
           bulan: cleanBulan,
@@ -719,11 +750,18 @@ export async function PATCH(request: Request) {
           id_kecamatan: kecIdNum,
           diagnosa: diagNamaTarget,
           nilai_baru: numValue,
-          keterangan: `Pembaruan kasus ${diagNamaTarget} untuk ${cleanPusk} (Kecamatan ID: ${kecIdNum || 'Umum'}) (${cleanBulan} ${tahunStr})`,
+          keterangan: numValue <= 0
+            ? `Penghapusan kasus ${diagNamaTarget} dari ${cleanPusk} (${cleanBulan} ${tahunStr})`
+            : `Pembaruan kasus ${diagNamaTarget} untuk ${cleanPusk} (Kecamatan: ${finalKecNama}) (${cleanBulan} ${tahunStr})`,
         },
       });
 
-      return NextResponse.json({ success: true, message: 'Data diagnosis penyakit berhasil diperbarui.' });
+      return NextResponse.json({ 
+        success: true, 
+        message: numValue <= 0 
+          ? 'Data kasus penyakit berhasil dihapus.' 
+          : 'Data diagnosis penyakit berhasil diperbarui.' 
+      });
     }
 
     // ── KONDISI 2: JIKA YANG DIEDIT ADALAH INDIKATOR PELAYANAN ──

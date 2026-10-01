@@ -115,7 +115,7 @@ export default function BeritaAcaraPrintModal({ item, onClose }: BeritaAcaraPrin
                 </span>
               ) : (
                 <span className="inline-block mt-1 px-3 py-0.5 rounded-full text-xs font-sans font-medium bg-blue-50 text-blue-900 border border-blue-200">
-                  DISTRIBUSI DROPING TERENCANA
+                  DISTRIBUSI DROPPING TERENCANA
                 </span>
               )}
             </div>

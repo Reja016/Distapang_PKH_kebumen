@@ -225,7 +225,7 @@ export default function StokGudangKeswanPage() {
             Stok Gudang Obat &amp; Alat Keswan
           </h1>
           <p className="text-xs sm:text-sm text-slate-500 mt-0.5">
-            Pengelolaan inventaris farmasi dinas, alokasi droping 8 puskeswan, Berita Acara (Kop Dinas), dan rekam apotek
+            Pengelolaan inventaris farmasi dinas, alokasi droping 8 puskeswan, Berita Acara, dan rekam apotek
           </p>
         </div>
 
@@ -250,7 +250,7 @@ export default function StokGudangKeswanPage() {
                 className="flex items-center gap-1.5 px-3.5 py-2 bg-slate-100 dark:bg-slate-800 hover:bg-blue-50 hover:text-blue-600 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 font-semibold rounded-xl text-xs transition-all cursor-pointer border border-slate-200 dark:border-slate-700"
               >
                 <Plus className="w-3.5 h-3.5" />
-                + Master Barang
+                Barang
               </button>
 
               <button
@@ -258,7 +258,7 @@ export default function StokGudangKeswanPage() {
                 className="flex items-center gap-1.5 px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl text-xs shadow-md transition-all cursor-pointer"
               >
                 <ArrowDownLeft className="w-3.5 h-3.5" />
-                + Dropping Masuk
+                Dropping Masuk
               </button>
             </>
           )}
@@ -276,7 +276,7 @@ export default function StokGudangKeswanPage() {
           }`}
         >
           <Layers className="w-4 h-4" />
-          Dashboard &amp; Stok Dinas (Ledger Tunggal)
+          Dashboard &amp; Stok Dinas
         </button>
 
         <button

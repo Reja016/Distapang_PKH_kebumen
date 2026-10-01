@@ -478,7 +478,7 @@ export function ModalDroppingDinas({ isOpen, onClose, onSuccess, masterBarang }:
   );
 }
 
-// ── 3. MODAL BUAT DISTRIBUSI KE PUSKESWAN (Droping Terencana / Amprahan Insidental) ──
+// ── 3. MODAL BUAT DISTRIBUSI KE PUSKESWAN (Dropping Terencana / Amprahan Insidental) ──
 interface ModalDistribusiProps {
   isOpen: boolean;
   onClose: () => void;
@@ -677,7 +677,7 @@ export function ModalBuatDistribusi({
                 onChange={(e: any) => setJenisDistribusi(e.target.value)}
                 className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none"
               >
-                <option value="DROPING_TERENCANA">Droping Terencana (Rutin)</option>
+                <option value="DROPING_TERENCANA">Dropping Terencana (Rutin)</option>
                 <option value="AMPRAHAN_INSIDENTAL">Amprahan Insidental (Mendesak)</option>
               </select>
             </div>
