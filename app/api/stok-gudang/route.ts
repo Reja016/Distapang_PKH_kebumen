@@ -44,12 +44,20 @@ async function ensureGudangTables() {
 
   // Sinkronisasi otomatis data eksisting antara merk <-> nama_barang, jenis_barang <-> kategori, satuan <-> satuan_kemasan
   try {
-    await pool.execute("UPDATE barang SET nama_barang = merk WHERE (nama_barang IS NULL OR nama_barang = '') AND merk IS NOT NULL AND merk != ''");
-    await pool.execute("UPDATE barang SET merk = nama_barang WHERE (merk IS NULL OR merk = '') AND nama_barang IS NOT NULL AND nama_barang != ''");
-    await pool.execute("UPDATE barang SET kategori = jenis_barang WHERE (kategori IS NULL OR kategori = '') AND jenis_barang IS NOT NULL");
-    await pool.execute("UPDATE barang SET jenis_barang = kategori WHERE (jenis_barang IS NULL) AND kategori IN ('Vaksin','Obat','Straw','Alat')");
-    await pool.execute("UPDATE barang SET satuan_kemasan = satuan WHERE (satuan_kemasan IS NULL OR satuan_kemasan = '') AND satuan IS NOT NULL");
-    await pool.execute("UPDATE barang SET satuan = satuan_kemasan WHERE (satuan IS NULL OR satuan = '') AND satuan_kemasan IS NOT NULL");
+    const [colsRows]: any = await pool.query("SHOW COLUMNS FROM barang");
+    const cols = (colsRows || []).map((c: any) => c.Field);
+    if (cols.includes('merk') && cols.includes('nama_barang')) {
+      try { await pool.execute("UPDATE barang SET nama_barang = merk WHERE (nama_barang IS NULL OR nama_barang = '') AND merk IS NOT NULL AND merk != ''"); } catch {}
+      try { await pool.execute("UPDATE barang SET merk = nama_barang WHERE (merk IS NULL OR merk = '') AND nama_barang IS NOT NULL AND nama_barang != ''"); } catch {}
+    }
+    if (cols.includes('jenis_barang') && cols.includes('kategori')) {
+      try { await pool.execute("UPDATE barang SET kategori = jenis_barang WHERE (kategori IS NULL OR kategori = '') AND jenis_barang IS NOT NULL"); } catch {}
+      try { await pool.execute("UPDATE barang SET jenis_barang = kategori WHERE (jenis_barang IS NULL) AND kategori IN ('Vaksin','Obat','Straw','Alat')"); } catch {}
+    }
+    if (cols.includes('satuan') && cols.includes('satuan_kemasan')) {
+      try { await pool.execute("UPDATE barang SET satuan_kemasan = satuan WHERE (satuan_kemasan IS NULL OR satuan_kemasan = '') AND satuan IS NOT NULL"); } catch {}
+      try { await pool.execute("UPDATE barang SET satuan = satuan_kemasan WHERE (satuan IS NULL OR satuan = '') AND satuan_kemasan IS NOT NULL"); } catch {}
+    }
   } catch {}
 
   // 2. Pastikan tabel dropping_dinas ada & memiliki kolom batch, tgl expired, sumber anggaran
@@ -602,7 +610,7 @@ export async function POST(request: Request) {
         [id_barang]
       );
       const [barangRow]: any = await pool.query(
-        `SELECT COALESCE(nama_barang, merk, 'Barang') as nama_barang, min_stok_dinas, satuan_kemasan FROM barang WHERE id_barang = ?`,
+        `SELECT * FROM barang WHERE id_barang = ?`,
         [id_barang]
       );
 
@@ -610,7 +618,7 @@ export async function POST(request: Request) {
       const totalKeluar = Number(sumKeluar?.[0]?.total_keluar || 0);
       const saldoDinasSaatIni = Math.max(0, totalMasuk - totalKeluar);
       const minBuffer = Number(barangRow?.[0]?.min_stok_dinas ?? 10);
-      const itemNama = barangRow?.[0]?.nama_barang || nama_barang;
+      const itemNama = barangRow?.[0]?.nama_barang || barangRow?.[0]?.merk || nama_barang || 'Barang';
 
       if (saldoDinasSaatIni < numJumlah) {
         return NextResponse.json({

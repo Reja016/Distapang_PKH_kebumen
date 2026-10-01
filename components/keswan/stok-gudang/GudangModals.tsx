@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import {
   X,
   Plus,
+  Minus,
   AlertTriangle,
   Building2,
   Pill,
@@ -162,11 +163,12 @@ export function ModalBarang({ isOpen, onClose, onSuccess, initialData }: ModalBa
             </label>
             <input
               type="number"
+              inputMode="numeric"
               min="0"
               required
               value={minStokDinas}
               onChange={(e) => setMinStokDinas(Number(e.target.value))}
-              className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none focus:ring-2 focus:ring-blue-500 font-bold"
+              className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none focus:ring-2 focus:ring-blue-500 font-bold [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
             />
             <p className="text-[11px] text-slate-400 mt-1">
               Bila stok dinas tersisa mencapai angka ini, tombol distribusi biasa terkunci dan hanya dapat disalurkan melalui jalur darurat.
@@ -229,8 +231,8 @@ export function ModalDroppingDinas({ isOpen, onClose, onSuccess, masterBarang }:
   const [bulan, setBulan] = useState('Juli');
   const [nomorBatch, setNomorBatch] = useState('');
   const [tanggalKadaluarsa, setTanggalKadaluarsa] = useState('');
-  const [jumlah, setJumlah] = useState<number>(100);
-  const [hargaSatuan, setHargaSatuan] = useState<number>(0);
+  const [jumlah, setJumlah] = useState<number | ''>(100);
+  const [hargaSatuanDisplay, setHargaSatuanDisplay] = useState<string>('');
   const [yangMenerima, setYangMenerima] = useState('');
   const [nipPenerima, setNipPenerima] = useState('');
   const [yangMenyerahkan, setYangMenyerahkan] = useState('');
@@ -247,10 +249,15 @@ export function ModalDroppingDinas({ isOpen, onClose, onSuccess, masterBarang }:
 
   if (!isOpen) return null;
 
+  const selectedB = masterBarang.find((b) => b.id_barang === idBarang);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!idBarang || jumlah <= 0) {
-      setErrorMsg('Pilih obat dan tentukan jumlah yang masuk.');
+    const numJumlah = typeof jumlah === 'number' ? jumlah : parseInt(String(jumlah), 10);
+    const numHarga = hargaSatuanDisplay ? parseInt(hargaSatuanDisplay.replace(/\D/g, ''), 10) : 0;
+
+    if (!idBarang || !numJumlah || numJumlah <= 0) {
+      setErrorMsg('Pilih obat dan tentukan jumlah yang masuk (minimal 1).');
       return;
     }
 
@@ -271,8 +278,8 @@ export function ModalDroppingDinas({ isOpen, onClose, onSuccess, masterBarang }:
           tanggal_kadaluarsa: tanggalKadaluarsa || null,
           sumber_anggaran: sumberAnggaran,
           satuan_kemasan: selectedB?.satuan_kemasan || 'Botol',
-          jumlah,
-          harga_satuan: hargaSatuan,
+          jumlah: numJumlah,
+          harga_satuan: numHarga,
           yang_menerima: yangMenerima,
           nip_penerima: nipPenerima,
           yang_menyerahkan: yangMenyerahkan,
@@ -386,27 +393,127 @@ export function ModalDroppingDinas({ isOpen, onClose, onSuccess, masterBarang }:
           </div>
 
           {/* Jumlah & Harga */}
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
             <div>
-              <label className="block font-semibold mb-1">Jumlah Masuk (Volume)</label>
-              <input
-                type="number"
-                min="1"
-                required
-                value={jumlah}
-                onChange={(e) => setJumlah(Number(e.target.value))}
-                className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none font-bold text-emerald-600 dark:text-emerald-400"
-              />
+              <div className="flex items-center justify-between mb-1">
+                <label className="block font-semibold">Jumlah Masuk (Volume)</label>
+                {selectedB?.satuan_kemasan && (
+                  <span className="text-[11px] text-slate-400 font-medium">
+                    Satuan: {selectedB.satuan_kemasan}
+                  </span>
+                )}
+              </div>
+              <div className="flex items-center">
+                <button
+                  type="button"
+                  onClick={() => {
+                    const cur = typeof jumlah === 'number' ? jumlah : parseInt(String(jumlah) || '0', 10);
+                    if (cur > 1) setJumlah(cur - 1);
+                  }}
+                  className="h-10 px-3.5 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 rounded-l-xl font-bold border border-r-0 border-slate-200 dark:border-slate-700 select-none active:scale-95 transition-all flex items-center justify-center cursor-pointer"
+                  title="Kurang 1"
+                >
+                  <Minus className="w-4 h-4" />
+                </button>
+                <input
+                  type="number"
+                  inputMode="numeric"
+                  min="1"
+                  required
+                  placeholder="0"
+                  value={jumlah === '' ? '' : jumlah}
+                  onChange={(e) => {
+                    const val = e.target.value;
+                    setJumlah(val === '' ? '' : Math.max(0, parseInt(val, 10) || 0));
+                  }}
+                  className="w-full h-10 px-3 py-2 bg-slate-50 dark:bg-slate-800 border-y border-slate-200 dark:border-slate-700 outline-none font-bold text-center text-emerald-600 dark:text-emerald-400 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none text-base"
+                />
+                <button
+                  type="button"
+                  onClick={() => {
+                    const cur = typeof jumlah === 'number' ? jumlah : parseInt(String(jumlah) || '0', 10);
+                    setJumlah(cur + 1);
+                  }}
+                  className="h-10 px-3.5 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 rounded-r-xl font-bold border border-l-0 border-slate-200 dark:border-slate-700 select-none active:scale-95 transition-all flex items-center justify-center cursor-pointer"
+                  title="Tambah 1"
+                >
+                  <Plus className="w-4 h-4" />
+                </button>
+              </div>
+              {/* Quick helper chips for mobile */}
+              <div className="flex items-center gap-1.5 mt-1.5">
+                {[10, 50, 100].map((add) => (
+                  <button
+                    key={add}
+                    type="button"
+                    onClick={() => {
+                      const cur = typeof jumlah === 'number' ? jumlah : parseInt(String(jumlah) || '0', 10);
+                      setJumlah(cur + add);
+                    }}
+                    className="px-2 py-0.5 text-[10px] font-bold bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 rounded-md border border-emerald-200 dark:border-emerald-800 hover:bg-emerald-100 transition-colors cursor-pointer"
+                  >
+                    +{add}
+                  </button>
+                ))}
+                <button
+                  type="button"
+                  onClick={() => setJumlah('')}
+                  className="px-2 py-0.5 text-[10px] font-medium text-slate-400 hover:text-rose-500 transition-colors ml-auto cursor-pointer"
+                >
+                  Kosongkan
+                </button>
+              </div>
             </div>
+
             <div>
-              <label className="block font-semibold mb-1">Harga Satuan (Rp)</label>
-              <input
-                type="number"
-                min="0"
-                value={hargaSatuan}
-                onChange={(e) => setHargaSatuan(Number(e.target.value))}
-                className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none"
-              />
+              <div className="flex items-center justify-between mb-1">
+                <label className="block font-semibold">Harga Satuan (Rp)</label>
+                <span className="text-[11px] text-slate-400 font-medium">Opsional</span>
+              </div>
+              <div className="relative">
+                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                  <span className="text-xs font-bold text-slate-400">Rp</span>
+                </div>
+                <input
+                  type="text"
+                  inputMode="numeric"
+                  placeholder="0"
+                  value={hargaSatuanDisplay}
+                  onChange={(e) => {
+                    const raw = e.target.value.replace(/\D/g, '');
+                    setHargaSatuanDisplay(raw ? Number(raw).toLocaleString('id-ID') : '');
+                  }}
+                  className="w-full h-10 pl-9 pr-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none font-semibold text-slate-800 dark:text-slate-100 text-sm focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500"
+                />
+              </div>
+              <div className="flex items-center gap-1.5 mt-1.5">
+                {[
+                  { label: '10 rb', val: 10000 },
+                  { label: '50 rb', val: 50000 },
+                  { label: '100 rb', val: 100000 },
+                ].map((item) => (
+                  <button
+                    key={item.val}
+                    type="button"
+                    onClick={() => {
+                      const cur = hargaSatuanDisplay ? parseInt(hargaSatuanDisplay.replace(/\D/g, ''), 10) : 0;
+                      setHargaSatuanDisplay(Number(cur + item.val).toLocaleString('id-ID'));
+                    }}
+                    className="px-2 py-0.5 text-[10px] font-bold bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 rounded-md border border-slate-200 dark:border-slate-700 hover:bg-slate-200 transition-colors cursor-pointer"
+                  >
+                    +{item.label}
+                  </button>
+                ))}
+                {hargaSatuanDisplay && (
+                  <button
+                    type="button"
+                    onClick={() => setHargaSatuanDisplay('')}
+                    className="px-2 py-0.5 text-[10px] font-medium text-slate-400 hover:text-rose-500 transition-colors ml-auto cursor-pointer"
+                  >
+                    Reset
+                  </button>
+                )}
+              </div>
             </div>
           </div>
 
@@ -685,15 +792,42 @@ export function ModalBuatDistribusi({
               <label className="block font-semibold mb-1">
                 Jumlah Distribusi ({selectedLedger?.satuan_kemasan || 'unit'})
               </label>
-              <input
-                type="number"
-                min="1"
-                max={maxAvailable}
-                required
-                value={jumlah}
-                onChange={(e) => setJumlah(Number(e.target.value))}
-                className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none font-black text-blue-600 dark:text-blue-400"
-              />
+              <div className="flex items-center">
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (jumlah > 1) setJumlah(jumlah - 1);
+                  }}
+                  className="h-10 px-3 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 rounded-l-xl font-bold border border-r-0 border-slate-200 dark:border-slate-700 select-none active:scale-95 transition-all flex items-center justify-center cursor-pointer"
+                  title="Kurang 1"
+                >
+                  <Minus className="w-4 h-4" />
+                </button>
+                <input
+                  type="number"
+                  inputMode="numeric"
+                  min="1"
+                  max={maxAvailable}
+                  required
+                  placeholder="0"
+                  value={jumlah === 0 ? '' : jumlah}
+                  onChange={(e) => {
+                    const val = e.target.value;
+                    setJumlah(val === '' ? 0 : Math.min(maxAvailable, Math.max(0, parseInt(val, 10) || 0)));
+                  }}
+                  className="w-full h-10 px-3 py-2 bg-slate-50 dark:bg-slate-800 border-y border-slate-200 dark:border-slate-700 outline-none font-black text-center text-blue-600 dark:text-blue-400 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none text-base"
+                />
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (jumlah < maxAvailable) setJumlah(jumlah + 1);
+                  }}
+                  className="h-10 px-3 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 rounded-r-xl font-bold border border-l-0 border-slate-200 dark:border-slate-700 select-none active:scale-95 transition-all flex items-center justify-center cursor-pointer"
+                  title="Tambah 1"
+                >
+                  <Plus className="w-4 h-4" />
+                </button>
+              </div>
             </div>
           </div>
 
@@ -961,15 +1095,42 @@ export function ModalCatatPenggunaan({
                   <label className="block font-semibold mb-1">
                     Jumlah ({currentSelectedStock?.satuan_kemasan || 'unit'})
                   </label>
-                  <input
-                    type="number"
-                    min="1"
-                    max={sisaStok}
-                    required
-                    value={jumlahPenggunaan}
-                    onChange={(e) => setJumlahPenggunaan(Number(e.target.value))}
-                    className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none font-black text-rose-600 dark:text-rose-400 text-sm"
-                  />
+                  <div className="flex items-center">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        if (jumlahPenggunaan > 1) setJumlahPenggunaan(jumlahPenggunaan - 1);
+                      }}
+                      className="h-10 px-3 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 rounded-l-xl font-bold border border-r-0 border-slate-200 dark:border-slate-700 select-none active:scale-95 transition-all flex items-center justify-center cursor-pointer"
+                      title="Kurang 1"
+                    >
+                      <Minus className="w-4 h-4" />
+                    </button>
+                    <input
+                      type="number"
+                      inputMode="numeric"
+                      min="1"
+                      max={sisaStok}
+                      required
+                      placeholder="0"
+                      value={jumlahPenggunaan === 0 ? '' : jumlahPenggunaan}
+                      onChange={(e) => {
+                        const val = e.target.value;
+                        setJumlahPenggunaan(val === '' ? 0 : Math.min(sisaStok, Math.max(0, parseInt(val, 10) || 0)));
+                      }}
+                      className="w-full h-10 px-3 py-2 bg-slate-50 dark:bg-slate-800 border-y border-slate-200 dark:border-slate-700 outline-none font-black text-center text-rose-600 dark:text-rose-400 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none text-base"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => {
+                        if (jumlahPenggunaan < sisaStok) setJumlahPenggunaan(jumlahPenggunaan + 1);
+                      }}
+                      className="h-10 px-3 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 rounded-r-xl font-bold border border-l-0 border-slate-200 dark:border-slate-700 select-none active:scale-95 transition-all flex items-center justify-center cursor-pointer"
+                      title="Tambah 1"
+                    >
+                      <Plus className="w-4 h-4" />
+                    </button>
+                  </div>
                 </div>
               </div>
 
