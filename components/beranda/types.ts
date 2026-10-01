@@ -16,6 +16,7 @@ import {
   Wheat,
   Store,
   Truck,
+  Boxes,
 } from 'lucide-react';
 
 export interface SubmenuItem {
@@ -129,7 +130,7 @@ export const MODULE_NAV_DATA: ModuleNavGroup[] = [
     id: 'keswan',
     name: 'Tim Kerja Keswan',
     shortDesc: 'Kesehatan Hewan',
-    badge: '4 Menu',
+    badge: '5 Menu',
     color: {
       accent: 'bg-blue-500',
       lightBadge: 'bg-blue-50 text-blue-700 border-blue-200',
@@ -170,6 +171,13 @@ export const MODULE_NAV_DATA: ModuleNavGroup[] = [
         href: '/keswan/puskeswan',
         icon: Building2,
         desc: 'Pelayanan Pasien & Puskeswan',
+      },
+      {
+        id: 'stok-gudang',
+        name: 'Stok Gudang Keswan',
+        href: '/keswan/stok-gudang',
+        icon: Boxes,
+        desc: 'Gudang Obat, Alat, Droping & BA',
       },
     ],
   },

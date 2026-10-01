@@ -39,6 +39,7 @@ export const DEFAULT_FULL_PERMISSIONS: UserPermissions = {
       'lalu-lintas-ternak': { enabled: true, mode: 'edit' },
       'laporan-penyakit': { enabled: true, mode: 'edit' },
       'puskeswan': { enabled: true, mode: 'edit' },
+      'stok-gudang': { enabled: true, mode: 'edit' },
     },
   },
   kesmavet: {
@@ -83,6 +84,7 @@ export const DEFAULT_VIEW_ONLY_PERMISSIONS: UserPermissions = {
       'lalu-lintas-ternak': { enabled: true, mode: 'view' },
       'laporan-penyakit': { enabled: true, mode: 'view' },
       'puskeswan': { enabled: true, mode: 'view' },
+      'stok-gudang': { enabled: true, mode: 'view' },
     },
   },
   kesmavet: {
