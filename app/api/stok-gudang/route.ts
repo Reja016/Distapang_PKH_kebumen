@@ -212,49 +212,41 @@ export async function GET(request: Request) {
     const view = searchParams.get('view') || 'all';
     const idPuskeswan = searchParams.get('id_puskeswan');
 
-    // 1. Master Barang (Adaptif nama_barang vs merk)
-    let orderCol = 'b.id_barang';
-    try {
-      const [desc]: any = await pool.query('DESCRIBE barang');
-      const fields = (desc || []).map((f: any) => f.Field);
-      if (fields.includes('nama_barang')) {
-        orderCol = 'b.nama_barang';
-      } else if (fields.includes('merk')) {
-        orderCol = 'b.merk';
-      }
-    } catch {}
-
-    const [barangs]: any = await pool.query(`
-      SELECT b.*, 
-        COALESCE(b.nama_barang, b.merk, 'Barang') as nama_barang,
-        COALESCE(b.satuan_kemasan, b.satuan, 'Botol') as satuan_kemasan,
-        COALESCE(b.kategori, b.jenis_barang, 'Obat') as kategori,
-        COALESCE(b.min_stok_dinas, 10) as min_stok_dinas
-      FROM barang b
-      ORDER BY ${orderCol} ASC
-    `);
+    // 1. Master Barang (Kebal terhadap skema lama vs baru)
+    const [barangRows]: any = await pool.query(`SELECT * FROM barang ORDER BY id_barang ASC`);
+    const barangMap: Record<number, any> = {};
+    const barangs = (barangRows || []).map((b: any) => {
+      const item = {
+        ...b,
+        id_barang: Number(b.id_barang),
+        nama_barang: b.nama_barang || b.merk || 'Barang',
+        kategori: b.kategori || b.jenis_barang || 'Obat',
+        satuan_kemasan: b.satuan_kemasan || b.satuan || 'Botol',
+        min_stok_dinas: Number(b.min_stok_dinas ?? 10),
+      };
+      barangMap[item.id_barang] = item;
+      return item;
+    }).sort((a: any, b: any) => (a.nama_barang || '').localeCompare(b.nama_barang || ''));
 
     // 2. Dropping Masuk ke Dinas
-    const [droppings]: any = await pool.query(`
-      SELECT d.*, 
-        COALESCE(b.nama_barang, b.merk, 'Barang') as nama_barang, 
-        COALESCE(d.satuan_kemasan, b.satuan_kemasan, b.satuan, 'Botol') as satuan_kemasan
-      FROM dropping_dinas d
-      LEFT JOIN barang b ON d.id_barang = b.id_barang
-      ORDER BY d.id_dropping_dinas DESC
-    `);
+    const [droppingRows]: any = await pool.query(`SELECT * FROM dropping_dinas ORDER BY id_dropping_dinas DESC`);
+    const droppings = (droppingRows || []).map((d: any) => {
+      const b = barangMap[Number(d.id_barang)];
+      return {
+        ...d,
+        nama_barang: d.nama_barang || b?.nama_barang || 'Barang',
+        satuan_kemasan: d.satuan_kemasan || b?.satuan_kemasan || 'Botol',
+      };
+    });
 
     // 3. Distribusi / Berita Acara
-    let distQuery = `
-      SELECT dist.* 
-      FROM distribusi_obat dist
-    `;
+    let distQuery = `SELECT * FROM distribusi_obat`;
     const distParams: any[] = [];
     if (idPuskeswan && idPuskeswan !== 'all' && Number(idPuskeswan) > 0) {
-      distQuery += ` WHERE dist.id_puskeswan = ? `;
+      distQuery += ` WHERE id_puskeswan = ?`;
       distParams.push(Number(idPuskeswan));
     }
-    distQuery += ` ORDER BY dist.tanggal_ba DESC, dist.id_distribusi DESC `;
+    distQuery += ` ORDER BY id_distribusi DESC`;
     const [distribusi]: any = await pool.query(distQuery, distParams);
 
     // 4. Hitung Saldo Stok Dinas & Batch Ledger Tunggal
@@ -341,36 +333,54 @@ export async function GET(request: Request) {
       };
     });
 
-    // 5. Stok per Puskeswan (Adaptif id_stock_keswan vs id_stok_puskeswan dan nama_puskeswan)
-    let puskStockQuery = `
-      SELECT sp.*, 
-        COALESCE(sp.id_stok_puskeswan, sp.id_stock_keswan) as id_stok_puskeswan,
-        COALESCE(sp.nama_puskeswan, CASE sp.id_puskeswan WHEN 1 THEN 'Puskeswan Mirit' WHEN 2 THEN 'Puskeswan Klirong' WHEN 3 THEN 'Puskeswan Gombong' WHEN 4 THEN 'Puskeswan Buayan' WHEN 5 THEN 'Puskeswan Alian' WHEN 6 THEN 'Puskeswan Prembun' WHEN 7 THEN 'Puskeswan Kebumen' WHEN 8 THEN 'Puskeswan Karanganyar' ELSE CONCAT('Puskeswan ', sp.id_puskeswan) END) as nama_puskeswan,
-        COALESCE(sp.nama_barang, b.nama_barang, b.merk, 'Barang') as nama_barang,
-        COALESCE(sp.satuan_kemasan, sp.satuan, b.satuan_kemasan, b.satuan, 'Botol') as satuan_kemasan,
-        COALESCE(sp.sisa_stok, sp.jumlah_stok, 0) as sisa_stok
-      FROM stok_puskeswan sp
-      LEFT JOIN barang b ON sp.id_barang = b.id_barang
-    `;
+    // 5. Stok per Puskeswan (Aman dari perbedaan nama kolom antar versi DB)
+    const PUSKESWAN_NAMES: Record<number, string> = {
+      1: 'Puskeswan Mirit',
+      2: 'Puskeswan Klirong',
+      3: 'Puskeswan Gombong',
+      4: 'Puskeswan Buayan',
+      5: 'Puskeswan Alian',
+      6: 'Puskeswan Prembun',
+      7: 'Puskeswan Kebumen',
+      8: 'Puskeswan Karanganyar',
+    };
+
+    let puskStockQuery = `SELECT * FROM stok_puskeswan`;
     const puskStockParams: any[] = [];
     if (idPuskeswan && idPuskeswan !== 'all' && Number(idPuskeswan) > 0) {
-      puskStockQuery += ` WHERE sp.id_puskeswan = ? `;
+      puskStockQuery += ` WHERE id_puskeswan = ?`;
       puskStockParams.push(Number(idPuskeswan));
     }
-    puskStockQuery += ` ORDER BY sp.id_puskeswan ASC, sp.id_barang ASC `;
-    const [stokPuskeswan]: any = await pool.query(puskStockQuery, puskStockParams);
+    puskStockQuery += ` ORDER BY id_puskeswan ASC`;
+    const [stokPuskRaw]: any = await pool.query(puskStockQuery, puskStockParams);
+
+    const stokPuskeswan = (stokPuskRaw || []).map((sp: any) => {
+      const b = barangMap[Number(sp.id_barang)];
+      const puskId = Number(sp.id_puskeswan);
+      return {
+        ...sp,
+        id_stok_puskeswan: sp.id_stok_puskeswan ?? sp.id_stock_keswan ?? sp.id,
+        id_puskeswan: puskId,
+        nama_puskeswan: sp.nama_puskeswan || PUSKESWAN_NAMES[puskId] || `Puskeswan ${puskId}`,
+        nama_barang: sp.nama_barang || b?.nama_barang || 'Barang',
+        satuan_kemasan: sp.satuan_kemasan || sp.satuan || b?.satuan_kemasan || 'Botol',
+        stok_masuk: Number(sp.stok_masuk ?? sp.jumlah_stok ?? 0),
+        stok_keluar: Number(sp.stok_keluar ?? 0),
+        sisa_stok: Number(sp.sisa_stok ?? sp.jumlah_stok ?? 0),
+      };
+    }).sort((a: any, b: any) => {
+      if (a.id_puskeswan !== b.id_puskeswan) return a.id_puskeswan - b.id_puskeswan;
+      return (a.nama_barang || '').localeCompare(b.nama_barang || '');
+    });
 
     // 6. Laporan Penggunaan Obat Puskeswan (7 Kolom)
-    let pengQuery = `
-      SELECT p.* 
-      FROM penggunaan_obat_puskeswan p
-    `;
+    let pengQuery = `SELECT * FROM penggunaan_obat_puskeswan`;
     const pengParams: any[] = [];
     if (idPuskeswan && idPuskeswan !== 'all' && Number(idPuskeswan) > 0) {
-      pengQuery += ` WHERE p.id_puskeswan = ? `;
+      pengQuery += ` WHERE id_puskeswan = ?`;
       pengParams.push(Number(idPuskeswan));
     }
-    pengQuery += ` ORDER BY p.tanggal DESC, p.id_penggunaan DESC `;
+    pengQuery += ` ORDER BY id_penggunaan DESC`;
     const [penggunaan]: any = await pool.query(pengQuery, pengParams);
 
     return NextResponse.json(
