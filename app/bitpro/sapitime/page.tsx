@@ -88,17 +88,26 @@ export default function SapiTimePage() {
   }, []);
 
   // 2. Fungsi Eksekusi API ke MySQL
-  const executeApi = async (action: string, payload: any, historyObj?: any) => {
+  const executeApi = async (action: string, payload: any, historyObj?: any): Promise<boolean> => {
     try {
-      await fetch('/api/sapitime', {
+      const res = await fetch('/api/sapitime', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ action, payload, history: historyObj }),
       });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok || data.success === false) {
+        console.error('API Error:', data.error || res.statusText);
+        alert('Gagal menyimpan ke database: ' + (data.error || 'Terjadi kesalahan sistem'));
+        return false;
+      }
       fetchData();
       window.dispatchEvent(new Event('cattleDataUpdated'));
-    } catch (e) {
+      return true;
+    } catch (e: any) {
       console.error(e);
+      alert('Koneksi terputus atau gagal menghubungi server: ' + (e.message || e));
+      return false;
     }
   };
 
@@ -108,7 +117,11 @@ export default function SapiTimePage() {
       alert('Anda tidak memiliki izin untuk menambah data sapi.');
       return;
     }
-    const newId = `ST${String(cattleList.length + 1).padStart(3, '0')}`;
+    const existingNums = cattleList
+      .map((c) => parseInt(String(c.id).replace(/\D/g, ''), 10))
+      .filter((n) => !isNaN(n));
+    const maxNum = existingNums.length > 0 ? Math.max(0, ...existingNums) : 0;
+    const newId = `ST${String(maxNum + 1).padStart(3, '0')}`;
     const newCattle = { ...formData, id: newId };
     const historyObj = {
       type: 'cattle_added',
@@ -123,7 +136,7 @@ export default function SapiTimePage() {
       const pkbDate = new Date(formData.pregnancyDate);
       pkbDate.setDate(pkbDate.getDate() + 90);
       const initialIb = {
-        id: Date.now(),
+        id: String(Date.now()),
         cattle_id: newId,
         date: formData.pregnancyDate,
         time: '08:00',
@@ -142,9 +155,9 @@ export default function SapiTimePage() {
     setCattleList([...cattleList, { ...newCattle, inseminations: initialInseminations }]);
     setShowAddModal(false);
     setFormData({ status: 'Estrus', cycleLength: 21, kecamatan: '', desa: '', ownerName: '' });
-    await executeApi('add_cattle', newCattle, historyObj);
+    const ok = await executeApi('add_cattle', newCattle, historyObj);
 
-    if (initialInseminations.length > 0) {
+    if (ok && initialInseminations.length > 0) {
       await executeApi('add_ib', initialInseminations[0]);
     }
   };
