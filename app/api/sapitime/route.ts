@@ -79,6 +79,11 @@ async function ensureSapitimeColumns() {
     if (idxNames.includes('id_user')) {
       try { await pool.execute('ALTER TABLE sapitime_ib DROP INDEX id_user'); } catch {}
     }
+
+    // 7. Hapus FK penghambat di sapitime_history jika ada
+    try {
+      await pool.execute('ALTER TABLE sapitime_history DROP FOREIGN KEY fk_history_ib');
+    } catch {}
   } catch (e) {
     console.error('ensureSapitimeColumns error', e);
   }
@@ -89,7 +94,11 @@ export async function GET() {
     await ensureSapitimeColumns();
     const [cattle] = await pool.query('SELECT * FROM sapitime_master ORDER BY created_at DESC');
     const [ibs] = await pool.query('SELECT * FROM sapitime_ib ORDER BY date ASC, id ASC');
-    const [history] = await pool.query('SELECT * FROM sapitime_history ORDER BY date DESC LIMIT 100');
+    const [historyRows]: any = await pool.query('SELECT * FROM sapitime_history ORDER BY date DESC LIMIT 100');
+    const history = (historyRows || []).map((h: any) => ({
+      ...h,
+      cattleId: h.cattle_id || h.cattleId,
+    }));
 
     // Kelompokkan IB per sapi untuk menentukan urutan (ke-1, ke-2, dst) dan kalkulasi otomatis
     const ibsByCattle: Record<string, any[]> = {};
@@ -169,10 +178,25 @@ export async function POST(req: Request) {
     
     // 1. Simpan Riwayat / History Aktivitas
     if (history) {
-       await pool.query(
-         'INSERT INTO sapitime_history (type, cattle, cattleId, description, icon) VALUES (?, ?, ?, ?, ?)', 
-         [history.type, history.cattle, history.cattleId || '', history.description, history.icon]
-       );
+      try {
+        const [hCols]: any = await pool.query('SHOW COLUMNS FROM sapitime_history');
+        const hColNames = (hCols || []).map((c: any) => c.Field);
+        const cattleCol = hColNames.includes('cattle_id') ? 'cattle_id' : hColNames.includes('cattleId') ? 'cattleId' : null;
+        
+        if (cattleCol) {
+          await pool.query(
+            `INSERT INTO sapitime_history (type, cattle, \`${cattleCol}\`, description, icon) VALUES (?, ?, ?, ?, ?)`, 
+            [history.type, history.cattle, history.cattleId || history.cattle_id || '', history.description, history.icon]
+          );
+        } else {
+          await pool.query(
+            'INSERT INTO sapitime_history (type, cattle, description, icon) VALUES (?, ?, ?, ?)', 
+            [history.type, history.cattle, history.description, history.icon]
+          );
+        }
+      } catch (errHistory) {
+        console.warn('Gagal mencatat history sapitime:', errHistory);
+      }
     }
 
     // Helper for activity logs
