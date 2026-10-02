@@ -10,26 +10,87 @@ const formatDate = (date: any) => {
   return d.toISOString().split('T')[0];
 };
 
+// Helper memastikan kolom status_keberhasilan dan mode_keberhasilan ada di MySQL
+async function ensureSapitimeColumns() {
+  try {
+    const [colsRows]: any = await pool.query('SHOW COLUMNS FROM sapitime_ib');
+    const cols = (colsRows || []).map((c: any) => c.Field);
+    if (!cols.includes('status_keberhasilan')) {
+      try {
+        await pool.execute("ALTER TABLE sapitime_ib ADD COLUMN status_keberhasilan VARCHAR(50) DEFAULT 'Menunggu PKB'");
+      } catch {}
+    }
+    if (!cols.includes('mode_keberhasilan')) {
+      try {
+        await pool.execute("ALTER TABLE sapitime_ib ADD COLUMN mode_keberhasilan VARCHAR(20) DEFAULT 'sistem'");
+      } catch {}
+    }
+  } catch (e) {
+    console.error('ensureSapitimeColumns error', e);
+  }
+}
+
 export async function GET() {
   try {
+    await ensureSapitimeColumns();
     const [cattle] = await pool.query('SELECT * FROM sapitime_master ORDER BY created_at DESC');
-    const [ibs] = await pool.query('SELECT * FROM sapitime_ib ORDER BY date DESC');
+    const [ibs] = await pool.query('SELECT * FROM sapitime_ib ORDER BY date ASC, id ASC');
     const [history] = await pool.query('SELECT * FROM sapitime_history ORDER BY date DESC LIMIT 100');
 
+    // Kelompokkan IB per sapi untuk menentukan urutan (ke-1, ke-2, dst) dan kalkulasi otomatis
+    const ibsByCattle: Record<string, any[]> = {};
+    (ibs as any[]).forEach(ib => {
+      const cId = ib.cattle_id || '';
+      if (!ibsByCattle[cId]) ibsByCattle[cId] = [];
+      ibsByCattle[cId].push(ib);
+    });
+
     // Gabungkan data Sapi dan data IB agar frontend gampang membacanya
-    const formattedCattle = (cattle as any[]).map(c => ({
-      ...c,
-      birthDate: formatDate(c.birthDate),
-      lastEstrus: formatDate(c.lastEstrus),
-      pregnancyDate: formatDate(c.pregnancyDate),
-      inseminations: (ibs as any[]).filter(ib => ib.cattle_id === c.id).map(ib => ({
-        ...ib,
-        date: formatDate(ib.date),
-        pkbSkipDate: formatDate(ib.pkbSkipDate),
-        pkbDateActual: formatDate(ib.pkbDateActual),
-        birthDate: formatDate(ib.birthDate)
-      }))
-    }));
+    const formattedCattle = (cattle as any[]).map(c => {
+      const cattleIbs = ibsByCattle[c.id] || [];
+      const enrichedInseminations = cattleIbs.map((ib, idx) => {
+        const isLatest = idx === cattleIbs.length - 1;
+        let statusKeberhasilan = ib.status_keberhasilan;
+        const modeKeberhasilan = ib.mode_keberhasilan || 'sistem';
+
+        // Jika mode 'sistem' (atau belum diset), hitung status keberhasilan secara otomatis:
+        if (modeKeberhasilan === 'sistem' || !statusKeberhasilan) {
+          if (ib.birthDate || ib.pkbResult === 'Bunting' || (c.status === 'Bunting' && isLatest)) {
+            statusKeberhasilan = 'Berhasil';
+          } else if (ib.pkbResult === 'Tidak Bunting') {
+            statusKeberhasilan = 'Tidak Berhasil';
+          } else if (!isLatest) {
+            // Sapi telah di-IB lagi setelah ini, berarti IB siklus ini tidak menghasilkan kebuntingan
+            statusKeberhasilan = 'Tidak Berhasil';
+          } else {
+            statusKeberhasilan = 'Menunggu PKB';
+          }
+        }
+
+        return {
+          ...ib,
+          ibOrder: idx + 1,
+          totalIbCount: cattleIbs.length,
+          status_keberhasilan: statusKeberhasilan,
+          mode_keberhasilan: modeKeberhasilan,
+          date: formatDate(ib.date),
+          pkbSkipDate: formatDate(ib.pkbSkipDate),
+          pkbDateActual: formatDate(ib.pkbDateActual),
+          birthDate: formatDate(ib.birthDate)
+        };
+      });
+
+      // Urutkan inseminations terbaru di atas untuk kemudahan baca
+      enrichedInseminations.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+
+      return {
+        ...c,
+        birthDate: formatDate(c.birthDate),
+        lastEstrus: formatDate(c.lastEstrus),
+        pregnancyDate: formatDate(c.pregnancyDate),
+        inseminations: enrichedInseminations
+      };
+    });
 
     return NextResponse.json({ success: true, cattle: formattedCattle, history });
   } catch (err: any) {
@@ -102,11 +163,21 @@ export async function POST(req: Request) {
       );
       await logActivity('sapitime_ib', payload.id, 'CREATE', payload);
     }
-    // --- AKSI KHUSUS HALAMAN DATABASE IB ---
-    else if (action === 'record_pkb') {
+    // --- AKSI KHUSUS HALAMAN DATABASE IB & SAPITIME ---
+    else if (action === 'update_ib_success') {
+      await ensureSapitimeColumns();
       await pool.query(
-        'UPDATE sapitime_ib SET pkbStatus="Sudah Diperiksa", pkbDateActual=?, pkbResult=?, pkbOfficer=?, pkbNotes=?, pkbSkipDate=NULL, pkbSkipReason=NULL WHERE id=?',
-        [payload.pkbDateActual, payload.pkbResult, payload.pkbOfficer, payload.pkbNotes, payload.ib_id]
+        'UPDATE sapitime_ib SET status_keberhasilan = ?, mode_keberhasilan = ? WHERE id = ?',
+        [payload.status_keberhasilan, payload.mode_keberhasilan || 'manual', payload.ib_id]
+      );
+      await logActivity('sapitime_ib', payload.ib_id, 'UPDATE', { action: 'update_ib_success', ...payload });
+    }
+    else if (action === 'record_pkb') {
+      await ensureSapitimeColumns();
+      const autoSuccess = payload.pkbResult === 'Bunting' ? 'Berhasil' : 'Tidak Berhasil';
+      await pool.query(
+        'UPDATE sapitime_ib SET pkbStatus="Sudah Diperiksa", pkbDateActual=?, pkbResult=?, pkbOfficer=?, pkbNotes=?, pkbSkipDate=NULL, pkbSkipReason=NULL, status_keberhasilan=?, mode_keberhasilan="sistem" WHERE id=?',
+        [payload.pkbDateActual, payload.pkbResult, payload.pkbOfficer, payload.pkbNotes, autoSuccess, payload.ib_id]
       );
       await pool.query(
         'UPDATE sapitime_master SET status=?, pregnancyDate=? WHERE id=?',
@@ -122,8 +193,9 @@ export async function POST(req: Request) {
       await logActivity('sapitime_ib', payload.ib_id, 'UPDATE', { action: 'skip_pkb', ...payload });
     }
     else if (action === 'record_birth') {
+      await ensureSapitimeColumns();
       await pool.query(
-        'UPDATE sapitime_ib SET birthDate=?, calfGender=?, birthNotes=? WHERE id=?',
+        'UPDATE sapitime_ib SET birthDate=?, calfGender=?, birthNotes=?, status_keberhasilan="Berhasil", mode_keberhasilan="sistem" WHERE id=?',
         [payload.birthDate, payload.calfGender, payload.birthNotes, payload.ib_id]
       );
       await pool.query(

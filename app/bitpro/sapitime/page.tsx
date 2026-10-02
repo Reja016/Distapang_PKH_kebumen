@@ -23,6 +23,8 @@ import {
   ModalEstrusInfo,
   ModalCattleForm,
   ModalCatatIB,
+  ModalTraceSapi,
+  ModalEditStatusIb,
 } from '@/components/bitpro/sapitime/SapiTimeModals';
 import { UniversalAuditModal } from '@/components/common/UniversalAuditModal';
 
@@ -52,6 +54,13 @@ export default function SapiTimePage() {
   const [selectedCattleForIB, setSelectedCattleForIB] = useState<Cattle | null>(null);
   const [ibFormData, setIbFormData] = useState<any>({});
   const [showEstrusModal, setShowEstrusModal] = useState(false);
+
+  // State Tracing Sapi & Edit Status Keberhasilan IB
+  const [showTraceModal, setShowTraceModal] = useState(false);
+  const [selectedCattleForTrace, setSelectedCattleForTrace] = useState<Cattle | null>(null);
+  const [showEditStatusModal, setShowEditStatusModal] = useState(false);
+  const [selectedIbForStatusEdit, setSelectedIbForStatusEdit] = useState<any | null>(null);
+  const [selectedCattleForStatusEdit, setSelectedCattleForStatusEdit] = useState<Cattle | null>(null);
 
   const [showAuditModal, setShowAuditModal] = useState(false);
   const [auditTarget, setAuditTarget] = useState<any | null>(null);
@@ -245,6 +254,36 @@ export default function SapiTimePage() {
     }
   };
 
+  // Handler Update Status Keberhasilan IB (Manual / Otomatis)
+  const handleSaveIbStatus = async (ibId: number, status: string, mode: string) => {
+    await executeApi(
+      'update_ib_success',
+      {
+        ib_id: ibId,
+        status_keberhasilan: status,
+        mode_keberhasilan: mode,
+      },
+      {
+        type: 'ib',
+        cattle: selectedCattleForStatusEdit?.name || 'Sapi',
+        cattleId: selectedCattleForStatusEdit?.id || '',
+        description: `Status keberhasilan IB #${ibId} diatur menjadi "${status}" (Mode: ${mode})`,
+        icon: '💉',
+      }
+    );
+  };
+
+  const handleOpenTrace = (cattle: Cattle) => {
+    setSelectedCattleForTrace(cattle);
+    setShowTraceModal(true);
+  };
+
+  const handleOpenEditStatus = (ib: any, cattle: Cattle) => {
+    setSelectedIbForStatusEdit(ib);
+    setSelectedCattleForStatusEdit(cattle);
+    setShowEditStatusModal(true);
+  };
+
   if (!isReady) return null;
 
   return (
@@ -326,7 +365,7 @@ export default function SapiTimePage() {
             }`}
           >
             <History size={16} />
-            <span>Riwayat IB &amp; PKB</span>
+            <span>Kinerja &amp; Riwayat</span>
           </button>
         </div>
 
@@ -354,6 +393,7 @@ export default function SapiTimePage() {
               setAuditTarget(cattle);
               setShowAuditModal(true);
             }}
+            onTraceCattle={handleOpenTrace}
           />
         )}
 
@@ -373,7 +413,12 @@ export default function SapiTimePage() {
         )}
 
         {activeTab === 'history' && (
-          <SapiTimeHistoryTab historyList={historyList} />
+          <SapiTimeHistoryTab
+            cattleList={cattleList}
+            historyList={historyList}
+            onTraceCattle={handleOpenTrace}
+            onEditStatusIb={handleOpenEditStatus}
+          />
         )}
       </main>
 
@@ -404,6 +449,30 @@ export default function SapiTimePage() {
         ibFormData={ibFormData}
         setIbFormData={setIbFormData}
         handleAddInsemination={handleAddInsemination}
+      />
+
+      {/* ── MODAL TRACE RIWAYAT IB SAPI ── */}
+      <ModalTraceSapi
+        isOpen={showTraceModal}
+        cattle={selectedCattleForTrace}
+        onClose={() => {
+          setShowTraceModal(false);
+          setSelectedCattleForTrace(null);
+        }}
+        onEditStatusIb={handleOpenEditStatus}
+      />
+
+      {/* ── MODAL EDIT STATUS KEBERHASILAN IB ── */}
+      <ModalEditStatusIb
+        isOpen={showEditStatusModal}
+        ib={selectedIbForStatusEdit}
+        cattle={selectedCattleForStatusEdit}
+        onClose={() => {
+          setShowEditStatusModal(false);
+          setSelectedIbForStatusEdit(null);
+          setSelectedCattleForStatusEdit(null);
+        }}
+        onSave={handleSaveIbStatus}
       />
 
       <UniversalAuditModal

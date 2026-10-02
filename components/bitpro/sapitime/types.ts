@@ -1,5 +1,8 @@
 export type Insemination = {
   id: number;
+  cattle_id?: string;
+  cattleName?: string;
+  ownerName?: string;
   date: string;
   time: string;
   kecamatan: string;
@@ -10,9 +13,19 @@ export type Insemination = {
   bullBreed: string;
   rekomendasiPkb: string;
   notes: string;
+  pkbStatus?: string;
   pkbSkipDate?: string;
   pkbDateActual?: string;
+  pkbResult?: string;
+  pkbOfficer?: string;
+  pkbNotes?: string;
   birthDate?: string;
+  calfGender?: string;
+  birthNotes?: string;
+  status_keberhasilan?: 'Berhasil' | 'Tidak Berhasil' | 'Menunggu PKB';
+  mode_keberhasilan?: 'sistem' | 'manual';
+  ibOrder?: number;
+  totalIbCount?: number;
 };
 
 export type Cattle = {

@@ -21,6 +21,7 @@ interface SapiTimeDatabaseTabProps {
   handleDeleteCattle: (id: string) => void;
   onOpenIBModal: (c: Cattle) => void;
   onShowHistory?: (row: any) => void;
+  onTraceCattle?: (cattle: Cattle) => void;
 }
 
 export function SapiTimeDatabaseTab({
@@ -39,6 +40,7 @@ export function SapiTimeDatabaseTab({
   handleDeleteCattle,
   onOpenIBModal,
   onShowHistory,
+  onTraceCattle,
 }: SapiTimeDatabaseTabProps) {
   const router = useRouter();
   const desaList = getDesaListForKecamatan(formData.kecamatan);
@@ -308,6 +310,21 @@ export function SapiTimeDatabaseTab({
                     <span className="font-semibold text-slate-800">{cattle.inseminations?.length || 0} Kali</span>
                   </div>
                 </div>
+
+                {/* Tombol Trace Riwayat IB Sapi */}
+                <button
+                  type="button"
+                  onClick={() => onTraceCattle?.(cattle)}
+                  className="w-full mb-3.5 py-2 px-3 rounded-xl bg-emerald-50 hover:bg-emerald-100/90 text-emerald-900 border border-emerald-200/90 font-bold text-xs flex items-center justify-between transition-all cursor-pointer"
+                >
+                  <span className="flex items-center gap-1.5">
+                    <Syringe size={13} className="text-emerald-700" />
+                    <span>Trace Riwayat IB Sapi</span>
+                  </span>
+                  <span className="bg-white px-2 py-0.5 rounded-lg text-[10px] font-black text-emerald-700 shadow-2xs border border-emerald-100">
+                    {cattle.inseminations?.length || 0}x IB
+                  </span>
+                </button>
               </div>
 
               <div className="flex gap-2">
