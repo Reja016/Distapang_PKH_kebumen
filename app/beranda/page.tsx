@@ -287,20 +287,53 @@ export default function BerandaPage() {
         });
 
         // Sinkronisasi aktivitas user dari dalam iframe ke parent untuk timer auto-logout
-        let lastIframeActivity = Date.now();
-        const onIframeActivity = () => {
-          const now = Date.now();
-          if (now - lastIframeActivity > 3000) {
-            lastIframeActivity = now;
-            recordUserActivity();
-          }
-        };
-        ['mousemove', 'mousedown', 'keydown', 'touchstart', 'scroll'].forEach((evt) => {
-          doc.addEventListener(evt, onIframeActivity, { passive: true });
-        });
+        if (!(doc as any).__activityAttached) {
+          (doc as any).__activityAttached = true;
+          let lastIframeActivity = Date.now();
+          const onIframeActivity = () => {
+            const now = Date.now();
+            if (now - lastIframeActivity > 3000) {
+              lastIframeActivity = now;
+              recordUserActivity();
+            }
+          };
+          ['mousemove', 'mousedown', 'keydown', 'touchstart', 'scroll'].forEach((evt) => {
+            doc.addEventListener(evt, onIframeActivity, { passive: true });
+          });
+        }
       }
     } catch {}
   };
+
+  // Fallback safety & proactive readiness check for iframe loading:
+  // Mencegah skeleton gantung jika event onLoad browser tertahan oleh aset eksternal.
+  useEffect(() => {
+    if (!isIframeLoading || !activeSubmenu) return;
+
+    const interval = setInterval(() => {
+      try {
+        const iframe = iframeRef.current;
+        if (iframe && iframe.contentDocument) {
+          const doc = iframe.contentDocument;
+          if (
+            doc.readyState === 'complete' ||
+            (doc.readyState === 'interactive' && doc.body && doc.body.children.length > 0)
+          ) {
+            handleIframeLoad();
+          }
+        }
+      } catch {}
+    }, 250);
+
+    const timeout = setTimeout(() => {
+      handleIframeLoad();
+    }, 2500);
+
+    return () => {
+      clearInterval(interval);
+      clearTimeout(timeout);
+    };
+  }, [isIframeLoading, activeSubmenu?.id]);
 
   const handleRefreshIframe = () => {
     if (iframeRef.current && activeSubmenu) {
