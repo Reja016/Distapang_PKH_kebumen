@@ -275,12 +275,18 @@ export function ModalCatatIB({
 
   const ibDesaList = getDesaListForKecamatan(ibFormData?.kecamatan);
 
-  // Auto-set jika petugas hanya memiliki 1 wilayah kerja dan belum memilih
+  // Auto-set data sapi akseptor, wilayah domisili, dan default tanggal/waktu
   useEffect(() => {
-    if (showIBModal && selectedCattleForIB && !isAdmin && availableIbKecamatanList.length === 1 && !ibFormData?.kecamatan) {
-      setIbFormData((prev: any) => ({ ...prev, kecamatan: availableIbKecamatanList[0] }));
+    if (showIBModal && selectedCattleForIB) {
+      setIbFormData((prev: any) => ({
+        ...prev,
+        date: prev?.date || new Date().toISOString().split('T')[0],
+        time: prev?.time || '08:00',
+        kecamatan: prev?.kecamatan || selectedCattleForIB.kecamatan || (!isAdmin && availableIbKecamatanList.length === 1 ? availableIbKecamatanList[0] : ''),
+        desa: prev?.desa || selectedCattleForIB.desa || '',
+      }));
     }
-  }, [showIBModal, selectedCattleForIB, isAdmin, availableIbKecamatanList, ibFormData?.kecamatan, setIbFormData]);
+  }, [showIBModal, selectedCattleForIB, isAdmin, availableIbKecamatanList, setIbFormData]);
 
   if (!showIBModal || !selectedCattleForIB) return null;
 
@@ -300,6 +306,32 @@ export function ModalCatatIB({
           </button>
         </div>
 
+        {/* Info Sapi Akseptor (Auto-Fill Otomatis Nama & Jenis) */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5 mb-5 p-4 bg-emerald-50/60 border border-emerald-200/80 rounded-2xl">
+          <div>
+            <label className="block text-[11px] font-bold text-emerald-900 uppercase tracking-wider mb-1">
+              Nama Sapi Akseptor
+            </label>
+            <input
+              type="text"
+              readOnly
+              value={selectedCattleForIB.name || ''}
+              className="w-full h-10 px-3.5 border border-emerald-300 rounded-xl bg-white text-emerald-950 font-extrabold text-xs cursor-not-allowed shadow-2xs"
+            />
+          </div>
+          <div>
+            <label className="block text-[11px] font-bold text-emerald-900 uppercase tracking-wider mb-1">
+              Jenis / Ras Sapi Betina
+            </label>
+            <input
+              type="text"
+              readOnly
+              value={selectedCattleForIB.breed || 'Tidak Spesifik'}
+              className="w-full h-10 px-3.5 border border-emerald-300 rounded-xl bg-white text-emerald-950 font-extrabold text-xs cursor-not-allowed shadow-2xs"
+            />
+          </div>
+        </div>
+
         {!isAdmin && allowedKecamatan.length > 0 && (
           <div className="mb-4 p-3 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-medium flex items-center gap-2">
             <MapPin size={16} className="text-emerald-600 shrink-0" />
@@ -314,7 +346,7 @@ export function ModalCatatIB({
             <label className="block text-xs font-bold mb-1 text-slate-700">Tanggal Pelaksanaan IB</label>
             <input
               type="date"
-              className="w-full min-h-touch h-11 px-3.5 border border-slate-200 rounded-xl bg-slate-50 focus:bg-white focus:outline-none focus:border-emerald-600 text-xs text-slate-900"
+              className="w-full min-h-touch h-11 px-3.5 border border-slate-200 rounded-xl bg-slate-50 focus:bg-white focus:outline-none focus:border-emerald-600 text-xs text-slate-900 font-semibold"
               value={ibFormData.date || ''}
               onChange={(e) => setIbFormData({ ...ibFormData, date: e.target.value })}
             />

@@ -237,7 +237,7 @@ export default function GudangDashboardTab({
                 <th className="p-3.5 text-center">Min. Buffer</th>
                 <th className="p-3.5 text-center">Total Masuk</th>
                 <th className="p-3.5 text-center">Distribusi</th>
-                <th className="p-3.5 text-center">Saldo Dinas</th>
+                <th className="p-3.5 text-center">Stok</th>
                 <th className="p-3.5 text-center">Status Stok</th>
                 <th className="p-3.5">Rincian Batch &amp; Kadaluarsa</th>
                 <th className="p-3.5 text-center w-28">Aksi</th>

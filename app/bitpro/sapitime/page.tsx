@@ -260,10 +260,9 @@ export default function SapiTimePage() {
     setShowIBModal(false);
     setIbFormData({});
     setSelectedCattleForIB(null);
-    await executeApi('add_ib', newIB, historyObj);
-
-    if (window.confirm('Data IB berhasil dicatat ke Database! Ingin langsung membuka Database IB sekarang?')) {
-      router.push('/bitpro/database-ib');
+    const success = await executeApi('add_ib', newIB, historyObj);
+    if (success) {
+      alert('Data pelayanan IB berhasil disimpan & disinkronkan ke Database!');
     }
   };
 

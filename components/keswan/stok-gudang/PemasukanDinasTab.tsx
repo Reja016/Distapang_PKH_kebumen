@@ -165,7 +165,7 @@ export default function PemasukanDinasTab({
                 <th className="p-3.5 text-center">Tgl Expired</th>
                 <th className="p-3.5">Sumber Anggaran</th>
                 <th className="p-3.5 text-center">Kemasan</th>
-                <th className="p-3.5 text-right">Jumlah</th>
+                <th className="p-3.5 text-right">Jumlah Stok</th>
                 <th className="p-3.5 text-right">Harga Satuan</th>
                 <th className="p-3.5 text-right">Total Nilai</th>
                 <th className="p-3.5">Penyerah &amp; Penerima</th>

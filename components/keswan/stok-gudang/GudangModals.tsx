@@ -530,7 +530,7 @@ export function ModalDroppingDinas({ isOpen, onClose, onSuccess, masterBarang }:
               />
               <input
                 type="text"
-                placeholder="NIP Penyerah"
+                placeholder="NIP Penyerah (Opsional)"
                 value={nipPenyerah}
                 onChange={(e) => setNipPenyerah(e.target.value)}
                 className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none text-[11px]"
@@ -547,7 +547,7 @@ export function ModalDroppingDinas({ isOpen, onClose, onSuccess, masterBarang }:
               />
               <input
                 type="text"
-                placeholder="NIP Penerima"
+                placeholder="NIP Penerima (Opsional)"
                 value={nipPenerima}
                 onChange={(e) => setNipPenerima(e.target.value)}
                 className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none text-[11px]"
@@ -875,7 +875,7 @@ export function ModalBuatDistribusi({
               />
               <input
                 type="text"
-                placeholder="NIP Penyerah"
+                placeholder="NIP Penyerah (Opsional)"
                 value={nipPenyerah}
                 onChange={(e) => setNipPenyerah(e.target.value)}
                 className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none text-[11px]"
@@ -892,7 +892,7 @@ export function ModalBuatDistribusi({
               />
               <input
                 type="text"
-                placeholder="NIP Penerima"
+                placeholder="NIP Penerima (Opsional)"
                 value={nipPenerima}
                 onChange={(e) => setNipPenerima(e.target.value)}
                 className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none text-[11px]"

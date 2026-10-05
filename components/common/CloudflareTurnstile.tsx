@@ -223,7 +223,7 @@ export const CloudflareTurnstile = forwardRef<CloudflareTurnstileRef, Cloudflare
           <div className="w-[300px] h-[65px] bg-slate-50 dark:bg-slate-800/60 rounded-xl border border-slate-200 dark:border-slate-700/60 flex items-center justify-center gap-2.5 animate-pulse shadow-sm">
             <span className="w-3.5 h-3.5 border-2 border-emerald-600 border-t-transparent rounded-full animate-spin"></span>
             <span className="text-xs text-slate-500 dark:text-slate-400 font-medium">
-              Memuat proteksi keamanan...
+              Memuat captcha...
             </span>
           </div>
         )}

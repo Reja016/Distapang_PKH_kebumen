@@ -229,26 +229,16 @@ export default function StokGudangKeswanPage() {
           </button>
 
           {canCreate && (
-            <>
-              <button
-                onClick={() => {
-                  setEditingBarang(null);
-                  setIsModalBarangOpen(true);
-                }}
-                className="flex items-center gap-1.5 px-3.5 py-2 bg-slate-100 dark:bg-slate-800 hover:bg-blue-50 hover:text-blue-600 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 font-semibold rounded-xl text-xs transition-all cursor-pointer border border-slate-200 dark:border-slate-700"
-              >
-                <Plus className="w-3.5 h-3.5" />
-                Barang
-              </button>
-
-              <button
-                onClick={() => setIsModalDroppingOpen(true)}
-                className="flex items-center gap-1.5 px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl text-xs shadow-md transition-all cursor-pointer"
-              >
-                <ArrowDownLeft className="w-3.5 h-3.5" />
-                Dropping Masuk
-              </button>
-            </>
+            <button
+              onClick={() => {
+                setEditingBarang(null);
+                setIsModalBarangOpen(true);
+              }}
+              className="flex items-center gap-1.5 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl text-xs shadow-md transition-all cursor-pointer"
+            >
+              <Plus className="w-3.5 h-3.5" />
+              Barang
+            </button>
           )}
         </div>
       </div>

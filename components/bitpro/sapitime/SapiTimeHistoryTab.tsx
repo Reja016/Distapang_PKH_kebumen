@@ -14,6 +14,8 @@ import {
   Edit2,
   Check,
   X,
+  Info,
+  Activity,
 } from 'lucide-react';
 import { Cattle, Insemination } from './types';
 
@@ -56,7 +58,7 @@ export function SapiTimeHistoryTab({
     return list;
   }, [cattleList]);
 
-  // 2. Kalkulasi Performa Inseminator (Total IB, Berhasil, Gagal, % Keberhasilan)
+  // 2. Kalkulasi Performa Inseminator Berdasarkan Standar Ilmiah Reproduksi (S/C & CR)
   const inseminatorStats = useMemo(() => {
     const statsMap: Record<
       string,
@@ -66,6 +68,8 @@ export function SapiTimeHistoryTab({
         berhasil: number;
         gagal: number;
         menunggu: number;
+        akseptorIb1: number;
+        buntingIb1: number;
         kecamatans: Set<string>;
         cattleIds: Set<string>;
       }
@@ -80,6 +84,8 @@ export function SapiTimeHistoryTab({
           berhasil: 0,
           gagal: 0,
           menunggu: 0,
+          akseptorIb1: 0,
+          buntingIb1: 0,
           kecamatans: new Set(),
           cattleIds: new Set(),
         };
@@ -96,19 +102,33 @@ export function SapiTimeHistoryTab({
       } else {
         statsMap[name].menunggu += 1;
       }
+
+      // Perhitungan khusus Conception Rate (CR) baku ilmiah:
+      // Hanya menghitung akseptor yang menjalani IB ke-1 (IB pertama kali)
+      if (ib.ibOrder === 1) {
+        statsMap[name].akseptorIb1 += 1;
+        if (ib.status_keberhasilan === 'Berhasil') {
+          statsMap[name].buntingIb1 += 1;
+        }
+      }
     });
 
     return Object.values(statsMap)
       .map((stat) => {
-        // Perhitungan Conception Rate (CR %):
-        // Jika ada yang sudah ada hasil (berhasil + gagal), hitung persentase dari yang sudah diperiksa.
-        // Jika belum ada yang diperiksa sama sekali, CR = 0%.
-        const evaluated = stat.berhasil + stat.gagal;
-        const crPercentage = evaluated > 0 ? Math.round((stat.berhasil / evaluated) * 100) : 0;
+        // Rumus Baku CR (Conception Rate):
+        // CR = (Jumlah betina bunting dari IB ke-1 / Jumlah total akseptor IB pertama) * 100%
+        const crPercentage =
+          stat.akseptorIb1 > 0 ? Math.round((stat.buntingIb1 / stat.akseptorIb1) * 100) : 0;
+
+        // Rumus Baku S/C (Service per Conception):
+        // S/C = Total pelayanan inseminasi (IB) yang dilakukan / Jumlah sapi betina yang bunting
+        const scValue =
+          stat.berhasil > 0 ? (stat.totalIb / stat.berhasil).toFixed(2) : '-';
 
         return {
           ...stat,
           conceptionRate: crPercentage,
+          scValue,
           kecamatanList: Array.from(stat.kecamatans),
           totalCattleHandled: stat.cattleIds.size,
         };
@@ -116,7 +136,7 @@ export function SapiTimeHistoryTab({
       .sort((a, b) => b.totalIb - a.totalIb);
   }, [allInseminations]);
 
-  // Statistik Ringkasan Dinas
+  // Statistik Ringkasan Dinas (S/C & CR Dinas)
   const summaryDinas = useMemo(() => {
     const totalPetugas = inseminatorStats.length;
     const totalIb = allInseminations.length;
@@ -124,8 +144,13 @@ export function SapiTimeHistoryTab({
     const totalGagal = allInseminations.filter((i) => i.status_keberhasilan === 'Tidak Berhasil').length;
     const totalMenunggu = allInseminations.filter((i) => !i.status_keberhasilan || i.status_keberhasilan === 'Menunggu PKB').length;
 
-    const evaluatedTotal = totalBerhasil + totalGagal;
-    const rataRataCr = evaluatedTotal > 0 ? Math.round((totalBerhasil / evaluatedTotal) * 100) : 0;
+    // CR Dinas Baku (dari IB ke-1)
+    const akseptorIb1Dinas = allInseminations.filter((i) => i.ibOrder === 1).length;
+    const buntingIb1Dinas = allInseminations.filter((i) => i.ibOrder === 1 && i.status_keberhasilan === 'Berhasil').length;
+    const crDinas = akseptorIb1Dinas > 0 ? Math.round((buntingIb1Dinas / akseptorIb1Dinas) * 100) : 0;
+
+    // S/C Dinas Baku: Total IB / Total Bunting
+    const scDinas = totalBerhasil > 0 ? (totalIb / totalBerhasil).toFixed(2) : '-';
 
     return {
       totalPetugas,
@@ -133,7 +158,10 @@ export function SapiTimeHistoryTab({
       totalBerhasil,
       totalGagal,
       totalMenunggu,
-      rataRataCr,
+      akseptorIb1Dinas,
+      buntingIb1Dinas,
+      crDinas,
+      scDinas,
     };
   }, [inseminatorStats, allInseminations]);
 
@@ -206,50 +234,89 @@ export function SapiTimeHistoryTab({
           </div>
         </div>
 
-        {/* 4 Kartu KPI Ringkasan */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3.5">
+        {/* 5 Kartu KPI Ringkasan Reproduksi (S/C & CR) */}
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3.5">
           <div className="bg-white border border-slate-200 rounded-2xl p-4 shadow-2xs">
             <div className="flex items-center justify-between">
-              <span className="text-slate-400 text-[10px] font-bold uppercase tracking-wider">Petugas Inseminator</span>
+              <span className="text-slate-400 text-[10px] font-bold uppercase tracking-wider">Inseminator</span>
               <div className="w-8 h-8 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center">
                 <User size={16} />
               </div>
             </div>
             <p className="text-2xl font-black text-slate-900 mt-2">{summaryDinas.totalPetugas}</p>
-            <p className="text-[11px] text-slate-500 mt-0.5">Inseminator tercatat aktif</p>
+            <p className="text-[11px] text-slate-500 mt-0.5">Petugas aktif tercatat</p>
           </div>
 
           <div className="bg-white border border-slate-200 rounded-2xl p-4 shadow-2xs">
             <div className="flex items-center justify-between">
-              <span className="text-slate-400 text-[10px] font-bold uppercase tracking-wider">Total Berhasil (Bunting)</span>
+              <span className="text-slate-400 text-[10px] font-bold uppercase tracking-wider">Total Tindakan IB</span>
+              <div className="w-8 h-8 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center">
+                <Syringe size={16} />
+              </div>
+            </div>
+            <p className="text-2xl font-black text-slate-900 mt-2">{summaryDinas.totalIb}</p>
+            <p className="text-[11px] text-slate-500 mt-0.5">Total suntikan pelayanan</p>
+          </div>
+
+          <div className="bg-white border border-slate-200 rounded-2xl p-4 shadow-2xs">
+            <div className="flex items-center justify-between">
+              <span className="text-slate-400 text-[10px] font-bold uppercase tracking-wider">Jadi (Bunting)</span>
               <div className="w-8 h-8 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center">
                 <CheckCircle2 size={16} />
               </div>
             </div>
             <p className="text-2xl font-black text-emerald-700 mt-2">{summaryDinas.totalBerhasil}</p>
-            <p className="text-[11px] text-emerald-600 font-semibold mt-0.5">Konsepsi / bunting tercatat</p>
+            <p className="text-[11px] text-emerald-600 font-semibold mt-0.5">Konsepsi tercatat</p>
           </div>
 
           <div className="bg-white border border-slate-200 rounded-2xl p-4 shadow-2xs">
             <div className="flex items-center justify-between">
-              <span className="text-slate-400 text-[10px] font-bold uppercase tracking-wider">Dalam Proses / Menunggu</span>
-              <div className="w-8 h-8 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center">
-                <Clock size={16} />
+              <span className="text-slate-400 text-[10px] font-bold uppercase tracking-wider">S/C (Service/Conc.)</span>
+              <div className="w-8 h-8 rounded-xl bg-purple-50 text-purple-700 flex items-center justify-center font-black text-[11px]">
+                S/C
               </div>
             </div>
-            <p className="text-2xl font-black text-amber-700 mt-2">{summaryDinas.totalMenunggu}</p>
-            <p className="text-[11px] text-amber-600 mt-0.5">Menunggu jadwal periksa PKB</p>
+            <div className="flex items-baseline gap-1 mt-2">
+              <p className="text-2xl font-black text-purple-900">{summaryDinas.scDinas}</p>
+              <span className="text-[10px] font-bold text-purple-600">x / bunting</span>
+            </div>
+            <p className="text-[11px] text-slate-500 mt-0.5">
+              Ideal: <strong className="text-slate-700">1.6 – 2.0</strong>
+            </p>
           </div>
 
-          <div className="bg-white border border-slate-200 rounded-2xl p-4 shadow-2xs">
+          <div className="bg-white border border-slate-200 rounded-2xl p-4 shadow-2xs col-span-2 sm:col-span-1">
             <div className="flex items-center justify-between">
-              <span className="text-slate-400 text-[10px] font-bold uppercase tracking-wider">Rata-rata Keberhasilan</span>
+              <span className="text-slate-400 text-[10px] font-bold uppercase tracking-wider">CR (Conception Rate)</span>
               <div className="w-8 h-8 rounded-xl bg-teal-50 text-teal-600 flex items-center justify-center">
                 <Award size={16} />
               </div>
             </div>
-            <p className="text-2xl font-black text-teal-800 mt-2">{summaryDinas.rataRataCr}%</p>
-            <p className="text-[11px] text-slate-500 mt-0.5">Conception Rate (CR) dinas</p>
+            <div className="flex items-baseline gap-1 mt-2">
+              <p className="text-2xl font-black text-teal-800">{summaryDinas.crDinas}%</p>
+              <span className="text-[10px] font-bold text-teal-600">IB ke-1</span>
+            </div>
+            <p className="text-[11px] text-slate-500 mt-0.5">
+              Ideal: <strong className="text-slate-700">60% – 75%</strong>
+            </p>
+          </div>
+        </div>
+
+        {/* Banner Edukasi Rumus S/C & CR Baku */}
+        <div className="bg-gradient-to-r from-emerald-50/90 via-teal-50/60 to-blue-50/90 border border-emerald-200/80 rounded-2xl p-4 text-xs text-slate-700 flex flex-col md:flex-row md:items-center justify-between gap-3 shadow-2xs">
+          <div className="flex items-start gap-3">
+            <div className="w-8 h-8 rounded-xl bg-emerald-100 text-emerald-800 flex items-center justify-center shrink-0 mt-0.5">
+              <Info size={16} />
+            </div>
+            <div>
+              <span className="font-extrabold text-slate-900 block mb-0.5 text-xs sm:text-sm">
+                Pedoman Standar Parameter Reproduksi Ternak (S/C &amp; CR)
+              </span>
+              <p className="text-slate-600 leading-relaxed text-[11px] sm:text-xs">
+                &bull; <strong>Service per Conception (S/C)</strong> = Total Inseminasi / Jumlah Betina Bunting. <em>(Nilai ideal: 1.6 – 2.0; semakin kecil mendekati 1 semakin baik)</em>.<br />
+                &bull; <strong>Conception Rate (CR)</strong> = (Betina Bunting dari IB ke-1 / Total Akseptor IB Pertama) &times; 100%. <em>(Nilai ideal: 60% – 75%; mengukur keberhasilan pada suntikan pertama)</em>.
+              </p>
+            </div>
           </div>
         </div>
 
@@ -259,10 +326,10 @@ export function SapiTimeHistoryTab({
             <div>
               <h3 className="font-extrabold text-base text-slate-900 flex items-center gap-2">
                 <TrendingUp size={18} className="text-emerald-700" />
-                <span>Tabel Kinerja &amp; Persentase Keberhasilan Petugas</span>
+                <span>Tabel Kinerja Petugas (Evaluasi S/C &amp; CR Inseminator)</span>
               </h3>
               <p className="text-xs text-slate-500 mt-0.5">
-                Evaluasi jumlah penyuntikan yang dilakukan setiap petugas dan tingkat keberhasilan bunting (*Conception Rate*).
+                Rincian total tindakan, efisiensi pelayanan (S/C), dan tingkat konsepsi suntikan pertama (CR) per petugas.
               </p>
             </div>
 
@@ -285,11 +352,11 @@ export function SapiTimeHistoryTab({
                   <th className="px-5 py-3.5 w-12 text-center">No</th>
                   <th className="px-5 py-3.5">Nama Petugas Inseminator</th>
                   <th className="px-5 py-3.5">Wilayah Layanan</th>
-                  <th className="px-5 py-3.5 text-center">Total IB (Kali)</th>
-                  <th className="px-5 py-3.5 text-center text-emerald-700">Jadi / Bunting</th>
-                  <th className="px-5 py-3.5 text-center text-rose-700">Tidak Jadi</th>
+                  <th className="px-5 py-3.5 text-center">Total IB</th>
+                  <th className="px-5 py-3.5 text-center text-emerald-700">Jadi (Bunting)</th>
+                  <th className="px-5 py-3.5 text-center text-purple-700">S/C (Ideal: 1.6–2)</th>
+                  <th className="px-5 py-3.5 w-44 text-teal-800">CR IB-1 (Ideal: 60–75%)</th>
                   <th className="px-5 py-3.5 text-center text-amber-700">Menunggu PKB</th>
-                  <th className="px-5 py-3.5 w-44">Persentase Keberhasilan (CR)</th>
                   <th className="px-5 py-3.5 text-center">Aksi Filter</th>
                 </tr>
               </thead>
@@ -327,20 +394,29 @@ export function SapiTimeHistoryTab({
                         <td className="px-5 py-3 text-center font-bold text-emerald-700 bg-emerald-50/30">
                           {petugas.berhasil}x
                         </td>
-                        <td className="px-5 py-3 text-center font-bold text-rose-700 bg-rose-50/30">
-                          {petugas.gagal}x
-                        </td>
-                        <td className="px-5 py-3 text-center font-bold text-amber-700 bg-amber-50/30">
-                          {petugas.menunggu}x
+                        <td className="px-5 py-3 text-center">
+                          <span
+                            className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-black ${
+                              petugas.scValue !== '-' && Number(petugas.scValue) <= 2.0
+                                ? 'bg-emerald-100 text-emerald-800'
+                                : petugas.scValue !== '-' && Number(petugas.scValue) <= 3.0
+                                ? 'bg-amber-100 text-amber-800'
+                                : petugas.scValue !== '-'
+                                ? 'bg-rose-100 text-rose-800'
+                                : 'bg-slate-100 text-slate-500'
+                            }`}
+                          >
+                            {petugas.scValue}
+                          </span>
                         </td>
                         <td className="px-5 py-3">
                           <div className="space-y-1">
                             <div className="flex items-center justify-between text-[11px]">
                               <span
                                 className={`font-black ${
-                                  petugas.conceptionRate >= 70
-                                    ? 'text-emerald-700'
-                                    : petugas.conceptionRate >= 50
+                                  petugas.conceptionRate >= 60
+                                    ? 'text-teal-700'
+                                    : petugas.conceptionRate >= 40
                                     ? 'text-amber-700'
                                     : 'text-rose-700'
                                 }`}
@@ -348,15 +424,15 @@ export function SapiTimeHistoryTab({
                                 {petugas.conceptionRate}%
                               </span>
                               <span className="text-[10px] text-slate-400">
-                                {petugas.berhasil}/{petugas.berhasil + petugas.gagal} dievaluasi
+                                {petugas.buntingIb1}/{petugas.akseptorIb1} sapi IB-1
                               </span>
                             </div>
                             <div className="w-full bg-slate-100 rounded-full h-2 overflow-hidden">
                               <div
                                 className={`h-full rounded-full transition-all duration-500 ${
-                                  petugas.conceptionRate >= 70
-                                    ? 'bg-emerald-600'
-                                    : petugas.conceptionRate >= 50
+                                  petugas.conceptionRate >= 60
+                                    ? 'bg-teal-600'
+                                    : petugas.conceptionRate >= 40
                                     ? 'bg-amber-500'
                                     : 'bg-rose-500'
                                 }`}
@@ -364,6 +440,9 @@ export function SapiTimeHistoryTab({
                               />
                             </div>
                           </div>
+                        </td>
+                        <td className="px-5 py-3 text-center font-bold text-amber-700 bg-amber-50/30">
+                          {petugas.menunggu}x
                         </td>
                         <td className="px-5 py-3 text-center">
                           <button
