@@ -310,7 +310,7 @@ export function ModalCatatIB({
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5 mb-5 p-4 bg-emerald-50/60 border border-emerald-200/80 rounded-2xl">
           <div>
             <label className="block text-[11px] font-bold text-emerald-900 uppercase tracking-wider mb-1">
-              Nama Sapi Akseptor
+              Nama Sapi Akseptor (Induk Betina)
             </label>
             <input
               type="text"
@@ -321,7 +321,7 @@ export function ModalCatatIB({
           </div>
           <div>
             <label className="block text-[11px] font-bold text-emerald-900 uppercase tracking-wider mb-1">
-              Jenis / Ras Sapi Betina
+              Jenis / Ras Sapi Akseptor (Betina)
             </label>
             <input
               type="text"
@@ -406,6 +406,14 @@ export function ModalCatatIB({
               placeholder="Nama lengkap petugas inseminator"
             />
           </div>
+
+          {/* Rincian Semen Beku (Straw) & Pejantan Donor */}
+          <div className="sm:col-span-2 pt-2 border-t border-slate-100">
+            <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider block mb-1">
+              Data Semen Beku (Straw) &amp; Pejantan Donor
+            </span>
+          </div>
+
           <div>
             <label className="block text-xs font-bold mb-1 text-slate-700">Kode Batch Straw</label>
             <input
@@ -417,23 +425,23 @@ export function ModalCatatIB({
             />
           </div>
           <div>
-            <label className="block text-xs font-bold mb-1 text-slate-700">Nama Pejantan</label>
+            <label className="block text-xs font-bold mb-1 text-slate-700">Nama Sapi Pejantan (Donor Straw)</label>
             <input
               type="text"
               className="w-full min-h-touch h-11 px-3.5 border border-slate-200 rounded-xl bg-slate-50 focus:bg-white focus:outline-none focus:border-emerald-600 text-xs text-slate-900"
               value={ibFormData.bullName || ''}
               onChange={(e) => setIbFormData({ ...ibFormData, bullName: e.target.value })}
-              placeholder="Nama sapi pejantan"
+              placeholder="Nama pejantan donor (misal: Bima / Gatotkaca)"
             />
           </div>
           <div className="sm:col-span-2">
-            <label className="block text-xs font-bold mb-1 text-slate-700">Ras Pejantan</label>
+            <label className="block text-xs font-bold mb-1 text-slate-700">Ras / Bangsa Pejantan (Donor)</label>
             <input
               type="text"
               className="w-full min-h-touch h-11 px-3.5 border border-slate-200 rounded-xl bg-slate-50 focus:bg-white focus:outline-none focus:border-emerald-600 text-xs text-slate-900"
               value={ibFormData.bullBreed || ''}
               onChange={(e) => setIbFormData({ ...ibFormData, bullBreed: e.target.value })}
-              placeholder="Contoh: Limousin / Brahman / Simental"
+              placeholder="Contoh: Limousin / Brahman / Simental / Angus"
             />
           </div>
 
