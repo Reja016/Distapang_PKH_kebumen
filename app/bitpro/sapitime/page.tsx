@@ -299,14 +299,14 @@ export default function SapiTimePage() {
   if (!isReady) return null;
 
   return (
-    <div className="min-h-screen bg-slate-50 text-slate-900 font-sans selection:bg-emerald-600 selection:text-white pb-20">
+    <div className="min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 font-sans selection:bg-emerald-600 selection:text-white pb-20">
       {/* ── TOP APP BAR (Tema Hijau Bitpro) ── */}
-      <header className="border-b border-emerald-100 bg-white/95 backdrop-blur-md sticky top-0 z-30 shadow-xs">
+      <header className="border-b border-emerald-100 dark:border-slate-800 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md sticky top-0 z-30 shadow-xs">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-5 min-h-[80px] sm:min-h-[88px] flex items-center justify-between gap-3">
           <div className="flex items-center gap-3 min-w-0 flex-1">
             <Link
               href="/bitpro"
-              className="min-h-touch min-w-touch w-11 h-11 rounded-2xl border border-emerald-200 bg-emerald-50 hover:bg-emerald-100 flex items-center justify-center text-emerald-800 transition-colors shrink-0"
+              className="min-h-touch min-w-touch w-11 h-11 rounded-2xl border border-emerald-200 dark:border-emerald-800 bg-emerald-50 dark:bg-emerald-950/60 hover:bg-emerald-100 dark:hover:bg-emerald-900/80 flex items-center justify-center text-emerald-800 dark:text-emerald-300 transition-colors shrink-0"
               aria-label="Kembali ke Bitpro"
             >
               <ArrowLeft size={18} />
@@ -316,14 +316,14 @@ export default function SapiTimePage() {
               <div className="flex items-center gap-2 mb-0.5">
                 <Link
                   href="/bitpro"
-                  className="text-xs font-semibold text-slate-500 hover:text-emerald-700 transition-colors truncate"
+                  className="text-xs font-semibold text-slate-500 dark:text-slate-400 hover:text-emerald-700 dark:hover:text-emerald-400 transition-colors truncate"
                 >
                   Bitpro
                 </Link>
-                <span className="text-slate-300">/</span>
-                <span className="text-xs font-bold text-emerald-700 whitespace-nowrap">SapiTime Smart App</span>
+                <span className="text-slate-300 dark:text-slate-600">/</span>
+                <span className="text-xs font-bold text-emerald-700 dark:text-emerald-400 whitespace-nowrap">SapiTime Smart App</span>
               </div>
-              <h1 className="text-base sm:text-xl font-bold text-slate-900 tracking-tight leading-tight truncate">
+              <h1 className="text-base sm:text-xl font-bold text-slate-900 dark:text-slate-100 tracking-tight leading-tight truncate">
                 Smart Monitoring Reproduksi Ternak
               </h1>
             </div>
@@ -334,13 +334,13 @@ export default function SapiTimePage() {
       {/* ── MAIN CONTENT ── */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-10 space-y-8">
         {/* Navigation Tabs */}
-        <div className="flex gap-2 border-b border-slate-200 pb-px overflow-x-auto no-scrollbar scroll-smooth -mx-4 px-4 sm:mx-0 sm:px-0">
+        <div className="flex gap-2 border-b border-slate-200 dark:border-slate-800 pb-px overflow-x-auto no-scrollbar scroll-smooth -mx-4 px-4 sm:mx-0 sm:px-0">
           <button
             onClick={() => setActiveTab('database')}
             className={`min-h-touch h-11 px-4 sm:px-5 rounded-xl text-xs sm:text-sm font-bold flex items-center gap-2 transition-all shrink-0 cursor-pointer ${
               activeTab === 'database'
                 ? 'bg-emerald-600 text-white shadow-xs'
-                : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
+                : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-slate-100'
             }`}
           >
             <Database size={16} />
@@ -351,7 +351,7 @@ export default function SapiTimePage() {
             className={`min-h-touch h-11 px-4 sm:px-5 rounded-xl text-xs sm:text-sm font-bold flex items-center gap-2 transition-all shrink-0 cursor-pointer ${
               activeTab === 'home'
                 ? 'bg-emerald-600 text-white shadow-xs'
-                : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
+                : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-slate-100'
             }`}
           >
             <LayoutDashboard size={16} />
@@ -362,7 +362,7 @@ export default function SapiTimePage() {
             className={`min-h-touch h-11 px-4 sm:px-5 rounded-xl text-xs sm:text-sm font-bold flex items-center gap-2 transition-all shrink-0 cursor-pointer ${
               activeTab === 'calendar'
                 ? 'bg-emerald-600 text-white shadow-xs'
-                : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
+                : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-slate-100'
             }`}
           >
             <CalendarIcon size={16} />
@@ -373,7 +373,7 @@ export default function SapiTimePage() {
             className={`min-h-touch h-11 px-4 sm:px-5 rounded-xl text-xs sm:text-sm font-bold flex items-center gap-2 transition-all shrink-0 cursor-pointer ${
               activeTab === 'history'
                 ? 'bg-emerald-600 text-white shadow-xs'
-                : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
+                : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-slate-100'
             }`}
           >
             <History size={16} />
