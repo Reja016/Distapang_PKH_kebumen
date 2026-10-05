@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import {
   Boxes,
   AlertTriangle,
@@ -13,6 +13,8 @@ import {
   Layers,
   Settings,
   Search,
+  ChevronLeft,
+  ChevronRight,
 } from 'lucide-react';
 import { StokDinasLedger, MasterBarang } from './types';
 
@@ -34,6 +36,8 @@ export default function GudangDashboardTab({
   const [searchTerm, setSearchTerm] = useState('');
   const [filterStatus, setFilterStatus] = useState<'ALL' | 'AMAN' | 'KRITIS' | 'HABIS'>('ALL');
   const [filterExp, setFilterExp] = useState<'ALL' | 'EXPIRED' | 'NEAR'>('ALL');
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 10;
 
   // Perhitungan Ringkasan KPI
   const totalMacam = stokDinas.length;
@@ -53,22 +57,39 @@ export default function GudangDashboardTab({
   }
 
   // Filter Data
-  const filteredList = stokDinas.filter((item) => {
-    const matchSearch =
-      item.nama_barang.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      item.kategori.toLowerCase().includes(searchTerm.toLowerCase());
+  const filteredList = useMemo(() => {
+    return stokDinas.filter((item) => {
+      const matchSearch =
+        item.nama_barang.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        item.kategori.toLowerCase().includes(searchTerm.toLowerCase());
 
-    const matchStatus = filterStatus === 'ALL' || item.status_stok === filterStatus;
+      const matchStatus = filterStatus === 'ALL' || item.status_stok === filterStatus;
 
-    let matchExp = true;
-    if (filterExp === 'EXPIRED') {
-      matchExp = item.batches.some((b) => b.saldo_batch > 0 && b.is_expired);
-    } else if (filterExp === 'NEAR') {
-      matchExp = item.batches.some((b) => b.saldo_batch > 0 && !b.is_expired && b.days_to_expire <= 90);
-    }
+      let matchExp = true;
+      if (filterExp === 'EXPIRED') {
+        matchExp = item.batches.some((b) => b.saldo_batch > 0 && b.is_expired);
+      } else if (filterExp === 'NEAR') {
+        matchExp = item.batches.some((b) => b.saldo_batch > 0 && !b.is_expired && b.days_to_expire <= 90);
+      }
 
-    return matchSearch && matchStatus && matchExp;
-  });
+      return matchSearch && matchStatus && matchExp;
+    });
+  }, [stokDinas, searchTerm, filterStatus, filterExp]);
+
+  // Reset ke halaman 1 jika filter atau pencarian berubah
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchTerm, filterStatus, filterExp]);
+
+  // Kalkulasi Paginasi
+  const totalPages = Math.max(1, Math.ceil(filteredList.length / itemsPerPage));
+  const activePage = Math.min(currentPage, totalPages);
+  const startIndex = (activePage - 1) * itemsPerPage;
+  const endIndex = Math.min(startIndex + itemsPerPage, filteredList.length);
+
+  const paginatedList = useMemo(() => {
+    return filteredList.slice(startIndex, startIndex + itemsPerPage);
+  }, [filteredList, startIndex, itemsPerPage]);
 
   return (
     <div className="space-y-6">
@@ -222,7 +243,9 @@ export default function GudangDashboardTab({
             </h3>
           </div>
           <span className="text-xs text-slate-400 font-medium">
-            {filteredList.length} dari {totalMacam} jenis barang
+            {filteredList.length === 0
+              ? '0 jenis barang'
+              : `Menampilkan ${startIndex + 1} - ${endIndex} dari ${filteredList.length} jenis barang`}
           </span>
         </div>
 
@@ -251,14 +274,14 @@ export default function GudangDashboardTab({
                   </td>
                 </tr>
               ) : (
-                filteredList.map((item, idx) => {
+                paginatedList.map((item, idx) => {
                   const mBarang = masterBarang.find((b) => b.id_barang === item.id_barang);
                   return (
                     <tr
                       key={item.id_barang}
                       className="hover:bg-slate-50/70 dark:hover:bg-slate-800/40 transition-colors"
                     >
-                      <td className="p-3.5 text-center font-mono text-slate-400">{idx + 1}</td>
+                      <td className="p-3.5 text-center font-mono text-slate-400">{startIndex + idx + 1}</td>
                       <td className="p-3.5">
                         <div className="font-bold text-slate-900 dark:text-slate-100">
                           {item.nama_barang}
@@ -392,6 +415,104 @@ export default function GudangDashboardTab({
             </tbody>
           </table>
         </div>
+
+        {/* ── KONTROL PAGINASI TABEL ── */}
+        {filteredList.length > 0 && (
+          <div className="px-6 py-4 border-t border-slate-100 dark:border-slate-800 flex flex-col sm:flex-row items-center justify-between gap-4 bg-slate-50/50 dark:bg-slate-900/50">
+            {/* Info Range Baris */}
+            <div className="text-xs text-slate-500 dark:text-slate-400 text-center sm:text-left">
+              Menampilkan <span className="font-bold text-slate-800 dark:text-slate-200">{startIndex + 1}</span> –{' '}
+              <span className="font-bold text-slate-800 dark:text-slate-200">{endIndex}</span> dari{' '}
+              <span className="font-bold text-slate-800 dark:text-slate-200">{filteredList.length}</span> barang{' '}
+              <span className="text-slate-400 dark:text-slate-500">(Halaman {activePage} dari {totalPages})</span>
+            </div>
+
+            {/* Navigasi Tombol & Pilih Halaman */}
+            <div className="flex flex-wrap items-center justify-center gap-2">
+              {/* Tombol Sebelumnya */}
+              <button
+                onClick={() => setCurrentPage((prev) => Math.max(1, prev - 1))}
+                disabled={activePage === 1}
+                className="px-3 py-1.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs font-bold text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 disabled:opacity-40 disabled:cursor-not-allowed transition-all flex items-center gap-1 cursor-pointer shadow-2xs"
+              >
+                <ChevronLeft className="w-3.5 h-3.5" />
+                <span className="hidden sm:inline">Sebelumnya</span>
+              </button>
+
+              {/* Tombol Angka Halaman */}
+              <div className="flex items-center gap-1">
+                {Array.from({ length: totalPages }, (_, i) => i + 1)
+                  .filter((p) => {
+                    return (
+                      p === 1 ||
+                      p === totalPages ||
+                      Math.abs(p - activePage) <= 1
+                    );
+                  })
+                  .reduce<(number | string)[]>((acc, p, i, arr) => {
+                    if (i > 0 && (p as number) - (arr[i - 1] as number) > 1) {
+                      acc.push('...');
+                    }
+                    acc.push(p);
+                    return acc;
+                  }, [])
+                  .map((item, pIdx) => {
+                    if (item === '...') {
+                      return (
+                        <span key={`ellipsis-${pIdx}`} className="px-1.5 text-xs text-slate-400">
+                          ...
+                        </span>
+                      );
+                    }
+                    const pageNum = item as number;
+                    const isActive = pageNum === activePage;
+                    return (
+                      <button
+                        key={pageNum}
+                        onClick={() => setCurrentPage(pageNum)}
+                        className={`w-8 h-8 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                          isActive
+                            ? 'bg-blue-600 text-white shadow-xs'
+                            : 'bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700'
+                        }`}
+                      >
+                        {pageNum}
+                      </button>
+                    );
+                  })}
+              </div>
+
+              {/* Tombol Selanjutnya */}
+              <button
+                onClick={() => setCurrentPage((prev) => Math.min(totalPages, prev + 1))}
+                disabled={activePage === totalPages}
+                className="px-3 py-1.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs font-bold text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 disabled:opacity-40 disabled:cursor-not-allowed transition-all flex items-center gap-1 cursor-pointer shadow-2xs"
+              >
+                <span className="hidden sm:inline">Selanjutnya</span>
+                <ChevronRight className="w-3.5 h-3.5" />
+              </button>
+
+              {/* Lompat ke Halaman (Dropdown Jump to Page) */}
+              {totalPages > 1 && (
+                <div className="flex items-center gap-1.5 ml-2 pl-2 border-l border-slate-200 dark:border-slate-700 text-xs text-slate-600 dark:text-slate-300">
+                  <span className="hidden sm:inline text-slate-400 text-[11px]">Ke:</span>
+                  <select
+                    value={activePage}
+                    onChange={(e) => setCurrentPage(Number(e.target.value))}
+                    className="h-8 px-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-bold text-slate-700 dark:text-slate-200 outline-none cursor-pointer focus:border-blue-500"
+                    title="Pilih halaman yang ingin dituju"
+                  >
+                    {Array.from({ length: totalPages }, (_, i) => i + 1).map((p) => (
+                      <option key={p} value={p}>
+                        Hal {p}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
