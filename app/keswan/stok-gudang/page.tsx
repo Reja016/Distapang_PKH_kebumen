@@ -243,55 +243,31 @@ export default function StokGudangKeswanPage() {
         </div>
       </div>
 
-      {/* ── 4 TAB UTAMA ── */}
-      <div className="flex items-center gap-2 border-b border-slate-200 dark:border-slate-800 pb-px overflow-x-auto">
-        <button
-          onClick={() => setActiveTab('dashboard')}
-          className={`flex items-center gap-2 px-5 py-3 text-xs sm:text-sm font-bold border-b-2 transition-all cursor-pointer whitespace-nowrap ${
-            activeTab === 'dashboard'
-              ? 'border-blue-600 text-blue-600 dark:text-blue-400 bg-blue-50/50 dark:bg-blue-950/20 rounded-t-xl'
-              : 'border-transparent text-slate-500 hover:text-slate-800 dark:hover:text-slate-200'
-          }`}
-        >
-          <Layers className="w-4 h-4" />
-          Dashboard &amp; Stok Dinas
-        </button>
-
-        <button
-          onClick={() => setActiveTab('pemasukan')}
-          className={`flex items-center gap-2 px-5 py-3 text-xs sm:text-sm font-bold border-b-2 transition-all cursor-pointer whitespace-nowrap ${
-            activeTab === 'pemasukan'
-              ? 'border-blue-600 text-blue-600 dark:text-blue-400 bg-blue-50/50 dark:bg-blue-950/20 rounded-t-xl'
-              : 'border-transparent text-slate-500 hover:text-slate-800 dark:hover:text-slate-200'
-          }`}
-        >
-          <ArrowDownLeft className="w-4 h-4" />
-          Pemasukan Dropping Dinas ({droppingDinas.length})
-        </button>
-
-        <button
-          onClick={() => setActiveTab('distribusi')}
-          className={`flex items-center gap-2 px-5 py-3 text-xs sm:text-sm font-bold border-b-2 transition-all cursor-pointer whitespace-nowrap ${
-            activeTab === 'distribusi'
-              ? 'border-blue-600 text-blue-600 dark:text-blue-400 bg-blue-50/50 dark:bg-blue-950/20 rounded-t-xl'
-              : 'border-transparent text-slate-500 hover:text-slate-800 dark:hover:text-slate-200'
-          }`}
-        >
-          <ArrowUpRight className="w-4 h-4" />
-          Distribusi &amp; Berita Acara BA ({distribusi.length})
-        </button>
-
-        <button
-          onClick={() => setActiveTab('puskeswan')}
-          className={`flex items-center gap-2 px-5 py-3 text-xs sm:text-sm font-bold border-b-2 transition-all cursor-pointer whitespace-nowrap ${
-            activeTab === 'puskeswan'
-              ? 'border-blue-600 text-blue-600 dark:text-blue-400 bg-blue-50/50 dark:bg-blue-950/20 rounded-t-xl'
-              : 'border-transparent text-slate-500 hover:text-slate-800 dark:hover:text-slate-200'
-          }`}
-        >
-          <Building2 className="w-4 h-4" />
-          Apotek Puskeswan &amp; Rekam Penggunaan ({penggunaan.length})
-        </button>
+      {/* ── 4 TAB UTAMA (Folder Tab Model Monev KTT) ── */}
+      <div className="flex gap-2 border-b border-slate-200 dark:border-slate-800 pb-px overflow-x-auto no-scrollbar scroll-smooth -mx-4 px-4 sm:mx-0 sm:px-0">
+        {[
+          { key: 'dashboard', label: 'Dashboard & Stok Dinas', icon: Layers },
+          { key: 'pemasukan', label: `Pemasukan Dropping Dinas (${droppingDinas.length})`, icon: ArrowDownLeft },
+          { key: 'distribusi', label: `Distribusi & Berita Acara BA (${distribusi.length})`, icon: ArrowUpRight },
+          { key: 'puskeswan', label: `Apotek Puskeswan & Rekam Penggunaan (${penggunaan.length})`, icon: Building2 },
+        ].map((tab) => {
+          const Icon = tab.icon;
+          const active = activeTab === tab.key;
+          return (
+            <button
+              key={tab.key}
+              onClick={() => setActiveTab(tab.key as any)}
+              className={`min-h-touch h-11 px-4 sm:px-6 rounded-t-xl text-xs sm:text-sm font-bold flex items-center gap-2 border-t border-x transition-all shrink-0 whitespace-nowrap cursor-pointer ${
+                active
+                  ? 'bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 text-blue-600 dark:text-blue-400 border-b-white dark:border-b-slate-900 translate-y-px shadow-xs'
+                  : 'border-transparent text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 bg-slate-100/60 dark:bg-slate-800/60'
+              }`}
+            >
+              <Icon size={16} strokeWidth={2.5} />
+              <span>{tab.label}</span>
+            </button>
+          );
+        })}
       </div>
 
       {/* ── KONTEN TAB ── */}

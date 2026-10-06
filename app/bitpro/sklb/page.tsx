@@ -10,6 +10,8 @@ import {
   RefreshCw,
   Plus,
   Calendar,
+  FileSpreadsheet,
+  Layers,
 } from 'lucide-react';
 import { KECAMATAN_ITEMS } from '@/lib/sklbPetaData';
 import {
@@ -636,24 +638,26 @@ export default function UnifiedSKLBPage() {
             </div>
           </div>
 
-          {/* Navigation Tabs */}
-          <div className="flex gap-1 border-b-2 border-slate-300 pb-px overflow-x-auto">
+          {/* Navigation Tabs (Folder Tab Model Monev KTT) */}
+          <div className="flex gap-2 border-b border-slate-200 dark:border-slate-800 pb-px overflow-x-auto no-scrollbar scroll-smooth -mx-4 px-4 sm:mx-0 sm:px-0">
             {[
-              { key: 'rekap', label: `Rekapitulasi Capaian Tim (${dataRekap.length})` },
-              { key: 'detail', label: `Master Detail Ternak (${dataDetail.length})` },
+              { key: 'rekap', label: `Rekapitulasi Capaian Tim (${dataRekap.length})`, icon: FileSpreadsheet },
+              { key: 'detail', label: `Master Detail Ternak (${dataDetail.length})`, icon: Layers },
             ].map((tab) => {
+              const Icon = tab.icon;
               const active = activeTab === tab.key;
               return (
                 <button
                   key={tab.key}
                   onClick={() => setActiveTab(tab.key as any)}
-                  className={`min-h-touch h-10 px-5 text-xs sm:text-sm font-extrabold border-t-2 border-x-2 transition-all shrink-0 whitespace-nowrap cursor-pointer ${
+                  className={`min-h-touch h-11 px-4 sm:px-6 rounded-t-xl text-xs sm:text-sm font-bold flex items-center gap-2 border-t border-x transition-all shrink-0 whitespace-nowrap cursor-pointer ${
                     active
-                      ? 'bg-white border-slate-300 text-emerald-800 border-b-white translate-y-0.5'
-                      : 'border-transparent text-slate-600 hover:text-slate-900 bg-slate-100'
+                      ? 'bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 text-emerald-700 dark:text-emerald-400 border-b-white dark:border-b-slate-900 translate-y-px shadow-xs'
+                      : 'border-transparent text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 bg-slate-100/60 dark:bg-slate-800/60'
                   }`}
                 >
-                  {tab.label}
+                  <Icon size={16} strokeWidth={2.5} />
+                  <span>{tab.label}</span>
                 </button>
               );
             })}

@@ -30,7 +30,7 @@ export default function NkvTableSection({
   return (
     <div className="space-y-6">
       {/* Filter & Search Toolbar */}
-      <div className="bg-white p-4 sm:p-5 rounded-3xl border border-slate-200 shadow-sm flex flex-col md:flex-row items-center gap-3">
+      <div className="bg-white dark:bg-slate-900 p-4 sm:p-5 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-sm flex flex-col md:flex-row items-center gap-3">
         <div className="relative flex-1 w-full">
           <Search size={16} strokeWidth={2.5} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
           <input
@@ -38,7 +38,7 @@ export default function NkvTableSection({
             placeholder="Cari nama usaha, jenis, proses audit, atau keterangan..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full min-h-touch h-11 pl-10 pr-4 rounded-xl border border-slate-200 bg-slate-50 text-xs font-bold text-slate-900 focus:outline-none focus:border-purple-600 focus:bg-white transition-colors"
+            className="w-full min-h-touch h-11 pl-10 pr-4 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-xs font-bold text-slate-900 dark:text-slate-100 focus:outline-none focus:border-purple-600 focus:bg-white dark:focus:bg-slate-800 transition-colors"
           />
         </div>
 
@@ -46,7 +46,7 @@ export default function NkvTableSection({
           <select
             value={filterJenis}
             onChange={(e) => setFilterJenis(e.target.value)}
-            className="min-h-touch h-11 px-3 rounded-xl border border-slate-200 bg-slate-50 text-xs font-bold text-slate-700 focus:outline-none focus:border-purple-600 focus:bg-white"
+            className="min-h-touch h-11 px-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-xs font-bold text-slate-700 dark:text-slate-200 focus:outline-none focus:border-purple-600 focus:bg-white dark:focus:bg-slate-800"
           >
             <option value="">Semua Jenis Usaha</option>
             {uniqueJenis.map((jenis) => (
@@ -62,7 +62,7 @@ export default function NkvTableSection({
                 setSearchTerm('');
                 setFilterJenis('');
               }}
-              className="min-h-touch h-11 px-3 rounded-xl border border-slate-200 bg-slate-100 hover:bg-slate-200 text-xs font-bold text-slate-700 transition-colors cursor-pointer"
+              className="min-h-touch h-11 px-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-xs font-bold text-slate-700 dark:text-slate-200 transition-colors cursor-pointer"
             >
               Reset Filter
             </button>
@@ -71,20 +71,20 @@ export default function NkvTableSection({
       </div>
 
       {/* ── TABEL DATA NOMOR KONTROL VETERINER (11 KOLOM) ── */}
-      <div className="bg-white rounded-3xl border border-slate-200 shadow-sm overflow-hidden">
-        <div className="p-5 border-b border-slate-100 flex flex-wrap items-center justify-between gap-3 bg-purple-50/50">
+      <div className="bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden">
+        <div className="p-5 border-b border-slate-100 dark:border-slate-800 flex flex-wrap items-center justify-between gap-3 bg-purple-50/50 dark:bg-slate-800/60">
           <div className="flex items-center gap-2.5">
             <span className="text-xl">📋</span>
             <div>
-              <h3 className="font-extrabold text-base text-slate-900">
+              <h3 className="font-extrabold text-base text-slate-900 dark:text-slate-100">
                 Rekapitulasi Usaha &amp; Pembinaan Sertifikasi NKV
               </h3>
-              <p className="text-xs text-slate-500">
+              <p className="text-xs text-slate-500 dark:text-slate-400">
                 Daftar pembinaan higiene sanitasi, proses audit, dan status pengeluaran rekomendasi
               </p>
             </div>
           </div>
-          <span className="text-xs font-bold px-3 py-1 rounded-full bg-purple-100 text-purple-800 border border-purple-200">
+          <span className="text-xs font-bold px-3 py-1 rounded-full bg-purple-100 dark:bg-purple-950/50 text-purple-800 dark:text-purple-300 border border-purple-200 dark:border-purple-800">
             {filteredData.length} Data Ditampilkan
           </span>
         </div>

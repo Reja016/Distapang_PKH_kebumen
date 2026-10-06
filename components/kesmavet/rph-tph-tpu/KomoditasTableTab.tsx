@@ -34,7 +34,7 @@ export function KomoditasTableTab({
   return (
     <div className="space-y-4">
       {/* Location Switcher Toolbar */}
-      <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 bg-white p-3.5 rounded-2xl border border-slate-200 shadow-xs">
+      <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 bg-white dark:bg-slate-900 p-3.5 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-xs">
         <div className="flex items-center gap-2 overflow-x-auto">
           {['ALL', 'RPH Kebumen', 'Luar RPH Kebumen', 'RPH Gombong', 'Luar RPH Gombong'].map((lok) => (
             <button
@@ -43,7 +43,7 @@ export function KomoditasTableTab({
               className={`px-3.5 py-2 rounded-xl text-xs font-bold transition-all shrink-0 cursor-pointer ${
                 selectedKomoditasFilter === lok
                   ? 'bg-purple-600 text-white shadow-xs'
-                  : 'bg-slate-100 hover:bg-purple-50 text-slate-700'
+                  : 'bg-slate-100 dark:bg-slate-800 hover:bg-purple-50 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200'
               }`}
             >
               {lok === 'ALL' ? 'Semua Lokasi' : lok}
@@ -59,7 +59,7 @@ export function KomoditasTableTab({
       </div>
 
       {/* Table TPH Komoditas */}
-      <div className="bg-white rounded-3xl border border-slate-300 dark:border-slate-700 shadow-xs overflow-hidden p-4 sm:p-6">
+      <div className="bg-white dark:bg-slate-900 rounded-3xl border border-slate-300 dark:border-slate-700 shadow-xs overflow-hidden p-4 sm:p-6">
         <div className="overflow-x-auto rounded-2xl border border-slate-300 dark:border-slate-700">
           <table className="w-full min-w-[1750px] text-center text-xs border-collapse">
             <thead>

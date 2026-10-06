@@ -239,9 +239,9 @@ export default function NKVPage() {
   if (loading || !isReady) return null;
 
   return (
-    <div className="min-h-screen bg-purple-50/30 text-slate-900 font-sans selection:bg-purple-600 selection:text-white pb-20">
+    <div className="min-h-screen bg-purple-50/30 dark:bg-slate-950 text-slate-900 dark:text-slate-100 font-sans selection:bg-purple-600 selection:text-white pb-20">
       {/* ── TOP HEADER (Tema Ungu) ── */}
-      <header className="border-b border-purple-100 bg-white/95 backdrop-blur-md sticky top-0 z-30 shadow-xs">
+      <header className="border-b border-purple-100 dark:border-slate-800 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md sticky top-0 z-30 shadow-xs">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-5 min-h-[80px] sm:min-h-[88px] flex items-center justify-between gap-3">
           <div className="flex items-center gap-3 min-w-0 flex-1">
             <Link
@@ -260,7 +260,7 @@ export default function NKVPage() {
                 <span className="text-slate-300">/</span>
                 <span className="text-xs font-bold text-purple-700 whitespace-nowrap">NKV</span>
               </div>
-              <h1 className="text-base sm:text-xl font-extrabold text-slate-900 tracking-tight leading-tight truncate">
+              <h1 className="text-base sm:text-xl font-extrabold text-slate-900 dark:text-white tracking-tight leading-tight truncate">
                 Nomor Kontrol Veteriner (NKV)
               </h1>
             </div>
@@ -269,7 +269,7 @@ export default function NKVPage() {
           <div className="flex items-center gap-2 shrink-0">
             <button
               onClick={handleExportExcel}
-              className="min-h-touch min-w-touch h-11 px-4 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 text-xs sm:text-sm font-bold flex items-center gap-2 transition-all shadow-xs cursor-pointer"
+              className="min-h-touch min-w-touch h-11 px-4 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 text-xs sm:text-sm font-bold flex items-center gap-2 transition-all shadow-xs cursor-pointer"
             >
               <Download size={16} strokeWidth={2.5} />
               <span className="hidden sm:inline">Export Excel</span>
@@ -280,7 +280,8 @@ export default function NKVPage() {
                 className="min-h-touch min-w-touch h-11 px-4 rounded-xl bg-purple-600 hover:bg-purple-700 text-white text-xs sm:text-sm font-bold flex items-center gap-2 transition-all shadow-xs cursor-pointer"
               >
                 <Plus size={16} strokeWidth={2.5} />
-                <span>Tambah Data NKV</span>
+                <span className="hidden sm:inline">Tambah Data NKV</span>
+                <span className="sm:hidden">Tambah</span>
               </button>
             )}
           </div>

@@ -41,16 +41,16 @@ export default function PakanPetaSection({
 }: PakanPetaSectionProps) {
   return (
     <div
-      className={`bg-white rounded-3xl border border-slate-200 shadow-sm p-4 sm:p-8 space-y-6 relative overflow-hidden ${
+      className={`bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-sm p-4 sm:p-8 space-y-6 relative overflow-hidden ${
         mobileTab !== 'map' ? 'hidden sm:block' : 'block'
       }`}
     >
       {/* Header Peta */}
-      <div className="text-center space-y-1 pb-4 border-b border-slate-100 relative">
-        <h2 className="text-lg sm:text-3xl font-black text-slate-900 tracking-tight uppercase">
+      <div className="text-center space-y-1 pb-4 border-b border-slate-100 dark:border-slate-800 relative">
+        <h2 className="text-lg sm:text-3xl font-black text-slate-900 dark:text-slate-100 tracking-tight uppercase">
           Peta Sebaran Kapasitas Pakan Kabupaten Kebumen
         </h2>
-        <p className="text-[11px] sm:text-sm font-semibold text-slate-500">
+        <p className="text-[11px] sm:text-sm font-semibold text-slate-500 dark:text-slate-400">
           Analisis Daya Tampung &amp; Potensi Penambahan Populasi Ternak Berdasarkan Ketersediaan Pakan Lokal (Tahun {selectedYear})
         </p>
       </div>
@@ -58,7 +58,7 @@ export default function PakanPetaSection({
       {/* Container Peta & Komponen Samping */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
         {/* 1. AREA PETA INTERAKTIF SVG (26 KECAMATAN PRESISI COREL) */}
-        <div className="lg:col-span-9 relative bg-slate-50/70 border border-slate-200 rounded-3xl p-3 sm:p-6 overflow-hidden flex flex-col items-center">
+        <div className="lg:col-span-9 relative bg-slate-50/70 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-3xl p-3 sm:p-6 overflow-hidden flex flex-col items-center">
           {/* Petunjuk Interaksi */}
           <div className="w-full flex flex-col sm:flex-row sm:items-center justify-between text-xs text-slate-500 gap-2 mb-2">
             <span className="flex items-center gap-1.5 font-bold text-purple-900 bg-purple-50 px-3 py-1 rounded-xl border border-purple-200">

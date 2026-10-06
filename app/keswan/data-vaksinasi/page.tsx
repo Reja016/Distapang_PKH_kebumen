@@ -11,6 +11,9 @@ import {
   Info,
   Check,
   AlertCircle,
+  Calendar,
+  FileSpreadsheet,
+  Layers,
 } from 'lucide-react';
 import {
   Bulanan,
@@ -624,25 +627,27 @@ export default function DataVaksinasiPMKPage() {
           </p>
         </div>
 
-        {/* Navigation Tabs */}
-        <div className="flex gap-2 border-b border-slate-200 pb-px overflow-x-auto no-scrollbar scroll-smooth -mx-4 px-4 sm:mx-0 sm:px-0">
+        {/* Navigation Tabs (Folder Tab Model Monev KTT) */}
+        <div className="flex gap-2 border-b border-slate-200 dark:border-slate-800 pb-px overflow-x-auto no-scrollbar scroll-smooth -mx-4 px-4 sm:mx-0 sm:px-0">
           {[
-            { key: 'harian', label: 'Matriks Input Harian' },
-            { key: 'bulanan', label: 'Rekapitulasi Bulanan' },
-            { key: 'apbd', label: 'Alokasi APBD & Log Droping' },
+            { key: 'harian', label: 'Matriks Input Harian', icon: Calendar },
+            { key: 'bulanan', label: 'Rekapitulasi Bulanan', icon: FileSpreadsheet },
+            { key: 'apbd', label: 'Alokasi APBD & Log Droping', icon: Layers },
           ].map((tab) => {
+            const Icon = tab.icon;
             const active = activeTab === tab.key;
             return (
               <button
                 key={tab.key}
                 onClick={() => setActiveTab(tab.key as any)}
-                className={`min-h-touch h-11 px-4 sm:px-5 rounded-t-xl text-xs sm:text-sm font-bold border-t border-x transition-all shrink-0 whitespace-nowrap cursor-pointer ${
+                className={`min-h-touch h-11 px-4 sm:px-6 rounded-t-xl text-xs sm:text-sm font-bold flex items-center gap-2 border-t border-x transition-all shrink-0 whitespace-nowrap cursor-pointer ${
                   active
-                    ? 'bg-white border-slate-200 text-blue-600 border-b-white translate-y-px shadow-sm'
-                    : 'border-transparent text-slate-500 hover:text-slate-900 bg-slate-100/60'
+                    ? 'bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 text-blue-600 dark:text-blue-400 border-b-white dark:border-b-slate-900 translate-y-px shadow-xs'
+                    : 'border-transparent text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 bg-slate-100/60 dark:bg-slate-800/60'
                 }`}
               >
-                {tab.label}
+                <Icon size={16} strokeWidth={2.5} />
+                <span>{tab.label}</span>
               </button>
             );
           })}

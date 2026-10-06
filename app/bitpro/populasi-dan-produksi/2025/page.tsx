@@ -90,11 +90,11 @@ export default function Populasi2025() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 text-slate-900 font-sans selection:bg-emerald-600 selection:text-white pb-20">
+    <div className="min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 font-sans selection:bg-emerald-600 selection:text-white pb-20">
       
       {/* ── TOP HEADER (Tema Hijau - Lega & Bernapas) ── */}
-      <header className="border-b border-emerald-100 bg-white/95 backdrop-blur-md sticky top-0 z-30 shadow-xs">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-5 min-h-[80px] sm:min-h-[88px] flex items-center justify-between gap-3">
+      <header className="border-b border-emerald-100 dark:border-slate-800 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md sticky top-0 z-30 shadow-xs">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-5 min-h-[80px] sm:min-h-[88px] flex flex-col md:flex-row md:items-center justify-between gap-4">
           
           <div className="flex items-center gap-3 min-w-0 flex-1">
             <Link
@@ -113,17 +113,17 @@ export default function Populasi2025() {
                 <span className="text-slate-300">/</span>
                 <span className="text-xs font-bold text-emerald-700 whitespace-nowrap">Populasi 2025</span>
               </div>
-              <h1 className="text-base sm:text-xl font-bold text-slate-900 tracking-tight leading-tight truncate">
+              <h1 className="text-base sm:text-xl font-bold text-slate-900 dark:text-white tracking-tight leading-tight truncate">
                 Data Populasi Ternak TW {selectedTw} Tahun 2025
               </h1>
             </div>
           </div>
 
-          <div className="flex items-center gap-2 shrink-0">
+          <div className="flex items-center gap-2 shrink-0 flex-wrap">
             <select
               value={selectedTw}
               onChange={(e) => setSelectedTw(e.target.value)}
-              className="min-h-touch h-11 px-3 rounded-xl border border-emerald-200 bg-emerald-50 text-emerald-900 text-xs sm:text-sm font-bold focus:outline-none focus:border-emerald-600 shadow-xs"
+              className="min-h-touch h-11 px-3 rounded-xl border border-emerald-200 dark:border-slate-700 bg-emerald-50 dark:bg-slate-800 text-emerald-900 dark:text-emerald-300 text-xs sm:text-sm font-bold focus:outline-none focus:border-emerald-600 shadow-xs"
             >
               <option value="1">Triwulan 1 (TW 1)</option>
               <option value="2">Triwulan 2 (TW 2)</option>
@@ -135,7 +135,7 @@ export default function Populasi2025() {
               onClick={handleExportExcel}
               title="Export Excel"
               aria-label="Export Excel"
-              className="min-h-touch min-w-touch h-11 w-11 sm:w-auto sm:px-4 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 text-xs sm:text-sm font-bold flex items-center justify-center sm:gap-2 transition-all shadow-xs cursor-pointer"
+              className="min-h-touch min-w-touch h-11 w-11 sm:w-auto sm:px-4 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 text-xs sm:text-sm font-bold flex items-center justify-center sm:gap-2 transition-all shadow-xs cursor-pointer"
             >
               <Download size={16} strokeWidth={2.5} />
               <span className="hidden sm:inline">Export Excel</span>
@@ -148,7 +148,7 @@ export default function Populasi2025() {
                 placeholder="Cari desa/kecamatan..."
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                className="w-full min-h-touch h-11 pl-9 pr-3 rounded-xl border border-slate-200 bg-slate-50 text-xs text-slate-900 focus:outline-none focus:border-emerald-600 focus:bg-white transition-colors"
+                className="w-full min-h-touch h-11 pl-9 pr-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-xs text-slate-900 dark:text-slate-100 focus:outline-none focus:border-emerald-600 focus:bg-white dark:focus:bg-slate-800 transition-colors"
               />
             </div>
           </div>
@@ -159,13 +159,13 @@ export default function Populasi2025() {
       {/* ── MAIN WORKSPACE ── */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-4">
         
-        <div className="rounded-2xl border border-slate-300 dark:border-slate-700 bg-white shadow-sm overflow-hidden">
+        <div className="rounded-2xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 shadow-sm overflow-hidden">
           
-          <div className="p-4 border-b border-slate-300 dark:border-slate-700 flex items-center justify-between bg-slate-50/50">
-            <span className="text-xs font-bold text-slate-700 font-sans">
+          <div className="p-4 border-b border-slate-300 dark:border-slate-700 flex items-center justify-between bg-slate-50/50 dark:bg-slate-800/60">
+            <span className="text-xs font-bold text-slate-700 dark:text-slate-300 font-sans">
               Menampilkan {filteredData.length} Desa dari Database MySQL (`populasi`)
             </span>
-            <span className="text-xs font-semibold text-emerald-700 bg-emerald-50 px-3 py-1 rounded-full border border-emerald-100">
+            <span className="text-xs font-semibold text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/60 px-3 py-1 rounded-full border border-emerald-100 dark:border-emerald-800">
               Sinkronisasi Live
             </span>
           </div>
@@ -196,21 +196,21 @@ export default function Populasi2025() {
                       <tr
                         key={idx}
                         className={`transition-colors ${
-                          isEven ? 'bg-white hover:bg-slate-50/80' : 'bg-slate-100 hover:bg-slate-200/60'
+                          isEven ? 'bg-white dark:bg-slate-900 hover:bg-slate-50/80 dark:hover:bg-slate-800/80' : 'bg-slate-100 dark:bg-slate-800/50 hover:bg-slate-200/60 dark:hover:bg-slate-800/80'
                         }`}
                       >
                         <td className={`p-3 text-center font-sans text-slate-400 sticky left-0 z-10 border-r border-slate-300 dark:border-slate-700 ${
-                          isEven ? 'bg-white' : 'bg-slate-100'
+                          isEven ? 'bg-white dark:bg-slate-900' : 'bg-slate-100 dark:bg-slate-800'
                         }`}>
                           {row.no || idx + 1}
                         </td>
-                        <td className={`p-3 font-semibold text-slate-900 sticky left-[48px] z-10 border-r border-slate-300 dark:border-slate-700 ${
-                          isEven ? 'bg-white' : 'bg-slate-100'
+                        <td className={`p-3 font-semibold text-slate-900 dark:text-slate-100 sticky left-[48px] z-10 border-r border-slate-300 dark:border-slate-700 ${
+                          isEven ? 'bg-white dark:bg-slate-900' : 'bg-slate-100 dark:bg-slate-800'
                         }`}>
                           {row.kec}
                         </td>
-                        <td className={`p-3 text-slate-700 sticky left-[168px] z-10 border-r border-slate-300 dark:border-slate-700 ${
-                          isEven ? 'bg-white' : 'bg-slate-100'
+                        <td className={`p-3 text-slate-700 dark:text-slate-300 sticky left-[168px] z-10 border-r border-slate-300 dark:border-slate-700 ${
+                          isEven ? 'bg-white dark:bg-slate-900' : 'bg-slate-100 dark:bg-slate-800'
                         }`}>
                           {row.desa}
                         </td>

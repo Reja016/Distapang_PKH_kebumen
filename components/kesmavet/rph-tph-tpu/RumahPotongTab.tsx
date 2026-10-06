@@ -33,7 +33,7 @@ export function RumahPotongTab({
   return (
     <div className="space-y-4">
       {/* Toolbar */}
-      <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 bg-white p-4 rounded-2xl border border-slate-200 shadow-xs">
+      <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 bg-white dark:bg-slate-900 p-4 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-xs">
         <div className="flex items-center gap-2 flex-1 max-w-md">
           <div className="relative w-full">
             <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
@@ -42,7 +42,7 @@ export function RumahPotongTab({
               value={searchRph}
               onChange={(e) => setSearchRph(e.target.value)}
               placeholder="Cari nama usaha, pemilik, atau lokasi..."
-              className="w-full h-10 pl-10 pr-3.5 text-xs rounded-xl border border-slate-200 bg-slate-50/60 focus:bg-white focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-600 font-medium"
+              className="w-full h-10 pl-10 pr-3.5 text-xs rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50/60 dark:bg-slate-800 text-slate-900 dark:text-slate-100 focus:bg-white dark:focus:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-600 font-medium"
             />
           </div>
         </div>
@@ -51,7 +51,7 @@ export function RumahPotongTab({
           <select
             value={filterJenis}
             onChange={(e) => setFilterJenis(e.target.value)}
-            className="h-10 px-3.5 text-xs rounded-xl border border-slate-200 bg-white font-bold text-slate-700 focus:outline-none focus:border-purple-600"
+            className="h-10 px-3.5 text-xs rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 font-bold text-slate-700 dark:text-slate-200 focus:outline-none focus:border-purple-600"
           >
             <option value="ALL">Semua Jenis Unit</option>
             <option value="RPH">RPH (Rumah Potong Hewan)</option>
@@ -63,7 +63,7 @@ export function RumahPotongTab({
           <select
             value={filterHalal}
             onChange={(e) => setFilterHalal(e.target.value)}
-            className="h-10 px-3.5 text-xs rounded-xl border border-slate-200 bg-white font-bold text-slate-700 focus:outline-none focus:border-purple-600"
+            className="h-10 px-3.5 text-xs rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 font-bold text-slate-700 dark:text-slate-200 focus:outline-none focus:border-purple-600"
           >
             <option value="ALL">Semua Status Halal</option>
             <option value="Sudah">Sudah Bersertifikat</option>

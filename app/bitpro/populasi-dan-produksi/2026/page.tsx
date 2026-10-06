@@ -382,9 +382,9 @@ function InputPopulasi2026Content() {
   if (!isReady) return null;
 
   return (
-    <div className="min-h-screen bg-slate-50 text-slate-900 font-sans selection:bg-emerald-600 selection:text-white pb-24">
+    <div className="min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 font-sans selection:bg-emerald-600 selection:text-white pb-24">
       {/* ── TOP HEADER ── */}
-      <header className="border-b border-emerald-100 bg-white/95 backdrop-blur-md sticky top-0 z-30 shadow-xs">
+      <header className="border-b border-emerald-100 dark:border-slate-800 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md sticky top-0 z-30 shadow-xs">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-5 min-h-[80px] sm:min-h-[88px] flex items-center justify-between gap-3">
           <div className="flex items-center gap-3 min-w-0 flex-1">
             <Link
@@ -403,7 +403,7 @@ function InputPopulasi2026Content() {
                 <span className="text-slate-300">/</span>
                 <span className="text-xs font-bold text-emerald-700 whitespace-nowrap">Populasi {year}</span>
               </div>
-              <h1 className="text-base sm:text-xl font-bold text-slate-900 tracking-tight leading-tight truncate">
+              <h1 className="text-base sm:text-xl font-bold text-slate-900 dark:text-white tracking-tight leading-tight truncate">
                 Data Populasi Ternak {year}
               </h1>
             </div>
@@ -415,9 +415,9 @@ function InputPopulasi2026Content() {
                 onClick={() => setShowBulkUpload(true)}
                 title="Import Excel"
                 aria-label="Import Excel"
-                className="min-h-touch min-w-touch h-11 w-11 sm:w-auto sm:px-4 rounded-xl border border-emerald-200 bg-emerald-50 hover:bg-emerald-100 text-emerald-900 text-xs sm:text-sm font-bold flex items-center justify-center sm:gap-2 transition-colors shadow-xs cursor-pointer"
+                className="min-h-touch min-w-touch h-11 w-11 sm:w-auto sm:px-4 rounded-xl border border-emerald-200 dark:border-slate-700 bg-emerald-50 dark:bg-slate-800 hover:bg-emerald-100 dark:hover:bg-slate-700 text-emerald-900 dark:text-emerald-300 text-xs sm:text-sm font-bold flex items-center justify-center sm:gap-2 transition-colors shadow-xs cursor-pointer"
               >
-                <UploadCloud size={16} className="text-emerald-700" />
+                <UploadCloud size={16} className="text-emerald-700 dark:text-emerald-400" />
                 <span className="hidden sm:inline">Import Excel</span>
               </button>
             )}

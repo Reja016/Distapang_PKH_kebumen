@@ -32,7 +32,7 @@ export function RumpunTableTab({
   return (
     <div className="space-y-4">
       {/* Horizontal Button Switcher untuk 4 Lokasi */}
-      <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 bg-white p-3.5 rounded-2xl border border-slate-200 shadow-xs">
+      <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 bg-white dark:bg-slate-900 p-3.5 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-xs">
         <div className="flex items-center gap-2 overflow-x-auto pb-1 sm:pb-0">
           {LOKASI_CONFIGS.map((cfg) => {
             const isActive = selectedLokasiKey === cfg.key;
@@ -43,7 +43,7 @@ export function RumpunTableTab({
                 className={`px-4 py-2.5 rounded-xl text-xs font-bold transition-all shrink-0 cursor-pointer ${
                   isActive
                     ? 'bg-purple-600 text-white shadow-xs'
-                    : 'bg-slate-100 hover:bg-purple-50 text-slate-700 hover:text-purple-700'
+                    : 'bg-slate-100 dark:bg-slate-800 hover:bg-purple-50 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 hover:text-purple-700 dark:hover:text-purple-300'
                 }`}
               >
                 {cfg.label}
@@ -60,10 +60,10 @@ export function RumpunTableTab({
       </div>
 
       {/* TABEL LOKASI TERPILIH DENGAN TOTAL TERPISAH */}
-      <div className="bg-white rounded-3xl border border-slate-300 dark:border-slate-700 shadow-xs overflow-hidden space-y-3 p-4 sm:p-6 animate-in fade-in duration-150">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-3 border-b border-purple-100">
+      <div className="bg-white dark:bg-slate-900 rounded-3xl border border-slate-300 dark:border-slate-700 shadow-xs overflow-hidden space-y-3 p-4 sm:p-6 animate-in fade-in duration-150">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-3 border-b border-purple-100 dark:border-slate-800">
           <div>
-            <h3 className="text-base font-extrabold text-slate-900 flex items-center gap-2">
+            <h3 className="text-base font-extrabold text-slate-900 dark:text-white flex items-center gap-2">
               <span className="w-3 h-3 rounded-full bg-purple-600" />
               <span>{activeCfg.label}</span>
             </h3>

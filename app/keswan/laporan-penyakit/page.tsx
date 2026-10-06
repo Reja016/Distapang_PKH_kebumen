@@ -450,29 +450,29 @@ export default function LaporanPenyakitPage() {
           </div>
         </div>
 
-        {/* View Switcher Tabs */}
-        <div className="flex items-center gap-2 p-1.5 bg-white rounded-2xl border border-blue-100 shadow-xs print:hidden">
+        {/* View Switcher Tabs (Folder Tab Model Monev KTT) */}
+        <div className="flex gap-2 border-b border-slate-200 dark:border-slate-800 pb-px overflow-x-auto no-scrollbar scroll-smooth -mx-4 px-4 sm:mx-0 sm:px-0 print:hidden">
           <button
             onClick={() => setActiveView('map')}
-            className={`px-4 py-2.5 rounded-xl text-xs sm:text-sm font-extrabold flex items-center gap-2 transition-all cursor-pointer ${
+            className={`min-h-touch h-11 px-4 sm:px-6 rounded-t-xl text-xs sm:text-sm font-bold flex items-center gap-2 border-t border-x transition-all shrink-0 whitespace-nowrap cursor-pointer ${
               activeView === 'map'
-                ? 'bg-blue-600 text-white shadow-xs'
-                : 'text-slate-600 hover:text-blue-700 hover:bg-blue-50'
+                ? 'bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 text-blue-600 dark:text-blue-400 border-b-white dark:border-b-slate-900 translate-y-px shadow-xs'
+                : 'border-transparent text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 bg-slate-100/60 dark:bg-slate-800/60'
             }`}
           >
-            <MapIcon size={16} />
+            <MapIcon size={16} strokeWidth={2.5} />
             <span>Peta Sebaran Spasial &amp; Legenda Diagnosa</span>
           </button>
 
           <button
             onClick={() => setActiveView('table')}
-            className={`px-4 py-2.5 rounded-xl text-xs sm:text-sm font-extrabold flex items-center gap-2 transition-all cursor-pointer ${
+            className={`min-h-touch h-11 px-4 sm:px-6 rounded-t-xl text-xs sm:text-sm font-bold flex items-center gap-2 border-t border-x transition-all shrink-0 whitespace-nowrap cursor-pointer ${
               activeView === 'table'
-                ? 'bg-blue-600 text-white shadow-xs'
-                : 'text-slate-600 hover:text-blue-700 hover:bg-blue-50'
+                ? 'bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 text-blue-600 dark:text-blue-400 border-b-white dark:border-b-slate-900 translate-y-px shadow-xs'
+                : 'border-transparent text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 bg-slate-100/60 dark:bg-slate-800/60'
             }`}
           >
-            <FileSpreadsheet size={16} />
+            <FileSpreadsheet size={16} strokeWidth={2.5} />
             <span>Tabel Rekapitulasi Data Kasus ({filteredCases.length} Baris)</span>
           </button>
         </div>

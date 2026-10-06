@@ -39,19 +39,19 @@ export default function PakanTableSection({
 }: PakanTableSectionProps) {
   return (
     <div
-      className={`bg-white rounded-3xl border border-slate-200 shadow-sm p-4 sm:p-8 space-y-6 ${
+      className={`bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-sm p-4 sm:p-8 space-y-6 ${
         mobileTab !== 'table' ? 'hidden sm:block' : 'block'
       }`}
     >
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-4 border-b border-slate-100">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-4 border-b border-slate-100 dark:border-slate-800">
         <div>
           <div className="flex items-center gap-2">
-            <span className="px-3 py-1 rounded-xl text-xs font-black bg-purple-100 text-purple-900">
+            <span className="px-3 py-1 rounded-xl text-xs font-black bg-purple-100 dark:bg-purple-950/60 text-purple-900 dark:text-purple-300">
               Tahun {selectedYear}
             </span>
             <span className="text-xs font-bold text-slate-400">26 Kecamatan</span>
           </div>
-          <h3 className="text-base sm:text-2xl font-black text-slate-900 tracking-tight mt-1 uppercase">
+          <h3 className="text-base sm:text-2xl font-black text-slate-900 dark:text-slate-100 tracking-tight mt-1 uppercase">
             DATA KAPASITAS PAKAN KABUPATEN KEBUMEN TAHUN {selectedYear}
           </h3>
         </div>
@@ -60,7 +60,7 @@ export default function PakanTableSection({
           <select
             value={filterStatus}
             onChange={(e) => setFilterStatus(e.target.value)}
-            className="min-h-touch h-10 px-3.5 rounded-xl border border-slate-200 bg-slate-50 text-xs font-bold text-slate-800 focus:outline-none focus:border-purple-600 shadow-2xs cursor-pointer"
+            className="min-h-touch h-10 px-3.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-xs font-bold text-slate-800 dark:text-slate-200 focus:outline-none focus:border-purple-600 shadow-2xs cursor-pointer"
           >
             <option value="Semua">Semua Status (Surplus &amp; Defisit)</option>
             <option value="Surplus">Hanya Surplus (Hijau)</option>
@@ -74,7 +74,7 @@ export default function PakanTableSection({
               placeholder="Cari kecamatan..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full min-h-touch h-10 pl-9 pr-4 rounded-xl border border-slate-200 bg-slate-50 text-xs font-semibold text-slate-900 focus:bg-white focus:outline-none focus:border-purple-600 shadow-2xs"
+              className="w-full min-h-touch h-10 pl-9 pr-4 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-xs font-semibold text-slate-900 dark:text-slate-100 focus:bg-white dark:focus:bg-slate-800 focus:outline-none focus:border-purple-600 shadow-2xs"
             />
           </div>
         </div>

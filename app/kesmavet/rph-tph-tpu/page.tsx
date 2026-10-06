@@ -513,10 +513,10 @@ export default function RphTphTpuPage() {
   if (!isReady) return null;
 
   return (
-    <div className="min-h-screen bg-purple-50/30 text-slate-900 font-sans selection:bg-purple-600 selection:text-white pb-24">
+    <div className="min-h-screen bg-purple-50/30 dark:bg-slate-950 text-slate-900 dark:text-slate-100 font-sans selection:bg-purple-600 selection:text-white pb-24">
       
       {/* ── TOP HEADER (Tema Ungu Khas Kesmavet) ── */}
-      <header className="border-b border-purple-100 bg-white/95 backdrop-blur-md sticky top-0 z-30 shadow-xs">
+      <header className="border-b border-purple-100 dark:border-slate-800 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md sticky top-0 z-30 shadow-xs">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-5 min-h-[80px] sm:min-h-[88px] flex flex-col md:flex-row md:items-center justify-between gap-4">
           
           <div className="flex items-center gap-3 min-w-0 flex-1">
@@ -536,18 +536,18 @@ export default function RphTphTpuPage() {
                 <span className="text-slate-300">/</span>
                 <span className="text-xs font-bold text-purple-700 whitespace-nowrap">RPH, TPH &amp; TPU</span>
               </div>
-              <h1 className="text-base sm:text-xl font-extrabold text-slate-900 tracking-tight leading-tight truncate">
+              <h1 className="text-base sm:text-xl font-extrabold text-slate-900 dark:text-white tracking-tight leading-tight truncate">
                 Manajemen Rumah Potong &amp; Pemotongan Hewan
               </h1>
             </div>
           </div>
 
-          <div className="flex items-center gap-2.5 shrink-0">
+          <div className="flex flex-wrap items-center gap-2 shrink-0">
             {activeTab === 'pemotongan_rumpun' && (
               <>
                 <button
                   onClick={exportRumpunToExcel}
-                  className="h-10 px-4 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 text-xs font-bold flex items-center gap-1.5 transition-all shadow-xs cursor-pointer"
+                  className="h-10 px-4 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 text-xs font-bold flex items-center gap-1.5 transition-all shadow-xs cursor-pointer"
                 >
                   <Download size={15} strokeWidth={2.5} />
                   <span>Export 4 Tabel Excel</span>
@@ -570,7 +570,7 @@ export default function RphTphTpuPage() {
               <>
                 <button
                   onClick={exportKomoditasToExcel}
-                  className="h-10 px-4 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 text-xs font-bold flex items-center gap-1.5 transition-all shadow-xs cursor-pointer"
+                  className="h-10 px-4 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 text-xs font-bold flex items-center gap-1.5 transition-all shadow-xs cursor-pointer"
                 >
                   <Download size={15} strokeWidth={2.5} />
                   <span>Export Excel</span>
@@ -580,7 +580,7 @@ export default function RphTphTpuPage() {
                   <>
                     <button
                       onClick={handleAddKomoditasRow}
-                      className="h-10 px-3.5 rounded-xl border border-purple-200 bg-purple-50 hover:bg-purple-100 text-purple-700 text-xs font-bold flex items-center gap-1.5 transition-colors cursor-pointer"
+                      className="h-10 px-3.5 rounded-xl border border-purple-200 dark:border-purple-800 bg-purple-50 dark:bg-purple-950/40 hover:bg-purple-100 dark:hover:bg-purple-900/50 text-purple-700 dark:text-purple-300 text-xs font-bold flex items-center gap-1.5 transition-colors cursor-pointer"
                     >
                       <Plus size={15} strokeWidth={2.5} />
                       <span>Tambah Baris</span>
@@ -603,7 +603,7 @@ export default function RphTphTpuPage() {
               <>
                 <button
                   onClick={exportRphToExcel}
-                  className="h-10 px-4 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 text-xs font-bold flex items-center gap-1.5 transition-all shadow-xs cursor-pointer"
+                  className="h-10 px-4 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 text-xs font-bold flex items-center gap-1.5 transition-all shadow-xs cursor-pointer"
                 >
                   <Download size={15} strokeWidth={2.5} />
                   <span>Export Excel</span>
@@ -633,17 +633,17 @@ export default function RphTphTpuPage() {
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 space-y-6">
         
         {/* Opsi Pilihan Tahun */}
-        <div className="flex flex-col sm:flex-row items-center justify-center gap-3 bg-white p-3.5 rounded-2xl border border-purple-200 shadow-xs max-w-xl mx-auto">
-          <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl border border-purple-200 bg-purple-50/70">
-            <Calendar className="text-purple-700" size={16} />
-            <span className="text-xs font-bold text-purple-900">Pilih Tahun:</span>
+        <div className="flex flex-col sm:flex-row items-center justify-center gap-3 bg-white dark:bg-slate-900 p-3.5 rounded-2xl border border-purple-200 dark:border-slate-800 shadow-xs max-w-xl mx-auto">
+          <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl border border-purple-200 dark:border-purple-900/50 bg-purple-50/70 dark:bg-purple-950/30">
+            <Calendar className="text-purple-700 dark:text-purple-400" size={16} />
+            <span className="text-xs font-bold text-purple-900 dark:text-purple-200">Pilih Tahun:</span>
             <select
               value={selectedYear}
               onChange={(e) => setSelectedYear(Number(e.target.value))}
-              className="bg-transparent text-xs font-black text-purple-800 focus:outline-none cursor-pointer"
+              className="bg-transparent text-xs font-black text-purple-800 dark:text-purple-300 focus:outline-none cursor-pointer"
             >
               {availableYears.map((yr) => (
-                <option key={yr} value={yr}>Tahun {yr}</option>
+                <option key={yr} value={yr} className="bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100">Tahun {yr}</option>
               ))}
             </select>
           </div>
@@ -663,41 +663,41 @@ export default function RphTphTpuPage() {
           )}
         </div>
 
-        {/* ── MAIN TAB NAVIGATION ── */}
-        <div className="flex items-center gap-2 p-1.5 bg-white rounded-2xl border border-purple-100 shadow-xs overflow-x-auto">
+        {/* ── MAIN TAB NAVIGATION (Folder Tab Model Monev KTT) ── */}
+        <div className="flex gap-2 border-b border-purple-200 dark:border-slate-800 pb-px overflow-x-auto no-scrollbar scroll-smooth -mx-4 px-4 sm:mx-0 sm:px-0">
           <button
             onClick={() => setActiveTab('pemotongan_rumpun')}
-            className={`px-4 py-2.5 rounded-xl text-xs sm:text-sm font-extrabold flex items-center gap-2 transition-all shrink-0 cursor-pointer ${
+            className={`min-h-touch h-11 px-4 sm:px-6 rounded-t-xl text-xs sm:text-sm font-bold flex items-center gap-2 border-t border-x transition-all shrink-0 whitespace-nowrap cursor-pointer ${
               activeTab === 'pemotongan_rumpun'
-                ? 'bg-purple-600 text-white shadow-xs'
-                : 'text-slate-600 hover:text-purple-700 hover:bg-purple-50'
+                ? 'bg-white dark:bg-slate-900 border-purple-200 dark:border-slate-800 text-purple-700 dark:text-purple-400 border-b-white dark:border-b-slate-900 translate-y-px shadow-xs'
+                : 'border-transparent text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 bg-purple-50/60 dark:bg-slate-800/60'
             }`}
           >
-            <TableIcon size={16} />
+            <TableIcon size={16} strokeWidth={2.5} />
             <span>1. Input Pemotongan Rumah Potong Hewan</span>
           </button>
 
           <button
             onClick={() => setActiveTab('rekap_komoditas')}
-            className={`px-4 py-2.5 rounded-xl text-xs sm:text-sm font-extrabold flex items-center gap-2 transition-all shrink-0 cursor-pointer ${
+            className={`min-h-touch h-11 px-4 sm:px-6 rounded-t-xl text-xs sm:text-sm font-bold flex items-center gap-2 border-t border-x transition-all shrink-0 whitespace-nowrap cursor-pointer ${
               activeTab === 'rekap_komoditas'
-                ? 'bg-purple-600 text-white shadow-xs'
-                : 'text-slate-600 hover:text-purple-700 hover:bg-purple-50'
+                ? 'bg-white dark:bg-slate-900 border-purple-200 dark:border-slate-800 text-purple-700 dark:text-purple-400 border-b-white dark:border-b-slate-900 translate-y-px shadow-xs'
+                : 'border-transparent text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 bg-purple-50/60 dark:bg-slate-800/60'
             }`}
           >
-            <FileSpreadsheet size={16} />
+            <FileSpreadsheet size={16} strokeWidth={2.5} />
             <span>2. Tempat Pemotongan Hewan (TPH)</span>
           </button>
 
           <button
             onClick={() => setActiveTab('rumah_potong')}
-            className={`px-4 py-2.5 rounded-xl text-xs sm:text-sm font-extrabold flex items-center gap-2 transition-all shrink-0 cursor-pointer ${
+            className={`min-h-touch h-11 px-4 sm:px-6 rounded-t-xl text-xs sm:text-sm font-bold flex items-center gap-2 border-t border-x transition-all shrink-0 whitespace-nowrap cursor-pointer ${
               activeTab === 'rumah_potong'
-                ? 'bg-purple-600 text-white shadow-xs'
-                : 'text-slate-600 hover:text-purple-700 hover:bg-purple-50'
+                ? 'bg-white dark:bg-slate-900 border-purple-200 dark:border-slate-800 text-purple-700 dark:text-purple-400 border-b-white dark:border-b-slate-900 translate-y-px shadow-xs'
+                : 'border-transparent text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 bg-purple-50/60 dark:bg-slate-800/60'
             }`}
           >
-            <Building2 size={16} />
+            <Building2 size={16} strokeWidth={2.5} />
             <span>3. Data Rumah Potong</span>
           </button>
         </div>
