@@ -347,32 +347,32 @@ export function SapiTimeHistoryTab({
 
           <div className="overflow-x-auto">
             <table className="w-full text-left text-xs whitespace-nowrap">
-              <thead className="bg-slate-50 dark:bg-slate-800/70 border-b border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-300 uppercase font-bold text-[11px] tracking-wider">
+              <thead className="bg-slate-100 dark:bg-slate-800/70 border-b border-slate-300 dark:border-slate-700 text-slate-700 dark:text-slate-300 uppercase font-bold text-[11px] tracking-wider">
                 <tr>
-                  <th className="px-5 py-3.5 w-12 text-center">No</th>
-                  <th className="px-5 py-3.5">Nama Petugas Inseminator</th>
-                  <th className="px-5 py-3.5">Wilayah Layanan</th>
-                  <th className="px-5 py-3.5 text-center">Total IB</th>
-                  <th className="px-5 py-3.5 text-center text-emerald-700 dark:text-emerald-400">Jadi (Bunting)</th>
-                  <th className="px-5 py-3.5 text-center text-purple-700 dark:text-purple-400">S/C (Ideal: 1.6–2)</th>
-                  <th className="px-5 py-3.5 w-44 text-teal-800 dark:text-teal-400">CR IB-1 (Ideal: 60–75%)</th>
-                  <th className="px-5 py-3.5 text-center text-amber-700 dark:text-amber-400">Menunggu PKB</th>
+                  <th className="px-5 py-3.5 w-12 text-center border-r border-slate-300 dark:border-slate-700">No</th>
+                  <th className="px-5 py-3.5 border-r border-slate-300 dark:border-slate-700">Nama Petugas Inseminator</th>
+                  <th className="px-5 py-3.5 border-r border-slate-300 dark:border-slate-700">Wilayah Layanan</th>
+                  <th className="px-5 py-3.5 text-center border-r border-slate-300 dark:border-slate-700">Total IB</th>
+                  <th className="px-5 py-3.5 text-center text-emerald-700 dark:text-emerald-400 border-r border-slate-300 dark:border-slate-700">Jadi (Bunting)</th>
+                  <th className="px-5 py-3.5 text-center text-purple-700 dark:text-purple-400 border-r border-slate-300 dark:border-slate-700">S/C (Ideal: 1.6–2)</th>
+                  <th className="px-5 py-3.5 w-44 text-teal-800 dark:text-teal-400 border-r border-slate-300 dark:border-slate-700">CR IB-1 (Ideal: 60–75%)</th>
+                  <th className="px-5 py-3.5 text-center text-amber-700 dark:text-amber-400 border-r border-slate-300 dark:border-slate-700">Menunggu PKB</th>
                   <th className="px-5 py-3.5 text-center">Aksi Filter</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
+              <tbody className="divide-y divide-slate-300 dark:divide-slate-700">
                 {filteredInseminators.length > 0 ? (
                   filteredInseminators.map((petugas, idx) => {
                     const isSelected = selectedInseminatorFilter === petugas.name;
                     return (
                       <tr
                         key={petugas.name}
-                        className={`hover:bg-slate-50/80 dark:hover:bg-slate-800/50 transition-colors ${
+                        className={`odd:bg-white even:bg-slate-100 dark:odd:bg-slate-900/50 dark:even:bg-slate-800/50 hover:bg-blue-50/60 dark:hover:bg-slate-800/70 transition-colors ${
                           isSelected ? 'bg-emerald-50/70 dark:bg-emerald-950/40 font-semibold' : ''
                         }`}
                       >
-                        <td className="px-5 py-3 text-center font-bold text-slate-500 dark:text-slate-400">{idx + 1}</td>
-                        <td className="px-5 py-3">
+                        <td className="px-5 py-3 text-center font-bold text-slate-500 dark:text-slate-400 border-r border-slate-300 dark:border-slate-700">{idx + 1}</td>
+                        <td className="px-5 py-3 border-r border-slate-300 dark:border-slate-700">
                           <div className="flex items-center gap-2">
                             <div className="w-7 h-7 rounded-lg bg-emerald-100 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-300 font-bold flex items-center justify-center text-xs shrink-0">
                               {petugas.name.charAt(0).toUpperCase()}
@@ -383,18 +383,18 @@ export function SapiTimeHistoryTab({
                             </div>
                           </div>
                         </td>
-                        <td className="px-5 py-3">
+                        <td className="px-5 py-3 border-r border-slate-300 dark:border-slate-700">
                           <span className="text-slate-600 dark:text-slate-300 max-w-[180px] truncate block" title={petugas.kecamatanList.join(', ')}>
                             {petugas.kecamatanList.length > 0 ? petugas.kecamatanList.join(', ') : '-'}
                           </span>
                         </td>
-                        <td className="px-5 py-3 text-center font-black text-slate-900 dark:text-slate-100 text-sm">
+                        <td className="px-5 py-3 text-center font-black text-slate-900 dark:text-slate-100 text-sm border-r border-slate-300 dark:border-slate-700">
                           {petugas.totalIb}x
                         </td>
-                        <td className="px-5 py-3 text-center font-bold text-emerald-700 dark:text-emerald-400 bg-emerald-50/30 dark:bg-emerald-950/20">
+                        <td className="px-5 py-3 text-center font-bold text-emerald-700 dark:text-emerald-400 bg-emerald-50/30 dark:bg-emerald-950/20 border-r border-slate-300 dark:border-slate-700">
                           {petugas.berhasil}x
                         </td>
-                        <td className="px-5 py-3 text-center">
+                        <td className="px-5 py-3 text-center border-r border-slate-300 dark:border-slate-700">
                           <span
                             className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-black ${
                               petugas.scValue !== '-' && Number(petugas.scValue) <= 2.0
@@ -409,7 +409,7 @@ export function SapiTimeHistoryTab({
                             {petugas.scValue}
                           </span>
                         </td>
-                        <td className="px-5 py-3">
+                        <td className="px-5 py-3 border-r border-slate-300 dark:border-slate-700">
                           <div className="space-y-1">
                             <div className="flex items-center justify-between text-[11px]">
                               <span
@@ -441,7 +441,7 @@ export function SapiTimeHistoryTab({
                             </div>
                           </div>
                         </td>
-                        <td className="px-5 py-3 text-center font-bold text-amber-700 dark:text-amber-400 bg-amber-50/30 dark:bg-amber-950/20">
+                        <td className="px-5 py-3 text-center font-bold text-amber-700 dark:text-amber-400 bg-amber-50/30 dark:bg-amber-950/20 border-r border-slate-300 dark:border-slate-700">
                           {petugas.menunggu}x
                         </td>
                         <td className="px-5 py-3 text-center">
@@ -539,22 +539,22 @@ export function SapiTimeHistoryTab({
         </div>
 
         {/* Tabel Riwayat Pelayanan IB */}
-        <div className="overflow-x-auto rounded-2xl border border-slate-100 dark:border-slate-800">
+        <div className="overflow-x-auto rounded-2xl border border-slate-300 dark:border-slate-700">
           <table className="w-full text-left text-xs whitespace-nowrap">
-            <thead className="bg-slate-50 dark:bg-slate-800/70 border-b border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-300 uppercase font-bold text-[11px] tracking-wider">
+            <thead className="bg-slate-100 dark:bg-slate-800/70 border-b border-slate-300 dark:border-slate-700 text-slate-700 dark:text-slate-300 uppercase font-bold text-[11px] tracking-wider">
               <tr>
-                <th className="px-4 py-3.5 w-12 text-center">No</th>
-                <th className="px-4 py-3.5">Tanggal &amp; Waktu</th>
-                <th className="px-4 py-3.5">Peternak &amp; Sapi</th>
-                <th className="px-4 py-3.5">Lokasi</th>
-                <th className="px-4 py-3.5">Petugas Inseminator</th>
-                <th className="px-4 py-3.5">Straw / Pejantan</th>
-                <th className="px-4 py-3.5 text-center">Urutan Siklus</th>
-                <th className="px-4 py-3.5">Status Keberhasilan</th>
+                <th className="px-4 py-3.5 w-12 text-center border-r border-slate-300 dark:border-slate-700">No</th>
+                <th className="px-4 py-3.5 border-r border-slate-300 dark:border-slate-700">Tanggal &amp; Waktu</th>
+                <th className="px-4 py-3.5 border-r border-slate-300 dark:border-slate-700">Peternak &amp; Sapi</th>
+                <th className="px-4 py-3.5 border-r border-slate-300 dark:border-slate-700">Lokasi</th>
+                <th className="px-4 py-3.5 border-r border-slate-300 dark:border-slate-700">Petugas Inseminator</th>
+                <th className="px-4 py-3.5 border-r border-slate-300 dark:border-slate-700">Straw / Pejantan</th>
+                <th className="px-4 py-3.5 text-center border-r border-slate-300 dark:border-slate-700">Urutan Siklus</th>
+                <th className="px-4 py-3.5 border-r border-slate-300 dark:border-slate-700">Status Keberhasilan</th>
                 <th className="px-4 py-3.5 text-center">Aksi Tracing</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
+            <tbody className="divide-y divide-slate-300 dark:divide-slate-700">
               {filteredHistory.length > 0 ? (
                 filteredHistory.map((ib, idx) => {
                   const isBerhasil = ib.status_keberhasilan === 'Berhasil';
@@ -562,9 +562,9 @@ export function SapiTimeHistoryTab({
                   const isMenunggu = !ib.status_keberhasilan || ib.status_keberhasilan === 'Menunggu PKB';
 
                   return (
-                    <tr key={ib.id || idx} className="hover:bg-slate-50/80 dark:hover:bg-slate-800/50 transition-colors">
-                      <td className="px-4 py-3 text-center font-bold text-slate-400 dark:text-slate-500">{idx + 1}</td>
-                      <td className="px-4 py-3">
+                    <tr key={ib.id || idx} className="odd:bg-white even:bg-slate-100 dark:odd:bg-slate-900/50 dark:even:bg-slate-800/50 hover:bg-blue-50/60 dark:hover:bg-slate-800/70 transition-colors">
+                      <td className="px-4 py-3 text-center font-bold text-slate-500 dark:text-slate-400 border-r border-slate-300 dark:border-slate-700">{idx + 1}</td>
+                      <td className="px-4 py-3 border-r border-slate-300 dark:border-slate-700">
                         <span className="font-bold text-slate-900 dark:text-slate-100 block">
                           {new Date(ib.date).toLocaleDateString('id-ID', {
                             day: 'numeric',
@@ -574,7 +574,7 @@ export function SapiTimeHistoryTab({
                         </span>
                         <span className="text-[10px] text-slate-400 dark:text-slate-500">{ib.time || 'Waktu -'}</span>
                       </td>
-                      <td className="px-4 py-3">
+                      <td className="px-4 py-3 border-r border-slate-300 dark:border-slate-700">
                         <span className="font-extrabold text-slate-900 dark:text-slate-100 block flex items-center gap-1">
                           <User size={12} className="text-slate-400 dark:text-slate-500" />
                           {ib.ownerName || 'Peternak Tanpa Nama'}
@@ -583,25 +583,25 @@ export function SapiTimeHistoryTab({
                           Sapi: {ib.cattleName || 'Sapi'} ({ib.cattle_id})
                         </span>
                       </td>
-                      <td className="px-4 py-3">
+                      <td className="px-4 py-3 border-r border-slate-300 dark:border-slate-700">
                         <span className="text-slate-700 dark:text-slate-300 block">{ib.kecamatan || '-'}</span>
                         <span className="text-[10px] text-slate-400 dark:text-slate-500">{ib.desa || '-'}</span>
                       </td>
-                      <td className="px-4 py-3">
+                      <td className="px-4 py-3 border-r border-slate-300 dark:border-slate-700">
                         <span className="font-bold text-slate-800 dark:text-slate-200 block">{ib.inseminatorName || '-'}</span>
                       </td>
-                      <td className="px-4 py-3">
+                      <td className="px-4 py-3 border-r border-slate-300 dark:border-slate-700">
                         <span className="font-mono font-bold text-slate-900 dark:text-slate-100 block">{ib.strawCode || '-'}</span>
                         <span className="text-[10px] text-slate-500 dark:text-slate-400">
                           {ib.bullBreed || ib.bullName || 'Straw Pejantan'}
                         </span>
                       </td>
-                      <td className="px-4 py-3 text-center">
+                      <td className="px-4 py-3 text-center border-r border-slate-300 dark:border-slate-700">
                         <span className="inline-block px-2.5 py-1 rounded-lg text-xs font-black bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-200 border border-slate-200 dark:border-slate-700">
                           IB Ke-{ib.ibOrder || 1}
                         </span>
                       </td>
-                      <td className="px-4 py-3">
+                      <td className="px-4 py-3 border-r border-slate-300 dark:border-slate-700">
                         <div className="flex flex-col gap-1 items-start">
                           <span
                             className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-lg text-[11px] font-bold ${

@@ -49,25 +49,25 @@ export default function PopulasiTable({
 
       <div className="overflow-x-auto">
         <table className="w-full text-left text-xs sm:text-sm whitespace-nowrap">
-          <thead className="bg-slate-50 text-slate-600 text-xs font-semibold uppercase tracking-wider border-b border-slate-200">
+          <thead className="bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 text-xs font-bold uppercase tracking-wider border-b border-slate-300 dark:border-slate-700">
             <tr>
-              <th className="p-3.5 w-12 text-center">NO</th>
-              <th className="p-3.5">TRIWULAN</th>
-              <th className="p-3.5">KECAMATAN</th>
-              <th className="p-3.5">DESA</th>
-              <th className="p-3.5">RINGKASAN TERNAK TERISI</th>
+              <th className="p-3.5 w-12 text-center border-r border-slate-300 dark:border-slate-700">NO</th>
+              <th className="p-3.5 border-r border-slate-300 dark:border-slate-700">TRIWULAN</th>
+              <th className="p-3.5 border-r border-slate-300 dark:border-slate-700">KECAMATAN</th>
+              <th className="p-3.5 border-r border-slate-300 dark:border-slate-700">DESA</th>
+              <th className="p-3.5 border-r border-slate-300 dark:border-slate-700">RINGKASAN TERNAK TERISI</th>
               {canEdit && <th className="p-3.5 text-center w-24">AKSI</th>}
             </tr>
           </thead>
-          <tbody className="divide-y divide-slate-100 text-slate-800">
+          <tbody className="divide-y divide-slate-300 dark:divide-slate-700 text-slate-800 dark:text-slate-200">
             {savedData.length > 0 ? (
               savedData.map((d, i) => (
-                <tr key={i} className="hover:bg-slate-50/80 dark:hover:bg-slate-800/60 transition-colors">
-                  <td className="p-3.5 text-center font-sans text-slate-400">{i + 1}</td>
-                  <td className="p-3.5 font-bold text-emerald-800">{d.tw}</td>
-                  <td className="p-3.5 font-bold text-slate-900">{d.kec}</td>
-                  <td className="p-3.5 text-slate-700 font-semibold">{d.desa}</td>
-                  <td className="p-3.5">
+                <tr key={i} className="odd:bg-white even:bg-slate-100 dark:odd:bg-slate-900/60 dark:even:bg-slate-800/50 hover:bg-blue-50/60 dark:hover:bg-slate-800/80 transition-colors">
+                  <td className="p-3.5 text-center font-sans text-slate-500 dark:text-slate-400 border-r border-slate-300 dark:border-slate-700">{i + 1}</td>
+                  <td className="p-3.5 font-bold text-emerald-800 dark:text-emerald-400 border-r border-slate-300 dark:border-slate-700">{d.tw}</td>
+                  <td className="p-3.5 font-bold text-slate-900 dark:text-slate-100 border-r border-slate-300 dark:border-slate-700">{d.kec}</td>
+                  <td className="p-3.5 text-slate-700 dark:text-slate-300 font-semibold border-r border-slate-300 dark:border-slate-700">{d.desa}</td>
+                  <td className="p-3.5 border-r border-slate-300 dark:border-slate-700">
                     {/* Tampilan Mobile: Ringkas & Padat */}
                     <div className="sm:hidden space-y-1.5 py-1">
                       {getConciseSummary(d.values).length > 0 ? (

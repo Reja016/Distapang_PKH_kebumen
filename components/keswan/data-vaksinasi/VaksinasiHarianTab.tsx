@@ -160,19 +160,27 @@ export default function VaksinasiHarianTab({
               </tr>
             </thead>
             <tbody className="divide-y-2 divide-slate-400 text-slate-900 font-medium">
-              {bulanan.map((row) => {
+              {bulanan.map((row, idx) => {
                 const days = Array.from({ length: daysInMonth(activeMonth, selectedYear) }, (_, i) => i + 1);
                 const realisasiBulanIni = Object.entries(harianMap[row.puskeswan] || {})
                   .filter(([tgl]) => tgl.startsWith(`${selectedYear}-${String(activeMonth).padStart(2, '0')}`))
                   .reduce((sum, [, v]) => sum + v.jumlah, 0);
+                const isEven = idx % 2 === 0;
 
                 return (
-                  <tr key={row.id || row.puskeswan} className="hover:bg-blue-50/50 transition-colors border-b-2 border-slate-400">
-                    <td className="p-3 font-black text-slate-950 sticky left-0 bg-white z-10 border-r-2 border-slate-700 shadow-[2px_0_4px_-1px_rgba(0,0,0,0.12)]">
+                  <tr
+                    key={row.id || row.puskeswan}
+                    className={`transition-colors border-b-2 border-slate-400 ${
+                      isEven ? 'bg-white hover:bg-blue-50/50' : 'bg-slate-100 hover:bg-blue-50/70'
+                    }`}
+                  >
+                    <td className={`p-3 font-black text-slate-950 sticky left-0 z-10 border-r-2 border-slate-700 shadow-[2px_0_4px_-1px_rgba(0,0,0,0.12)] ${
+                      isEven ? 'bg-white' : 'bg-slate-100'
+                    }`}>
                       {row.puskeswan}
                     </td>
-                    <td className="p-3 text-right font-sans font-bold border-r-2 border-slate-400 bg-slate-50/70">{row.target.toLocaleString('id-ID')}</td>
-                    <td className="p-3 text-right font-sans font-bold border-r-2 border-slate-400 bg-slate-50/70">{row.pengambilan}</td>
+                    <td className={`p-3 text-right font-sans font-bold border-r-2 border-slate-400 ${isEven ? 'bg-slate-50/50' : 'bg-slate-100/60'}`}>{row.target.toLocaleString('id-ID')}</td>
+                    <td className={`p-3 text-right font-sans font-bold border-r-2 border-slate-400 ${isEven ? 'bg-slate-50/50' : 'bg-slate-100/60'}`}>{row.pengambilan}</td>
                     <td className="p-3 text-right font-sans font-black text-emerald-950 bg-emerald-100/70 border-r-2 border-slate-400">
                       {realisasiBulanIni.toLocaleString('id-ID')}
                     </td>

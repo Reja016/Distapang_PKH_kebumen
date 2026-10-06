@@ -147,7 +147,7 @@ export function PuskeswanRekapTab({
           }
         }}
         title={tooltip}
-        className={`p-3 border-r border-slate-200 font-sans text-center select-none font-black transition-colors group ${cellStyle} ${
+        className={`p-3 border-r border-slate-300 dark:border-slate-700 font-sans text-center select-none font-black transition-colors group ${cellStyle} ${
           isCurrency ? 'text-right text-blue-900' : 'text-slate-900'
         } ${extraClass}`}
       >
@@ -206,7 +206,7 @@ export function PuskeswanRekapTab({
       <td
         onClick={() => isCellEditable && onStartEdit(row.bulan, row.puskeswan, field, value, rowYear, sub.id_kecamatan)}
         title={tooltip}
-        className={`p-2.5 border-r border-slate-100 font-sans transition-colors group select-none ${cellStyle} ${
+        className={`p-2.5 border-r border-slate-300 dark:border-slate-700 font-sans transition-colors group select-none ${cellStyle} ${
           isCurrency ? 'text-right font-medium text-slate-900' : 'text-center'
         } ${extraClass}`}
       >
@@ -366,41 +366,50 @@ export function PuskeswanRekapTab({
 
               <div className="overflow-x-auto">
                 <table className="w-full text-xs text-left whitespace-nowrap border-collapse">
-                  <thead className="bg-slate-100 text-slate-700 font-extrabold uppercase tracking-wider border-b border-slate-200">
+                  <thead className="bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-extrabold uppercase tracking-wider border-b border-slate-300 dark:border-slate-700">
                     <tr>
-                      <th className="p-3 text-center w-12 border-r border-slate-200">NO</th>
-                      <th className="p-3 border-r border-slate-200 sticky left-0 bg-slate-100 z-10 shadow-2xs">PUSKESWAN / KECAMATAN</th>
-                      <th className="p-3 text-center border-r border-slate-200 bg-red-50/50">BEF</th>
-                      <th className="p-3 text-center border-r border-slate-200 bg-red-50/50">CACING</th>
-                      <th className="p-3 text-center border-r border-slate-200 bg-red-50/50">SCABIES</th>
-                      <th className="p-3 text-center border-r border-slate-200 bg-red-50/50">ORF</th>
-                      <th className="p-3 text-center border-r border-slate-200 bg-red-50/50">PMK (KASUS)</th>
-                      <th className="p-3 text-center border-r border-slate-200 bg-red-50/50">LSD (KASUS)</th>
-                      <th className="p-3 text-center border-r border-slate-200 bg-emerald-50/50">AKTIF</th>
-                      <th className="p-3 text-center border-r border-slate-200 bg-emerald-50/50">SEMI AKTIF</th>
-                      <th className="p-3 text-center border-r border-slate-200 bg-emerald-50/50">PASIF</th>
-                      <th className="p-3 text-center border-r border-slate-200 bg-emerald-50/50">PUSLING</th>
-                      <th className="p-3 text-center border-r border-slate-200 bg-purple-50/50">IB</th>
-                      <th className="p-3 text-center border-r border-slate-200 bg-purple-50/50">PKB</th>
-                      <th className="p-3 text-center border-r border-slate-200 bg-amber-50/50">PMK (VAKS)</th>
-                      <th className="p-3 text-center border-r border-slate-200 bg-amber-50/50">LSD (VAKS)</th>
-                      <th className="p-3 text-right border-r border-slate-200 bg-blue-50/50">RETRIBUSI (RP)</th>
+                      <th className="p-3 text-center w-12 border-r border-slate-300 dark:border-slate-700">NO</th>
+                      <th className="p-3 border-r border-slate-300 dark:border-slate-700 sticky left-0 bg-slate-100 dark:bg-slate-800 z-10 shadow-2xs">PUSKESWAN / KECAMATAN</th>
+                      <th className="p-3 text-center border-r border-slate-300 dark:border-slate-700 bg-red-50/50">BEF</th>
+                      <th className="p-3 text-center border-r border-slate-300 dark:border-slate-700 bg-red-50/50">CACING</th>
+                      <th className="p-3 text-center border-r border-slate-300 dark:border-slate-700 bg-red-50/50">SCABIES</th>
+                      <th className="p-3 text-center border-r border-slate-300 dark:border-slate-700 bg-red-50/50">ORF</th>
+                      <th className="p-3 text-center border-r border-slate-300 dark:border-slate-700 bg-red-50/50">PMK (KASUS)</th>
+                      <th className="p-3 text-center border-r border-slate-300 dark:border-slate-700 bg-red-50/50">LSD (KASUS)</th>
+                      <th className="p-3 text-center border-r border-slate-300 dark:border-slate-700 bg-emerald-50/50">AKTIF</th>
+                      <th className="p-3 text-center border-r border-slate-300 dark:border-slate-700 bg-emerald-50/50">SEMI AKTIF</th>
+                      <th className="p-3 text-center border-r border-slate-300 dark:border-slate-700 bg-emerald-50/50">PASIF</th>
+                      <th className="p-3 text-center border-r border-slate-300 dark:border-slate-700 bg-emerald-50/50">PUSLING</th>
+                      <th className="p-3 text-center border-r border-slate-300 dark:border-slate-700 bg-purple-50/50">IB</th>
+                      <th className="p-3 text-center border-r border-slate-300 dark:border-slate-700 bg-purple-50/50">PKB</th>
+                      <th className="p-3 text-center border-r border-slate-300 dark:border-slate-700 bg-amber-50/50">PMK (VAKS)</th>
+                      <th className="p-3 text-center border-r border-slate-300 dark:border-slate-700 bg-amber-50/50">LSD (VAKS)</th>
+                      <th className="p-3 text-right border-r border-slate-300 dark:border-slate-700 bg-blue-50/50">RETRIBUSI (RP)</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-slate-100 text-slate-800 font-semibold">
+                  <tbody className="divide-y divide-slate-300 dark:divide-slate-700 text-slate-800 font-semibold">
                     {rows.map((row, idx) => {
                       const rowYear = row.tahun ? String(row.tahun) : '2026';
                       const rowKey = `${rowYear}-${row.bulan}-${row.puskeswan}`;
                       const isExpanded = !!expandedPuskeswan[rowKey];
+                      const isEven = idx % 2 === 0;
 
                       return (
                         <React.Fragment key={row.id || rowKey}>
                           {/* ── BARIS INDUK PUSKESWAN (AKUMULASI TOTAL) ── */}
-                          <tr className={`transition-colors ${isExpanded ? 'bg-blue-50/50 font-bold' : 'hover:bg-blue-50/30'}`}>
-                            <td className="p-3 text-center text-slate-400 font-sans border-r border-slate-200">
+                          <tr className={`transition-colors ${
+                            isExpanded
+                              ? 'bg-blue-50/70 font-bold'
+                              : isEven
+                                ? 'bg-white hover:bg-blue-50/40'
+                                : 'bg-slate-100 hover:bg-blue-50/50'
+                          }`}>
+                            <td className="p-3 text-center text-slate-400 font-sans border-r border-slate-300 dark:border-slate-700">
                               {row.no_urut || row.no || idx + 1}
                             </td>
-                            <td className="p-3 font-black text-slate-900 border-r border-slate-200 sticky left-0 bg-white z-10 shadow-2xs">
+                            <td className={`p-3 font-black text-slate-900 border-r border-slate-300 dark:border-slate-700 sticky left-0 z-10 shadow-2xs ${
+                              isExpanded ? 'bg-blue-50' : isEven ? 'bg-white' : 'bg-slate-100'
+                            }`}>
                               <div className="flex items-center justify-between gap-2">
                                 <button
                                   type="button"
@@ -435,22 +444,28 @@ export function PuskeswanRekapTab({
                           </tr>
 
                           {/* ── BARIS ANAK / RINCIAN KECAMATAN BINAAN (ACCORDION) ── */}
-                          {isExpanded && (row.subRows || []).map((sub: any, subIdx: number) => (
-                            <tr
-                              key={`${rowKey}-sub-${sub.id_kecamatan}`}
-                              className="bg-slate-50/80 hover:bg-blue-50/40 border-b border-slate-100 transition-colors"
-                            >
-                              <td className="p-2.5 text-center text-slate-400 font-sans border-r border-slate-100 text-[11px]">
-                                {subIdx + 1}
-                              </td>
-                              <td className="p-2.5 font-bold text-slate-800 border-r border-slate-100 sticky left-0 bg-slate-50/95 z-10 shadow-2xs pl-6">
-                                <div className="flex items-center gap-1.5">
-                                  <span className="text-blue-500 font-mono text-xs">↳</span>
-                                  <span className="text-slate-900 font-semibold">
-                                    {sub.nama_kecamatan}
-                                  </span>
-                                </div>
-                              </td>
+                          {isExpanded && (row.subRows || []).map((sub: any, subIdx: number) => {
+                            const isSubEven = subIdx % 2 === 0;
+                            return (
+                              <tr
+                                key={`${rowKey}-sub-${sub.id_kecamatan}`}
+                                className={`border-b border-slate-300 dark:border-slate-700 transition-colors ${
+                                  isSubEven ? 'bg-slate-100/90 hover:bg-blue-50/40' : 'bg-slate-200/70 hover:bg-blue-50/50'
+                                }`}
+                              >
+                                <td className="p-2.5 text-center text-slate-400 font-sans border-r border-slate-300 dark:border-slate-700 text-[11px]">
+                                  {subIdx + 1}
+                                </td>
+                                <td className={`p-2.5 font-bold text-slate-800 border-r border-slate-300 dark:border-slate-700 sticky left-0 z-10 shadow-2xs pl-6 ${
+                                  isSubEven ? 'bg-slate-100' : 'bg-slate-200'
+                                }`}>
+                                  <div className="flex items-center gap-1.5">
+                                    <span className="text-blue-500 font-mono text-xs">↳</span>
+                                    <span className="text-slate-900 font-semibold">
+                                      {sub.nama_kecamatan}
+                                    </span>
+                                  </div>
+                                </td>
                               {renderEditableSubCell(row, sub, 'bef')}
                               {renderEditableSubCell(row, sub, 'cacingan')}
                               {renderEditableSubCell(row, sub, 'scabies')}
@@ -467,31 +482,32 @@ export function PuskeswanRekapTab({
                               {renderEditableSubCell(row, sub, 'lsd_vaks', false, 'bg-amber-50/20 text-amber-900')}
                               {renderEditableSubCell(row, sub, 'retribusi', true, 'bg-blue-50/20 font-bold text-blue-900')}
                             </tr>
-                          ))}
-                        </React.Fragment>
-                      );
-                    })}
+                          );
+                        })}
+                      </React.Fragment>
+                    );
+                  })}
                   </tbody>
                   <tfoot className="bg-slate-100 font-black text-slate-900 border-t-2 border-slate-300">
                     <tr>
                       <td colSpan={2} className="p-3 text-center uppercase tracking-wider sticky left-0 bg-slate-100 z-10 border-r border-slate-300">
                         TOTAL KABUPATEN
                       </td>
-                      <td className="p-3 text-center font-sans border-r border-slate-200">{sum(rows, 'bef')}</td>
-                      <td className="p-3 text-center font-sans border-r border-slate-200">{sum(rows, 'cacingan')}</td>
-                      <td className="p-3 text-center font-sans border-r border-slate-200">{sum(rows, 'scabies')}</td>
-                      <td className="p-3 text-center font-sans border-r border-slate-200">{sum(rows, 'orf')}</td>
-                      <td className="p-3 text-center font-sans border-r border-slate-200">{sum(rows, 'pmk_diag')}</td>
-                      <td className="p-3 text-center font-sans border-r border-slate-200">{sum(rows, 'lsd_diag')}</td>
-                      <td className="p-3 text-center font-sans border-r border-slate-200 text-emerald-800">{sum(rows, 'aktif')}</td>
-                      <td className="p-3 text-center font-sans border-r border-slate-200 text-emerald-800">{sum(rows, 'semi_aktif')}</td>
-                      <td className="p-3 text-center font-sans border-r border-slate-200 text-emerald-800">{sum(rows, 'pasif')}</td>
-                      <td className="p-3 text-center font-sans border-r border-slate-200 text-emerald-800">{sum(rows, 'pusling')}</td>
-                      <td className="p-3 text-center font-sans border-r border-slate-200 text-purple-800">{sum(rows, 'ib')}</td>
-                      <td className="p-3 text-center font-sans border-r border-slate-200 text-purple-800">{sum(rows, 'pkb')}</td>
-                      <td className="p-3 text-center font-sans border-r border-slate-200 text-amber-800">{sum(rows, 'pmk_vaks')}</td>
-                      <td className="p-3 text-center font-sans border-r border-slate-200 text-amber-800">{sum(rows, 'lsd_vaks')}</td>
-                      <td className="p-3 text-right font-sans text-blue-900 border-r border-slate-200">
+                      <td className="p-3 text-center font-sans border-r border-slate-300 dark:border-slate-700">{sum(rows, 'bef')}</td>
+                      <td className="p-3 text-center font-sans border-r border-slate-300 dark:border-slate-700">{sum(rows, 'cacingan')}</td>
+                      <td className="p-3 text-center font-sans border-r border-slate-300 dark:border-slate-700">{sum(rows, 'scabies')}</td>
+                      <td className="p-3 text-center font-sans border-r border-slate-300 dark:border-slate-700">{sum(rows, 'orf')}</td>
+                      <td className="p-3 text-center font-sans border-r border-slate-300 dark:border-slate-700">{sum(rows, 'pmk_diag')}</td>
+                      <td className="p-3 text-center font-sans border-r border-slate-300 dark:border-slate-700">{sum(rows, 'lsd_diag')}</td>
+                      <td className="p-3 text-center font-sans border-r border-slate-300 dark:border-slate-700 text-emerald-800">{sum(rows, 'aktif')}</td>
+                      <td className="p-3 text-center font-sans border-r border-slate-300 dark:border-slate-700 text-emerald-800">{sum(rows, 'semi_aktif')}</td>
+                      <td className="p-3 text-center font-sans border-r border-slate-300 dark:border-slate-700 text-emerald-800">{sum(rows, 'pasif')}</td>
+                      <td className="p-3 text-center font-sans border-r border-slate-300 dark:border-slate-700 text-emerald-800">{sum(rows, 'pusling')}</td>
+                      <td className="p-3 text-center font-sans border-r border-slate-300 dark:border-slate-700 text-purple-800">{sum(rows, 'ib')}</td>
+                      <td className="p-3 text-center font-sans border-r border-slate-300 dark:border-slate-700 text-purple-800">{sum(rows, 'pkb')}</td>
+                      <td className="p-3 text-center font-sans border-r border-slate-300 dark:border-slate-700 text-amber-800">{sum(rows, 'pmk_vaks')}</td>
+                      <td className="p-3 text-center font-sans border-r border-slate-300 dark:border-slate-700 text-amber-800">{sum(rows, 'lsd_vaks')}</td>
+                      <td className="p-3 text-right font-sans text-blue-900 border-r border-slate-300 dark:border-slate-700">
                         Rp {formatRp(sum(rows, 'retribusi'))}
                       </td>
                     </tr>

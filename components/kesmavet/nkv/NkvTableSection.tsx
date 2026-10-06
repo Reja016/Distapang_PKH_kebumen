@@ -91,23 +91,23 @@ export default function NkvTableSection({
 
         <div className="overflow-x-auto">
           <table className="w-full text-xs text-left border-collapse whitespace-nowrap">
-            <thead className="bg-slate-50 text-slate-700 font-extrabold uppercase tracking-wider border-b border-slate-200">
+            <thead className="bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-extrabold uppercase tracking-wider border-b border-slate-300 dark:border-slate-700">
               <tr>
-                <th className="p-3.5 text-center w-12 border-r border-slate-200">No</th>
-                <th className="p-3.5 border-r border-slate-200">Nama Usaha</th>
-                <th className="p-3.5 border-r border-slate-200">Jenis Usaha</th>
-                <th className="p-3.5 border-r border-slate-200">Proses</th>
-                <th className="p-3.5 border-r border-slate-200">Pembinaan 1</th>
-                <th className="p-3.5 border-r border-slate-200">Hasil (1)</th>
-                <th className="p-3.5 border-r border-slate-200">Pembinaan 2</th>
-                <th className="p-3.5 border-r border-slate-200">Hasil (2)</th>
-                <th className="p-3.5 border-r border-slate-200">Pelatihan Higiene Sanitasi</th>
-                <th className="p-3.5 border-r border-slate-200">Pengeluaran Rekomendasi</th>
-                <th className="p-3.5 border-r border-slate-200">Keterangan</th>
-                {canEdit && <th className="p-3.5 text-center sticky right-0 bg-slate-50 z-10">Aksi</th>}
+                <th className="p-3.5 text-center w-12 border-r border-slate-300 dark:border-slate-700">No</th>
+                <th className="p-3.5 border-r border-slate-300 dark:border-slate-700">Nama Usaha</th>
+                <th className="p-3.5 border-r border-slate-300 dark:border-slate-700">Jenis Usaha</th>
+                <th className="p-3.5 border-r border-slate-300 dark:border-slate-700">Proses</th>
+                <th className="p-3.5 border-r border-slate-300 dark:border-slate-700">Pembinaan 1</th>
+                <th className="p-3.5 border-r border-slate-300 dark:border-slate-700">Hasil (1)</th>
+                <th className="p-3.5 border-r border-slate-300 dark:border-slate-700">Pembinaan 2</th>
+                <th className="p-3.5 border-r border-slate-300 dark:border-slate-700">Hasil (2)</th>
+                <th className="p-3.5 border-r border-slate-300 dark:border-slate-700">Pelatihan Higiene Sanitasi</th>
+                <th className="p-3.5 border-r border-slate-300 dark:border-slate-700">Pengeluaran Rekomendasi</th>
+                <th className="p-3.5 border-r border-slate-300 dark:border-slate-700">Keterangan</th>
+                {canEdit && <th className="p-3.5 text-center sticky right-0 bg-slate-100 dark:bg-slate-800 z-10 border-l border-slate-300 dark:border-slate-700">Aksi</th>}
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-100 text-slate-800 font-medium">
+            <tbody className="divide-y divide-slate-300 dark:divide-slate-700 text-slate-800 dark:text-slate-200 font-medium">
               {filteredData.length === 0 ? (
                 <tr>
                   <td colSpan={canEdit ? 12 : 11} className="p-8 text-center text-slate-400 font-medium text-xs">
@@ -115,53 +115,66 @@ export default function NkvTableSection({
                   </td>
                 </tr>
               ) : (
-                filteredData.map((row, index) => (
-                  <tr key={row.id} className="hover:bg-purple-50/40 transition-colors">
-                    <td className="p-3.5 text-center font-bold text-slate-500 border-r border-slate-100">
-                      {index + 1}
-                    </td>
-                    <td className="p-3.5 font-bold text-slate-900 border-r border-slate-100">
-                      {row.namaUsaha}
-                    </td>
-                    <td className="p-3.5 font-semibold text-purple-700 border-r border-slate-100">
-                      {row.jenisUsaha || '-'}
-                    </td>
-                    <td className="p-3.5 border-r border-slate-100">
-                      <span className="px-2 py-0.5 rounded-lg bg-slate-100 text-slate-700 font-bold text-[11px]">
-                        {row.proses || '-'}
-                      </span>
-                    </td>
-                    <td className="p-3.5 border-r border-slate-100 text-slate-600">
-                      {row.pembinaan1 || '-'}
-                    </td>
-                    <td className="p-3.5 border-r border-slate-100 text-slate-700 max-w-[200px] truncate" title={row.hasil1}>
-                      {row.hasil1 || '-'}
-                    </td>
-                    <td className="p-3.5 border-r border-slate-100 text-slate-600">
-                      {row.pembinaan2 || '-'}
-                    </td>
-                    <td className="p-3.5 border-r border-slate-100 text-slate-700 max-w-[200px] truncate" title={row.hasil2}>
-                      {row.hasil2 || '-'}
-                    </td>
-                    <td className="p-3.5 border-r border-slate-100 font-semibold text-slate-800">
-                      {row.pelatihanHigiene || '-'}
-                    </td>
-                    <td className="p-3.5 border-r border-slate-100">
-                      <span
-                        className={`px-2.5 py-1 rounded-full text-[11px] font-extrabold ${
-                          row.pengeluaranRekomendasi.toLowerCase().includes('diterbitkan')
-                            ? 'bg-emerald-50 text-emerald-800 border border-emerald-200'
-                            : 'bg-amber-50 text-amber-800 border border-amber-200'
-                        }`}
-                      >
-                        {row.pengeluaranRekomendasi || '-'}
-                      </span>
-                    </td>
-                    <td className="p-3.5 border-r border-slate-100 text-slate-500 max-w-[220px] truncate" title={row.keterangan}>
-                      {row.keterangan || '-'}
-                    </td>
-                    {canEdit && (
-                      <td className="p-3.5 text-center sticky right-0 bg-white z-10 border-l border-slate-100">
+                filteredData.map((row, index) => {
+                  const isEven = index % 2 === 0;
+                  return (
+                    <tr
+                      key={row.id}
+                      className={`transition-colors group ${
+                        isEven
+                          ? 'bg-white dark:bg-slate-900/60 hover:bg-purple-50/40 dark:hover:bg-purple-950/20'
+                          : 'bg-slate-100 dark:bg-slate-800/50 hover:bg-purple-50/60 dark:hover:bg-purple-950/30'
+                      }`}
+                    >
+                      <td className="p-3.5 text-center font-bold text-slate-500 dark:text-slate-400 border-r border-slate-300 dark:border-slate-700">
+                        {index + 1}
+                      </td>
+                      <td className="p-3.5 font-bold text-slate-900 dark:text-slate-100 border-r border-slate-300 dark:border-slate-700">
+                        {row.namaUsaha}
+                      </td>
+                      <td className="p-3.5 font-semibold text-purple-700 dark:text-purple-400 border-r border-slate-300 dark:border-slate-700">
+                        {row.jenisUsaha || '-'}
+                      </td>
+                      <td className="p-3.5 border-r border-slate-300 dark:border-slate-700">
+                        <span className="px-2 py-0.5 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-bold text-[11px]">
+                          {row.proses || '-'}
+                        </span>
+                      </td>
+                      <td className="p-3.5 border-r border-slate-300 dark:border-slate-700 text-slate-600 dark:text-slate-400">
+                        {row.pembinaan1 || '-'}
+                      </td>
+                      <td className="p-3.5 border-r border-slate-300 dark:border-slate-700 text-slate-700 dark:text-slate-300 max-w-[200px] truncate" title={row.hasil1}>
+                        {row.hasil1 || '-'}
+                      </td>
+                      <td className="p-3.5 border-r border-slate-300 dark:border-slate-700 text-slate-600 dark:text-slate-400">
+                        {row.pembinaan2 || '-'}
+                      </td>
+                      <td className="p-3.5 border-r border-slate-300 dark:border-slate-700 text-slate-700 dark:text-slate-300 max-w-[200px] truncate" title={row.hasil2}>
+                        {row.hasil2 || '-'}
+                      </td>
+                      <td className="p-3.5 border-r border-slate-300 dark:border-slate-700 font-semibold text-slate-800 dark:text-slate-200">
+                        {row.pelatihanHigiene || '-'}
+                      </td>
+                      <td className="p-3.5 border-r border-slate-300 dark:border-slate-700">
+                        <span
+                          className={`px-2.5 py-1 rounded-full text-[11px] font-extrabold ${
+                            row.pengeluaranRekomendasi.toLowerCase().includes('diterbitkan')
+                              ? 'bg-emerald-50 dark:bg-emerald-950/40 text-emerald-800 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800'
+                              : 'bg-amber-50 dark:bg-amber-950/40 text-amber-800 dark:text-amber-300 border border-amber-200 dark:border-amber-800'
+                          }`}
+                        >
+                          {row.pengeluaranRekomendasi || '-'}
+                        </span>
+                      </td>
+                      <td className="p-3.5 border-r border-slate-300 dark:border-slate-700 text-slate-500 dark:text-slate-400 max-w-[220px] truncate" title={row.keterangan}>
+                        {row.keterangan || '-'}
+                      </td>
+                      {canEdit && (
+                        <td className={`p-3.5 text-center sticky right-0 z-10 border-l border-slate-300 dark:border-slate-700 ${
+                          isEven
+                            ? 'bg-white dark:bg-slate-900 group-hover:bg-purple-50/40 dark:group-hover:bg-purple-950/20'
+                            : 'bg-slate-100 dark:bg-slate-800 group-hover:bg-purple-50/60 dark:group-hover:bg-purple-950/30'
+                        }`}>
                         <div className="flex items-center justify-center gap-1.5">
                           <button
                             onClick={() => onEdit(row)}
@@ -181,9 +194,10 @@ export default function NkvTableSection({
                       </td>
                     )}
                   </tr>
-                ))
-              )}
-            </tbody>
+                );
+              })
+            )}
+          </tbody>
           </table>
         </div>
       </div>

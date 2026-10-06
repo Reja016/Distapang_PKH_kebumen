@@ -81,21 +81,21 @@ export default function PakanTableSection({
       </div>
 
       {/* Tabel Responsive dengan Sticky Kolom Pertama */}
-      <div className="overflow-x-auto rounded-2xl border border-slate-200 shadow-2xs">
+      <div className="overflow-x-auto rounded-2xl border border-slate-300 dark:border-slate-700 shadow-2xs">
         <table className="w-full text-left text-xs border-collapse min-w-[700px]">
           <thead>
-            <tr className="bg-slate-100/90 text-slate-800 font-extrabold uppercase text-[11px] border-b border-slate-200">
-              <th className="py-3.5 px-4 text-center w-12 sticky left-0 bg-slate-100 z-10">No</th>
-              <th className="py-3.5 px-4 sticky left-12 bg-slate-100 z-10">Kecamatan</th>
-              <th className="py-3.5 px-4 text-right">Potensi Pakan (kg)</th>
-              <th className="py-3.5 px-4 text-right">Kapasitas Tampung (ekor)</th>
-              <th className="py-3.5 px-4 text-right">Jumlah Ternak Sekarang (Satuan Ternak)</th>
-              <th className="py-3.5 px-4 text-right">Potensi Penambahan (ST)</th>
-              <th className="py-3.5 px-4 text-center">Status</th>
+            <tr className="bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-200 font-extrabold uppercase text-[11px] border-b border-slate-300 dark:border-slate-700">
+              <th className="py-3.5 px-4 text-center w-12 sticky left-0 bg-slate-100 dark:bg-slate-800 z-10 border-r border-slate-300 dark:border-slate-700">No</th>
+              <th className="py-3.5 px-4 sticky left-12 bg-slate-100 dark:bg-slate-800 z-10 border-r border-slate-300 dark:border-slate-700">Kecamatan</th>
+              <th className="py-3.5 px-4 text-right border-r border-slate-300 dark:border-slate-700">Potensi Pakan (kg)</th>
+              <th className="py-3.5 px-4 text-right border-r border-slate-300 dark:border-slate-700">Kapasitas Tampung (ekor)</th>
+              <th className="py-3.5 px-4 text-right border-r border-slate-300 dark:border-slate-700">Jumlah Ternak Sekarang (Satuan Ternak)</th>
+              <th className="py-3.5 px-4 text-right border-r border-slate-300 dark:border-slate-700">Potensi Penambahan (ST)</th>
+              <th className={`py-3.5 px-4 text-center ${canEdit ? 'border-r border-slate-300 dark:border-slate-700' : ''}`}>Status</th>
               {canEdit && <th className="py-3.5 px-4 text-center w-24">Aksi</th>}
             </tr>
           </thead>
-          <tbody className="divide-y divide-slate-100 font-medium text-slate-700">
+          <tbody className="divide-y divide-slate-300 dark:divide-slate-700 font-medium text-slate-700 dark:text-slate-300">
             {filteredData.map((item, index) => {
               const isDefisit = item.potensi_penambahan_st < 0;
               const isSelected = selectedKecamatan?.id === item.id;
@@ -105,48 +105,60 @@ export default function PakanTableSection({
                   id={`row-${item.id}`}
                   key={item.id}
                   onClick={() => setSelectedKecamatan(item)}
-                  className={`hover:bg-purple-50/60 transition-colors cursor-pointer ${
-                    isSelected ? 'bg-purple-50/90 font-semibold' : index % 2 === 1 ? 'bg-slate-50/40' : 'bg-white'
+                  className={`hover:bg-purple-50/60 dark:hover:bg-purple-950/30 transition-colors cursor-pointer ${
+                    isSelected
+                      ? 'bg-purple-50/90 dark:bg-purple-950/40 font-semibold'
+                      : index % 2 === 1
+                        ? 'bg-slate-100 dark:bg-slate-800/50'
+                        : 'bg-white dark:bg-slate-900/60'
                   }`}
                 >
                   <td
-                    className={`py-3 px-4 text-center font-bold text-slate-400 sticky left-0 z-10 ${
-                      isSelected ? 'bg-purple-100' : index % 2 === 1 ? 'bg-slate-50' : 'bg-white'
+                    className={`py-3 px-4 text-center font-bold text-slate-400 dark:text-slate-500 sticky left-0 z-10 border-r border-slate-300 dark:border-slate-700 ${
+                      isSelected
+                        ? 'bg-purple-100 dark:bg-purple-950'
+                        : index % 2 === 1
+                          ? 'bg-slate-100 dark:bg-slate-800'
+                          : 'bg-white dark:bg-slate-900'
                     }`}
                   >
                     {index + 1}
                   </td>
                   <td
-                    className={`py-3 px-4 font-black text-slate-900 tracking-wide sticky left-12 z-10 ${
-                      isSelected ? 'bg-purple-100' : index % 2 === 1 ? 'bg-slate-50' : 'bg-white'
+                    className={`py-3 px-4 font-black text-slate-900 dark:text-slate-100 tracking-wide sticky left-12 z-10 border-r border-slate-300 dark:border-slate-700 ${
+                      isSelected
+                        ? 'bg-purple-100 dark:bg-purple-950'
+                        : index % 2 === 1
+                          ? 'bg-slate-100 dark:bg-slate-800'
+                          : 'bg-white dark:bg-slate-900'
                     }`}
                   >
                     {item.nama}
                   </td>
-                  <td className="py-3 px-4 text-right font-semibold font-mono">
+                  <td className="py-3 px-4 text-right font-semibold font-mono border-r border-slate-300 dark:border-slate-700">
                     {item.potensi_pakan_kg.toLocaleString('id-ID', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                   </td>
-                  <td className="py-3 px-4 text-right font-semibold font-mono">
+                  <td className="py-3 px-4 text-right font-semibold font-mono border-r border-slate-300 dark:border-slate-700">
                     {item.kapasitas_tampung_ekor.toLocaleString('id-ID', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                   </td>
-                  <td className="py-3 px-4 text-right font-semibold font-mono">
+                  <td className="py-3 px-4 text-right font-semibold font-mono border-r border-slate-300 dark:border-slate-700">
                     {item.jumlah_ternak_st.toLocaleString('id-ID', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                   </td>
                   <td
-                    className={`py-3 px-4 text-right font-black font-mono ${
-                      isDefisit ? 'text-rose-600' : 'text-emerald-700'
+                    className={`py-3 px-4 text-right font-black font-mono border-r border-slate-300 dark:border-slate-700 ${
+                      isDefisit ? 'text-rose-600 dark:text-rose-400' : 'text-emerald-700 dark:text-emerald-400'
                     }`}
                   >
                     {item.potensi_penambahan_st > 0
                       ? `+${item.potensi_penambahan_st.toLocaleString('id-ID', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
                       : item.potensi_penambahan_st.toLocaleString('id-ID', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                   </td>
-                  <td className="py-3 px-4 text-center">
+                  <td className={`py-3 px-4 text-center ${canEdit ? 'border-r border-slate-300 dark:border-slate-700' : ''}`}>
                     <span
                       className={`inline-block px-2.5 py-0.5 rounded-md text-[10px] font-black uppercase ${
                         isDefisit
-                          ? 'bg-rose-100 text-rose-700 border border-rose-200'
-                          : 'bg-emerald-100 text-emerald-800 border border-emerald-200'
+                          ? 'bg-rose-100 dark:bg-rose-950/40 text-rose-700 dark:text-rose-300 border border-rose-200 dark:border-rose-800'
+                          : 'bg-emerald-100 dark:bg-emerald-950/40 text-emerald-800 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800'
                       }`}
                     >
                       {isDefisit ? 'Defisit' : 'Surplus'}

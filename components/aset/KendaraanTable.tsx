@@ -93,14 +93,14 @@ export function KendaraanTable({
       </div>
 
       {/* ── TABEL INVENTARIS KENDARAAN (8 KOLOM) ── */}
-      <div className="bg-white rounded-3xl border border-slate-200 shadow-sm overflow-hidden">
-        <div className="p-5 border-b border-slate-100 flex flex-wrap items-center justify-between gap-3 bg-amber-50/50">
+      <div className="bg-white dark:bg-slate-900 rounded-3xl border border-slate-300 dark:border-slate-700 shadow-sm overflow-hidden">
+        <div className="p-5 border-b border-slate-300 dark:border-slate-700 flex flex-wrap items-center justify-between gap-3 bg-amber-50/50 dark:bg-slate-800/60">
           <div className="flex items-center gap-2.5">
             <div className="w-10 h-10 rounded-2xl bg-amber-600 text-white flex items-center justify-center font-bold shadow-xs">
               <Car size={20} strokeWidth={2.5} />
             </div>
             <div>
-              <h3 className="font-extrabold text-base text-slate-900">
+              <h3 className="font-extrabold text-base text-slate-900 dark:text-slate-100">
                 Daftar Inventaris Kendaraan Dinas Operasional
               </h3>
               <p className="text-xs text-slate-500">
@@ -108,27 +108,27 @@ export function KendaraanTable({
               </p>
             </div>
           </div>
-          <span className="text-xs font-bold px-3 py-1 rounded-full bg-amber-100 text-amber-800 border border-amber-200">
+          <span className="text-xs font-bold px-3 py-1 rounded-full bg-amber-100 dark:bg-amber-950/60 text-amber-800 dark:text-amber-300 border border-amber-200 dark:border-amber-800">
             {filteredData.length} Kendaraan
           </span>
         </div>
 
         <div className="overflow-x-auto">
           <table className="w-full text-xs text-left border-collapse whitespace-nowrap">
-            <thead className="bg-slate-50 text-slate-700 font-extrabold uppercase tracking-wider border-b border-slate-200">
+            <thead className="bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-extrabold uppercase tracking-wider border-b border-slate-300 dark:border-slate-700">
               <tr>
-                <th className="p-3.5 text-center w-12 border-r border-slate-200">No</th>
-                <th className="p-3.5 border-r border-slate-200">Nama Pemegang</th>
-                <th className="p-3.5 border-r border-slate-200">Merk / Type</th>
-                <th className="p-3.5 text-center border-r border-slate-200">Tahun</th>
-                <th className="p-3.5 border-r border-slate-200 text-center bg-amber-50/50">Nopol Lama</th>
-                <th className="p-3.5 border-r border-slate-200 text-center bg-emerald-50/50 text-emerald-900">Nopol Baru</th>
-                <th className="p-3.5 border-r border-slate-200 font-mono">Nomor Mesin</th>
-                <th className="p-3.5 border-r border-slate-200 font-mono">Nomor Rangka</th>
-                {canEdit && <th className="p-3.5 text-center sticky right-0 bg-slate-50 z-10">Aksi</th>}
+                <th className="p-3.5 text-center w-12 border-r border-slate-300 dark:border-slate-700">No</th>
+                <th className="p-3.5 border-r border-slate-300 dark:border-slate-700">Nama Pemegang</th>
+                <th className="p-3.5 border-r border-slate-300 dark:border-slate-700">Merk / Type</th>
+                <th className="p-3.5 text-center border-r border-slate-300 dark:border-slate-700">Tahun</th>
+                <th className="p-3.5 border-r border-slate-300 dark:border-slate-700 text-center bg-amber-50/50 dark:bg-slate-800/70">Nopol Lama</th>
+                <th className="p-3.5 border-r border-slate-300 dark:border-slate-700 text-center bg-emerald-50/50 dark:bg-emerald-950/40 text-emerald-900 dark:text-emerald-300">Nopol Baru</th>
+                <th className="p-3.5 border-r border-slate-300 dark:border-slate-700 font-mono">Nomor Mesin</th>
+                <th className="p-3.5 border-r border-slate-300 dark:border-slate-700 font-mono">Nomor Rangka</th>
+                {canEdit && <th className="p-3.5 text-center sticky right-0 bg-slate-100 dark:bg-slate-800 z-10 border-l border-slate-300 dark:border-slate-700">Aksi</th>}
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-100 text-slate-800 font-medium">
+            <tbody className="divide-y divide-slate-300 dark:divide-slate-700 text-slate-800 dark:text-slate-200 font-medium">
               {filteredData.length === 0 ? (
                 <tr>
                   <td colSpan={canEdit ? 9 : 8} className="p-8 text-center text-slate-400 font-medium text-xs">
@@ -136,38 +136,49 @@ export function KendaraanTable({
                   </td>
                 </tr>
               ) : (
-                filteredData.map((row, index) => (
-                  <tr key={row.id} className="hover:bg-amber-50/40 transition-colors">
-                    <td className="p-3.5 text-center font-bold text-slate-500 border-r border-slate-100">
-                      {index + 1}
-                    </td>
-                    <td className="p-3.5 font-extrabold text-slate-900 border-r border-slate-100">
-                      {row.namaPemegang}
-                    </td>
-                    <td className="p-3.5 font-bold text-slate-800 border-r border-slate-100">
-                      {row.merkType || '-'}
-                    </td>
-                    <td className="p-3.5 text-center font-bold font-sans text-slate-600 border-r border-slate-100">
-                      {row.tahun || '-'}
-                    </td>
-                    <td className="p-3.5 text-center border-r border-slate-100">
-                      <span className="px-2.5 py-1 rounded-lg bg-slate-100 text-slate-700 font-extrabold font-mono text-[11px] border border-slate-200">
-                        {row.nopolLama || '-'}
-                      </span>
-                    </td>
-                    <td className="p-3.5 text-center border-r border-slate-100">
-                      <span className="px-2.5 py-1 rounded-lg bg-emerald-50 text-emerald-800 font-extrabold font-mono text-[11px] border border-emerald-300 shadow-2xs">
-                        {row.nopolBaru || '-'}
-                      </span>
-                    </td>
-                    <td className="p-3.5 font-mono text-xs font-bold text-slate-700 border-r border-slate-100">
-                      {row.nomorMesin || '-'}
-                    </td>
-                    <td className="p-3.5 font-mono text-xs font-bold text-slate-700 border-r border-slate-100">
-                      {row.nomorRangka || '-'}
-                    </td>
-                    {canEdit && (
-                      <td className="p-3.5 text-center sticky right-0 bg-white z-10 border-l border-slate-100">
+                filteredData.map((row, index) => {
+                  const isEven = index % 2 === 0;
+                  return (
+                    <tr
+                      key={row.id}
+                      className={`transition-colors ${
+                        isEven
+                          ? 'bg-white dark:bg-slate-900/60 hover:bg-amber-50/40 dark:hover:bg-slate-800/60'
+                          : 'bg-slate-100 dark:bg-slate-800/50 hover:bg-amber-50/60 dark:hover:bg-slate-800/70'
+                      }`}
+                    >
+                      <td className="p-3.5 text-center font-bold text-slate-500 dark:text-slate-400 border-r border-slate-300 dark:border-slate-700">
+                        {index + 1}
+                      </td>
+                      <td className="p-3.5 font-extrabold text-slate-900 dark:text-slate-100 border-r border-slate-300 dark:border-slate-700">
+                        {row.namaPemegang}
+                      </td>
+                      <td className="p-3.5 font-bold text-slate-800 dark:text-slate-200 border-r border-slate-300 dark:border-slate-700">
+                        {row.merkType || '-'}
+                      </td>
+                      <td className="p-3.5 text-center font-bold font-sans text-slate-600 dark:text-slate-400 border-r border-slate-300 dark:border-slate-700">
+                        {row.tahun || '-'}
+                      </td>
+                      <td className="p-3.5 text-center border-r border-slate-300 dark:border-slate-700">
+                        <span className="px-2.5 py-1 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-extrabold font-mono text-[11px] border border-slate-300 dark:border-slate-700">
+                          {row.nopolLama || '-'}
+                        </span>
+                      </td>
+                      <td className="p-3.5 text-center border-r border-slate-300 dark:border-slate-700">
+                        <span className="px-2.5 py-1 rounded-lg bg-emerald-50 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-300 font-extrabold font-mono text-[11px] border border-emerald-300 dark:border-emerald-800 shadow-2xs">
+                          {row.nopolBaru || '-'}
+                        </span>
+                      </td>
+                      <td className="p-3.5 font-mono text-xs font-bold text-slate-700 dark:text-slate-300 border-r border-slate-300 dark:border-slate-700">
+                        {row.nomorMesin || '-'}
+                      </td>
+                      <td className="p-3.5 font-mono text-xs font-bold text-slate-700 dark:text-slate-300 border-r border-slate-300 dark:border-slate-700">
+                        {row.nomorRangka || '-'}
+                      </td>
+                      {canEdit && (
+                        <td className={`p-3.5 text-center sticky right-0 z-10 border-l border-slate-300 dark:border-slate-700 ${
+                          isEven ? 'bg-white dark:bg-slate-900' : 'bg-slate-100 dark:bg-slate-800'
+                        }`}>
                         <div className="flex items-center justify-center gap-1.5">
                           <button
                             onClick={() => onEdit(row)}
@@ -187,9 +198,10 @@ export function KendaraanTable({
                       </td>
                     )}
                   </tr>
-                ))
-              )}
-            </tbody>
+                );
+              })
+            )}
+          </tbody>
           </table>
         </div>
       </div>

@@ -62,24 +62,24 @@ export default function IbTableSection({
 
       <div className="overflow-x-auto w-full">
         <table className="w-full text-xs sm:text-sm text-left whitespace-nowrap">
-          <thead className="bg-slate-50 dark:bg-slate-800/90 text-slate-700 dark:text-slate-300 border-b border-slate-200 dark:border-slate-800 text-[11px] uppercase tracking-wider font-bold">
+          <thead className="bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border-b border-slate-300 dark:border-slate-700 text-[11px] uppercase tracking-wider font-bold">
             <tr>
-              <th className="px-5 py-4">Identitas Peternak &amp; Sapi</th>
-              <th className="px-5 py-4">Data IB (Awal)</th>
-              <th className="px-5 py-4">Pejantan / Straw</th>
-              <th className="px-5 py-4">Status PKB (90 Hari)</th>
-              <th className="px-5 py-4">Status Kelahiran</th>
+              <th className="px-5 py-4 border-r border-slate-300 dark:border-slate-700">Identitas Peternak &amp; Sapi</th>
+              <th className="px-5 py-4 border-r border-slate-300 dark:border-slate-700">Data IB (Awal)</th>
+              <th className="px-5 py-4 border-r border-slate-300 dark:border-slate-700">Pejantan / Straw</th>
+              <th className="px-5 py-4 border-r border-slate-300 dark:border-slate-700">Status PKB (90 Hari)</th>
+              <th className="px-5 py-4 border-r border-slate-300 dark:border-slate-700">Status Kelahiran</th>
               {(canCreate ?? canEdit) && <th className="px-5 py-4 text-center">Tindakan Petugas</th>}
             </tr>
           </thead>
-          <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
+          <tbody className="divide-y divide-slate-300 dark:divide-slate-700">
             {filteredIB.map((ib) => {
               const birthInfo = ib.pkbResult === 'Bunting' && !ib.birthDate ? estimateBirthInfo(ib) : null;
 
               return (
-                <tr key={ib.id} className="hover:bg-slate-50/80 dark:hover:bg-slate-800/60 transition-colors">
+                <tr key={ib.id} className="odd:bg-white even:bg-slate-100 dark:odd:bg-slate-900/60 dark:even:bg-slate-800/50 hover:bg-blue-50/60 dark:hover:bg-slate-800/80 transition-colors">
                   {/* 1. Sapi & Peternak */}
-                  <td className="px-5 py-4">
+                  <td className="px-5 py-4 border-r border-slate-300 dark:border-slate-700">
                     <span className="font-bold text-slate-900 text-sm block mb-0.5 flex items-center gap-1.5">
                       <User size={15} className="text-slate-400" />
                       {ib.ownerName || 'Peternak Tidak Diketahui'}
@@ -93,7 +93,7 @@ export default function IbTableSection({
                   </td>
 
                   {/* 2. IB */}
-                  <td className="px-5 py-4">
+                  <td className="px-5 py-4 border-r border-slate-300 dark:border-slate-700">
                     <div className="flex items-center gap-1.5 flex-wrap">
                       <span className="font-bold text-slate-900 dark:text-slate-100">{fmtDate(ib.date)}</span>
                       {ib.totalIbCount && ib.totalIbCount > 1 ? (
@@ -115,7 +115,7 @@ export default function IbTableSection({
                   </td>
 
                   {/* 3. Pejantan */}
-                  <td className="px-5 py-4">
+                  <td className="px-5 py-4 border-r border-slate-300 dark:border-slate-700">
                     <span className="font-bold text-slate-900 block">
                       {ib.bullName} <span className="text-slate-500 font-normal text-xs">({ib.bullBreed})</span>
                     </span>
@@ -125,7 +125,7 @@ export default function IbTableSection({
                   </td>
 
                   {/* 4. PKB Status */}
-                  <td className="px-5 py-4">
+                  <td className="px-5 py-4 border-r border-slate-300 dark:border-slate-700">
                     {!ib.pkbResult && ib.pkbStatus !== 'Tidak Diperiksa' && (
                       <div className="bg-amber-50 border border-amber-200 p-2.5 rounded-xl">
                         <span className="block text-[10px] font-bold uppercase tracking-wider text-amber-700">
@@ -165,7 +165,7 @@ export default function IbTableSection({
                   </td>
 
                   {/* 5. Kelahiran Status */}
-                  <td className="px-5 py-4">
+                  <td className="px-5 py-4 border-r border-slate-300 dark:border-slate-700">
                     {ib.birthDate ? (
                       <div className="bg-blue-50 border border-blue-200 p-2.5 rounded-xl">
                         <span className="block text-xs font-bold text-blue-900">

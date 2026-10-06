@@ -96,12 +96,12 @@ export default function PenyakitTableTab({
           <table className="w-full text-xs text-left border-collapse">
             <thead className="bg-blue-900 text-white font-bold uppercase tracking-wider text-[11px]">
               <tr>
-                <th className="p-3.5 w-12 text-center">NO</th>
-                <th className="p-3.5">KECAMATAN</th>
-                <th className="p-3.5">WILAYAH PUSKESWAN</th>
-                <th className="p-3.5">DIAGNOSA PENYAKIT</th>
-                <th className="p-3.5 text-center">JUMLAH KASUS</th>
-                <th className="p-3.5">KETERANGAN</th>
+                <th className="p-3.5 w-12 text-center border-r border-blue-800">NO</th>
+                <th className="p-3.5 border-r border-blue-800">KECAMATAN</th>
+                <th className="p-3.5 border-r border-blue-800">WILAYAH PUSKESWAN</th>
+                <th className="p-3.5 border-r border-blue-800">DIAGNOSA PENYAKIT</th>
+                <th className="p-3.5 text-center border-r border-blue-800">JUMLAH KASUS</th>
+                <th className="p-3.5 border-r border-blue-800">KETERANGAN</th>
                 {(isAdmin || canEdit) && <th className="p-3.5 text-center w-24">AKSI</th>}
               </tr>
             </thead>
@@ -123,25 +123,25 @@ export default function PenyakitTableTab({
                 filteredCases.map((row, idx) => {
                   const zone = getZoneByKecamatanId(row.kecamatan_id);
                   return (
-                    <tr key={row.id || idx} className="hover:bg-blue-50/30 transition-colors">
-                      <td className="p-3.5 text-center font-semibold text-slate-400">{idx + 1}</td>
-                      <td className="p-3.5 font-bold text-slate-900">{row.kecamatan_nama}</td>
-                      <td className="p-3.5">
-                        <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-blue-50 text-blue-700 border border-blue-200">
+                    <tr key={row.id || idx} className="odd:bg-white even:bg-slate-100 hover:bg-blue-50/70 dark:odd:bg-slate-900/60 dark:even:bg-slate-800/50 dark:hover:bg-slate-800/80 transition-colors">
+                      <td className="p-3.5 text-center font-semibold text-slate-500 border-r border-slate-300 dark:border-slate-700">{idx + 1}</td>
+                      <td className="p-3.5 font-bold text-slate-900 dark:text-slate-100 border-r border-slate-300 dark:border-slate-700">{row.kecamatan_nama}</td>
+                      <td className="p-3.5 border-r border-slate-300 dark:border-slate-700">
+                        <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-blue-50 dark:bg-blue-950/60 text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-800">
                           {zone ? zone.nama : row.puskeswan_id}
                         </span>
                       </td>
-                      <td className="p-3.5 font-extrabold flex items-center gap-2">
+                      <td className="p-3.5 font-extrabold flex items-center gap-2 border-r border-slate-300 dark:border-slate-700">
                         <span
                           className="w-3 h-3 rounded-full shrink-0"
                           style={{ backgroundColor: DIAGNOSA_COLOR_MAP[row.diagnosa_nama] || '#64748B' }}
                         />
                         <span>{row.diagnosa_nama}</span>
                       </td>
-                      <td className="p-3.5 text-center font-mono font-bold text-slate-900">
+                      <td className="p-3.5 text-center font-mono font-bold text-slate-900 dark:text-slate-100 border-r border-slate-300 dark:border-slate-700">
                         {Number(row.jumlah_kasus ?? 0)} Ekor
                       </td>
-                      <td className="p-3.5 text-slate-500 max-w-xs truncate">{row.keterangan || '-'}</td>
+                      <td className="p-3.5 text-slate-600 dark:text-slate-400 max-w-xs truncate border-r border-slate-300 dark:border-slate-700">{row.keterangan || '-'}</td>
                       {(isAdmin || canEdit) && (
                         <td className="p-3.5 text-center">
                           <div className="flex items-center justify-center gap-1.5">

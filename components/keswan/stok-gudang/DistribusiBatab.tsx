@@ -125,19 +125,19 @@ export default function DistribusiBatab({
         <div className="overflow-x-auto">
           <table className="w-full text-left text-xs border-collapse">
             <thead>
-              <tr className="bg-slate-50 dark:bg-slate-800/60 text-slate-600 dark:text-slate-300 font-semibold border-b border-slate-100 dark:border-slate-800">
-                <th className="p-3.5 text-center w-12">No</th>
-                <th className="p-3.5">Nomor BA &amp; Tanggal</th>
-                <th className="p-3.5">Tujuan Puskeswan</th>
-                <th className="p-3.5">Nama Obat / Barang</th>
-                <th className="p-3.5">No. Batch &amp; Exp</th>
-                <th className="p-3.5 text-center">Jumlah</th>
-                <th className="p-3.5 text-center">Jenis Distribusi</th>
-                <th className="p-3.5 text-center">Bukti Tanda Terima</th>
+              <tr className="bg-slate-100 dark:bg-slate-800/60 text-slate-700 dark:text-slate-300 font-semibold border-b border-slate-300 dark:border-slate-700">
+                <th className="p-3.5 text-center w-12 border-r border-slate-300 dark:border-slate-700">No</th>
+                <th className="p-3.5 border-r border-slate-300 dark:border-slate-700">Nomor BA &amp; Tanggal</th>
+                <th className="p-3.5 border-r border-slate-300 dark:border-slate-700">Tujuan Puskeswan</th>
+                <th className="p-3.5 border-r border-slate-300 dark:border-slate-700">Nama Obat / Barang</th>
+                <th className="p-3.5 border-r border-slate-300 dark:border-slate-700">No. Batch &amp; Exp</th>
+                <th className="p-3.5 text-center border-r border-slate-300 dark:border-slate-700">Jumlah</th>
+                <th className="p-3.5 text-center border-r border-slate-300 dark:border-slate-700">Jenis Distribusi</th>
+                <th className="p-3.5 text-center border-r border-slate-300 dark:border-slate-700">Bukti Tanda Terima</th>
                 <th className="p-3.5 text-center w-36">Aksi &amp; Berita Acara</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-100 dark:divide-slate-800/80 text-slate-700 dark:text-slate-200">
+            <tbody className="divide-y divide-slate-300 dark:divide-slate-700 text-slate-700 dark:text-slate-200">
               {filteredList.length === 0 ? (
                 <tr>
                   <td colSpan={9} className="p-8 text-center text-slate-400">
@@ -148,10 +148,10 @@ export default function DistribusiBatab({
                 filteredList.map((item, idx) => (
                   <tr
                     key={item.id_distribusi}
-                    className="hover:bg-slate-50/70 dark:hover:bg-slate-800/40 transition-colors"
+                    className="odd:bg-white even:bg-slate-100 dark:odd:bg-slate-900/60 dark:even:bg-slate-800/50 hover:bg-blue-50/60 dark:hover:bg-slate-800/80 transition-colors"
                   >
-                    <td className="p-3.5 text-center font-mono text-slate-400">{idx + 1}</td>
-                    <td className="p-3.5 whitespace-nowrap">
+                    <td className="p-3.5 text-center font-mono text-slate-500 dark:text-slate-400 border-r border-slate-300 dark:border-slate-700">{idx + 1}</td>
+                    <td className="p-3.5 whitespace-nowrap border-r border-slate-300 dark:border-slate-700">
                       <div className="font-mono font-bold text-blue-600 dark:text-blue-400">
                         {item.nomor_ba}
                       </div>
@@ -159,13 +159,13 @@ export default function DistribusiBatab({
                         {item.tanggal_ba ? String(item.tanggal_ba).slice(0, 10) : '-'}
                       </div>
                     </td>
-                    <td className="p-3.5 whitespace-nowrap">
+                    <td className="p-3.5 whitespace-nowrap border-r border-slate-300 dark:border-slate-700">
                       <div className="font-bold text-slate-800 dark:text-slate-100 flex items-center gap-1.5">
                         <Building2 className="w-3.5 h-3.5 text-slate-400" />
                         Puskeswan {item.nama_puskeswan}
                       </div>
                     </td>
-                    <td className="p-3.5">
+                    <td className="p-3.5 border-r border-slate-300 dark:border-slate-700">
                       <div className="font-semibold text-slate-900 dark:text-slate-100">
                         {item.nama_barang}
                       </div>
@@ -173,7 +173,7 @@ export default function DistribusiBatab({
                         {item.sumber_anggaran} • {item.tahun_anggaran || '2026'}
                       </div>
                     </td>
-                    <td className="p-3.5 whitespace-nowrap">
+                    <td className="p-3.5 whitespace-nowrap border-r border-slate-300 dark:border-slate-700">
                       <div className="font-mono font-bold text-slate-700 dark:text-slate-300">
                         {item.nomor_batch || '-'}
                       </div>
@@ -181,10 +181,10 @@ export default function DistribusiBatab({
                         Exp: {item.tanggal_kadaluarsa ? String(item.tanggal_kadaluarsa).slice(0, 10) : '-'}
                       </div>
                     </td>
-                    <td className="p-3.5 text-center font-black text-blue-600 dark:text-blue-400 text-sm whitespace-nowrap">
+                    <td className="p-3.5 text-center font-black text-blue-600 dark:text-blue-400 text-sm whitespace-nowrap border-r border-slate-300 dark:border-slate-700">
                       {item.jumlah.toLocaleString('id-ID')} {item.satuan_kemasan || 'unit'}
                     </td>
-                    <td className="p-3.5 text-center whitespace-nowrap">
+                    <td className="p-3.5 text-center whitespace-nowrap border-r border-slate-300 dark:border-slate-700">
                       {item.is_darurat ? (
                         <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-amber-100 dark:bg-amber-950/60 text-amber-800 dark:text-amber-300 border border-amber-300 dark:border-amber-800">
                           <AlertTriangle className="w-3 h-3" /> AMPRAHAN DARURAT
@@ -199,7 +199,7 @@ export default function DistribusiBatab({
                         </span>
                       )}
                     </td>
-                    <td className="p-3.5 text-center whitespace-nowrap">
+                    <td className="p-3.5 text-center whitespace-nowrap border-r border-slate-300 dark:border-slate-700">
                       {item.file_bukti_ba ? (
                         <button
                           onClick={() => setPreviewBuktiUrl(item.file_bukti_ba || null)}

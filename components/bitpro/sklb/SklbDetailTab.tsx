@@ -98,7 +98,7 @@ export function SklbDetailTab({
                 {canEdit && <th className="p-3 text-center w-20 border border-slate-300 dark:border-slate-700">AKSI</th>}
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-200 dark:divide-slate-800 text-slate-900 dark:text-slate-100 font-medium">
+            <tbody className="divide-y divide-slate-300 dark:divide-slate-700 text-slate-900 dark:text-slate-100 font-medium">
               {filteredData.length === 0 ? (
                 <tr>
                   <td colSpan={canEdit ? 12 : 11} className="p-12 text-center text-slate-400 font-semibold">
@@ -107,15 +107,22 @@ export function SklbDetailTab({
                 </tr>
               ) : (
                 filteredData.map((row, idx) => (
-                  <tr key={row.id || idx} className="hover:bg-slate-50 dark:hover:bg-slate-800/60 transition-colors">
-                    <td className="p-2.5 text-center font-sans text-slate-500 dark:text-slate-400 border border-slate-200 dark:border-slate-700">{idx + 1}</td>
-                    <td className="p-2.5 font-bold text-emerald-800 dark:text-emerald-400 border border-slate-200 dark:border-slate-700">{row.desa_lokasi}</td>
-                    <td className="p-2.5 font-bold text-slate-900 dark:text-slate-100 border border-slate-200 dark:border-slate-700">{row.nama_pemilik}</td>
-                    <td className="p-2.5 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700">
+                  <tr
+                    key={row.id || idx}
+                    className={`transition-colors ${
+                      idx % 2 === 0
+                        ? 'bg-white dark:bg-slate-900/60 hover:bg-blue-50/60 dark:hover:bg-slate-800/60'
+                        : 'bg-slate-100 dark:bg-slate-800/50 hover:bg-blue-50/60 dark:hover:bg-slate-800/70'
+                    }`}
+                  >
+                    <td className="p-2.5 text-center font-sans text-slate-500 dark:text-slate-400 border border-slate-300 dark:border-slate-700">{idx + 1}</td>
+                    <td className="p-2.5 font-bold text-emerald-800 dark:text-emerald-400 border border-slate-300 dark:border-slate-700">{row.desa_lokasi}</td>
+                    <td className="p-2.5 font-bold text-slate-900 dark:text-slate-100 border border-slate-300 dark:border-slate-700">{row.nama_pemilik}</td>
+                    <td className="p-2.5 text-slate-700 dark:text-slate-300 border border-slate-300 dark:border-slate-700">
                       {row.dusun || '-'} (RT {row.rt || '-'}/RW {row.rw || '-'})
                     </td>
-                    <td className="p-2.5 font-semibold text-slate-800 dark:text-slate-200 border border-slate-200 dark:border-slate-700">{row.nama_sapi}</td>
-                    <td className="p-2.5 text-center border border-slate-200 dark:border-slate-700">
+                    <td className="p-2.5 font-semibold text-slate-800 dark:text-slate-200 border border-slate-300 dark:border-slate-700">{row.nama_sapi}</td>
+                    <td className="p-2.5 text-center border border-slate-300 dark:border-slate-700">
                       <span
                         className={`px-2 py-0.5 text-[10px] font-bold ${
                           row.jenis_kelamin === 'Jantan'
@@ -126,13 +133,13 @@ export function SklbDetailTab({
                         {row.jenis_kelamin}
                       </span>
                     </td>
-                    <td className="p-2.5 text-center font-sans text-slate-800 dark:text-slate-200 border border-slate-200 dark:border-slate-700">{row.umur_bulan}</td>
-                    <td className="p-2.5 text-center font-sans text-slate-800 dark:text-slate-200 border border-slate-200 dark:border-slate-700">{row.tinggi_pundak}</td>
-                    <td className="p-2.5 text-center font-sans text-slate-800 dark:text-slate-200 border border-slate-200 dark:border-slate-700">{row.panjang_badan}</td>
-                    <td className="p-2.5 text-center font-sans text-slate-800 dark:text-slate-200 border border-slate-200 dark:border-slate-700">{row.lingkar_dada}</td>
-                    <td className="p-2.5 text-center font-sans font-bold text-slate-900 dark:text-slate-100 border border-slate-200 dark:border-slate-700">{row.berat_badan}</td>
+                    <td className="p-2.5 text-center font-sans text-slate-800 dark:text-slate-200 border border-slate-300 dark:border-slate-700">{row.umur_bulan}</td>
+                    <td className="p-2.5 text-center font-sans text-slate-800 dark:text-slate-200 border border-slate-300 dark:border-slate-700">{row.tinggi_pundak}</td>
+                    <td className="p-2.5 text-center font-sans text-slate-800 dark:text-slate-200 border border-slate-300 dark:border-slate-700">{row.panjang_badan}</td>
+                    <td className="p-2.5 text-center font-sans text-slate-800 dark:text-slate-200 border border-slate-300 dark:border-slate-700">{row.lingkar_dada}</td>
+                    <td className="p-2.5 text-center font-sans font-bold text-slate-900 dark:text-slate-100 border border-slate-300 dark:border-slate-700">{row.berat_badan}</td>
                     {canEdit && (
-                      <td className="p-2.5 text-center border border-slate-200 dark:border-slate-700">
+                      <td className="p-2.5 text-center border border-slate-300 dark:border-slate-700">
                         <div className="flex items-center justify-center gap-1">
                           <button
                             onClick={() => onOpenModalDetail('edit', row)}

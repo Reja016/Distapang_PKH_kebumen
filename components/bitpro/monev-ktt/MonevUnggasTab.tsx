@@ -417,23 +417,23 @@ export function MonevUnggasTab({
 
         <div className="overflow-x-auto w-full">
           <table className="w-full text-xs sm:text-sm text-left whitespace-nowrap">
-            <thead className="bg-slate-50 text-slate-700 border-b border-slate-200 text-[11px] uppercase tracking-wider font-bold">
+            <thead className="bg-slate-100 dark:bg-slate-800/90 text-slate-700 dark:text-slate-300 border-b border-slate-300 dark:border-slate-700 text-[11px] uppercase tracking-wider font-bold">
               <tr>
-                <th className="px-4 py-3.5 text-center w-12">No</th>
-                <th className="px-4 py-3.5">Tahun</th>
-                <th className="px-4 py-3.5">Nama KTT</th>
-                <th className="px-4 py-3.5">Wilayah</th>
-                <th className="px-4 py-3.5">Komoditas</th>
-                <th className="px-4 py-3.5 text-right">Awal Total</th>
-                <th className="px-4 py-3.5 text-right">Mati</th>
-                <th className="px-4 py-3.5 text-right">Dijual</th>
-                <th className="px-4 py-3.5 text-right">Populasi Saat Ini</th>
-                <th className="px-4 py-3.5 text-right">Prod. Telur / Hari</th>
-                <th className="px-4 py-3.5 text-center">GPS, Foto &amp; Dokumen</th>
+                <th className="px-4 py-3.5 text-center w-12 border-r border-slate-300 dark:border-slate-700">No</th>
+                <th className="px-4 py-3.5 border-r border-slate-300 dark:border-slate-700">Tahun</th>
+                <th className="px-4 py-3.5 border-r border-slate-300 dark:border-slate-700">Nama KTT</th>
+                <th className="px-4 py-3.5 border-r border-slate-300 dark:border-slate-700">Wilayah</th>
+                <th className="px-4 py-3.5 border-r border-slate-300 dark:border-slate-700">Komoditas</th>
+                <th className="px-4 py-3.5 text-right border-r border-slate-300 dark:border-slate-700">Awal Total</th>
+                <th className="px-4 py-3.5 text-right border-r border-slate-300 dark:border-slate-700">Mati</th>
+                <th className="px-4 py-3.5 text-right border-r border-slate-300 dark:border-slate-700">Dijual</th>
+                <th className="px-4 py-3.5 text-right border-r border-slate-300 dark:border-slate-700">Populasi Saat Ini</th>
+                <th className="px-4 py-3.5 text-right border-r border-slate-300 dark:border-slate-700">Prod. Telur / Hari</th>
+                <th className="px-4 py-3.5 text-center border-r border-slate-300 dark:border-slate-700">GPS, Foto &amp; Dokumen</th>
                 <th className="px-4 py-3.5 text-center">Aksi / Cetak</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-100">
+            <tbody className="divide-y divide-slate-300 dark:divide-slate-700">
               {dbUnggasTabel.map((d, idx) => {
                 const ku = d.kondisiUnggas || {
                   awalTotal: d.kondisi?.awalJantan || 0,
@@ -450,28 +450,35 @@ export function MonevUnggasTab({
                 const allPhotos = (d.photos && d.photos.length > 0) ? d.photos : (d.photo ? [d.photo] : []);
 
                 return (
-                  <tr key={d.id} className="hover:bg-slate-50/80 transition-colors">
-                    <td className="px-4 py-3.5 text-center font-bold text-amber-700 text-xs">{idx + 1}</td>
-                    <td className="px-4 py-3.5 font-bold text-slate-800">
-                      <span className="px-2 py-0.5 rounded-md bg-slate-100 text-slate-700 border border-slate-200 text-xs">
+                  <tr
+                    key={d.id}
+                    className={`transition-colors ${
+                      idx % 2 === 0
+                        ? 'bg-white dark:bg-slate-900/60 hover:bg-blue-50/60 dark:hover:bg-slate-800/60'
+                        : 'bg-slate-100 dark:bg-slate-800/50 hover:bg-blue-50/60 dark:hover:bg-slate-800/70'
+                    }`}
+                  >
+                    <td className="px-4 py-3.5 text-center font-bold text-amber-700 dark:text-amber-400 text-xs border-r border-slate-300 dark:border-slate-700">{idx + 1}</td>
+                    <td className="px-4 py-3.5 font-bold text-slate-800 dark:text-slate-200 border-r border-slate-300 dark:border-slate-700">
+                      <span className="px-2 py-0.5 rounded-md bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700 text-xs">
                         {d.tahun}
                       </span>
                     </td>
-                    <td className="px-4 py-3.5 font-bold text-slate-900">{d.namaKtt}</td>
-                    <td className="px-4 py-3.5 text-slate-600 text-xs">
+                    <td className="px-4 py-3.5 font-bold text-slate-900 dark:text-slate-100 border-r border-slate-300 dark:border-slate-700">{d.namaKtt}</td>
+                    <td className="px-4 py-3.5 text-slate-600 dark:text-slate-300 text-xs border-r border-slate-300 dark:border-slate-700">
                       {d.desa}, {d.kec}
                     </td>
-                    <td className="px-4 py-3.5">
-                      <span className="px-2 py-0.5 rounded-md bg-amber-50 text-amber-800 border border-amber-200 text-xs font-semibold">
+                    <td className="px-4 py-3.5 border-r border-slate-300 dark:border-slate-700">
+                      <span className="px-2 py-0.5 rounded-md bg-amber-50 dark:bg-amber-950/40 text-amber-800 dark:text-amber-300 border border-amber-200 dark:border-amber-800 text-xs font-semibold">
                         {d.jenis}
                       </span>
                     </td>
-                    <td className="px-4 py-3.5 text-right font-bold text-slate-700">{ku.awalTotal}</td>
-                    <td className="px-4 py-3.5 text-right font-bold text-red-600">{ku.kematian}</td>
-                    <td className="px-4 py-3.5 text-right font-bold text-slate-700">{ku.dijual}</td>
-                    <td className="px-4 py-3.5 text-right font-extrabold text-amber-700">{sisa} Ekor</td>
-                    <td className="px-4 py-3.5 text-right font-bold text-slate-700">{ku.rataanTelur || 0} Butir</td>
-                    <td className="px-4 py-3.5 text-center">
+                    <td className="px-4 py-3.5 text-right font-bold text-slate-700 dark:text-slate-300 border-r border-slate-300 dark:border-slate-700">{ku.awalTotal}</td>
+                    <td className="px-4 py-3.5 text-right font-bold text-red-600 dark:text-red-400 border-r border-slate-300 dark:border-slate-700">{ku.kematian}</td>
+                    <td className="px-4 py-3.5 text-right font-bold text-slate-700 dark:text-slate-300 border-r border-slate-300 dark:border-slate-700">{ku.dijual}</td>
+                    <td className="px-4 py-3.5 text-right font-extrabold text-amber-700 dark:text-amber-400 border-r border-slate-300 dark:border-slate-700">{sisa} Ekor</td>
+                    <td className="px-4 py-3.5 text-right font-bold text-slate-700 dark:text-slate-300 border-r border-slate-300 dark:border-slate-700">{ku.rataanTelur || 0} Butir</td>
+                    <td className="px-4 py-3.5 text-center border-r border-slate-300 dark:border-slate-700">
                       <div className="flex flex-wrap items-center justify-center gap-1.5 text-xs">
                         {d.lat ? (
                           <span className="text-emerald-700 font-bold flex items-center gap-0.5">

@@ -56,9 +56,16 @@ export default function VaksinasiApbdTab({
                 </tr>
               </thead>
               <tbody className="divide-y-2 divide-slate-400 text-slate-900 font-medium">
-                {apbdTarget.map((row) => (
-                  <tr key={row.id} className="hover:bg-blue-50/50 transition-colors border-b-2 border-slate-400">
-                    <td className="p-3 text-center font-black text-slate-700 border-r-2 border-slate-400 bg-slate-100">{row.no_urut}</td>
+                {apbdTarget.map((row, idx) => (
+                  <tr
+                    key={row.id}
+                    className={`transition-colors border-b-2 border-slate-400 ${
+                      idx % 2 === 0 ? 'bg-white hover:bg-blue-50/50' : 'bg-slate-100 hover:bg-blue-50/70'
+                    }`}
+                  >
+                    <td className={`p-3 text-center font-black text-slate-700 border-r-2 border-slate-400 ${
+                      idx % 2 === 0 ? 'bg-slate-100/70' : 'bg-slate-200/70'
+                    }`}>{row.no_urut}</td>
                     <td className="p-3 font-black text-slate-950 border-r-2 border-slate-400">{row.puskeswan}</td>
                     <td className="p-3 text-right font-sans font-bold border-r-2 border-slate-400">{row.target_lsd.toLocaleString('id-ID')}</td>
                     <td className="p-3 text-right font-sans font-bold border-r-2 border-slate-400">{row.target_ndai.toLocaleString('id-ID')}</td>
@@ -94,8 +101,8 @@ export default function VaksinasiApbdTab({
 
         </div>
 
-        <div className="rounded-3xl border border-slate-200 bg-white shadow-sm overflow-hidden">
-          <div className="divide-y divide-slate-100">
+        <div className="rounded-3xl border border-slate-300 dark:border-slate-700 bg-white shadow-sm overflow-hidden">
+          <div className="divide-y divide-slate-300 dark:divide-slate-700">
             {droping.map((d) => (
               <div key={d.id} className="p-4 flex items-center justify-between hover:bg-slate-50/80 dark:hover:bg-slate-800/60 transition-colors">
                 <div className="flex flex-col">

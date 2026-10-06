@@ -73,23 +73,23 @@ export function RumahPotongTab({
       </div>
 
       {/* Table RPH List */}
-      <div className="bg-white rounded-3xl border border-slate-200 shadow-xs overflow-hidden">
+      <div className="bg-white dark:bg-slate-900 rounded-3xl border border-slate-300 dark:border-slate-700 shadow-xs overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-xs text-left border-collapse">
             <thead className="bg-purple-900 text-white font-bold uppercase tracking-wider text-[11px]">
               <tr>
-                <th className="p-3.5 w-12 text-center">NO</th>
-                <th className="p-3.5">NAMA USAHA</th>
-                <th className="p-3.5 text-center">JENIS</th>
-                <th className="p-3.5">PEMILIK</th>
-                <th className="p-3.5">KONTAK</th>
-                <th className="p-3.5">LOKASI / ALAMAT</th>
-                <th className="p-3.5 text-center">SERTIFIKAT HALAL</th>
-                <th className="p-3.5 text-center">NKV</th>
+                <th className="p-3.5 w-12 text-center border-r border-purple-800">NO</th>
+                <th className="p-3.5 border-r border-purple-800">NAMA USAHA</th>
+                <th className="p-3.5 text-center border-r border-purple-800">JENIS</th>
+                <th className="p-3.5 border-r border-purple-800">PEMILIK</th>
+                <th className="p-3.5 border-r border-purple-800">KONTAK</th>
+                <th className="p-3.5 border-r border-purple-800">LOKASI / ALAMAT</th>
+                <th className="p-3.5 text-center border-r border-purple-800">SERTIFIKAT HALAL</th>
+                <th className="p-3.5 text-center border-r border-purple-800">NKV</th>
                 {isAdmin && <th className="p-3.5 text-center w-24">AKSI</th>}
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-100 text-slate-700">
+            <tbody className="divide-y divide-slate-300 dark:divide-slate-700 text-slate-700 dark:text-slate-200">
               {isLoadingRph ? (
                 <tr>
                   <td colSpan={isAdmin ? 9 : 8} className="p-8 text-center text-slate-400">
@@ -105,18 +105,18 @@ export function RumahPotongTab({
                 </tr>
               ) : (
                 filteredRph.map((item, idx) => (
-                  <tr key={item.id || idx} className="hover:bg-purple-50/30 transition-colors">
-                    <td className="p-3.5 text-center font-semibold text-slate-400">{idx + 1}</td>
-                    <td className="p-3.5 font-bold text-slate-900">{item.nama_usaha}</td>
-                    <td className="p-3.5 text-center">
+                  <tr key={item.id || idx} className="odd:bg-white even:bg-slate-100 hover:bg-purple-50/70 dark:odd:bg-slate-900/60 dark:even:bg-slate-800/50 dark:hover:bg-slate-800/80 transition-colors">
+                    <td className="p-3.5 text-center font-semibold text-slate-500 dark:text-slate-400 border-r border-slate-300 dark:border-slate-700">{idx + 1}</td>
+                    <td className="p-3.5 font-bold text-slate-900 dark:text-slate-100 border-r border-slate-300 dark:border-slate-700">{item.nama_usaha}</td>
+                    <td className="p-3.5 text-center border-r border-slate-300 dark:border-slate-700">
                       <span className="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold bg-purple-50 text-purple-700 border border-purple-200">
                         {item.jenis}
                       </span>
                     </td>
-                    <td className="p-3.5 font-medium">{item.pemilik || '-'}</td>
-                    <td className="p-3.5 text-slate-500">{item.kontak || '-'}</td>
-                    <td className="p-3.5 text-slate-600 max-w-xs truncate">{item.lokasi || item.alamat_pemilik || '-'}</td>
-                    <td className="p-3.5 text-center">
+                    <td className="p-3.5 font-medium border-r border-slate-300 dark:border-slate-700">{item.pemilik || '-'}</td>
+                    <td className="p-3.5 text-slate-500 dark:text-slate-400 border-r border-slate-300 dark:border-slate-700">{item.kontak || '-'}</td>
+                    <td className="p-3.5 text-slate-600 dark:text-slate-300 max-w-xs truncate border-r border-slate-300 dark:border-slate-700">{item.lokasi || item.alamat_pemilik || '-'}</td>
+                    <td className="p-3.5 text-center border-r border-slate-300 dark:border-slate-700">
                       <span
                         className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold border ${
                           item.sertifikat_halal
@@ -127,7 +127,7 @@ export function RumahPotongTab({
                         {item.sertifikat_halal ? 'Sudah' : 'Belum'}
                       </span>
                     </td>
-                    <td className="p-3.5 text-center">
+                    <td className="p-3.5 text-center border-r border-slate-300 dark:border-slate-700">
                       <span
                         className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold border ${
                           item.sertifikat_nkv && !item.sertifikat_nkv.includes('belum')

@@ -75,7 +75,7 @@ export function SklbRekapTab({
               {canEdit && <th className="p-2.5 border border-slate-300 dark:border-slate-700 w-20">AKSI</th>}
             </tr>
           </thead>
-          <tbody className="divide-y divide-slate-200 dark:divide-slate-800 text-slate-900 dark:text-slate-100 font-medium">
+          <tbody className="divide-y divide-slate-300 dark:divide-slate-700 text-slate-900 dark:text-slate-100 font-medium">
             {data.length === 0 ? (
               <tr>
                 <td
@@ -86,27 +86,34 @@ export function SklbRekapTab({
                 </td>
               </tr>
             ) : (
-              data.map((row) => (
-                <tr key={row.id || row.no_urut} className="hover:bg-slate-50 dark:hover:bg-slate-800/60 transition-colors">
-                  <td className="p-2.5 border border-slate-200 dark:border-slate-700 font-sans text-slate-500 dark:text-slate-400">
+              data.map((row, idx) => (
+                <tr
+                  key={row.id || row.no_urut}
+                  className={`transition-colors ${
+                    idx % 2 === 0
+                      ? 'bg-white dark:bg-slate-900/60 hover:bg-blue-50/60 dark:hover:bg-slate-800/60'
+                      : 'bg-slate-100 dark:bg-slate-800/50 hover:bg-blue-50/60 dark:hover:bg-slate-800/70'
+                  }`}
+                >
+                  <td className="p-2.5 border border-slate-300 dark:border-slate-700 font-sans text-slate-500 dark:text-slate-400">
                     {row.no_urut}
                   </td>
-                  <td className="p-2.5 border border-slate-200 dark:border-slate-700 font-sans">{row.tanggal}</td>
-                  <td className="p-2.5 border border-slate-200 dark:border-slate-700 font-bold text-slate-900 dark:text-slate-100 text-left">
+                  <td className="p-2.5 border border-slate-300 dark:border-slate-700 font-sans">{row.tanggal}</td>
+                  <td className="p-2.5 border border-slate-300 dark:border-slate-700 font-bold text-slate-900 dark:text-slate-100 text-left">
                     {row.desa}
                   </td>
-                  <td className="p-2.5 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 text-left">
+                  <td className="p-2.5 border border-slate-300 dark:border-slate-700 text-slate-700 dark:text-slate-300 text-left">
                     {row.kecamatan}
                   </td>
-                  <td className="p-2.5 border border-slate-200 dark:border-slate-700 font-sans font-bold">{row.target}</td>
-                  <td className="p-2.5 border border-slate-200 dark:border-slate-700 font-sans font-black text-emerald-700 dark:text-emerald-400">
+                  <td className="p-2.5 border border-slate-300 dark:border-slate-700 font-sans font-bold">{row.target}</td>
+                  <td className="p-2.5 border border-slate-300 dark:border-slate-700 font-sans font-black text-emerald-700 dark:text-emerald-400">
                     {row.capaian}
                   </td>
-                  <td className="p-2.5 border border-slate-200 dark:border-slate-700 font-sans font-bold text-slate-800 dark:text-slate-200">
+                  <td className="p-2.5 border border-slate-300 dark:border-slate-700 font-sans font-bold text-slate-800 dark:text-slate-200">
                     {row.selisih}
                   </td>
                   {canEdit && (
-                    <td className="p-2.5 border border-slate-200 dark:border-slate-700">
+                    <td className="p-2.5 border border-slate-300 dark:border-slate-700">
                       <div className="flex items-center justify-center gap-1">
                         <button
                           onClick={() => onOpenModalRekap('edit', row)}

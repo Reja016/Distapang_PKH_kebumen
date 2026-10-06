@@ -59,8 +59,8 @@ export function KomoditasTableTab({
       </div>
 
       {/* Table TPH Komoditas */}
-      <div className="bg-white rounded-3xl border border-slate-200 shadow-xs overflow-hidden p-4 sm:p-6">
-        <div className="overflow-x-auto rounded-2xl border border-slate-200">
+      <div className="bg-white rounded-3xl border border-slate-300 dark:border-slate-700 shadow-xs overflow-hidden p-4 sm:p-6">
+        <div className="overflow-x-auto rounded-2xl border border-slate-300 dark:border-slate-700">
           <table className="w-full min-w-[1750px] text-center text-xs border-collapse">
             <thead>
               <tr className="bg-purple-900 text-white font-bold border border-purple-950">
@@ -124,16 +124,26 @@ export function KomoditasTableTab({
                       rowBetina += Number(row[`${m}_betina`]) || 0;
                     });
                     const grandRowTotal = rowJantan + rowBetina;
+                    const isEven = idx % 2 === 0;
 
                     return (
-                      <tr key={idx} className="hover:bg-purple-50/40 transition-colors">
+                      <tr
+                        key={idx}
+                        className={`transition-colors ${
+                          isEven ? 'bg-white hover:bg-purple-50/40' : 'bg-slate-100 hover:bg-purple-50/60'
+                        }`}
+                      >
                         {/* Sticky No */}
-                        <td className="p-2 border border-slate-200 font-semibold text-slate-500 bg-slate-50 sticky left-0 z-10">
+                        <td className={`p-2 border border-slate-300 dark:border-slate-700 font-semibold text-slate-500 sticky left-0 z-10 ${
+                          isEven ? 'bg-white' : 'bg-slate-100'
+                        }`}>
                           {idx + 1}
                         </td>
                         
                         {/* Sticky Nama Pemotongan */}
-                        <td className="p-1 border border-slate-200 text-left bg-white sticky left-[48px] z-10 shadow-[2px_0_5px_-2px_rgba(0,0,0,0.08)]">
+                        <td className={`p-1 border border-slate-300 dark:border-slate-700 text-left sticky left-[48px] z-10 shadow-[2px_0_5px_-2px_rgba(0,0,0,0.08)] ${
+                          isEven ? 'bg-white' : 'bg-slate-100'
+                        }`}>
                           {isAdmin ? (
                             <input
                               type="text"
@@ -148,12 +158,12 @@ export function KomoditasTableTab({
                         </td>
 
                         {/* Komoditas Ternak */}
-                        <td className="p-1 border border-slate-200 text-left">
+                        <td className="p-1 border border-slate-300 dark:border-slate-700 text-left">
                           {isAdmin ? (
                             <select
                               value={row.komoditas || 'Sapi Potong'}
                               onChange={(e) => handleKomoditasCellChange(idx, 'komoditas', e.target.value)}
-                              className="w-full h-8 px-1.5 rounded border border-slate-200/70 focus:border-purple-600 focus:bg-white bg-slate-50/40 text-xs font-bold text-purple-700 outline-none"
+                              className="w-full h-8 px-1.5 rounded border border-slate-300 dark:border-slate-600 focus:border-purple-600 focus:bg-white bg-slate-50/40 text-xs font-bold text-purple-700 outline-none"
                             >
                               {KOMODITAS_LIST.map((k) => (
                                 <option key={k} value={k}>{k}</option>
@@ -167,27 +177,27 @@ export function KomoditasTableTab({
                         {/* 12 Months Cells (J & B) */}
                         {months.map((m) => (
                           <React.Fragment key={m}>
-                            <td className="p-1 border border-slate-200">
+                            <td className="p-1 border border-slate-300 dark:border-slate-700">
                               {isAdmin ? (
                                 <input
                                   type="number"
                                   min="0"
                                   value={row[`${m}_jantan`] ?? 0}
                                   onChange={(e) => handleKomoditasCellChange(idx, `${m}_jantan`, Math.max(0, parseInt(e.target.value, 10) || 0))}
-                                  className="w-full h-8 text-center rounded border border-slate-200/60 focus:border-purple-600 focus:bg-white bg-slate-50/40 font-mono font-bold text-slate-900 text-xs outline-none"
+                                  className="w-full h-8 text-center rounded border border-slate-300 dark:border-slate-600 focus:border-purple-600 focus:bg-white bg-slate-50/40 font-mono font-bold text-slate-900 text-xs outline-none"
                                 />
                               ) : (
                                 <span className="font-mono font-semibold text-slate-800">{(row[`${m}_jantan`] || 0).toLocaleString('id-ID')}</span>
                               )}
                             </td>
-                            <td className="p-1 border border-slate-200">
+                            <td className="p-1 border border-slate-300 dark:border-slate-700">
                               {isAdmin ? (
                                 <input
                                   type="number"
                                   min="0"
                                   value={row[`${m}_betina`] ?? 0}
                                   onChange={(e) => handleKomoditasCellChange(idx, `${m}_betina`, Math.max(0, parseInt(e.target.value, 10) || 0))}
-                                  className="w-full h-8 text-center rounded border border-slate-200/60 focus:border-purple-600 focus:bg-white bg-slate-50/40 font-mono font-bold text-slate-900 text-xs outline-none"
+                                  className="w-full h-8 text-center rounded border border-slate-300 dark:border-slate-600 focus:border-purple-600 focus:bg-white bg-slate-50/40 font-mono font-bold text-slate-900 text-xs outline-none"
                                 />
                               ) : (
                                 <span className="font-mono font-semibold text-slate-800">{(row[`${m}_betina`] || 0).toLocaleString('id-ID')}</span>
@@ -197,19 +207,19 @@ export function KomoditasTableTab({
                         ))}
 
                         {/* Subtotal Row */}
-                        <td className="p-2 border border-slate-200 font-mono font-bold text-slate-900 bg-purple-50/30">
+                        <td className="p-2 border border-slate-300 dark:border-slate-700 font-mono font-bold text-slate-900 bg-purple-50/30">
                           {rowJantan.toLocaleString('id-ID')}
                         </td>
-                        <td className="p-2 border border-slate-200 font-mono font-bold text-slate-900 bg-purple-50/30">
+                        <td className="p-2 border border-slate-300 dark:border-slate-700 font-mono font-bold text-slate-900 bg-purple-50/30">
                           {rowBetina.toLocaleString('id-ID')}
                         </td>
-                        <td className="p-2 border border-slate-200 font-mono font-black text-purple-950 bg-purple-100/70">
+                        <td className="p-2 border border-slate-300 dark:border-slate-700 font-mono font-black text-purple-950 bg-purple-100/70">
                           {grandRowTotal.toLocaleString('id-ID')}
                         </td>
 
                         {/* Action: Tambah Baris di Samping Hapus */}
                         {isAdmin && (
-                          <td className="p-1 border border-slate-200 text-center">
+                          <td className="p-1 border border-slate-300 dark:border-slate-700 text-center">
                             <div className="flex items-center justify-center gap-1.5">
                               <button
                                 onClick={handleAddKomoditasRow}

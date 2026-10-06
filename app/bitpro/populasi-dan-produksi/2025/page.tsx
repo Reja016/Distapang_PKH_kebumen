@@ -159,9 +159,9 @@ export default function Populasi2025() {
       {/* ── MAIN WORKSPACE ── */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-4">
         
-        <div className="rounded-2xl border border-slate-200 bg-white shadow-sm overflow-hidden">
+        <div className="rounded-2xl border border-slate-300 dark:border-slate-700 bg-white shadow-sm overflow-hidden">
           
-          <div className="p-4 border-b border-slate-200 flex items-center justify-between bg-slate-50/50">
+          <div className="p-4 border-b border-slate-300 dark:border-slate-700 flex items-center justify-between bg-slate-50/50">
             <span className="text-xs font-bold text-slate-700 font-sans">
               Menampilkan {filteredData.length} Desa dari Database MySQL (`populasi`)
             </span>
@@ -179,43 +179,57 @@ export default function Populasi2025() {
           ) : (
             <div className="overflow-x-auto max-h-[75vh] overflow-y-auto">
               <table className="w-full text-xs text-left whitespace-nowrap border-collapse">
-                <thead className="bg-slate-100 text-slate-700 font-semibold uppercase tracking-wider sticky top-0 z-20 border-b border-slate-200 shadow-sm">
+                <thead className="bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-semibold uppercase tracking-wider sticky top-0 z-20 border-b border-slate-300 dark:border-slate-700 shadow-sm">
                   <tr>
-                    <th className="p-3 w-12 text-center sticky left-0 bg-slate-100 z-30 border-r border-slate-200">No</th>
-                    <th className="p-3 sticky left-[48px] bg-slate-100 z-30 border-r border-slate-200">Kecamatan</th>
-                    <th className="p-3 sticky left-[168px] bg-slate-100 z-30 border-r border-slate-200">Desa</th>
+                    <th className="p-3 w-12 text-center sticky left-0 bg-slate-100 dark:bg-slate-800 z-30 border-r border-slate-300 dark:border-slate-700">No</th>
+                    <th className="p-3 sticky left-[48px] bg-slate-100 dark:bg-slate-800 z-30 border-r border-slate-300 dark:border-slate-700">Kecamatan</th>
+                    <th className="p-3 sticky left-[168px] bg-slate-100 dark:bg-slate-800 z-30 border-r border-slate-300 dark:border-slate-700">Desa</th>
                     {HEADERS.map((h, i) => (
-                      <th key={i} className="p-3 text-right font-sans border-r border-slate-200">{h}</th>
+                      <th key={i} className="p-3 text-right font-sans border-r border-slate-300 dark:border-slate-700">{h}</th>
                     ))}
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-slate-100 text-slate-800">
-                  {filteredData.map((row, idx) => (
-                    <tr key={idx} className="hover:bg-slate-50/80 transition-colors">
-                      <td className="p-3 text-center font-sans text-slate-400 sticky left-0 bg-white z-10 border-r border-slate-100">
-                        {row.no || idx + 1}
-                      </td>
-                      <td className="p-3 font-semibold text-slate-900 sticky left-[48px] bg-white z-10 border-r border-slate-100">
-                        {row.kec}
-                      </td>
-                      <td className="p-3 text-slate-700 sticky left-[168px] bg-white z-10 border-r border-slate-100">
-                        {row.desa}
-                      </td>
-                      {row.v.map((val: any, i: number) => (
-                        <td key={i} className="p-3 text-right font-sans tabular-nums border-r border-slate-100">
-                          {Number(val).toLocaleString('id-ID')}
+                <tbody className="divide-y divide-slate-300 dark:divide-slate-700 text-slate-800 dark:text-slate-200">
+                  {filteredData.map((row, idx) => {
+                    const isEven = idx % 2 === 0;
+                    return (
+                      <tr
+                        key={idx}
+                        className={`transition-colors ${
+                          isEven ? 'bg-white hover:bg-slate-50/80' : 'bg-slate-100 hover:bg-slate-200/60'
+                        }`}
+                      >
+                        <td className={`p-3 text-center font-sans text-slate-400 sticky left-0 z-10 border-r border-slate-300 dark:border-slate-700 ${
+                          isEven ? 'bg-white' : 'bg-slate-100'
+                        }`}>
+                          {row.no || idx + 1}
                         </td>
-                      ))}
-                    </tr>
-                  ))}
+                        <td className={`p-3 font-semibold text-slate-900 sticky left-[48px] z-10 border-r border-slate-300 dark:border-slate-700 ${
+                          isEven ? 'bg-white' : 'bg-slate-100'
+                        }`}>
+                          {row.kec}
+                        </td>
+                        <td className={`p-3 text-slate-700 sticky left-[168px] z-10 border-r border-slate-300 dark:border-slate-700 ${
+                          isEven ? 'bg-white' : 'bg-slate-100'
+                        }`}>
+                          {row.desa}
+                        </td>
+                        {row.v.map((val: any, i: number) => (
+                          <td key={i} className="p-3 text-right font-sans tabular-nums border-r border-slate-300 dark:border-slate-700">
+                            {Number(val).toLocaleString('id-ID')}
+                          </td>
+                        ))}
+                      </tr>
+                    );
+                  })}
                 </tbody>
                 <tfoot>
-                  <tr className="bg-slate-100 text-slate-900 font-bold sticky bottom-0 z-20 border-t-2 border-slate-300">
-                    <td colSpan={3} className="p-3 text-center sticky left-0 bg-slate-100 z-30 border-r border-slate-300 font-sans uppercase">
+                  <tr className="bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-slate-100 font-bold sticky bottom-0 z-20 border-t-2 border-slate-300 dark:border-slate-700">
+                    <td colSpan={3} className="p-3 text-center sticky left-0 bg-slate-100 dark:bg-slate-800 z-30 border-r border-slate-300 dark:border-slate-700 font-sans uppercase">
                       TOTAL KABUPATEN
                     </td>
                     {dynamicTotalRow.map((val: number, i: number) => (
-                      <td key={i} className="p-3 text-right font-sans text-emerald-600 font-bold border-r border-slate-300">
+                      <td key={i} className="p-3 text-right font-sans text-emerald-600 font-bold border-r border-slate-300 dark:border-slate-700">
                         {Number(val).toLocaleString('id-ID')}
                       </td>
                     ))}

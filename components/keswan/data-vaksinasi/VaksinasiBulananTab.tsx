@@ -81,17 +81,27 @@ export default function VaksinasiBulananTab({
               </tr>
             </thead>
             <tbody className="divide-y-2 divide-slate-400 text-slate-900 font-medium">
-              {bulanan.map(veraFormatVaksinasiRow).map((row) => {
+              {bulanan.map(veraFormatVaksinasiRow).map((row, idx) => {
                 const isAllowed = isAdmin || isPuskeswanAllowed(row.puskeswan);
                 const isEditingTarget = editingBulananCell?.id === row.id && editingBulananCell?.field === 'target';
                 const isEditingAmbil = editingBulananCell?.id === row.id && editingBulananCell?.field === 'pengambilan';
+                const isEven = idx % 2 === 0;
 
                 return (
-                  <tr key={row.id} className="hover:bg-blue-50/50 transition-colors border-b-2 border-slate-400">
-                    <td className="p-3 text-center font-black text-slate-700 sticky left-0 bg-slate-100 z-10 border-r-2 border-slate-500">
+                  <tr
+                    key={row.id}
+                    className={`transition-colors border-b-2 border-slate-400 ${
+                      isEven ? 'bg-white hover:bg-blue-50/50' : 'bg-slate-100 hover:bg-blue-50/70'
+                    }`}
+                  >
+                    <td className={`p-3 text-center font-black text-slate-700 sticky left-0 z-10 border-r-2 border-slate-500 ${
+                      isEven ? 'bg-white' : 'bg-slate-100'
+                    }`}>
                       {row.no_urut}
                     </td>
-                    <td className="p-3 font-black text-slate-950 sticky left-12 bg-white z-10 border-r-2 border-slate-700 shadow-[2px_0_4px_-1px_rgba(0,0,0,0.12)]">
+                    <td className={`p-3 font-black text-slate-950 sticky left-12 z-10 border-r-2 border-slate-700 shadow-[2px_0_4px_-1px_rgba(0,0,0,0.12)] ${
+                      isEven ? 'bg-white' : 'bg-slate-100'
+                    }`}>
                       {row.puskeswan}
                     </td>
 

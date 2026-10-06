@@ -150,97 +150,137 @@ export default function LandingServicesSection({
           )}
 
           {/* Table Layout for detail views */}
-          <div className="overflow-x-auto rounded-xl border-2 border-slate-200 dark:border-slate-700 shadow-xs bg-white dark:bg-slate-800">
+          <div className="overflow-x-auto rounded-xl border-2 border-slate-300 dark:border-slate-700 shadow-xs bg-white dark:bg-slate-800">
             {detailView === 'populasi' && subTabProd === 'populasi' && (
               <table className="w-full text-left text-xs sm:text-sm whitespace-nowrap">
-                <thead className="bg-slate-50 dark:bg-slate-900/80 text-slate-700 dark:text-slate-300 font-semibold border-b-2 border-slate-200 dark:border-slate-700">
+                <thead className="bg-slate-100 dark:bg-slate-900/80 text-slate-700 dark:text-slate-300 font-semibold border-b-2 border-slate-300 dark:border-slate-700">
                   <tr>
-                    <th className="p-3 sm:p-3.5 w-12 sm:w-14 text-center">NO</th>
-                    <th className="p-3 sm:p-3.5">KOMODITAS TERNAK</th>
+                    <th className="p-3 sm:p-3.5 w-12 sm:w-14 text-center border-r border-slate-300 dark:border-slate-700">NO</th>
+                    <th className="p-3 sm:p-3.5 border-r border-slate-300 dark:border-slate-700">KOMODITAS TERNAK</th>
                     <th className="p-3 sm:p-3.5 text-right font-semibold">TOTAL POPULASI</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y-2 divide-slate-100 dark:divide-slate-700 text-slate-800 dark:text-slate-200">
-                  {populasi16.map((row, idx) => (
-                    <tr key={idx} className="hover:bg-slate-50/60 dark:hover:bg-slate-700/40 transition-colors">
-                      <td className="p-3 sm:p-3.5 text-center text-slate-400">{idx + 1}</td>
-                      <td className="p-3.5 font-bold text-slate-900 dark:text-white">{row.komoditas}</td>
-                      <td className="p-3.5 text-right font-bold text-blue-600 dark:text-blue-400">
-                        {row.total.toLocaleString('id-ID')} Ekor
-                      </td>
-                    </tr>
-                  ))}
+                <tbody className="divide-y-2 divide-slate-300 dark:divide-slate-700 text-slate-800 dark:text-slate-200">
+                  {populasi16.map((row, idx) => {
+                    const isEven = idx % 2 === 0;
+                    return (
+                      <tr
+                        key={idx}
+                        className={`transition-colors ${
+                          isEven
+                            ? 'bg-white dark:bg-slate-800 hover:bg-slate-50/80 dark:hover:bg-slate-700/60'
+                            : 'bg-slate-100 dark:bg-slate-900/40 hover:bg-slate-200/60 dark:hover:bg-slate-700/70'
+                        }`}
+                      >
+                        <td className="p-3 sm:p-3.5 text-center text-slate-400 border-r border-slate-300 dark:border-slate-700">{idx + 1}</td>
+                        <td className="p-3.5 font-bold text-slate-900 dark:text-white border-r border-slate-300 dark:border-slate-700">{row.komoditas}</td>
+                        <td className="p-3.5 text-right font-bold text-blue-600 dark:text-blue-400">
+                          {row.total.toLocaleString('id-ID')} Ekor
+                        </td>
+                      </tr>
+                    );
+                  })}
                 </tbody>
               </table>
             )}
 
             {detailView === 'populasi' && subTabProd === 'daging' && (
               <table className="w-full text-left text-xs sm:text-sm whitespace-nowrap">
-                <thead className="bg-slate-50 dark:bg-slate-900/80 text-slate-700 dark:text-slate-300 font-semibold border-b-2 border-slate-200 dark:border-slate-700">
+                <thead className="bg-slate-100 dark:bg-slate-900/80 text-slate-700 dark:text-slate-300 font-semibold border-b-2 border-slate-300 dark:border-slate-700">
                   <tr>
-                    <th className="p-3 sm:p-3.5 w-12 sm:w-14 text-center">NO</th>
-                    <th className="p-3 sm:p-3.5">JENIS TERNAK POTONG</th>
+                    <th className="p-3 sm:p-3.5 w-12 sm:w-14 text-center border-r border-slate-300 dark:border-slate-700">NO</th>
+                    <th className="p-3 sm:p-3.5 border-r border-slate-300 dark:border-slate-700">JENIS TERNAK POTONG</th>
                     <th className="p-3 sm:p-3.5 text-right font-semibold">TOTAL PRODUKSI DAGING</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y-2 divide-slate-100 dark:divide-slate-700 text-slate-800 dark:text-slate-200">
-                  {dagingList.map((row, idx) => (
-                    <tr key={idx} className="hover:bg-slate-50/60 dark:hover:bg-slate-700/40 transition-colors">
-                      <td className="p-3.5 text-center text-slate-400">{idx + 1}</td>
-                      <td className="p-3.5 font-bold text-slate-900 dark:text-white">{row.jenis}</td>
-                      <td className="p-3.5 text-right font-bold text-blue-600 dark:text-blue-400">
-                        {(row.total / 1000).toLocaleString('id-ID', { minimumFractionDigits: 1, maximumFractionDigits: 2 })} Ton
-                      </td>
-                    </tr>
-                  ))}
+                <tbody className="divide-y-2 divide-slate-300 dark:divide-slate-700 text-slate-800 dark:text-slate-200">
+                  {dagingList.map((row, idx) => {
+                    const isEven = idx % 2 === 0;
+                    return (
+                      <tr
+                        key={idx}
+                        className={`transition-colors ${
+                          isEven
+                            ? 'bg-white dark:bg-slate-800 hover:bg-slate-50/80 dark:hover:bg-slate-700/60'
+                            : 'bg-slate-100 dark:bg-slate-900/40 hover:bg-slate-200/60 dark:hover:bg-slate-700/70'
+                        }`}
+                      >
+                        <td className="p-3.5 text-center text-slate-400 border-r border-slate-300 dark:border-slate-700">{idx + 1}</td>
+                        <td className="p-3.5 font-bold text-slate-900 dark:text-white border-r border-slate-300 dark:border-slate-700">{row.jenis}</td>
+                        <td className="p-3.5 text-right font-bold text-blue-600 dark:text-blue-400">
+                          {(row.total / 1000).toLocaleString('id-ID', { minimumFractionDigits: 1, maximumFractionDigits: 2 })} Ton
+                        </td>
+                      </tr>
+                    );
+                  })}
                 </tbody>
               </table>
             )}
 
             {detailView === 'populasi' && subTabProd === 'telur' && (
               <table className="w-full text-left text-xs sm:text-sm whitespace-nowrap">
-                <thead className="bg-slate-50 dark:bg-slate-900/80 text-slate-700 dark:text-slate-300 font-semibold border-b-2 border-slate-200 dark:border-slate-700">
+                <thead className="bg-slate-100 dark:bg-slate-900/80 text-slate-700 dark:text-slate-300 font-semibold border-b-2 border-slate-300 dark:border-slate-700">
                   <tr>
-                    <th className="p-3 sm:p-3.5 w-12 sm:w-14 text-center">NO</th>
-                    <th className="p-3 sm:p-3.5">KOMODITAS UNGGAS PETELUR</th>
+                    <th className="p-3 sm:p-3.5 w-12 sm:w-14 text-center border-r border-slate-300 dark:border-slate-700">NO</th>
+                    <th className="p-3 sm:p-3.5 border-r border-slate-300 dark:border-slate-700">KOMODITAS UNGGAS PETELUR</th>
                     <th className="p-3 sm:p-3.5 text-right font-semibold">TOTAL PRODUKSI TELUR</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y-2 divide-slate-100 dark:divide-slate-700 text-slate-800 dark:text-slate-200">
-                  {telurList.map((row, idx) => (
-                    <tr key={idx} className="hover:bg-slate-50/60 dark:hover:bg-slate-700/40 transition-colors">
-                      <td className="p-3.5 text-center text-slate-400">{idx + 1}</td>
-                      <td className="p-3.5 font-bold text-slate-900 dark:text-white">{row.jenis}</td>
-                      <td className="p-3.5 text-right font-bold text-blue-600 dark:text-blue-400">
-                        {(row.total / 1000).toLocaleString('id-ID', { minimumFractionDigits: 1, maximumFractionDigits: 2 })} Ton
-                      </td>
-                    </tr>
-                  ))}
+                <tbody className="divide-y-2 divide-slate-300 dark:divide-slate-700 text-slate-800 dark:text-slate-200">
+                  {telurList.map((row, idx) => {
+                    const isEven = idx % 2 === 0;
+                    return (
+                      <tr
+                        key={idx}
+                        className={`transition-colors ${
+                          isEven
+                            ? 'bg-white dark:bg-slate-800 hover:bg-slate-50/80 dark:hover:bg-slate-700/60'
+                            : 'bg-slate-100 dark:bg-slate-900/40 hover:bg-slate-200/60 dark:hover:bg-slate-700/70'
+                        }`}
+                      >
+                        <td className="p-3.5 text-center text-slate-400 border-r border-slate-300 dark:border-slate-700">{idx + 1}</td>
+                        <td className="p-3.5 font-bold text-slate-900 dark:text-white border-r border-slate-300 dark:border-slate-700">{row.jenis}</td>
+                        <td className="p-3.5 text-right font-bold text-blue-600 dark:text-blue-400">
+                          {(row.total / 1000).toLocaleString('id-ID', { minimumFractionDigits: 1, maximumFractionDigits: 2 })} Ton
+                        </td>
+                      </tr>
+                    );
+                  })}
                 </tbody>
               </table>
             )}
 
             {detailView === 'farm' && (
               <table className="w-full text-left text-xs sm:text-sm whitespace-nowrap">
-                <thead className="bg-slate-50 dark:bg-slate-900/80 text-slate-700 dark:text-slate-300 font-semibold border-b-2 border-slate-200 dark:border-slate-700">
+                <thead className="bg-slate-100 dark:bg-slate-900/80 text-slate-700 dark:text-slate-300 font-semibold border-b-2 border-slate-300 dark:border-slate-700">
                   <tr>
-                    <th className="p-3 sm:p-3.5 w-12 sm:w-14 text-center">NO</th>
-                    <th className="p-3 sm:p-3.5">JENIS KELOMPOK TERNAK</th>
-                    <th className="p-3.5 text-center font-semibold">JUMLAH KELOMPOK</th>
-                    <th className="p-3.5 text-right font-semibold">TOTAL ANGGOTA</th>
+                    <th className="p-3 sm:p-3.5 w-12 sm:w-14 text-center border-r border-slate-300 dark:border-slate-700">NO</th>
+                    <th className="p-3 sm:p-3.5 border-r border-slate-300 dark:border-slate-700">JENIS KELOMPOK TERNAK</th>
+                    <th className="p-3 sm:p-3.5 text-center font-semibold border-r border-slate-300 dark:border-slate-700">JUMLAH KELOMPOK</th>
+                    <th className="p-3 sm:p-3.5 text-right font-semibold">TOTAL ANGGOTA</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y-2 divide-slate-100 dark:divide-slate-700 text-slate-800 dark:text-slate-200">
-                  {sebaranFarmList.map((row, idx) => (
-                    <tr key={idx} className="hover:bg-slate-50/60 dark:hover:bg-slate-700/40 transition-colors">
-                      <td className="p-3.5 text-center text-slate-400">{idx + 1}</td>
-                      <td className="p-3.5 font-bold text-slate-900 dark:text-white">{row.komoditas}</td>
-                      <td className="p-3.5 text-center font-bold text-slate-900 dark:text-white">{row.jumlah_farm.toLocaleString('id-ID')} Kelompok</td>
-                      <td className="p-3.5 text-right font-bold text-blue-600 dark:text-blue-400">
-                        {row.total_populasi}
-                      </td>
-                    </tr>
-                  ))}
+                <tbody className="divide-y-2 divide-slate-300 dark:divide-slate-700 text-slate-800 dark:text-slate-200">
+                  {sebaranFarmList.map((row, idx) => {
+                    const isEven = idx % 2 === 0;
+                    return (
+                      <tr
+                        key={idx}
+                        className={`transition-colors ${
+                          isEven
+                            ? 'bg-white dark:bg-slate-800 hover:bg-slate-50/80 dark:hover:bg-slate-700/60'
+                            : 'bg-slate-100 dark:bg-slate-900/40 hover:bg-slate-200/60 dark:hover:bg-slate-700/70'
+                        }`}
+                      >
+                        <td className="p-3.5 text-center text-slate-400 border-r border-slate-300 dark:border-slate-700">{idx + 1}</td>
+                        <td className="p-3.5 font-bold text-slate-900 dark:text-white border-r border-slate-300 dark:border-slate-700">{row.komoditas}</td>
+                        <td className="p-3.5 text-center font-bold text-slate-900 dark:text-white border-r border-slate-300 dark:border-slate-700">{row.jumlah_farm.toLocaleString('id-ID')} Kelompok</td>
+                        <td className="p-3.5 text-right font-bold text-blue-600 dark:text-blue-400">
+                          {row.total_populasi}
+                        </td>
+                      </tr>
+                    );
+                  })}
                 </tbody>
               </table>
             )}
@@ -248,33 +288,43 @@ export default function LandingServicesSection({
             {/* 3. DATA VAKSINASI PMK & LSD */}
             {detailView === 'vaksinasi' && (
               <table className="w-full text-left text-xs sm:text-sm whitespace-nowrap">
-                <thead className="bg-slate-50 dark:bg-slate-900/80 text-slate-700 dark:text-slate-300 font-semibold border-b-2 border-slate-200 dark:border-slate-700">
+                <thead className="bg-slate-100 dark:bg-slate-900/80 text-slate-700 dark:text-slate-300 font-semibold border-b-2 border-slate-300 dark:border-slate-700">
                   <tr>
-                    <th className="p-3 sm:p-3.5 w-12 sm:w-14 text-center">NO</th>
-                    <th className="p-3 sm:p-3.5">NAMA PUSKESWAN</th>
-                    <th className="p-3 sm:p-3.5 text-center">PROGRAM VAKSINASI</th>
-                    <th className="p-3 sm:p-3.5 text-center">TARGET DOSIS</th>
-                    <th className="p-3 sm:p-3.5 text-center">REALISASI DOSIS</th>
+                    <th className="p-3 sm:p-3.5 w-12 sm:w-14 text-center border-r border-slate-300 dark:border-slate-700">NO</th>
+                    <th className="p-3 sm:p-3.5 border-r border-slate-300 dark:border-slate-700">NAMA PUSKESWAN</th>
+                    <th className="p-3 sm:p-3.5 text-center border-r border-slate-300 dark:border-slate-700">PROGRAM VAKSINASI</th>
+                    <th className="p-3 sm:p-3.5 text-center border-r border-slate-300 dark:border-slate-700">TARGET DOSIS</th>
+                    <th className="p-3 sm:p-3.5 text-center border-r border-slate-300 dark:border-slate-700">REALISASI DOSIS</th>
                     <th className="p-3.5 text-right">CAPAIAN (%)</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y-2 divide-slate-100 dark:divide-slate-700 text-slate-800 dark:text-slate-200">
-                  {filteredVaksinasi.map((row: any, idx: number) => (
-                    <tr key={idx} className="hover:bg-slate-50/60 dark:hover:bg-slate-700/40 transition-colors">
-                      <td className="p-3.5 text-center text-slate-400 font-bold">{idx + 1}</td>
-                      <td className="p-3.5 font-bold text-slate-900 dark:text-white">{row.desa}</td>
-                      <td className="p-3.5 text-center">
-                        <span className="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-blue-50 dark:bg-blue-950/50 text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-800">
-                          {row.jenis}
-                        </span>
-                      </td>
-                      <td className="p-3.5 text-center text-slate-600 dark:text-slate-300">{Number(row.target).toLocaleString('id-ID')} Dosis</td>
-                      <td className="p-3.5 text-center font-bold text-slate-900 dark:text-white">{Number(row.realisasi).toLocaleString('id-ID')} Dosis</td>
-                      <td className="p-3.5 text-right font-bold text-emerald-600 dark:text-emerald-400">
-                        {row.persen}%
-                      </td>
-                    </tr>
-                  ))}
+                <tbody className="divide-y-2 divide-slate-300 dark:divide-slate-700 text-slate-800 dark:text-slate-200">
+                  {filteredVaksinasi.map((row: any, idx: number) => {
+                    const isEven = idx % 2 === 0;
+                    return (
+                      <tr
+                        key={idx}
+                        className={`transition-colors ${
+                          isEven
+                            ? 'bg-white dark:bg-slate-800 hover:bg-slate-50/80 dark:hover:bg-slate-700/60'
+                            : 'bg-slate-100 dark:bg-slate-900/40 hover:bg-slate-200/60 dark:hover:bg-slate-700/70'
+                        }`}
+                      >
+                        <td className="p-3.5 text-center text-slate-400 font-bold border-r border-slate-300 dark:border-slate-700">{idx + 1}</td>
+                        <td className="p-3.5 font-bold text-slate-900 dark:text-white border-r border-slate-300 dark:border-slate-700">{row.desa}</td>
+                        <td className="p-3.5 text-center border-r border-slate-300 dark:border-slate-700">
+                          <span className="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-blue-50 dark:bg-blue-950/50 text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-800">
+                            {row.jenis}
+                          </span>
+                        </td>
+                        <td className="p-3.5 text-center text-slate-600 dark:text-slate-300 border-r border-slate-300 dark:border-slate-700">{Number(row.target).toLocaleString('id-ID')} Dosis</td>
+                        <td className="p-3.5 text-center font-bold text-slate-900 dark:text-white border-r border-slate-300 dark:border-slate-700">{Number(row.realisasi).toLocaleString('id-ID')} Dosis</td>
+                        <td className="p-3.5 text-right font-bold text-emerald-600 dark:text-emerald-400">
+                          {row.persen}%
+                        </td>
+                      </tr>
+                    );
+                  })}
                 </tbody>
               </table>
             )}
@@ -282,44 +332,54 @@ export default function LandingServicesSection({
             {/* 4. DATA RPH & TPH TERBINA */}
             {detailView === 'rph_tph' && (
               <table className="w-full text-left text-xs sm:text-sm whitespace-nowrap">
-                <thead className="bg-slate-50 dark:bg-slate-900/80 text-slate-700 dark:text-slate-300 font-semibold border-b-2 border-slate-200 dark:border-slate-700">
+                <thead className="bg-slate-100 dark:bg-slate-900/80 text-slate-700 dark:text-slate-300 font-semibold border-b-2 border-slate-300 dark:border-slate-700">
                   <tr>
-                    <th className="p-3 sm:p-3.5 w-12 sm:w-14 text-center">NO</th>
-                    <th className="p-3 sm:p-3.5">NAMA TEMPAT / USAHA</th>
-                    <th className="p-3 sm:p-3.5 text-center">JENIS</th>
-                    <th className="p-3 sm:p-3.5">PEMILIK</th>
-                    <th className="p-3 sm:p-3.5">LOKASI DESA/KECAMATAN</th>
+                    <th className="p-3 sm:p-3.5 w-12 sm:w-14 text-center border-r border-slate-300 dark:border-slate-700">NO</th>
+                    <th className="p-3 sm:p-3.5 border-r border-slate-300 dark:border-slate-700">NAMA TEMPAT / USAHA</th>
+                    <th className="p-3 sm:p-3.5 text-center border-r border-slate-300 dark:border-slate-700">JENIS</th>
+                    <th className="p-3 sm:p-3.5 border-r border-slate-300 dark:border-slate-700">PEMILIK</th>
+                    <th className="p-3 sm:p-3.5 border-r border-slate-300 dark:border-slate-700">LOKASI DESA/KECAMATAN</th>
                     <th className="p-3 sm:p-3.5 text-right font-semibold">SERTIFIKAT HALAL</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y-2 divide-slate-100 dark:divide-slate-700 text-slate-800 dark:text-slate-200">
-                  {rphList.map((row, idx) => (
-                    <tr key={idx} className="hover:bg-slate-50/60 dark:hover:bg-slate-700/40 transition-colors">
-                      <td className="p-3.5 text-center text-slate-400">{idx + 1}</td>
-                      <td className="p-3.5 font-bold text-slate-900 dark:text-white flex items-center gap-2">
-                        <Building2 size={15} className="text-indigo-600 shrink-0" />
-                        <span>{row.nama}</span>
-                      </td>
-                      <td className="p-3.5 text-center">
-                        <span className="px-2 py-0.5 rounded text-xs font-bold bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-300">
-                          {row.jenis}
-                        </span>
-                      </td>
-                      <td className="p-3.5 text-slate-700 dark:text-slate-300">{row.pemilik}</td>
-                      <td className="p-3.5 text-slate-600 dark:text-slate-400">{row.desa}</td>
-                      <td className="p-3.5 text-right">
-                        <span
-                          className={`px-2.5 py-0.5 rounded-full text-xs font-semibold border ${
-                            row.halal.includes('Sudah')
-                              ? 'bg-emerald-50 dark:bg-emerald-950/50 text-emerald-700 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800'
-                              : 'bg-amber-50 dark:bg-amber-950/50 text-amber-700 dark:text-amber-300 border-amber-200 dark:border-amber-800'
-                          }`}
-                        >
-                          {row.halal}
-                        </span>
-                      </td>
-                    </tr>
-                  ))}
+                <tbody className="divide-y-2 divide-slate-300 dark:divide-slate-700 text-slate-800 dark:text-slate-200">
+                  {rphList.map((row, idx) => {
+                    const isEven = idx % 2 === 0;
+                    return (
+                      <tr
+                        key={idx}
+                        className={`transition-colors ${
+                          isEven
+                            ? 'bg-white dark:bg-slate-800 hover:bg-slate-50/80 dark:hover:bg-slate-700/60'
+                            : 'bg-slate-100 dark:bg-slate-900/40 hover:bg-slate-200/60 dark:hover:bg-slate-700/70'
+                        }`}
+                      >
+                        <td className="p-3.5 text-center text-slate-400 border-r border-slate-300 dark:border-slate-700">{idx + 1}</td>
+                        <td className="p-3.5 font-bold text-slate-900 dark:text-white flex items-center gap-2 border-r border-slate-300 dark:border-slate-700">
+                          <Building2 size={15} className="text-indigo-600 shrink-0" />
+                          <span>{row.nama}</span>
+                        </td>
+                        <td className="p-3.5 text-center border-r border-slate-300 dark:border-slate-700">
+                          <span className="px-2 py-0.5 rounded text-xs font-bold bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-300">
+                            {row.jenis}
+                          </span>
+                        </td>
+                        <td className="p-3.5 text-slate-700 dark:text-slate-300 border-r border-slate-300 dark:border-slate-700">{row.pemilik}</td>
+                        <td className="p-3.5 text-slate-600 dark:text-slate-400 border-r border-slate-300 dark:border-slate-700">{row.desa}</td>
+                        <td className="p-3.5 text-right">
+                          <span
+                            className={`px-2.5 py-0.5 rounded-full text-xs font-semibold border ${
+                              row.halal.includes('Sudah')
+                                ? 'bg-emerald-50 dark:bg-emerald-950/50 text-emerald-700 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800'
+                                : 'bg-amber-50 dark:bg-amber-950/50 text-amber-700 dark:text-amber-300 border-amber-200 dark:border-amber-800'
+                            }`}
+                          >
+                            {row.halal}
+                          </span>
+                        </td>
+                      </tr>
+                    );
+                  })}
                 </tbody>
               </table>
             )}
@@ -327,38 +387,48 @@ export default function LandingServicesSection({
             {/* 5. DATA SERTIFIKASI NKV */}
             {detailView === 'nkv' && (
               <table className="w-full text-left text-xs sm:text-sm whitespace-nowrap">
-                <thead className="bg-slate-50 dark:bg-slate-900/80 text-slate-700 dark:text-slate-300 font-semibold border-b-2 border-slate-200 dark:border-slate-700">
+                <thead className="bg-slate-100 dark:bg-slate-900/80 text-slate-700 dark:text-slate-300 font-semibold border-b-2 border-slate-300 dark:border-slate-700">
                   <tr>
-                    <th className="p-3 sm:p-3.5 w-12 sm:w-14 text-center">NO</th>
-                    <th className="p-3 sm:p-3.5">NAMA USAHA / PT</th>
-                    <th className="p-3 sm:p-3.5">BIDANG USAHA</th>
-                    <th className="p-3 sm:p-3.5">KETERANGAN / REKOMENDASI</th>
+                    <th className="p-3 sm:p-3.5 w-12 sm:w-14 text-center border-r border-slate-300 dark:border-slate-700">NO</th>
+                    <th className="p-3 sm:p-3.5 border-r border-slate-300 dark:border-slate-700">NAMA USAHA / PT</th>
+                    <th className="p-3 sm:p-3.5 border-r border-slate-300 dark:border-slate-700">BIDANG USAHA</th>
+                    <th className="p-3 sm:p-3.5 border-r border-slate-300 dark:border-slate-700">KETERANGAN / REKOMENDASI</th>
                     <th className="p-3 sm:p-3.5 text-right font-semibold">STATUS NKV</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y-2 divide-slate-100 dark:divide-slate-700 text-slate-800 dark:text-slate-200">
-                  {nkvList.map((row, idx) => (
-                    <tr key={idx} className="hover:bg-slate-50/60 dark:hover:bg-slate-700/40 transition-colors">
-                      <td className="p-3.5 text-center text-slate-400">{idx + 1}</td>
-                      <td className="p-3.5 font-bold text-slate-900 dark:text-white flex items-center gap-2">
-                        <CheckCircle2 size={15} className="text-emerald-600 shrink-0" />
-                        <span>{row.nama_pt}</span>
-                      </td>
-                      <td className="p-3.5 text-slate-700 dark:text-slate-300 font-medium">{row.jenis_usaha}</td>
-                      <td className="p-3.5 text-slate-600 dark:text-slate-400">{row.alamat}</td>
-                      <td className="p-3.5 text-right">
-                        <span
-                          className={`px-2.5 py-0.5 rounded-full text-xs font-semibold border ${
-                            row.status_nkv.includes('Terbit')
-                              ? 'bg-emerald-50 dark:bg-emerald-950/50 text-emerald-700 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800'
-                              : 'bg-blue-50 dark:bg-blue-950/50 text-blue-700 dark:text-blue-300 border-blue-200 dark:border-blue-800'
-                          }`}
-                        >
-                          {row.status_nkv}
-                        </span>
-                      </td>
-                    </tr>
-                  ))}
+                <tbody className="divide-y-2 divide-slate-300 dark:divide-slate-700 text-slate-800 dark:text-slate-200">
+                  {nkvList.map((row, idx) => {
+                    const isEven = idx % 2 === 0;
+                    return (
+                      <tr
+                        key={idx}
+                        className={`transition-colors ${
+                          isEven
+                            ? 'bg-white dark:bg-slate-800 hover:bg-slate-50/80 dark:hover:bg-slate-700/60'
+                            : 'bg-slate-100 dark:bg-slate-900/40 hover:bg-slate-200/60 dark:hover:bg-slate-700/70'
+                        }`}
+                      >
+                        <td className="p-3.5 text-center text-slate-400 border-r border-slate-300 dark:border-slate-700">{idx + 1}</td>
+                        <td className="p-3.5 font-bold text-slate-900 dark:text-white flex items-center gap-2 border-r border-slate-300 dark:border-slate-700">
+                          <CheckCircle2 size={15} className="text-emerald-600 shrink-0" />
+                          <span>{row.nama_pt}</span>
+                        </td>
+                        <td className="p-3.5 text-slate-700 dark:text-slate-300 font-medium border-r border-slate-300 dark:border-slate-700">{row.jenis_usaha}</td>
+                        <td className="p-3.5 text-slate-600 dark:text-slate-400 border-r border-slate-300 dark:border-slate-700">{row.alamat}</td>
+                        <td className="p-3.5 text-right">
+                          <span
+                            className={`px-2.5 py-0.5 rounded-full text-xs font-semibold border ${
+                              row.status_nkv.includes('Terbit')
+                                ? 'bg-emerald-50 dark:bg-emerald-950/50 text-emerald-700 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800'
+                                : 'bg-blue-50 dark:bg-blue-950/50 text-blue-700 dark:text-blue-300 border-blue-200 dark:border-blue-800'
+                            }`}
+                          >
+                            {row.status_nkv}
+                          </span>
+                        </td>
+                      </tr>
+                    );
+                  })}
                 </tbody>
               </table>
             )}

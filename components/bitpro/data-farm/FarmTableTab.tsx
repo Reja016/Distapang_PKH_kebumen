@@ -82,35 +82,35 @@ export default function FarmTableTab({
         </div>
         <div className="overflow-x-auto max-h-[70vh]">
           <table className="w-full text-left text-xs whitespace-nowrap border-collapse">
-            <thead className="bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-bold uppercase tracking-wider sticky top-0 z-20 border-b border-slate-200 dark:border-slate-700 shadow-sm">
+            <thead className="bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-bold uppercase tracking-wider sticky top-0 z-20 border-b border-slate-300 dark:border-slate-700 shadow-sm">
               <tr>
-                <th className="p-4 w-14 text-center border-r border-slate-200 dark:border-slate-700">NO</th>
-                <th className="p-4 border-r border-slate-200 dark:border-slate-700">NAMA USAHA / FARM</th>
-                <th className="p-4 border-r border-slate-200 dark:border-slate-700">KECAMATAN</th>
-                <th className="p-4 border-r border-slate-200 dark:border-slate-700">DESA</th>
-                <th className="p-4 border-r border-slate-200 dark:border-slate-700">STATUS</th>
-                <th className="p-4 text-right font-sans border-r border-slate-200 dark:border-slate-700">KAPASITAS KANDANG</th>
-                <th className="p-4 border-r border-slate-200 dark:border-slate-700">KOORDINAT (GPS)</th>
+                <th className="p-4 w-14 text-center border-r border-slate-300 dark:border-slate-700">NO</th>
+                <th className="p-4 border-r border-slate-300 dark:border-slate-700">NAMA USAHA / FARM</th>
+                <th className="p-4 border-r border-slate-300 dark:border-slate-700">KECAMATAN</th>
+                <th className="p-4 border-r border-slate-300 dark:border-slate-700">DESA</th>
+                <th className="p-4 border-r border-slate-300 dark:border-slate-700">STATUS</th>
+                <th className="p-4 text-right font-sans border-r border-slate-300 dark:border-slate-700">KAPASITAS KANDANG</th>
+                <th className="p-4 border-r border-slate-300 dark:border-slate-700">KOORDINAT (GPS)</th>
                 {canEdit && <th className="p-4 text-center w-36">AKSI</th>}
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-100 dark:divide-slate-800 text-slate-800 dark:text-slate-200">
+            <tbody className="divide-y divide-slate-300 dark:divide-slate-700 text-slate-800 dark:text-slate-200">
               {filteredData.length > 0 ? (
                 filteredData.map((item, idx) => (
-                  <tr key={item.db_id || item.no || idx} className="hover:bg-slate-50/80 dark:hover:bg-slate-800/60 transition-colors">
-                    <td className="p-4 text-center font-bold font-sans text-slate-400 border-r border-slate-100 dark:border-slate-800">
+                  <tr key={item.db_id || item.no || idx} className="odd:bg-white even:bg-slate-100 dark:odd:bg-slate-900/60 dark:even:bg-slate-800/50 hover:bg-blue-50/60 dark:hover:bg-slate-800/80 transition-colors">
+                    <td className="p-4 text-center font-bold font-sans text-slate-500 dark:text-slate-400 border-r border-slate-300 dark:border-slate-700">
                       {idx + 1}
                     </td>
-                    <td className="p-4 font-bold text-slate-900 dark:text-slate-100 border-r border-slate-100 dark:border-slate-800">
+                    <td className="p-4 font-bold text-slate-900 dark:text-slate-100 border-r border-slate-300 dark:border-slate-700">
                       {item.nama_peternak || item.nama_unit_farm || item.nama_badan_usaha || item.nama_unit_farm_perusahaan || item.nama_unit_farm_mandiri || '-'}
                     </td>
-                    <td className="p-4 font-semibold text-slate-700 dark:text-slate-300 border-r border-slate-100 dark:border-slate-800">
+                    <td className="p-4 font-semibold text-slate-700 dark:text-slate-300 border-r border-slate-300 dark:border-slate-700">
                       {item.kecamatan || '-'}
                     </td>
-                    <td className="p-4 text-slate-600 dark:text-slate-400 border-r border-slate-100 dark:border-slate-800">
+                    <td className="p-4 text-slate-600 dark:text-slate-400 border-r border-slate-300 dark:border-slate-700">
                       {item.desa || item.kelurahan_desa || '-'}
                     </td>
-                    <td className="p-4 border-r border-slate-100 dark:border-slate-800">
+                    <td className="p-4 border-r border-slate-300 dark:border-slate-700">
                       <span
                         className={`px-2.5 py-1 rounded-full text-[11px] font-bold ${
                           (item.mandiri_kemitraan || item.status_kepemilikan || '').toLowerCase().includes('kemitraan')
@@ -121,10 +121,10 @@ export default function FarmTableTab({
                         {item.mandiri_kemitraan || item.status_kepemilikan || 'Mandiri'}
                       </span>
                     </td>
-                    <td className="p-4 text-right font-sans font-bold text-emerald-700 dark:text-emerald-400 bg-emerald-50/30 dark:bg-emerald-950/20 border-r border-slate-100 dark:border-slate-800">
+                    <td className="p-4 text-right font-sans font-bold text-emerald-700 dark:text-emerald-400 bg-emerald-50/30 dark:bg-emerald-950/20 border-r border-slate-300 dark:border-slate-700">
                       {item.kapasitas_kandang ? formatNum(parseNum(item.kapasitas_kandang)) : '-'}
                     </td>
-                    <td className="p-4 text-slate-500 dark:text-slate-400 font-mono text-[11px] border-r border-slate-100 dark:border-slate-800">
+                    <td className="p-4 text-slate-500 dark:text-slate-400 font-mono text-[11px] border-r border-slate-300 dark:border-slate-700">
                       {item.lintang && item.bujur ? (
                         <a
                           href={`https://maps.google.com/?q=${item.lintang},${item.bujur}`}

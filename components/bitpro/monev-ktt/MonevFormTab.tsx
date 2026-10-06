@@ -670,28 +670,28 @@ export function MonevFormTab({
 
         <div className="overflow-x-auto w-full">
           <table className="w-full text-xs sm:text-sm text-left whitespace-nowrap border-collapse">
-            <thead className="bg-slate-50 text-slate-700 border-b border-slate-200 text-[11px] uppercase tracking-wider font-bold">
+            <thead className="bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border-b border-slate-300 dark:border-slate-700 text-[11px] uppercase tracking-wider font-bold">
               <tr>
-                <th rowSpan={2} className="px-3 py-2.5 text-center border-r border-b border-slate-200 w-12 align-middle">NO</th>
-                <th rowSpan={2} className="px-3 py-2.5 border-r border-b border-slate-200 align-middle">Nama KTT</th>
-                <th colSpan={3} className="px-3 py-2 text-center border-r border-b border-slate-200">ALAMAT</th>
-                <th rowSpan={2} className="px-3 py-2.5 text-center border-r border-b border-slate-200 align-middle">Jenis Ternak</th>
-                <th colSpan={2} className="px-3 py-2 text-center border-r border-b border-slate-200">Jml (Ekor)</th>
-                <th rowSpan={2} className="px-3 py-2.5 text-center border-r border-b border-slate-200 align-middle">BIBIT ODOT (STEK)</th>
-                <th rowSpan={2} className="px-3 py-2.5 text-center border-r border-b border-slate-200 align-middle">OBAT (PAKET)</th>
-                <th rowSpan={2} className="px-3 py-2.5 border-r border-b border-slate-200 align-middle">KETERANGAN</th>
-                <th rowSpan={2} className="px-3 py-2.5 text-center border-r border-b border-slate-200 align-middle">GPS, Foto &amp; Dokumen</th>
-                <th rowSpan={2} className="px-3 py-2.5 text-center border-b border-slate-200 align-middle">Aksi / Cetak</th>
+                <th rowSpan={2} className="px-3 py-2.5 text-center border-r border-b border-slate-300 dark:border-slate-700 w-12 align-middle">NO</th>
+                <th rowSpan={2} className="px-3 py-2.5 border-r border-b border-slate-300 dark:border-slate-700 align-middle">Nama KTT</th>
+                <th colSpan={3} className="px-3 py-2 text-center border-r border-b border-slate-300 dark:border-slate-700">ALAMAT</th>
+                <th rowSpan={2} className="px-3 py-2.5 text-center border-r border-b border-slate-300 dark:border-slate-700 align-middle">Jenis Ternak</th>
+                <th colSpan={2} className="px-3 py-2 text-center border-r border-b border-slate-300 dark:border-slate-700">Jml (Ekor)</th>
+                <th rowSpan={2} className="px-3 py-2.5 text-center border-r border-b border-slate-300 dark:border-slate-700 align-middle">BIBIT ODOT (STEK)</th>
+                <th rowSpan={2} className="px-3 py-2.5 text-center border-r border-b border-slate-300 dark:border-slate-700 align-middle">OBAT (PAKET)</th>
+                <th rowSpan={2} className="px-3 py-2.5 border-r border-b border-slate-300 dark:border-slate-700 align-middle">KETERANGAN</th>
+                <th rowSpan={2} className="px-3 py-2.5 text-center border-r border-b border-slate-300 dark:border-slate-700 align-middle">GPS, Foto &amp; Dokumen</th>
+                <th rowSpan={2} className="px-3 py-2.5 text-center border-b border-slate-300 dark:border-slate-700 align-middle">Aksi / Cetak</th>
               </tr>
               <tr>
-                <th className="px-3 py-2 border-r border-b border-slate-200 text-center text-[10px]">Desa</th>
-                <th className="px-3 py-2 border-r border-b border-slate-200 text-center text-[10px]">Kecamatan</th>
-                <th className="px-3 py-2 border-r border-b border-slate-200 text-center text-[10px]">Wil. Puskeswan</th>
-                <th className="px-3 py-2 border-r border-b border-slate-200 text-center text-[10px]">B</th>
-                <th className="px-3 py-2 border-r border-b border-slate-200 text-center text-[10px]">J</th>
+                <th className="px-3 py-2 border-r border-b border-slate-300 dark:border-slate-700 text-center text-[10px]">Desa</th>
+                <th className="px-3 py-2 border-r border-b border-slate-300 dark:border-slate-700 text-center text-[10px]">Kecamatan</th>
+                <th className="px-3 py-2 border-r border-b border-slate-300 dark:border-slate-700 text-center text-[10px]">Wil. Puskeswan</th>
+                <th className="px-3 py-2 border-r border-b border-slate-300 dark:border-slate-700 text-center text-[10px]">B</th>
+                <th className="px-3 py-2 border-r border-b border-slate-300 dark:border-slate-700 text-center text-[10px]">J</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-100">
+            <tbody className="divide-y divide-slate-300 dark:divide-slate-700">
               {dbLapanganTabel.map((d, idx) => {
                 const baMati = d.kondisi.matiBangkaiBAPdf;
                 const baJual = d.kondisi.jualBAPdf;
@@ -700,12 +700,19 @@ export function MonevFormTab({
                 const allPhotos = (d.photos && d.photos.length > 0) ? d.photos : (d.photo ? [d.photo] : []);
 
                 return (
-                  <tr key={d.id} className="hover:bg-slate-50/80 transition-colors divide-x divide-slate-100">
-                    <td className="px-3 py-3 text-center font-bold text-emerald-700 text-xs">{idx + 1}</td>
-                    <td className="px-3 py-3 font-bold text-slate-900">
+                  <tr
+                    key={d.id}
+                    className={`transition-colors divide-x divide-slate-300 dark:divide-slate-700 ${
+                      idx % 2 === 0
+                        ? 'bg-white dark:bg-slate-900/60 hover:bg-blue-50/60 dark:hover:bg-slate-800/60'
+                        : 'bg-slate-100 dark:bg-slate-800/50 hover:bg-blue-50/60 dark:hover:bg-slate-800/70'
+                    }`}
+                  >
+                    <td className="px-3 py-3 text-center font-bold text-emerald-700 dark:text-emerald-400 text-xs">{idx + 1}</td>
+                    <td className="px-3 py-3 font-bold text-slate-900 dark:text-slate-100">
                       <div>{d.namaKtt}</div>
                       {d.namaKetua && (
-                        <span className="text-[10px] text-slate-500 font-normal block">Ketua: {d.namaKetua}</span>
+                        <span className="text-[10px] text-slate-500 dark:text-slate-400 font-normal block">Ketua: {d.namaKetua}</span>
                       )}
                     </td>
                     <td className="px-3 py-3 text-slate-700 text-xs">{d.desa || '-'}</td>
@@ -1729,43 +1736,50 @@ export function MonevFormTab({
                 const kondisiTahun = (d.waktuMonev || (d.tahun ? `TAHUN ${d.tahun}` : '-')).toUpperCase();
 
                 return (
-                  <tr key={d.id} className="hover:bg-slate-50/80 transition-colors border-b border-slate-200">
-                    <td className="px-3 py-2.5 text-center font-bold text-slate-700 text-xs border-r border-slate-200">
+                  <tr
+                    key={d.id}
+                    className={`transition-colors border-b border-slate-300 dark:border-slate-700 ${
+                      idx % 2 === 0
+                        ? 'bg-white dark:bg-slate-900/60 hover:bg-blue-50/60 dark:hover:bg-slate-800/60'
+                        : 'bg-slate-100 dark:bg-slate-800/50 hover:bg-blue-50/60 dark:hover:bg-slate-800/70'
+                    }`}
+                  >
+                    <td className="px-3 py-2.5 text-center font-bold text-slate-700 dark:text-slate-300 text-xs border-r border-slate-300 dark:border-slate-700">
                       {idx + 1}
                     </td>
-                    <td className="px-4 py-2.5 font-bold text-slate-900 border-r border-slate-200">
+                    <td className="px-4 py-2.5 font-bold text-slate-900 dark:text-slate-100 border-r border-slate-300 dark:border-slate-700">
                       <div>{d.namaKtt}</div>
                       {d.desa && d.kec && (
-                        <span className="text-[10px] text-slate-400 font-normal block">
+                        <span className="text-[10px] text-slate-400 dark:text-slate-500 font-normal block">
                           Desa {d.desa}, Kec. {d.kec}
                         </span>
                       )}
                     </td>
-                    <td className="px-3 py-2.5 text-center font-semibold text-slate-700 border-r border-slate-200">
+                    <td className="px-3 py-2.5 text-center font-semibold text-slate-700 dark:text-slate-300 border-r border-slate-300 dark:border-slate-700">
                       {anakLahir}
                     </td>
-                    <td className="px-3 py-2.5 text-center font-semibold text-slate-700 border-r border-slate-200">
+                    <td className="px-3 py-2.5 text-center font-semibold text-slate-700 dark:text-slate-300 border-r border-slate-300 dark:border-slate-700">
                       {anakMati}
                     </td>
-                    <td className="px-3 py-2.5 text-center font-semibold text-slate-700 border-r border-slate-200">
+                    <td className="px-3 py-2.5 text-center font-semibold text-slate-700 dark:text-slate-300 border-r border-slate-300 dark:border-slate-700">
                       {anakDijual}
                     </td>
-                    <td className="px-3 py-2.5 text-center font-semibold text-slate-700 border-r border-slate-200">
+                    <td className="px-3 py-2.5 text-center font-semibold text-slate-700 dark:text-slate-300 border-r border-slate-300 dark:border-slate-700">
                       {pokokMati}
                     </td>
-                    <td className="px-3 py-2.5 text-center font-semibold text-slate-700 border-r border-slate-200">
+                    <td className="px-3 py-2.5 text-center font-semibold text-slate-700 dark:text-slate-300 border-r border-slate-300 dark:border-slate-700">
                       {pokokPotongPaksa}
                     </td>
-                    <td className="px-3 py-2.5 text-center font-semibold text-slate-700 border-r border-slate-200">
+                    <td className="px-3 py-2.5 text-center font-semibold text-slate-700 dark:text-slate-300 border-r border-slate-300 dark:border-slate-700">
                       {pokokDijual}
                     </td>
-                    <td className="px-3 py-2.5 text-center font-semibold text-slate-700 border-r border-slate-200">
+                    <td className="px-3 py-2.5 text-center font-semibold text-slate-700 dark:text-slate-300 border-r border-slate-300 dark:border-slate-700">
                       {beliPengganti}
                     </td>
-                    <td className="px-3 py-2.5 text-center font-black text-emerald-950 bg-[#d4edda]/70 border-r border-slate-200">
+                    <td className="px-3 py-2.5 text-center font-black text-emerald-950 dark:text-emerald-300 bg-[#d4edda]/70 dark:bg-emerald-950/40 border-r border-slate-300 dark:border-slate-700">
                       {kondisiSaatIni}
                     </td>
-                    <td className="px-4 py-2.5 text-center font-bold text-slate-800 text-xs bg-amber-50/40">
+                    <td className="px-4 py-2.5 text-center font-bold text-slate-800 dark:text-slate-200 text-xs bg-amber-50/40 dark:bg-amber-950/20">
                       {kondisiTahun}
                     </td>
                   </tr>
@@ -1782,7 +1796,7 @@ export function MonevFormTab({
             </tbody>
             {dbLapanganTabel.length > 0 && (
               <tfoot className="bg-slate-100 font-bold border-t-2 border-slate-300 text-xs">
-                <tr className="divide-x divide-slate-200 border-b border-slate-300">
+                <tr className="divide-x divide-slate-300 border-b border-slate-300">
                   <td colSpan={2} className="px-4 py-3 text-center font-black uppercase text-slate-900 tracking-wider">
                     TOTAL
                   </td>

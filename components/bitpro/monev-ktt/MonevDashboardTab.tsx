@@ -87,35 +87,35 @@ export function MonevDashboardTab({
             const totalTernakKec = dataKec.reduce((acc, curr) => acc + hitungKondisi(curr.kondisi).i, 0);
 
             return (
-              <div key={kec} className="rounded-2xl border border-slate-200 bg-white shadow-sm overflow-hidden">
-                <div className="bg-slate-50 p-4 border-b border-slate-200 flex flex-wrap items-center justify-between gap-2">
-                  <h4 className="font-bold text-slate-900 text-sm flex items-center gap-2">
-                    <MapPin size={16} strokeWidth={2.5} className="text-emerald-600" />
+              <div key={kec} className="rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm overflow-hidden">
+                <div className="bg-slate-50 dark:bg-slate-800/80 p-4 border-b border-slate-200 dark:border-slate-700 flex flex-wrap items-center justify-between gap-2">
+                  <h4 className="font-bold text-slate-900 dark:text-slate-100 text-sm flex items-center gap-2">
+                    <MapPin size={16} strokeWidth={2.5} className="text-emerald-600 dark:text-emerald-400" />
                     <span>Kecamatan {kec}</span>
                   </h4>
-                  <span className="text-xs font-sans font-bold px-3 py-1 rounded-full bg-emerald-50 text-emerald-800 border border-emerald-200">
+                  <span className="text-xs font-sans font-bold px-3 py-1 rounded-full bg-emerald-50 dark:bg-emerald-950/40 text-emerald-800 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800">
                     {dataKec.length} Kelompok · {totalTernakKec} Ekor Aset
                   </span>
                 </div>
 
                 <div className="overflow-x-auto">
                   <table className="w-full text-left text-sm whitespace-nowrap">
-                    <thead className="bg-slate-50/50 text-slate-500 text-xs font-semibold uppercase tracking-wider border-b border-slate-200">
+                    <thead className="bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 text-xs font-bold uppercase tracking-wider border-b border-slate-300 dark:border-slate-700">
                       <tr>
-                        <th className="p-3.5">WAKTU</th>
-                        <th className="p-3.5">TAHUN</th>
-                        <th className="p-3.5">NAMA KTT</th>
-                        <th className="p-3.5">DESA</th>
-                        <th className="p-3.5">KOMODITAS</th>
-                        <th className="p-3.5 text-right">AWAL</th>
-                        <th className="p-3.5 text-right">SISA</th>
-                        <th className="p-3.5 text-right">TOTAL ASET</th>
-                        <th className="p-3.5 text-center">GPS, FOTO &amp; DOKUMEN</th>
+                        <th className="p-3.5 border-r border-slate-300 dark:border-slate-700">WAKTU</th>
+                        <th className="p-3.5 border-r border-slate-300 dark:border-slate-700">TAHUN</th>
+                        <th className="p-3.5 border-r border-slate-300 dark:border-slate-700">NAMA KTT</th>
+                        <th className="p-3.5 border-r border-slate-300 dark:border-slate-700">DESA</th>
+                        <th className="p-3.5 border-r border-slate-300 dark:border-slate-700">KOMODITAS</th>
+                        <th className="p-3.5 text-right border-r border-slate-300 dark:border-slate-700">AWAL</th>
+                        <th className="p-3.5 text-right border-r border-slate-300 dark:border-slate-700">SISA</th>
+                        <th className="p-3.5 text-right border-r border-slate-300 dark:border-slate-700">TOTAL ASET</th>
+                        <th className={`p-3.5 text-center ${canEdit || onShowHistory ? 'border-r border-slate-300 dark:border-slate-700' : ''}`}>GPS, FOTO &amp; DOKUMEN</th>
                         {(canEdit || onShowHistory) && <th className="p-3.5 text-center w-24">AKSI</th>}
                       </tr>
                     </thead>
-                    <tbody className="divide-y divide-slate-200 text-slate-800">
-                      {dataKec.map((d) => {
+                    <tbody className="divide-y divide-slate-300 dark:divide-slate-700 text-slate-800 dark:text-slate-200">
+                      {dataKec.map((d, idx) => {
                         const h = hitungKondisi(d.kondisi);
                         const baMati = d.kondisi.matiBangkaiBAPdf;
                         const baJual = d.kondisi.jualBAPdf;
@@ -125,26 +125,33 @@ export function MonevDashboardTab({
                         const allPhotos = (d.photos && d.photos.length > 0) ? d.photos : (d.photo ? [d.photo] : []);
 
                         return (
-                          <tr key={d.id} className="hover:bg-slate-50/80 dark:hover:bg-slate-800/60 transition-colors">
-                            <td className="p-3.5 font-sans text-xs text-slate-500">
+                          <tr
+                            key={d.id}
+                            className={`transition-colors ${
+                              idx % 2 === 0
+                                ? 'bg-white dark:bg-slate-900/60 hover:bg-blue-50/60 dark:hover:bg-slate-800/60'
+                                : 'bg-slate-100 dark:bg-slate-800/50 hover:bg-blue-50/60 dark:hover:bg-slate-800/70'
+                            }`}
+                          >
+                            <td className="p-3.5 font-sans text-xs text-slate-500 dark:text-slate-400 border-r border-slate-300 dark:border-slate-700">
                               {d.waktuMonev || new Date(Number(d.id)).toLocaleDateString('id-ID')}
                             </td>
-                            <td className="p-3.5 font-bold text-xs text-slate-700">
+                            <td className="p-3.5 font-bold text-xs text-slate-700 dark:text-slate-300 border-r border-slate-300 dark:border-slate-700">
                               {d.tahun}
                             </td>
-                            <td className="p-3.5 font-bold text-slate-900">
+                            <td className="p-3.5 font-bold text-slate-900 dark:text-slate-100 border-r border-slate-300 dark:border-slate-700">
                               {d.namaKtt}
                             </td>
-                            <td className="p-3.5 text-slate-600 text-xs">{d.desa}</td>
-                            <td className="p-3.5 text-xs">
-                              <span className="px-2 py-0.5 rounded-md bg-slate-100 text-slate-800 font-semibold border border-slate-200">
+                            <td className="p-3.5 text-slate-600 dark:text-slate-300 text-xs border-r border-slate-300 dark:border-slate-700">{d.desa}</td>
+                            <td className="p-3.5 text-xs border-r border-slate-300 dark:border-slate-700">
+                              <span className="px-2 py-0.5 rounded-md bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-200 font-semibold border border-slate-200 dark:border-slate-700">
                                 {d.jenis}
                               </span>
                             </td>
-                            <td className="p-3.5 text-right font-sans text-xs font-bold text-slate-700">{h.a}</td>
-                            <td className="p-3.5 text-right font-sans text-xs font-bold text-slate-700">{h.e}</td>
-                            <td className="p-3.5 text-right font-sans text-xs font-extrabold text-emerald-600">{h.i} Ekor</td>
-                            <td className="p-3.5 text-center">
+                            <td className="p-3.5 text-right font-sans text-xs font-bold text-slate-700 dark:text-slate-300 border-r border-slate-300 dark:border-slate-700">{h.a}</td>
+                            <td className="p-3.5 text-right font-sans text-xs font-bold text-slate-700 dark:text-slate-300 border-r border-slate-300 dark:border-slate-700">{h.e}</td>
+                            <td className="p-3.5 text-right font-sans text-xs font-extrabold text-emerald-600 dark:text-emerald-400 border-r border-slate-300 dark:border-slate-700">{h.i} Ekor</td>
+                            <td className={`p-3.5 text-center ${canEdit || onShowHistory ? 'border-r border-slate-300 dark:border-slate-700' : ''}`}>
                               <div className="flex flex-wrap items-center justify-center gap-1.5 text-xs">
                                 {d.lat ? (
                                   <span className="text-emerald-700 font-bold flex items-center gap-0.5">

@@ -153,26 +153,26 @@ export default function PemasukanDinasTab({
       </div>
 
       {/* ── 3. TABEL DATA DROPPING DINAS ── */}
-      <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200/80 dark:border-slate-800 shadow-xs overflow-hidden">
+      <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-300 dark:border-slate-700 shadow-xs overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-left text-xs border-collapse">
             <thead>
-              <tr className="bg-slate-50 dark:bg-slate-800/60 text-slate-600 dark:text-slate-300 font-semibold border-b border-slate-100 dark:border-slate-800">
-                <th className="p-3.5 text-center w-12">No</th>
-                <th className="p-3.5">Periode / Bulan</th>
-                <th className="p-3.5">Nama Produk / Obat</th>
-                <th className="p-3.5">No. Batch</th>
-                <th className="p-3.5 text-center">Tgl Expired</th>
-                <th className="p-3.5">Sumber Anggaran</th>
-                <th className="p-3.5 text-center">Kemasan</th>
-                <th className="p-3.5 text-right">Jumlah Stok</th>
-                <th className="p-3.5 text-right">Harga Satuan</th>
-                <th className="p-3.5 text-right">Total Nilai</th>
-                <th className="p-3.5">Penyerah &amp; Penerima</th>
+              <tr className="bg-slate-100 dark:bg-slate-800/60 text-slate-700 dark:text-slate-300 font-semibold border-b border-slate-300 dark:border-slate-700">
+                <th className="p-3.5 text-center w-12 border-r border-slate-300 dark:border-slate-700">No</th>
+                <th className="p-3.5 border-r border-slate-300 dark:border-slate-700">Periode / Bulan</th>
+                <th className="p-3.5 border-r border-slate-300 dark:border-slate-700">Nama Produk / Obat</th>
+                <th className="p-3.5 border-r border-slate-300 dark:border-slate-700">No. Batch</th>
+                <th className="p-3.5 text-center border-r border-slate-300 dark:border-slate-700">Tgl Expired</th>
+                <th className="p-3.5 border-r border-slate-300 dark:border-slate-700">Sumber Anggaran</th>
+                <th className="p-3.5 text-center border-r border-slate-300 dark:border-slate-700">Kemasan</th>
+                <th className="p-3.5 text-right border-r border-slate-300 dark:border-slate-700">Jumlah Stok</th>
+                <th className="p-3.5 text-right border-r border-slate-300 dark:border-slate-700">Harga Satuan</th>
+                <th className="p-3.5 text-right border-r border-slate-300 dark:border-slate-700">Total Nilai</th>
+                <th className="p-3.5 border-r border-slate-300 dark:border-slate-700">Penyerah &amp; Penerima</th>
                 {canEdit && <th className="p-3.5 text-center w-16">Aksi</th>}
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-100 dark:divide-slate-800/80 text-slate-700 dark:text-slate-200">
+            <tbody className="divide-y divide-slate-300 dark:divide-slate-700 text-slate-700 dark:text-slate-200">
               {filteredList.length === 0 ? (
                 <tr>
                   <td colSpan={12} className="p-8 text-center text-slate-400">
@@ -183,39 +183,39 @@ export default function PemasukanDinasTab({
                 filteredList.map((item, idx) => (
                   <tr
                     key={item.id_dropping_dinas}
-                    className="hover:bg-slate-50/70 dark:hover:bg-slate-800/40 transition-colors"
+                    className="odd:bg-white even:bg-slate-100 dark:odd:bg-slate-900/60 dark:even:bg-slate-800/50 hover:bg-blue-50/60 dark:hover:bg-slate-800/80 transition-colors"
                   >
-                    <td className="p-3.5 text-center font-mono text-slate-400">{idx + 1}</td>
-                    <td className="p-3.5 font-medium whitespace-nowrap">
+                    <td className="p-3.5 text-center font-mono text-slate-500 dark:text-slate-400 border-r border-slate-300 dark:border-slate-700">{idx + 1}</td>
+                    <td className="p-3.5 font-medium whitespace-nowrap border-r border-slate-300 dark:border-slate-700">
                       {item.bulan} {item.tahun}
                     </td>
-                    <td className="p-3.5">
+                    <td className="p-3.5 border-r border-slate-300 dark:border-slate-700">
                       <div className="font-bold text-slate-900 dark:text-slate-100">
                         {item.nama_barang || `Barang #${item.id_barang}`}
                       </div>
                     </td>
-                    <td className="p-3.5 font-mono text-slate-700 dark:text-slate-300 font-semibold">
+                    <td className="p-3.5 font-mono text-slate-700 dark:text-slate-300 font-semibold border-r border-slate-300 dark:border-slate-700">
                       {item.nomor_batch || '-'}
                     </td>
-                    <td className="p-3.5 text-center whitespace-nowrap">
+                    <td className="p-3.5 text-center whitespace-nowrap border-r border-slate-300 dark:border-slate-700">
                       {item.tanggal_kadaluarsa ? String(item.tanggal_kadaluarsa).slice(0, 10) : '-'}
                     </td>
-                    <td className="p-3.5">
+                    <td className="p-3.5 border-r border-slate-300 dark:border-slate-700">
                       <span className="px-2 py-0.5 rounded-md text-[10px] font-semibold bg-blue-50 dark:bg-blue-950/60 text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-800">
                         {item.sumber_anggaran || 'APBD Kabupaten'}
                       </span>
                     </td>
-                    <td className="p-3.5 text-center">{item.satuan_kemasan || 'Botol'}</td>
-                    <td className="p-3.5 text-right font-black text-emerald-600 dark:text-emerald-400 text-sm">
+                    <td className="p-3.5 text-center border-r border-slate-300 dark:border-slate-700">{item.satuan_kemasan || 'Botol'}</td>
+                    <td className="p-3.5 text-right font-black text-emerald-600 dark:text-emerald-400 text-sm border-r border-slate-300 dark:border-slate-700">
                       {Number(item.jumlah || 0).toLocaleString('id-ID')}
                     </td>
-                    <td className="p-3.5 text-right text-slate-500 whitespace-nowrap">
+                    <td className="p-3.5 text-right text-slate-500 dark:text-slate-400 whitespace-nowrap border-r border-slate-300 dark:border-slate-700">
                       Rp {Number(item.harga_satuan || 0).toLocaleString('id-ID')}
                     </td>
-                    <td className="p-3.5 text-right font-bold text-slate-800 dark:text-slate-100 whitespace-nowrap">
+                    <td className="p-3.5 text-right font-bold text-slate-800 dark:text-slate-100 whitespace-nowrap border-r border-slate-300 dark:border-slate-700">
                       Rp {Number(item.harga_total || 0).toLocaleString('id-ID')}
                     </td>
-                    <td className="p-3.5 text-[11px] text-slate-500">
+                    <td className="p-3.5 text-[11px] text-slate-500 dark:text-slate-400 border-r border-slate-300 dark:border-slate-700">
                       <div>
                         Serah: <span className="font-medium text-slate-700 dark:text-slate-300">{item.yang_menyerahkan || '-'}</span>
                       </div>
