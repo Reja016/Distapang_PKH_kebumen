@@ -67,9 +67,10 @@ export const MODULES_METADATA = [
     desc: 'Laporan vaksinasi, lalu lintas, penyakit ternak, dan kinerja puskeswan',
     submenus: [
       { id: 'data-vaksinasi', name: 'Data Vaksinasi PMK & Penyakit Menular', path: '/keswan/data-vaksinasi' },
-      { id: 'lalu-lintas-ternak', name: 'Lalu Lintas Ternak', path: '/keswan/data-vaksinasi' },
-      { id: 'laporan-penyakit', name: 'Laporan Penyakit Ternak', path: '/keswan/data-vaksinasi' },
+      { id: 'lalu-lintas-ternak', name: 'Lalu Lintas Ternak (SKKH)', path: '/keswan/lalu-lintas-ternak' },
+      { id: 'laporan-penyakit', name: 'Laporan Penyakit Ternak', path: '/keswan/laporan-penyakit' },
       { id: 'puskeswan', name: 'Kinerja Pelayanan Puskeswan', path: '/keswan/puskeswan' },
+      { id: 'stok-gudang', name: 'Stok Gudang Keswan', path: '/keswan/stok-gudang' },
     ],
   },
   {
