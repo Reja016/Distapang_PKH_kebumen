@@ -13,6 +13,7 @@ import {
   Flame,
   Clock,
   Sparkles,
+  Target,
 } from 'lucide-react';
 
 interface Announcement {
@@ -146,8 +147,9 @@ export default function AnnouncementBanner({ isDark, userDisplay }: Announcement
               </span>
 
               {currentItem.target_label && (
-                <span className="text-[10px] font-bold px-2 py-0.5 rounded-md bg-white/70 dark:bg-black/40 border border-current/20">
-                  🎯 {currentItem.target_label}
+                <span className="text-[10px] font-bold px-2 py-0.5 rounded-md bg-white/70 dark:bg-black/40 border border-current/20 flex items-center gap-1">
+                  <Target size={10} className="shrink-0" />
+                  <span>{currentItem.target_label}</span>
                 </span>
               )}
 

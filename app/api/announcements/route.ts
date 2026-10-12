@@ -188,7 +188,7 @@ export async function POST(request: NextRequest) {
     // 2. Tentukan target user / subscriber untuk notifikasi lonceng & Web Push
     // Kirim notifikasi lonceng ke database app_notifications
     const notifType = category === 'urgent' ? 'warning' : 'info';
-    const notifTitle = `📢 Pengumuman: ${title}`;
+    const notifTitle = `Pengumuman: ${title}`;
     const notifBody = `${message.slice(0, 150)}${message.length > 150 ? '...' : ''}`;
 
     if (target_type === 'ALL') {
@@ -283,7 +283,7 @@ export async function POST(request: NextRequest) {
 
       if (subRows && subRows.length > 0) {
         const payloadStr = JSON.stringify({
-          title: `📢 ${title}`,
+          title: `Pengumuman: ${title}`,
           body: notifBody,
           icon: '/icons/modules/bitpro.png',
           badge: '/icons/modules/bitpro.png',

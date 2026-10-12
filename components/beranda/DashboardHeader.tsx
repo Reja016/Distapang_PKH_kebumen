@@ -15,7 +15,7 @@ import {
 } from 'lucide-react';
 import { SubmenuItem } from './types';
 import NotificationBell from '@/components/common/NotificationBell';
-import BroadcastAnnouncementModal from '@/components/admin/BroadcastAnnouncementModal';
+import BroadcastAnnouncementModal from '@/components/admin/broadcast/BroadcastAnnouncementModal';
 
 interface DashboardHeaderProps {
   isDark: boolean;
