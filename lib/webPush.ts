@@ -133,8 +133,8 @@ export async function sendNotificationToRole(
     const stringifiedPayload = JSON.stringify({
       title: payload.title,
       body: payload.body,
-      icon: payload.icon || '/icons/modules/bitpro.png',
-      badge: payload.badge || '/icons/modules/bitpro.png',
+      icon: payload.icon || '/logo-simantap.png',
+      badge: payload.badge || '/logo-simantap.png',
       url: payload.url || '/beranda',
       tag: payload.tag || `simantap-${Date.now()}`,
     });

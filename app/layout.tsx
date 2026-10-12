@@ -22,6 +22,8 @@ export const metadata: Metadata = {
     shortcut: '/logo-circle.svg',
     apple: '/logo-circle.svg',
   },
+  manifest: '/manifest.json',
+  themeColor: '#059669',
 };
 
 export default function RootLayout({
@@ -32,6 +34,10 @@ export default function RootLayout({
   return (
     <html lang="id" className={`${poppins.variable} ${poppins.className}`} suppressHydrationWarning>
       <head>
+        <link rel="manifest" href="/manifest.json" />
+        <meta name="theme-color" content="#059669" />
+        <meta name="apple-mobile-web-app-capable" content="yes" />
+        <meta name="apple-mobile-web-app-status-bar-style" content="default" />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <link

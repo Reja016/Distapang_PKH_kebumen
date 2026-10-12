@@ -11,8 +11,8 @@ self.addEventListener('push', (event) => {
   let data = {
     title: 'SiMantap PKH',
     body: 'Ada pembaruan data atau jadwal tugas baru.',
-    icon: '/icons/modules/bitpro.png',
-    badge: '/icons/modules/bitpro.png',
+    icon: '/logo-simantap.png',
+    badge: '/logo-simantap.png',
     url: '/beranda',
     tag: 'simantap-notification',
   };
@@ -28,8 +28,8 @@ self.addEventListener('push', (event) => {
 
   const options = {
     body: data.body,
-    icon: data.icon || '/icons/modules/bitpro.png',
-    badge: data.badge || '/icons/modules/bitpro.png',
+    icon: data.icon || '/logo-simantap.png',
+    badge: data.badge || '/logo-simantap.png',
     vibrate: [200, 100, 200],
     data: {
       url: data.url || '/beranda',

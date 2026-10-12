@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, useRef } from 'react';
+import { createPortal } from 'react-dom';
 import Link from 'next/link';
 import {
   Bell,
@@ -59,8 +60,9 @@ function playNotificationChime() {
 
 // Konversi VAPID public key dari base64 URL safe ke Uint8Array
 function urlBase64ToUint8Array(base64String: string) {
-  const padding = '='.repeat((4 - (base64String.length % 4)) % 4);
-  const base64 = (base64String + padding).replace(/-/g, '+').replace(/_/g, '/');
+  const clean = (base64String || '').trim();
+  const padding = '='.repeat((4 - (clean.length % 4)) % 4);
+  const base64 = (clean + padding).replace(/-/g, '+').replace(/_/g, '/');
   const rawData = window.atob(base64);
   const outputArray = new Uint8Array(rawData.length);
   for (let i = 0; i < rawData.length; ++i) {
@@ -70,6 +72,7 @@ function urlBase64ToUint8Array(base64String: string) {
 }
 
 export default function NotificationBell({ isDark = false }: NotificationBellProps) {
+  const [mounted, setMounted] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
   const [notifications, setNotifications] = useState<NotificationItem[]>([]);
   const [unreadCount, setUnreadCount] = useState(0);
@@ -80,6 +83,10 @@ export default function NotificationBell({ isDark = false }: NotificationBellPro
   const [isPushActive, setIsPushActive] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const prevUnreadRef = useRef<number>(0);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   // Cek kapabilitas Service Worker & Push Notification di browser
   useEffect(() => {
@@ -158,7 +165,7 @@ export default function NotificationBell({ isDark = false }: NotificationBellPro
       const perm = await Notification.requestPermission();
       setPushPermission(perm);
       if (perm !== 'granted') {
-        alert('Izin notifikasi tidak diberikan. Anda tetap dapat melihat notifikasi di aplikasi.');
+        alert('Izin notifikasi tidak diberikan. Silakan aktifkan izin notifikasi pada setelan situs/Chrome di HP Anda.');
         setIsSubscribing(false);
         return;
       }
@@ -176,13 +183,23 @@ export default function NotificationBell({ isDark = false }: NotificationBellPro
 
       const convertedVapidKey = urlBase64ToUint8Array(keyData.publicKey);
 
-      // 4. Subscribe ke Push Manager
+      // 4. Bersihkan / unsubscribe langganan lama jika ada agar tidak bentrok dengan kunci baru di FCM
+      try {
+        const existingSub = await reg.pushManager.getSubscription();
+        if (existingSub) {
+          await existingSub.unsubscribe();
+        }
+      } catch (unsubErr) {
+        console.warn('Gagal reset langganan lama:', unsubErr);
+      }
+
+      // 5. Subscribe ke Push Manager
       const sub = await reg.pushManager.subscribe({
         userVisibleOnly: true,
         applicationServerKey: convertedVapidKey,
       });
 
-      // 5. Simpan subscription ke backend
+      // 6. Simpan subscription ke backend
       const saveRes = await fetch('/api/notifications/subscribe', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -196,13 +213,27 @@ export default function NotificationBell({ isDark = false }: NotificationBellPro
       if (saveData.success) {
         setIsPushActive(true);
         playNotificationChime();
+        // Coba kirim preview notifikasi lokal dengan logo resmi SiMantap
+        try {
+          if (reg && reg.showNotification) {
+            await reg.showNotification('SiMantap PKH — Notifikasi Aktif!', {
+              body: 'Perangkat ini siap menerima informasi dan pembaruan data secara otomatis.',
+              icon: '/logo-simantap.png',
+              badge: '/logo-simantap.png',
+            });
+          }
+        } catch {}
         alert('🎉 Notifikasi HP & Browser SiMantap PKH Berhasil Diaktifkan!');
       } else {
         throw new Error(saveData.error || 'Gagal menyimpan langganan notifikasi');
       }
     } catch (err: any) {
       console.error('Error enabling push:', err);
-      alert('Gagal mengaktifkan notifikasi push: ' + err.message);
+      let errorMsg = err.message || 'Terjadi kesalahan sistem';
+      if (errorMsg.includes('push service error')) {
+        errorMsg = 'Layanan Google Push (FCM) gagal merespons. Pastikan HP terhubung ke internet, tidak menggunakan AdBlock/Private DNS pemblokir (seperti AdGuard/VPN), dan izin notifikasi Chrome aktif di Pengaturan HP.';
+      }
+      alert('Gagal mengaktifkan notifikasi push: ' + errorMsg);
     } finally {
       setIsSubscribing(false);
     }
@@ -287,6 +318,192 @@ export default function NotificationBell({ isDark = false }: NotificationBellPro
     }
   };
 
+  // Konten panel notifikasi (digunakan bersama oleh desktop dropdown & mobile sheet)
+  const renderPanelContent = () => (
+    <>
+      {/* Header Panel */}
+      <div
+        className={`px-4 py-3 border-b flex items-center justify-between shrink-0 ${
+          isDark ? 'bg-slate-900/95 border-slate-800' : 'bg-slate-50/95 border-slate-100'
+        }`}
+      >
+        <div className="flex items-center gap-2 min-w-0">
+          <div className="p-1.5 rounded-lg bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 shrink-0">
+            <Bell size={16} />
+          </div>
+          <h3 className="text-sm font-bold tracking-tight text-slate-900 dark:text-white truncate">
+            Pusat Notifikasi
+          </h3>
+          {unreadCount > 0 && (
+            <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20 shrink-0">
+              {unreadCount} baru
+            </span>
+          )}
+        </div>
+
+        <div className="flex items-center gap-1.5 shrink-0">
+          {unreadCount > 0 && (
+            <button
+              onClick={markAllAsRead}
+              className="text-[11px] font-bold text-emerald-600 dark:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-950/40 px-2 py-1 rounded-lg transition-colors flex items-center gap-1 cursor-pointer"
+              title="Tandai semua sudah dibaca"
+            >
+              <CheckCheck size={13} />
+              <span>Baca Semua</span>
+            </button>
+          )}
+          <button
+            onClick={() => setIsOpen(false)}
+            className="p-1.5 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer"
+            title="Tutup"
+          >
+            <X size={16} />
+          </button>
+        </div>
+      </div>
+
+      {/* Banner Notifikasi Push HP / Browser */}
+      {pushSupported && (
+        <div
+          className={`px-4 py-2.5 border-b flex items-center justify-between gap-2 text-xs shrink-0 ${
+            isPushActive
+              ? isDark
+                ? 'bg-emerald-950/20 border-emerald-900/30 text-emerald-300'
+                : 'bg-emerald-50/70 border-emerald-100 text-emerald-800'
+              : isDark
+              ? 'bg-slate-800/50 border-slate-800 text-slate-300'
+              : 'bg-amber-50/60 border-amber-100 text-amber-800'
+          }`}
+        >
+          <div className="flex items-center gap-2 min-w-0">
+            <Smartphone size={16} className={isPushActive ? 'text-emerald-500 shrink-0' : 'text-amber-500 shrink-0'} />
+            <span className="font-semibold text-xs truncate">
+              {isPushActive ? 'Push HP/Browser Aktif' : 'Notifikasi HP Belum Aktif'}
+            </span>
+          </div>
+          {!isPushActive ? (
+            <button
+              onClick={handleTogglePush}
+              disabled={isSubscribing}
+              className="px-3 py-1 rounded-lg text-xs font-bold bg-emerald-600 hover:bg-emerald-700 text-white transition-colors flex items-center gap-1 shadow-xs disabled:opacity-50 cursor-pointer shrink-0"
+            >
+              {isSubscribing ? 'Mengaktifkan...' : 'Aktifkan'}
+            </button>
+          ) : (
+            <span className="text-[11px] font-bold text-emerald-600 dark:text-emerald-400 flex items-center gap-1 shrink-0">
+              <Check size={13} strokeWidth={2.5} /> Terhubung
+            </span>
+          )}
+        </div>
+      )}
+
+      {/* List Notifikasi */}
+      <div className="overflow-y-auto divide-y divide-slate-100 dark:divide-slate-800 flex-1 max-h-[380px] sm:max-h-[360px]">
+        {isLoading ? (
+          <div className="py-10 text-center text-xs text-slate-400">
+            Memuat notifikasi...
+          </div>
+        ) : notifications.length === 0 ? (
+          <div className="py-12 text-center px-4">
+            <Bell size={32} className="mx-auto text-slate-300 dark:text-slate-600 mb-2.5" />
+            <p className="text-xs font-bold text-slate-700 dark:text-slate-200">
+              Belum ada notifikasi baru
+            </p>
+            <p className="text-[11px] text-slate-400 mt-1 max-w-xs mx-auto">
+              Setiap pengumuman resmi, pengajuan revisi, atau pengingat sapi akan muncul di sini secara realtime.
+            </p>
+          </div>
+        ) : (
+          notifications.map((item) => {
+            const badge = getNotificationBadge(item.type);
+            return (
+              <div
+                key={item.id}
+                onClick={() => {
+                  if (item.is_read === 0) markAsRead(item.id);
+                }}
+                className={`p-3.5 sm:p-4 transition-colors relative flex gap-3 cursor-pointer ${
+                  item.is_read === 0
+                    ? isDark
+                      ? 'bg-slate-800/40 hover:bg-slate-800/70'
+                      : 'bg-emerald-50/40 hover:bg-emerald-50/70'
+                    : isDark
+                    ? 'hover:bg-slate-800/30'
+                    : 'hover:bg-slate-50'
+                }`}
+              >
+                {/* Unread indicator dot */}
+                {item.is_read === 0 && (
+                  <span className="absolute top-4 right-3.5 w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse shadow-xs" />
+                )}
+
+                {/* Icon Type */}
+                <div className="mt-0.5 shrink-0">
+                  <div className="p-2 rounded-xl border bg-white dark:bg-slate-800 shadow-2xs">
+                    {badge.icon}
+                  </div>
+                </div>
+
+                {/* Content */}
+                <div className="flex-1 min-w-0 pr-3">
+                  <div className="flex items-center gap-1.5 mb-1 flex-wrap">
+                    <span
+                      className={`px-1.5 py-0.5 rounded text-[9px] font-black uppercase tracking-wider border ${badge.bg}`}
+                    >
+                      {badge.label}
+                    </span>
+                    <span className="text-[10px] text-slate-400 font-medium">
+                      {formatTimeAgo(item.created_at)}
+                    </span>
+                  </div>
+
+                  <h4
+                    className={`text-xs font-bold leading-snug ${
+                      item.is_read === 0
+                        ? isDark
+                          ? 'text-white'
+                          : 'text-slate-900'
+                        : 'text-slate-600 dark:text-slate-300'
+                    }`}
+                  >
+                    {item.title}
+                  </h4>
+
+                  <p className="text-[11px] text-slate-600 dark:text-slate-400 mt-1 leading-relaxed">
+                    {item.message}
+                  </p>
+
+                  {/* Tombol Buka Tautan */}
+                  {item.link && (
+                    <div className="mt-2.5">
+                      <Link
+                        href={item.link}
+                        onClick={() => setIsOpen(false)}
+                        className="inline-flex items-center gap-1 text-[11px] font-bold text-emerald-600 dark:text-emerald-400 hover:underline"
+                      >
+                        <span>Buka Halaman</span>
+                        <ExternalLink size={11} />
+                      </Link>
+                    </div>
+                  )}
+                </div>
+              </div>
+            );
+          })
+        )}
+      </div>
+
+      {/* Footer Panel */}
+      <div
+        className={`px-4 py-2.5 border-t text-center text-[10px] font-medium text-slate-400 shrink-0 ${
+          isDark ? 'bg-slate-900 border-slate-800' : 'bg-slate-50 border-slate-100'
+        }`}
+      >
+        SiMantap PKH • Sistem Notifikasi Terintegrasi
+      </div>
+    </>
+  );
+
   return (
     <div className="relative inline-block" ref={dropdownRef}>
       {/* Tombol Lonceng di Header */}
@@ -311,194 +528,37 @@ export default function NotificationBell({ isDark = false }: NotificationBellPro
         )}
       </button>
 
-      {/* Dropdown Panel Notifikasi */}
+      {/* ── DESKTOP DROPDOWN (SM KE ATAS) ── */}
       {isOpen && (
         <div
-          className={`absolute right-0 sm:right-auto sm:left-auto md:right-0 mt-2 w-80 sm:w-96 rounded-2xl border shadow-2xl z-50 overflow-hidden flex flex-col transition-all ${
+          className={`hidden sm:flex absolute right-0 top-full mt-2 w-96 rounded-2xl border shadow-2xl z-50 overflow-hidden flex-col transition-all ${
             isDark ? 'bg-slate-900 border-slate-800 text-slate-100' : 'bg-white border-slate-200 text-slate-800'
           }`}
           style={{ maxHeight: 'calc(100vh - 80px)' }}
         >
-          {/* Header Panel */}
-          <div
-            className={`px-4 py-3 border-b flex items-center justify-between shrink-0 ${
-              isDark ? 'bg-slate-900/90 border-slate-800' : 'bg-slate-50/90 border-slate-100'
-            }`}
-          >
-            <div className="flex items-center gap-2">
-              <div className="p-1 rounded-md bg-emerald-500/10 text-emerald-600 dark:text-emerald-400">
-                <Bell size={16} />
-              </div>
-              <h3 className="text-xs sm:text-sm font-bold tracking-tight">Pusat Notifikasi</h3>
-              {unreadCount > 0 && (
-                <span className="px-1.5 py-0.5 rounded-full text-[10px] font-bold bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20">
-                  {unreadCount} baru
-                </span>
-              )}
-            </div>
-
-            <div className="flex items-center gap-1">
-              {unreadCount > 0 && (
-                <button
-                  onClick={markAllAsRead}
-                  className="text-[11px] font-semibold text-emerald-600 dark:text-emerald-400 hover:underline flex items-center gap-1 px-1.5 py-0.5 rounded transition-colors"
-                  title="Tandai semua sudah dibaca"
-                >
-                  <CheckCheck size={13} />
-                  <span>Baca Semua</span>
-                </button>
-              )}
-              <button
-                onClick={() => setIsOpen(false)}
-                className="p-1 rounded-md text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"
-              >
-                <X size={14} />
-              </button>
-            </div>
-          </div>
-
-          {/* Banner Notifikasi Push HP / Browser */}
-          {pushSupported && (
-            <div
-              className={`px-4 py-2.5 border-b flex items-center justify-between gap-2 text-xs shrink-0 ${
-                isPushActive
-                  ? isDark
-                    ? 'bg-emerald-950/20 border-emerald-900/30 text-emerald-300'
-                    : 'bg-emerald-50/70 border-emerald-100 text-emerald-800'
-                  : isDark
-                  ? 'bg-slate-800/50 border-slate-800 text-slate-300'
-                  : 'bg-amber-50/60 border-amber-100 text-amber-800'
-              }`}
-            >
-              <div className="flex items-center gap-2">
-                <Smartphone size={15} className={isPushActive ? 'text-emerald-500' : 'text-amber-500'} />
-                <span className="font-medium text-[11px]">
-                  {isPushActive
-                    ? 'Push HP/Browser Aktif'
-                    : 'Notifikasi HP Belum Aktif'}
-                </span>
-              </div>
-              {!isPushActive ? (
-                <button
-                  onClick={handleTogglePush}
-                  disabled={isSubscribing}
-                  className="px-2.5 py-1 rounded-md text-[11px] font-bold bg-emerald-600 hover:bg-emerald-700 text-white transition-colors flex items-center gap-1 shadow-xs disabled:opacity-50 cursor-pointer"
-                >
-                  {isSubscribing ? 'Mengaktifkan...' : 'Aktifkan'}
-                </button>
-              ) : (
-                <span className="text-[10px] font-semibold text-emerald-600 dark:text-emerald-400 flex items-center gap-0.5">
-                  <Check size={12} /> Terhubung
-                </span>
-              )}
-            </div>
-          )}
-
-          {/* List Notifikasi */}
-          <div className="overflow-y-auto divide-y divide-slate-100 dark:divide-slate-800 flex-1 max-h-[360px]">
-            {isLoading ? (
-              <div className="py-8 text-center text-xs text-slate-400">
-                Memuat notifikasi...
-              </div>
-            ) : notifications.length === 0 ? (
-              <div className="py-10 text-center px-4">
-                <Bell size={28} className="mx-auto text-slate-300 dark:text-slate-600 mb-2" />
-                <p className="text-xs font-semibold text-slate-600 dark:text-slate-300">
-                  Belum ada notifikasi baru
-                </p>
-                <p className="text-[11px] text-slate-400 mt-0.5">
-                  Setiap pengajuan revisi atau laporan kondisi sapi akan muncul di sini secara realtime.
-                </p>
-              </div>
-            ) : (
-              notifications.map((item) => {
-                const badge = getNotificationBadge(item.type);
-                return (
-                  <div
-                    key={item.id}
-                    onClick={() => {
-                      if (item.is_read === 0) markAsRead(item.id);
-                    }}
-                    className={`p-3.5 transition-colors relative flex gap-3 cursor-pointer ${
-                      item.is_read === 0
-                        ? isDark
-                          ? 'bg-slate-800/40 hover:bg-slate-800/70'
-                          : 'bg-emerald-50/30 hover:bg-emerald-50/60'
-                        : isDark
-                        ? 'hover:bg-slate-800/30'
-                        : 'hover:bg-slate-50'
-                    }`}
-                  >
-                    {/* Unread indicator dot */}
-                    {item.is_read === 0 && (
-                      <span className="absolute top-4 right-3 w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-                    )}
-
-                    {/* Icon Type */}
-                    <div className="mt-0.5 shrink-0">
-                      <div className="p-1.5 rounded-lg border bg-white dark:bg-slate-800 shadow-2xs">
-                        {badge.icon}
-                      </div>
-                    </div>
-
-                    {/* Content */}
-                    <div className="flex-1 min-w-0 pr-2">
-                      <div className="flex items-center gap-1.5 mb-1">
-                        <span
-                          className={`px-1.5 py-0.5 rounded text-[9px] font-black uppercase tracking-wider border ${badge.bg}`}
-                        >
-                          {badge.label}
-                        </span>
-                        <span className="text-[10px] text-slate-400">
-                          {formatTimeAgo(item.created_at)}
-                        </span>
-                      </div>
-
-                      <h4
-                        className={`text-xs font-bold leading-tight line-clamp-1 ${
-                          item.is_read === 0
-                            ? isDark
-                              ? 'text-white'
-                              : 'text-slate-900'
-                            : 'text-slate-600 dark:text-slate-300'
-                        }`}
-                      >
-                        {item.title}
-                      </h4>
-
-                      <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-1 line-clamp-2 leading-relaxed">
-                        {item.message}
-                      </p>
-
-                      {/* Tombol Buka Tautan */}
-                      {item.link && (
-                        <div className="mt-2">
-                          <Link
-                            href={item.link}
-                            onClick={() => setIsOpen(false)}
-                            className="inline-flex items-center gap-1 text-[11px] font-bold text-emerald-600 dark:text-emerald-400 hover:underline"
-                          >
-                            <span>Buka Halaman</span>
-                            <ExternalLink size={10} />
-                          </Link>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                );
-              })
-            )}
-          </div>
-
-          {/* Footer Panel */}
-          <div
-            className={`px-4 py-2 border-t text-center text-[10px] text-slate-400 shrink-0 ${
-              isDark ? 'bg-slate-900 border-slate-800' : 'bg-slate-50 border-slate-100'
-            }`}
-          >
-            SiMantap PKH • Sistem Notifikasi Terintegrasi
-          </div>
+          {renderPanelContent()}
         </div>
+      )}
+
+      {/* ── MOBILE MODAL SHEET (PORTAL LANGSUNG KE BODY) ── */}
+      {isOpen && mounted && typeof document !== 'undefined' && createPortal(
+        <div className="sm:hidden">
+          {/* Backdrop gelap transparan */}
+          <div
+            className="fixed inset-0 bg-slate-950/60 backdrop-blur-xs z-[99998] animate-in fade-in duration-200"
+            onClick={() => setIsOpen(false)}
+          />
+
+          {/* Panel sheet melayang presisi di tengah layar HP */}
+          <div
+            className={`fixed inset-x-3 top-16 max-h-[82vh] max-w-md mx-auto z-[99999] rounded-2xl border shadow-2xl overflow-hidden flex flex-col animate-in zoom-in-95 duration-200 ${
+              isDark ? 'bg-slate-900 border-slate-800 text-slate-100' : 'bg-white border-slate-200 text-slate-800'
+            }`}
+          >
+            {renderPanelContent()}
+          </div>
+        </div>,
+        document.body
       )}
     </div>
   );
