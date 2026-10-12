@@ -12,19 +12,21 @@ export async function GET(request: NextRequest) {
 
     const session = await getSessionFromRequest(request as any);
     const userRole = session?.role || 'ALL';
-    const userName = session?.nama || session?.nip_username || '';
+    const userName = session?.nama || '';
+    const userNip = session?.nip_username || '';
 
-    // Ambil notifikasi yang relevan untuk role ini atau ditujukan khusus untuk user ini
+    // Ambil notifikasi:
+    // 1. Notifikasi privat untuk user ini (target_user cocok dengan nama atau nip_username)
+    // 2. Notifikasi broadcast umum (target_user IS NULL dan user_role sesuai atau 'ALL')
     const query = `
       SELECT * FROM app_notifications 
-      WHERE user_role = 'ALL' 
-         OR user_role = ? 
-         OR target_user = ?
+      WHERE (target_user IS NOT NULL AND (target_user = ? OR target_user = ?))
+         OR (target_user IS NULL AND (user_role = 'ALL' OR user_role = ?))
       ORDER BY created_at DESC 
       LIMIT 50
     `;
 
-    const [rows]: any = await pool.query(query, [userRole, userName]);
+    const [rows]: any = await pool.query(query, [userName, userNip, userRole]);
 
     const unreadCount = (rows || []).filter((r: any) => r.is_read === 0).length;
 
@@ -48,14 +50,16 @@ export async function POST(request: NextRequest) {
 
     const session = await getSessionFromRequest(request as any);
     const userRole = session?.role || 'ALL';
-    const userName = session?.nama || session?.nip_username || '';
+    const userName = session?.nama || '';
+    const userNip = session?.nip_username || '';
 
     if (action === 'mark_all_read') {
       await pool.query(
         `UPDATE app_notifications 
          SET is_read = 1 
-         WHERE user_role = 'ALL' OR user_role = ? OR target_user = ?`,
-        [userRole, userName]
+         WHERE (target_user IS NOT NULL AND (target_user = ? OR target_user = ?))
+            OR (target_user IS NULL AND (user_role = 'ALL' OR user_role = ?))`,
+        [userName, userNip, userRole]
       );
       return NextResponse.json({ success: true, message: 'Semua notifikasi ditandai dibaca' });
     }

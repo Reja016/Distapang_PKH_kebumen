@@ -102,7 +102,7 @@ export async function sendNotificationToRole(
       `INSERT INTO app_notifications (user_role, target_user, title, message, type, link, data, is_read)
        VALUES (?, ?, ?, ?, ?, ?, ?, 0)`,
       [
-        targetRole,
+        targetUser ? 'USER_SPECIFIC' : targetRole,
         targetUser || null,
         payload.title,
         payload.body,
@@ -116,14 +116,14 @@ export async function sendNotificationToRole(
     let query = `SELECT * FROM push_subscriptions`;
     const params: any[] = [];
 
-    if (targetRole !== 'ALL') {
+    if (targetUser) {
+      // Jika ditujukan khusus ke satu user, HANYA kirim ke user tersebut
+      query += ` WHERE user_identifier = ?`;
+      params.push(targetUser);
+    } else if (targetRole !== 'ALL') {
+      // Jika broadcast ke role tertentu (misal: semua Administrator)
       query += ` WHERE role = ?`;
       params.push(targetRole);
-    }
-
-    if (targetUser) {
-      query += targetRole === 'ALL' ? ` WHERE user_identifier = ?` : ` OR user_identifier = ?`;
-      params.push(targetUser);
     }
 
     const [rows]: any = await pool.query(query, params);
