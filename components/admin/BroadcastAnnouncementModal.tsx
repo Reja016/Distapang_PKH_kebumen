@@ -72,10 +72,7 @@ export default function BroadcastAnnouncementModal({
   const [title, setTitle] = useState('');
   const [message, setMessage] = useState('');
   const [category, setCategory] = useState<'info' | 'warning' | 'urgent'>('info');
-  const [targetGroup, setTargetGroup] = useState<'ALL' | 'PUSKESWAN' | 'BIDANG' | 'ROLE'>('ALL');
-  const [selectedPuskeswan, setSelectedPuskeswan] = useState(TARGET_PUSKESWAN_LIST[0]);
-  const [selectedBidang, setSelectedBidang] = useState(TARGET_BIDANG_LIST[0].key);
-  const [selectedRole, setSelectedRole] = useState('Petugas Teknis');
+  const [selectedTargetKey, setSelectedTargetKey] = useState('ALL');
   const [linkPreset, setLinkPreset] = useState('');
   const [customLink, setCustomLink] = useState('');
 
@@ -110,20 +107,23 @@ export default function BroadcastAnnouncementModal({
   if (!isOpen) return null;
 
   // Resolve target value & label
-  let targetType = targetGroup;
+  let targetType = 'ALL';
   let targetValue = 'ALL';
-  let targetLabel = 'Semua Pengguna (Broadcast)';
+  let targetLabel = 'Semua Pengguna (Broadcast Dinas)';
 
-  if (targetGroup === 'PUSKESWAN') {
-    targetValue = selectedPuskeswan;
-    targetLabel = `Tim ${selectedPuskeswan}`;
-  } else if (targetGroup === 'BIDANG') {
-    targetValue = selectedBidang;
-    const found = TARGET_BIDANG_LIST.find((b) => b.key === selectedBidang);
-    targetLabel = found ? found.label : selectedBidang;
-  } else if (targetGroup === 'ROLE') {
-    targetValue = selectedRole;
-    targetLabel = `Role: ${selectedRole}`;
+  if (selectedTargetKey.startsWith('PUSKESWAN:')) {
+    targetType = 'PUSKESWAN';
+    targetValue = selectedTargetKey.replace('PUSKESWAN:', '');
+    targetLabel = `Tim ${targetValue}`;
+  } else if (selectedTargetKey.startsWith('BIDANG:')) {
+    targetType = 'BIDANG';
+    targetValue = selectedTargetKey.replace('BIDANG:', '');
+    const found = TARGET_BIDANG_LIST.find((b) => b.key === targetValue);
+    targetLabel = found ? found.label : `Tim Bidang ${targetValue.toUpperCase()}`;
+  } else if (selectedTargetKey.startsWith('ROLE:')) {
+    targetType = 'ROLE';
+    targetValue = selectedTargetKey.replace('ROLE:', '');
+    targetLabel = `Peran: ${targetValue}`;
   }
 
   const effectiveLink = customLink.trim() || linkPreset;
@@ -289,145 +289,175 @@ export default function BroadcastAnnouncementModal({
             <form onSubmit={handleSubmit} className="space-y-4">
               {/* Target Tim Penerima */}
               <div
-                className={`p-4 rounded-2xl border space-y-3 ${
+                className={`p-4 rounded-2xl border space-y-3.5 ${
                   isDark ? 'bg-slate-950/40 border-slate-800' : 'bg-slate-50/70 border-slate-200'
                 }`}
               >
                 <div className="flex items-center justify-between">
-                  <label className="text-xs font-bold uppercase tracking-wider text-slate-500 flex items-center gap-1.5">
-                    <Users size={14} className="text-amber-500" />
-                    Target Tim Penerima Pengumuman
+                  <label className="text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-slate-300 flex items-center gap-2">
+                    <Users size={16} className="text-amber-500" />
+                    Target Tim Penerima (Wajib Dipilih)
                   </label>
-                  <span className="text-[11px] font-semibold text-amber-600 dark:text-amber-400">
+                  <span className="text-[11px] font-extrabold px-2.5 py-0.5 rounded-full bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20">
                     {targetLabel}
                   </span>
                 </div>
 
-                {/* 4 Opsi Target Group */}
-                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs">
-                  <button
-                    type="button"
-                    onClick={() => setTargetGroup('ALL')}
-                    className={`p-2.5 rounded-xl border font-bold flex flex-col items-center justify-center gap-1 transition-all cursor-pointer ${
-                      targetGroup === 'ALL'
-                        ? 'bg-amber-500 text-white border-amber-600 shadow-xs'
-                        : isDark
-                        ? 'bg-slate-900 border-slate-800 text-slate-300 hover:bg-slate-800'
-                        : 'bg-white border-slate-200 text-slate-700 hover:bg-slate-100'
+                {/* Dropdown Utama Pilihan Tim (Selalu Tampil Jelas & Lengkap) */}
+                <div className="space-y-1.5">
+                  <select
+                    value={selectedTargetKey}
+                    onChange={(e) => setSelectedTargetKey(e.target.value)}
+                    className={`w-full p-3 rounded-xl border text-xs font-bold focus:outline-none focus:ring-2 focus:ring-amber-500 cursor-pointer shadow-xs ${
+                      isDark
+                        ? 'bg-slate-900 border-slate-700 text-slate-100'
+                        : 'bg-white border-slate-300 text-slate-900'
                     }`}
                   >
-                    <Radio size={14} />
-                    <span>Semua Tim (Publik)</span>
-                  </button>
+                    <optgroup label="📢 Broadcast Umum">
+                      <option value="ALL">Semua Pengguna (Seluruh Dinas & Petugas)</option>
+                    </optgroup>
 
-                  <button
-                    type="button"
-                    onClick={() => setTargetGroup('PUSKESWAN')}
-                    className={`p-2.5 rounded-xl border font-bold flex flex-col items-center justify-center gap-1 transition-all cursor-pointer ${
-                      targetGroup === 'PUSKESWAN'
-                        ? 'bg-amber-500 text-white border-amber-600 shadow-xs'
-                        : isDark
-                        ? 'bg-slate-900 border-slate-800 text-slate-300 hover:bg-slate-800'
-                        : 'bg-white border-slate-200 text-slate-700 hover:bg-slate-100'
-                    }`}
-                  >
-                    <MapPin size={14} />
-                    <span>Tim Puskeswan</span>
-                  </button>
+                    <optgroup label="🏥 Tim Wilayah Puskeswan (8 Puskeswan)">
+                      {TARGET_PUSKESWAN_LIST.map((p) => (
+                        <option key={p} value={`PUSKESWAN:${p}`}>
+                          Tim {p}
+                        </option>
+                      ))}
+                    </optgroup>
 
-                  <button
-                    type="button"
-                    onClick={() => setTargetGroup('BIDANG')}
-                    className={`p-2.5 rounded-xl border font-bold flex flex-col items-center justify-center gap-1 transition-all cursor-pointer ${
-                      targetGroup === 'BIDANG'
-                        ? 'bg-amber-500 text-white border-amber-600 shadow-xs'
-                        : isDark
-                        ? 'bg-slate-900 border-slate-800 text-slate-300 hover:bg-slate-800'
-                        : 'bg-white border-slate-200 text-slate-700 hover:bg-slate-100'
-                    }`}
-                  >
-                    <Building2 size={14} />
-                    <span>Tim Bidang</span>
-                  </button>
+                    <optgroup label="🏢 Tim Bidang Kerja Dinas">
+                      {TARGET_BIDANG_LIST.map((b) => (
+                        <option key={b.key} value={`BIDANG:${b.key}`}>
+                          {b.label}
+                        </option>
+                      ))}
+                    </optgroup>
 
-                  <button
-                    type="button"
-                    onClick={() => setTargetGroup('ROLE')}
-                    className={`p-2.5 rounded-xl border font-bold flex flex-col items-center justify-center gap-1 transition-all cursor-pointer ${
-                      targetGroup === 'ROLE'
-                        ? 'bg-amber-500 text-white border-amber-600 shadow-xs'
-                        : isDark
-                        ? 'bg-slate-900 border-slate-800 text-slate-300 hover:bg-slate-800'
-                        : 'bg-white border-slate-200 text-slate-700 hover:bg-slate-100'
-                    }`}
-                  >
-                    <Shield size={14} />
-                    <span>Role Akun</span>
-                  </button>
+                    <optgroup label="👥 Berdasarkan Peran Akun (Role)">
+                      <option value="ROLE:Petugas Teknis">Khusus Petugas Teknis Lapangan</option>
+                      <option value="ROLE:Petugas Lapangan">Khusus Petugas Lapangan</option>
+                      <option value="ROLE:Puskeswan">Khusus Akun Puskeswan</option>
+                      <option value="ROLE:Administrator">Khusus Administrator Dinas</option>
+                    </optgroup>
+                  </select>
                 </div>
 
-                {/* Sub Selector jika memilih PUSKESWAN */}
-                {targetGroup === 'PUSKESWAN' && (
-                  <div className="pt-2 border-t border-slate-200 dark:border-slate-800">
-                    <label className="text-[11px] font-semibold text-slate-500 block mb-1">
-                      Pilih Puskeswan Sasaran:
-                    </label>
-                    <select
-                      value={selectedPuskeswan}
-                      onChange={(e) => setSelectedPuskeswan(e.target.value)}
-                      className={`w-full p-2.5 rounded-xl border text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-amber-500 ${
-                        isDark ? 'bg-slate-900 border-slate-700' : 'bg-white border-slate-300'
+                {/* Tombol Cepat Pintasan Tim (Quick Shortcut Pills) */}
+                <div className="space-y-1.5 pt-1">
+                  <span className="text-[11px] font-medium text-slate-400 block">
+                    Pintasan Cepat:
+                  </span>
+                  <div className="flex flex-wrap gap-1.5 text-[11px]">
+                    <button
+                      type="button"
+                      onClick={() => setSelectedTargetKey('ALL')}
+                      className={`px-2.5 py-1 rounded-lg border font-bold transition-all cursor-pointer ${
+                        selectedTargetKey === 'ALL'
+                          ? 'bg-amber-500 text-white border-amber-600 shadow-xs'
+                          : isDark
+                          ? 'bg-slate-900 border-slate-800 text-slate-300 hover:bg-slate-800'
+                          : 'bg-white border-slate-200 text-slate-700 hover:bg-slate-100'
                       }`}
                     >
-                      {TARGET_PUSKESWAN_LIST.map((p) => (
-                        <option key={p} value={p}>
-                          🏥 {p}
-                        </option>
-                      ))}
-                    </select>
+                      📢 Semua
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setSelectedTargetKey('PUSKESWAN:Puskeswan Mirit')}
+                      className={`px-2.5 py-1 rounded-lg border font-bold transition-all cursor-pointer ${
+                        selectedTargetKey === 'PUSKESWAN:Puskeswan Mirit'
+                          ? 'bg-amber-500 text-white border-amber-600 shadow-xs'
+                          : isDark
+                          ? 'bg-slate-900 border-slate-800 text-slate-300 hover:bg-slate-800'
+                          : 'bg-white border-slate-200 text-slate-700 hover:bg-slate-100'
+                      }`}
+                    >
+                      🏥 Mirit
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setSelectedTargetKey('PUSKESWAN:Puskeswan Klirong')}
+                      className={`px-2.5 py-1 rounded-lg border font-bold transition-all cursor-pointer ${
+                        selectedTargetKey === 'PUSKESWAN:Puskeswan Klirong'
+                          ? 'bg-amber-500 text-white border-amber-600 shadow-xs'
+                          : isDark
+                          ? 'bg-slate-900 border-slate-800 text-slate-300 hover:bg-slate-800'
+                          : 'bg-white border-slate-200 text-slate-700 hover:bg-slate-100'
+                      }`}
+                    >
+                      🏥 Klirong
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setSelectedTargetKey('PUSKESWAN:Puskeswan Gombong')}
+                      className={`px-2.5 py-1 rounded-lg border font-bold transition-all cursor-pointer ${
+                        selectedTargetKey === 'PUSKESWAN:Puskeswan Gombong'
+                          ? 'bg-amber-500 text-white border-amber-600 shadow-xs'
+                          : isDark
+                          ? 'bg-slate-900 border-slate-800 text-slate-300 hover:bg-slate-800'
+                          : 'bg-white border-slate-200 text-slate-700 hover:bg-slate-100'
+                      }`}
+                    >
+                      🏥 Gombong
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setSelectedTargetKey('BIDANG:keswan')}
+                      className={`px-2.5 py-1 rounded-lg border font-bold transition-all cursor-pointer ${
+                        selectedTargetKey === 'BIDANG:keswan'
+                          ? 'bg-amber-500 text-white border-amber-600 shadow-xs'
+                          : isDark
+                          ? 'bg-slate-900 border-slate-800 text-slate-300 hover:bg-slate-800'
+                          : 'bg-white border-slate-200 text-slate-700 hover:bg-slate-100'
+                      }`}
+                    >
+                      🏢 Tim Keswan
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setSelectedTargetKey('BIDANG:bitpro')}
+                      className={`px-2.5 py-1 rounded-lg border font-bold transition-all cursor-pointer ${
+                        selectedTargetKey === 'BIDANG:bitpro'
+                          ? 'bg-amber-500 text-white border-amber-600 shadow-xs'
+                          : isDark
+                          ? 'bg-slate-900 border-slate-800 text-slate-300 hover:bg-slate-800'
+                          : 'bg-white border-slate-200 text-slate-700 hover:bg-slate-100'
+                      }`}
+                    >
+                      🏢 Tim Bitpro
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setSelectedTargetKey('BIDANG:kesmavet')}
+                      className={`px-2.5 py-1 rounded-lg border font-bold transition-all cursor-pointer ${
+                        selectedTargetKey === 'BIDANG:kesmavet'
+                          ? 'bg-amber-500 text-white border-amber-600 shadow-xs'
+                          : isDark
+                          ? 'bg-slate-900 border-slate-800 text-slate-300 hover:bg-slate-800'
+                          : 'bg-white border-slate-200 text-slate-700 hover:bg-slate-100'
+                      }`}
+                    >
+                      🏢 Tim Kesmavet
+                    </button>
                   </div>
-                )}
+                </div>
 
-                {/* Sub Selector jika memilih BIDANG */}
-                {targetGroup === 'BIDANG' && (
-                  <div className="pt-2 border-t border-slate-200 dark:border-slate-800">
-                    <label className="text-[11px] font-semibold text-slate-500 block mb-1">
-                      Pilih Bidang Sasaran:
-                    </label>
-                    <select
-                      value={selectedBidang}
-                      onChange={(e) => setSelectedBidang(e.target.value)}
-                      className={`w-full p-2.5 rounded-xl border text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-amber-500 ${
-                        isDark ? 'bg-slate-900 border-slate-700' : 'bg-white border-slate-300'
-                      }`}
-                    >
-                      {TARGET_BIDANG_LIST.map((b) => (
-                        <option key={b.key} value={b.key}>
-                          🏢 {b.label}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-                )}
-
-                {/* Sub Selector jika memilih ROLE */}
-                {targetGroup === 'ROLE' && (
-                  <div className="pt-2 border-t border-slate-200 dark:border-slate-800">
-                    <label className="text-[11px] font-semibold text-slate-500 block mb-1">
-                      Pilih Role Sasaran:
-                    </label>
-                    <select
-                      value={selectedRole}
-                      onChange={(e) => setSelectedRole(e.target.value)}
-                      className={`w-full p-2.5 rounded-xl border text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-amber-500 ${
-                        isDark ? 'bg-slate-900 border-slate-700' : 'bg-white border-slate-300'
-                      }`}
-                    >
-                      <option value="Petugas Teknis">Petugas Teknis Lapangan</option>
-                      <option value="Administrator">Administrator Dinas</option>
-                    </select>
-                  </div>
-                )}
+                {/* Penjelasan Isolasi Pengumuman */}
+                <div
+                  className={`p-2.5 rounded-xl text-[11px] leading-relaxed border ${
+                    isDark
+                      ? 'bg-slate-900/80 border-slate-800 text-slate-300'
+                      : 'bg-white border-slate-200 text-slate-600'
+                  }`}
+                >
+                  <span className="font-bold text-amber-600 dark:text-amber-400">
+                    ℹ️ Info Penargetan:
+                  </span>{' '}
+                  {selectedTargetKey === 'ALL'
+                    ? 'Pengumuman akan disiarkan ke seluruh akun dinas dan petugas di semua modul.'
+                    : `Pengumuman dan notifikasi ini HANYA akan diterima oleh petugas yang berada di ${targetLabel}. User di luar tim ini tidak akan menerima notifikasi atau melihat banner ini.`}
+                </div>
               </div>
 
               {/* Judul & Kategori Urgensi */}

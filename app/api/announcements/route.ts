@@ -90,23 +90,35 @@ export async function GET(request: NextRequest) {
       // 1. Target ALL: Semua user dapat melihat
       if (item.target_type === 'ALL' || item.target_value === 'ALL') return true;
 
-      // 2. Target ROLE: Cocokkan role akun
-      if (item.target_type === 'ROLE') {
-        return item.target_value.toLowerCase() === userRole.toLowerCase();
-      }
+      const userNameClean = (session?.nama || '').toUpperCase();
+      const userNipClean = (session?.nip_username || '').toUpperCase();
+      const roleUpper = (userRole || '').toUpperCase();
 
-      // 3. Target PUSKESWAN: Cocokkan wilayah tugas puskeswan
+      // 2. Target PUSKESWAN: Cocokkan wilayah tugas puskeswan, nama, username, atau role puskeswan
       if (item.target_type === 'PUSKESWAN') {
         const targetClean = item.target_value.toUpperCase();
-        return userPuskeswan.some(
-          (up) => up.includes(targetClean) || targetClean.includes(up)
+        const baseTarget = targetClean.replace('PUSKESWAN ', '').trim();
+        const matchArea = userPuskeswan.some(
+          (up) => up.includes(targetClean) || up.includes(baseTarget) || targetClean.includes(up)
         );
+        const matchIdentity = userNameClean.includes(baseTarget) || userNipClean.includes(baseTarget);
+        return matchArea || matchIdentity;
       }
 
-      // 4. Target BIDANG: Cocokkan modul yang diizinkan (keswan, bitpro, kesmavet, aset)
+      // 3. Target BIDANG: Cocokkan modul yang diizinkan atau role bidang
       if (item.target_type === 'BIDANG') {
         const bidangKey = item.target_value.toLowerCase();
-        return !!userPermissions[bidangKey]?.enabled;
+        const matchRole = roleUpper.includes(bidangKey.toUpperCase());
+        const matchPerm = !!userPermissions[bidangKey]?.enabled;
+        return matchRole || matchPerm;
+      }
+
+      // 4. Target ROLE: Cocokkan role akun
+      if (item.target_type === 'ROLE') {
+        const targetRoleUpper = item.target_value.toUpperCase();
+        if (targetRoleUpper.includes('PETUGAS') && (roleUpper.includes('PETUGAS') || roleUpper === 'ENUMERATOR')) return true;
+        if (targetRoleUpper.includes('PUSKESWAN') && (roleUpper.includes('PUSKESWAN') || userPuskeswan.length > 0)) return true;
+        return targetRoleUpper === roleUpper;
       }
 
       return false;
