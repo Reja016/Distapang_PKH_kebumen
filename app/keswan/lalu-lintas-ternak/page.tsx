@@ -1,17 +1,11 @@
 'use client';
 
 import React, { useState, useEffect, useCallback } from 'react';
-import Link from 'next/link';
 import {
-  ArrowLeft,
-  FileCheck2,
   ArrowDownLeft,
   ArrowUpRight,
-  RefreshCw,
-  Plus,
 } from 'lucide-react';
 import { usePageAuth } from '@/hooks/usePageAuth';
-import NotificationBell from '@/components/common/NotificationBell';
 import { UniversalAuditModal } from '@/components/common/UniversalAuditModal';
 import {
   LalinTernakItem,
@@ -128,109 +122,51 @@ export default function LaluLintasTernakPage() {
 
   return (
     <div className="min-h-screen bg-slate-50 text-slate-900 pb-16 font-sans">
-      {/* ── HEADER HALAMAN ── */}
-      <header className="sticky top-0 z-30 bg-white/95 backdrop-blur-md border-b border-slate-200">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-4">
-          <div className="flex items-center gap-3">
-            <Link
-              href="/beranda"
-              className="p-2 rounded-xl text-slate-500 hover:text-slate-900 hover:bg-slate-100 transition-colors"
-              title="Kembali ke Beranda"
-            >
-              <ArrowLeft size={20} />
-            </Link>
-
-            <div className="flex items-center gap-2.5">
-              <div className="w-10 h-10 rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center border border-blue-100 shrink-0">
-                <FileCheck2 size={22} />
-              </div>
-              <div>
-                <div className="flex items-center gap-2">
-                  <h1 className="text-base sm:text-lg font-black text-slate-900 leading-tight">
-                    Lalu Lintas Ternak (SKKH)
-                  </h1>
-                  <span className="hidden sm:inline-block px-2 py-0.5 rounded-full text-[10px] font-bold bg-blue-50 text-blue-700 border border-blue-200">
-                    Kesehatan Hewan
-                  </span>
-                </div>
-                <p className="text-[11px] text-slate-500 hidden sm:block">
-                  Pencatatan mutasi ternak masuk & keluar Pasar Hewan Kebumen & Gombong
-                </p>
-              </div>
-            </div>
-          </div>
-
-          <div className="flex items-center gap-2">
-            <button
-              onClick={fetchData}
-              disabled={isLoading}
-              className="p-2 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-slate-600 hover:text-slate-900 transition-colors disabled:opacity-50"
-              title="Segarkan data"
-            >
-              <RefreshCw size={16} className={isLoading ? 'animate-spin' : ''} />
-            </button>
-            <NotificationBell />
-          </div>
-        </div>
-      </header>
-
       {/* ── KONTEN UTAMA ── */}
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6 space-y-6">
-        {/* ── TAB NAVIGASI UTAMA: PEMASUKAN vs PENGELUARAN ── */}
-        <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4">
-          <div className="flex items-center p-1.5 bg-white rounded-2xl border border-slate-200/90 shadow-2xs w-full sm:w-auto">
-            <button
-              onClick={() => setActiveKategori('Pemasukkan')}
-              className={`flex-1 sm:flex-none px-5 py-2.5 rounded-xl text-xs sm:text-sm font-black transition-all flex items-center justify-center gap-2 cursor-pointer ${
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
+        {/* ── 2 VIEW TABS: PEMASUKAN vs PENGELUARAN ── */}
+        <div className="flex gap-2 border-b border-slate-200 pb-px overflow-x-auto no-scrollbar scroll-smooth -mx-4 px-4 sm:mx-0 sm:px-0">
+          <button
+            onClick={() => setActiveKategori('Pemasukkan')}
+            className={`min-h-touch h-11 px-4 sm:px-6 rounded-t-xl text-xs sm:text-sm font-bold flex items-center gap-2 border-t border-x transition-all shrink-0 whitespace-nowrap cursor-pointer ${
+              activeKategori === 'Pemasukkan'
+                ? 'bg-white border-slate-200 text-emerald-700 border-b-white translate-y-px shadow-xs'
+                : 'border-transparent text-slate-500 hover:text-slate-900 bg-slate-100/60'
+            }`}
+          >
+            <ArrowDownLeft size={16} strokeWidth={2.5} />
+            <span>Data Pemasukan Ternak</span>
+            <span
+              className={`px-2 py-0.5 rounded-full text-[10px] font-black ${
                 activeKategori === 'Pemasukkan'
-                  ? 'bg-emerald-600 text-white shadow-xs'
-                  : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50'
+                  ? 'bg-emerald-100 text-emerald-700'
+                  : 'bg-slate-200/70 text-slate-600'
               }`}
             >
-              <ArrowDownLeft size={16} />
-              <span>Data Pemasukan Ternak</span>
-              <span
-                className={`px-2 py-0.5 rounded-full text-[10px] font-black ${
-                  activeKategori === 'Pemasukkan'
-                    ? 'bg-white/20 text-white'
-                    : 'bg-slate-100 text-slate-600'
-                }`}
-              >
-                {(summary.pemasukan.total_ekor || 0).toLocaleString('id-ID')} Ekor
-              </span>
-            </button>
+              {(summary.pemasukan.total_ekor || 0).toLocaleString('id-ID')} Ekor
+            </span>
+          </button>
 
-            <button
-              onClick={() => setActiveKategori('Pengeluaran')}
-              className={`flex-1 sm:flex-none px-5 py-2.5 rounded-xl text-xs sm:text-sm font-black transition-all flex items-center justify-center gap-2 cursor-pointer ${
+          <button
+            onClick={() => setActiveKategori('Pengeluaran')}
+            className={`min-h-touch h-11 px-4 sm:px-6 rounded-t-xl text-xs sm:text-sm font-bold flex items-center gap-2 border-t border-x transition-all shrink-0 whitespace-nowrap cursor-pointer ${
+              activeKategori === 'Pengeluaran'
+                ? 'bg-white border-slate-200 text-emerald-700 border-b-white translate-y-px shadow-xs'
+                : 'border-transparent text-slate-500 hover:text-slate-900 bg-slate-100/60'
+            }`}
+          >
+            <ArrowUpRight size={16} strokeWidth={2.5} />
+            <span>Data Pengeluaran Ternak</span>
+            <span
+              className={`px-2 py-0.5 rounded-full text-[10px] font-black ${
                 activeKategori === 'Pengeluaran'
-                  ? 'bg-blue-600 text-white shadow-xs'
-                  : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50'
+                  ? 'bg-emerald-100 text-emerald-700'
+                  : 'bg-slate-200/70 text-slate-600'
               }`}
             >
-              <ArrowUpRight size={16} />
-              <span>Data Pengeluaran Ternak</span>
-              <span
-                className={`px-2 py-0.5 rounded-full text-[10px] font-black ${
-                  activeKategori === 'Pengeluaran'
-                    ? 'bg-white/20 text-white'
-                    : 'bg-slate-100 text-slate-600'
-                }`}
-              >
-                {(summary.pengeluaran.total_ekor || 0).toLocaleString('id-ID')} Ekor
-              </span>
-            </button>
-          </div>
-
-          {canEdit && (
-            <button
-              onClick={handleOpenAdd}
-              className="min-h-touch h-11 px-5 rounded-2xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs sm:text-sm font-bold flex items-center justify-center gap-2 shadow-xs transition-colors cursor-pointer"
-            >
-              <Plus size={18} />
-              <span>Input {activeKategori === 'Pemasukkan' ? 'Pemasukan' : 'Pengeluaran'}</span>
-            </button>
-          )}
+              {(summary.pengeluaran.total_ekor || 0).toLocaleString('id-ID')} Ekor
+            </span>
+          </button>
         </div>
 
         {/* ── KARTU STATISTIK ── */}
