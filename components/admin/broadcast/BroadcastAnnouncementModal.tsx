@@ -180,9 +180,6 @@ export default function BroadcastAnnouncementModal({
             <div>
               <h2 className="text-base sm:text-lg font-black tracking-tight flex items-center gap-2">
                 Broadcast Pengumuman Dinas
-                <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20">
-                  Admin Tool
-                </span>
               </h2>
               <p className="text-xs text-slate-500 dark:text-slate-400">
                 Siarkan pengumuman ke seluruh dinas atau tim wilayah/bidang tertentu secara terarah
