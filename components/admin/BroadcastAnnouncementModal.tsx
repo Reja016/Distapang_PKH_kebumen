@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import {
   Megaphone,
   X,
@@ -77,10 +78,15 @@ export default function BroadcastAnnouncementModal({
   const [customLink, setCustomLink] = useState('');
 
   // Status states
+  const [mounted, setMounted] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [historyList, setHistoryList] = useState<any[]>([]);
   const [isLoadingHistory, setIsLoadingHistory] = useState(false);
   const [statusMsg, setStatusMsg] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   // Ambil riwayat pengumuman saat tab 'history' dibuka
   const fetchHistory = async () => {
@@ -104,7 +110,7 @@ export default function BroadcastAnnouncementModal({
     }
   }, [isOpen, activeTab]);
 
-  if (!isOpen) return null;
+  if (!isOpen || !mounted) return null;
 
   // Resolve target value & label
   let targetType = 'ALL';
@@ -192,14 +198,15 @@ export default function BroadcastAnnouncementModal({
     }
   };
 
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-950/70 backdrop-blur-xs animate-in fade-in duration-200">
+  return createPortal(
+    <div className="fixed inset-0 z-[9999] flex items-center justify-center p-3 sm:p-6 bg-slate-950/75 backdrop-blur-sm animate-in fade-in duration-200">
       <div
-        className={`w-full max-w-3xl rounded-3xl border shadow-2xl overflow-hidden flex flex-col max-h-[90vh] transition-all ${
+        className={`relative w-full max-w-3xl rounded-3xl border shadow-2xl overflow-hidden flex flex-col max-h-[85vh] my-auto transition-all ${
           isDark
             ? 'bg-slate-900 border-slate-800 text-slate-100'
             : 'bg-white border-slate-200 text-slate-900'
         }`}
+        onClick={(e) => e.stopPropagation()}
       >
         {/* Header Modal */}
         <div
@@ -716,6 +723,7 @@ export default function BroadcastAnnouncementModal({
           )}
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }
