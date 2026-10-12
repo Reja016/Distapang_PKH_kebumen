@@ -293,7 +293,7 @@ export default function LaporanPenyakitPage() {
   if (!isReady) return null;
 
   return (
-    <div className="min-h-screen bg-blue-50/20 text-slate-900 font-sans selection:bg-blue-600 selection:text-white pb-24">
+    <div className="min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 font-sans selection:bg-blue-600 selection:text-white pb-24">
       {/* ── TOP HEADER ── */}
       <header className="border-b border-blue-100 bg-white/95 backdrop-blur-md sticky top-0 z-30 shadow-xs print:hidden">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 sm:py-5 min-h-[64px] sm:min-h-[88px] flex items-center justify-between gap-3">

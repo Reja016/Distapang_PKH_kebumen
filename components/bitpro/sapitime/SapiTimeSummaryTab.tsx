@@ -1,14 +1,15 @@
 'use client';
 
 import React from 'react';
-import { User } from 'lucide-react';
+import { User, Activity } from 'lucide-react';
 import { Cattle, getCattleStatusData } from './types';
 
 interface SapiTimeSummaryTabProps {
   cattleList: Cattle[];
+  onLaporKondisi?: (cattle: Cattle) => void;
 }
 
-export function SapiTimeSummaryTab({ cattleList }: SapiTimeSummaryTabProps) {
+export function SapiTimeSummaryTab({ cattleList, onLaporKondisi }: SapiTimeSummaryTabProps) {
   const sortedCattle = [...cattleList].map(getCattleStatusData).sort((a: any, b: any) => {
     const aDays = a.daysUntil ?? 999;
     const bDays = b.daysUntil ?? 999;
@@ -41,7 +42,8 @@ export function SapiTimeSummaryTab({ cattleList }: SapiTimeSummaryTabProps) {
                 <th className="px-6 py-4 border-r border-slate-300 dark:border-slate-700">Data Peternak &amp; Sapi</th>
                 <th className="px-6 py-4 border-r border-slate-300 dark:border-slate-700">Status</th>
                 <th className="px-6 py-4 border-r border-slate-300 dark:border-slate-700">Sisa Waktu</th>
-                <th className="px-6 py-4 w-[25%]">Progress Siklus</th>
+                <th className="px-6 py-4 w-[25%] border-r border-slate-300 dark:border-slate-700">Progress Siklus</th>
+                <th className="px-6 py-4 text-center">Aksi Lapor</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-300 dark:divide-slate-700">
@@ -94,7 +96,7 @@ export function SapiTimeSummaryTab({ cattleList }: SapiTimeSummaryTabProps) {
                             : 'Aman'}
                         </div>
                       </td>
-                      <td className="px-6 py-4">
+                      <td className="px-6 py-4 border-r border-slate-300 dark:border-slate-700">
                         <div className="w-full bg-slate-100 dark:bg-slate-800 rounded-full h-2.5 overflow-hidden">
                           <div
                             className="h-full rounded-full transition-all duration-500 ease-out"
@@ -102,12 +104,25 @@ export function SapiTimeSummaryTab({ cattleList }: SapiTimeSummaryTabProps) {
                           ></div>
                         </div>
                       </td>
+                      <td className="px-6 py-4 text-center">
+                        {onLaporKondisi && (
+                          <button
+                            type="button"
+                            onClick={() => onLaporKondisi(cattleData)}
+                            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-200 text-xs font-bold transition-all cursor-pointer shadow-2xs"
+                            title="Cek & Lapor Kondisi Fisik Sapi"
+                          >
+                            <Activity size={13} className="text-emerald-600" />
+                            <span>Cek Fisik</span>
+                          </button>
+                        )}
+                      </td>
                     </tr>
                   );
                 })
               ) : (
                 <tr>
-                  <td colSpan={5} className="px-6 py-12 text-center text-slate-400 font-medium">
+                  <td colSpan={6} className="px-6 py-12 text-center text-slate-400 font-medium">
                     Belum ada data sapi di Database.
                   </td>
                 </tr>

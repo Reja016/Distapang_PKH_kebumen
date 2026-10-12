@@ -32,6 +32,7 @@ import {
   Edit3,
   Link2,
 } from 'lucide-react';
+import NotificationBell from '@/components/common/NotificationBell';
 
 // Helper to format keys like "nama_kegiatan" to "Nama Kegiatan"
 const formatLabel = (key: string) => {
@@ -451,6 +452,8 @@ export default function PusatKoreksiPage() {
                 </span>
               )}
             </button>
+
+            <NotificationBell />
           </div>
         </div>
       </header>

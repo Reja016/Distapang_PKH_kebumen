@@ -25,8 +25,10 @@ import {
   ModalCatatIB,
   ModalTraceSapi,
   ModalEditStatusIb,
+  ModalLaporKondisiFisik,
 } from '@/components/bitpro/sapitime/SapiTimeModals';
 import { UniversalAuditModal } from '@/components/common/UniversalAuditModal';
+import NotificationBell from '@/components/common/NotificationBell';
 
 export default function SapiTimePage() {
   const router = useRouter();
@@ -64,6 +66,7 @@ export default function SapiTimePage() {
 
   const [showAuditModal, setShowAuditModal] = useState(false);
   const [auditTarget, setAuditTarget] = useState<any | null>(null);
+  const [selectedCattleForLapor, setSelectedCattleForLapor] = useState<Cattle | null>(null);
 
   // 1. Tarik Data dari MySQL API
   const fetchData = async () => {
@@ -328,6 +331,10 @@ export default function SapiTimePage() {
               </h1>
             </div>
           </div>
+
+          <div className="flex items-center gap-2 shrink-0">
+            <NotificationBell />
+          </div>
         </div>
       </header>
 
@@ -385,11 +392,15 @@ export default function SapiTimePage() {
               setShowAuditModal(true);
             }}
             onTraceCattle={handleOpenTrace}
+            onLaporKondisi={(cattle) => setSelectedCattleForLapor(cattle)}
           />
         )}
 
         {activeTab === 'home' && (
-          <SapiTimeSummaryTab cattleList={cattleList} />
+          <SapiTimeSummaryTab
+            cattleList={cattleList}
+            onLaporKondisi={(cattle) => setSelectedCattleForLapor(cattle)}
+          />
         )}
 
         {activeTab === 'calendar' && (
@@ -464,6 +475,14 @@ export default function SapiTimePage() {
           setSelectedCattleForStatusEdit(null);
         }}
         onSave={handleSaveIbStatus}
+      />
+
+      {/* ── MODAL CEK & LAPOR KONDISI FISIK SAPI (POST-IB) ── */}
+      <ModalLaporKondisiFisik
+        isOpen={!!selectedCattleForLapor}
+        cattle={selectedCattleForLapor}
+        onClose={() => setSelectedCattleForLapor(null)}
+        onSuccess={fetchData}
       />
 
       <UniversalAuditModal

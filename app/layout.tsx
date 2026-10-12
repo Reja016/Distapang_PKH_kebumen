@@ -53,7 +53,7 @@ export default function RootLayout({
           }}
         />
       </head>
-      <body className={`${poppins.className} font-sans antialiased text-slate-900 bg-slate-50 selection:bg-blue-600 selection:text-white`} suppressHydrationWarning>
+      <body className={`${poppins.className} font-sans antialiased text-slate-900 bg-slate-50 dark:bg-slate-950 dark:text-slate-100 selection:bg-blue-600 selection:text-white`} suppressHydrationWarning>
         {children}
         <AiChatWidget />
       </body>

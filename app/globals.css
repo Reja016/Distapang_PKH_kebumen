@@ -111,17 +111,21 @@ header div.flex.items-center.gap-1\.5.mb-0\.5 {
 /* ── UNIVERSAL DARK MODE UNTUK SUBMENU & TABEL ── */
 html.dark,
 html.dark body,
-body.dark {
+body.dark,
+html.dark .min-h-screen,
+body.dark .min-h-screen,
+html.dark [class*="min-h-screen"],
+body.dark [class*="min-h-screen"] {
   background-color: #090a0f !important;
   color: #f1f5f9 !important;
 }
 
 /* Base card, containers & white / slate variants */
-html.dark .bg-slate-50,
+html.dark .bg-slate-50:not([class*="min-h-screen"]),
 html.dark .bg-white,
 html.dark [class^="bg-white/"],
 html.dark [class*=" bg-white/"],
-body.dark .bg-slate-50,
+body.dark .bg-slate-50:not([class*="min-h-screen"]),
 body.dark .bg-white,
 body.dark [class^="bg-white/"],
 body.dark [class*=" bg-white/"] {
@@ -303,76 +307,76 @@ body.dark [class*="text-sky-900"] {
 }
 
 /* ── PERBAIKAN WARNA LATAR PASTEL AGAR TIDAK MENABRAK PUTIH ── */
-html.dark [class*="bg-emerald-50"],
-html.dark [class*="bg-emerald-100"],
-html.dark [class*="bg-emerald-200"],
-body.dark [class*="bg-emerald-50"],
-body.dark [class*="bg-emerald-100"],
-body.dark [class*="bg-emerald-200"] {
+html.dark [class*="bg-emerald-50"]:not([class*="min-h-screen"]),
+html.dark [class*="bg-emerald-100"]:not([class*="min-h-screen"]),
+html.dark [class*="bg-emerald-200"]:not([class*="min-h-screen"]),
+body.dark [class*="bg-emerald-50"]:not([class*="min-h-screen"]),
+body.dark [class*="bg-emerald-100"]:not([class*="min-h-screen"]),
+body.dark [class*="bg-emerald-200"]:not([class*="min-h-screen"]) {
   background-color: rgba(6, 78, 59, 0.45) !important;
   color: #6ee7b7 !important;
   border-color: rgba(16, 185, 129, 0.4) !important;
 }
 
-html.dark [class*="bg-blue-50"],
-html.dark [class*="bg-blue-100"],
-html.dark [class*="bg-blue-200"],
-body.dark [class*="bg-blue-50"],
-body.dark [class*="bg-blue-100"],
-body.dark [class*="bg-blue-200"] {
+html.dark [class*="bg-blue-50"]:not([class*="min-h-screen"]),
+html.dark [class*="bg-blue-100"]:not([class*="min-h-screen"]),
+html.dark [class*="bg-blue-200"]:not([class*="min-h-screen"]),
+body.dark [class*="bg-blue-50"]:not([class*="min-h-screen"]),
+body.dark [class*="bg-blue-100"]:not([class*="min-h-screen"]),
+body.dark [class*="bg-blue-200"]:not([class*="min-h-screen"]) {
   background-color: rgba(30, 58, 138, 0.45) !important;
   color: #93c5fd !important;
   border-color: rgba(59, 130, 246, 0.4) !important;
 }
 
-html.dark [class*="bg-purple-50"],
-html.dark [class*="bg-purple-100"],
-html.dark [class*="bg-purple-200"],
-body.dark [class*="bg-purple-50"],
-body.dark [class*="bg-purple-100"],
-body.dark [class*="bg-purple-200"] {
+html.dark [class*="bg-purple-50"]:not([class*="min-h-screen"]),
+html.dark [class*="bg-purple-100"]:not([class*="min-h-screen"]),
+html.dark [class*="bg-purple-200"]:not([class*="min-h-screen"]),
+body.dark [class*="bg-purple-50"]:not([class*="min-h-screen"]),
+body.dark [class*="bg-purple-100"]:not([class*="min-h-screen"]),
+body.dark [class*="bg-purple-200"]:not([class*="min-h-screen"]) {
   background-color: rgba(88, 28, 135, 0.45) !important;
   color: #d8b4fe !important;
   border-color: rgba(168, 85, 247, 0.4) !important;
 }
 
-html.dark [class*="bg-amber-50"],
-html.dark [class*="bg-amber-100"],
-html.dark [class*="bg-amber-200"],
-body.dark [class*="bg-amber-50"],
-body.dark [class*="bg-amber-100"],
-body.dark [class*="bg-amber-200"] {
+html.dark [class*="bg-amber-50"]:not([class*="min-h-screen"]),
+html.dark [class*="bg-amber-100"]:not([class*="min-h-screen"]),
+html.dark [class*="bg-amber-200"]:not([class*="min-h-screen"]),
+body.dark [class*="bg-amber-50"]:not([class*="min-h-screen"]),
+body.dark [class*="bg-amber-100"]:not([class*="min-h-screen"]),
+body.dark [class*="bg-amber-200"]:not([class*="min-h-screen"]) {
   background-color: rgba(120, 53, 15, 0.45) !important;
   color: #fcd34d !important;
   border-color: rgba(245, 158, 11, 0.4) !important;
 }
 
-html.dark [class*="bg-rose-50"],
-html.dark [class*="bg-rose-100"],
-html.dark [class*="bg-red-50"],
-html.dark [class*="bg-red-100"],
-body.dark [class*="bg-rose-50"],
-body.dark [class*="bg-rose-100"],
-body.dark [class*="bg-red-50"],
-body.dark [class*="bg-red-100"] {
+html.dark [class*="bg-rose-50"]:not([class*="min-h-screen"]),
+html.dark [class*="bg-rose-100"]:not([class*="min-h-screen"]),
+html.dark [class*="bg-red-50"]:not([class*="min-h-screen"]),
+html.dark [class*="bg-red-100"]:not([class*="min-h-screen"]),
+body.dark [class*="bg-rose-50"]:not([class*="min-h-screen"]),
+body.dark [class*="bg-rose-100"]:not([class*="min-h-screen"]),
+body.dark [class*="bg-red-50"]:not([class*="min-h-screen"]),
+body.dark [class*="bg-red-100"]:not([class*="min-h-screen"]) {
   background-color: rgba(153, 27, 27, 0.45) !important;
   color: #fca5a5 !important;
   border-color: rgba(239, 68, 68, 0.4) !important;
 }
 
-html.dark [class*="bg-sky-50"],
-html.dark [class*="bg-sky-100"],
-body.dark [class*="bg-sky-50"],
-body.dark [class*="bg-sky-100"] {
+html.dark [class*="bg-sky-50"]:not([class*="min-h-screen"]),
+html.dark [class*="bg-sky-100"]:not([class*="min-h-screen"]),
+body.dark [class*="bg-sky-50"]:not([class*="min-h-screen"]),
+body.dark [class*="bg-sky-100"]:not([class*="min-h-screen"]) {
   background-color: rgba(12, 74, 110, 0.45) !important;
   color: #7dd3fc !important;
   border-color: rgba(14, 165, 233, 0.4) !important;
 }
 
-html.dark [class*="bg-indigo-50"],
-html.dark [class*="bg-indigo-100"],
-body.dark [class*="bg-indigo-50"],
-body.dark [class*="bg-indigo-100"] {
+html.dark [class*="bg-indigo-50"]:not([class*="min-h-screen"]),
+html.dark [class*="bg-indigo-100"]:not([class*="min-h-screen"]),
+body.dark [class*="bg-indigo-50"]:not([class*="min-h-screen"]),
+body.dark [class*="bg-indigo-100"]:not([class*="min-h-screen"]) {
   background-color: rgba(49, 46, 129, 0.45) !important;
   color: #a5b4fc !important;
   border-color: rgba(99, 102, 241, 0.4) !important;

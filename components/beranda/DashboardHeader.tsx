@@ -13,6 +13,7 @@ import {
   ExternalLink,
 } from 'lucide-react';
 import { SubmenuItem } from './types';
+import NotificationBell from '@/components/common/NotificationBell';
 
 interface DashboardHeaderProps {
   isDark: boolean;
@@ -116,6 +117,9 @@ export default function DashboardHeader({
       </div>
 
       <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
+        {/* Lonceng Notifikasi Realtime & Push */}
+        <NotificationBell isDark={isDark} />
+
         {/* Pintasan Riwayat / Pusat Koreksi (Tampil di Desktop & Mobile untuk Admin) */}
         {isAdmin && (
           <Link

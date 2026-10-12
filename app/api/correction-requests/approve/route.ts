@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import pool from '@/lib/db';
 import { requireAdmin } from '@/lib/session';
 import { logActivity } from '@/lib/auditLog';
+import { sendNotificationToRole } from '@/lib/webPush';
 
 export const dynamic = 'force-dynamic';
 
@@ -45,6 +46,16 @@ export async function POST(request: NextRequest) {
         userName: adminName,
         details: { reason: reject_reason },
       });
+
+      // Beritahu pemohon bahwa permohonannya ditolak
+      if (reqData.requested_by) {
+        sendNotificationToRole('Petugas Teknis', {
+          title: 'Pengajuan Revisi Ditolak',
+          body: `Pengajuan koreksi Anda pada modul ${reqData.module} (${reqData.submenu}) telah ditolak: ${reject_reason || 'Tidak memenuhi kriteria'}.`,
+          url: '/beranda',
+          type: 'koreksi',
+        }, reqData.requested_by).catch(() => {});
+      }
 
       return NextResponse.json({ success: true, message: 'Pengajuan ditolak' });
     }
@@ -102,6 +113,16 @@ export async function POST(request: NextRequest) {
         userName: adminName,
         details: { changes: proposed },
       });
+
+      // 4. Beritahu pemohon bahwa permohonannya disetujui
+      if (reqData.requested_by) {
+        sendNotificationToRole('Petugas Teknis', {
+          title: 'Pengajuan Revisi Disetujui',
+          body: `Pengajuan koreksi Anda pada modul ${reqData.module} (${reqData.submenu}) telah disetujui oleh ${adminName} dan data telah diperbarui.`,
+          url: '/beranda',
+          type: 'koreksi',
+        }, reqData.requested_by).catch(() => {});
+      }
 
       return NextResponse.json({ success: true, message: proposed.ACTION === 'DELETE_REQUEST' ? 'Data berhasil dihapus!' : 'Pengajuan disetujui dan data diperbarui!' });
     }

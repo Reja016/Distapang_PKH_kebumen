@@ -14,6 +14,10 @@ import {
   Edit2,
   RotateCcw,
   Check,
+  Activity,
+  Send,
+  Phone,
+  AlertCircle,
 } from 'lucide-react';
 import { Cattle, Insemination, calculateAge, KECAMATAN_LIST, getDesaListForKecamatan } from './types';
 import { useUserAreaRestriction } from '@/hooks/useUserAreaRestriction';
@@ -860,4 +864,320 @@ export function ModalEditStatusIb({
     </div>
   );
 }
+
+interface ModalLaporKondisiFisikProps {
+  isOpen: boolean;
+  cattle: Cattle | null;
+  onClose: () => void;
+  onSuccess?: () => void;
+}
+
+export function ModalLaporKondisiFisik({
+  isOpen,
+  cattle,
+  onClose,
+  onSuccess,
+}: ModalLaporKondisiFisikProps) {
+  const [kondisi, setKondisi] = useState('Tenang (Tidak Birahi / Kemungkinan Bunting)');
+  const [tandaBirahiList, setTandaBirahiList] = useState<string[]>([]);
+  const [catatan, setCatatan] = useState('');
+  const [pelapor, setPelapor] = useState('');
+  const [noKontak, setNoKontak] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  useEffect(() => {
+    if (cattle) {
+      setPelapor(cattle.ownerName || '');
+      setKondisi('Tenang (Tidak Birahi / Kemungkinan Bunting)');
+      setTandaBirahiList([]);
+      setCatatan('');
+      setNoKontak('');
+    }
+  }, [cattle]);
+
+  if (!isOpen || !cattle) return null;
+
+  // Hitung hari setelah IB terakhir jika ada
+  let daysSinceLastIB: number | null = null;
+  let lastIbDateStr = '-';
+  let inseminatorName = '-';
+
+  if (cattle.inseminations && cattle.inseminations.length > 0) {
+    const sorted = [...cattle.inseminations].sort(
+      (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
+    );
+    const lastIb = sorted[0];
+    if (lastIb && lastIb.date) {
+      lastIbDateStr = new Date(lastIb.date).toLocaleDateString('id-ID');
+      inseminatorName = lastIb.inseminatorName || '-';
+      const diff = Math.floor(
+        (new Date().getTime() - new Date(lastIb.date).getTime()) / (1000 * 3600 * 24)
+      );
+      daysSinceLastIB = diff >= 0 ? diff : null;
+    }
+  }
+
+  const toggleTanda = (tanda: string) => {
+    setTandaBirahiList((prev) =>
+      prev.includes(tanda) ? prev.filter((t) => t !== tanda) : [...prev, tanda]
+    );
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!kondisi) {
+      alert('Pilih kondisi fisik sapi terlebih dahulu');
+      return;
+    }
+
+    try {
+      setIsSubmitting(true);
+      const res = await fetch('/api/sapitime/lapor-kondisi', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          cattle_id: cattle.id,
+          cattle_name: cattle.name,
+          owner_name: cattle.ownerName,
+          inseminator_name: inseminatorName,
+          kondisi,
+          tanda_birahi: tandaBirahiList.join(', '),
+          catatan,
+          pelapor,
+          no_kontak: noKontak,
+        }),
+      });
+
+      const data = await res.json();
+      if (data.success) {
+        alert(
+          '✅ Laporan kondisi fisik sapi berhasil dikirim! Notifikasi otomatis diteruskan ke petugas teknis & admin.'
+        );
+        onClose();
+        if (onSuccess) onSuccess();
+      } else {
+        alert('Gagal mengirim laporan: ' + (data.error || 'Terjadi kesalahan'));
+      }
+    } catch (err: any) {
+      alert('Terjadi kesalahan jaringan: ' + err.message);
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  return (
+    <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center z-50 p-4 animate-in fade-in duration-200">
+      <div className="bg-white rounded-3xl w-full max-w-lg p-6 sm:p-7 shadow-2xl relative max-h-[92vh] overflow-y-auto">
+        <button
+          onClick={onClose}
+          className="absolute top-5 right-5 text-slate-400 hover:text-slate-700 text-2xl font-light cursor-pointer"
+        >
+          &times;
+        </button>
+
+        {/* Header */}
+        <div className="flex items-center gap-2.5 mb-4">
+          <div className="p-2.5 rounded-2xl bg-emerald-500/10 text-emerald-600">
+            <Activity size={22} />
+          </div>
+          <div>
+            <h3 className="text-base sm:text-lg font-bold text-slate-900">
+              Cek &amp; Lapor Kondisi Fisik Sapi
+            </h3>
+            <p className="text-xs text-slate-500">
+              Notifikasi otomatis dikirim ke petugas &amp; admin
+            </p>
+          </div>
+        </div>
+
+        {/* Ringkasan Data Sapi & Post-IB */}
+        <div className="p-3.5 bg-slate-50 rounded-2xl border border-slate-200 mb-4 text-xs space-y-1.5">
+          <div className="flex justify-between items-center">
+            <span className="text-slate-500">Nama / ID Sapi:</span>
+            <span className="font-bold text-emerald-700">
+              {cattle.name} ({cattle.id})
+            </span>
+          </div>
+          <div className="flex justify-between items-center">
+            <span className="text-slate-500">Pemilik / Peternak:</span>
+            <span className="font-bold text-slate-800">{cattle.ownerName}</span>
+          </div>
+          <div className="flex justify-between items-center">
+            <span className="text-slate-500">IB Terakhir:</span>
+            <span className="font-semibold text-slate-700">
+              {lastIbDateStr} {daysSinceLastIB !== null && `(Hari ke-${daysSinceLastIB} Post-IB)`}
+            </span>
+          </div>
+
+          {/* Banner Peringatan Birahi Periode 18-24 Hari */}
+          {daysSinceLastIB !== null && daysSinceLastIB >= 18 && daysSinceLastIB <= 24 && (
+            <div className="mt-2 p-2.5 rounded-xl bg-amber-50 border border-amber-200 text-amber-900 flex items-start gap-2">
+              <AlertCircle size={16} className="text-amber-600 shrink-0 mt-0.5" />
+              <div className="text-[11px] leading-relaxed">
+                <strong className="font-bold text-amber-950 block">
+                  🔔 Jendela Kritis Pantau Birahi (Hari ke-18 s/d 24):
+                </strong>
+                Jika sapi tenang (tidak minta kawin), kemungkinan besar bunting. Jika sapi menunjukkan birahi (3A), segera laporkan agar dijadwalkan IB ulang.
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* Form Laporan */}
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div>
+            <label className="block text-xs font-bold text-slate-800 mb-1.5">
+              Kondisi Fisik Sapi Saat Ini <span className="text-red-500">*</span>
+            </label>
+            <div className="space-y-2">
+              {[
+                {
+                  val: 'Tenang (Tidak Birahi / Kemungkinan Bunting)',
+                  desc: 'Sapi tenang, nafsu makan stabil, tidak menunjukkan tanda birahi',
+                  color: 'emerald',
+                },
+                {
+                  val: 'Birahi Kembali / Minta Kawin Lagi',
+                  desc: 'Muncul gejala 3A atau gelisah (perlu dijadwalkan IB ulang)',
+                  color: 'amber',
+                },
+                {
+                  val: 'Kondisi Sehat & Nafsu Makan Baik',
+                  desc: 'Fisik segar, pakan habis, kotoran normal',
+                  color: 'blue',
+                },
+                {
+                  val: 'Kondisi Kurang Sehat / Sakit',
+                  desc: 'Lemas, tidak mau makan, demam atau kembung',
+                  color: 'rose',
+                },
+                {
+                  val: 'Keluar Lendir / Gejala Lain',
+                  desc: 'Ada cairan dari saluran reproduksi / gejala tidak biasa',
+                  color: 'purple',
+                },
+              ].map((item) => (
+                <label
+                  key={item.val}
+                  className={`flex items-start gap-2.5 p-2.5 rounded-xl border cursor-pointer transition-all ${
+                    kondisi === item.val
+                      ? 'border-emerald-600 bg-emerald-50/60 ring-1 ring-emerald-500'
+                      : 'border-slate-200 hover:bg-slate-50'
+                  }`}
+                >
+                  <input
+                    type="radio"
+                    name="kondisi"
+                    value={item.val}
+                    checked={kondisi === item.val}
+                    onChange={(e) => setKondisi(e.target.value)}
+                    className="mt-0.5 text-emerald-600 focus:ring-emerald-500 cursor-pointer"
+                  />
+                  <div className="min-w-0">
+                    <p className="text-xs font-bold text-slate-900">{item.val}</p>
+                    <p className="text-[11px] text-slate-500 mt-0.5">{item.desc}</p>
+                  </div>
+                </label>
+              ))}
+            </div>
+          </div>
+
+          {/* Tanda-tanda Birahi (Opsional Checklist) */}
+          {(kondisi.includes('Birahi') || kondisi.includes('Lendir')) && (
+            <div className="p-3 bg-amber-50/60 rounded-2xl border border-amber-200/80 space-y-2">
+              <label className="block text-xs font-bold text-amber-950">
+                Tanda-Tanda Birahi yang Teramati (Opsional):
+              </label>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
+                {[
+                  '3A: Abang, Aboh, Anget (Vulva)',
+                  'Sering Melenguh / Gelisah',
+                  'Menaiki Sapi Lain / Diam Dinaiki',
+                  'Lendir Bening Elastis Keluar',
+                  'Ekor Sering Terangkat',
+                ].map((t) => (
+                  <label
+                    key={t}
+                    className="flex items-center gap-2 p-1.5 rounded-lg hover:bg-amber-100/50 cursor-pointer"
+                  >
+                    <input
+                      type="checkbox"
+                      checked={tandaBirahiList.includes(t)}
+                      onChange={() => toggleTanda(t)}
+                      className="rounded text-amber-600 focus:ring-amber-500"
+                    />
+                    <span className="text-[11px] font-medium text-slate-800">{t}</span>
+                  </label>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Catatan Tambahan */}
+          <div>
+            <label className="block text-xs font-bold text-slate-800 mb-1">
+              Catatan / Gejala Tambahan
+            </label>
+            <textarea
+              rows={2}
+              className="w-full p-2.5 border border-slate-200 rounded-xl bg-slate-50 focus:bg-white focus:outline-none focus:border-emerald-600 text-xs text-slate-900"
+              placeholder="Contoh: Sapi sudah diam sejak tadi pagi, lendir terlihat keluar pukul 08:00..."
+              value={catatan}
+              onChange={(e) => setCatatan(e.target.value)}
+            />
+          </div>
+
+          {/* Data Pelapor & Kontak */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div>
+              <label className="block text-xs font-bold text-slate-800 mb-1">
+                Nama Pelapor <span className="text-red-500">*</span>
+              </label>
+              <input
+                type="text"
+                className="w-full h-10 px-3 border border-slate-200 rounded-xl bg-slate-50 focus:bg-white focus:outline-none focus:border-emerald-600 text-xs font-medium text-slate-900"
+                value={pelapor}
+                onChange={(e) => setPelapor(e.target.value)}
+                placeholder="Nama Peternak / Pelapor"
+                required
+              />
+            </div>
+            <div>
+              <label className="block text-xs font-bold text-slate-800 mb-1">
+                No. WhatsApp / HP
+              </label>
+              <input
+                type="text"
+                className="w-full h-10 px-3 border border-slate-200 rounded-xl bg-slate-50 focus:bg-white focus:outline-none focus:border-emerald-600 text-xs font-medium text-slate-900"
+                value={noKontak}
+                onChange={(e) => setNoKontak(e.target.value)}
+                placeholder="08xxxxxxxxxx"
+              />
+            </div>
+          </div>
+
+          {/* Actions */}
+          <div className="flex gap-2 pt-3 border-t border-slate-100 justify-end">
+            <button
+              type="button"
+              onClick={onClose}
+              className="px-4 py-2.5 rounded-xl border border-slate-200 text-xs font-bold text-slate-600 hover:bg-slate-50 cursor-pointer"
+            >
+              Batal
+            </button>
+            <button
+              type="submit"
+              disabled={isSubmitting}
+              className="px-5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold shadow-xs flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
+            >
+              <Send size={13} />
+              <span>{isSubmitting ? 'Mengirim...' : 'Kirim Laporan & Notifikasi'}</span>
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  );
+}
+
 

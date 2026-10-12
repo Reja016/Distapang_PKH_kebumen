@@ -275,7 +275,7 @@ export default function PakanTernakPage() {
   if (!isReady) return null;
 
   return (
-    <div className="min-h-screen bg-purple-50/30 dark:bg-slate-950 text-slate-900 dark:text-slate-100 font-sans selection:bg-purple-600 selection:text-white pb-24">
+    <div className="min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 font-sans selection:bg-purple-600 selection:text-white pb-24">
       {/* Toast Notification */}
       {toast && (
         <div

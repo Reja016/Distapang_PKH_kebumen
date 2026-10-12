@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { useRouter } from 'next/navigation';
-import { Plus, Edit2, Search, Syringe, User, Trash2 } from 'lucide-react';
+import { Plus, Edit2, Search, Syringe, User, Trash2, Activity, Bell, AlertCircle } from 'lucide-react';
 import { Cattle, calculateAge, KECAMATAN_LIST, getDesaListForKecamatan } from './types';
 
 interface SapiTimeDatabaseTabProps {
@@ -22,6 +22,7 @@ interface SapiTimeDatabaseTabProps {
   onOpenIBModal: (c: Cattle) => void;
   onShowHistory?: (row: any) => void;
   onTraceCattle?: (cattle: Cattle) => void;
+  onLaporKondisi?: (cattle: Cattle) => void;
 }
 
 export function SapiTimeDatabaseTab({
@@ -41,6 +42,7 @@ export function SapiTimeDatabaseTab({
   onOpenIBModal,
   onShowHistory,
   onTraceCattle,
+  onLaporKondisi,
 }: SapiTimeDatabaseTabProps) {
   const router = useRouter();
   const desaList = getDesaListForKecamatan(formData.kecamatan);
@@ -262,70 +264,119 @@ export function SapiTimeDatabaseTab({
               c.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
               (c.ownerName || '').toLowerCase().includes(searchTerm.toLowerCase())
           )
-          .map((cattle) => (
-            <div
-              key={cattle.id}
-              className="bg-white border border-slate-200 rounded-2xl p-5 shadow-xs hover:border-emerald-300 transition-all flex flex-col justify-between"
-            >
-              <div>
-                <div className="flex justify-between items-start mb-4 gap-2">
-                  <div className="min-w-0">
-                    <h3 className="font-bold text-base text-slate-900 truncate flex items-center gap-1.5">
-                      <User size={16} className="text-slate-400 shrink-0" />
-                      {cattle.ownerName || 'Tanpa Nama'}
-                    </h3>
-                    <p className="font-bold text-sm text-emerald-700 mt-1 truncate">Sapi: {cattle.name}</p>
-                    <p className="text-xs text-slate-500 mt-0.5 truncate">
-                      {cattle.id} • {cattle.kecamatan || '-'}, {cattle.desa || '-'}
-                    </p>
-                  </div>
-                  <span
-                    className={`shrink-0 px-2.5 py-1 rounded-md text-[10px] font-bold uppercase tracking-wider ${
-                      cattle.status === 'Bunting'
-                        ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
-                        : 'bg-amber-50 text-amber-700 border border-amber-200'
-                    }`}
-                  >
-                    {cattle.status}
-                  </span>
-                </div>
+          .map((cattle) => {
+            const latestIb = cattle.inseminations && cattle.inseminations.length > 0
+              ? [...cattle.inseminations].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())[0]
+              : null;
+            let daysSinceIB: number | null = null;
+            if (latestIb && latestIb.date) {
+              const diff = Math.floor((new Date().getTime() - new Date(latestIb.date).getTime()) / (1000 * 3600 * 24));
+              if (diff >= 0) daysSinceIB = diff;
+            }
+            const isEstrusWindow = daysSinceIB !== null && daysSinceIB >= 18 && daysSinceIB <= 24;
 
-                <div className="grid grid-cols-2 gap-2 text-xs text-slate-700 mb-5 bg-slate-50 p-3.5 rounded-xl border border-slate-100">
-                  <div>
-                    <span className="text-slate-400 block text-[10px] uppercase font-bold tracking-wider mb-0.5">Ras</span>
-                    <span className="font-semibold text-slate-800">{cattle.breed}</span>
-                  </div>
-                  <div>
-                    <span className="text-slate-400 block text-[10px] uppercase font-bold tracking-wider mb-0.5">Umur</span>
-                    <span className="font-semibold text-slate-800">{calculateAge(cattle.birthDate)}</span>
-                  </div>
-                  <div>
-                    <span className="text-slate-400 block text-[10px] uppercase font-bold tracking-wider mb-0.5">Estrus Terakhir</span>
-                    <span className="font-semibold text-slate-800">
-                      {cattle.lastEstrus ? new Date(cattle.lastEstrus).toLocaleDateString('id-ID') : '-'}
+            return (
+              <div
+                key={cattle.id}
+                className={`bg-white border rounded-2xl p-5 shadow-xs transition-all flex flex-col justify-between ${
+                  isEstrusWindow ? 'border-amber-400 ring-2 ring-amber-400/20' : 'border-slate-200 hover:border-emerald-300'
+                }`}
+              >
+                <div>
+                  {/* Banner Peringatan Periode Cek Birahi Hari 18-24 Post-IB */}
+                  {isEstrusWindow && (
+                    <div className="mb-3 px-3 py-2 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-900 flex items-center justify-between text-xs font-bold">
+                      <div className="flex items-center gap-1.5 min-w-0">
+                        <span className="w-2 h-2 rounded-full bg-amber-500 animate-ping shrink-0" />
+                        <span className="truncate">H+{daysSinceIB} Post-IB: Cek Birahi</span>
+                      </div>
+                      {onLaporKondisi && (
+                        <button
+                          type="button"
+                          onClick={() => onLaporKondisi(cattle)}
+                          className="px-2 py-1 rounded-lg bg-amber-600 hover:bg-amber-700 text-white text-[10px] font-bold shadow-xs cursor-pointer shrink-0"
+                        >
+                          Lapor
+                        </button>
+                      )}
+                    </div>
+                  )}
+
+                  <div className="flex justify-between items-start mb-4 gap-2">
+                    <div className="min-w-0">
+                      <h3 className="font-bold text-base text-slate-900 truncate flex items-center gap-1.5">
+                        <User size={16} className="text-slate-400 shrink-0" />
+                        {cattle.ownerName || 'Tanpa Nama'}
+                      </h3>
+                      <p className="font-bold text-sm text-emerald-700 mt-1 truncate">Sapi: {cattle.name}</p>
+                      <p className="text-xs text-slate-500 mt-0.5 truncate">
+                        {cattle.id} • {cattle.kecamatan || '-'}, {cattle.desa || '-'}
+                      </p>
+                    </div>
+                    <span
+                      className={`shrink-0 px-2.5 py-1 rounded-md text-[10px] font-bold uppercase tracking-wider ${
+                        cattle.status === 'Bunting'
+                          ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
+                          : 'bg-amber-50 text-amber-700 border border-amber-200'
+                      }`}
+                    >
+                      {cattle.status}
                     </span>
                   </div>
-                  <div>
-                    <span className="text-slate-400 block text-[10px] uppercase font-bold tracking-wider mb-0.5">Total IB</span>
-                    <span className="font-semibold text-slate-800">{cattle.inseminations?.length || 0} Kali</span>
-                  </div>
-                </div>
 
-                {/* Tombol Trace Riwayat IB Sapi */}
-                <button
-                  type="button"
-                  onClick={() => onTraceCattle?.(cattle)}
-                  className="w-full mb-3.5 py-2 px-3 rounded-xl bg-emerald-50 hover:bg-emerald-100/90 text-emerald-900 border border-emerald-200/90 font-bold text-xs flex items-center justify-between transition-all cursor-pointer"
-                >
-                  <span className="flex items-center gap-1.5">
-                    <Syringe size={13} className="text-emerald-700" />
-                    <span>Trace Riwayat IB Sapi</span>
-                  </span>
-                  <span className="bg-white px-2 py-0.5 rounded-lg text-[10px] font-black text-emerald-700 shadow-2xs border border-emerald-100">
-                    {cattle.inseminations?.length || 0}x IB
-                  </span>
-                </button>
-              </div>
+                  <div className="grid grid-cols-2 gap-2 text-xs text-slate-700 mb-5 bg-slate-50 p-3.5 rounded-xl border border-slate-100">
+                    <div>
+                      <span className="text-slate-400 block text-[10px] uppercase font-bold tracking-wider mb-0.5">Ras</span>
+                      <span className="font-semibold text-slate-800">{cattle.breed}</span>
+                    </div>
+                    <div>
+                      <span className="text-slate-400 block text-[10px] uppercase font-bold tracking-wider mb-0.5">Umur</span>
+                      <span className="font-semibold text-slate-800">{calculateAge(cattle.birthDate)}</span>
+                    </div>
+                    <div>
+                      <span className="text-slate-400 block text-[10px] uppercase font-bold tracking-wider mb-0.5">Estrus Terakhir</span>
+                      <span className="font-semibold text-slate-800">
+                        {cattle.lastEstrus ? new Date(cattle.lastEstrus).toLocaleDateString('id-ID') : '-'}
+                      </span>
+                    </div>
+                    <div>
+                      <span className="text-slate-400 block text-[10px] uppercase font-bold tracking-wider mb-0.5">Total IB</span>
+                      <span className="font-semibold text-slate-800">{cattle.inseminations?.length || 0} Kali</span>
+                    </div>
+                  </div>
+
+                  {/* Tombol Trace Riwayat IB Sapi */}
+                  <button
+                    type="button"
+                    onClick={() => onTraceCattle?.(cattle)}
+                    className="w-full mb-2 py-2 px-3 rounded-xl bg-emerald-50 hover:bg-emerald-100/90 text-emerald-900 border border-emerald-200/90 font-bold text-xs flex items-center justify-between transition-all cursor-pointer"
+                  >
+                    <span className="flex items-center gap-1.5">
+                      <Syringe size={13} className="text-emerald-700" />
+                      <span>Trace Riwayat IB Sapi</span>
+                    </span>
+                    <span className="bg-white px-2 py-0.5 rounded-lg text-[10px] font-black text-emerald-700 shadow-2xs border border-emerald-100">
+                      {cattle.inseminations?.length || 0}x IB
+                    </span>
+                  </button>
+
+                  {/* Tombol Lapor Kondisi Fisik Sapi */}
+                  {onLaporKondisi && (
+                    <button
+                      type="button"
+                      onClick={() => onLaporKondisi(cattle)}
+                      className="w-full mb-3.5 py-2 px-3 rounded-xl bg-blue-50 hover:bg-blue-100/90 text-blue-900 border border-blue-200/90 font-bold text-xs flex items-center justify-between transition-all cursor-pointer"
+                    >
+                      <span className="flex items-center gap-1.5">
+                        <Activity size={13} className="text-blue-700" />
+                        <span>Lapor Kondisi Fisik Sapi</span>
+                      </span>
+                      <span className="bg-white px-2 py-0.5 rounded-lg text-[10px] font-black text-blue-700 shadow-2xs border border-blue-100">
+                        {daysSinceIB !== null ? `H+${daysSinceIB} IB` : 'Cek Fisik'}
+                      </span>
+                    </button>
+                  )}
+                </div>
 
               <div className="flex gap-2">
                 {canEdit && (
@@ -366,7 +417,8 @@ export function SapiTimeDatabaseTab({
                 )}
               </div>
             </div>
-          ))}
+          );
+        })}
       </div>
     </div>
   );

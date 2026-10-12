@@ -513,7 +513,7 @@ export default function RphTphTpuPage() {
   if (!isReady) return null;
 
   return (
-    <div className="min-h-screen bg-purple-50/30 dark:bg-slate-950 text-slate-900 dark:text-slate-100 font-sans selection:bg-purple-600 selection:text-white pb-24">
+    <div className="min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 font-sans selection:bg-purple-600 selection:text-white pb-24">
       
       {/* ── TOP HEADER (Tema Ungu Khas Kesmavet) ── */}
       <header className="border-b border-purple-100 dark:border-slate-800 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md sticky top-0 z-30 shadow-xs">
