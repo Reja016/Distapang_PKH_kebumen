@@ -38,6 +38,7 @@ import {
 } from '@/components/keswan/stok-gudang/GudangModals';
 import BeritaAcaraPrintModal from '@/components/keswan/stok-gudang/BeritaAcaraPrintModal';
 import UploadBuktiBaModal from '@/components/keswan/stok-gudang/UploadBuktiBaModal';
+import { UniversalAuditModal } from '@/components/common/UniversalAuditModal';
 
 export default function StokGudangKeswanPage() {
   const { isReady, canCreate, canEdit } = usePageAuth('keswan', 'stok-gudang');
@@ -57,6 +58,23 @@ export default function StokGudangKeswanPage() {
   const [penggunaan, setPenggunaan] = useState<PenggunaanObatItem[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [toast, setToast] = useState<{ type: 'success' | 'error'; msg: string } | null>(null);
+
+  // State Universal Audit Modal / Pusat Koreksi
+  const [showAuditModal, setShowAuditModal] = useState(false);
+  const [auditTarget, setAuditTarget] = useState<{
+    recordId: any;
+    tableName: string;
+    fields: { key: string; label: string; type?: string }[];
+  } | null>(null);
+
+  const handleOpenAudit = (
+    recordId: any,
+    tableName: string,
+    fields: { key: string; label: string; type?: string }[]
+  ) => {
+    setAuditTarget({ recordId, tableName, fields });
+    setShowAuditModal(true);
+  };
 
   // Selected Puskeswan untuk Apotek Tab
   const initialPuskId = useMemo(() => {
@@ -294,7 +312,9 @@ export default function StokGudangKeswanPage() {
           masterBarang={masterBarang}
           onOpenTambahDropping={() => setIsModalDroppingOpen(true)}
           onDeleteDropping={handleDeleteDropping}
+          canCreate={canCreate}
           canEdit={canEdit}
+          onOpenAudit={handleOpenAudit}
         />
       )}
 
@@ -309,7 +329,9 @@ export default function StokGudangKeswanPage() {
           onOpenPrintBa={(item) => setPrintBaItem(item)}
           onOpenUploadBa={(item) => setUploadBaItem(item)}
           onDeleteDistribusi={handleDeleteDistribusi}
+          canCreate={canCreate}
           canEdit={canEdit}
+          onOpenAudit={handleOpenAudit}
         />
       )}
 
@@ -324,8 +346,10 @@ export default function StokGudangKeswanPage() {
             setIsModalPenggunaanOpen(true);
           }}
           onDeletePenggunaan={handleDeletePenggunaan}
+          canCreate={canCreate}
           canEdit={canEdit}
           isAdmin={isAdmin}
+          onOpenAudit={handleOpenAudit}
         />
       )}
 
@@ -397,6 +421,18 @@ export default function StokGudangKeswanPage() {
             showToast('success', 'Bukti tanda terima Berita Acara berhasil diunggah.');
             loadGudangData();
           }}
+        />
+      )}
+
+      {showAuditModal && auditTarget && (
+        <UniversalAuditModal
+          isOpen={showAuditModal}
+          onClose={() => setShowAuditModal(false)}
+          recordId={auditTarget.recordId}
+          tableName={auditTarget.tableName}
+          moduleKey="keswan"
+          submenuKey="stok-gudang"
+          availableFields={auditTarget.fields as any}
         />
       )}
     </div>

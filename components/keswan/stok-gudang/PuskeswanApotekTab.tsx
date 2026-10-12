@@ -24,8 +24,10 @@ interface PuskeswanApotekTabProps {
   setSelectedPuskId: (id: number) => void;
   onOpenCatatPenggunaan: (item?: StokPuskeswanItem) => void;
   onDeletePenggunaan: (id: number) => void;
+  canCreate?: boolean;
   canEdit: boolean;
   isAdmin: boolean;
+  onOpenAudit?: (recordId: any, tableName: string, fields: any[]) => void;
 }
 
 export default function PuskeswanApotekTab({
@@ -35,8 +37,10 @@ export default function PuskeswanApotekTab({
   setSelectedPuskId,
   onOpenCatatPenggunaan,
   onDeletePenggunaan,
+  canCreate,
   canEdit,
   isAdmin,
+  onOpenAudit,
 }: PuskeswanApotekTabProps) {
   const [activeSubTab, setActiveSubTab] = useState<'stok' | 'penggunaan'>('stok');
   const [searchTerm, setSearchTerm] = useState('');
@@ -165,7 +169,7 @@ export default function PuskeswanApotekTab({
             </button>
           )}
 
-          {canEdit && (
+          {(canCreate || canEdit) && (
             <button
               onClick={() => onOpenCatatPenggunaan()}
               className="flex items-center gap-1.5 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold rounded-xl shadow-md transition-all cursor-pointer"
@@ -211,7 +215,7 @@ export default function PuskeswanApotekTab({
                   <th className="p-3.5 text-center border-r border-slate-300 dark:border-slate-700">Terpakai</th>
                   <th className="p-3.5 text-center border-r border-slate-300 dark:border-slate-700">Sisa Stok</th>
                   <th className="p-3.5 text-center border-r border-slate-300 dark:border-slate-700">Status</th>
-                  {canEdit && <th className="p-3.5 text-center w-24">Aksi</th>}
+                  <th className="p-3.5 text-center w-28">Aksi</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-300 dark:divide-slate-700 text-slate-700 dark:text-slate-200">
@@ -274,21 +278,41 @@ export default function PuskeswanApotekTab({
                           </span>
                         )}
                       </td>
-                      {canEdit && (
-                        <td className="p-3.5 text-center">
-                          <button
-                            onClick={() => onOpenCatatPenggunaan(item)}
-                            disabled={item.sisa_stok <= 0}
-                            className={`px-3 py-1.5 rounded-lg text-xs font-semibold shadow-xs transition-all cursor-pointer ${
-                              item.sisa_stok <= 0
-                                ? 'bg-slate-100 dark:bg-slate-800 text-slate-400 cursor-not-allowed'
-                                : 'bg-emerald-600 hover:bg-emerald-700 text-white'
-                            }`}
-                          >
-                            Pakai
-                          </button>
-                        </td>
-                      )}
+                      <td className="p-3.5 text-center whitespace-nowrap">
+                        <div className="flex items-center justify-center gap-1.5">
+                          {(canCreate || canEdit) && (
+                            <button
+                              onClick={() => onOpenCatatPenggunaan(item)}
+                              disabled={item.sisa_stok <= 0}
+                              className={`px-2.5 py-1 rounded-lg text-xs font-semibold shadow-xs transition-all cursor-pointer ${
+                                item.sisa_stok <= 0
+                                  ? 'bg-slate-100 dark:bg-slate-800 text-slate-400 cursor-not-allowed'
+                                  : 'bg-emerald-600 hover:bg-emerald-700 text-white'
+                              }`}
+                              title="Catat pemakaian obat ini"
+                            >
+                              Pakai
+                            </button>
+                          )}
+                          {onOpenAudit && item.id_stok_puskeswan && (
+                            <button
+                              onClick={() =>
+                                onOpenAudit(item.id_stok_puskeswan, 'stok_puskeswan', [
+                                  { key: 'nama_barang', label: 'Nama Barang' },
+                                  { key: 'nomor_batch', label: 'Nomor Batch' },
+                                  { key: 'sisa_stok', label: 'Sisa Stok', type: 'number' },
+                                  { key: 'stok_masuk', label: 'Stok Masuk', type: 'number' },
+                                  { key: 'stok_keluar', label: 'Stok Keluar', type: 'number' },
+                                ])
+                              }
+                              className="p-1.5 text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-950/40 rounded-lg transition-colors cursor-pointer"
+                              title="Riwayat & Ajukan Koreksi ke Admin"
+                            >
+                              <Clock className="w-3.5 h-3.5" />
+                            </button>
+                          )}
+                        </div>
+                      </td>
                     </tr>
                   ))
                 )}
@@ -332,7 +356,7 @@ export default function PuskeswanApotekTab({
                   <th className="p-3.5 text-center font-bold border-r border-slate-300 dark:border-slate-700">7. Kemasan</th>
                   <th className="p-3.5 border-r border-slate-300 dark:border-slate-700">Keterangan / Kasus</th>
                   <th className="p-3.5 border-r border-slate-300 dark:border-slate-700">Petugas</th>
-                  {canEdit && <th className="p-3.5 text-center w-16">Aksi</th>}
+                  <th className="p-3.5 text-center w-24">Aksi</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-300 dark:divide-slate-700 text-slate-700 dark:text-slate-200">
@@ -377,17 +401,38 @@ export default function PuskeswanApotekTab({
                       <td className="p-3.5 text-slate-500 dark:text-slate-400 text-[11px] whitespace-nowrap border-r border-slate-300 dark:border-slate-700">
                         {item.petugas || '-'}
                       </td>
-                      {canEdit && (
-                        <td className="p-3.5 text-center">
-                          <button
-                            onClick={() => onDeletePenggunaan(item.id_penggunaan)}
-                            className="p-1.5 text-slate-400 hover:text-rose-600 rounded-lg hover:bg-rose-50 dark:hover:bg-rose-950/40 transition-colors cursor-pointer"
-                            title="Hapus pemakaian & kembalikan stok"
-                          >
-                            <Trash2 className="w-4 h-4" />
-                          </button>
-                        </td>
-                      )}
+                      <td className="p-3.5 text-center whitespace-nowrap">
+                        <div className="flex items-center justify-center gap-1.5">
+                          {onOpenAudit && (
+                            <button
+                              onClick={() =>
+                                onOpenAudit(item.id_penggunaan, 'penggunaan_obat_puskeswan', [
+                                  { key: 'tanggal', label: 'Tanggal Pemakaian', type: 'date' },
+                                  { key: 'nama_produk', label: 'Nama Produk / Obat' },
+                                  { key: 'nomor_batch', label: 'Nomor Batch' },
+                                  { key: 'jumlah_penggunaan', label: 'Jumlah Pemakaian', type: 'number' },
+                                  { key: 'kemasan', label: 'Kemasan' },
+                                  { key: 'keterangan', label: 'Keterangan Kasus / Pasien' },
+                                  { key: 'petugas', label: 'Nama Petugas' },
+                                ])
+                              }
+                              className="p-1.5 text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-950/40 rounded-lg transition-colors cursor-pointer"
+                              title="Riwayat & Ajukan Koreksi ke Admin"
+                            >
+                              <Clock className="w-3.5 h-3.5" />
+                            </button>
+                          )}
+                          {canEdit && (
+                            <button
+                              onClick={() => onDeletePenggunaan(item.id_penggunaan)}
+                              className="p-1.5 text-slate-400 hover:text-rose-600 rounded-lg hover:bg-rose-50 dark:hover:bg-rose-950/40 transition-colors cursor-pointer"
+                              title="Hapus pemakaian & kembalikan stok"
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </button>
+                          )}
+                        </div>
+                      </td>
                     </tr>
                   ))
                 )}

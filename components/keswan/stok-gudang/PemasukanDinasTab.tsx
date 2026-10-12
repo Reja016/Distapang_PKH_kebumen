@@ -10,6 +10,7 @@ import {
   Search,
   FileSpreadsheet,
   Building,
+  Clock,
 } from 'lucide-react';
 import * as XLSX from 'xlsx';
 import { DroppingDinasItem, MasterBarang } from './types';
@@ -19,7 +20,9 @@ interface PemasukanDinasTabProps {
   masterBarang: MasterBarang[];
   onOpenTambahDropping: () => void;
   onDeleteDropping: (id: number) => void;
+  canCreate?: boolean;
   canEdit: boolean;
+  onOpenAudit?: (recordId: any, tableName: string, fields: any[]) => void;
 }
 
 export default function PemasukanDinasTab({
@@ -27,7 +30,9 @@ export default function PemasukanDinasTab({
   masterBarang,
   onOpenTambahDropping,
   onDeleteDropping,
+  canCreate,
   canEdit,
+  onOpenAudit,
 }: PemasukanDinasTabProps) {
   const [searchTerm, setSearchTerm] = useState('');
   const [filterSumber, setFilterSumber] = useState('ALL');
@@ -140,7 +145,7 @@ export default function PemasukanDinasTab({
             Excel
           </button>
 
-          {canEdit && (
+          {(canCreate || canEdit) && (
             <button
               onClick={onOpenTambahDropping}
               className="flex items-center gap-1.5 px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-xl shadow-md transition-all cursor-pointer shrink-0"
@@ -169,7 +174,7 @@ export default function PemasukanDinasTab({
                 <th className="p-3.5 text-right border-r border-slate-300 dark:border-slate-700">Harga Satuan</th>
                 <th className="p-3.5 text-right border-r border-slate-300 dark:border-slate-700">Total Nilai</th>
                 <th className="p-3.5 border-r border-slate-300 dark:border-slate-700">Penyerah &amp; Penerima</th>
-                {canEdit && <th className="p-3.5 text-center w-16">Aksi</th>}
+                <th className="p-3.5 text-center w-24">Aksi</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-300 dark:divide-slate-700 text-slate-700 dark:text-slate-200">
@@ -223,18 +228,42 @@ export default function PemasukanDinasTab({
                         Terima: <span className="font-medium text-slate-700 dark:text-slate-300">{item.yang_menerima || '-'}</span>
                       </div>
                     </td>
-                    {canEdit && (
-                      <td className="p-3.5 text-center">
-                        <button
-                          onClick={() => onDeleteDropping(item.id_dropping_dinas)}
-                          className="p-1.5 text-slate-400 hover:text-rose-600 dark:hover:text-rose-400 rounded-lg hover:bg-rose-50 dark:hover:bg-rose-950/40 transition-colors cursor-pointer"
-                          title="Hapus data dropping"
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </button>
+                    <td className="p-3.5 text-center whitespace-nowrap">
+                        <div className="flex items-center justify-center gap-1.5">
+                          {onOpenAudit && (
+                            <button
+                              onClick={() =>
+                                onOpenAudit(item.id_dropping_dinas, 'dropping_dinas', [
+                                  { key: 'tahun', label: 'Tahun Anggaran', type: 'number' },
+                                  { key: 'bulan', label: 'Bulan' },
+                                  { key: 'nama_barang', label: 'Nama Barang' },
+                                  { key: 'nomor_batch', label: 'Nomor Batch' },
+                                  { key: 'sumber_anggaran', label: 'Sumber Anggaran' },
+                                  { key: 'jumlah', label: 'Jumlah Dropping', type: 'number' },
+                                  { key: 'harga_satuan', label: 'Harga Satuan', type: 'number' },
+                                  { key: 'harga_total', label: 'Total Nilai', type: 'number' },
+                                  { key: 'yang_menyerahkan', label: 'Yang Menyerahkan' },
+                                  { key: 'yang_menerima', label: 'Yang Menerima' },
+                                ])
+                              }
+                              className="p-1.5 text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-950/40 rounded-lg transition-colors cursor-pointer"
+                              title="Riwayat & Ajukan Koreksi ke Admin"
+                            >
+                              <Clock className="w-3.5 h-3.5" />
+                            </button>
+                          )}
+                          {canEdit && (
+                            <button
+                              onClick={() => onDeleteDropping(item.id_dropping_dinas)}
+                              className="p-1.5 text-slate-400 hover:text-rose-600 dark:hover:text-rose-400 rounded-lg hover:bg-rose-50 dark:hover:bg-rose-950/40 transition-colors cursor-pointer"
+                              title="Hapus data dropping"
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </button>
+                          )}
+                        </div>
                       </td>
-                    )}
-                  </tr>
+                    </tr>
                 ))
               )}
             </tbody>

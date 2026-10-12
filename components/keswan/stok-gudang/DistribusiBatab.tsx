@@ -23,7 +23,9 @@ interface DistribusiBatabProps {
   onOpenPrintBa: (item: DistribusiBaItem) => void;
   onOpenUploadBa: (item: DistribusiBaItem) => void;
   onDeleteDistribusi: (id: number) => void;
+  canCreate?: boolean;
   canEdit: boolean;
+  onOpenAudit?: (recordId: any, tableName: string, fields: any[]) => void;
 }
 
 export default function DistribusiBatab({
@@ -32,7 +34,9 @@ export default function DistribusiBatab({
   onOpenPrintBa,
   onOpenUploadBa,
   onDeleteDistribusi,
+  canCreate,
   canEdit,
+  onOpenAudit,
 }: DistribusiBatabProps) {
   const [searchTerm, setSearchTerm] = useState('');
   const [filterPusk, setFilterPusk] = useState('ALL');
@@ -99,7 +103,7 @@ export default function DistribusiBatab({
             <option value="DARURAT">Khusus Status Darurat</option>
           </select>
 
-          {canEdit && (
+          {(canCreate || canEdit) && (
             <>
               <button
                 onClick={() => onOpenCreateDistribusi(false)}
@@ -225,6 +229,28 @@ export default function DistribusiBatab({
                         >
                           <Printer className="w-3.5 h-3.5" /> Kop BA
                         </button>
+
+                        {onOpenAudit && (
+                          <button
+                            onClick={() =>
+                              onOpenAudit(item.id_distribusi, 'distribusi_obat', [
+                                { key: 'nomor_ba', label: 'Nomor Berita Acara' },
+                                { key: 'tanggal_ba', label: 'Tanggal BA', type: 'date' },
+                                { key: 'nama_puskeswan', label: 'Puskeswan Tujuan' },
+                                { key: 'nama_barang', label: 'Nama Barang' },
+                                { key: 'nomor_batch', label: 'Nomor Batch' },
+                                { key: 'jumlah', label: 'Jumlah Alokasi', type: 'number' },
+                                { key: 'jenis_distribusi', label: 'Jenis Distribusi' },
+                                { key: 'yang_menyerahkan', label: 'Yang Menyerahkan' },
+                                { key: 'yang_menerima', label: 'Yang Menerima' },
+                              ])
+                            }
+                            className="p-1.5 text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-950/40 rounded-lg transition-colors cursor-pointer"
+                            title="Riwayat & Ajukan Koreksi ke Admin"
+                          >
+                            <Clock className="w-3.5 h-3.5" />
+                          </button>
+                        )}
 
                         {canEdit && (
                           <button
