@@ -10,6 +10,7 @@ import {
 } from 'lucide-react';
 import { ModuleNavGroup, SubmenuItem, MODULE_NAV_DATA } from './types';
 import { checkModuleAccess, checkSubmenuAccess } from '@/lib/auth';
+import AnnouncementBanner from './AnnouncementBanner';
 
 interface DashboardOverviewProps {
   isDark: boolean;
@@ -144,6 +145,9 @@ export default function DashboardOverview({
           </div>
         </div>
       </div>
+
+      {/* Banner Informasi Pengumuman Dinas (Target-Specific) */}
+      <AnnouncementBanner isDark={isDark} userDisplay={userDisplay} />
 
       {/* Grid Modul: Akses 1-Klik Langsung */}
       <div>
