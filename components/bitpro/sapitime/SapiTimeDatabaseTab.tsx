@@ -78,7 +78,7 @@ export function SapiTimeDatabaseTab({
               <button
                 onClick={() => {
                   setEditingCattle(null);
-                  setFormData({ status: 'Estrus', cycleLength: 21, kecamatan: '', desa: '', ownerName: '' });
+                  setFormData({ status: 'Estrus', cycleLength: 21, kecamatan: '', desa: '', ownerName: '', nik: '' });
                 }}
                 className="text-xs font-bold px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 transition-colors"
               >
@@ -96,6 +96,18 @@ export function SapiTimeDatabaseTab({
                 value={formData.ownerName || ''}
                 onChange={(e) => setFormData({ ...formData, ownerName: e.target.value })}
                 placeholder="Nama pemilik peternak"
+              />
+            </div>
+            <div>
+              <label className="block text-xs font-bold mb-1 text-slate-700">NIK Peternak</label>
+              <input
+                type="text"
+                inputMode="numeric"
+                maxLength={16}
+                className="w-full min-h-touch h-10 px-3.5 border border-slate-200 rounded-xl bg-slate-50 focus:bg-white focus:outline-none focus:border-emerald-600 text-xs font-bold text-slate-900"
+                value={formData.nik || ''}
+                onChange={(e) => setFormData({ ...formData, nik: e.target.value.replace(/\D/g, '') })}
+                placeholder="16 digit NIK (opsional)"
               />
             </div>
             <div>
@@ -217,7 +229,7 @@ export function SapiTimeDatabaseTab({
               <button
                 onClick={() => {
                   setEditingCattle(null);
-                  setFormData({ status: 'Estrus', cycleLength: 21, kecamatan: '', desa: '', ownerName: '' });
+                  setFormData({ status: 'Estrus', cycleLength: 21, kecamatan: '', desa: '', ownerName: '', nik: '' });
                 }}
                 className="min-h-touch h-10 px-5 rounded-xl border border-slate-200 bg-slate-100 hover:bg-slate-200 text-xs font-bold text-slate-700 transition-colors"
               >
@@ -240,7 +252,7 @@ export function SapiTimeDatabaseTab({
           <Search size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
           <input
             type="text"
-            placeholder="Cari nama peternak atau sapi..."
+            placeholder="Cari nama peternak, NIK, atau sapi..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             className="w-full min-h-touch h-11 pl-11 pr-4 bg-white border border-slate-200 rounded-xl text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-emerald-600 text-sm shadow-xs transition-colors"
@@ -262,7 +274,8 @@ export function SapiTimeDatabaseTab({
           .filter(
             (c) =>
               c.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-              (c.ownerName || '').toLowerCase().includes(searchTerm.toLowerCase())
+              (c.ownerName || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+              (c.nik || '').includes(searchTerm)
           )
           .map((cattle) => {
             const latestIb = cattle.inseminations && cattle.inseminations.length > 0
@@ -306,8 +319,13 @@ export function SapiTimeDatabaseTab({
                     <div className="min-w-0">
                       <h3 className="font-bold text-base text-slate-900 truncate flex items-center gap-1.5">
                         <User size={16} className="text-slate-400 shrink-0" />
-                        {cattle.ownerName || 'Tanpa Nama'}
+                        <span>{cattle.ownerName || 'Tanpa Nama'}</span>
                       </h3>
+                      {cattle.nik && (
+                        <p className="text-[11px] font-medium text-slate-500 mt-0.5 truncate">
+                          NIK: <span className="font-mono text-slate-700 font-semibold">{cattle.nik}</span>
+                        </p>
+                      )}
                       <p className="font-bold text-sm text-emerald-700 mt-1 truncate">Sapi: {cattle.name}</p>
                       <p className="text-xs text-slate-500 mt-0.5 truncate">
                         {cattle.id} • {cattle.kecamatan || '-'}, {cattle.desa || '-'}

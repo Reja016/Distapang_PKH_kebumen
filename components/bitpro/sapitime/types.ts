@@ -32,6 +32,7 @@ export type Cattle = {
   id: string;
   name: string;
   ownerName: string;
+  nik?: string;
   breed: string;
   birthDate: string;
   kecamatan: string;

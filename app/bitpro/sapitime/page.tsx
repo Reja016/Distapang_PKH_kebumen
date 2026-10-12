@@ -495,6 +495,7 @@ export default function SapiTimePage() {
         availableFields={[
           { key: 'name', label: 'Nama Sapi' },
           { key: 'ownerName', label: 'Nama Peternak' },
+          { key: 'nik', label: 'NIK Peternak' },
           { key: 'breed', label: 'Ras' },
           { key: 'kecamatan', label: 'Kecamatan' },
           { key: 'desa', label: 'Desa' },

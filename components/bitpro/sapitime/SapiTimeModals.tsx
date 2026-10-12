@@ -136,6 +136,18 @@ export function ModalCattleForm({
             />
           </div>
           <div>
+            <label className="block text-xs font-bold mb-1 text-slate-700">NIK Peternak</label>
+            <input
+              type="text"
+              inputMode="numeric"
+              maxLength={16}
+              className="w-full min-h-touch h-11 px-3.5 border border-slate-200 rounded-xl bg-slate-50 focus:bg-white focus:outline-none focus:border-emerald-600 text-xs text-slate-900 font-bold"
+              value={formData.nik || ''}
+              onChange={(e) => setFormData({ ...formData, nik: e.target.value.replace(/\D/g, '') })}
+              placeholder="16 digit NIK (opsional)"
+            />
+          </div>
+          <div>
             <label className="block text-xs font-bold mb-1 text-slate-700">Nama Sapi</label>
             <input
               type="text"

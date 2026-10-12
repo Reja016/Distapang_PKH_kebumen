@@ -89,9 +89,25 @@ async function ensureSapitimeColumns() {
   }
 }
 
+// Helper memastikan kolom nik ada di sapitime_master
+async function ensureSapitimeMasterColumns() {
+  try {
+    const [colsRows]: any = await pool.query('SHOW COLUMNS FROM sapitime_master');
+    const cols = (colsRows || []).map((c: any) => c.Field);
+    if (!cols.includes('nik')) {
+      try {
+        await pool.execute('ALTER TABLE sapitime_master ADD COLUMN nik VARCHAR(20) NULL AFTER ownerName');
+      } catch {}
+    }
+  } catch (e) {
+    console.error('ensureSapitimeMasterColumns error', e);
+  }
+}
+
 export async function GET() {
   try {
     await ensureSapitimeColumns();
+    await ensureSapitimeMasterColumns();
     const [cattle] = await pool.query('SELECT * FROM sapitime_master ORDER BY created_at DESC');
     const [ibs] = await pool.query('SELECT * FROM sapitime_ib ORDER BY date ASC, id ASC');
     const [historyRows]: any = await pool.query('SELECT * FROM sapitime_history ORDER BY date DESC LIMIT 100');
@@ -216,6 +232,7 @@ export async function POST(req: Request) {
 
     // 2. Routing Aksi Database IB & SapiTime
     if (action === 'add_cattle') {
+      await ensureSapitimeMasterColumns();
       let finalId = payload.id;
       // Cek apakah ID sudah ada di tabel sapitime_master agar tidak duplicate primary key
       const [existing]: any = await pool.query('SELECT id FROM sapitime_master WHERE id = ?', [finalId]);
@@ -230,15 +247,16 @@ export async function POST(req: Request) {
       }
 
       await pool.query(
-        'INSERT INTO sapitime_master (id, name, ownerName, breed, birthDate, kecamatan, desa, status, lastEstrus, pregnancyDate) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
-        [finalId, payload.name, payload.ownerName, payload.breed, payload.birthDate || null, payload.kecamatan, payload.desa, payload.status, payload.lastEstrus || null, payload.pregnancyDate || null]
+        'INSERT INTO sapitime_master (id, name, ownerName, nik, breed, birthDate, kecamatan, desa, status, lastEstrus, pregnancyDate) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
+        [finalId, payload.name, payload.ownerName, payload.nik || null, payload.breed, payload.birthDate || null, payload.kecamatan, payload.desa, payload.status, payload.lastEstrus || null, payload.pregnancyDate || null]
       );
       await logActivity('sapitime', finalId, 'CREATE', { ...payload, id: finalId });
     } 
     else if (action === 'update_cattle') {
+      await ensureSapitimeMasterColumns();
       await pool.query(
-        'UPDATE sapitime_master SET name=?, ownerName=?, breed=?, birthDate=?, kecamatan=?, desa=?, status=?, lastEstrus=?, pregnancyDate=? WHERE id=?',
-        [payload.name, payload.ownerName, payload.breed, payload.birthDate || null, payload.kecamatan, payload.desa, payload.status, payload.lastEstrus || null, payload.pregnancyDate || null, payload.id]
+        'UPDATE sapitime_master SET name=?, ownerName=?, nik=?, breed=?, birthDate=?, kecamatan=?, desa=?, status=?, lastEstrus=?, pregnancyDate=? WHERE id=?',
+        [payload.name, payload.ownerName, payload.nik || null, payload.breed, payload.birthDate || null, payload.kecamatan, payload.desa, payload.status, payload.lastEstrus || null, payload.pregnancyDate || null, payload.id]
       );
       await logActivity('sapitime', payload.id, 'UPDATE', payload);
     } 
