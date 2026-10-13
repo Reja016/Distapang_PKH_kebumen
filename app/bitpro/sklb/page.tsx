@@ -28,6 +28,7 @@ import {
   ModalAddYear,
   ModalRekap,
   ModalDetail,
+  ModalEditTotalSapiPO,
 } from '@/components/bitpro/sklb/SklbModals';
 import { UniversalAuditModal } from '@/components/common/UniversalAuditModal';
 
@@ -44,7 +45,9 @@ export default function UnifiedSKLBPage() {
   const [sapiPOData, setSapiPOData] = useState<any[]>([]);
   const [sapiPOKecMap, setSapiPOKecMap] = useState<Record<string, number>>({});
   const [totalSapiPO, setTotalSapiPO] = useState<number>(50450);
+  const [calculatedSum, setCalculatedSum] = useState<number>(50450);
   const [triwulanText, setTriwulanText] = useState<string>('Triwulan 2');
+  const [showEditTotalModal, setShowEditTotalModal] = useState<boolean>(false);
   const [isLoadingSapiPO, setIsLoadingSapiPO] = useState<boolean>(true);
 
   const [selectedKecamatan, setSelectedKecamatan] = useState<any | null>(null);
@@ -114,6 +117,7 @@ export default function UnifiedSKLBPage() {
         setSapiPOData(rezaProcessSklbData(json.data || []));
         setSapiPOKecMap(json.kecMap || {});
         setTotalSapiPO(json.totalPopulasi || 0);
+        setCalculatedSum(json.calculatedSum || 0);
         if (json.triwulan) setTriwulanText(json.triwulan);
       }
     } catch (err) {
@@ -587,6 +591,7 @@ export default function UnifiedSKLBPage() {
           setHoveredKecamatan={setHoveredKecamatan}
           canEdit={canEdit}
           topKecamatan={topKecamatan}
+          onOpenEditTotalSapiPO={() => setShowEditTotalModal(true)}
           onOpenEditSapiPO={(kec) => {
             const cleanId = kec.id.toLowerCase().replace('k_', '');
             setFormSapiPO({
@@ -695,6 +700,17 @@ export default function UnifiedSKLBPage() {
         </section>
 
       </main>
+
+      {/* MODAL: EDIT TOTAL POPULASI & TRIWULAN SAPI PO */}
+      <ModalEditTotalSapiPO
+        open={showEditTotalModal}
+        onClose={() => setShowEditTotalModal(false)}
+        selectedYear={selectedYear}
+        currentTotal={totalSapiPO}
+        calculatedSum={calculatedSum}
+        currentTriwulan={triwulanText}
+        onSuccess={() => loadSapiPOData(selectedYear)}
+      />
 
       {/* MODAL: INPUT / EDIT POPULASI SAPI PO PER KECAMATAN */}
       <ModalSapiPO

@@ -21,6 +21,7 @@ interface SklbPetaSectionProps {
   canEdit: boolean;
   topKecamatan: { nama: string; pop: number };
   onOpenEditSapiPO: (kec: any) => void;
+  onOpenEditTotalSapiPO?: () => void;
   onShowHistory?: (row: any) => void;
 }
 
@@ -36,6 +37,7 @@ export function SklbPetaSection({
   canEdit,
   topKecamatan,
   onOpenEditSapiPO,
+  onOpenEditTotalSapiPO,
   onShowHistory,
 }: SklbPetaSectionProps) {
   return (
@@ -245,10 +247,20 @@ export function SklbPetaSection({
           {/* Card Ringkasan Total Populasi */}
           <div className="bg-gradient-to-br from-emerald-600 to-teal-800 text-white rounded-3xl p-6 shadow-md relative overflow-hidden">
             <div className="relative z-10 space-y-3">
-              <div className="flex items-center justify-between">
+              <div className="flex items-center justify-between gap-2">
                 <span className="text-[11px] font-black uppercase tracking-wider text-emerald-100 bg-white/15 px-3 py-1 rounded-xl backdrop-blur-xs">
                   {triwulanText} {selectedYear}
                 </span>
+                {canEdit && onOpenEditTotalSapiPO && (
+                  <button
+                    onClick={onOpenEditTotalSapiPO}
+                    className="h-7 px-2.5 rounded-xl bg-white/20 hover:bg-white/30 active:scale-95 text-white transition-all cursor-pointer flex items-center gap-1.5 text-[11px] font-bold backdrop-blur-xs"
+                    title="Edit Total Populasi & Triwulan"
+                  >
+                    <Edit2 size={12} />
+                    <span>Edit Total</span>
+                  </button>
+                )}
               </div>
 
               <div>

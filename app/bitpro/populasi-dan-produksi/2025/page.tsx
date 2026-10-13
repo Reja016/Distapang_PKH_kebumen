@@ -163,7 +163,7 @@ export default function Populasi2025() {
           
           <div className="p-4 border-b border-slate-300 dark:border-slate-700 flex items-center justify-between bg-slate-50/50 dark:bg-slate-800/60">
             <span className="text-xs font-bold text-slate-700 dark:text-slate-300 font-sans">
-              Menampilkan {filteredData.length} Desa dari Database MySQL (`populasi`)
+              Menampilkan {filteredData.length} Desa
             </span>
             <span className="text-xs font-semibold text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/60 px-3 py-1 rounded-full border border-emerald-100 dark:border-emerald-800">
               Sinkronisasi Live
