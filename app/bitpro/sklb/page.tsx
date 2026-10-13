@@ -25,7 +25,6 @@ import { SklbRekapTab } from '@/components/bitpro/sklb/SklbRekapTab';
 import { SklbDetailTab } from '@/components/bitpro/sklb/SklbDetailTab';
 import {
   ModalSapiPO,
-  ModalAddYear,
   ModalRekap,
   ModalDetail,
   ModalEditTotalSapiPO,
@@ -36,11 +35,9 @@ export default function UnifiedSKLBPage() {
   const { isReady, canCreate, canEdit } = usePageAuth('bitpro', 'sklb');
 
   // ── SAPI PO PETA & MULTI-YEAR STATE ──
-  const [selectedYear, setSelectedYear] = useState<number>(2026);
-  const [availableYears, setAvailableYears] = useState<number[]>([2025, 2026]);
-  const [showAddYearModal, setShowAddYearModal] = useState<boolean>(false);
-  const [newYearInput, setNewYearInput] = useState<number>(2027);
-  const [isAddingYear, setIsAddingYear] = useState<boolean>(false);
+  const currentYear = new Date().getFullYear();
+  const [selectedYear, setSelectedYear] = useState<number>(currentYear);
+  const [availableYears, setAvailableYears] = useState<number[]>([2027, 2026, 2025, 2024]);
 
   const [sapiPOData, setSapiPOData] = useState<any[]>([]);
   const [sapiPOKecMap, setSapiPOKecMap] = useState<Record<string, number>>({});
@@ -178,36 +175,6 @@ export default function UnifiedSKLBPage() {
     loadTablesData(selectedYear);
   }, [selectedYear]);
 
-  // ── TAMBAH TAHUN BARU HANDLER ──
-  const handleAddYearSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!newYearInput || newYearInput < 2000) {
-      alert('Masukkan tahun yang valid');
-      return;
-    }
-
-    try {
-      setIsAddingYear(true);
-      const res = await fetch('/api/sklb-sapi-po', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ action: 'add_year', tahun: newYearInput }),
-      });
-      const json = await res.json();
-      if (json.success) {
-        await loadAvailableYears();
-        setSelectedYear(newYearInput);
-        setShowAddYearModal(false);
-        alert(`Periode Tahun ${newYearInput} berhasil ditambahkan!`);
-      } else {
-        alert(json.error || 'Gagal menambahkan tahun baru');
-      }
-    } catch (err: any) {
-      alert('Terjadi kesalahan: ' + err.message);
-    } finally {
-      setIsAddingYear(false);
-    }
-  };
 
   // ── SAVE POPULASI SAPI PO HANDLER ──
   const handleSaveSapiPO = async (e: React.FormEvent) => {
@@ -585,19 +552,6 @@ export default function UnifiedSKLBPage() {
             </select>
           </div>
 
-          {canEdit && (
-            <button
-              onClick={() => {
-                const maxYear = Math.max(...availableYears, 2026);
-                setNewYearInput(maxYear + 1);
-                setShowAddYearModal(true);
-              }}
-              className="h-9 px-3.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold flex items-center gap-1.5 shadow-xs transition-colors cursor-pointer"
-            >
-              <Plus size={14} />
-              <span>Tambah Tahun Baru</span>
-            </button>
-          )}
         </div>
 
         {/* 1. PETA SEBARAN POPULASI SAPI PO */}
@@ -746,15 +700,6 @@ export default function UnifiedSKLBPage() {
         handleSaveSapiPO={handleSaveSapiPO}
       />
 
-      {/* MODAL: TAMBAH TAHUN BARU */}
-      <ModalAddYear
-        showAddYearModal={showAddYearModal}
-        setShowAddYearModal={setShowAddYearModal}
-        newYearInput={newYearInput}
-        setNewYearInput={setNewYearInput}
-        isAddingYear={isAddingYear}
-        handleAddYearSubmit={handleAddYearSubmit}
-      />
 
       {/* MODAL: REKAP TIM */}
       <ModalRekap

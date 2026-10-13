@@ -27,19 +27,25 @@ export async function GET(req: Request) {
     const { searchParams } = new URL(req.url);
     const action = searchParams.get('action');
 
-    // 1. Ambil daftar tahun unik
+    // 1. Ambil daftar tahun unik (otomatis mengikuti sistem tahun berjalan)
     if (action === 'years') {
+      const currentYear = new Date().getFullYear();
       const [yearRows]: any = await pool.query(
         `SELECT DISTINCT tahun FROM bitpro_sklb_populasi_sapi_po ORDER BY tahun ASC`
       );
-      let years: number[] = yearRows ? yearRows.map((r: any) => Number(r.tahun)).filter(Boolean) : [];
-      if (!years.includes(2025)) years.push(2025);
-      if (!years.includes(2026)) years.push(2026);
-      years = Array.from(new Set<number>(years)).sort((a, b) => a - b);
+      const dbYears: number[] = yearRows ? yearRows.map((r: any) => Number(r.tahun)).filter(Boolean) : [];
+      
+      // Rentang tahun dinamis otomatis dari 2024 s/d (tahun sekarang + 1)
+      const systemYears: number[] = [];
+      for (let y = 2024; y <= Math.max(currentYear + 1, 2026); y++) {
+        systemYears.push(y);
+      }
+      const years = Array.from(new Set<number>([...systemYears, ...dbYears])).sort((a, b) => b - a);
       return NextResponse.json({ success: true, years });
     }
 
-    const tahun = Number(searchParams.get('tahun')) || 2026;
+    const currentYear = new Date().getFullYear();
+    const tahun = Number(searchParams.get('tahun')) || currentYear;
 
     // 2. Ambil setting tahun (jika ada)
     const [settingRows]: any = await pool.query(
@@ -48,26 +54,26 @@ export async function GET(req: Request) {
     );
     const setting = settingRows && settingRows.length > 0 ? settingRows[0] : null;
 
-    // 3. Ambil data populasi Sapi PO pada tahun tersebut dengan JOIN ke tabel master kecamatan
+    // 3. Ambil data 26 kecamatan dari master kecamatan, jika di DB kosong otomatis default populasi = 0
     const [rows]: any = await pool.query(
       `SELECT 
+         k.id_kecamatan,
+         k.kecamatan AS kecamatan_nama,
          p.id,
-         p.tahun,
-         p.id_kecamatan,
-         p.triwulan,
-         p.populasi,
-         p.keterangan,
-         COALESCE(k.kecamatan, '') AS kecamatan_nama
-       FROM bitpro_sklb_populasi_sapi_po p
-       LEFT JOIN kecamatan k ON p.id_kecamatan = k.id_kecamatan
-       WHERE p.tahun = ?
-       ORDER BY p.populasi DESC`,
-      [tahun]
+         COALESCE(p.tahun, ?) AS tahun,
+         COALESCE(p.triwulan, ?) AS triwulan,
+         COALESCE(p.populasi, 0) AS populasi,
+         p.keterangan
+       FROM kecamatan k
+       LEFT JOIN bitpro_sklb_populasi_sapi_po p 
+         ON k.id_kecamatan = p.id_kecamatan AND p.tahun = ?
+       ORDER BY k.id_kecamatan ASC`,
+      [tahun, setting?.triwulan || 'Triwulan 1', tahun]
     );
 
     const kecMap: Record<string, number> = {};
     let calculatedSum = 0;
-    let triwulan = setting?.triwulan || 'Triwulan 2';
+    let triwulan = setting?.triwulan || 'Triwulan 1';
 
     const formattedData = (rows || []).map((r: any) => {
       const kecName = r.kecamatan_nama || '';
