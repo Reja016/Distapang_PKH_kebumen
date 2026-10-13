@@ -103,16 +103,25 @@ export async function GET(req: Request) {
       ? Number(setting.total_populasi)
       : calculatedSum;
 
-    return NextResponse.json({
-      success: true,
-      tahun,
-      triwulan,
-      totalPopulasi,
-      calculatedSum,
-      isManualTotal,
-      kecMap,
-      data: formattedData,
-    });
+    return NextResponse.json(
+      {
+        success: true,
+        tahun,
+        triwulan,
+        totalPopulasi,
+        calculatedSum,
+        isManualTotal,
+        kecMap,
+        data: formattedData,
+      },
+      {
+        headers: {
+          'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate',
+          Pragma: 'no-cache',
+          Expires: '0',
+        },
+      }
+    );
   } catch (error: any) {
     console.error('Error GET sklb-sapi-po:', error);
     return NextResponse.json({ success: false, error: error.message }, { status: 500 });

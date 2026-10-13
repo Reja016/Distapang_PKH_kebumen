@@ -97,7 +97,13 @@ export default function UnifiedSKLBPage() {
   // ── LOAD AVAILABLE YEARS ──
   const loadAvailableYears = async () => {
     try {
-      const res = await fetch('/api/sklb-sapi-po?action=years');
+      const res = await fetch(`/api/sklb-sapi-po?action=years&_t=${Date.now()}`, {
+        cache: 'no-store',
+        headers: {
+          'Cache-Control': 'no-cache, no-store, must-revalidate',
+          Pragma: 'no-cache',
+        },
+      });
       const json = await res.json();
       if (json.success && Array.isArray(json.years)) {
         setAvailableYears(json.years);
@@ -111,7 +117,13 @@ export default function UnifiedSKLBPage() {
   const loadSapiPOData = async (year: number) => {
     try {
       setIsLoadingSapiPO(true);
-      const res = await fetch(`/api/sklb-sapi-po?tahun=${year}`);
+      const res = await fetch(`/api/sklb-sapi-po?tahun=${year}&_t=${Date.now()}`, {
+        cache: 'no-store',
+        headers: {
+          'Cache-Control': 'no-cache, no-store, must-revalidate',
+          Pragma: 'no-cache',
+        },
+      });
       const json = await res.json();
       if (json.success) {
         setSapiPOData(rezaProcessSklbData(json.data || []));
@@ -600,6 +612,7 @@ export default function UnifiedSKLBPage() {
           setHoveredKecamatan={setHoveredKecamatan}
           canEdit={canEdit}
           topKecamatan={topKecamatan}
+          isLoading={isLoadingSapiPO}
           onOpenEditTotalSapiPO={() => setShowEditTotalModal(true)}
           onOpenEditSapiPO={(kec) => {
             const cleanId = kec.id.toLowerCase().replace('k_', '');

@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { Sparkles, X, MapPin, Edit2 } from 'lucide-react';
+import { Sparkles, X, MapPin, Edit2, Loader2 } from 'lucide-react';
 import {
   KECAMATAN_ITEMS,
   KEBUMEN_MAP_VIEWBOX,
@@ -23,6 +23,7 @@ interface SklbPetaSectionProps {
   onOpenEditSapiPO: (kec: any) => void;
   onOpenEditTotalSapiPO?: () => void;
   onShowHistory?: (row: any) => void;
+  isLoading?: boolean;
 }
 
 export function SklbPetaSection({
@@ -39,6 +40,7 @@ export function SklbPetaSection({
   onOpenEditSapiPO,
   onOpenEditTotalSapiPO,
   onShowHistory,
+  isLoading,
 }: SklbPetaSectionProps) {
   return (
     <section className="bg-white rounded-3xl border border-slate-200/90 shadow-xs p-5 sm:p-8 space-y-6 relative overflow-hidden">
@@ -47,9 +49,12 @@ export function SklbPetaSection({
         <h2 className="text-lg sm:text-2xl font-black text-slate-900 tracking-tight uppercase">
           Peta Sebaran Populasi Sapi PO di Kabupaten Kebumen
         </h2>
-        <p className="text-xs sm:text-sm font-semibold text-emerald-800">
-          Peranakan Ongole &bull; Agregasi Tingkat Kecamatan &bull; Tahun {selectedYear}
-        </p>
+        <div className="flex items-center justify-center gap-2">
+          <p className="text-xs sm:text-sm font-semibold text-emerald-800">
+            Peranakan Ongole &bull; Agregasi Tingkat Kecamatan &bull; Tahun {selectedYear}
+          </p>
+          {isLoading && <Loader2 size={14} className="animate-spin text-emerald-600" />}
+        </div>
       </div>
 
       {/* Grid Layout: Peta di Kiri & Panel Samping di Kanan */}
