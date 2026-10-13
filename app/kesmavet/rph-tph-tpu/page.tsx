@@ -4,7 +4,6 @@ import { useState, useEffect, useMemo } from 'react';
 import Link from 'next/link';
 import * as XLSX from 'xlsx';
 import { usePageAuth } from '@/hooks/usePageAuth';
-import { getAuthSession } from '@/lib/auth';
 import {
   ArrowLeft,
   Download,
@@ -25,7 +24,7 @@ import {
 import { RumpunTableTab } from '@/components/kesmavet/rph-tph-tpu/RumpunTableTab';
 import { KomoditasTableTab } from '@/components/kesmavet/rph-tph-tpu/KomoditasTableTab';
 import { RumahPotongTab } from '@/components/kesmavet/rph-tph-tpu/RumahPotongTab';
-import { RphFormModal, AddYearModal } from '@/components/kesmavet/rph-tph-tpu/RphModals';
+import { RphFormModal } from '@/components/kesmavet/rph-tph-tpu/RphModals';
 
 export default function RphTphTpuPage() {
   const { isReady, canCreate, canEdit, isAdmin: isAuthAdmin, userRole } = usePageAuth('kesmavet', 'rph-tph-tpu');
@@ -35,19 +34,19 @@ export default function RphTphTpuPage() {
     return isAuthAdmin || canEdit || userRole === 'Administrator';
   }, [isAuthAdmin, canEdit, userRole]);
 
-  // Navigation tabs (URUTAN SESUAI PERMINTAAN USER: 1. Input Pemotongan, 2. TPH, 3. Data Rumah Potong)
+  // Navigation tabs (1. Input Pemotongan, 2. TPH, 3. Data Rumah Potong)
   const [activeTab, setActiveTab] = useState<'pemotongan_rumpun' | 'rekap_komoditas' | 'rumah_potong'>('pemotongan_rumpun');
 
   // Tab 1 & 2 Location Switcher
   const [selectedLokasiKey, setSelectedLokasiKey] = useState<string>('rph_kebumen');
-  const [selectedKomoditasFilter, setSelectedKomoditasFilter] = useState<string>('ALL');
 
-  // Year filter & dynamic multi-year state
-  const [selectedYear, setSelectedYear] = useState<number>(2025);
-  const [availableYears, setAvailableYears] = useState<number[]>([2025, 2026]);
-  const [showAddYearModal, setShowAddYearModal] = useState<boolean>(false);
-  const [newYearInput, setNewYearInput] = useState<number>(2026);
-  const [isAddingYear, setIsAddingYear] = useState<boolean>(false);
+  // Year & Month filter
+  const currentYear = new Date().getFullYear();
+  const currentMonth = new Date().getMonth() + 1;
+
+  const [selectedYear, setSelectedYear] = useState<number>(currentYear);
+  const [selectedMonth, setSelectedMonth] = useState<number>(currentMonth);
+  const [availableYears, setAvailableYears] = useState<number[]>([2027, 2026, 2025, 2024]);
 
   // ── 1. STATE TAB: DATA RUMAH POTONG (RPH / TPH / TPU) ──
   const [rphList, setRphList] = useState<any[]>([]);
@@ -59,7 +58,7 @@ export default function RphTphTpuPage() {
   const [editingItem, setEditingItem] = useState<any | null>(null);
   const [formRph, setFormRph] = useState<RphFormData>(INITIAL_RPH_FORM);
 
-  // ── 2. STATE TAB: INPUT PEMOTONGAN RUMAH POTONG HEWAN (4 TABEL RUMPUN SAPI) ──
+  // ── 2. STATE TAB: INPUT PEMOTONGAN RUMAH POTONG HEWAN (4 TABEL RUMPUN SAPI HARIAN) ──
   const [rumpunData, setRumpunData] = useState<Record<string, any[]>>({
     rph_kebumen: [],
     luar_rph_kebumen: [],
@@ -70,8 +69,13 @@ export default function RphTphTpuPage() {
   const [isSavingRumpun, setIsSavingRumpun] = useState(false);
   const [rumpunSaveMessage, setRumpunSaveMessage] = useState('');
 
-  // ── 3. STATE TAB: TEMPAT PEMOTONGAN HEWAN (TPH) / KOMODITAS TERNAK (12 BULAN) ──
-  const [komoditasData, setKomoditasData] = useState<any[]>([]);
+  // ── 3. STATE TAB: TEMPAT PEMOTONGAN HEWAN (TPH) / KOMODITAS TERNAK HARIAN ──
+  const [komoditasData, setKomoditasData] = useState<Record<string, any[]>>({
+    rph_kebumen: [],
+    luar_rph_kebumen: [],
+    rph_gombong: [],
+    luar_rph_gombong: [],
+  });
   const [isLoadingKomoditas, setIsLoadingKomoditas] = useState(false);
   const [isSavingKomoditas, setIsSavingKomoditas] = useState(false);
   const [komoditasSaveMessage, setKomoditasSaveMessage] = useState('');
@@ -85,15 +89,15 @@ export default function RphTphTpuPage() {
       ]);
       const json1 = await res1.json();
       const json2 = await res2.json();
-      
-      const yearsSet = new Set<number>([2025, 2026]);
+
+      const yearsSet = new Set<number>([2027, 2026, 2025, 2024]);
       if (json1.success && Array.isArray(json1.years)) {
         json1.years.forEach((y: number) => yearsSet.add(Number(y)));
       }
       if (json2.success && Array.isArray(json2.years)) {
         json2.years.forEach((y: number) => yearsSet.add(Number(y)));
       }
-      setAvailableYears(Array.from(yearsSet).sort((a, b) => a - b));
+      setAvailableYears(Array.from(yearsSet).sort((a, b) => b - a));
     } catch (err) {
       console.warn('Gagal memuat tahun unik:', err);
     }
@@ -115,11 +119,11 @@ export default function RphTphTpuPage() {
     }
   };
 
-  // ── 2. LOAD DATA PEMOTONGAN RUMPUN SAPI ──
-  const loadRumpunData = async (year: number) => {
+  // ── 2. LOAD DATA PEMOTONGAN RUMPUN SAPI HARIAN ──
+  const loadRumpunData = async (year: number, month: number) => {
     try {
       setIsLoadingRumpun(true);
-      const res = await fetch(`/api/pemotongan-rumpun?tahun=${year}`);
+      const res = await fetch(`/api/pemotongan-rumpun?tahun=${year}&bulan=${month}&mode=daily&_t=${Date.now()}`);
       const json = await res.json();
       if (json.success && json.data) {
         setRumpunData({
@@ -130,48 +134,28 @@ export default function RphTphTpuPage() {
         });
       }
     } catch (err) {
-      console.error('Gagal memuat data pemotongan rumpun:', err);
+      console.error('Gagal memuat data pemotongan rumpun harian:', err);
     } finally {
       setIsLoadingRumpun(false);
     }
   };
 
-  // ── 3. LOAD DATA REKAP KOMODITAS TERNAK ──
-  const loadKomoditasData = async (year: number) => {
+  // ── 3. LOAD DATA REKAP KOMODITAS TERNAK HARIAN ──
+  const loadKomoditasData = async (year: number, month: number) => {
     try {
       setIsLoadingKomoditas(true);
-      const res = await fetch(`/api/pemotongan-komoditas?tahun=${year}`);
+      const res = await fetch(`/api/pemotongan-komoditas?tahun=${year}&bulan=${month}&mode=daily&_t=${Date.now()}`);
       const json = await res.json();
-      if (json.success && Array.isArray(json.data)) {
-        let data = json.data;
-        const ensureBabi = (lokasiName: string) => {
-          const exists = data.some((r: any) => r.nama_pemotongan === lokasiName && (r.komoditas || '').toLowerCase() === 'babi');
-          if (!exists) {
-            data.push({
-              tahun: year,
-              nama_pemotongan: lokasiName,
-              komoditas: 'Babi',
-              jan_jantan: 0, jan_betina: 0,
-              feb_jantan: 0, feb_betina: 0,
-              mar_jantan: 0, mar_betina: 0,
-              apr_jantan: 0, apr_betina: 0,
-              mei_jantan: 0, mei_betina: 0,
-              jun_jantan: 0, jun_betina: 0,
-              jul_jantan: 0, jul_betina: 0,
-              agu_jantan: 0, agu_betina: 0,
-              sep_jantan: 0, sep_betina: 0,
-              okt_jantan: 0, okt_betina: 0,
-              nov_jantan: 0, nov_betina: 0,
-              des_jantan: 0, des_betina: 0,
-            });
-          }
-        };
-        ensureBabi('RPH Gombong');
-        ensureBabi('Luar RPH Gombong');
-        setKomoditasData(data);
+      if (json.success && json.data) {
+        setKomoditasData({
+          rph_kebumen: json.data.rph_kebumen || [],
+          luar_rph_kebumen: json.data.luar_rph_kebumen || [],
+          rph_gombong: json.data.rph_gombong || [],
+          luar_rph_gombong: json.data.luar_rph_gombong || [],
+        });
       }
     } catch (err) {
-      console.error('Gagal memuat data komoditas:', err);
+      console.error('Gagal memuat data komoditas harian:', err);
     } finally {
       setIsLoadingKomoditas(false);
     }
@@ -183,62 +167,20 @@ export default function RphTphTpuPage() {
   }, []);
 
   useEffect(() => {
-    loadRumpunData(selectedYear);
-    loadKomoditasData(selectedYear);
-  }, [selectedYear]);
+    loadRumpunData(selectedYear, selectedMonth);
+    loadKomoditasData(selectedYear, selectedMonth);
+  }, [selectedYear, selectedMonth]);
 
-  // ── TAMBAH TAHUN BARU HANDLER ──
-  const handleAddYearSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!newYearInput || newYearInput < 2000) {
-      alert('Masukkan tahun yang valid');
-      return;
-    }
-
-    try {
-      setIsAddingYear(true);
-      const [res1, res2] = await Promise.all([
-        fetch('/api/pemotongan-rumpun', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ action: 'add_year', tahun: newYearInput }),
-        }),
-        fetch('/api/pemotongan-komoditas', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ action: 'add_year', tahun: newYearInput }),
-        }),
-      ]);
-
-      const json1 = await res1.json();
-      const json2 = await res2.json();
-
-      if (json1.success || json2.success) {
-        await loadAvailableYears();
-        setSelectedYear(newYearInput);
-        setShowAddYearModal(false);
-        alert(`Periode Tahun ${newYearInput} berhasil ditambahkan!`);
-      } else {
-        alert(json1.error || json2.error || 'Gagal menambahkan tahun baru');
-      }
-    } catch (err: any) {
-      alert('Terjadi kesalahan: ' + err.message);
-    } finally {
-      setIsAddingYear(false);
-    }
-  };
-
-  // ── SAVE TAB 1: RUMPUN SAPI INLINE SPREADSHEET ──
-  const handleRumpunCellChange = (lokasiKey: string, monthIndex: number, field: string, value: any) => {
-    if (!isAdmin) return;
+  // ── CELL CHANGE TAB 1: RUMPUN SAPI HARIAN ──
+  const handleRumpunCellChange = (lokasiKey: string, dayIndex: number, field: string, value: any) => {
     const num = Math.max(0, parseInt(value, 10) || 0);
 
     setRumpunData((prev) => {
       const copy = { ...prev };
       const lokasiRows = [...(copy[lokasiKey] || [])];
-      if (lokasiRows[monthIndex]) {
-        lokasiRows[monthIndex] = {
-          ...lokasiRows[monthIndex],
+      if (lokasiRows[dayIndex]) {
+        lokasiRows[dayIndex] = {
+          ...lokasiRows[dayIndex],
           [field]: num,
         };
       }
@@ -247,8 +189,26 @@ export default function RphTphTpuPage() {
     });
   };
 
+  // ── CELL CHANGE TAB 2: KOMODITAS HARIAN ──
+  const handleKomoditasCellChange = (lokasiKey: string, dayIndex: number, field: string, value: any) => {
+    const num = Math.max(0, parseInt(value, 10) || 0);
+
+    setKomoditasData((prev) => {
+      const copy = { ...prev };
+      const lokasiRows = [...(copy[lokasiKey] || [])];
+      if (lokasiRows[dayIndex]) {
+        lokasiRows[dayIndex] = {
+          ...lokasiRows[dayIndex],
+          [field]: num,
+        };
+      }
+      copy[lokasiKey] = lokasiRows;
+      return copy;
+    });
+  };
+
+  // ── SAVE TAB 1: RUMPUN SAPI HARIAN ──
   const handleSaveRumpun = async () => {
-    if (!isAdmin) return;
     try {
       setIsSavingRumpun(true);
       setRumpunSaveMessage('');
@@ -257,12 +217,14 @@ export default function RphTphTpuPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           tahun: selectedYear,
+          bulan: selectedMonth,
           data: rumpunData,
+          isAdmin,
         }),
       });
       const json = await res.json();
       if (json.success) {
-        setRumpunSaveMessage('✓ Perubahan 4 Tabel Pemotongan berhasil disimpan!');
+        setRumpunSaveMessage('✓ Data Pemotongan Rumpun Harian berhasil disimpan!');
         setTimeout(() => setRumpunSaveMessage(''), 4000);
       } else {
         alert('Gagal menyimpan: ' + json.error);
@@ -274,9 +236,8 @@ export default function RphTphTpuPage() {
     }
   };
 
-  // ── SAVE TAB 2: KOMODITAS SPREADSHEET ──
+  // ── SAVE TAB 2: KOMODITAS HARIAN ──
   const handleSaveKomoditas = async () => {
-    if (!isAdmin) return;
     try {
       setIsSavingKomoditas(true);
       setKomoditasSaveMessage('');
@@ -285,12 +246,14 @@ export default function RphTphTpuPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           tahun: selectedYear,
+          bulan: selectedMonth,
           data: komoditasData,
+          isAdmin,
         }),
       });
       const json = await res.json();
       if (json.success) {
-        setKomoditasSaveMessage('✓ Rekap Pemotongan Komoditas berhasil disimpan!');
+        setKomoditasSaveMessage('✓ Data Pemotongan Komoditas Harian berhasil disimpan!');
         setTimeout(() => setKomoditasSaveMessage(''), 4000);
       } else {
         alert('Gagal menyimpan: ' + json.error);
@@ -300,45 +263,6 @@ export default function RphTphTpuPage() {
     } finally {
       setIsSavingKomoditas(false);
     }
-  };
-
-  const handleKomoditasCellChange = (rowIndex: number, field: string, val: any) => {
-    if (!isAdmin) return;
-    setKomoditasData((prev) => {
-      const copy = [...prev];
-      if (copy[rowIndex]) {
-        copy[rowIndex] = { ...copy[rowIndex], [field]: val };
-      }
-      return copy;
-    });
-  };
-
-  const handleAddKomoditasRow = () => {
-    if (!isAdmin) return;
-    const newRow = {
-      tahun: selectedYear,
-      nama_pemotongan: 'RPH Gombong',
-      komoditas: 'Babi',
-      jan_jantan: 0, jan_betina: 0,
-      feb_jantan: 0, feb_betina: 0,
-      mar_jantan: 0, mar_betina: 0,
-      apr_jantan: 0, apr_betina: 0,
-      mei_jantan: 0, mei_betina: 0,
-      jun_jantan: 0, jun_betina: 0,
-      jul_jantan: 0, jul_betina: 0,
-      agu_jantan: 0, agu_betina: 0,
-      sep_jantan: 0, sep_betina: 0,
-      okt_jantan: 0, okt_betina: 0,
-      nov_jantan: 0, nov_betina: 0,
-      des_jantan: 0, des_betina: 0,
-    };
-    setKomoditasData((prev) => [...prev, newRow]);
-  };
-
-  const handleDeleteKomoditasRow = (rowIndex: number) => {
-    if (!isAdmin) return;
-    if (!confirm('Apakah Anda yakin ingin menghapus baris pemotongan ini?')) return;
-    setKomoditasData((prev) => prev.filter((_, i) => i !== rowIndex));
   };
 
   // ── EXPORT EXCEL HANDLERS ──
@@ -367,38 +291,67 @@ export default function RphTphTpuPage() {
   const exportRumpunToExcel = () => {
     try {
       const wb = XLSX.utils.book_new();
+      const bulanName = BULAN_NAMES[selectedMonth - 1];
+
       LOKASI_CONFIGS.forEach((cfg) => {
         const rows = rumpunData[cfg.key] || [];
-        const data = rows.map((r, idx) => {
-          const totJ = (Number(r.po_jantan) || 0) + (Number(r.so_jantan) || 0) + (Number(r.simmental_jantan) || 0) + (Number(r.limousine_jantan) || 0);
-          const totBP = (Number(r.po_betina_prod) || 0) + (Number(r.so_betina_prod) || 0) + (Number(r.simmental_betina_prod) || 0) + (Number(r.limousine_betina_prod) || 0);
-          const totBNP = (Number(r.po_betina_non_prod) || 0) + (Number(r.so_betina_non_prod) || 0) + (Number(r.simmental_betina_non_prod) || 0) + (Number(r.limousine_betina_non_prod) || 0);
-          const totBulan = totJ + totBP + totBNP;
+        const isGombong = cfg.key === 'rph_gombong' || cfg.key === 'luar_rph_gombong';
 
-          return {
-            Bulan: r.bulan || BULAN_NAMES[idx],
-            'PO Jantan': r.po_jantan || 0,
-            'PO Betina Prod': r.po_betina_prod || 0,
-            'PO Betina Non-P': r.po_betina_non_prod || 0,
-            'SO Jantan': r.so_jantan || 0,
-            'SO Betina Prod': r.so_betina_prod || 0,
-            'SO Betina Non-P': r.so_betina_non_prod || 0,
-            'Simmental Jantan': r.simmental_jantan || 0,
-            'Simmental Betina Prod': r.simmental_betina_prod || 0,
-            'Simmental Betina Non-P': r.simmental_betina_non_prod || 0,
-            'Limousine Jantan': r.limousine_jantan || 0,
-            'Limousine Betina Prod': r.limousine_betina_prod || 0,
-            'Limousine Betina Non-P': r.limousine_betina_non_prod || 0,
-            'Total Jantan': totJ,
-            'Total Betina Prod': totBP,
-            'Total Betina Non-P': totBNP,
-            'Total Keseluruhan Bulan': totBulan,
+        const data = rows.map((r) => {
+          const pj = Number(r.po_jantan) || 0;
+          const pbp = Number(r.po_betina_prod) || 0;
+          const pbnp = Number(r.po_betina_non_prod) || 0;
+          const sj = Number(r.so_jantan) || 0;
+          const sbp = Number(r.so_betina_prod) || 0;
+          const sbnp = Number(r.so_betina_non_prod) || 0;
+          const smj = Number(r.simmental_jantan) || 0;
+          const smbp = Number(r.simmental_betina_prod) || 0;
+          const smbnp = Number(r.simmental_betina_non_prod) || 0;
+          const lj = Number(r.limousine_jantan) || 0;
+          const lbp = Number(r.limousine_betina_prod) || 0;
+          const lbnp = Number(r.limousine_betina_non_prod) || 0;
+          const bj = Number(r.babi_jantan) || 0;
+          const bb = Number(r.babi_betina_prod) || Number(r.babi_betina) || 0;
+
+          const totJ = pj + sj + smj + lj + (isGombong ? bj : 0);
+          const totBP = pbp + sbp + smbp + lbp + (isGombong ? bb : 0);
+          const totBNP = pbnp + sbnp + smbnp + lbnp;
+          const totHari = totJ + totBP + totBNP;
+
+          const item: any = {
+            Hari: `Tgl ${r.hari}`,
+            'PO Jantan': pj,
+            'PO Betina Prod': pbp,
+            'PO Betina Non-P': pbnp,
+            'SO Jantan': sj,
+            'SO Betina Prod': sbp,
+            'SO Betina Non-P': sbnp,
+            'Simmental Jantan': smj,
+            'Simmental Betina Prod': smbp,
+            'Simmental Betina Non-P': smbnp,
+            'Limousine Jantan': lj,
+            'Limousine Betina Prod': lbp,
+            'Limousine Betina Non-P': lbnp,
           };
+
+          if (isGombong) {
+            item['Babi Jantan'] = bj;
+            item['Babi Betina'] = bb;
+          }
+
+          item['Total Jantan'] = totJ;
+          item['Total Betina Prod'] = totBP;
+          item['Total Betina Non-P'] = totBNP;
+          item['Total Hari'] = totHari;
+
+          return item;
         });
+
         const ws = XLSX.utils.json_to_sheet(data);
         XLSX.utils.book_append_sheet(wb, ws, cfg.label.substring(0, 31));
       });
-      XLSX.writeFile(wb, `Data_Pemotongan_Rumpun_${selectedYear}.xlsx`);
+
+      XLSX.writeFile(wb, `Pemotongan_Rumpun_${bulanName}_${selectedYear}.xlsx`);
     } catch {
       alert('Gagal mengekspor data pemotongan.');
     }
@@ -406,33 +359,49 @@ export default function RphTphTpuPage() {
 
   const exportKomoditasToExcel = () => {
     try {
-      const months = ['jan', 'feb', 'mar', 'apr', 'mei', 'jun', 'jul', 'agu', 'sep', 'okt', 'nov', 'des'];
-      const data = komoditasData.map((r, i) => {
-        const item: any = {
-          No: i + 1,
-          'Nama Pemotongan': r.nama_pemotongan,
-          Komoditas: r.komoditas,
-        };
-        let totJ = 0;
-        let totB = 0;
-        months.forEach((m) => {
-          const j = Number(r[`${m}_jantan`]) || 0;
-          const b = Number(r[`${m}_betina`]) || 0;
-          item[`${m.toUpperCase()} Jantan`] = j;
-          item[`${m.toUpperCase()} Betina`] = b;
-          totJ += j;
-          totB += b;
+      const wb = XLSX.utils.book_new();
+      const bulanName = BULAN_NAMES[selectedMonth - 1];
+
+      LOKASI_CONFIGS.forEach((cfg) => {
+        const rows = komoditasData[cfg.key] || [];
+        const data = rows.map((r) => {
+          const sj = Number(r.sapi_jantan) || 0;
+          const sb = Number(r.sapi_betina) || 0;
+          const kj = Number(r.kuda_jantan) || 0;
+          const kb = Number(r.kuda_betina) || 0;
+          const bj = Number(r.babi_jantan) || 0;
+          const bb = Number(r.babi_betina) || 0;
+          const kmj = Number(r.kambing_jantan) || 0;
+          const kmb = Number(r.kambing_betina) || 0;
+          const dj = Number(r.domba_jantan) || 0;
+          const db = Number(r.domba_betina) || 0;
+
+          const totJ = sj + kj + bj + kmj + dj;
+          const totB = sb + kb + bb + kmb + db;
+
+          return {
+            Hari: `Tgl ${r.hari}`,
+            'Sapi Potong J': sj,
+            'Sapi Potong B': sb,
+            'Kuda J': kj,
+            'Kuda B': kb,
+            'Babi J': bj,
+            'Babi B': bb,
+            'Kambing J': kmj,
+            'Kambing B': kmb,
+            'Domba J': dj,
+            'Domba B': db,
+            'Total Jantan': totJ,
+            'Total Betina': totB,
+            'Total Hari': totJ + totB,
+          };
         });
-        item['Total Jantan'] = totJ;
-        item['Total Betina'] = totB;
-        item['Total Keseluruhan'] = totJ + totB;
-        return item;
+
+        const ws = XLSX.utils.json_to_sheet(data);
+        XLSX.utils.book_append_sheet(wb, ws, cfg.label.substring(0, 31));
       });
 
-      const ws = XLSX.utils.json_to_sheet(data);
-      const wb = XLSX.utils.book_new();
-      XLSX.utils.book_append_sheet(wb, ws, 'Rekap Komoditas');
-      XLSX.writeFile(wb, `Rekap_Pemotongan_Komoditas_${selectedYear}.xlsx`);
+      XLSX.writeFile(wb, `Pemotongan_Komoditas_${bulanName}_${selectedYear}.xlsx`);
     } catch {
       alert('Gagal mengekspor rekap komoditas.');
     }
@@ -453,49 +422,34 @@ export default function RphTphTpuPage() {
     });
   }, [rphList, searchRph, filterJenis, filterHalal]);
 
-  // Form submit for Tab 3
-  const handleRphSubmit = async (e: React.FormEvent) => {
+  const handleSaveRph = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (editingItem && !canEdit) {
-      alert('Hanya Administrator yang berhak mengedit data unit pemotongan.');
-      return;
-    }
-    if (!editingItem && !canCreate) {
-      alert('Anda tidak memiliki izin untuk menambah data.');
+    if (!canCreate && !canEdit) {
+      alert('Anda tidak memiliki hak akses untuk menambah/mengedit data RPH.');
       return;
     }
 
     try {
-      if (editingItem) {
-        const res = await fetch(`/api/pemotongan-hewan/${editingItem.id}`, {
-          method: 'PUT',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(formRph),
-        });
-        if (res.ok) {
-          loadRphData();
-          setShowAddModal(false);
-          setEditingItem(null);
-        }
-      } else {
-        const res = await fetch('/api/pemotongan-hewan', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(formRph),
-        });
-        if (res.ok) {
-          loadRphData();
-          setShowAddModal(false);
-        }
+      const method = editingItem ? 'PUT' : 'POST';
+      const body = editingItem ? { ...formRph, id: editingItem.id } : formRph;
+      const res = await fetch('/api/pemotongan-hewan', {
+        method,
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body),
+      });
+
+      if (res.ok) {
+        setShowAddModal(false);
+        loadRphData();
       }
     } catch (err) {
-      console.error('Submit error:', err);
+      console.error('Save error:', err);
     }
   };
 
   const handleDeleteRph = async (id: number) => {
-    if (!isAdmin && !canEdit) {
-      alert('Hanya Administrator yang berhak menghapus data.');
+    if (!isAdmin) {
+      alert('Hanya Administrator yang berhak menghapus unit pemotongan.');
       return;
     }
     if (!confirm('Apakah Anda yakin ingin menghapus unit pemotongan ini?')) return;
@@ -514,11 +468,9 @@ export default function RphTphTpuPage() {
 
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 font-sans selection:bg-purple-600 selection:text-white pb-24">
-      
       {/* ── TOP HEADER (Tema Ungu Khas Kesmavet) ── */}
       <header className="border-b border-purple-100 dark:border-slate-800 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md sticky top-0 z-30 shadow-xs">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-5 min-h-[80px] sm:min-h-[88px] flex flex-col md:flex-row md:items-center justify-between gap-4">
-          
           <div className="flex items-center gap-3 min-w-0 flex-1">
             <Link
               href="/kesmavet"
@@ -550,7 +502,7 @@ export default function RphTphTpuPage() {
                   className="h-10 px-4 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 text-xs font-bold flex items-center gap-1.5 transition-all shadow-xs cursor-pointer"
                 >
                   <Download size={15} strokeWidth={2.5} />
-                  <span>Export 4 Tabel Excel</span>
+                  <span>Export Excel</span>
                 </button>
 
                 {(canEdit || isAdmin) && (
@@ -576,25 +528,15 @@ export default function RphTphTpuPage() {
                   <span>Export Excel</span>
                 </button>
 
-                {isAdmin && (
-                  <>
-                    <button
-                      onClick={handleAddKomoditasRow}
-                      className="h-10 px-3.5 rounded-xl border border-purple-200 dark:border-purple-800 bg-purple-50 dark:bg-purple-950/40 hover:bg-purple-100 dark:hover:bg-purple-900/50 text-purple-700 dark:text-purple-300 text-xs font-bold flex items-center gap-1.5 transition-colors cursor-pointer"
-                    >
-                      <Plus size={15} strokeWidth={2.5} />
-                      <span>Tambah Baris</span>
-                    </button>
-
-                    <button
-                      onClick={handleSaveKomoditas}
-                      disabled={isSavingKomoditas}
-                      className="h-10 px-4 rounded-xl bg-purple-600 hover:bg-purple-700 disabled:opacity-50 text-white text-xs font-bold flex items-center gap-1.5 shadow-xs transition-colors cursor-pointer"
-                    >
-                      {isSavingKomoditas ? <Loader2 size={15} className="animate-spin" /> : <Save size={15} />}
-                      <span>Simpan Perubahan</span>
-                    </button>
-                  </>
+                {(canEdit || isAdmin) && (
+                  <button
+                    onClick={handleSaveKomoditas}
+                    disabled={isSavingKomoditas}
+                    className="h-10 px-4 rounded-xl bg-purple-600 hover:bg-purple-700 disabled:opacity-50 text-white text-xs font-bold flex items-center gap-1.5 shadow-xs transition-colors cursor-pointer"
+                  >
+                    {isSavingKomoditas ? <Loader2 size={15} className="animate-spin" /> : <Save size={15} />}
+                    <span>Simpan Perubahan</span>
+                  </button>
                 )}
               </>
             )}
@@ -625,15 +567,14 @@ export default function RphTphTpuPage() {
               </>
             )}
           </div>
-
         </div>
       </header>
 
       {/* ── WORKSPACE ── */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 space-y-6">
-        
-        {/* Opsi Pilihan Tahun */}
-        <div className="flex flex-col sm:flex-row items-center justify-center gap-3 bg-white dark:bg-slate-900 p-3.5 rounded-2xl border border-purple-200 dark:border-slate-800 shadow-xs max-w-xl mx-auto">
+        {/* Opsi Pilihan Tahun & Bulan (Output Per Hari) */}
+        <div className="flex flex-wrap items-center justify-center gap-3 bg-white dark:bg-slate-900 p-3.5 rounded-2xl border border-purple-200 dark:border-slate-800 shadow-xs max-w-2xl mx-auto">
+          {/* Pilih Tahun */}
           <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl border border-purple-200 dark:border-purple-900/50 bg-purple-50/70 dark:bg-purple-950/30">
             <Calendar className="text-purple-700 dark:text-purple-400" size={16} />
             <span className="text-xs font-bold text-purple-900 dark:text-purple-200">Pilih Tahun:</span>
@@ -643,27 +584,32 @@ export default function RphTphTpuPage() {
               className="bg-transparent text-xs font-black text-purple-800 dark:text-purple-300 focus:outline-none cursor-pointer"
             >
               {availableYears.map((yr) => (
-                <option key={yr} value={yr} className="bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100">Tahun {yr}</option>
+                <option key={yr} value={yr} className="bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100">
+                  Tahun {yr}
+                </option>
               ))}
             </select>
           </div>
 
-          {isAdmin && (
-            <button
-              onClick={() => {
-                const maxYear = Math.max(...availableYears, 2026);
-                setNewYearInput(maxYear + 1);
-                setShowAddYearModal(true);
-              }}
-              className="h-9 px-3.5 rounded-xl bg-purple-600 hover:bg-purple-700 text-white text-xs font-bold flex items-center gap-1.5 shadow-xs transition-colors cursor-pointer"
+          {/* Pilih Bulan */}
+          <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl border border-purple-200 dark:border-purple-900/50 bg-purple-50/70 dark:bg-purple-950/30">
+            <Calendar className="text-purple-700 dark:text-purple-400" size={16} />
+            <span className="text-xs font-bold text-purple-900 dark:text-purple-200">Pilih Bulan:</span>
+            <select
+              value={selectedMonth}
+              onChange={(e) => setSelectedMonth(Number(e.target.value))}
+              className="bg-transparent text-xs font-black text-purple-800 dark:text-purple-300 focus:outline-none cursor-pointer"
             >
-              <Plus size={14} />
-              <span>Tambah Tahun Baru</span>
-            </button>
-          )}
+              {BULAN_NAMES.map((bln, idx) => (
+                <option key={bln} value={idx + 1} className="bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100">
+                  {bln}
+                </option>
+              ))}
+            </select>
+          </div>
         </div>
 
-        {/* ── MAIN TAB NAVIGATION (Folder Tab Model Monev KTT) ── */}
+        {/* ── MAIN TAB NAVIGATION ── */}
         <div className="flex gap-2 border-b border-purple-200 dark:border-slate-800 pb-px overflow-x-auto no-scrollbar scroll-smooth -mx-4 px-4 sm:mx-0 sm:px-0">
           <button
             onClick={() => setActiveTab('pemotongan_rumpun')}
@@ -702,13 +648,14 @@ export default function RphTphTpuPage() {
           </button>
         </div>
 
-        {/* TAB 1: RUMPUN SAPI */}
+        {/* TAB 1: RUMPUN SAPI HARIAN */}
         {activeTab === 'pemotongan_rumpun' && (
           <RumpunTableTab
             selectedLokasiKey={selectedLokasiKey}
             setSelectedLokasiKey={setSelectedLokasiKey}
             rumpunData={rumpunData}
             selectedYear={selectedYear}
+            selectedMonth={selectedMonth}
             canEdit={canEdit}
             isAdmin={isAdmin}
             rumpunSaveMessage={rumpunSaveMessage}
@@ -716,19 +663,19 @@ export default function RphTphTpuPage() {
           />
         )}
 
-        {/* TAB 2: REKAP KOMODITAS */}
+        {/* TAB 2: REKAP KOMODITAS HARIAN */}
         {activeTab === 'rekap_komoditas' && (
           <KomoditasTableTab
-            selectedKomoditasFilter={selectedKomoditasFilter}
-            setSelectedKomoditasFilter={setSelectedKomoditasFilter}
+            selectedLokasiKey={selectedLokasiKey}
+            setSelectedLokasiKey={setSelectedLokasiKey}
             komoditasSaveMessage={komoditasSaveMessage}
             isLoadingKomoditas={isLoadingKomoditas}
             komoditasData={komoditasData}
             selectedYear={selectedYear}
+            selectedMonth={selectedMonth}
+            canEdit={canEdit}
             isAdmin={isAdmin}
             handleKomoditasCellChange={handleKomoditasCellChange}
-            handleAddKomoditasRow={handleAddKomoditasRow}
-            handleDeleteKomoditasRow={handleDeleteKomoditasRow}
           />
         )}
 
@@ -762,29 +709,17 @@ export default function RphTphTpuPage() {
             onDeleteRph={handleDeleteRph}
           />
         )}
-
       </main>
 
-      {/* MODAL: TAMBAH / EDIT RUMAH POTONG */}
+      {/* MODAL INPUT / EDIT RPH */}
       <RphFormModal
         showAddModal={showAddModal}
         setShowAddModal={setShowAddModal}
         editingItem={editingItem}
         formRph={formRph}
         setFormRph={setFormRph}
-        handleRphSubmit={handleRphSubmit}
+        handleRphSubmit={handleSaveRph}
       />
-
-      {/* MODAL: TAMBAH TAHUN BARU */}
-      <AddYearModal
-        showAddYearModal={showAddYearModal}
-        setShowAddYearModal={setShowAddYearModal}
-        newYearInput={newYearInput}
-        setNewYearInput={setNewYearInput}
-        isAddingYear={isAddingYear}
-        handleAddYearSubmit={handleAddYearSubmit}
-      />
-
     </div>
   );
 }

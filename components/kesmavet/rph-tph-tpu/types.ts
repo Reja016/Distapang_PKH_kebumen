@@ -88,8 +88,51 @@ export const getTableSummary = (rows: any[]) => {
   return summary;
 };
 
+export const getKomoditasDailySummary = (rows: any[]) => {
+  const summary = {
+    sapi_jantan: 0, sapi_betina: 0, sapi_total: 0,
+    kuda_jantan: 0, kuda_betina: 0, kuda_total: 0,
+    babi_jantan: 0, babi_betina: 0, babi_total: 0,
+    kambing_jantan: 0, kambing_betina: 0, kambing_total: 0,
+    domba_jantan: 0, domba_betina: 0, domba_total: 0,
+    total_jantan: 0, total_betina: 0, grand_total: 0,
+  };
+
+  (rows || []).forEach((r) => {
+    const sj = Number(r.sapi_jantan) || 0;
+    const sb = Number(r.sapi_betina) || 0;
+    const kj = Number(r.kuda_jantan) || 0;
+    const kb = Number(r.kuda_betina) || 0;
+    const bj = Number(r.babi_jantan) || 0;
+    const bb = Number(r.babi_betina) || 0;
+    const kmj = Number(r.kambing_jantan) || 0;
+    const kmb = Number(r.kambing_betina) || 0;
+    const dj = Number(r.domba_jantan) || 0;
+    const db = Number(r.domba_betina) || 0;
+
+    summary.sapi_jantan += sj; summary.sapi_betina += sb;
+    summary.kuda_jantan += kj; summary.kuda_betina += kb;
+    summary.babi_jantan += bj; summary.babi_betina += bb;
+    summary.kambing_jantan += kmj; summary.kambing_betina += kmb;
+    summary.domba_jantan += dj; summary.domba_betina += db;
+
+    summary.total_jantan += sj + kj + bj + kmj + dj;
+    summary.total_betina += sb + kb + bb + kmb + db;
+  });
+
+  summary.sapi_total = summary.sapi_jantan + summary.sapi_betina;
+  summary.kuda_total = summary.kuda_jantan + summary.kuda_betina;
+  summary.babi_total = summary.babi_jantan + summary.babi_betina;
+  summary.kambing_total = summary.kambing_jantan + summary.kambing_betina;
+  summary.domba_total = summary.domba_jantan + summary.domba_betina;
+  summary.grand_total = summary.total_jantan + summary.total_betina;
+
+  return summary;
+};
+
 // Internal Module Watermark - Kesmavet
 export const FAJAR_RPH_SIGNATURE = 'fajar_rph_kesmavet_core';
 export function fajarValidateRphRecord<T>(data: T): T {
   return data;
 }
+

@@ -1,17 +1,20 @@
 'use client';
 
 import React from 'react';
+import { Lock, Unlock, ShieldCheck, AlertCircle } from 'lucide-react';
 import { BULAN_NAMES, LOKASI_CONFIGS, getTableSummary } from './types';
+import { isDayLocked, getDayNameIndo } from './timeLock';
 
 interface RumpunTableTabProps {
   selectedLokasiKey: string;
   setSelectedLokasiKey: (key: string) => void;
   rumpunData: Record<string, any[]>;
   selectedYear: number;
+  selectedMonth: number;
   canEdit: boolean;
   isAdmin: boolean;
   rumpunSaveMessage: string;
-  handleRumpunCellChange: (lokasiKey: string, monthIndex: number, field: string, value: any) => void;
+  handleRumpunCellChange: (lokasiKey: string, dayIndex: number, field: string, value: any) => void;
 }
 
 export function RumpunTableTab({
@@ -19,6 +22,7 @@ export function RumpunTableTab({
   setSelectedLokasiKey,
   rumpunData,
   selectedYear,
+  selectedMonth,
   canEdit,
   isAdmin,
   rumpunSaveMessage,
@@ -28,6 +32,7 @@ export function RumpunTableTab({
   const isGombong = activeCfg.key === 'rph_gombong' || activeCfg.key === 'luar_rph_gombong';
   const rows = rumpunData[activeCfg.key] || [];
   const summary = getTableSummary(rows);
+  const bulanName = BULAN_NAMES[selectedMonth - 1] || 'Bulan';
 
   return (
     <div className="space-y-4">
@@ -59,6 +64,36 @@ export function RumpunTableTab({
         )}
       </div>
 
+      {/* Info Banner Aturan 3 Hari & Role Access */}
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 px-4 py-2.5 rounded-2xl bg-purple-50/70 dark:bg-purple-950/30 border border-purple-200/80 dark:border-purple-900/50 text-xs">
+        <div className="flex items-center gap-2 text-purple-900 dark:text-purple-200 font-medium">
+          {isAdmin ? (
+            <>
+              <ShieldCheck size={16} className="text-purple-700 dark:text-purple-400 shrink-0" />
+              <span>
+                <strong>Akses Khusus Administrator:</strong> Anda dapat mengisi &amp; memperbarui data semua tanggal tanpa batasan waktu.
+              </span>
+            </>
+          ) : (
+            <>
+              <AlertCircle size={16} className="text-amber-600 dark:text-amber-400 shrink-0" />
+              <span>
+                <strong>Aturan Pengisian:</strong> Pengisian data hanya dapat dilakukan pada hari ini hingga <strong>maksimal 3 hari ke belakang (H-3)</strong>. Tanggal yang lebih lama otomatis terkunci.
+              </span>
+            </>
+          )}
+        </div>
+
+        <div className="flex items-center gap-2 self-end sm:self-auto shrink-0">
+          <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-[11px] text-slate-600 dark:text-slate-300 font-semibold">
+            <Lock size={12} className="text-slate-400" /> Terkunci (&gt;3 hari)
+          </span>
+          <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-emerald-50 border border-emerald-200 text-[11px] text-emerald-700 font-semibold">
+            <Unlock size={12} className="text-emerald-600" /> Aktif (H s/d H-3)
+          </span>
+        </div>
+      </div>
+
       {/* TABEL LOKASI TERPILIH DENGAN TOTAL TERPISAH */}
       <div className="bg-white dark:bg-slate-900 rounded-3xl border border-slate-300 dark:border-slate-700 shadow-xs overflow-hidden space-y-3 p-4 sm:p-6 animate-in fade-in duration-150">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-3 border-b border-purple-100 dark:border-slate-800">
@@ -67,24 +102,26 @@ export function RumpunTableTab({
               <span className="w-3 h-3 rounded-full bg-purple-600" />
               <span>{activeCfg.label}</span>
             </h3>
-            <p className="text-xs text-slate-500">{activeCfg.subtitle} &bull; Periode Tahun {selectedYear}</p>
+            <p className="text-xs text-slate-500">
+              {activeCfg.subtitle} &bull; Output Harian {bulanName} {selectedYear}
+            </p>
           </div>
 
           <div className="flex items-center gap-2">
             <span className="px-3.5 py-1.5 rounded-xl bg-purple-50 border border-purple-200 text-xs font-black text-purple-800">
-              Total Pemotongan: {summary.grand_total.toLocaleString('id-ID')} Ekor
+              Total {bulanName}: {summary.grand_total.toLocaleString('id-ID')} Ekor
             </span>
           </div>
         </div>
 
-        {/* Spreadsheet Inline-Editable Table */}
+        {/* Spreadsheet Inline-Editable Table (Baris per Hari) */}
         <div className="overflow-x-auto rounded-2xl border border-slate-300 dark:border-slate-700">
-          <table className="w-full min-w-[1280px] text-center text-xs border-collapse">
+          <table className="w-full min-w-[1340px] text-center text-xs border-collapse">
             <thead>
               {/* Level 1 Header: Rumpun Sapi & Babi & Total Terpisah */}
               <tr className="bg-purple-900 text-white font-bold border border-purple-950">
-                <th rowSpan={2} className="p-3 border border-purple-800 text-center w-28 min-w-[110px] bg-purple-950 sticky left-0 z-20">
-                  BULAN
+                <th rowSpan={2} className="p-3 border border-purple-800 text-center w-36 min-w-[130px] bg-purple-950 sticky left-0 z-20">
+                  TANGGAL
                 </th>
                 <th colSpan={3} className="p-2.5 border border-purple-800 bg-purple-900/95 text-purple-100 text-xs">
                   PERANAKAN ONGOLE (PO)
@@ -104,7 +141,7 @@ export function RumpunTableTab({
                   </th>
                 )}
                 <th colSpan={4} className="p-2.5 border border-purple-800 bg-purple-950 text-purple-100 font-extrabold text-xs">
-                  TOTAL BULANAN
+                  TOTAL HARIAN
                 </th>
               </tr>
               {/* Level 2 Header: Jantan / Betina */}
@@ -132,16 +169,21 @@ export function RumpunTableTab({
                     <th className="p-2 border border-purple-200 bg-rose-100 text-rose-950 font-black min-w-[65px]">B</th>
                   </>
                 )}
-                {/* Total Terpisah Setiap Bulan */}
+                {/* Total Terpisah Setiap Hari */}
                 <th className="p-2 border border-purple-200 bg-purple-100/90 text-purple-950 min-w-[68px]">Total J</th>
                 <th className="p-2 border border-purple-200 bg-purple-100/90 text-purple-950 min-w-[68px]">Total BP</th>
                 <th className="p-2 border border-purple-200 bg-purple-100/90 text-purple-950 min-w-[68px]">Total BT</th>
-                <th className="p-2 border border-purple-200 bg-purple-200 text-purple-950 font-black min-w-[80px]">Total Bulan</th>
+                <th className="p-2 border border-purple-200 bg-purple-200 text-purple-950 font-black min-w-[80px]">Total Hari</th>
               </tr>
             </thead>
 
             <tbody>
-              {rows.map((row, monthIdx) => {
+              {rows.map((row, dayIdx) => {
+                const dayNum = row.hari || dayIdx + 1;
+                const dayName = getDayNameIndo(selectedYear, selectedMonth, dayNum);
+                const lockStatus = isDayLocked(selectedYear, selectedMonth, dayNum, isAdmin);
+                const isLocked = !canEdit || lockStatus.isLocked;
+
                 const pj = Number(row.po_jantan) || 0;
                 const pbp = Number(row.po_betina_prod) || 0;
                 const pbnp = Number(row.po_betina_non_prod) || 0;
@@ -158,282 +200,316 @@ export function RumpunTableTab({
                 const lbp = Number(row.limousine_betina_prod) || 0;
                 const lbnp = Number(row.limousine_betina_non_prod) || 0;
 
-                const bj = isGombong ? (Number(row.babi_jantan) || 0) : 0;
-                const bb = isGombong ? (Number(row.babi_betina) || Number(row.babi_betina_prod) || 0) : 0;
+                const bj = Number(row.babi_jantan) || 0;
+                const bb = Number(row.babi_betina_prod) || Number(row.babi_betina) || 0;
 
-                const rowTotalJantan = pj + sj + smj + lj + bj;
-                const rowTotalBetinaProd = pbp + sbp + smbp + lbp + bb;
-                const rowTotalBetinaNon = pbnp + sbnp + smbnp + lbnp;
-                const rowGrandTotal = rowTotalJantan + rowTotalBetinaProd + rowTotalBetinaNon;
-                const isEven = monthIdx % 2 === 0;
+                const totJantan = pj + sj + smj + lj + (isGombong ? bj : 0);
+                const totBetinaProd = pbp + sbp + smbp + lbp + (isGombong ? bb : 0);
+                const totBetinaNonProd = pbnp + sbnp + smbnp + lbnp;
+                const grandHari = totJantan + totBetinaProd + totBetinaNonProd;
+
+                const isEven = dayIdx % 2 === 0;
 
                 return (
                   <tr
-                    key={monthIdx}
+                    key={dayNum}
                     className={`transition-colors ${
-                      isEven ? 'bg-white hover:bg-purple-50/40' : 'bg-slate-100 hover:bg-purple-50/60'
+                      lockStatus.isLocked
+                        ? 'bg-slate-50/80 hover:bg-slate-100/80 text-slate-500'
+                        : isEven
+                        ? 'bg-white hover:bg-purple-50/40 text-slate-900'
+                        : 'bg-purple-50/20 hover:bg-purple-50/60 text-slate-900'
                     }`}
                   >
-                    {/* Month Name */}
-                    <td className={`p-2 border border-slate-300 dark:border-slate-700 font-bold text-slate-900 sticky left-0 z-10 text-left pl-3.5 ${
-                      isEven ? 'bg-white' : 'bg-slate-100'
-                    }`}>
-                      {row.bulan || BULAN_NAMES[monthIdx]}
+                    {/* Sticky Kolom Tanggal */}
+                    <td
+                      className={`p-2 border border-slate-300 dark:border-slate-700 text-left sticky left-0 z-10 ${
+                        lockStatus.isLocked ? 'bg-slate-100' : isEven ? 'bg-white' : 'bg-purple-50/30'
+                      }`}
+                    >
+                      <div className="flex items-center justify-between gap-1.5 px-1">
+                        <div className="flex items-center gap-1.5 font-bold">
+                          <span className="w-6 text-right font-mono text-purple-950 dark:text-purple-200">
+                            {dayNum}
+                          </span>
+                          <span className="text-[11px] text-slate-500 font-semibold">
+                            {bulanName.slice(0, 3)} ({dayName})
+                          </span>
+                        </div>
+                        {lockStatus.isLocked ? (
+                          <span title={lockStatus.label} className="text-slate-400">
+                            <Lock size={13} />
+                          </span>
+                        ) : (
+                          <span title={lockStatus.label} className="text-emerald-600">
+                            <Unlock size={13} />
+                          </span>
+                        )}
+                      </div>
                     </td>
 
-                    {/* PO */}
+                    {/* PO: J, BP, BT */}
                     <td className="p-1 border border-slate-300 dark:border-slate-700">
-                      {canEdit || isAdmin ? (
-                        <input
-                          type="number"
-                          min="0"
-                          value={row.po_jantan ?? 0}
-                          onChange={(e) => handleRumpunCellChange(activeCfg.key, monthIdx, 'po_jantan', e.target.value)}
-                          className="w-full h-8 text-center rounded border border-slate-300 dark:border-slate-600 focus:border-purple-600 focus:bg-white bg-slate-50/40 font-mono font-bold text-slate-900 text-xs outline-none"
-                        />
-                      ) : (
-                        <span className="font-mono font-bold text-slate-800">{(row.po_jantan || 0).toLocaleString('id-ID')}</span>
-                      )}
+                      <input
+                        type="number"
+                        min="0"
+                        disabled={isLocked}
+                        value={row.po_jantan ?? 0}
+                        onChange={(e) => handleRumpunCellChange(activeCfg.key, dayIdx, 'po_jantan', Math.max(0, parseInt(e.target.value, 10) || 0))}
+                        className={`w-full h-8 text-center rounded border font-mono font-bold text-xs outline-none ${
+                          isLocked
+                            ? 'bg-transparent border-transparent text-slate-500 cursor-not-allowed'
+                            : 'border-slate-300 focus:border-purple-600 focus:bg-white bg-slate-50/40 text-slate-900'
+                        }`}
+                      />
                     </td>
                     <td className="p-1 border border-slate-300 dark:border-slate-700">
-                      {canEdit || isAdmin ? (
-                        <input
-                          type="number"
-                          min="0"
-                          value={row.po_betina_prod ?? 0}
-                          onChange={(e) => handleRumpunCellChange(activeCfg.key, monthIdx, 'po_betina_prod', e.target.value)}
-                          className="w-full h-8 text-center rounded border border-slate-300 dark:border-slate-600 focus:border-purple-600 focus:bg-white bg-slate-50/40 font-mono font-bold text-slate-900 text-xs outline-none"
-                        />
-                      ) : (
-                        <span className="font-mono font-bold text-slate-800">{(row.po_betina_prod || 0).toLocaleString('id-ID')}</span>
-                      )}
+                      <input
+                        type="number"
+                        min="0"
+                        disabled={isLocked}
+                        value={row.po_betina_prod ?? 0}
+                        onChange={(e) => handleRumpunCellChange(activeCfg.key, dayIdx, 'po_betina_prod', Math.max(0, parseInt(e.target.value, 10) || 0))}
+                        className={`w-full h-8 text-center rounded border font-mono font-bold text-xs outline-none ${
+                          isLocked
+                            ? 'bg-transparent border-transparent text-slate-500 cursor-not-allowed'
+                            : 'border-slate-300 focus:border-purple-600 focus:bg-white bg-slate-50/40 text-slate-900'
+                        }`}
+                      />
                     </td>
                     <td className="p-1 border border-slate-300 dark:border-slate-700">
-                      {canEdit || isAdmin ? (
-                        <input
-                          type="number"
-                          min="0"
-                          value={row.po_betina_non_prod ?? 0}
-                          onChange={(e) => handleRumpunCellChange(activeCfg.key, monthIdx, 'po_betina_non_prod', e.target.value)}
-                          className="w-full h-8 text-center rounded border border-slate-300 dark:border-slate-600 focus:border-purple-600 focus:bg-white bg-slate-50/40 font-mono font-bold text-slate-900 text-xs outline-none"
-                        />
-                      ) : (
-                        <span className="font-mono font-bold text-slate-800">{(row.po_betina_non_prod || 0).toLocaleString('id-ID')}</span>
-                      )}
-                    </td>
-
-                    {/* SO */}
-                    <td className="p-1 border border-slate-300 dark:border-slate-700">
-                      {canEdit || isAdmin ? (
-                        <input
-                          type="number"
-                          min="0"
-                          value={row.so_jantan ?? 0}
-                          onChange={(e) => handleRumpunCellChange(activeCfg.key, monthIdx, 'so_jantan', e.target.value)}
-                          className="w-full h-8 text-center rounded border border-slate-300 dark:border-slate-600 focus:border-purple-600 focus:bg-white bg-slate-50/40 font-mono font-bold text-slate-900 text-xs outline-none"
-                        />
-                      ) : (
-                        <span className="font-mono font-bold text-slate-800">{(row.so_jantan || 0).toLocaleString('id-ID')}</span>
-                      )}
-                    </td>
-                    <td className="p-1 border border-slate-300 dark:border-slate-700">
-                      {canEdit || isAdmin ? (
-                        <input
-                          type="number"
-                          min="0"
-                          value={row.so_betina_prod ?? 0}
-                          onChange={(e) => handleRumpunCellChange(activeCfg.key, monthIdx, 'so_betina_prod', e.target.value)}
-                          className="w-full h-8 text-center rounded border border-slate-300 dark:border-slate-600 focus:border-purple-600 focus:bg-white bg-slate-50/40 font-mono font-bold text-slate-900 text-xs outline-none"
-                        />
-                      ) : (
-                        <span className="font-mono font-bold text-slate-800">{(row.so_betina_prod || 0).toLocaleString('id-ID')}</span>
-                      )}
-                    </td>
-                    <td className="p-1 border border-slate-300 dark:border-slate-700">
-                      {canEdit || isAdmin ? (
-                        <input
-                          type="number"
-                          min="0"
-                          value={row.so_betina_non_prod ?? 0}
-                          onChange={(e) => handleRumpunCellChange(activeCfg.key, monthIdx, 'so_betina_non_prod', e.target.value)}
-                          className="w-full h-8 text-center rounded border border-slate-300 dark:border-slate-600 focus:border-purple-600 focus:bg-white bg-slate-50/40 font-mono font-bold text-slate-900 text-xs outline-none"
-                        />
-                      ) : (
-                        <span className="font-mono font-bold text-slate-800">{(row.so_betina_non_prod || 0).toLocaleString('id-ID')}</span>
-                      )}
+                      <input
+                        type="number"
+                        min="0"
+                        disabled={isLocked}
+                        value={row.po_betina_non_prod ?? 0}
+                        onChange={(e) => handleRumpunCellChange(activeCfg.key, dayIdx, 'po_betina_non_prod', Math.max(0, parseInt(e.target.value, 10) || 0))}
+                        className={`w-full h-8 text-center rounded border font-mono font-bold text-xs outline-none ${
+                          isLocked
+                            ? 'bg-transparent border-transparent text-slate-500 cursor-not-allowed'
+                            : 'border-slate-300 focus:border-purple-600 focus:bg-white bg-slate-50/40 text-slate-900'
+                        }`}
+                      />
                     </td>
 
-                    {/* Simmental */}
+                    {/* SO: J, BP, BT */}
                     <td className="p-1 border border-slate-300 dark:border-slate-700">
-                      {canEdit || isAdmin ? (
-                        <input
-                          type="number"
-                          min="0"
-                          value={row.simmental_jantan ?? 0}
-                          onChange={(e) => handleRumpunCellChange(activeCfg.key, monthIdx, 'simmental_jantan', e.target.value)}
-                          className="w-full h-8 text-center rounded border border-slate-300 dark:border-slate-600 focus:border-purple-600 focus:bg-white bg-slate-50/40 font-mono font-bold text-slate-900 text-xs outline-none"
-                        />
-                      ) : (
-                        <span className="font-mono font-bold text-slate-800">{(row.simmental_jantan || 0).toLocaleString('id-ID')}</span>
-                      )}
+                      <input
+                        type="number"
+                        min="0"
+                        disabled={isLocked}
+                        value={row.so_jantan ?? 0}
+                        onChange={(e) => handleRumpunCellChange(activeCfg.key, dayIdx, 'so_jantan', Math.max(0, parseInt(e.target.value, 10) || 0))}
+                        className={`w-full h-8 text-center rounded border font-mono font-bold text-xs outline-none ${
+                          isLocked
+                            ? 'bg-transparent border-transparent text-slate-500 cursor-not-allowed'
+                            : 'border-slate-300 focus:border-purple-600 focus:bg-white bg-slate-50/40 text-slate-900'
+                        }`}
+                      />
                     </td>
                     <td className="p-1 border border-slate-300 dark:border-slate-700">
-                      {canEdit || isAdmin ? (
-                        <input
-                          type="number"
-                          min="0"
-                          value={row.simmental_betina_prod ?? 0}
-                          onChange={(e) => handleRumpunCellChange(activeCfg.key, monthIdx, 'simmental_betina_prod', e.target.value)}
-                          className="w-full h-8 text-center rounded border border-slate-300 dark:border-slate-600 focus:border-purple-600 focus:bg-white bg-slate-50/40 font-mono font-bold text-slate-900 text-xs outline-none"
-                        />
-                      ) : (
-                        <span className="font-mono font-bold text-slate-800">{(row.simmental_betina_prod || 0).toLocaleString('id-ID')}</span>
-                      )}
+                      <input
+                        type="number"
+                        min="0"
+                        disabled={isLocked}
+                        value={row.so_betina_prod ?? 0}
+                        onChange={(e) => handleRumpunCellChange(activeCfg.key, dayIdx, 'so_betina_prod', Math.max(0, parseInt(e.target.value, 10) || 0))}
+                        className={`w-full h-8 text-center rounded border font-mono font-bold text-xs outline-none ${
+                          isLocked
+                            ? 'bg-transparent border-transparent text-slate-500 cursor-not-allowed'
+                            : 'border-slate-300 focus:border-purple-600 focus:bg-white bg-slate-50/40 text-slate-900'
+                        }`}
+                      />
                     </td>
                     <td className="p-1 border border-slate-300 dark:border-slate-700">
-                      {canEdit || isAdmin ? (
-                        <input
-                          type="number"
-                          min="0"
-                          value={row.simmental_betina_non_prod ?? 0}
-                          onChange={(e) => handleRumpunCellChange(activeCfg.key, monthIdx, 'simmental_betina_non_prod', e.target.value)}
-                          className="w-full h-8 text-center rounded border border-slate-300 dark:border-slate-600 focus:border-purple-600 focus:bg-white bg-slate-50/40 font-mono font-bold text-slate-900 text-xs outline-none"
-                        />
-                      ) : (
-                        <span className="font-mono font-bold text-slate-800">{(row.simmental_betina_non_prod || 0).toLocaleString('id-ID')}</span>
-                      )}
-                    </td>
-
-                    {/* Limousine */}
-                    <td className="p-1 border border-slate-300 dark:border-slate-700">
-                      {canEdit || isAdmin ? (
-                        <input
-                          type="number"
-                          min="0"
-                          value={row.limousine_jantan ?? 0}
-                          onChange={(e) => handleRumpunCellChange(activeCfg.key, monthIdx, 'limousine_jantan', e.target.value)}
-                          className="w-full h-8 text-center rounded border border-slate-300 dark:border-slate-600 focus:border-purple-600 focus:bg-white bg-slate-50/40 font-mono font-bold text-slate-900 text-xs outline-none"
-                        />
-                      ) : (
-                        <span className="font-mono font-bold text-slate-800">{(row.limousine_jantan || 0).toLocaleString('id-ID')}</span>
-                      )}
-                    </td>
-                    <td className="p-1 border border-slate-300 dark:border-slate-700">
-                      {canEdit || isAdmin ? (
-                        <input
-                          type="number"
-                          min="0"
-                          value={row.limousine_betina_prod ?? 0}
-                          onChange={(e) => handleRumpunCellChange(activeCfg.key, monthIdx, 'limousine_betina_prod', e.target.value)}
-                          className="w-full h-8 text-center rounded border border-slate-300 dark:border-slate-600 focus:border-purple-600 focus:bg-white bg-slate-50/40 font-mono font-bold text-slate-900 text-xs outline-none"
-                        />
-                      ) : (
-                        <span className="font-mono font-bold text-slate-800">{(row.limousine_betina_prod || 0).toLocaleString('id-ID')}</span>
-                      )}
-                    </td>
-                    <td className="p-1 border border-slate-300 dark:border-slate-700">
-                      {canEdit || isAdmin ? (
-                        <input
-                          type="number"
-                          min="0"
-                          value={row.limousine_betina_non_prod ?? 0}
-                          onChange={(e) => handleRumpunCellChange(activeCfg.key, monthIdx, 'limousine_betina_non_prod', e.target.value)}
-                          className="w-full h-8 text-center rounded border border-slate-300 dark:border-slate-600 focus:border-purple-600 focus:bg-white bg-slate-50/40 font-mono font-bold text-slate-900 text-xs outline-none"
-                        />
-                      ) : (
-                        <span className="font-mono font-bold text-slate-800">{(row.limousine_betina_non_prod || 0).toLocaleString('id-ID')}</span>
-                      )}
+                      <input
+                        type="number"
+                        min="0"
+                        disabled={isLocked}
+                        value={row.so_betina_non_prod ?? 0}
+                        onChange={(e) => handleRumpunCellChange(activeCfg.key, dayIdx, 'so_betina_non_prod', Math.max(0, parseInt(e.target.value, 10) || 0))}
+                        className={`w-full h-8 text-center rounded border font-mono font-bold text-xs outline-none ${
+                          isLocked
+                            ? 'bg-transparent border-transparent text-slate-500 cursor-not-allowed'
+                            : 'border-slate-300 focus:border-purple-600 focus:bg-white bg-slate-50/40 text-slate-900'
+                        }`}
+                      />
                     </td>
 
-                    {/* Babi (Hanya J dan B - Khusus Gombong & Luar Gombong) */}
+                    {/* Simmental: J, BP, BT */}
+                    <td className="p-1 border border-slate-300 dark:border-slate-700">
+                      <input
+                        type="number"
+                        min="0"
+                        disabled={isLocked}
+                        value={row.simmental_jantan ?? 0}
+                        onChange={(e) => handleRumpunCellChange(activeCfg.key, dayIdx, 'simmental_jantan', Math.max(0, parseInt(e.target.value, 10) || 0))}
+                        className={`w-full h-8 text-center rounded border font-mono font-bold text-xs outline-none ${
+                          isLocked
+                            ? 'bg-transparent border-transparent text-slate-500 cursor-not-allowed'
+                            : 'border-slate-300 focus:border-purple-600 focus:bg-white bg-slate-50/40 text-slate-900'
+                        }`}
+                      />
+                    </td>
+                    <td className="p-1 border border-slate-300 dark:border-slate-700">
+                      <input
+                        type="number"
+                        min="0"
+                        disabled={isLocked}
+                        value={row.simmental_betina_prod ?? 0}
+                        onChange={(e) => handleRumpunCellChange(activeCfg.key, dayIdx, 'simmental_betina_prod', Math.max(0, parseInt(e.target.value, 10) || 0))}
+                        className={`w-full h-8 text-center rounded border font-mono font-bold text-xs outline-none ${
+                          isLocked
+                            ? 'bg-transparent border-transparent text-slate-500 cursor-not-allowed'
+                            : 'border-slate-300 focus:border-purple-600 focus:bg-white bg-slate-50/40 text-slate-900'
+                        }`}
+                      />
+                    </td>
+                    <td className="p-1 border border-slate-300 dark:border-slate-700">
+                      <input
+                        type="number"
+                        min="0"
+                        disabled={isLocked}
+                        value={row.simmental_betina_non_prod ?? 0}
+                        onChange={(e) => handleRumpunCellChange(activeCfg.key, dayIdx, 'simmental_betina_non_prod', Math.max(0, parseInt(e.target.value, 10) || 0))}
+                        className={`w-full h-8 text-center rounded border font-mono font-bold text-xs outline-none ${
+                          isLocked
+                            ? 'bg-transparent border-transparent text-slate-500 cursor-not-allowed'
+                            : 'border-slate-300 focus:border-purple-600 focus:bg-white bg-slate-50/40 text-slate-900'
+                        }`}
+                      />
+                    </td>
+
+                    {/* Limousine: J, BP, BT */}
+                    <td className="p-1 border border-slate-300 dark:border-slate-700">
+                      <input
+                        type="number"
+                        min="0"
+                        disabled={isLocked}
+                        value={row.limousine_jantan ?? 0}
+                        onChange={(e) => handleRumpunCellChange(activeCfg.key, dayIdx, 'limousine_jantan', Math.max(0, parseInt(e.target.value, 10) || 0))}
+                        className={`w-full h-8 text-center rounded border font-mono font-bold text-xs outline-none ${
+                          isLocked
+                            ? 'bg-transparent border-transparent text-slate-500 cursor-not-allowed'
+                            : 'border-slate-300 focus:border-purple-600 focus:bg-white bg-slate-50/40 text-slate-900'
+                        }`}
+                      />
+                    </td>
+                    <td className="p-1 border border-slate-300 dark:border-slate-700">
+                      <input
+                        type="number"
+                        min="0"
+                        disabled={isLocked}
+                        value={row.limousine_betina_prod ?? 0}
+                        onChange={(e) => handleRumpunCellChange(activeCfg.key, dayIdx, 'limousine_betina_prod', Math.max(0, parseInt(e.target.value, 10) || 0))}
+                        className={`w-full h-8 text-center rounded border font-mono font-bold text-xs outline-none ${
+                          isLocked
+                            ? 'bg-transparent border-transparent text-slate-500 cursor-not-allowed'
+                            : 'border-slate-300 focus:border-purple-600 focus:bg-white bg-slate-50/40 text-slate-900'
+                        }`}
+                      />
+                    </td>
+                    <td className="p-1 border border-slate-300 dark:border-slate-700">
+                      <input
+                        type="number"
+                        min="0"
+                        disabled={isLocked}
+                        value={row.limousine_betina_non_prod ?? 0}
+                        onChange={(e) => handleRumpunCellChange(activeCfg.key, dayIdx, 'limousine_betina_non_prod', Math.max(0, parseInt(e.target.value, 10) || 0))}
+                        className={`w-full h-8 text-center rounded border font-mono font-bold text-xs outline-none ${
+                          isLocked
+                            ? 'bg-transparent border-transparent text-slate-500 cursor-not-allowed'
+                            : 'border-slate-300 focus:border-purple-600 focus:bg-white bg-slate-50/40 text-slate-900'
+                        }`}
+                      />
+                    </td>
+
+                    {/* Babi (Gombong) */}
                     {isGombong && (
                       <>
-                        <td className="p-1 border border-slate-300 dark:border-slate-700 bg-rose-50/30">
-                          {canEdit || isAdmin ? (
-                            <input
-                              type="number"
-                              min="0"
-                              value={row.babi_jantan ?? 0}
-                              onChange={(e) => handleRumpunCellChange(activeCfg.key, monthIdx, 'babi_jantan', e.target.value)}
-                              className="w-full h-8 text-center rounded border border-rose-200 focus:border-rose-600 focus:bg-white bg-white font-mono font-bold text-slate-900 text-xs outline-none"
-                            />
-                          ) : (
-                            <span className="font-mono font-bold text-slate-800">{(row.babi_jantan || 0).toLocaleString('id-ID')}</span>
-                          )}
+                        <td className="p-1 border border-slate-300 dark:border-slate-700 bg-rose-50/40">
+                          <input
+                            type="number"
+                            min="0"
+                            disabled={isLocked}
+                            value={row.babi_jantan ?? 0}
+                            onChange={(e) => handleRumpunCellChange(activeCfg.key, dayIdx, 'babi_jantan', Math.max(0, parseInt(e.target.value, 10) || 0))}
+                            className={`w-full h-8 text-center rounded border font-mono font-bold text-xs outline-none ${
+                              isLocked
+                                ? 'bg-transparent border-transparent text-slate-500 cursor-not-allowed'
+                                : 'border-rose-200 focus:border-rose-600 focus:bg-white bg-white text-rose-950'
+                            }`}
+                          />
                         </td>
-                        <td className="p-1 border border-slate-300 dark:border-slate-700 bg-rose-50/30">
-                          {canEdit || isAdmin ? (
-                            <input
-                              type="number"
-                              min="0"
-                              value={row.babi_betina ?? (row.babi_betina_prod || 0)}
-                              onChange={(e) => {
-                                handleRumpunCellChange(activeCfg.key, monthIdx, 'babi_betina_prod', e.target.value);
-                                handleRumpunCellChange(activeCfg.key, monthIdx, 'babi_betina', e.target.value);
-                              }}
-                              className="w-full h-8 text-center rounded border border-rose-200 focus:border-rose-600 focus:bg-white bg-white font-mono font-bold text-slate-900 text-xs outline-none"
-                            />
-                          ) : (
-                            <span className="font-mono font-bold text-slate-800">{(Number(row.babi_betina) || Number(row.babi_betina_prod) || 0).toLocaleString('id-ID')}</span>
-                          )}
+                        <td className="p-1 border border-slate-300 dark:border-slate-700 bg-rose-50/40">
+                          <input
+                            type="number"
+                            min="0"
+                            disabled={isLocked}
+                            value={row.babi_betina_prod ?? row.babi_betina ?? 0}
+                            onChange={(e) => handleRumpunCellChange(activeCfg.key, dayIdx, 'babi_betina_prod', Math.max(0, parseInt(e.target.value, 10) || 0))}
+                            className={`w-full h-8 text-center rounded border font-mono font-bold text-xs outline-none ${
+                              isLocked
+                                ? 'bg-transparent border-transparent text-slate-500 cursor-not-allowed'
+                                : 'border-rose-200 focus:border-rose-600 focus:bg-white bg-white text-rose-950'
+                            }`}
+                          />
                         </td>
                       </>
                     )}
 
-                    {/* TOTAL TERPISAH SETIAP BULAN */}
+                    {/* Total Harian */}
                     <td className="p-2 border border-slate-300 dark:border-slate-700 font-mono font-bold text-slate-900 bg-purple-50/30">
-                      {rowTotalJantan.toLocaleString('id-ID')}
+                      {totJantan.toLocaleString('id-ID')}
                     </td>
                     <td className="p-2 border border-slate-300 dark:border-slate-700 font-mono font-bold text-slate-900 bg-purple-50/30">
-                      {rowTotalBetinaProd.toLocaleString('id-ID')}
+                      {totBetinaProd.toLocaleString('id-ID')}
                     </td>
                     <td className="p-2 border border-slate-300 dark:border-slate-700 font-mono font-bold text-slate-900 bg-purple-50/30">
-                      {rowTotalBetinaNon.toLocaleString('id-ID')}
+                      {totBetinaNonProd.toLocaleString('id-ID')}
                     </td>
-                    <td className="p-2 border border-slate-300 dark:border-slate-700 font-extrabold font-mono text-purple-900 bg-purple-100/70">
-                      {rowGrandTotal.toLocaleString('id-ID')}
+                    <td className="p-2 border border-slate-300 dark:border-slate-700 font-mono font-black text-purple-950 bg-purple-100/70">
+                      {grandHari.toLocaleString('id-ID')}
                     </td>
                   </tr>
                 );
               })}
             </tbody>
 
-            {/* SUMMARY / TOTALS FOOTER ROW */}
+            {/* Footer Summary Total Bulan Ini */}
             <tfoot>
-              <tr className="bg-purple-100/90 text-purple-950 font-bold border border-purple-200">
-                <td className="p-3 border border-purple-200 font-black text-left pl-3.5 sticky left-0 z-10 bg-purple-100">
-                  TOTAL TAHUNAN
+              <tr className="bg-purple-950 text-white font-extrabold border-t-2 border-purple-900">
+                <td className="p-3 text-center sticky left-0 z-20 bg-purple-950">
+                  TOTAL BULAN {bulanName.toUpperCase()}
                 </td>
                 {/* PO */}
-                <td className="p-2 border border-purple-200 font-mono font-bold">{summary.po_jantan.toLocaleString('id-ID')}</td>
-                <td className="p-2 border border-purple-200 font-mono font-bold">{summary.po_betina_prod.toLocaleString('id-ID')}</td>
-                <td className="p-2 border border-purple-200 font-mono font-bold">{summary.po_betina_non_prod.toLocaleString('id-ID')}</td>
+                <td className="p-2">{summary.po_jantan.toLocaleString('id-ID')}</td>
+                <td className="p-2">{summary.po_betina_prod.toLocaleString('id-ID')}</td>
+                <td className="p-2">{summary.po_betina_non_prod.toLocaleString('id-ID')}</td>
                 {/* SO */}
-                <td className="p-2 border border-purple-200 font-mono font-bold">{summary.so_jantan.toLocaleString('id-ID')}</td>
-                <td className="p-2 border border-purple-200 font-mono font-bold">{summary.so_betina_prod.toLocaleString('id-ID')}</td>
-                <td className="p-2 border border-purple-200 font-mono font-bold">{summary.so_betina_non_prod.toLocaleString('id-ID')}</td>
+                <td className="p-2">{summary.so_jantan.toLocaleString('id-ID')}</td>
+                <td className="p-2">{summary.so_betina_prod.toLocaleString('id-ID')}</td>
+                <td className="p-2">{summary.so_betina_non_prod.toLocaleString('id-ID')}</td>
                 {/* Simmental */}
-                <td className="p-2 border border-purple-200 font-mono font-bold">{summary.simmental_jantan.toLocaleString('id-ID')}</td>
-                <td className="p-2 border border-purple-200 font-mono font-bold">{summary.simmental_betina_prod.toLocaleString('id-ID')}</td>
-                <td className="p-2 border border-purple-200 font-mono font-bold">{summary.simmental_betina_non_prod.toLocaleString('id-ID')}</td>
+                <td className="p-2">{summary.simmental_jantan.toLocaleString('id-ID')}</td>
+                <td className="p-2">{summary.simmental_betina_prod.toLocaleString('id-ID')}</td>
+                <td className="p-2">{summary.simmental_betina_non_prod.toLocaleString('id-ID')}</td>
                 {/* Limousine */}
-                <td className="p-2 border border-purple-200 font-mono font-bold">{summary.limousine_jantan.toLocaleString('id-ID')}</td>
-                <td className="p-2 border border-purple-200 font-mono font-bold">{summary.limousine_betina_prod.toLocaleString('id-ID')}</td>
-                <td className="p-2 border border-purple-200 font-mono font-bold">{summary.limousine_betina_non_prod.toLocaleString('id-ID')}</td>
-                {/* Babi Footer */}
+                <td className="p-2">{summary.limousine_jantan.toLocaleString('id-ID')}</td>
+                <td className="p-2">{summary.limousine_betina_prod.toLocaleString('id-ID')}</td>
+                <td className="p-2">{summary.limousine_betina_non_prod.toLocaleString('id-ID')}</td>
+                {/* Babi */}
                 {isGombong && (
                   <>
-                    <td className="p-2 border border-purple-200 font-mono font-bold bg-rose-100/70 text-rose-950">{summary.babi_jantan.toLocaleString('id-ID')}</td>
-                    <td className="p-2 border border-purple-200 font-mono font-bold bg-rose-100/70 text-rose-950">{summary.babi_betina.toLocaleString('id-ID')}</td>
+                    <td className="p-2 text-rose-200">{summary.babi_jantan.toLocaleString('id-ID')}</td>
+                    <td className="p-2 text-rose-200">{summary.babi_betina.toLocaleString('id-ID')}</td>
                   </>
                 )}
-                {/* Subtotals Footer */}
-                <td className="p-2 border border-purple-200 font-mono font-black text-purple-950 bg-purple-200/60">{summary.total_jantan.toLocaleString('id-ID')}</td>
-                <td className="p-2 border border-purple-200 font-mono font-black text-purple-950 bg-purple-200/60">{summary.total_betina_prod.toLocaleString('id-ID')}</td>
-                <td className="p-2 border border-purple-200 font-mono font-black text-purple-950 bg-purple-200/60">{summary.total_betina_non_prod.toLocaleString('id-ID')}</td>
-                <td className="p-2.5 border border-purple-200 font-black font-mono text-purple-950 bg-purple-300/80 text-sm">
-                  {summary.grand_total.toLocaleString('id-ID')}
-                </td>
+                {/* Grand Total */}
+                <td className="p-2 bg-purple-900/90 text-purple-200">{summary.total_jantan.toLocaleString('id-ID')}</td>
+                <td className="p-2 bg-purple-900/90 text-purple-200">{summary.total_betina_prod.toLocaleString('id-ID')}</td>
+                <td className="p-2 bg-purple-900/90 text-purple-200">{summary.total_betina_non_prod.toLocaleString('id-ID')}</td>
+                <td className="p-2 bg-purple-900 font-black text-amber-300 text-sm">{summary.grand_total.toLocaleString('id-ID')}</td>
               </tr>
             </tfoot>
           </table>
