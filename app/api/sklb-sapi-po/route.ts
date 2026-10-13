@@ -48,9 +48,20 @@ export async function GET(req: Request) {
     );
     const setting = settingRows && settingRows.length > 0 ? settingRows[0] : null;
 
-    // 3. Ambil data populasi Sapi PO pada tahun tersebut
+    // 3. Ambil data populasi Sapi PO pada tahun tersebut dengan JOIN ke tabel master kecamatan
     const [rows]: any = await pool.query(
-      `SELECT * FROM bitpro_sklb_populasi_sapi_po WHERE tahun = ? ORDER BY populasi DESC, kecamatan_nama ASC`,
+      `SELECT 
+         p.id,
+         p.tahun,
+         p.id_kecamatan,
+         p.triwulan,
+         p.populasi,
+         p.keterangan,
+         COALESCE(k.kecamatan, '') AS kecamatan_nama
+       FROM bitpro_sklb_populasi_sapi_po p
+       LEFT JOIN kecamatan k ON p.id_kecamatan = k.id_kecamatan
+       WHERE p.tahun = ?
+       ORDER BY p.populasi DESC`,
       [tahun]
     );
 
@@ -58,15 +69,33 @@ export async function GET(req: Request) {
     let calculatedSum = 0;
     let triwulan = setting?.triwulan || 'Triwulan 2';
 
-    (rows || []).forEach((r: any) => {
-      const cleanId = (r.kecamatan_id || '').toLowerCase().replace('k_', '');
+    const formattedData = (rows || []).map((r: any) => {
+      const kecName = r.kecamatan_nama || '';
+      const cleanId = kecName.toLowerCase().replace(/[^a-z0-9]/g, '');
       const pop = Number(r.populasi) || 0;
-      kecMap[cleanId] = pop;
-      kecMap[`k_${cleanId}`] = pop;
+
+      if (cleanId) {
+        kecMap[cleanId] = pop;
+        kecMap[`k_${cleanId}`] = pop;
+      }
+      if (kecName) {
+        kecMap[kecName.toLowerCase()] = pop;
+      }
+      if (r.id_kecamatan) {
+        kecMap[String(r.id_kecamatan)] = pop;
+      }
+
       calculatedSum += pop;
       if (!setting?.triwulan && r.triwulan) {
         triwulan = r.triwulan;
       }
+
+      return {
+        ...r,
+        kecamatan_id: cleanId || String(r.id_kecamatan || ''),
+        kecamatan_nama: kecName || `Kecamatan ${r.id_kecamatan}`,
+        populasi: pop,
+      };
     });
 
     const isManualTotal = setting ? Number(setting.is_manual_total) === 1 : false;
@@ -82,7 +111,7 @@ export async function GET(req: Request) {
       calculatedSum,
       isManualTotal,
       kecMap,
-      data: rows || [],
+      data: formattedData,
     });
   } catch (error: any) {
     console.error('Error GET sklb-sapi-po:', error);
@@ -104,17 +133,27 @@ export async function POST(req: Request) {
 
       // Ambil template dari tahun terdekat (misal 2026 atau data terbaru)
       const [templateRows]: any = await pool.query(
-        `SELECT kecamatan_id, kecamatan_nama, populasi, triwulan FROM bitpro_sklb_populasi_sapi_po WHERE tahun = 2026`
+        `SELECT id_kecamatan, populasi, triwulan FROM bitpro_sklb_populasi_sapi_po WHERE tahun = 2026`
       );
 
       if (templateRows && templateRows.length > 0) {
         for (const row of templateRows) {
-          await pool.query(
-            `INSERT INTO bitpro_sklb_populasi_sapi_po (tahun, kecamatan_id, kecamatan_nama, populasi, triwulan)
-             VALUES (?, ?, ?, ?, ?)
-             ON DUPLICATE KEY UPDATE populasi = VALUES(populasi)`,
-            [newYear, row.kecamatan_id, row.kecamatan_nama, row.populasi, row.triwulan || 'Triwulan 2']
+          const [exists]: any = await pool.query(
+            `SELECT id FROM bitpro_sklb_populasi_sapi_po WHERE tahun = ? AND id_kecamatan = ? LIMIT 1`,
+            [newYear, row.id_kecamatan]
           );
+          if (exists && exists.length > 0) {
+            await pool.query(
+              `UPDATE bitpro_sklb_populasi_sapi_po SET populasi = ?, triwulan = ? WHERE id = ?`,
+              [row.populasi, row.triwulan || 'Triwulan 2', exists[0].id]
+            );
+          } else {
+            await pool.query(
+              `INSERT INTO bitpro_sklb_populasi_sapi_po (tahun, id_kecamatan, populasi, triwulan)
+               VALUES (?, ?, ?, ?)`,
+              [newYear, row.id_kecamatan, row.populasi, row.triwulan || 'Triwulan 2']
+            );
+          }
         }
       }
 
@@ -176,30 +215,50 @@ export async function POST(req: Request) {
 
     // Aksi Tambah / Update Satuan Kasus Populasi Sapi PO
     const { tahun, kecamatan_id, kecamatan_nama, populasi, triwulan, keterangan } = body;
-    if (!tahun || !kecamatan_id) {
+    if (!tahun || (!kecamatan_id && !kecamatan_nama)) {
       return NextResponse.json({ success: false, error: 'Tahun dan Kecamatan wajib diisi' }, { status: 400 });
     }
 
-    const cleanKecId = String(kecamatan_id).toLowerCase().replace('k_', '');
     const cleanPop = Number(populasi) || 0;
+    const cleanKecId = String(kecamatan_id || '').toLowerCase().replace('k_', '');
+    const cleanKecNama = kecamatan_nama || cleanKecId;
+
+    // Cari id_kecamatan dari tabel master kecamatan
+    const [kecRows]: any = await pool.query(
+      `SELECT id_kecamatan, kecamatan FROM kecamatan 
+       WHERE LOWER(kecamatan) = LOWER(?) OR LOWER(REPLACE(kecamatan, ' ', '')) = LOWER(?) OR id_kecamatan = ? LIMIT 1`,
+      [cleanKecNama, cleanKecId, Number(cleanKecId) || 0]
+    );
+
+    const targetIdKecamatan = kecRows && kecRows.length > 0 ? kecRows[0].id_kecamatan : null;
+    const resolvedKecNama = kecRows && kecRows.length > 0 ? kecRows[0].kecamatan : cleanKecNama;
+
+    if (!targetIdKecamatan) {
+      return NextResponse.json({ success: false, error: 'Kecamatan tidak ditemukan di database' }, { status: 400 });
+    }
 
     // Ambil data lama untuk hitung selisih perubahan (delta)
     const [oldRows]: any = await pool.query(
-      `SELECT populasi FROM bitpro_sklb_populasi_sapi_po WHERE tahun = ? AND kecamatan_id = ? LIMIT 1`,
-      [Number(tahun), cleanKecId]
+      `SELECT id, populasi FROM bitpro_sklb_populasi_sapi_po WHERE tahun = ? AND id_kecamatan = ? LIMIT 1`,
+      [Number(tahun), targetIdKecamatan]
     );
     const oldPop = oldRows && oldRows.length > 0 ? Number(oldRows[0].populasi) || 0 : 0;
     const delta = cleanPop - oldPop;
 
-    const session = await getSessionFromRequest(req as any);
-    const userName = session?.nama || session?.nip_username || 'Unknown';
-
-    await pool.query(
-      `INSERT INTO bitpro_sklb_populasi_sapi_po (tahun, kecamatan_id, kecamatan_nama, populasi, triwulan, keterangan)
-       VALUES (?, ?, ?, ?, ?, ?)
-       ON DUPLICATE KEY UPDATE populasi = VALUES(populasi), kecamatan_nama = VALUES(kecamatan_nama), triwulan = VALUES(triwulan), keterangan = VALUES(keterangan)`,
-      [Number(tahun), cleanKecId, kecamatan_nama || cleanKecId, cleanPop, triwulan || 'Triwulan 2', keterangan || null]
-    );
+    if (oldRows && oldRows.length > 0) {
+      await pool.query(
+        `UPDATE bitpro_sklb_populasi_sapi_po 
+         SET populasi = ?, triwulan = ?, keterangan = ? 
+         WHERE id = ?`,
+        [cleanPop, triwulan || 'Triwulan 2', keterangan || null, oldRows[0].id]
+      );
+    } else {
+      await pool.query(
+        `INSERT INTO bitpro_sklb_populasi_sapi_po (tahun, id_kecamatan, populasi, triwulan, keterangan)
+         VALUES (?, ?, ?, ?, ?)`,
+        [Number(tahun), targetIdKecamatan, cleanPop, triwulan || 'Triwulan 2', keterangan || null]
+      );
+    }
 
     // Jika setting tahun ada dan manual, sesuaikan total_populasi dengan delta
     if (delta !== 0) {
@@ -221,14 +280,17 @@ export async function POST(req: Request) {
       );
     }
 
+    const session = await getSessionFromRequest(req as any);
+    const userName = session?.nama || session?.nip_username || 'Unknown';
+
     await logActivity({
       module: 'bitpro',
       submenu: 'sklb',
       tableName: 'sklb_sapi_po',
-      recordId: `${tahun}_${cleanKecId}`,
+      recordId: `${tahun}_${targetIdKecamatan}`,
       action: 'UPDATE',
       userName,
-      details: { tahun, kecamatan_id: cleanKecId, kecamatan_nama, populasi: cleanPop, triwulan, keterangan },
+      details: { tahun, id_kecamatan: targetIdKecamatan, kecamatan_nama: resolvedKecNama, populasi: cleanPop, triwulan, keterangan },
     });
 
     return NextResponse.json({ success: true, message: 'Data populasi Sapi PO berhasil disimpan' });

@@ -44,8 +44,8 @@ export default function UnifiedSKLBPage() {
 
   const [sapiPOData, setSapiPOData] = useState<any[]>([]);
   const [sapiPOKecMap, setSapiPOKecMap] = useState<Record<string, number>>({});
-  const [totalSapiPO, setTotalSapiPO] = useState<number>(50450);
-  const [calculatedSum, setCalculatedSum] = useState<number>(50450);
+  const [totalSapiPO, setTotalSapiPO] = useState<number>(0);
+  const [calculatedSum, setCalculatedSum] = useState<number>(0);
   const [triwulanText, setTriwulanText] = useState<string>('Triwulan 2');
   const [showEditTotalModal, setShowEditTotalModal] = useState<boolean>(false);
   const [isLoadingSapiPO, setIsLoadingSapiPO] = useState<boolean>(true);
@@ -116,12 +116,21 @@ export default function UnifiedSKLBPage() {
       if (json.success) {
         setSapiPOData(rezaProcessSklbData(json.data || []));
         setSapiPOKecMap(json.kecMap || {});
-        setTotalSapiPO(json.totalPopulasi || 0);
-        setCalculatedSum(json.calculatedSum || 0);
+        setTotalSapiPO(json.totalPopulasi ?? 0);
+        setCalculatedSum(json.calculatedSum ?? 0);
         if (json.triwulan) setTriwulanText(json.triwulan);
+      } else {
+        setSapiPOData([]);
+        setSapiPOKecMap({});
+        setTotalSapiPO(0);
+        setCalculatedSum(0);
       }
     } catch (err) {
       console.error('Gagal memuat data populasi Sapi PO:', err);
+      setSapiPOData([]);
+      setSapiPOKecMap({});
+      setTotalSapiPO(0);
+      setCalculatedSum(0);
     } finally {
       setIsLoadingSapiPO(false);
     }
