@@ -14,6 +14,7 @@ import { ArrowUp } from 'lucide-react';
 import LandingHeader from '@/components/landing/LandingHeader';
 import LandingHeroSection from '@/components/landing/LandingHeroSection';
 import LandingStatsSection from '@/components/landing/LandingStatsSection';
+import LandingHargaTernakSection from '@/components/landing/LandingHargaTernakSection';
 import LandingFacilitiesSection from '@/components/landing/LandingFacilitiesSection';
 import LandingChartsSection from '@/components/landing/LandingChartsSection';
 import LandingServicesSection from '@/components/landing/LandingServicesSection';
@@ -235,23 +236,23 @@ export default function LandingPage() {
 
       {/* 2. DASHBOARD BODY */}
       <main className="flex-1 w-full">
+        {/* Top Hero Banner With Waves Shape Divider */}
+        <LandingHeroSection
+          onSelectModule={(modKey) => {
+            if (modKey === 'bitpro') {
+              setDetailView('populasi');
+              scrollToSection('modul');
+            } else if (modKey === 'keswan') {
+              setFacilityTab('puskeswan');
+              scrollToSection('puskeswan');
+            } else if (modKey === 'kesmavet') {
+              setFacilityTab('rph');
+              scrollToSection('puskeswan');
+            }
+          }}
+        />
+
         <div className="max-w-[1360px] mx-auto p-3.5 sm:p-6 md:p-8 lg:p-9 space-y-6 sm:space-y-7">
-          
-          {/* Top Hero Banner With Module Cards */}
-          <LandingHeroSection
-            onSelectModule={(modKey) => {
-              if (modKey === 'bitpro') {
-                setDetailView('populasi');
-                scrollToSection('modul');
-              } else if (modKey === 'keswan') {
-                setFacilityTab('puskeswan');
-                scrollToSection('puskeswan');
-              } else if (modKey === 'kesmavet') {
-                setFacilityTab('rph');
-                scrollToSection('puskeswan');
-              }
-            }}
-          />
 
           {/* Section 1: Stat Cards (Ringkasan Wilayah) */}
           <LandingStatsSection
@@ -270,6 +271,9 @@ export default function LandingPage() {
               scrollToSection('modul');
             }}
           />
+
+          {/* Section 1.5: Harga Pasar Ternak */}
+          <LandingHargaTernakSection />
 
           {/* Section 2: Puskeswan & RPH */}
           <LandingFacilitiesSection

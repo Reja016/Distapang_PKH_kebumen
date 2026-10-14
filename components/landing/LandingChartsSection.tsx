@@ -1,7 +1,6 @@
 'use client';
 
 import React from 'react';
-import { Activity, BarChart3, TrendingUp, PackageCheck } from 'lucide-react';
 import {
   PALETTE_TERNAK,
   PALETTE_UNGGAS,
@@ -47,15 +46,6 @@ export default function LandingChartsSection({
       {/* 1. POPULASI HEWAN TERNAK */}
       <div className="p-3.5 sm:p-6 rounded-2xl sm:rounded-3xl border-2 border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 shadow-xs space-y-3.5 sm:space-y-5 flex flex-col justify-between">
         <div>
-          <div className="flex flex-wrap items-center justify-between gap-2 mb-1.5">
-            <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-blue-50 dark:bg-blue-950/60 border border-blue-200 dark:border-blue-800 text-xs sm:text-sm font-bold text-blue-700 dark:text-blue-300">
-              <Activity size={14} />
-              <span>Ruminansia &amp; Non-Ruminansia</span>
-            </div>
-            <span className="text-xs sm:text-sm font-bold text-blue-600 dark:text-blue-400 bg-blue-50/70 dark:bg-blue-950/40 px-2.5 py-1 rounded-md border border-blue-100 dark:border-blue-800">
-              Total: {totalTernakHewan.toLocaleString('id-ID')} Ekor
-            </span>
-          </div>
           <h3 className="text-base sm:text-xl font-extrabold text-slate-900 dark:text-white">
             Populasi Hewan Ternak
           </h3>
@@ -106,15 +96,6 @@ export default function LandingChartsSection({
       {/* 2. POPULASI UNGGAS */}
       <div className="p-3.5 sm:p-6 rounded-2xl sm:rounded-3xl border-2 border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 shadow-xs space-y-3.5 sm:space-y-5 flex flex-col justify-between">
         <div>
-          <div className="flex flex-wrap items-center justify-between gap-2 mb-1.5">
-            <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-amber-50 dark:bg-amber-950/60 border border-amber-200 dark:border-amber-800 text-xs sm:text-sm font-bold text-amber-700 dark:text-amber-300">
-              <BarChart3 size={14} />
-              <span>Komoditas Unggas</span>
-            </div>
-            <span className="text-xs sm:text-sm font-bold text-amber-600 dark:text-amber-400 bg-amber-50/70 dark:bg-amber-950/40 px-2.5 py-1 rounded-md border border-amber-100 dark:border-amber-800">
-              Total: {totalUnggas.toLocaleString('id-ID')} Ekor
-            </span>
-          </div>
           <h3 className="text-base sm:text-xl font-extrabold text-slate-900 dark:text-white">
             Populasi Unggas
           </h3>
@@ -165,15 +146,6 @@ export default function LandingChartsSection({
       {/* 3. PRODUKSI DAGING */}
       <div className="p-3.5 sm:p-6 rounded-2xl sm:rounded-3xl border-2 border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 shadow-xs space-y-3.5 sm:space-y-5 flex flex-col justify-between">
         <div>
-          <div className="flex flex-wrap items-center justify-between gap-2 mb-1.5">
-            <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-rose-50 dark:bg-rose-950/60 border border-rose-200 dark:border-rose-800 text-xs sm:text-sm font-bold text-rose-700 dark:text-rose-300">
-              <TrendingUp size={14} />
-              <span>Hasil Ternak Potong</span>
-            </div>
-            <span className="text-xs sm:text-sm font-bold text-rose-600 dark:text-rose-400 bg-rose-50/70 dark:bg-rose-950/40 px-2.5 py-1 rounded-md border border-rose-100 dark:border-rose-800">
-              Total: {totalProdDagingTon.toLocaleString('id-ID', { minimumFractionDigits: 1, maximumFractionDigits: 1 })} Ton
-            </span>
-          </div>
           <h3 className="text-base sm:text-xl font-extrabold text-slate-900 dark:text-white">
             Produksi Daging
           </h3>
@@ -224,15 +196,6 @@ export default function LandingChartsSection({
       {/* 4. PRODUKSI TELUR */}
       <div className="p-3.5 sm:p-6 rounded-2xl sm:rounded-3xl border-2 border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 shadow-xs space-y-3.5 sm:space-y-5 flex flex-col justify-between">
         <div>
-          <div className="flex flex-wrap items-center justify-between gap-2 mb-1.5">
-            <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-amber-50 dark:bg-amber-950/60 border border-amber-200 dark:border-amber-800 text-xs sm:text-sm font-bold text-amber-700 dark:text-amber-300">
-              <PackageCheck size={14} />
-              <span>Hasil Ternak Petelur</span>
-            </div>
-            <span className="text-xs sm:text-sm font-bold text-amber-600 dark:text-amber-400 bg-amber-50/70 dark:bg-amber-950/40 px-2.5 py-1 rounded-md border border-amber-100 dark:border-amber-800">
-              Total: {totalProdTelurTon.toLocaleString('id-ID', { minimumFractionDigits: 1, maximumFractionDigits: 1 })} Ton
-            </span>
-          </div>
           <h3 className="text-base sm:text-xl font-extrabold text-slate-900 dark:text-white">
             Produksi Telur
           </h3>
