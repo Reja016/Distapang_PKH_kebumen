@@ -12,12 +12,14 @@ import {
   Calendar as CalendarIcon,
   History,
   Users,
+  Stethoscope,
 } from 'lucide-react';
 import {
   Cattle,
   rezaProcessCattleData,
 } from '@/components/bitpro/sapitime/types';
 import { SapiTimePetugasTab } from '@/components/bitpro/sapitime/SapiTimePetugasTab';
+import { SapiTimePkbTab } from '@/components/bitpro/sapitime/SapiTimePkbTab';
 import { SapiTimeSummaryTab } from '@/components/bitpro/sapitime/SapiTimeSummaryTab';
 import { SapiTimeDatabaseTab } from '@/components/bitpro/sapitime/SapiTimeDatabaseTab';
 import { SapiTimeCalendarTab } from '@/components/bitpro/sapitime/SapiTimeCalendarTab';
@@ -37,9 +39,14 @@ export default function SapiTimePage() {
   const router = useRouter();
   const { isReady, canCreate, canEdit, isAdmin: isAuthAdmin, userName, userRole } = usePageAuth('bitpro', 'sapitime');
   const isAdmin = useMemo(() => isAuthAdmin || canEdit || userRole === 'Administrator', [isAuthAdmin, canEdit, userRole]);
+  const isPkbOfficer = useMemo(() => {
+    const roleNorm = (userRole || '').toLowerCase();
+    return roleNorm.includes('pkb') || roleNorm === 'petugas pkb';
+  }, [userRole]);
+  const canAccessAllIbs = useMemo(() => isAdmin || isPkbOfficer, [isAdmin, isPkbOfficer]);
 
-  // Tab State: Untuk Admin default 'petugas_ib', untuk user biasa default 'database'
-  const [activeTab, setActiveTab] = useState<'petugas_ib' | 'home' | 'database' | 'calendar' | 'history'>('database');
+  // Tab State: Untuk Admin default 'petugas_ib', Petugas PKB default 'pkb', user biasa default 'database'
+  const [activeTab, setActiveTab] = useState<'petugas_ib' | 'pkb' | 'home' | 'database' | 'calendar' | 'history'>('database');
   const [cattleList, setCattleList] = useState<Cattle[]>([]);
   const [historyList, setHistoryList] = useState<any[]>([]);
 
@@ -76,10 +83,16 @@ export default function SapiTimePage() {
 
   // Set default active tab saat role sudah siap
   useEffect(() => {
-    if (isReady && isAdmin) {
-      setActiveTab('petugas_ib');
+    if (isReady) {
+      if (isAdmin) {
+        setActiveTab('petugas_ib');
+      } else if (isPkbOfficer) {
+        setActiveTab('pkb');
+      } else {
+        setActiveTab('database');
+      }
     }
-  }, [isReady, isAdmin]);
+  }, [isReady, isAdmin, isPkbOfficer]);
 
   // 1. Tarik Data dari MySQL API
   const fetchData = async () => {
@@ -103,10 +116,11 @@ export default function SapiTimePage() {
     };
   }, []);
 
-  // 2. Filter data khusus petugas non-admin (Data Isolation)
-  // Petugas biasa hanya bisa melihat data sapi dan IB yang ditanganinya
+  // 2. Filter data khusus petugas non-admin / non-PKB (Data Isolation)
+  // Admin dan Petugas PKB dapat melihat SELURUH sapi dan IB (Semi Admin)
+  // Petugas biasa hanya bisa melihat data sapi dan IB yang ditanganinya sendiri
   const displayCattleList = useMemo(() => {
-    if (isAdmin) return cattleList;
+    if (canAccessAllIbs) return cattleList;
     const localUser = getAuthSession();
     const uName = (userName || localUser?.nama || '').toLowerCase().trim();
     const uId = localUser?.id;
@@ -130,10 +144,10 @@ export default function SapiTimePage() {
         };
       })
       .filter((c) => (c.inseminations && c.inseminations.length > 0));
-  }, [cattleList, isAdmin, userName]);
+  }, [cattleList, canAccessAllIbs, userName]);
 
   const displayHistoryList = useMemo(() => {
-    if (isAdmin) return historyList;
+    if (canAccessAllIbs) return historyList;
     const localUser = getAuthSession();
     const uName = (userName || localUser?.nama || '').toLowerCase().trim();
     if (!uName) return historyList;
@@ -143,7 +157,7 @@ export default function SapiTimePage() {
       const officer = (h.officer || h.inseminatorName || '').toLowerCase();
       return officer.includes(uName) || desc.includes(uName);
     });
-  }, [historyList, isAdmin, userName]);
+  }, [historyList, canAccessAllIbs, userName]);
 
   // 3. Fungsi Eksekusi API ke MySQL
   const executeApi = async (action: string, payload: any, historyObj?: any): Promise<boolean> => {
@@ -176,10 +190,14 @@ export default function SapiTimePage() {
       return;
     }
     const newId = `ST${String(cattleList.length + 1).padStart(3, '0')}`;
-    const newC = {
+    const fallbackName = (formData.name || '').trim() || (formData.registrationNumber || '').trim() || `Sapi ${newId}`;
+
+    const newC: Cattle = {
       id: newId,
-      name: formData.name || `Sapi ${newId}`,
+      name: fallbackName,
       ownerName: formData.ownerName || '',
+      ownerPhone: formData.ownerPhone || '',
+      registrationNumber: formData.registrationNumber || '',
       nik: formData.nik || '',
       breed: formData.breed || 'PO',
       birthDate: formData.birthDate || '',
@@ -187,13 +205,14 @@ export default function SapiTimePage() {
       lastEstrus: formData.lastEstrus || '',
       cycleLength: Number(formData.cycleLength) || 21,
       inseminations: [],
+      notes: formData.notes || '',
       pregnancyDate: formData.pregnancyDate || '',
       kecamatan: formData.kecamatan || '',
       desa: formData.desa || '',
     };
 
     setShowAddModal(false);
-    setFormData({ status: 'Estrus', cycleLength: 21, kecamatan: '', desa: '', ownerName: '' });
+    setFormData({ status: 'Estrus', cycleLength: 21, kecamatan: '', desa: '', ownerName: '', ownerPhone: '', registrationNumber: '', nik: '' });
 
     const historyObj = {
       type: 'cattle_added',
@@ -211,7 +230,9 @@ export default function SapiTimePage() {
     setFormData({
       name: cattle.name,
       ownerName: cattle.ownerName || '',
-      nik: (cattle as any).nik || '',
+      ownerPhone: cattle.ownerPhone || '',
+      registrationNumber: cattle.registrationNumber || '',
+      nik: cattle.nik || '',
       breed: cattle.breed,
       birthDate: cattle.birthDate || '',
       status: cattle.status,
@@ -226,10 +247,14 @@ export default function SapiTimePage() {
 
   const handleUpdateCattle = async () => {
     if (!editingCattle) return;
+    const fallbackName = (formData.name || '').trim() || (formData.registrationNumber || '').trim() || editingCattle.id;
+
     const updatedCattle: Cattle = {
       ...editingCattle,
-      name: formData.name,
+      name: fallbackName,
       ownerName: formData.ownerName,
+      ownerPhone: formData.ownerPhone,
+      registrationNumber: formData.registrationNumber,
       nik: formData.nik,
       breed: formData.breed,
       birthDate: formData.birthDate,
@@ -239,7 +264,7 @@ export default function SapiTimePage() {
       pregnancyDate: formData.pregnancyDate,
       kecamatan: formData.kecamatan,
       desa: formData.desa,
-    } as any;
+    };
 
     setShowEditModal(false);
     setEditingCattle(null);
@@ -365,15 +390,28 @@ export default function SapiTimePage() {
     setShowEditStatusModal(true);
   };
 
-  // 4. Konfigurasi Tabs: Untuk Admin tab 'petugas_ib' paling depan dan 'database' paling belakang
+  // 4. Konfigurasi Tabs:
+  // - Admin: Petugas IB paling depan, lalu Pemeriksaan PKB, Ringkasan Siklus, Kalender, Kinerja, Database Indukan di paling belakang
+  // - Petugas PKB: Pemeriksaan PKB paling depan, lalu Database Indukan, Ringkasan, Kalender, Kinerja
+  // - Petugas biasa: Database Indukan, Ringkasan, Kalender, Kinerja
   const navigationTabs = useMemo(() => {
     if (isAdmin) {
       return [
         { key: 'petugas_ib', label: 'Petugas IB', icon: Users },
+        { key: 'pkb', label: 'Pemeriksaan PKB', icon: Stethoscope },
         { key: 'home', label: 'Ringkasan Siklus', icon: LayoutDashboard },
         { key: 'calendar', label: 'Kalender Reproduksi', icon: CalendarIcon },
         { key: 'history', label: 'Kinerja & Riwayat', icon: History },
         { key: 'database', label: 'Database Indukan', icon: Database },
+      ];
+    }
+    if (isPkbOfficer) {
+      return [
+        { key: 'pkb', label: 'Pemeriksaan PKB', icon: Stethoscope },
+        { key: 'database', label: 'Database Indukan', icon: Database },
+        { key: 'home', label: 'Ringkasan Siklus', icon: LayoutDashboard },
+        { key: 'calendar', label: 'Kalender Reproduksi', icon: CalendarIcon },
+        { key: 'history', label: 'Kinerja & Riwayat', icon: History },
       ];
     }
     return [
@@ -382,7 +420,7 @@ export default function SapiTimePage() {
       { key: 'calendar', label: 'Kalender Reproduksi', icon: CalendarIcon },
       { key: 'history', label: 'Kinerja & Riwayat', icon: History },
     ];
-  }, [isAdmin]);
+  }, [isAdmin, isPkbOfficer]);
 
   if (!isReady) return null;
 
@@ -454,6 +492,17 @@ export default function SapiTimePage() {
           <SapiTimePetugasTab
             cattleList={cattleList}
             onTraceCattle={handleOpenTrace}
+          />
+        )}
+
+        {/* 1.5 TAB PEMERIKSAAN PKB (ADMINISTRATOR & PETUGAS PKB) */}
+        {activeTab === 'pkb' && canAccessAllIbs && (
+          <SapiTimePkbTab
+            cattleList={cattleList}
+            onTraceCattle={handleOpenTrace}
+            onRefreshData={fetchData}
+            executeApi={executeApi}
+            canEdit={canEdit}
           />
         )}
 

@@ -27,12 +27,16 @@ export type Insemination = {
   ibOrder?: number;
   totalIbCount?: number;
   id_user?: number;
+  ownerPhone?: string;
+  registrationNumber?: string;
 };
 
 export type Cattle = {
   id: string;
   name: string;
   ownerName: string;
+  ownerPhone?: string;
+  registrationNumber?: string;
   nik?: string;
   breed: string;
   birthDate: string;

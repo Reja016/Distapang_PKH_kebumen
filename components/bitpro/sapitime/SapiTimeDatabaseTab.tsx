@@ -87,7 +87,7 @@ export function SapiTimeDatabaseTab({
             )}
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">
             <div>
               <label className="block text-xs font-bold mb-1 text-slate-700">Nama Peternak <span className="text-red-500">*</span></label>
               <input
@@ -96,6 +96,16 @@ export function SapiTimeDatabaseTab({
                 value={formData.ownerName || ''}
                 onChange={(e) => setFormData({ ...formData, ownerName: e.target.value })}
                 placeholder="Nama pemilik peternak"
+              />
+            </div>
+            <div>
+              <label className="block text-xs font-bold mb-1 text-slate-700">No. Telepon Peternak</label>
+              <input
+                type="tel"
+                className="w-full min-h-touch h-10 px-3.5 border border-slate-200 rounded-xl bg-slate-50 focus:bg-white focus:outline-none focus:border-emerald-600 text-xs font-bold text-slate-900"
+                value={formData.ownerPhone || ''}
+                onChange={(e) => setFormData({ ...formData, ownerPhone: e.target.value })}
+                placeholder="Contoh: 081234567890"
               />
             </div>
             <div>
@@ -111,13 +121,23 @@ export function SapiTimeDatabaseTab({
               />
             </div>
             <div>
-              <label className="block text-xs font-bold mb-1 text-slate-700">Nama Sapi <span className="text-red-500">*</span></label>
+              <label className="block text-xs font-bold mb-1 text-slate-700">No. Registrasi / Eartag Sapi</label>
+              <input
+                type="text"
+                className="w-full min-h-touch h-10 px-3.5 border border-slate-200 rounded-xl bg-slate-50 focus:bg-white focus:outline-none focus:border-emerald-600 text-xs font-bold text-slate-900"
+                value={formData.registrationNumber || ''}
+                onChange={(e) => setFormData({ ...formData, registrationNumber: e.target.value })}
+                placeholder="No. eartag / barcode registrasi"
+              />
+            </div>
+            <div>
+              <label className="block text-xs font-bold mb-1 text-slate-700">Nama Sapi <span className="text-[11px] text-slate-400 font-normal">(Opsional)</span></label>
               <input
                 type="text"
                 className="w-full min-h-touch h-10 px-3.5 border border-slate-200 rounded-xl bg-slate-50 focus:bg-white focus:outline-none focus:border-emerald-600 text-xs font-bold text-slate-900"
                 value={formData.name || ''}
                 onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                placeholder="Contoh: Si Manis"
+                placeholder="Opsional (Contoh: Si Manis)"
               />
             </div>
             <div>
@@ -275,7 +295,9 @@ export function SapiTimeDatabaseTab({
             (c) =>
               c.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
               (c.ownerName || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
-              (c.nik || '').includes(searchTerm)
+              (c.nik || '').includes(searchTerm) ||
+              (c.registrationNumber || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+              (c.ownerPhone || '').includes(searchTerm)
           )
           .map((cattle) => {
             const latestIb = cattle.inseminations && cattle.inseminations.length > 0
@@ -321,12 +343,24 @@ export function SapiTimeDatabaseTab({
                         <User size={16} className="text-slate-400 shrink-0" />
                         <span>{cattle.ownerName || 'Tanpa Nama'}</span>
                       </h3>
-                      {cattle.nik && (
-                        <p className="text-[11px] font-medium text-slate-500 mt-0.5 truncate">
-                          NIK: <span className="font-mono text-slate-700 font-semibold">{cattle.nik}</span>
-                        </p>
-                      )}
-                      <p className="font-bold text-sm text-emerald-700 mt-1 truncate">Sapi: {cattle.name}</p>
+                      <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5 mt-0.5 text-[11px] text-slate-500 font-medium">
+                        {cattle.ownerPhone && (
+                          <span className="text-emerald-700 font-bold">📞 {cattle.ownerPhone}</span>
+                        )}
+                        {cattle.nik && (
+                          <span>NIK: <span className="font-mono text-slate-700 font-semibold">{cattle.nik}</span></span>
+                        )}
+                      </div>
+                      <div className="mt-1 flex items-center gap-1.5 flex-wrap">
+                        <span className="font-bold text-sm text-emerald-800 dark:text-emerald-300">
+                          {cattle.name || (cattle.registrationNumber ? `Sapi (${cattle.registrationNumber})` : `Sapi ${cattle.id}`)}
+                        </span>
+                        {cattle.registrationNumber && (
+                          <span className="px-2 py-0.5 rounded-md bg-emerald-50 text-emerald-800 text-[10px] font-mono font-bold border border-emerald-200">
+                            Reg: {cattle.registrationNumber}
+                          </span>
+                        )}
+                      </div>
                       <p className="text-xs text-slate-500 mt-0.5 truncate">
                         {cattle.id} • {cattle.kecamatan || '-'}, {cattle.desa || '-'}
                       </p>

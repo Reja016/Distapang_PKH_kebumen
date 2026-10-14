@@ -89,7 +89,7 @@ async function ensureSapitimeColumns() {
   }
 }
 
-// Helper memastikan kolom nik ada di sapitime_master
+// Helper memastikan kolom nik, ownerPhone, registrationNumber ada di sapitime_master
 async function ensureSapitimeMasterColumns() {
   try {
     const [colsRows]: any = await pool.query('SHOW COLUMNS FROM sapitime_master');
@@ -97,6 +97,16 @@ async function ensureSapitimeMasterColumns() {
     if (!cols.includes('nik')) {
       try {
         await pool.execute('ALTER TABLE sapitime_master ADD COLUMN nik VARCHAR(20) NULL AFTER ownerName');
+      } catch {}
+    }
+    if (!cols.includes('ownerPhone')) {
+      try {
+        await pool.execute('ALTER TABLE sapitime_master ADD COLUMN ownerPhone VARCHAR(30) NULL AFTER ownerName');
+      } catch {}
+    }
+    if (!cols.includes('registrationNumber')) {
+      try {
+        await pool.execute('ALTER TABLE sapitime_master ADD COLUMN registrationNumber VARCHAR(50) NULL AFTER name');
       } catch {}
     }
   } catch (e) {
@@ -246,19 +256,49 @@ export async function POST(req: Request) {
         finalId = `ST${String(nextNum).padStart(3, '0')}`;
       }
 
+      const cowName = (payload.name || '').trim() || (payload.registrationNumber || '').trim() || finalId;
       await pool.query(
-        'INSERT INTO sapitime_master (id, name, ownerName, nik, breed, birthDate, kecamatan, desa, status, lastEstrus, pregnancyDate) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
-        [finalId, payload.name, payload.ownerName, payload.nik || null, payload.breed, payload.birthDate || null, payload.kecamatan, payload.desa, payload.status, payload.lastEstrus || null, payload.pregnancyDate || null]
+        'INSERT INTO sapitime_master (id, name, registrationNumber, ownerName, ownerPhone, nik, breed, birthDate, kecamatan, desa, status, lastEstrus, pregnancyDate) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
+        [
+          finalId,
+          cowName,
+          payload.registrationNumber || null,
+          payload.ownerName,
+          payload.ownerPhone || null,
+          payload.nik || null,
+          payload.breed,
+          payload.birthDate || null,
+          payload.kecamatan,
+          payload.desa,
+          payload.status,
+          payload.lastEstrus || null,
+          payload.pregnancyDate || null
+        ]
       );
-      await logActivity('sapitime', finalId, 'CREATE', { ...payload, id: finalId });
+      await logActivity('sapitime', finalId, 'CREATE', { ...payload, id: finalId, name: cowName });
     } 
     else if (action === 'update_cattle') {
       await ensureSapitimeMasterColumns();
+      const cowName = (payload.name || '').trim() || (payload.registrationNumber || '').trim() || payload.id;
       await pool.query(
-        'UPDATE sapitime_master SET name=?, ownerName=?, nik=?, breed=?, birthDate=?, kecamatan=?, desa=?, status=?, lastEstrus=?, pregnancyDate=? WHERE id=?',
-        [payload.name, payload.ownerName, payload.nik || null, payload.breed, payload.birthDate || null, payload.kecamatan, payload.desa, payload.status, payload.lastEstrus || null, payload.pregnancyDate || null, payload.id]
+        'UPDATE sapitime_master SET name=?, registrationNumber=?, ownerName=?, ownerPhone=?, nik=?, breed=?, birthDate=?, kecamatan=?, desa=?, status=?, lastEstrus=?, pregnancyDate=? WHERE id=?',
+        [
+          cowName,
+          payload.registrationNumber || null,
+          payload.ownerName,
+          payload.ownerPhone || null,
+          payload.nik || null,
+          payload.breed,
+          payload.birthDate || null,
+          payload.kecamatan,
+          payload.desa,
+          payload.status,
+          payload.lastEstrus || null,
+          payload.pregnancyDate || null,
+          payload.id
+        ]
       );
-      await logActivity('sapitime', payload.id, 'UPDATE', payload);
+      await logActivity('sapitime', payload.id, 'UPDATE', { ...payload, name: cowName });
     } 
     else if (action === 'delete_cattle') {
       await pool.query('DELETE FROM sapitime_master WHERE id=?', [payload.id]);
@@ -317,10 +357,12 @@ export async function POST(req: Request) {
     }
     else if (action === 'record_pkb') {
       await ensureSapitimeColumns();
-      const autoSuccess = payload.pkbResult === 'Bunting' ? 'Berhasil' : 'Tidak Berhasil';
+      const isChecked = !!payload.pkbResult;
+      const autoSuccess = payload.pkbResult === 'Bunting' ? 'Berhasil' : payload.pkbResult === 'Tidak Bunting' ? 'Tidak Berhasil' : 'Menunggu PKB';
+      const pkbStatusVal = isChecked ? 'Sudah Diperiksa' : 'Menunggu Jadwal';
       await pool.query(
-        'UPDATE sapitime_ib SET pkbStatus="Sudah Diperiksa", pkbDateActual=?, pkbResult=?, pkbOfficer=?, pkbNotes=?, pkbSkipDate=NULL, pkbSkipReason=NULL, status_keberhasilan=?, mode_keberhasilan="sistem" WHERE id=? OR id_ib=?',
-        [payload.pkbDateActual, payload.pkbResult, payload.pkbOfficer, payload.pkbNotes, autoSuccess, payload.ib_id, payload.ib_id]
+        'UPDATE sapitime_ib SET pkbStatus=?, pkbDateActual=?, pkbResult=?, pkbOfficer=?, pkbNotes=?, pkbSkipDate=NULL, pkbSkipReason=NULL, status_keberhasilan=?, mode_keberhasilan="sistem" WHERE id=? OR id_ib=?',
+        [pkbStatusVal, payload.pkbDateActual || null, payload.pkbResult || null, payload.pkbOfficer || null, payload.pkbNotes || null, autoSuccess, payload.ib_id, payload.ib_id]
       );
       await pool.query(
         'UPDATE sapitime_master SET status=?, pregnancyDate=? WHERE id=?',

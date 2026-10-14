@@ -83,6 +83,7 @@ const KECAMATAN_KEBUMEN = [
 
 const ROLE_OPTIONS = [
   'Administrator',
+  'Petugas PKB',
   'Petugas Lapangan',
   'Puskeswan',
   'Tim Bitpro',

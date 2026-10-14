@@ -17,7 +17,7 @@ import {
   TrendingUp,
   Filter,
 } from 'lucide-react';
-import { Cattle, Insemination } from './types';
+import { Cattle, Insemination, KECAMATAN_LIST } from './types';
 
 const BULAN_NAMES = [
   'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
@@ -326,6 +326,7 @@ export function SapiTimePetugasTab({
   const currentNow = new Date();
   const [selectedYear, setSelectedYear] = useState<number>(currentNow.getFullYear());
   const [selectedMonth, setSelectedMonth] = useState<number>(currentNow.getMonth() + 1);
+  const [selectedKecamatan, setSelectedKecamatan] = useState<string>('Semua');
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedPetugasForModal, setSelectedPetugasForModal] = useState<string | null>(null);
 
@@ -388,9 +389,12 @@ export function SapiTimePetugasTab({
       map[name].totalSepanjangWaktu += 1;
       map[name].allRecords.push(ib);
 
-      // Cek apakah tanggal IB berada pada tahun & bulan terpilih
+      // Cek apakah tanggal IB berada pada tahun & bulan terpilih serta filter kecamatan
       const d = new Date(ib.date);
-      if (d.getFullYear() === selectedYear && d.getMonth() + 1 === selectedMonth) {
+      const isPeriodMatch = d.getFullYear() === selectedYear && d.getMonth() + 1 === selectedMonth;
+      const isKecMatch = selectedKecamatan === 'Semua' || (ib.kecamatan || '').toUpperCase() === selectedKecamatan.toUpperCase();
+
+      if (isPeriodMatch && isKecMatch) {
         map[name].totalBulanIni += 1;
         if (ib.cattle_id) map[name].sapiesBulanIni.add(ib.cattle_id);
         if (ib.kecamatan) map[name].kecamatansBulanIni.add(ib.kecamatan);
@@ -407,7 +411,7 @@ export function SapiTimePetugasTab({
     });
 
     return Object.values(map);
-  }, [allInseminations, selectedYear, selectedMonth]);
+  }, [allInseminations, selectedYear, selectedMonth, selectedKecamatan]);
 
   // 3. Ringkasan Keseluruhan Dinas di Bulan Terpilih
   const summaryDinas = useMemo(() => {
@@ -438,10 +442,11 @@ export function SapiTimePetugasTab({
     };
   }, [monthlyStats]);
 
-  // 4. Filter Petugas berdasarkan Pencarian
+  // 4. Filter Petugas berdasarkan Pencarian dan Wilayah
   const filteredPetugas = useMemo(() => {
     return monthlyStats
       .filter((p) => {
+        if (selectedKecamatan !== 'Semua' && p.totalBulanIni === 0) return false;
         if (!searchQuery.trim()) return true;
         const q = searchQuery.toLowerCase();
         const matchName = p.name.toLowerCase().includes(q);
@@ -449,7 +454,7 @@ export function SapiTimePetugasTab({
         return matchName || matchKec;
       })
       .sort((a, b) => b.totalBulanIni - a.totalBulanIni); // Ranking capaian tertinggi di atas
-  }, [monthlyStats, searchQuery]);
+  }, [monthlyStats, searchQuery, selectedKecamatan]);
 
   // Petugas terpilih untuk modal
   const selectedPetugasObj = useMemo(() => {
@@ -459,7 +464,7 @@ export function SapiTimePetugasTab({
 
   return (
     <div className="space-y-6 animate-in fade-in duration-150">
-      {/* ── HEADER TOOLBAR: FILTER BULAN & TAHUN (Tema Hijau Bitpro) ── */}
+      {/* ── HEADER TOOLBAR: FILTER BULAN, TAHUN & KECAMATAN (Tema Hijau Bitpro) ── */}
       <div className="bg-gradient-to-r from-emerald-800 via-teal-800 to-emerald-900 text-white p-6 sm:p-7 rounded-3xl shadow-sm flex flex-col md:flex-row items-start md:items-center justify-between gap-5">
         <div>
           <div className="flex items-center gap-2 mb-1.5">
@@ -477,8 +482,28 @@ export function SapiTimePetugasTab({
           </p>
         </div>
 
-        {/* Pilihan Tahun & Bulan */}
+        {/* Pilihan Tahun, Bulan & Kecamatan */}
         <div className="flex items-center gap-2.5 self-start md:self-auto flex-wrap bg-white/10 backdrop-blur-sm p-2 rounded-2xl border border-white/20">
+          {/* Dropdown Kecamatan */}
+          <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-white/20">
+            <MapPin className="text-emerald-200" size={15} />
+            <span className="text-xs font-bold text-white">Kecamatan:</span>
+            <select
+              value={selectedKecamatan}
+              onChange={(e) => setSelectedKecamatan(e.target.value)}
+              className="bg-transparent text-xs font-black text-white focus:outline-none cursor-pointer max-w-[150px]"
+            >
+              <option value="Semua" className="bg-slate-900 text-white">
+                Semua Kecamatan
+              </option>
+              {KECAMATAN_LIST.map((kec) => (
+                <option key={kec} value={kec} className="bg-slate-900 text-white">
+                  {kec}
+                </option>
+              ))}
+            </select>
+          </div>
+
           {/* Dropdown Bulan */}
           <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-white/20">
             <Calendar className="text-emerald-200" size={15} />

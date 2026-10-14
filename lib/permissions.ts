@@ -139,6 +139,12 @@ export function getDefaultPermissionsForRole(role: string): UserPermissions {
     base.keswan.submenus['data-vaksinasi'] = { enabled: true, mode: 'edit' };
     base.keswan.submenus['laporan-penyakit'] = { enabled: true, mode: 'edit' };
     base.keswan.submenus['lalu-lintas-ternak'] = { enabled: true, mode: 'edit' };
+  } else if (r === 'petugas pkb') {
+    // Petugas PKB memiliki akses pemeriksaan ke SapiTime dan Database IB
+    base.bitpro.enabled = true;
+    base.bitpro.mode = 'edit';
+    base.bitpro.submenus['sapitime'] = { enabled: true, mode: 'edit' };
+    base.bitpro.submenus['database-ib'] = { enabled: true, mode: 'edit' };
   } else if (r === 'petugas lapangan') {
     // Form IB & Keswan
     base.bitpro.enabled = true;

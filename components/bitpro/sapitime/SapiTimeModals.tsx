@@ -127,13 +127,23 @@ export function ModalCattleForm({
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
-            <label className="block text-xs font-bold mb-1 text-slate-700">Nama Peternak</label>
+            <label className="block text-xs font-bold mb-1 text-slate-700">Nama Peternak <span className="text-red-500">*</span></label>
             <input
               type="text"
               className="w-full min-h-touch h-11 px-3.5 border border-slate-200 rounded-xl bg-slate-50 focus:bg-white focus:outline-none focus:border-emerald-600 text-xs text-slate-900 font-bold"
               value={formData.ownerName || ''}
               onChange={(e) => setFormData({ ...formData, ownerName: e.target.value })}
               placeholder="Nama pemilik peternak"
+            />
+          </div>
+          <div>
+            <label className="block text-xs font-bold mb-1 text-slate-700">No. Telepon Peternak</label>
+            <input
+              type="tel"
+              className="w-full min-h-touch h-11 px-3.5 border border-slate-200 rounded-xl bg-slate-50 focus:bg-white focus:outline-none focus:border-emerald-600 text-xs text-slate-900 font-bold"
+              value={formData.ownerPhone || ''}
+              onChange={(e) => setFormData({ ...formData, ownerPhone: e.target.value })}
+              placeholder="Contoh: 081234567890"
             />
           </div>
           <div>
@@ -149,13 +159,23 @@ export function ModalCattleForm({
             />
           </div>
           <div>
-            <label className="block text-xs font-bold mb-1 text-slate-700">Nama Sapi</label>
+            <label className="block text-xs font-bold mb-1 text-slate-700">No. Registrasi / Eartag Sapi</label>
+            <input
+              type="text"
+              className="w-full min-h-touch h-11 px-3.5 border border-slate-200 rounded-xl bg-slate-50 focus:bg-white focus:outline-none focus:border-emerald-600 text-xs text-slate-900 font-bold"
+              value={formData.registrationNumber || ''}
+              onChange={(e) => setFormData({ ...formData, registrationNumber: e.target.value })}
+              placeholder="Nomor eartag / barcode registrasi"
+            />
+          </div>
+          <div>
+            <label className="block text-xs font-bold mb-1 text-slate-700">Nama Sapi <span className="text-[11px] text-slate-400 font-normal">(Opsional)</span></label>
             <input
               type="text"
               className="w-full min-h-touch h-11 px-3.5 border border-slate-200 rounded-xl bg-slate-50 focus:bg-white focus:outline-none focus:border-emerald-600 text-xs text-slate-900 font-bold"
               value={formData.name || ''}
               onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-              placeholder="Contoh: Si Manis"
+              placeholder="Opsional (Contoh: Si Manis)"
             />
           </div>
           <div>
