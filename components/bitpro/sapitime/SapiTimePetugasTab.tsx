@@ -103,22 +103,22 @@ function PetugasDetailModal({
   }, [displayRecords]);
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-5 bg-slate-900/60 backdrop-blur-xs animate-in fade-in duration-200">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-5 bg-slate-950/70 backdrop-blur-sm animate-in fade-in duration-200">
       <div className="bg-white dark:bg-slate-900 w-full max-w-5xl rounded-3xl border border-slate-200 dark:border-slate-800 shadow-2xl flex flex-col max-h-[92vh] overflow-hidden">
-        {/* Header Modal */}
-        <div className="p-5 sm:p-6 border-b border-slate-100 dark:border-slate-800 flex items-start justify-between gap-4 bg-emerald-50/40 dark:bg-emerald-950/20">
+        {/* Header Modal dengan Background Hijau Emerald Bitpro */}
+        <div className="p-5 sm:p-6 border-b border-emerald-900 flex items-start justify-between gap-4 bg-gradient-to-r from-emerald-800 via-teal-800 to-emerald-900 text-white">
           <div className="flex items-center gap-3">
-            <div className="w-12 h-12 rounded-2xl bg-emerald-600 text-white font-black text-lg flex items-center justify-center shadow-xs">
+            <div className="w-12 h-12 rounded-2xl bg-white/20 backdrop-blur-sm text-white font-black text-lg flex items-center justify-center border border-white/30 shadow-xs">
               {petugasName.charAt(0).toUpperCase()}
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <h3 className="text-lg font-black text-slate-900 dark:text-white">{petugasName}</h3>
-                <span className="px-2.5 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-900/60 text-emerald-800 dark:text-emerald-300 text-[11px] font-bold">
+                <h3 className="text-lg font-black text-white">{petugasName}</h3>
+                <span className="px-2.5 py-0.5 rounded-full bg-white/20 text-emerald-100 text-[11px] font-bold">
                   Inseminator
                 </span>
               </div>
-              <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+              <p className="text-xs text-emerald-100/90 mt-0.5">
                 Trace pencapaian pelayanan IB &bull; Periode {BULAN_NAMES[selectedMonth - 1]} {selectedYear}
               </p>
             </div>
@@ -126,7 +126,7 @@ function PetugasDetailModal({
 
           <button
             onClick={onClose}
-            className="w-9 h-9 rounded-full border border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 flex items-center justify-center text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors cursor-pointer shrink-0"
+            className="w-9 h-9 rounded-full bg-white/10 hover:bg-white/20 border border-white/25 flex items-center justify-center text-white transition-colors cursor-pointer shrink-0"
           >
             <X size={18} />
           </button>
@@ -459,31 +459,37 @@ export function SapiTimePetugasTab({
 
   return (
     <div className="space-y-6 animate-in fade-in duration-150">
-      {/* ── HEADER TOOLBAR: FILTER BULAN & TAHUN ── */}
-      <div className="flex flex-col md:flex-row items-stretch md:items-center justify-between gap-4 bg-white dark:bg-slate-900 p-4 sm:p-5 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-xs">
+      {/* ── HEADER TOOLBAR: FILTER BULAN & TAHUN (Tema Hijau Bitpro) ── */}
+      <div className="bg-gradient-to-r from-emerald-800 via-teal-800 to-emerald-900 text-white p-6 sm:p-7 rounded-3xl shadow-sm flex flex-col md:flex-row items-start md:items-center justify-between gap-5">
         <div>
-          <h2 className="text-base sm:text-lg font-black text-slate-900 dark:text-white flex items-center gap-2">
-            <Award className="text-emerald-600" size={20} />
+          <div className="flex items-center gap-2 mb-1.5">
+            <span className="px-2.5 py-0.5 rounded-full bg-white/20 text-white text-[10px] font-bold uppercase tracking-wider backdrop-blur-sm">
+              Khusus Administrator
+            </span>
+            <span className="text-xs text-emerald-200/90 font-semibold">Monitoring Capaian Bulanan</span>
+          </div>
+          <h2 className="text-xl sm:text-2xl font-black tracking-tight flex items-center gap-2.5">
+            <Award className="text-amber-300" size={24} />
             <span>Trace Pencapaian Kinerja Petugas Inseminasi Buatan</span>
           </h2>
-          <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-            Monitoring performa harian/bulanan petugas, total sapi di-IB, dan sebaran wilayah kerja (Khusus Administrator).
+          <p className="text-xs sm:text-sm text-emerald-100/90 mt-1 max-w-2xl">
+            Monitoring performa harian &amp; bulanan petugas inseminator lapangan, total sapi di-IB, dan sebaran wilayah kerja.
           </p>
         </div>
 
         {/* Pilihan Tahun & Bulan */}
-        <div className="flex items-center gap-2 self-start md:self-auto flex-wrap">
+        <div className="flex items-center gap-2.5 self-start md:self-auto flex-wrap bg-white/10 backdrop-blur-sm p-2 rounded-2xl border border-white/20">
           {/* Dropdown Bulan */}
-          <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl border border-emerald-200 dark:border-emerald-900/50 bg-emerald-50/70 dark:bg-emerald-950/30">
-            <Calendar className="text-emerald-700 dark:text-emerald-400" size={15} />
-            <span className="text-xs font-bold text-emerald-900 dark:text-emerald-200">Bulan:</span>
+          <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-white/20">
+            <Calendar className="text-emerald-200" size={15} />
+            <span className="text-xs font-bold text-white">Bulan:</span>
             <select
               value={selectedMonth}
               onChange={(e) => setSelectedMonth(Number(e.target.value))}
-              className="bg-transparent text-xs font-black text-emerald-900 dark:text-emerald-300 focus:outline-none cursor-pointer"
+              className="bg-transparent text-xs font-black text-white focus:outline-none cursor-pointer"
             >
               {BULAN_NAMES.map((bln, idx) => (
-                <option key={bln} value={idx + 1} className="bg-white dark:bg-slate-900 text-slate-900 dark:text-white">
+                <option key={bln} value={idx + 1} className="bg-slate-900 text-white">
                   {bln}
                 </option>
               ))}
@@ -491,15 +497,15 @@ export function SapiTimePetugasTab({
           </div>
 
           {/* Dropdown Tahun */}
-          <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl border border-emerald-200 dark:border-emerald-900/50 bg-emerald-50/70 dark:bg-emerald-950/30">
-            <span className="text-xs font-bold text-emerald-900 dark:text-emerald-200">Tahun:</span>
+          <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-white/20">
+            <span className="text-xs font-bold text-white">Tahun:</span>
             <select
               value={selectedYear}
               onChange={(e) => setSelectedYear(Number(e.target.value))}
-              className="bg-transparent text-xs font-black text-emerald-900 dark:text-emerald-300 focus:outline-none cursor-pointer"
+              className="bg-transparent text-xs font-black text-white focus:outline-none cursor-pointer"
             >
               {[2027, 2026, 2025, 2024].map((yr) => (
-                <option key={yr} value={yr} className="bg-white dark:bg-slate-900 text-slate-900 dark:text-white">
+                <option key={yr} value={yr} className="bg-slate-900 text-white">
                   {yr}
                 </option>
               ))}
