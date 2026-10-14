@@ -26,6 +26,7 @@ export type Insemination = {
   mode_keberhasilan?: 'sistem' | 'manual';
   ibOrder?: number;
   totalIbCount?: number;
+  id_user?: number;
 };
 
 export type Cattle = {

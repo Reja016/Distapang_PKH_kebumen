@@ -4,6 +4,7 @@ import { useState, useEffect, useMemo } from 'react';
 import Link from 'next/link';
 import * as XLSX from 'xlsx';
 import { usePageAuth } from '@/hooks/usePageAuth';
+import { getAuthSession } from '@/lib/auth';
 import {
   ArrowLeft,
   Download,
@@ -24,7 +25,8 @@ import IbModals from '@/components/bitpro/database-ib/IbModals';
 import { UniversalAuditModal } from '@/components/common/UniversalAuditModal';
 
 export default function DatabaseIBPage() {
-  const { isReady, canCreate, canEdit } = usePageAuth('bitpro', 'database-ib');
+  const { isReady, canCreate, canEdit, isAdmin: isAuthAdmin, userName, userRole } = usePageAuth('bitpro', 'database-ib');
+  const isAdmin = useMemo(() => isAuthAdmin || canEdit || userRole === 'Administrator', [isAuthAdmin, canEdit, userRole]);
   const [ibList, setIbList] = useState<IBRecord[]>([]);
   const [allIbHistory, setAllIbHistory] = useState<IBRecord[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
@@ -62,10 +64,25 @@ export default function DatabaseIBPage() {
         const uniqueCattleLatestIB: IBRecord[] = [];
         const fullHistory: IBRecord[] = [];
 
+        const localUser = getAuthSession();
+        const uName = (userName || localUser?.nama || '').toLowerCase().trim();
+        const uId = localUser?.id;
+
         json.cattle.forEach((cattle: any) => {
-          if (cattle.inseminations && cattle.inseminations.length > 0) {
+          // Filter pelayanan IB: jika bukan Admin, hanya tampilkan IB milik petugas yang sedang login
+          const relevantInseminations = (cattle.inseminations || []).filter((ib: any) => {
+            if (isAdmin) return true;
+            const insemName = (ib.inseminatorName || '').toLowerCase().trim();
+            if (uId && ib.id_user && Number(ib.id_user) === Number(uId)) return true;
+            if (uName && insemName && (insemName === uName || insemName.includes(uName) || uName.includes(insemName))) {
+              return true;
+            }
+            return false;
+          });
+
+          if (relevantInseminations.length > 0) {
             // Urutkan ascending berdasarkan tanggal agar siklus IB ke-1, ke-2, dst. akurat
-            const sorted = [...cattle.inseminations].sort(
+            const sorted = [...relevantInseminations].sort(
               (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()
             );
 
@@ -107,10 +124,12 @@ export default function DatabaseIBPage() {
   };
 
   useEffect(() => {
-    loadData();
+    if (isReady) {
+      loadData();
+    }
     window.addEventListener('cattleDataUpdated', loadData);
     return () => window.removeEventListener('cattleDataUpdated', loadData);
-  }, []);
+  }, [isReady, isAdmin, userName]);
 
   // 2. Fungsi Tembak Eksekusi ke MySQL
   const executeApi = async (action: string, payload: any, historyObj?: any) => {
@@ -135,12 +154,13 @@ export default function DatabaseIBPage() {
       return;
     }
 
+    const effectiveOfficer = pkbFormData.officer || userName || 'Petugas';
     const payload = {
       ib_id: selectedIbForPkb.id,
       cattle_id: selectedIbForPkb.cattleId,
       pkbDateActual: pkbFormData.date,
       pkbResult: pkbFormData.result,
-      pkbOfficer: pkbFormData.officer,
+      pkbOfficer: effectiveOfficer,
       pkbNotes: pkbFormData.notes,
       pregnancyDate: pkbFormData.result === 'Bunting' ? selectedIbForPkb.date : null,
       newCattleStatus: pkbFormData.result === 'Bunting' ? 'Bunting' : 'Estrus',

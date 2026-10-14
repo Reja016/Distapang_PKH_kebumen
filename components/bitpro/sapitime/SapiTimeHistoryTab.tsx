@@ -345,9 +345,9 @@ export function SapiTimeHistoryTab({
             </div>
           </div>
 
-          <div className="overflow-x-auto">
-            <table className="w-full text-left text-xs whitespace-nowrap">
-              <thead className="bg-slate-100 dark:bg-slate-800/70 border-b border-slate-300 dark:border-slate-700 text-slate-700 dark:text-slate-300 uppercase font-bold text-[11px] tracking-wider">
+          <div className="overflow-x-auto overflow-y-auto max-h-[520px] rounded-2xl border border-slate-300 dark:border-slate-700 relative">
+            <table className="w-full text-left text-xs whitespace-nowrap border-collapse">
+              <thead className="sticky top-0 z-20 bg-slate-100 dark:bg-slate-800 border-b border-slate-300 dark:border-slate-700 text-slate-700 dark:text-slate-300 uppercase font-bold text-[11px] tracking-wider shadow-2xs">
                 <tr>
                   <th className="px-5 py-3.5 w-12 text-center border-r border-slate-300 dark:border-slate-700">No</th>
                   <th className="px-5 py-3.5 border-r border-slate-300 dark:border-slate-700">Nama Petugas Inseminator</th>
@@ -539,9 +539,9 @@ export function SapiTimeHistoryTab({
         </div>
 
         {/* Tabel Riwayat Pelayanan IB */}
-        <div className="overflow-x-auto rounded-2xl border border-slate-300 dark:border-slate-700">
-          <table className="w-full text-left text-xs whitespace-nowrap">
-            <thead className="bg-slate-100 dark:bg-slate-800/70 border-b border-slate-300 dark:border-slate-700 text-slate-700 dark:text-slate-300 uppercase font-bold text-[11px] tracking-wider">
+        <div className="overflow-x-auto overflow-y-auto max-h-[550px] rounded-2xl border border-slate-300 dark:border-slate-700 relative">
+          <table className="w-full text-left text-xs whitespace-nowrap border-collapse">
+            <thead className="sticky top-0 z-20 bg-slate-100 dark:bg-slate-800 border-b border-slate-300 dark:border-slate-700 text-slate-700 dark:text-slate-300 uppercase font-bold text-[11px] tracking-wider shadow-2xs">
               <tr>
                 <th className="px-4 py-3.5 w-12 text-center border-r border-slate-300 dark:border-slate-700">No</th>
                 <th className="px-4 py-3.5 border-r border-slate-300 dark:border-slate-700">Tanggal &amp; Waktu</th>

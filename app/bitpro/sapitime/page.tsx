@@ -1,20 +1,23 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { usePageAuth } from '@/hooks/usePageAuth';
+import { getAuthSession } from '@/lib/auth';
 import {
   ArrowLeft,
   LayoutDashboard,
   Database,
   Calendar as CalendarIcon,
   History,
+  Users,
 } from 'lucide-react';
 import {
   Cattle,
   rezaProcessCattleData,
 } from '@/components/bitpro/sapitime/types';
+import { SapiTimePetugasTab } from '@/components/bitpro/sapitime/SapiTimePetugasTab';
 import { SapiTimeSummaryTab } from '@/components/bitpro/sapitime/SapiTimeSummaryTab';
 import { SapiTimeDatabaseTab } from '@/components/bitpro/sapitime/SapiTimeDatabaseTab';
 import { SapiTimeCalendarTab } from '@/components/bitpro/sapitime/SapiTimeCalendarTab';
@@ -32,8 +35,11 @@ import NotificationBell from '@/components/common/NotificationBell';
 
 export default function SapiTimePage() {
   const router = useRouter();
-  const { isReady, canCreate, canEdit } = usePageAuth('bitpro', 'sapitime');
-  const [activeTab, setActiveTab] = useState<'home' | 'database' | 'calendar' | 'history'>('database');
+  const { isReady, canCreate, canEdit, isAdmin: isAuthAdmin, userName, userRole } = usePageAuth('bitpro', 'sapitime');
+  const isAdmin = useMemo(() => isAuthAdmin || canEdit || userRole === 'Administrator', [isAuthAdmin, canEdit, userRole]);
+
+  // Tab State: Untuk Admin default 'petugas_ib', untuk user biasa default 'database'
+  const [activeTab, setActiveTab] = useState<'petugas_ib' | 'home' | 'database' | 'calendar' | 'history'>('database');
   const [cattleList, setCattleList] = useState<Cattle[]>([]);
   const [historyList, setHistoryList] = useState<any[]>([]);
 
@@ -68,6 +74,13 @@ export default function SapiTimePage() {
   const [auditTarget, setAuditTarget] = useState<any | null>(null);
   const [selectedCattleForLapor, setSelectedCattleForLapor] = useState<Cattle | null>(null);
 
+  // Set default active tab saat role sudah siap
+  useEffect(() => {
+    if (isReady && isAdmin) {
+      setActiveTab('petugas_ib');
+    }
+  }, [isReady, isAdmin]);
+
   // 1. Tarik Data dari MySQL API
   const fetchData = async () => {
     try {
@@ -90,7 +103,49 @@ export default function SapiTimePage() {
     };
   }, []);
 
-  // 2. Fungsi Eksekusi API ke MySQL
+  // 2. Filter data khusus petugas non-admin (Data Isolation)
+  // Petugas biasa hanya bisa melihat data sapi dan IB yang ditanganinya
+  const displayCattleList = useMemo(() => {
+    if (isAdmin) return cattleList;
+    const localUser = getAuthSession();
+    const uName = (userName || localUser?.nama || '').toLowerCase().trim();
+    const uId = localUser?.id;
+
+    if (!uName && !uId) return cattleList;
+
+    return cattleList
+      .map((cattle) => {
+        const userIbs = (cattle.inseminations || []).filter((ib) => {
+          const insemName = (ib.inseminatorName || '').toLowerCase().trim();
+          if (uId && ib.id_user && Number(ib.id_user) === Number(uId)) return true;
+          if (uName && insemName && (insemName === uName || insemName.includes(uName) || uName.includes(insemName))) {
+            return true;
+          }
+          return false;
+        });
+
+        return {
+          ...cattle,
+          inseminations: userIbs,
+        };
+      })
+      .filter((c) => (c.inseminations && c.inseminations.length > 0));
+  }, [cattleList, isAdmin, userName]);
+
+  const displayHistoryList = useMemo(() => {
+    if (isAdmin) return historyList;
+    const localUser = getAuthSession();
+    const uName = (userName || localUser?.nama || '').toLowerCase().trim();
+    if (!uName) return historyList;
+
+    return historyList.filter((h) => {
+      const desc = (h.description || '').toLowerCase();
+      const officer = (h.officer || h.inseminatorName || '').toLowerCase();
+      return officer.includes(uName) || desc.includes(uName);
+    });
+  }, [historyList, isAdmin, userName]);
+
+  // 3. Fungsi Eksekusi API ke MySQL
   const executeApi = async (action: string, payload: any, historyObj?: any): Promise<boolean> => {
     try {
       const res = await fetch('/api/sapitime', {
@@ -120,83 +175,83 @@ export default function SapiTimePage() {
       alert('Anda tidak memiliki izin untuk menambah data sapi.');
       return;
     }
-    const existingNums = cattleList
-      .map((c) => parseInt(String(c.id).replace(/\D/g, ''), 10))
-      .filter((n) => !isNaN(n));
-    const maxNum = existingNums.length > 0 ? Math.max(0, ...existingNums) : 0;
-    const newId = `ST${String(maxNum + 1).padStart(3, '0')}`;
-    const newCattle = { ...formData, id: newId };
-    const historyObj = {
-      type: 'cattle_added',
-      cattle: formData.name,
-      cattleId: newId,
-      description: `Sapi baru ditambahkan milik ${formData.ownerName}`,
-      icon: '➕',
+    const newId = `ST${String(cattleList.length + 1).padStart(3, '0')}`;
+    const newC = {
+      id: newId,
+      name: formData.name || `Sapi ${newId}`,
+      ownerName: formData.ownerName || '',
+      nik: formData.nik || '',
+      breed: formData.breed || 'PO',
+      birthDate: formData.birthDate || '',
+      status: formData.status || 'Estrus',
+      lastEstrus: formData.lastEstrus || '',
+      cycleLength: Number(formData.cycleLength) || 21,
+      inseminations: [],
+      pregnancyDate: formData.pregnancyDate || '',
+      kecamatan: formData.kecamatan || '',
+      desa: formData.desa || '',
     };
 
-    let initialInseminations: any[] = [];
-    if (formData.status === 'Bunting' && formData.pregnancyDate) {
-      const pkbDate = new Date(formData.pregnancyDate);
-      pkbDate.setDate(pkbDate.getDate() + 90);
-      const initialIb = {
-        id: String(Date.now()),
-        cattle_id: newId,
-        date: formData.pregnancyDate,
-        time: '08:00',
-        kecamatan: formData.kecamatan,
-        desa: formData.desa,
-        inseminatorName: 'Petugas Inseminator',
-        strawCode: 'STRAW-IB',
-        bullName: 'Pejantan Unggul',
-        bullBreed: formData.breed || 'Simmental',
-        rekomendasiPkb: pkbDate.toLocaleDateString('id-ID'),
-        notes: 'Dicatat saat pendaftaran SapiTime',
-      };
-      initialInseminations = [initialIb];
-    }
-
-    setCattleList([...cattleList, { ...newCattle, inseminations: initialInseminations }]);
     setShowAddModal(false);
     setFormData({ status: 'Estrus', cycleLength: 21, kecamatan: '', desa: '', ownerName: '' });
-    const ok = await executeApi('add_cattle', newCattle, historyObj);
 
-    if (ok && initialInseminations.length > 0) {
-      await executeApi('add_ib', initialInseminations[0]);
-    }
+    const historyObj = {
+      type: 'cattle_added',
+      cattle: newC.name,
+      cattleId: newC.id,
+      description: `Sapi baru ditambahkan (${newC.breed}, Pemilik: ${newC.ownerName || 'Peternak'})`,
+      icon: '🐄',
+    };
+
+    await executeApi('add_cattle', newC, historyObj);
   };
 
   const handleEditCattle = (cattle: Cattle) => {
-    if (!canEdit) {
-      alert('Hanya Administrator yang berhak mengedit data sapi.');
-      return;
-    }
     setEditingCattle(cattle);
-    setFormData({ ...cattle });
-    setShowEditModal(false);
-    setActiveTab('database');
-    setTimeout(() => {
-      document.getElementById('form-sapi')?.scrollIntoView({ behavior: 'smooth' });
-    }, 50);
+    setFormData({
+      name: cattle.name,
+      ownerName: cattle.ownerName || '',
+      nik: (cattle as any).nik || '',
+      breed: cattle.breed,
+      birthDate: cattle.birthDate || '',
+      status: cattle.status,
+      lastEstrus: cattle.lastEstrus || '',
+      cycleLength: cattle.cycleLength || 21,
+      pregnancyDate: cattle.pregnancyDate || '',
+      kecamatan: cattle.kecamatan || '',
+      desa: cattle.desa || '',
+    });
+    setShowEditModal(true);
   };
 
   const handleUpdateCattle = async () => {
-    if (!canEdit) {
-      alert('Hanya Administrator yang berhak mengedit data sapi.');
-      return;
-    }
-    const updatedCattle = { ...editingCattle, ...formData };
+    if (!editingCattle) return;
+    const updatedCattle: Cattle = {
+      ...editingCattle,
+      name: formData.name,
+      ownerName: formData.ownerName,
+      nik: formData.nik,
+      breed: formData.breed,
+      birthDate: formData.birthDate,
+      status: formData.status,
+      lastEstrus: formData.lastEstrus,
+      cycleLength: Number(formData.cycleLength) || 21,
+      pregnancyDate: formData.pregnancyDate,
+      kecamatan: formData.kecamatan,
+      desa: formData.desa,
+    } as any;
+
+    setShowEditModal(false);
+    setEditingCattle(null);
+
     const historyObj = {
       type: 'cattle_updated',
-      cattle: formData.name,
-      cattleId: editingCattle?.id,
-      description: `Data sapi diperbarui`,
+      cattle: updatedCattle.name,
+      cattleId: updatedCattle.id,
+      description: `Data sapi diperbarui (Status: ${updatedCattle.status})`,
       icon: '✏️',
     };
 
-    setCattleList(cattleList.map((c) => (c.id === editingCattle?.id ? updatedCattle : c)));
-    setShowEditModal(false);
-    setEditingCattle(null);
-    setFormData({ status: 'Estrus', cycleLength: 21, kecamatan: '', desa: '', ownerName: '' });
     await executeApi('update_cattle', updatedCattle, historyObj);
   };
 
@@ -223,12 +278,23 @@ export default function SapiTimePage() {
     pkbDate.setDate(pkbDate.getDate() + 90);
     const rekomendasiPkb = pkbDate.toLocaleDateString('id-ID');
 
-    const newIB = { id: Date.now(), cattle_id: selectedCattleForIB?.id, ...ibFormData, rekomendasiPkb };
+    const localUser = getAuthSession();
+    const effectiveInseminator = ibFormData.inseminatorName || userName || localUser?.nama || 'Petugas';
+
+    const newIB = {
+      id: Date.now(),
+      cattle_id: selectedCattleForIB?.id,
+      ...ibFormData,
+      inseminatorName: effectiveInseminator,
+      id_user: localUser?.id,
+      rekomendasiPkb,
+    };
+
     const historyObj = {
       type: 'insemination_added',
       cattle: selectedCattleForIB?.name,
       cattleId: selectedCattleForIB?.id,
-      description: `Inseminasi Buatan (${newIB.kecamatan}, ${newIB.desa}). PKB: ${rekomendasiPkb}`,
+      description: `Inseminasi Buatan (${newIB.kecamatan}, ${newIB.desa}). Petugas: ${effectiveInseminator}. PKB: ${rekomendasiPkb}`,
       icon: '💉',
     };
 
@@ -243,7 +309,7 @@ export default function SapiTimePage() {
         waktu: newIB.time,
         kecamatan: newIB.kecamatan,
         desa: newIB.desa,
-        inseminator: newIB.inseminatorName,
+        inseminator: effectiveInseminator,
         kodeStraw: newIB.strawCode,
         namaPejantan: newIB.bullName,
         rasPejantan: newIB.bullBreed,
@@ -299,6 +365,25 @@ export default function SapiTimePage() {
     setShowEditStatusModal(true);
   };
 
+  // 4. Konfigurasi Tabs: Untuk Admin tab 'petugas_ib' paling depan dan 'database' paling belakang
+  const navigationTabs = useMemo(() => {
+    if (isAdmin) {
+      return [
+        { key: 'petugas_ib', label: 'Petugas IB', icon: Users },
+        { key: 'home', label: 'Ringkasan Siklus', icon: LayoutDashboard },
+        { key: 'calendar', label: 'Kalender Reproduksi', icon: CalendarIcon },
+        { key: 'history', label: 'Kinerja & Riwayat', icon: History },
+        { key: 'database', label: 'Database Indukan', icon: Database },
+      ];
+    }
+    return [
+      { key: 'database', label: 'Database Indukan', icon: Database },
+      { key: 'home', label: 'Ringkasan Siklus', icon: LayoutDashboard },
+      { key: 'calendar', label: 'Kalender Reproduksi', icon: CalendarIcon },
+      { key: 'history', label: 'Kinerja & Riwayat', icon: History },
+    ];
+  }, [isAdmin]);
+
   if (!isReady) return null;
 
   return (
@@ -324,7 +409,9 @@ export default function SapiTimePage() {
                   Bitpro
                 </Link>
                 <span className="text-slate-300 dark:text-slate-600">/</span>
-                <span className="text-xs font-bold text-emerald-700 dark:text-emerald-400 whitespace-nowrap">SapiTime Smart App</span>
+                <span className="text-xs font-bold text-emerald-700 dark:text-emerald-400 whitespace-nowrap">
+                  SapiTime Smart App
+                </span>
               </div>
               <h1 className="text-base sm:text-xl font-bold text-slate-900 dark:text-slate-100 tracking-tight leading-tight truncate">
                 Smart Monitoring Reproduksi Ternak
@@ -342,12 +429,7 @@ export default function SapiTimePage() {
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-10 space-y-8">
         {/* Navigation Tabs (Folder Tab Model Monev KTT) */}
         <div className="flex gap-2 border-b border-slate-200 dark:border-slate-800 pb-px overflow-x-auto no-scrollbar scroll-smooth -mx-4 px-4 sm:mx-0 sm:px-0">
-          {[
-            { key: 'database', label: 'Database Indukan', icon: Database },
-            { key: 'home', label: 'Ringkasan Siklus', icon: LayoutDashboard },
-            { key: 'calendar', label: 'Kalender Reproduksi', icon: CalendarIcon },
-            { key: 'history', label: 'Kinerja & Riwayat', icon: History },
-          ].map((tab) => {
+          {navigationTabs.map((tab) => {
             const Icon = tab.icon;
             const active = activeTab === tab.key;
             return (
@@ -367,9 +449,18 @@ export default function SapiTimePage() {
           })}
         </div>
 
+        {/* 1. TAB PETUGAS IB (KHUSUS ADMINISTRATOR - PALING DEPAN) */}
+        {activeTab === 'petugas_ib' && isAdmin && (
+          <SapiTimePetugasTab
+            cattleList={cattleList}
+            onTraceCattle={handleOpenTrace}
+          />
+        )}
+
+        {/* 2. TAB DATABASE INDUKAN (UNTUK ADMIN DI BELAKANG, UNTUK PETUGAS HANYA SAPI MILIKNYA) */}
         {activeTab === 'database' && (
           <SapiTimeDatabaseTab
-            cattleList={cattleList}
+            cattleList={displayCattleList}
             canCreate={canCreate}
             canEdit={canEdit}
             editingCattle={editingCattle}
@@ -396,28 +487,31 @@ export default function SapiTimePage() {
           />
         )}
 
+        {/* 3. TAB RINGKASAN SIKLUS */}
         {activeTab === 'home' && (
           <SapiTimeSummaryTab
-            cattleList={cattleList}
+            cattleList={displayCattleList}
             onLaporKondisi={(cattle) => setSelectedCattleForLapor(cattle)}
           />
         )}
 
+        {/* 4. TAB KALENDER REPRODUKSI */}
         {activeTab === 'calendar' && (
           <SapiTimeCalendarTab
             currentDate={currentDate}
             setCurrentDate={setCurrentDate}
             selectedDay={selectedDay}
             setSelectedDay={setSelectedDay}
-            cattleList={cattleList}
+            cattleList={displayCattleList}
             onOpenEstrusModal={() => setShowEstrusModal(true)}
           />
         )}
 
+        {/* 5. TAB KINERJA & RIWAYAT (STICKY TABLE & SCROLLABLE) */}
         {activeTab === 'history' && (
           <SapiTimeHistoryTab
-            cattleList={cattleList}
-            historyList={historyList}
+            cattleList={displayCattleList}
+            historyList={displayHistoryList}
             onTraceCattle={handleOpenTrace}
             onEditStatusIb={handleOpenEditStatus}
           />
@@ -438,12 +532,12 @@ export default function SapiTimePage() {
           setShowAddModal(false);
           setShowEditModal(false);
         }}
+        onSubmit={showEditModal ? handleUpdateCattle : handleAddCattle}
         formData={formData}
         setFormData={setFormData}
-        onSubmit={showEditModal ? handleUpdateCattle : handleAddCattle}
       />
 
-      {/* ── MODAL CATAT IB ── */}
+      {/* ── MODAL INPUT PELAYANAN IB ── */}
       <ModalCatatIB
         showIBModal={showIBModal}
         setShowIBModal={setShowIBModal}
@@ -453,54 +547,48 @@ export default function SapiTimePage() {
         handleAddInsemination={handleAddInsemination}
       />
 
-      {/* ── MODAL TRACE RIWAYAT IB SAPI ── */}
+      {/* ── MODAL TRACE SIKLUS SAPI ── */}
       <ModalTraceSapi
         isOpen={showTraceModal}
+        onClose={() => setShowTraceModal(false)}
         cattle={selectedCattleForTrace}
-        onClose={() => {
-          setShowTraceModal(false);
-          setSelectedCattleForTrace(null);
+        onEditStatusIb={(ib, c) => {
+          handleOpenEditStatus(ib, c);
         }}
-        onEditStatusIb={handleOpenEditStatus}
       />
 
       {/* ── MODAL EDIT STATUS KEBERHASILAN IB ── */}
       <ModalEditStatusIb
         isOpen={showEditStatusModal}
+        onClose={() => setShowEditStatusModal(false)}
         ib={selectedIbForStatusEdit}
         cattle={selectedCattleForStatusEdit}
-        onClose={() => {
-          setShowEditStatusModal(false);
-          setSelectedIbForStatusEdit(null);
-          setSelectedCattleForStatusEdit(null);
-        }}
         onSave={handleSaveIbStatus}
       />
 
-      {/* ── MODAL CEK & LAPOR KONDISI FISIK SAPI (POST-IB) ── */}
-      <ModalLaporKondisiFisik
-        isOpen={!!selectedCattleForLapor}
-        cattle={selectedCattleForLapor}
-        onClose={() => setSelectedCattleForLapor(null)}
-        onSuccess={fetchData}
-      />
+      {/* ── MODAL LAPOR KONDISI FISIK SAPI ── */}
+      {selectedCattleForLapor && (
+        <ModalLaporKondisiFisik
+          isOpen={!!selectedCattleForLapor}
+          onClose={() => setSelectedCattleForLapor(null)}
+          cattle={selectedCattleForLapor}
+          onSuccess={() => fetchData()}
+        />
+      )}
 
+      {/* ── UNIVERSAL AUDIT MODAL ── */}
       <UniversalAuditModal
         isOpen={showAuditModal}
-        onClose={() => setShowAuditModal(false)}
-        recordId={auditTarget?.id}
+        onClose={() => {
+          setShowAuditModal(false);
+          setAuditTarget(null);
+        }}
+        recordId={auditTarget?.id ? String(auditTarget.id) : null}
+        recordTitle={auditTarget?.name ? `Sapi: ${auditTarget.name} (${auditTarget.id})` : 'Data Sapi'}
         tableName="sapitime"
         moduleKey="bitpro"
         submenuKey="sapitime"
-        availableFields={[
-          { key: 'name', label: 'Nama Sapi' },
-          { key: 'ownerName', label: 'Nama Peternak' },
-          { key: 'nik', label: 'NIK Peternak' },
-          { key: 'breed', label: 'Ras' },
-          { key: 'kecamatan', label: 'Kecamatan' },
-          { key: 'desa', label: 'Desa' },
-          { key: 'status', label: 'Status' }
-        ]}
+        availableFields={['name', 'ownerName', 'breed', 'status', 'lastEstrus', 'kecamatan', 'desa']}
       />
     </div>
   );

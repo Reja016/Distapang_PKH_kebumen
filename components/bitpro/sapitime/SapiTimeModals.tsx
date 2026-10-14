@@ -21,6 +21,7 @@ import {
 } from 'lucide-react';
 import { Cattle, Insemination, calculateAge, KECAMATAN_LIST, getDesaListForKecamatan } from './types';
 import { useUserAreaRestriction } from '@/hooks/useUserAreaRestriction';
+import { getAuthSession } from '@/lib/auth';
 
 interface ModalEstrusInfoProps {
   showEstrusModal: boolean;
@@ -294,12 +295,14 @@ export function ModalCatatIB({
   // Auto-set data sapi akseptor, wilayah domisili, dan default tanggal/waktu
   useEffect(() => {
     if (showIBModal && selectedCattleForIB) {
+      const localUser = getAuthSession();
       setIbFormData((prev: any) => ({
         ...prev,
         date: prev?.date || new Date().toISOString().split('T')[0],
         time: prev?.time || '08:00',
         kecamatan: prev?.kecamatan || selectedCattleForIB.kecamatan || (!isAdmin && availableIbKecamatanList.length === 1 ? availableIbKecamatanList[0] : ''),
         desa: prev?.desa || selectedCattleForIB.desa || '',
+        inseminatorName: prev?.inseminatorName || localUser?.nama || '',
       }));
     }
   }, [showIBModal, selectedCattleForIB, isAdmin, availableIbKecamatanList, setIbFormData]);
