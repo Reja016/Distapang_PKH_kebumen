@@ -54,7 +54,7 @@ export function KendaraanModalForm({
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1">
-                Nama Pemegang <span className="text-red-500">*</span>
+                Nama Pemegang
               </label>
               <input
                 type="text"
@@ -68,7 +68,7 @@ export function KendaraanModalForm({
 
             <div>
               <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1">
-                Merk / Type <span className="text-red-500">*</span>
+                Merk / Type
               </label>
               <input
                 type="text"
@@ -83,7 +83,7 @@ export function KendaraanModalForm({
 
           <div>
             <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1">
-              Tahun Pembuatan / Pengadaan
+              Tahun Pembuatan / Pengadaan <span className="text-[11px] text-slate-400 font-normal">(opsional)</span>
             </label>
             <input
               type="text"
@@ -101,7 +101,7 @@ export function KendaraanModalForm({
             </h4>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div>
-                <label className="block text-[11px] font-bold text-slate-600 mb-1">Nomor Polisi Lama</label>
+                <label className="block text-[11px] font-bold text-slate-600 mb-1">Nomor Polisi Lama <span className="text-[11px] text-slate-400 font-normal">(opsional)</span></label>
                 <input
                   type="text"
                   placeholder="Contoh: AA 1234 AD"
@@ -111,7 +111,7 @@ export function KendaraanModalForm({
                 />
               </div>
               <div>
-                <label className="block text-[11px] font-bold text-slate-600 mb-1">Nomor Polisi Baru</label>
+                <label className="block text-[11px] font-bold text-slate-600 mb-1">Nomor Polisi Baru <span className="text-[11px] text-slate-400 font-normal">(opsional)</span></label>
                 <input
                   type="text"
                   placeholder="Contoh: AA 1 D"
@@ -127,7 +127,7 @@ export function KendaraanModalForm({
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1">
-                Nomor Mesin
+                Nomor Mesin <span className="text-[11px] text-slate-400 font-normal">(opsional)</span>
               </label>
               <input
                 type="text"
@@ -140,7 +140,7 @@ export function KendaraanModalForm({
 
             <div>
               <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1">
-                Nomor Rangka
+                Nomor Rangka <span className="text-[11px] text-slate-400 font-normal">(opsional)</span>
               </label>
               <input
                 type="text"
@@ -155,7 +155,7 @@ export function KendaraanModalForm({
           {/* Keterangan */}
           <div>
             <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1">
-              Keterangan Tambahan
+              Keterangan Tambahan <span className="text-[11px] text-slate-400 font-normal">(opsional)</span>
             </label>
             <textarea
               rows={2}

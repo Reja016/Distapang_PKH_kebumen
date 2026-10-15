@@ -391,7 +391,7 @@ export function MonevSuratPernyataanTab({
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
                 <label className="block text-xs font-sans font-bold uppercase tracking-wider text-slate-600 mb-1">
-                  Nama Lengkap <span className="text-red-500">*</span>
+                  Nama Lengkap
                 </label>
                 <input
                   type="text"
@@ -405,7 +405,7 @@ export function MonevSuratPernyataanTab({
 
               <div>
                 <label className="block text-xs font-sans font-bold uppercase tracking-wider text-slate-600 mb-1">
-                  Jabatan dalam Kelompok
+                  Jabatan dalam Kelompok <span className="text-[11px] text-slate-400 font-normal">(opsional)</span>
                 </label>
                 <input
                   type="text"
@@ -417,7 +417,7 @@ export function MonevSuratPernyataanTab({
 
               <div>
                 <label className="block text-xs font-sans font-bold uppercase tracking-wider text-slate-600 mb-1">
-                  Nama Kelompok (KTT) <span className="text-red-500">*</span>
+                  Nama Kelompok (KTT)
                 </label>
                 <input
                   type="text"
@@ -431,7 +431,7 @@ export function MonevSuratPernyataanTab({
 
               <div>
                 <label className="block text-xs font-sans font-bold uppercase tracking-wider text-slate-600 mb-1">
-                  Nomor Telp / WhatsApp
+                  Nomor Telp / WhatsApp <span className="text-[11px] text-slate-400 font-normal">(opsional)</span>
                 </label>
                 <input
                   type="text"
@@ -445,7 +445,7 @@ export function MonevSuratPernyataanTab({
 
             <div>
               <label className="block text-xs font-sans font-bold uppercase tracking-wider text-slate-600 mb-1">
-                Alamat Domisili Kelompok
+                Alamat Domisili Kelompok <span className="text-[11px] text-slate-400 font-normal">(opsional)</span>
               </label>
               <input
                 type="text"

@@ -611,7 +611,7 @@ export function MonevUnggasTab({
             <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
               <div>
                 <label className="block text-xs font-sans font-bold uppercase tracking-wider text-slate-600 mb-1">
-                  Tahun Bantuan <span className="text-red-500">*</span>
+                  Tahun Bantuan
                 </label>
                 <select
                   value={formTahun}
@@ -626,7 +626,7 @@ export function MonevUnggasTab({
 
               <div>
                 <label className="block text-xs font-sans font-bold uppercase tracking-wider text-slate-600 mb-1">
-                  Nama Ketua Kelompok <span className="text-slate-400 font-normal">(Manual / Auto)</span>
+                  Nama Ketua Kelompok <span className="text-[11px] text-slate-400 font-normal">(opsional)</span>
                 </label>
                 <input
                   type="text"
@@ -639,7 +639,7 @@ export function MonevUnggasTab({
 
               <div>
                 <label className="block text-xs font-sans font-bold uppercase tracking-wider text-slate-600 mb-1">
-                  Kecamatan <span className="text-red-500">*</span>
+                  Kecamatan
                 </label>
                 <select
                   value={formKec}
@@ -659,7 +659,7 @@ export function MonevUnggasTab({
 
               <div>
                 <label className="block text-xs font-sans font-bold uppercase tracking-wider text-slate-600 mb-1">
-                  Desa / Kelurahan <span className="text-red-500">*</span>
+                  Desa / Kelurahan
                 </label>
                 <select
                   value={formDesa}
@@ -679,7 +679,7 @@ export function MonevUnggasTab({
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
               <div className="relative" ref={kttInputRef}>
                 <label className="block text-xs font-sans font-bold uppercase tracking-wider text-slate-600 mb-1 flex items-center justify-between">
-                  <span>Nama Kelompok (KTT) <span className="text-red-500">*</span></span>
+                  <span>Nama Kelompok (KTT)</span>
                   <span className="text-[10px] font-semibold text-amber-700">🔍 Live Search Master</span>
                 </label>
                 <div className="relative">
@@ -723,7 +723,7 @@ export function MonevUnggasTab({
 
               <div>
                 <label className="block text-xs font-sans font-bold uppercase tracking-wider text-slate-600 mb-1">
-                  Jenis Komoditas Unggas <span className="text-red-500">*</span>
+                  Jenis Komoditas Unggas
                 </label>
                 <select
                   value={formJenis}
@@ -738,7 +738,7 @@ export function MonevUnggasTab({
 
               <div>
                 <label className="block text-xs font-sans font-bold uppercase tracking-wider text-slate-600 mb-1">
-                  Waktu Pelaksanaan Monev <span className="text-red-500">*</span>
+                  Waktu Pelaksanaan Monev
                 </label>
                 <input
                   type="date"
@@ -857,7 +857,7 @@ export function MonevUnggasTab({
               <div>
                 <div className="flex items-center justify-between mb-1">
                   <label className="block text-xs font-sans font-bold uppercase tracking-wider text-slate-600">
-                    Titik Koordinat Kandang Unggas <span className="text-red-500">*</span>
+                    Titik Koordinat Kandang Unggas
                   </label>
                   <button
                     type="button"

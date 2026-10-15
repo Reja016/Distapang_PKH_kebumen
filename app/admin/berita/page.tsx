@@ -23,6 +23,7 @@ import {
 } from 'lucide-react';
 import { getAuthSession } from '@/lib/auth';
 import ImageCropperModal from '@/components/admin/ImageCropperModal';
+import { showToast, showConfirm } from '@/components/common/CustomToast';
 
 export interface BeritaItem {
   id: number;
@@ -194,32 +195,40 @@ export default function AdminBeritaPage() {
 
       const data = await res.json();
       if (res.ok && data.success) {
-        alert(editingItem ? 'Berita berhasil diperbarui!' : 'Berita baru berhasil diterbitkan!');
+        showToast.success(editingItem ? 'Berita berhasil diperbarui!' : 'Berita baru berhasil diterbitkan!');
         setShowFormModal(false);
         fetchNews();
       } else {
-        alert('Gagal menyimpan berita: ' + (data.error || 'Terjadi kesalahan sistem'));
+        showToast.error('Gagal menyimpan berita: ' + (data.error || 'Terjadi kesalahan sistem'));
       }
     } catch (err: any) {
-      alert('Gagal menghubungi server: ' + err.message);
+      showToast.error('Gagal menghubungi server: ' + err.message);
     } finally {
       setIsSaving(false);
     }
   };
 
   const handleDelete = async (id: number, judul: string) => {
-    if (!confirm(`Hapus berita "${judul}"? Tindakan ini tidak dapat dibatalkan.`)) return;
+    const ok = await showConfirm({
+      title: 'Hapus Berita',
+      message: `Apakah Anda yakin ingin menghapus berita "${judul}"? Tindakan ini tidak dapat dibatalkan.`,
+      confirmText: 'Ya, Hapus',
+      cancelText: 'Batal',
+      type: 'danger',
+    });
+    if (!ok) return;
 
     try {
       const res = await fetch(`/api/berita/${id}`, { method: 'DELETE' });
       const data = await res.json();
       if (res.ok && data.success) {
+        showToast.success('Berita berhasil dihapus!');
         setNewsList((prev) => prev.filter((n) => n.id !== id));
       } else {
-        alert('Gagal menghapus berita: ' + (data.error || 'Kesalahan'));
+        showToast.error('Gagal menghapus berita: ' + (data.error || 'Kesalahan'));
       }
     } catch (e: any) {
-      alert('Terjadi kendala jaringan: ' + e.message);
+      showToast.error('Terjadi kendala jaringan: ' + e.message);
     }
   };
 
@@ -472,7 +481,7 @@ export default function AdminBeritaPage() {
               {/* Judul Berita */}
               <div>
                 <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
-                  Judul Berita <span className="text-red-500">*</span>
+                  Judul Berita
                 </label>
                 <input
                   type="text"
@@ -519,7 +528,7 @@ export default function AdminBeritaPage() {
               {/* Narasi Singkat / Ringkasan */}
               <div>
                 <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
-                  Narasi Singkat / Ringkasan (Tampil di Card &amp; Pop-up) <span className="text-red-500">*</span>
+                  Narasi Singkat / Ringkasan (Tampil di Card &amp; Pop-up)
                 </label>
                 <textarea
                   required
@@ -534,7 +543,7 @@ export default function AdminBeritaPage() {
               {/* Isi / Konten Berita Lengkap */}
               <div>
                 <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
-                  Konten Berita Lengkap
+                  Konten Berita Lengkap <span className="text-slate-400 font-normal text-xs">(opsional)</span>
                 </label>
                 <textarea
                   rows={4}
@@ -550,7 +559,7 @@ export default function AdminBeritaPage() {
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
                   <div>
                     <label className="block text-xs font-bold text-slate-900 dark:text-white">
-                      Foto Berita &amp; Crop Thumbnail (Wajib)
+                      Foto Berita &amp; Crop Thumbnail
                     </label>
                     <p className="text-[11px] text-slate-500 dark:text-slate-400">
                       Thumbnail dibuat dengan rasio tetap 16:9 yang rapi. Anda bisa memilih area fokus sendiri.

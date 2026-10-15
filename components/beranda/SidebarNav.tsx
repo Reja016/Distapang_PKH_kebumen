@@ -700,6 +700,21 @@ export default function SidebarNav({
                 <Users size={16} className="text-emerald-500 shrink-0" />
                 {!isCollapsed && <span className="truncate">Anggota</span>}
               </Link>
+
+              {/* 4. Cadangkan & Pulihkan Database */}
+              <button
+                type="button"
+                onClick={onOpenBackupModal}
+                className={`w-full px-3 py-2 rounded-xl flex items-center gap-2.5 text-xs font-bold transition-colors cursor-pointer text-left ${
+                  isDark
+                    ? 'text-slate-200 hover:bg-slate-800/80 hover:text-white'
+                    : 'text-slate-700 hover:bg-slate-100 hover:text-blue-600'
+                } ${isCollapsed ? 'justify-center px-1' : ''}`}
+                title="Cadangkan & Pulihkan Database MySQL"
+              >
+                <Database size={16} className="text-blue-500 shrink-0" />
+                {!isCollapsed && <span className="truncate">Backup Database</span>}
+              </button>
             </div>
           )}
         </div>
@@ -711,20 +726,6 @@ export default function SidebarNav({
               isDark ? 'border-slate-800 bg-slate-900' : 'border-slate-300 bg-slate-100'
             }`}
           >
-            {isAdmin && (
-              <button
-                onClick={onOpenBackupModal}
-                className={`w-10 h-10 rounded-xl border-2 flex items-center justify-center transition-colors cursor-pointer ${
-                  isDark
-                    ? 'bg-slate-800 border-slate-700 text-blue-400 hover:bg-slate-700'
-                    : 'bg-white border-slate-300 text-blue-600 hover:bg-slate-50 shadow-2xs'
-                }`}
-                title="Cadangkan Database MySQL"
-              >
-                <Database size={16} />
-              </button>
-            )}
-
             <Link
               href="/"
               className="w-10 h-10 rounded-xl border-2 border-emerald-700 bg-emerald-600 hover:bg-emerald-700 text-white flex items-center justify-center transition-colors shadow-xs shrink-0"
@@ -763,24 +764,6 @@ export default function SidebarNav({
               isDark ? 'border-slate-800 bg-slate-900' : 'border-slate-300 bg-slate-100'
             }`}
           >
-            {/* Admin Extras (Tampil di Desktop & Mobile Drawer) */}
-            {isAdmin && (
-              <div className="pb-0.5">
-                <button
-                  onClick={onOpenBackupModal}
-                  className={`w-full py-2 px-2.5 rounded-xl border-2 text-[11px] font-bold flex items-center justify-center gap-1.5 transition-colors cursor-pointer ${
-                    isDark
-                      ? 'bg-slate-800 border-slate-700 text-slate-200 hover:bg-slate-700'
-                      : 'bg-white border-slate-300 text-slate-800 hover:bg-slate-50 shadow-2xs'
-                  }`}
-                  title="Cadangkan Database MySQL"
-                >
-                  <Database size={14} className="text-blue-600 shrink-0" />
-                  <span className="truncate">Backup Database</span>
-                </button>
-              </div>
-            )}
-
             {/* Portal Publik & Logout */}
             <div className="flex items-center gap-2 min-w-0">
               <Link

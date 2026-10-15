@@ -16,6 +16,7 @@ import {
   Layers,
 } from 'lucide-react';
 import { getAuthSession } from '@/lib/auth';
+import { showConfirm, showToast } from '@/components/common/CustomToast';
 
 interface DatabaseBackupModalProps {
   isOpen: boolean;
@@ -119,7 +120,7 @@ export default function DatabaseBackupModal({ isOpen, onClose }: DatabaseBackupM
     if (e.target.files && e.target.files[0]) {
       const file = e.target.files[0];
       if (!file.name.endsWith('.sql')) {
-        alert('Mohon pilih file berformat .sql');
+        showToast('Mohon pilih file berformat .sql', 'warning');
         return;
       }
       setSelectedFile(file);
@@ -130,9 +131,13 @@ export default function DatabaseBackupModal({ isOpen, onClose }: DatabaseBackupM
   const handleRestoreDatabase = async () => {
     if (!selectedFile) return;
 
-    const confirmed = window.confirm(
-      `PERINGATAN: Memulihkan database dari "${selectedFile.name}" akan menimpa/memperbarui data tabel yang ada saat ini. Apakah Anda yakin ingin melanjutkan?`
-    );
+    const confirmed = await showConfirm({
+      title: 'Peringatan Pemulihan Database',
+      message: `Memulihkan database dari "${selectedFile.name}" akan menimpa/memperbarui data tabel yang ada saat ini. Apakah Anda yakin ingin melanjutkan?`,
+      confirmText: 'Ya, Pulihkan',
+      cancelText: 'Batal',
+      type: 'danger',
+    });
     if (!confirmed) return;
 
     try {

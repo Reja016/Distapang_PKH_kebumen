@@ -39,6 +39,7 @@ import {
 import BeritaAcaraPrintModal from '@/components/keswan/stok-gudang/BeritaAcaraPrintModal';
 import UploadBuktiBaModal from '@/components/keswan/stok-gudang/UploadBuktiBaModal';
 import { UniversalAuditModal } from '@/components/common/UniversalAuditModal';
+import { showConfirm } from '@/components/common/CustomToast';
 
 export default function StokGudangKeswanPage() {
   const { isReady, canCreate, canEdit } = usePageAuth('keswan', 'stok-gudang');
@@ -145,7 +146,15 @@ export default function StokGudangKeswanPage() {
 
   // Handler Hapus Dropping
   const handleDeleteDropping = async (id: number) => {
-    if (!confirm('Apakah Anda yakin ingin menghapus data dropping masuk ini?')) return;
+    const ok = await showConfirm({
+      title: 'Hapus Dropping Masuk',
+      message: 'Apakah Anda yakin ingin menghapus data dropping masuk ini?',
+      confirmText: 'Ya, Hapus',
+      cancelText: 'Batal',
+      type: 'danger',
+    });
+    if (!ok) return;
+
     try {
       const res = await fetch(`/api/stok-gudang?type=dropping&id=${id}`, { method: 'DELETE' });
       const resJson = await res.json();
@@ -162,7 +171,15 @@ export default function StokGudangKeswanPage() {
 
   // Handler Hapus Distribusi
   const handleDeleteDistribusi = async (id: number) => {
-    if (!confirm('Apakah Anda yakin ingin membatalkan distribusi ini? Stok puskeswan terkait akan disesuaikan.')) return;
+    const ok = await showConfirm({
+      title: 'Batalkan Distribusi',
+      message: 'Apakah Anda yakin ingin membatalkan distribusi ini? Stok puskeswan terkait akan disesuaikan.',
+      confirmText: 'Ya, Batalkan',
+      cancelText: 'Kembali',
+      type: 'warning',
+    });
+    if (!ok) return;
+
     try {
       const res = await fetch(`/api/stok-gudang?type=distribusi&id=${id}`, { method: 'DELETE' });
       const resJson = await res.json();
@@ -179,7 +196,15 @@ export default function StokGudangKeswanPage() {
 
   // Handler Hapus Penggunaan
   const handleDeletePenggunaan = async (id: number) => {
-    if (!confirm('Hapus catatan penggunaan obat ini? Stok puskeswan akan dikembalikan.')) return;
+    const ok = await showConfirm({
+      title: 'Hapus Penggunaan Obat',
+      message: 'Hapus catatan penggunaan obat ini? Stok puskeswan akan dikembalikan.',
+      confirmText: 'Ya, Hapus',
+      cancelText: 'Batal',
+      type: 'danger',
+    });
+    if (!ok) return;
+
     try {
       const res = await fetch(`/api/stok-gudang?type=penggunaan&id=${id}`, { method: 'DELETE' });
       const resJson = await res.json();

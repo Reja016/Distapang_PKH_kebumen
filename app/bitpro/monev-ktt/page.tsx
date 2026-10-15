@@ -35,6 +35,7 @@ import { MonevUnggasTab } from '@/components/bitpro/monev-ktt/MonevUnggasTab';
 import { MonevDashboardTab } from '@/components/bitpro/monev-ktt/MonevDashboardTab';
 import { MonevCameraModal, MonevPreviewPhotoModal } from '@/components/bitpro/monev-ktt/MonevModals';
 import { UniversalAuditModal } from '@/components/common/UniversalAuditModal';
+import { showToast, showConfirm } from '@/components/common/CustomToast';
 
 export default function MonevKTT() {
   const { isReady, canCreate, canEdit, isAdmin } = usePageAuth('bitpro', 'monev-ktt');
@@ -754,16 +755,25 @@ export default function MonevKTT() {
 
   const handleDeleteClick = async (id: string) => {
     if (!canEdit) {
-      alert('Hanya Administrator yang berhak menghapus data.');
+      showToast.error('Hanya Administrator yang berhak menghapus data.');
       return;
     }
-    if (!confirm('Yakin ingin menghapus data lapangan ini?')) return;
+    const ok = await showConfirm({
+      title: 'Hapus Data Lapangan',
+      message: 'Yakin ingin menghapus data lapangan ini?',
+      confirmText: 'Ya, Hapus',
+      cancelText: 'Batal',
+      type: 'danger',
+    });
+    if (!ok) return;
+
     try {
       await fetch(`/api/monev-lapangan?id=${id}`, { method: 'DELETE' });
+      showToast.success('Data lapangan berhasil dihapus.');
       await fetchDatabase();
       if (editingId === id) resetForm();
     } catch {
-      alert('Gagal menghapus data.');
+      showToast.error('Gagal menghapus data.');
     }
   };
 

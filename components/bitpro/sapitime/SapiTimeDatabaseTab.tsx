@@ -89,7 +89,7 @@ export function SapiTimeDatabaseTab({
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">
             <div>
-              <label className="block text-xs font-bold mb-1 text-slate-700">Nama Peternak <span className="text-red-500">*</span></label>
+              <label className="block text-xs font-bold mb-1 text-slate-700">Nama Peternak</label>
               <input
                 type="text"
                 className="w-full min-h-touch h-10 px-3.5 border border-slate-200 rounded-xl bg-slate-50 focus:bg-white focus:outline-none focus:border-emerald-600 text-xs font-bold text-slate-900"
@@ -99,7 +99,7 @@ export function SapiTimeDatabaseTab({
               />
             </div>
             <div>
-              <label className="block text-xs font-bold mb-1 text-slate-700">No. Telepon Peternak</label>
+              <label className="block text-xs font-bold mb-1 text-slate-700">No. Telepon Peternak <span className="text-[11px] text-slate-400 font-normal">(opsional)</span></label>
               <input
                 type="tel"
                 className="w-full min-h-touch h-10 px-3.5 border border-slate-200 rounded-xl bg-slate-50 focus:bg-white focus:outline-none focus:border-emerald-600 text-xs font-bold text-slate-900"
@@ -109,7 +109,7 @@ export function SapiTimeDatabaseTab({
               />
             </div>
             <div>
-              <label className="block text-xs font-bold mb-1 text-slate-700">NIK Peternak</label>
+              <label className="block text-xs font-bold mb-1 text-slate-700">NIK Peternak <span className="text-[11px] text-slate-400 font-normal">(opsional)</span></label>
               <input
                 type="text"
                 inputMode="numeric"
@@ -117,11 +117,11 @@ export function SapiTimeDatabaseTab({
                 className="w-full min-h-touch h-10 px-3.5 border border-slate-200 rounded-xl bg-slate-50 focus:bg-white focus:outline-none focus:border-emerald-600 text-xs font-bold text-slate-900"
                 value={formData.nik || ''}
                 onChange={(e) => setFormData({ ...formData, nik: e.target.value.replace(/\D/g, '') })}
-                placeholder="16 digit NIK (opsional)"
+                placeholder="16 digit NIK"
               />
             </div>
             <div>
-              <label className="block text-xs font-bold mb-1 text-slate-700">No. Registrasi / Eartag Sapi</label>
+              <label className="block text-xs font-bold mb-1 text-slate-700">No. Registrasi / Eartag Sapi <span className="text-[11px] text-slate-400 font-normal">(opsional)</span></label>
               <input
                 type="text"
                 className="w-full min-h-touch h-10 px-3.5 border border-slate-200 rounded-xl bg-slate-50 focus:bg-white focus:outline-none focus:border-emerald-600 text-xs font-bold text-slate-900"
@@ -131,17 +131,17 @@ export function SapiTimeDatabaseTab({
               />
             </div>
             <div>
-              <label className="block text-xs font-bold mb-1 text-slate-700">Nama Sapi <span className="text-[11px] text-slate-400 font-normal">(Opsional)</span></label>
+              <label className="block text-xs font-bold mb-1 text-slate-700">Nama Sapi <span className="text-[11px] text-slate-400 font-normal">(opsional)</span></label>
               <input
                 type="text"
                 className="w-full min-h-touch h-10 px-3.5 border border-slate-200 rounded-xl bg-slate-50 focus:bg-white focus:outline-none focus:border-emerald-600 text-xs font-bold text-slate-900"
                 value={formData.name || ''}
                 onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                placeholder="Opsional (Contoh: Si Manis)"
+                placeholder="Contoh: Si Manis"
               />
             </div>
             <div>
-              <label className="block text-xs font-bold mb-1 text-slate-700">Kecamatan <span className="text-red-500">*</span></label>
+              <label className="block text-xs font-bold mb-1 text-slate-700">Kecamatan</label>
               <select
                 className="w-full min-h-touch h-10 px-3.5 border border-slate-200 rounded-xl bg-slate-50 focus:bg-white focus:outline-none focus:border-emerald-600 text-xs font-medium text-slate-900 cursor-pointer"
                 value={formData.kecamatan ? formData.kecamatan.toUpperCase() : ''}
@@ -156,7 +156,7 @@ export function SapiTimeDatabaseTab({
               </select>
             </div>
             <div>
-              <label className="block text-xs font-bold mb-1 text-slate-700">Desa <span className="text-red-500">*</span></label>
+              <label className="block text-xs font-bold mb-1 text-slate-700">Desa</label>
               <select
                 className="w-full min-h-touch h-10 px-3.5 border border-slate-200 rounded-xl bg-slate-50 focus:bg-white focus:outline-none focus:border-emerald-600 text-xs font-medium text-slate-900 cursor-pointer disabled:bg-slate-100 disabled:text-slate-400 disabled:cursor-not-allowed"
                 value={formData.desa || ''}
@@ -177,7 +177,7 @@ export function SapiTimeDatabaseTab({
               </select>
             </div>
             <div>
-              <label className="block text-xs font-bold mb-1 text-slate-700">Ras Sapi</label>
+              <label className="block text-xs font-bold mb-1 text-slate-700">Ras Sapi <span className="text-[11px] text-slate-400 font-normal">(opsional)</span></label>
               <input
                 type="text"
                 className="w-full min-h-touch h-10 px-3.5 border border-slate-200 rounded-xl bg-slate-50 focus:bg-white focus:outline-none focus:border-emerald-600 text-xs font-medium text-slate-900"
@@ -187,7 +187,7 @@ export function SapiTimeDatabaseTab({
               />
             </div>
             <div>
-              <label className="block text-xs font-bold mb-1 text-slate-700">Tanggal Lahir Sapi</label>
+              <label className="block text-xs font-bold mb-1 text-slate-700">Tanggal Lahir Sapi <span className="text-[11px] text-slate-400 font-normal">(opsional)</span></label>
               <input
                 type="date"
                 className="w-full min-h-touch h-10 px-3.5 border border-slate-200 rounded-xl bg-slate-50 focus:bg-white focus:outline-none focus:border-emerald-600 text-xs font-medium text-slate-900"
@@ -208,7 +208,7 @@ export function SapiTimeDatabaseTab({
               </select>
             </div>
             <div>
-              <label className="block text-xs font-bold mb-1 text-slate-700">Tanggal Estrus Terakhir</label>
+              <label className="block text-xs font-bold mb-1 text-slate-700">Tanggal Estrus Terakhir <span className="text-[11px] text-slate-400 font-normal">(opsional)</span></label>
               <input
                 type="date"
                 className="w-full min-h-touch h-10 px-3.5 border border-slate-200 rounded-xl bg-slate-50 focus:bg-white focus:outline-none focus:border-emerald-600 text-xs font-medium text-slate-900"

@@ -106,7 +106,7 @@ export function KegiatanForm({
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
             <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1">
-              Tanggal Kegiatan <span className="text-red-500">*</span>
+              Tanggal Kegiatan
             </label>
             <input
               type="date"
@@ -119,7 +119,7 @@ export function KegiatanForm({
 
           <div>
             <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1">
-              Tim Pelaksana <span className="text-red-500">*</span>
+              Tim Pelaksana
             </label>
             <select
               value={formData.tim_pelaksana}
@@ -139,7 +139,7 @@ export function KegiatanForm({
         <div className="relative">
           <div className="flex items-center justify-between mb-1">
             <label className="block text-xs font-bold uppercase tracking-wider text-slate-700">
-              Nama Kelompok Tani Ternak (KTT) <span className="text-red-500">*</span>
+              Nama Kelompok Tani Ternak (KTT)
             </label>
             <span className="text-[11px] text-emerald-700 font-semibold">
               Live Search Database KTT (ketik cth: &quot;gom&quot;)
@@ -238,7 +238,7 @@ export function KegiatanForm({
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
             <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1">
-              Kecamatan
+              Kecamatan <span className="text-[11px] text-slate-400 font-normal">(opsional)</span>
             </label>
             <input
               type="text"
@@ -250,7 +250,7 @@ export function KegiatanForm({
           </div>
           <div>
             <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1">
-              Desa
+              Desa <span className="text-[11px] text-slate-400 font-normal">(opsional)</span>
             </label>
             <input
               type="text"
@@ -266,7 +266,7 @@ export function KegiatanForm({
         <div>
           <div className="flex items-center justify-between mb-1">
             <label className="block text-xs font-bold uppercase tracking-wider text-slate-700">
-              Nama / Jenis Kegiatan <span className="text-red-500">*</span>
+              Nama / Jenis Kegiatan
             </label>
             <span className="text-[11px] text-slate-400">Pilih rekomendasi di bawah</span>
           </div>
@@ -297,7 +297,7 @@ export function KegiatanForm({
         {/* Hasil & Catatan Kegiatan */}
         <div>
           <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1">
-            Uraian Hasil Kegiatan &amp; Arahan Petugas
+            Uraian Hasil Kegiatan &amp; Arahan Petugas <span className="text-[11px] text-slate-400 font-normal">(opsional)</span>
           </label>
           <textarea
             rows={3}
@@ -319,7 +319,7 @@ export function KegiatanForm({
             <div>
               <div className="flex items-center justify-between mb-1">
                 <label className="block text-[11px] font-bold uppercase tracking-wider text-slate-600">
-                  Koordinat GPS
+                  Koordinat GPS <span className="text-[10px] text-slate-400 font-normal">(opsional)</span>
                 </label>
                 <button
                   type="button"
@@ -353,7 +353,7 @@ export function KegiatanForm({
 
             <div>
               <label className="block text-[11px] font-bold uppercase tracking-wider text-slate-600 mb-1">
-                Dokumentasi Foto Lapangan (Maks 2 MB)
+                Dokumentasi Foto Lapangan <span className="text-[10px] text-slate-400 font-normal">(opsional, maks 2 MB)</span>
               </label>
 
               {/* Hidden File Inputs: Kamera HP Asli & Galeri Berkas */}

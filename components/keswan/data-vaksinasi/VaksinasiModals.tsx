@@ -173,7 +173,7 @@ export default function VaksinasiModals({
               <div>
                 <div className="flex items-center justify-between mb-1">
                   <label className="block text-xs font-bold text-slate-700">
-                    Puskeswan <span className="text-red-500">*</span>
+                    Puskeswan
                   </label>
                   {!isAdmin && (
                     <span className="text-[10px] font-semibold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-md border border-emerald-200">
@@ -196,7 +196,7 @@ export default function VaksinasiModals({
 
               <div>
                 <label className="block text-xs font-bold text-slate-700 mb-1">
-                  Tanggal Pelaksanaan <span className="text-red-500">*</span>
+                  Tanggal Pelaksanaan
                 </label>
                 <input
                   type="date"
@@ -209,7 +209,7 @@ export default function VaksinasiModals({
 
               <div>
                 <label className="block text-xs font-bold text-slate-700 mb-1">
-                  Jumlah Dosis Vaksin <span className="text-red-500">*</span>
+                  Jumlah Dosis Vaksin
                 </label>
                 <input
                   type="number"
@@ -250,7 +250,9 @@ export default function VaksinasiModals({
             </h3>
             <form onSubmit={submitBulanan} className="space-y-3">
               <div>
-                <label className="block text-xs font-semibold text-slate-600 mb-1">No. Urut</label>
+                <label className="block text-xs font-semibold text-slate-600 mb-1">
+                  No. Urut <span className="text-[11px] text-slate-400 font-normal">(opsional)</span>
+                </label>
                 <input
                   type="number"
                   value={formBulanan.no_urut}
@@ -269,7 +271,9 @@ export default function VaksinasiModals({
                 />
               </div>
               <div>
-                <label className="block text-xs font-semibold text-slate-600 mb-1">Target Dosis</label>
+                <label className="block text-xs font-semibold text-slate-600 mb-1">
+                  Target Dosis <span className="text-[11px] text-slate-400 font-normal">(opsional)</span>
+                </label>
                 <input
                   type="number"
                   value={formBulanan.target}
@@ -278,7 +282,9 @@ export default function VaksinasiModals({
                 />
               </div>
               <div>
-                <label className="block text-xs font-semibold text-slate-600 mb-1">Pengambilan Vaksin</label>
+                <label className="block text-xs font-semibold text-slate-600 mb-1">
+                  Pengambilan Vaksin <span className="text-[11px] text-slate-400 font-normal">(opsional)</span>
+                </label>
                 <input
                   type="number"
                   value={formBulanan.pengambilan}
@@ -343,7 +349,9 @@ export default function VaksinasiModals({
                 />
               </div>
               <div>
-                <label className="block text-xs font-semibold text-slate-600 mb-1">Keterangan</label>
+                <label className="block text-xs font-semibold text-slate-600 mb-1">
+                  Keterangan <span className="text-[11px] text-slate-400 font-normal">(opsional)</span>
+                </label>
                 <input
                   type="text"
                   value={formDroping.keterangan}

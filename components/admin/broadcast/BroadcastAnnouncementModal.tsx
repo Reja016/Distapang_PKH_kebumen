@@ -13,6 +13,7 @@ import {
 import { AnnouncementItem, TARGET_BIDANG_LIST } from './types';
 import BroadcastFormTab from './BroadcastFormTab';
 import BroadcastHistoryTab from './BroadcastHistoryTab';
+import { showConfirm, showToast } from '@/components/common/CustomToast';
 
 interface BroadcastAnnouncementModalProps {
   isOpen: boolean;
@@ -142,18 +143,27 @@ export default function BroadcastAnnouncementModal({
   };
 
   const handleDelete = async (id: number) => {
-    if (!confirm('Hapus pengumuman ini? Banner tidak akan tampil lagi di dashboard petugas.')) return;
+    const ok = await showConfirm({
+      title: 'Hapus Pengumuman',
+      message: 'Hapus pengumuman ini? Banner tidak akan tampil lagi di dashboard petugas.',
+      confirmText: 'Ya, Hapus',
+      cancelText: 'Batal',
+      type: 'danger',
+    });
+    if (!ok) return;
+
     try {
       const res = await fetch(`/api/announcements?id=${id}`, { method: 'DELETE' });
       const json = await res.json();
       if (json.success) {
         fetchHistory();
         if (onSuccess) onSuccess();
+        showToast('Pengumuman berhasil dihapus', 'success');
       } else {
-        alert(json.error);
+        showToast(json.error || 'Gagal menghapus pengumuman', 'error');
       }
     } catch {
-      alert('Gagal menghapus pengumuman.');
+      showToast('Gagal menghapus pengumuman.', 'error');
     }
   };
 

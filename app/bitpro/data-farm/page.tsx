@@ -22,6 +22,7 @@ import FarmOverviewTab from '@/components/bitpro/data-farm/FarmOverviewTab';
 import FarmTableTab from '@/components/bitpro/data-farm/FarmTableTab';
 import FarmModal from '@/components/bitpro/data-farm/FarmModal';
 import { UniversalAuditModal } from '@/components/common/UniversalAuditModal';
+import { showToast, showConfirm } from '@/components/common/CustomToast';
 
 export default function DataFarmPage() {
   const { isReady, canCreate, canEdit } = usePageAuth('bitpro', 'data-farm');
@@ -295,28 +296,34 @@ export default function DataFarmPage() {
   // Hapus Data Farm (DELETE)
   const handleDelete = async (item: any) => {
     if (!canEdit) {
-      alert('Hanya Administrator yang memiliki hak akses untuk menghapus data!');
+      showToast.error('Hanya Administrator yang memiliki hak akses untuk menghapus data!');
       return;
     }
     const farmName = item.nama_peternak || item.nama_unit_farm || item.nama_badan_usaha || 'data farm ini';
-    if (!confirm(`Apakah Anda yakin ingin menghapus "${farmName}" dari database?`)) return;
-
+    const ok = await showConfirm({
+      title: 'Hapus Data Farm',
+      message: `Apakah Anda yakin ingin menghapus "${farmName}" dari database?`,
+      confirmText: 'Ya, Hapus',
+      cancelText: 'Batal',
+      type: 'danger',
+    });
+    if (!ok) return;
 
     try {
       if (item.db_id) {
         const res = await fetch(`/api/get-farm?id=${item.db_id}`, { method: 'DELETE' });
         const json = await res.json();
         if (json.success) {
-          alert('Data farm berhasil dihapus dari database!');
+          showToast.success('Data farm berhasil dihapus dari database!');
           fetchData();
         } else {
-          alert('Gagal menghapus: ' + json.error);
+          showToast.error('Gagal menghapus: ' + json.error);
         }
       } else {
-        alert('Data berhasil dihapus.');
+        showToast.success('Data berhasil dihapus.');
       }
     } catch {
-      alert('Terjadi kesalahan saat menghapus data farm.');
+      showToast.error('Terjadi kesalahan saat menghapus data farm.');
     }
   };
 

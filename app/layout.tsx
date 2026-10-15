@@ -2,11 +2,12 @@ import './globals.css';
 import type { Metadata } from 'next';
 import { Poppins } from 'next/font/google';
 import AiChatWidget from '@/components/ai-chat-widget';
+import CustomToastProvider from '@/components/common/CustomToast';
 
 const poppins = Poppins({
   subsets: ['latin'],
   variable: '--font-sans',
-  weight: ['400', '500', '600', '700', '800'],
+  weight: ['400', '500', '600', '700', '800', '900'],
   display: 'swap',
 });
 
@@ -41,7 +42,7 @@ export default function RootLayout({
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <link
-          href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400;1,600&display=swap"
+          href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,400;0,500;0,600;0,700;0,800;0,900;1,400;1,600;1,900&display=swap"
           rel="stylesheet"
         />
         <script
@@ -62,6 +63,7 @@ export default function RootLayout({
       <body className={`${poppins.className} font-sans antialiased text-slate-900 bg-slate-50 dark:bg-slate-950 dark:text-slate-100 selection:bg-blue-600 selection:text-white`} suppressHydrationWarning>
         {children}
         <AiChatWidget />
+        <CustomToastProvider />
       </body>
     </html>
   );

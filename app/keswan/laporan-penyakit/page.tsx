@@ -27,6 +27,7 @@ import PenyakitPetaTab from '@/components/keswan/laporan-penyakit/PenyakitPetaTa
 import PenyakitTableTab from '@/components/keswan/laporan-penyakit/PenyakitTableTab';
 import PenyakitModals from '@/components/keswan/laporan-penyakit/PenyakitModals';
 import { UniversalAuditModal } from '@/components/common/UniversalAuditModal';
+import { showConfirm, showToast } from '@/components/common/CustomToast';
 
 export default function LaporanPenyakitPage() {
   const { isReady, canCreate, canEdit, isAdmin: isAuthAdmin, userRole } = usePageAuth('keswan', 'laporan-penyakit');
@@ -122,7 +123,7 @@ export default function LaporanPenyakitPage() {
   const handleAddYearSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!newYearInput || newYearInput < 2000) {
-      alert('Masukkan tahun yang valid');
+      showToast('Masukkan tahun yang valid', 'warning');
       return;
     }
 
@@ -138,12 +139,12 @@ export default function LaporanPenyakitPage() {
         await loadAvailableYears();
         setSelectedYear(newYearInput);
         setShowAddYearModal(false);
-        alert(`Periode Tahun ${newYearInput} berhasil ditambahkan!`);
+        showToast(`Periode Tahun ${newYearInput} berhasil ditambahkan!`, 'success');
       } else {
-        alert(json.error || 'Gagal menambahkan tahun baru');
+        showToast(json.error || 'Gagal menambahkan tahun baru', 'error');
       }
     } catch (err: any) {
-      alert('Terjadi kesalahan: ' + err.message);
+      showToast('Terjadi kesalahan: ' + err.message, 'error');
     } finally {
       setIsAddingYear(false);
     }
@@ -153,16 +154,15 @@ export default function LaporanPenyakitPage() {
   const handleCaseSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (editingItem && !canEdit) {
-      alert('Hanya Administrator yang berhak mengedit data kasus penyakit.');
+      showToast('Hanya Administrator yang berhak mengedit data kasus penyakit.', 'warning');
       return;
     }
     if (!editingItem && !canCreate) {
-      alert('Anda tidak memiliki izin untuk menambah data.');
+      showToast('Anda tidak memiliki izin untuk menambah data.', 'warning');
       return;
     }
 
     try {
-
       setIsSubmitting(true);
       const kec = KECAMATAN_MAP_ITEMS.find((k) => k.id === formValues.kecamatan_id);
       const zone = getZoneByKecamatanId(formValues.kecamatan_id);
@@ -188,8 +188,9 @@ export default function LaporanPenyakitPage() {
           setShowAddModal(false);
           setEditingItem(null);
           loadCasesData(selectedYear);
+          showToast('Data kasus berhasil diperbarui', 'success');
         } else {
-          alert('Gagal memperbarui: ' + json.error);
+          showToast('Gagal memperbarui: ' + json.error, 'error');
         }
       } else {
         const res = await fetch('/api/laporan-penyakit', {
@@ -201,12 +202,13 @@ export default function LaporanPenyakitPage() {
         if (json.success) {
           setShowAddModal(false);
           loadCasesData(selectedYear);
+          showToast('Data kasus berhasil ditambahkan', 'success');
         } else {
-          alert('Gagal menambahkan: ' + json.error);
+          showToast('Gagal menambahkan: ' + json.error, 'error');
         }
       }
     } catch (err: any) {
-      alert('Terjadi kesalahan: ' + err.message);
+      showToast('Terjadi kesalahan: ' + err.message, 'error');
     } finally {
       setIsSubmitting(false);
     }
@@ -215,18 +217,27 @@ export default function LaporanPenyakitPage() {
   // Delete Case
   const handleDeleteCase = async (id: number) => {
     if (!isAdmin && !canEdit) {
-      alert('Hanya Administrator yang berhak menghapus data.');
+      showToast('Hanya Administrator yang berhak menghapus data.', 'warning');
       return;
     }
-    if (!confirm('Apakah Anda yakin ingin menghapus data kasus penyakit ini?')) return;
+    const ok = await showConfirm({
+      title: 'Hapus Kasus Penyakit',
+      message: 'Apakah Anda yakin ingin menghapus data kasus penyakit ini?',
+      confirmText: 'Ya, Hapus',
+      cancelText: 'Batal',
+      type: 'danger',
+    });
+    if (!ok) return;
 
     try {
       const res = await fetch(`/api/laporan-penyakit/${id}`, { method: 'DELETE' });
       if (res.ok) {
         loadCasesData(selectedYear);
+        showToast('Data kasus berhasil dihapus', 'success');
       }
     } catch (err) {
       console.error('Delete error:', err);
+      showToast('Gagal menghapus data', 'error');
     }
   };
 
@@ -286,7 +297,7 @@ export default function LaporanPenyakitPage() {
       XLSX.utils.book_append_sheet(wb, ws, `Kasus_Penyakit_${selectedYear}`);
       XLSX.writeFile(wb, `Laporan_Penyakit_Hewan_Kebumen_${selectedYear}.xlsx`);
     } catch {
-      alert('Gagal mengekspor file Excel.');
+      showToast('Gagal mengekspor file Excel.', 'error');
     }
   };
 

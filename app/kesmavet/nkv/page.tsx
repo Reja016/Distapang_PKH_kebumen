@@ -10,6 +10,7 @@ import { NKVRecord, fajarFormatNkvRecord } from '@/components/kesmavet/nkv/types
 import NkvKpiSection from '@/components/kesmavet/nkv/NkvKpiSection';
 import NkvTableSection from '@/components/kesmavet/nkv/NkvTableSection';
 import NkvModal from '@/components/kesmavet/nkv/NkvModal';
+import { showToast, showConfirm } from '@/components/common/CustomToast';
 
 export default function NKVPage() {
   const { isReady, canCreate, canEdit } = usePageAuth('kesmavet', 'nkv');
@@ -102,36 +103,44 @@ export default function NKVPage() {
 
   const handleDelete = async (id: string) => {
     if (!canEdit) {
-      alert('Hanya Administrator yang berhak menghapus data NKV.');
+      showToast.error('Hanya Administrator yang berhak menghapus data NKV.');
       return;
     }
-    if (confirm('Apakah Anda yakin ingin menghapus data unit usaha NKV ini?')) {
-      try {
-        const res = await fetch(`/api/nkv?id=${id}`, { method: 'DELETE' });
-        const json = await res.json();
-        if (json.success) {
-          setDataNkv((prev) => prev.filter((item) => item.id !== id));
-        } else {
-          alert('Gagal menghapus: ' + json.error);
-        }
-      } catch {
-        alert('Terjadi kesalahan saat menghapus data.');
+    const ok = await showConfirm({
+      title: 'Hapus Unit Usaha NKV',
+      message: 'Apakah Anda yakin ingin menghapus data unit usaha NKV ini?',
+      confirmText: 'Ya, Hapus',
+      cancelText: 'Batal',
+      type: 'danger',
+    });
+    if (!ok) return;
+
+    try {
+      const res = await fetch(`/api/nkv?id=${id}`, { method: 'DELETE' });
+      const json = await res.json();
+      if (json.success) {
+        setDataNkv((prev) => prev.filter((item) => item.id !== id));
+        showToast.success('Data unit usaha NKV berhasil dihapus.');
+      } else {
+        showToast.error('Gagal menghapus: ' + json.error);
       }
+    } catch {
+      showToast.error('Terjadi kesalahan saat menghapus data.');
     }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (editingId && !canEdit) {
-      alert('Hanya Administrator yang berhak mengedit data NKV.');
+      showToast.error('Hanya Administrator yang berhak mengedit data NKV.');
       return;
     }
     if (!editingId && !canCreate) {
-      alert('Anda tidak memiliki izin untuk menambah data.');
+      showToast.error('Anda tidak memiliki izin untuk menambah data.');
       return;
     }
     if (!formData.namaUsaha) {
-      alert('Nama Usaha wajib diisi!');
+      showToast.warning('Nama Usaha wajib diisi!');
       return;
     }
     try {
@@ -158,9 +167,9 @@ export default function NKVPage() {
           setDataNkv((prev) =>
             prev.map((item) => (item.id === editingId ? { ...item, ...formData } : item))
           );
-          alert('Data NKV berhasil diperbarui!');
+          showToast.success('Data NKV berhasil diperbarui!');
         } else {
-          alert('Gagal memperbarui: ' + json.error);
+          showToast.error('Gagal memperbarui: ' + json.error);
         }
       } else {
         const res = await fetch('/api/nkv', {
@@ -186,13 +195,13 @@ export default function NKVPage() {
             ...formData,
           };
           setDataNkv((prev) => [...prev, newRecord]);
-          alert('Data unit usaha baru berhasil ditambahkan!');
+          showToast.success('Data unit usaha baru berhasil ditambahkan!');
         } else {
-          alert('Gagal menyimpan: ' + json.error);
+          showToast.error('Gagal menyimpan: ' + json.error);
         }
       }
     } catch {
-      alert('Terjadi kesalahan saat menyimpan data.');
+      showToast.error('Terjadi kesalahan saat menyimpan data.');
     }
     setShowModal(false);
   };

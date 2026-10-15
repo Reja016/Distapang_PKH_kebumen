@@ -32,6 +32,7 @@ import {
   DEFAULT_VIEW_ONLY_PERMISSIONS,
 } from '@/lib/permissions';
 import { getAuthSession } from '@/lib/auth';
+import { showConfirm, showToast } from '@/components/common/CustomToast';
 
 export interface AnggotaUser {
   id: number;
@@ -204,17 +205,25 @@ export default function UserManagementModal({
 
   // Delete Member
   const handleDeleteMember = async (id: number, nama: string) => {
-    if (!confirm(`Hapus anggota "${nama}"? Anggota ini tidak akan bisa login lagi.`)) {
-      return;
-    }
+    const ok = await showConfirm({
+      title: 'Hapus Anggota Petugas',
+      message: `Hapus anggota "${nama}"? Anggota ini tidak akan bisa login lagi.`,
+      confirmText: 'Ya, Hapus',
+      cancelText: 'Batal',
+      type: 'danger',
+    });
+    if (!ok) return;
 
     try {
       const res = await fetch(`/api/anggota?id=${id}`, { method: 'DELETE' });
       if (res.ok) {
         setMembers((prev) => prev.filter((m) => m.id !== id));
+        showToast('Anggota berhasil dihapus', 'success');
+      } else {
+        showToast('Gagal menghapus anggota', 'error');
       }
     } catch {
-      alert('Gagal menghapus anggota.');
+      showToast('Gagal menghapus anggota.', 'error');
     }
   };
 
@@ -702,7 +711,7 @@ export default function UserManagementModal({
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div className="space-y-1.5">
                     <label className="block text-xs font-bold text-slate-700">
-                      Nama Lengkap Petugas <span className="text-red-500">*</span>
+                      Nama Lengkap Petugas
                     </label>
                     <input
                       type="text"
@@ -716,7 +725,7 @@ export default function UserManagementModal({
 
                   <div className="space-y-1.5">
                     <label className="block text-xs font-bold text-slate-700">
-                      NIP / Username Login <span className="text-red-500">*</span>
+                      NIP / Username Login
                     </label>
                     <input
                       type="text"
@@ -730,8 +739,11 @@ export default function UserManagementModal({
 
                   <div className="space-y-1.5">
                     <label className="block text-xs font-bold text-slate-700">
-                      {isEditing ? 'Ganti Kata Sandi (Opsional)' : 'Kata Sandi Awal'}{' '}
-                      {!isEditing && <span className="text-red-500">*</span>}
+                      {isEditing ? (
+                        <>Ganti Kata Sandi <span className="text-[11px] text-slate-400 font-normal">(opsional)</span></>
+                      ) : (
+                        'Kata Sandi Awal'
+                      )}
                     </label>
                     <div className="relative">
                       <input

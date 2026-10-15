@@ -52,7 +52,7 @@ export default function LandingHeader({
         <div className="max-w-[1360px] mx-auto px-4 sm:px-6 md:px-8 py-3.5 sm:py-4 flex items-center justify-between">
           {/* Logo Brand */}
           <div className="flex items-center gap-2.5 sm:gap-3">
-            <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-xl bg-blue-50/80 dark:bg-slate-800 border border-blue-100 dark:border-slate-700 p-1 flex items-center justify-center shrink-0 shadow-2xs overflow-hidden">
+            <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-blue-50/80 dark:bg-slate-800 border border-blue-100 dark:border-slate-700 p-1 flex items-center justify-center shrink-0 shadow-2xs overflow-hidden">
               <img
                 src="/logo-simantap.png"
                 alt="Logo SiMantap"
@@ -63,16 +63,19 @@ export default function LandingHeader({
                 }}
               />
               <div className="hidden text-blue-600 items-center justify-center">
-                <Landmark size={18} />
+                <Landmark size={20} />
               </div>
             </div>
 
-            <div className="flex flex-col">
-              <span className="font-extrabold text-lg sm:text-2xl text-blue-600 dark:text-blue-400 tracking-tight leading-tight">
+            <div className="flex flex-col justify-center">
+              <span
+                className="text-2xl sm:text-[28px] text-blue-600 dark:text-blue-400 tracking-tight leading-none"
+                style={{ fontWeight: 900 }}
+              >
                 SiMantap
               </span>
-              <span className="text-[11px] sm:text-xs font-semibold text-slate-500 dark:text-slate-400 leading-none">
-                Kabupaten Kebumen (Beta Version)
+              <span className="text-[11px] sm:text-xs font-semibold text-slate-500 dark:text-slate-400 leading-none mt-1">
+                Kabupaten Kebumen
               </span>
             </div>
           </div>
@@ -81,12 +84,6 @@ export default function LandingHeader({
           <div className="flex items-center gap-4 sm:gap-6 lg:gap-8 ml-auto">
             {/* Desktop Nav Links */}
             <nav className="hidden md:flex items-center gap-5 lg:gap-7 text-sm font-semibold text-slate-600 dark:text-slate-300">
-              <a
-                href="#ringkasan"
-                className="px-2.5 py-1 rounded-lg hover:text-blue-600 dark:hover:text-blue-400 hover:bg-slate-50 dark:hover:bg-slate-800 transition-all"
-              >
-                Ringkasan Wilayah
-              </a>
               <a
                 href="#harga-ternak"
                 className="px-2.5 py-1 rounded-lg hover:text-blue-600 dark:hover:text-blue-400 hover:bg-slate-50 dark:hover:bg-slate-800 transition-all"

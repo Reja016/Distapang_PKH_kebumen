@@ -3,6 +3,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import Link from 'next/link';
 import { usePageAuth } from '@/hooks/usePageAuth';
+import { showToast, showConfirm } from '@/components/common/CustomToast';
 import {
   ArrowLeft,
   CheckCircle,
@@ -352,7 +353,14 @@ export default function PusatKoreksiPage() {
       if (p === null) return;
       rejectReason = p;
     } else {
-      if (!confirm('Apakah Anda yakin menyetujui perubahan ini? Data akan langsung diperbarui ke database.')) return;
+      const ok = await showConfirm({
+        title: 'Konfirmasi Persetujuan',
+        message: 'Apakah Anda yakin menyetujui perubahan ini? Data akan langsung diperbarui ke database.',
+        confirmText: 'Ya, Setujui',
+        cancelText: 'Batal',
+        type: 'info',
+      });
+      if (!ok) return;
     }
 
     setProcessingId(id);
@@ -364,14 +372,14 @@ export default function PusatKoreksiPage() {
       });
       const json = await res.json();
       if (json.success) {
-        alert(json.message);
+        showToast.success(json.message);
         fetchRequests();
         fetchAuditLogs(1); // update logs after approval
       } else {
-        alert('Gagal: ' + json.error);
+        showToast.error('Gagal: ' + json.error);
       }
     } catch (e) {
-      alert('Terjadi kesalahan.');
+      showToast.error('Terjadi kesalahan.');
     } finally {
       setProcessingId(null);
     }

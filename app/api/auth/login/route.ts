@@ -146,7 +146,7 @@ export async function POST(req: Request) {
 
         if (!isMatch) {
           return NextResponse.json(
-            { success: false, error: 'Kata sandi tidak sesuai. Silakan periksa kembali.' },
+            { success: false, error: 'Kata sandi yang Anda masukkan salah.' },
             { status: 401 }
           );
         }
@@ -208,41 +208,46 @@ export async function POST(req: Request) {
         );
         if (Array.isArray(legacyRows) && legacyRows.length > 0) {
           const lUser = legacyRows[0];
-          if (verifyPassword(trimmedPass, lUser.password)) {
-            const userPayload = {
-              id: lUser.id || 999,
-              nama: lUser.name || lUser.nama || trimmedId,
-              nip_username: trimmedId,
-              role: (trimmedId.toLowerCase().includes('admin') || lUser.role === 'admin') ? 'Administrator' : 'Petugas Teknis',
-              status: 'Aktif' as const,
-              permissions: DEFAULT_FULL_PERMISSIONS,
-            };
-
-            const sessionToken = await createSessionToken(userPayload);
-            resetRateLimit(rateLimitKey);
-
-            const response = NextResponse.json({
-              success: true,
-              user: userPayload,
-            });
-
-            response.cookies.set({
-              name: 'simantap_session',
-              value: sessionToken,
-              path: '/',
-              maxAge: 7 * 24 * 60 * 60,
-              sameSite: 'lax',
-            });
-
-            return response;
+          if (!verifyPassword(trimmedPass, lUser.password)) {
+            return NextResponse.json(
+              { success: false, error: 'Kata sandi yang Anda masukkan salah.' },
+              { status: 401 }
+            );
           }
+
+          const userPayload = {
+            id: lUser.id || 999,
+            nama: lUser.name || lUser.nama || trimmedId,
+            nip_username: trimmedId,
+            role: (trimmedId.toLowerCase().includes('admin') || lUser.role === 'admin') ? 'Administrator' : 'Petugas Teknis',
+            status: 'Aktif' as const,
+            permissions: DEFAULT_FULL_PERMISSIONS,
+          };
+
+          const sessionToken = await createSessionToken(userPayload);
+          resetRateLimit(rateLimitKey);
+
+          const response = NextResponse.json({
+            success: true,
+            user: userPayload,
+          });
+
+          response.cookies.set({
+            name: 'simantap_session',
+            value: sessionToken,
+            path: '/',
+            maxAge: 7 * 24 * 60 * 60,
+            sameSite: 'lax',
+          });
+
+          return response;
         }
       } catch {}
     } catch {}
 
-    // Backdoor dihapus demi keamanan. Kredensial wajib terdaftar di database.
+    // Username tidak ditemukan di database
     return NextResponse.json(
-      { success: false, error: 'ID Petugas / NIP / Username atau kata sandi salah.' },
+      { success: false, error: 'Username / ID Petugas tidak terdaftar.' },
       { status: 401 }
     );
   } catch (error: any) {

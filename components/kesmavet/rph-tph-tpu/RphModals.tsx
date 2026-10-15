@@ -43,7 +43,7 @@ export function RphFormModal({
         <form onSubmit={handleRphSubmit} className="space-y-4 text-xs font-semibold text-slate-700">
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="block mb-1 font-bold text-slate-700">Nama Usaha / Tempat <span className="text-red-500">*</span></label>
+              <label className="block mb-1 font-bold text-slate-700">Nama Usaha / Tempat</label>
               <input
                 type="text"
                 required
@@ -54,7 +54,7 @@ export function RphFormModal({
               />
             </div>
             <div>
-              <label className="block mb-1 font-bold text-slate-700">Jenis Usaha <span className="text-red-500">*</span></label>
+              <label className="block mb-1 font-bold text-slate-700">Jenis Usaha</label>
               <select
                 value={formRph.jenis}
                 onChange={(e) => setFormRph({ ...formRph, jenis: e.target.value })}
@@ -70,7 +70,7 @@ export function RphFormModal({
 
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="block mb-1 font-bold text-slate-700">Nama Pemilik / Pengelola <span className="text-red-500">*</span></label>
+              <label className="block mb-1 font-bold text-slate-700">Nama Pemilik / Pengelola</label>
               <input
                 type="text"
                 required
@@ -81,7 +81,9 @@ export function RphFormModal({
               />
             </div>
             <div>
-              <label className="block mb-1 font-bold text-slate-700">Kontak / Telepon</label>
+              <label className="block mb-1 font-bold text-slate-700">
+                Kontak / Telepon <span className="text-[11px] text-slate-400 font-normal">(opsional)</span>
+              </label>
               <input
                 type="text"
                 value={formRph.kontak}
@@ -93,7 +95,7 @@ export function RphFormModal({
           </div>
 
           <div>
-            <label className="block mb-1 font-bold text-slate-700">Lokasi / Alamat Lengkap <span className="text-red-500">*</span></label>
+            <label className="block mb-1 font-bold text-slate-700">Lokasi / Alamat Lengkap</label>
             <textarea
               required
               rows={2}
@@ -106,7 +108,9 @@ export function RphFormModal({
 
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="block mb-1 font-bold text-slate-700">Sertifikat Halal</label>
+              <label className="block mb-1 font-bold text-slate-700">
+                Sertifikat Halal <span className="text-[11px] text-slate-400 font-normal">(opsional)</span>
+              </label>
               <input
                 type="text"
                 value={formRph.sertifikat_halal}
@@ -116,7 +120,9 @@ export function RphFormModal({
               />
             </div>
             <div>
-              <label className="block mb-1 font-bold text-slate-700">Nomor Kontrol Veteriner (NKV)</label>
+              <label className="block mb-1 font-bold text-slate-700">
+                Nomor Kontrol Veteriner (NKV) <span className="text-[11px] text-slate-400 font-normal">(opsional)</span>
+              </label>
               <input
                 type="text"
                 value={formRph.sertifikat_nkv}
@@ -185,7 +191,7 @@ export function AddYearModal({
 
         <form onSubmit={handleAddYearSubmit} className="space-y-4 text-xs font-semibold text-slate-700">
           <div>
-            <label className="block mb-1 font-bold text-slate-700">Tahun Baru yang Ditambahkan <span className="text-red-500">*</span></label>
+            <label className="block mb-1 font-bold text-slate-700">Tahun Baru yang Ditambahkan</label>
             <input
               type="number"
               required

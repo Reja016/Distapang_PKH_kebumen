@@ -2,6 +2,7 @@
 
 import React, { useState, useMemo, useRef } from 'react';
 import * as XLSX from 'xlsx';
+import { showToast, showConfirm } from '@/components/common/CustomToast';
 import {
   Filter,
   Search,
@@ -511,13 +512,19 @@ export function MonevFormTab({
       }
 
       if (parsedItems.length === 0) {
-        alert('Tidak ada data KTT yang valid ditemukan di file Excel.\nPastikan kolom "Nama KTT" terisi.');
+        showToast.warning('Tidak ada data KTT yang valid ditemukan di file Excel. Pastikan kolom "Nama KTT" terisi.');
         setIsImporting(false);
         if (excelFileInputRef.current) excelFileInputRef.current.value = '';
         return;
       }
 
-      const konfirmasi = confirm(`Ditemukan ${parsedItems.length} data KTT di file Excel.\n\nApakah Anda yakin ingin mengimpor semua data ini ke sistem?`);
+      const konfirmasi = await showConfirm({
+        title: 'Konfirmasi Impor Excel',
+        message: `Ditemukan ${parsedItems.length} data KTT di file Excel. Apakah Anda yakin ingin mengimpor semua data ini ke sistem?`,
+        confirmText: 'Ya, Impor Semua',
+        cancelText: 'Batal',
+        type: 'info',
+      });
       if (!konfirmasi) {
         setIsImporting(false);
         if (excelFileInputRef.current) excelFileInputRef.current.value = '';
@@ -891,7 +898,7 @@ export function MonevFormTab({
             <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
               <div>
                 <label className="block text-xs font-sans font-bold uppercase tracking-wider text-slate-600 mb-1">
-                  Tahun Bantuan <span className="text-red-500">*</span>
+                  Tahun Bantuan
                 </label>
                 <select
                   value={formTahun}
@@ -906,7 +913,7 @@ export function MonevFormTab({
 
               <div>
                 <label className="block text-xs font-sans font-bold uppercase tracking-wider text-slate-600 mb-1">
-                  Sumber Hibah / Sumber Dana
+                  Sumber Hibah / Sumber Dana <span className="text-[11px] text-slate-400 font-normal">(opsional)</span>
                 </label>
                 <input
                   type="text"
@@ -919,7 +926,7 @@ export function MonevFormTab({
 
               <div>
                 <label className="block text-xs font-sans font-bold uppercase tracking-wider text-slate-600 mb-1">
-                  Kecamatan <span className="text-red-500">*</span>
+                  Kecamatan
                 </label>
                 <select
                   value={formKec}
@@ -939,7 +946,7 @@ export function MonevFormTab({
 
               <div>
                 <label className="block text-xs font-sans font-bold uppercase tracking-wider text-slate-600 mb-1">
-                  Desa / Kelurahan <span className="text-red-500">*</span>
+                  Desa / Kelurahan
                 </label>
                 <select
                   value={formDesa}
@@ -959,7 +966,7 @@ export function MonevFormTab({
             <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
               <div className="relative" ref={kttInputRef}>
                 <label className="block text-xs font-sans font-bold uppercase tracking-wider text-slate-600 mb-1 flex items-center justify-between">
-                  <span>Nama Kelompok (KTT) <span className="text-red-500">*</span></span>
+                  <span>Nama Kelompok (KTT)</span>
                   <span className="text-[10px] font-semibold text-emerald-700">🔍 Live Search Master</span>
                 </label>
                 <div className="relative">
@@ -1003,7 +1010,7 @@ export function MonevFormTab({
 
               <div>
                 <label className="block text-xs font-sans font-bold uppercase tracking-wider text-slate-600 mb-1">
-                  Nama Ketua Kelompok
+                  Nama Ketua Kelompok <span className="text-[11px] text-slate-400 font-normal">(opsional)</span>
                 </label>
                 <input
                   type="text"
@@ -1016,7 +1023,7 @@ export function MonevFormTab({
 
               <div>
                 <label className="block text-xs font-sans font-bold uppercase tracking-wider text-slate-600 mb-1">
-                  Komoditas Ruminansia <span className="text-red-500">*</span>
+                  Komoditas Ruminansia
                 </label>
                 <select
                   value={formJenis}
@@ -1031,7 +1038,7 @@ export function MonevFormTab({
 
               <div>
                 <label className="block text-xs font-sans font-bold uppercase tracking-wider text-slate-600 mb-1">
-                  Waktu Pelaksanaan Monev / Kondisi Tahun <span className="text-red-500">*</span>
+                  Waktu Pelaksanaan Monev / Kondisi Tahun
                 </label>
                 <input
                   type="date"
@@ -1340,7 +1347,7 @@ export function MonevFormTab({
               <div>
                 <div className="flex items-center justify-between mb-1">
                   <label className="block text-xs font-sans font-bold uppercase tracking-wider text-slate-600">
-                    Titik Koordinat Kandang <span className="text-red-500">*</span>
+                    Titik Koordinat Kandang
                   </label>
                   <button
                     type="button"

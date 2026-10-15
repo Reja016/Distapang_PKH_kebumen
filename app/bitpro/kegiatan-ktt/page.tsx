@@ -23,6 +23,7 @@ import {
   rezaFormatKegiatanList,
 } from '@/components/bitpro/kegiatan-ktt/types';
 import { KegiatanForm } from '@/components/bitpro/kegiatan-ktt/KegiatanForm';
+import { showToast, showConfirm } from '@/components/common/CustomToast';
 import { KegiatanCalendar } from '@/components/bitpro/kegiatan-ktt/KegiatanCalendar';
 import { KegiatanTable } from '@/components/bitpro/kegiatan-ktt/KegiatanTable';
 import { KegiatanPetaTab } from '@/components/bitpro/kegiatan-ktt/KegiatanPetaTab';
@@ -456,25 +457,34 @@ export default function KegiatanKTTPage() {
   // Handle Delete
   const handleDelete = async (id: string) => {
     if (!canEdit) {
-      alert('Hanya Administrator yang berhak menghapus kegiatan.');
+      showToast.error('Hanya Administrator yang berhak menghapus kegiatan.');
       return;
     }
-    if (!confirm('Yakin ingin menghapus catatan log kegiatan ini?')) return;
+    const ok = await showConfirm({
+      title: 'Hapus Catatan Kegiatan',
+      message: 'Yakin ingin menghapus catatan log kegiatan ini?',
+      confirmText: 'Ya, Hapus',
+      cancelText: 'Batal',
+      type: 'danger',
+    });
+    if (!ok) return;
+
     try {
       const res = await fetch(`/api/kegiatan-ktt?id=${id}`, { method: 'DELETE' });
       if (res.ok) {
+        showToast.success('Catatan kegiatan berhasil dihapus.');
         fetchData();
       } else {
-        alert('Gagal menghapus kegiatan.');
+        showToast.error('Gagal menghapus kegiatan.');
       }
     } catch {
-      alert('Terjadi kesalahan koneksi.');
+      showToast.error('Terjadi kesalahan koneksi.');
     }
   };
 
   // Export to Excel
   const handleExportExcel = () => {
-    if (listKegiatan.length === 0) return alert('Belum ada data kegiatan untuk diekspor!');
+    if (listKegiatan.length === 0) return showToast.warning('Belum ada data kegiatan untuk diekspor!');
     const rows = filteredKegiatan.map((item, idx) => ({
       No: idx + 1,
       Tanggal: item.tanggal ? item.tanggal.substring(0, 10) : '-',

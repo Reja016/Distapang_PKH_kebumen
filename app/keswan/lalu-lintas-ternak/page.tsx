@@ -16,6 +16,7 @@ import {
 import LalinStatsCard from '@/components/keswan/lalin-ternak/LalinStatsCard';
 import LalinTable from '@/components/keswan/lalin-ternak/LalinTable';
 import LalinModalForm from '@/components/keswan/lalin-ternak/LalinModalForm';
+import { showToast, showConfirm } from '@/components/common/CustomToast';
 
 const EMPTY_SUMMARY: LalinSummary = {
   pemasukan: {
@@ -86,22 +87,29 @@ export default function LaluLintasTernakPage() {
 
   // Handler Hapus Data
   const handleDelete = async (id: number) => {
-    if (!confirm('Apakah Anda yakin ingin menghapus catatan lalu lintas ternak ini?')) {
-      return;
-    }
+    const ok = await showConfirm({
+      title: 'Hapus Catatan Lalu Lintas Ternak',
+      message: 'Apakah Anda yakin ingin menghapus catatan lalu lintas ternak ini?',
+      confirmText: 'Ya, Hapus',
+      cancelText: 'Batal',
+      type: 'danger',
+    });
+    if (!ok) return;
+
     try {
       const res = await fetch(`/api/lalin-ternak?id=${id}`, {
         method: 'DELETE',
       });
       const json = await res.json();
       if (json.success) {
+        showToast.success('Catatan lalu lintas ternak berhasil dihapus.');
         fetchData();
       } else {
-        alert('Gagal menghapus data: ' + (json.error || 'Terjadi kesalahan'));
+        showToast.error('Gagal menghapus data: ' + (json.error || 'Terjadi kesalahan'));
       }
     } catch (err) {
       console.error(err);
-      alert('Gagal menghapus data.');
+      showToast.error('Gagal menghapus data.');
     }
   };
 

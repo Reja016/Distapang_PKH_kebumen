@@ -37,6 +37,7 @@ import {
 import { PuskeswanProfilTab } from '@/components/keswan/puskeswan/PuskeswanProfilTab';
 import { PuskeswanRekapTab } from '@/components/keswan/puskeswan/PuskeswanRekapTab';
 import { checkMonthlyDeadline } from '@/lib/deadlineCheck';
+import { showConfirm } from '@/components/common/CustomToast';
 
 export default function LaporanPuskeswanPage() {
   const { isReady, canCreate, canEdit } = usePageAuth('keswan', 'puskeswan');
@@ -321,10 +322,17 @@ export default function LaporanPuskeswanPage() {
   const handleDeleteProfil = async (id: string | number, nama: string, e?: React.MouseEvent) => {
     if (e) e.stopPropagation();
     if (!isAdmin) {
-      alert('Akses Ditolak: Hanya Administrator yang memiliki hak akses untuk menghapus profil puskeswan!');
+      showToast('error', 'Akses Ditolak: Hanya Administrator yang memiliki hak akses untuk menghapus profil puskeswan!');
       return;
     }
-    if (!confirm(`Apakah Anda yakin ingin menghapus data ${nama}?`)) return;
+    const ok = await showConfirm({
+      title: 'Hapus Profil Puskeswan',
+      message: `Apakah Anda yakin ingin menghapus data ${nama}?`,
+      confirmText: 'Ya, Hapus',
+      cancelText: 'Batal',
+      type: 'danger',
+    });
+    if (!ok) return;
 
 
     setProfilList((prev) => prev.filter((p) => String(p.id) !== String(id)));

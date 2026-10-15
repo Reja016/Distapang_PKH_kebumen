@@ -721,7 +721,7 @@ export function SapiTimePkbTab({
               {/* Status Pilihan: Sudah di-PKB atau Belum */}
               <div className="space-y-1.5">
                 <label className="block text-xs font-bold text-slate-700 dark:text-slate-300">
-                  Status Pemeriksaan PKB <span className="text-red-500">*</span>
+                  Status Pemeriksaan PKB
                 </label>
                 <div className="grid grid-cols-2 gap-3">
                   <button
@@ -757,7 +757,7 @@ export function SapiTimePkbTab({
                 <>
                   <div className="space-y-1.5">
                     <label className="block text-xs font-bold text-slate-700 dark:text-slate-300">
-                      Hasil Pemeriksaan Kebuntingan (Palpasi Rektal) <span className="text-red-500">*</span>
+                      Hasil Pemeriksaan Kebuntingan (Palpasi Rektal)
                     </label>
                     <div className="grid grid-cols-2 gap-3">
                       <button
@@ -791,7 +791,7 @@ export function SapiTimePkbTab({
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     <div className="space-y-1">
                       <label className="block text-xs font-bold text-slate-700 dark:text-slate-300">
-                        Tanggal Pemeriksaan PKB <span className="text-red-500">*</span>
+                        Tanggal Pemeriksaan PKB
                       </label>
                       <input
                         type="date"
@@ -803,7 +803,7 @@ export function SapiTimePkbTab({
 
                     <div className="space-y-1">
                       <label className="block text-xs font-bold text-slate-700 dark:text-slate-300">
-                        Nama Petugas PKB Pemeriksa <span className="text-red-500">*</span>
+                        Nama Petugas PKB Pemeriksa
                       </label>
                       <input
                         type="text"
@@ -820,7 +820,7 @@ export function SapiTimePkbTab({
               {/* Catatan Pemeriksaan di Bawahnya */}
               <div className="space-y-1">
                 <label className="block text-xs font-bold text-slate-700 dark:text-slate-300">
-                  Catatan Hasil Pemeriksaan PKB
+                  Catatan Hasil Pemeriksaan PKB <span className="text-[11px] text-slate-400 font-normal">(opsional)</span>
                 </label>
                 <textarea
                   rows={3}

@@ -65,6 +65,7 @@ export const FOOTER_CONFIG = {
     { nama: 'Kesehatan Masyarakat Veteriner (Kesmavet & NKV)', href: '#layanan' },
     { nama: 'Monitoring Vaksinasi PMK & LSD', href: '#fasilitas' },
     { nama: 'Sebaran Farm & Populasi Ternak Wilayah', href: '#grafik' },
+    { nama: 'Menu Khusus revejar', href: '#' },
   ],
   tautanTerkait: [
     { nama: 'Portal Resmi Pemkab Kebumen', url: 'https://www.kebumenkab.go.id' },
@@ -119,9 +120,6 @@ export function LandingFooter() {
               <div>
                 <h3 className="text-base sm:text-lg font-black tracking-tight text-slate-900 dark:text-white flex items-center gap-1.5">
                   <span>SiMantap</span>
-                  <span className="text-xs px-2 py-0.5 rounded-md font-bold bg-blue-100 text-blue-700 border border-blue-200 dark:bg-blue-500/20 dark:text-blue-400 dark:border-blue-500/30">
-                    PKH (Website ini masih versi Beta)
-                  </span>
                 </h3>
                 <p className="text-xs font-medium text-slate-500 dark:text-slate-400">
                   {FOOTER_CONFIG.instansi.bidang}

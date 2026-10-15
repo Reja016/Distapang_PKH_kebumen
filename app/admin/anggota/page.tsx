@@ -3,6 +3,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import Link from 'next/link';
 import { usePageAuth } from '@/hooks/usePageAuth';
+import { showConfirm } from '@/components/common/CustomToast';
 import {
   Users,
   UserPlus,
@@ -286,9 +287,14 @@ export default function AdminAnggotaPage() {
 
   // Hapus User
   const handleDeleteUser = async (id: number, nama: string) => {
-    if (!confirm(`Hapus akun petugas "${nama}"? Akun ini tidak akan dapat login lagi.`)) {
-      return;
-    }
+    const ok = await showConfirm({
+      title: 'Hapus Akun Petugas',
+      message: `Hapus akun petugas "${nama}"? Akun ini tidak akan dapat login lagi.`,
+      confirmText: 'Ya, Hapus',
+      cancelText: 'Batal',
+      type: 'danger',
+    });
+    if (!ok) return;
     try {
       const res = await fetch(`/api/anggota?id=${id}`, { method: 'DELETE' });
       if (res.ok) {
@@ -1051,7 +1057,7 @@ export default function AdminAnggotaPage() {
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
                 <div className="space-y-1">
                   <label className="block text-xs font-bold text-slate-700 dark:text-slate-300">
-                    Nama Lengkap Petugas <span className="text-red-500">*</span>
+                    Nama Lengkap Petugas
                   </label>
                   <input
                     type="text"
@@ -1065,7 +1071,7 @@ export default function AdminAnggotaPage() {
 
                 <div className="space-y-1">
                   <label className="block text-xs font-bold text-slate-700 dark:text-slate-300">
-                    NIP / Username Login <span className="text-red-500">*</span>
+                    NIP / Username Login
                   </label>
                   <input
                     type="text"
@@ -1079,8 +1085,11 @@ export default function AdminAnggotaPage() {
 
                 <div className="space-y-1">
                   <label className="block text-xs font-bold text-slate-700 dark:text-slate-300">
-                    {isEditingUser ? 'Ganti Kata Sandi (Opsional)' : 'Kata Sandi Awal'}{' '}
-                    {!isEditingUser && <span className="text-red-500">*</span>}
+                    {isEditingUser ? (
+                      <>Ganti Kata Sandi <span className="text-[11px] text-slate-400 font-normal">(opsional)</span></>
+                    ) : (
+                      'Kata Sandi Awal'
+                    )}
                   </label>
                   <div className="relative">
                     <input
@@ -1102,7 +1111,7 @@ export default function AdminAnggotaPage() {
 
                 <div className="space-y-1">
                   <label className="block text-xs font-bold text-slate-700 dark:text-slate-300">
-                    Jabatan / Role Pengguna <span className="text-red-500">*</span>
+                    Jabatan / Role Pengguna
                   </label>
                   <select
                     value={formRole}
@@ -1181,7 +1190,7 @@ export default function AdminAnggotaPage() {
                       {/* Wilayah Binaan Utama (Puskeswan) */}
                       <div className="space-y-1">
                         <label className="block text-xs font-bold text-slate-700 dark:text-slate-300">
-                          Wilayah Binaan Utama (Puskeswan) <span className="text-red-500">*</span>
+                          Wilayah Binaan Utama (Puskeswan)
                         </label>
                         <select
                           value={formPuskeswanUtama}
@@ -1199,7 +1208,7 @@ export default function AdminAnggotaPage() {
                       {/* Kompetensi */}
                       <div className="space-y-1">
                         <label className="block text-xs font-bold text-slate-700 dark:text-slate-300">
-                          Kompetensi Teknis
+                          Kompetensi Teknis <span className="text-[11px] text-slate-400 font-normal">(opsional)</span>
                         </label>
                         <input
                           type="text"
@@ -1625,7 +1634,7 @@ export default function AdminAnggotaPage() {
                       {/* Puskeswan Binaan Utama */}
                       <div className="space-y-1">
                         <label className="block text-xs font-bold text-slate-700 dark:text-slate-300">
-                          Puskeswan Binaan Utama <span className="text-red-500">*</span>
+                          Puskeswan Binaan Utama
                         </label>
                         <select
                           required
@@ -1644,7 +1653,7 @@ export default function AdminAnggotaPage() {
                       {/* Kompetensi */}
                       <div className="space-y-1">
                         <label className="block text-xs font-bold text-slate-700 dark:text-slate-300">
-                          Kompetensi Petugas
+                          Kompetensi Petugas <span className="text-[11px] text-slate-400 font-normal">(opsional)</span>
                         </label>
                         <input
                           type="text"

@@ -48,7 +48,7 @@ export function ModalSapiPO({
         <form onSubmit={handleSaveSapiPO} className="space-y-4 text-xs font-semibold text-slate-700">
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="block mb-1 font-bold text-slate-700">Kecamatan <span className="text-red-500">*</span></label>
+              <label className="block mb-1 font-bold text-slate-700">Kecamatan</label>
               <select
                 value={formSapiPO.kecamatan_id}
                 onChange={(e) => {
@@ -73,7 +73,9 @@ export function ModalSapiPO({
             </div>
 
             <div>
-              <label className="block mb-1 font-bold text-slate-700">Periode Triwulan</label>
+              <label className="block mb-1 font-bold text-slate-700">
+                Periode Triwulan <span className="text-[11px] text-slate-400 font-normal">(opsional)</span>
+              </label>
               <input
                 type="text"
                 value={formSapiPO.triwulan}
@@ -85,7 +87,7 @@ export function ModalSapiPO({
           </div>
 
           <div>
-            <label className="block mb-1 font-bold text-slate-700">Jumlah Populasi Sapi PO (Ekor) <span className="text-red-500">*</span></label>
+            <label className="block mb-1 font-bold text-slate-700">Jumlah Populasi Sapi PO (Ekor)</label>
             <input
               type="number"
               required
@@ -97,7 +99,9 @@ export function ModalSapiPO({
           </div>
 
           <div>
-            <label className="block mb-1 font-bold text-slate-700">Keterangan Tambahan</label>
+            <label className="block mb-1 font-bold text-slate-700">
+              Keterangan Tambahan <span className="text-[11px] text-slate-400 font-normal">(opsional)</span>
+            </label>
             <textarea
               rows={2}
               placeholder="Catatan verifikasi data lapangan..."
@@ -166,7 +170,7 @@ export function ModalAddYear({
 
         <form onSubmit={handleAddYearSubmit} className="space-y-4 text-xs font-semibold text-slate-700">
           <div>
-            <label className="block mb-1 font-bold text-slate-700">Tahun Baru yang Ditambahkan <span className="text-red-500">*</span></label>
+            <label className="block mb-1 font-bold text-slate-700">Tahun Baru yang Ditambahkan</label>
             <input
               type="number"
               required
@@ -360,7 +364,7 @@ export function ModalDetail({
         <form onSubmit={handleSaveDetail} className="space-y-4 text-xs font-semibold text-slate-700">
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="block mb-1 font-bold">Desa Lokasi <span className="text-red-500">*</span></label>
+              <label className="block mb-1 font-bold">Desa Lokasi</label>
               <input
                 type="text"
                 required
@@ -370,7 +374,7 @@ export function ModalDetail({
               />
             </div>
             <div>
-              <label className="block mb-1 font-bold">Nama Pemilik <span className="text-red-500">*</span></label>
+              <label className="block mb-1 font-bold">Nama Pemilik</label>
               <input
                 type="text"
                 required
@@ -382,7 +386,9 @@ export function ModalDetail({
           </div>
           <div className="grid grid-cols-3 gap-3">
             <div>
-              <label className="block mb-1 font-bold">Dusun</label>
+              <label className="block mb-1 font-bold">
+                Dusun <span className="text-[11px] text-slate-400 font-normal">(opsional)</span>
+              </label>
               <input
                 type="text"
                 value={modalDetail.data?.dusun || ''}
@@ -598,7 +604,7 @@ export function ModalEditTotalSapiPO({
         <form onSubmit={handleSubmit} className="space-y-4 text-xs font-semibold text-slate-700">
           <div>
             <label className="block mb-1 font-bold text-slate-700">
-              Periode Triwulan <span className="text-red-500">*</span>
+              Periode Triwulan
             </label>
             <div className="grid grid-cols-4 gap-2 mb-2">
               {quickTriwulan.map((tw) => (
@@ -629,7 +635,7 @@ export function ModalEditTotalSapiPO({
           <div>
             <div className="flex items-center justify-between mb-1">
               <label className="font-bold text-slate-700">
-                Total Populasi Sapi PO (Ekor) <span className="text-red-500">*</span>
+                Total Populasi Sapi PO (Ekor)
               </label>
               {calculatedSum > 0 && (
                 <button

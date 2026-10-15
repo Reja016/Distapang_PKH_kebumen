@@ -4,6 +4,7 @@ import React, { useEffect, useState, useCallback, useMemo, useRef } from 'react'
 import Link from 'next/link';
 import * as XLSX from 'xlsx';
 import { usePageAuth } from '@/hooks/usePageAuth';
+import { showConfirm } from '@/components/common/CustomToast';
 import {
   ArrowLeft,
   Download,
@@ -370,7 +371,15 @@ export default function DataVaksinasiPMKPage() {
       showToast('error', 'Hanya Administrator yang memiliki hak akses untuk menghapus data!');
       return;
     }
-    if (!confirm(`Hapus puskeswan "${item.puskeswan}"? Data harian terkait tidak akan terhapus.`)) return;
+    const ok = await showConfirm({
+      title: 'Hapus Data Puskeswan',
+      message: `Hapus puskeswan "${item.puskeswan}"? Data harian terkait tidak akan terhapus.`,
+      confirmText: 'Ya, Hapus',
+      cancelText: 'Batal',
+      type: 'danger',
+    });
+    if (!ok) return;
+
     try {
       const res = await fetch(`/api/vaksinasi-pmk/bulanan/${item.id}`, { method: 'DELETE' });
       const json = await res.json();
@@ -440,7 +449,15 @@ export default function DataVaksinasiPMKPage() {
       showToast('error', 'Hanya Administrator yang memiliki hak akses untuk menghapus data droping!');
       return;
     }
-    if (!confirm(`Hapus catatan droping tanggal ${item.tanggal}?`)) return;
+    const ok = await showConfirm({
+      title: 'Hapus Catatan Droping',
+      message: `Hapus catatan droping tanggal ${item.tanggal}?`,
+      confirmText: 'Ya, Hapus',
+      cancelText: 'Batal',
+      type: 'danger',
+    });
+    if (!ok) return;
+
     try {
       const res = await fetch(`/api/vaksinasi-pmk/apbd-droping/${item.id}`, { method: 'DELETE' });
       const json = await res.json();

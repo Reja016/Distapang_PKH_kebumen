@@ -417,7 +417,7 @@ export function PuskeswanProfilFormModal({
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
               <label className="block text-xs font-bold text-slate-700 mb-1">
-                Nama Puskeswan <span className="text-red-500">*</span>
+                Nama Puskeswan
               </label>
               <input
                 type="text"
@@ -431,7 +431,7 @@ export function PuskeswanProfilFormModal({
 
             <div>
               <label className="block text-xs font-bold text-slate-700 mb-1">
-                Kode Singkatan Puskeswan
+                Kode Singkatan Puskeswan <span className="text-[11px] text-slate-400 font-normal">(opsional)</span>
               </label>
               <input
                 type="text"
@@ -557,7 +557,7 @@ export function PuskeswanProfilFormModal({
 
           <div>
             <label className="block text-xs font-bold text-slate-700 mb-1">
-              Wilayah Kerja / Kecamatan Binaan <span className="text-red-500">*</span>
+              Wilayah Kerja / Kecamatan Binaan
             </label>
             <input
               type="text"
@@ -571,7 +571,7 @@ export function PuskeswanProfilFormModal({
 
           <div>
             <label className="block text-xs font-bold text-slate-700 mb-1">
-              Alamat Lengkap <span className="text-red-500">*</span>
+              Alamat Lengkap
             </label>
             <textarea
               required
@@ -585,7 +585,7 @@ export function PuskeswanProfilFormModal({
 
           <div>
             <label className="block text-xs font-bold text-slate-700 mb-1">
-              Link Google Maps (Opsional / Otomatis Dibuat)
+              Link Google Maps <span className="text-[11px] text-slate-400 font-normal">(opsional)</span>
             </label>
             <input
               type="url"
@@ -599,7 +599,7 @@ export function PuskeswanProfilFormModal({
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
               <label className="block text-xs font-bold text-slate-700 mb-1">
-                Dokter Hewan / Kepala
+                Dokter Hewan / Kepala <span className="text-[11px] text-slate-400 font-normal">(opsional)</span>
               </label>
               <input
                 type="text"
@@ -612,7 +612,7 @@ export function PuskeswanProfilFormModal({
 
             <div>
               <label className="block text-xs font-bold text-slate-700 mb-1">
-                Nomor Telepon / WhatsApp
+                Nomor Telepon / WhatsApp <span className="text-[11px] text-slate-400 font-normal">(opsional)</span>
               </label>
               <input
                 type="text"
@@ -627,7 +627,7 @@ export function PuskeswanProfilFormModal({
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
               <label className="block text-xs font-bold text-slate-700 mb-1">
-                Daftar Layanan (1 baris per layanan)
+                Daftar Layanan (1 baris per layanan) <span className="text-[11px] text-slate-400 font-normal">(opsional)</span>
               </label>
               <textarea
                 rows={3}
@@ -640,7 +640,7 @@ export function PuskeswanProfilFormModal({
 
             <div>
               <label className="block text-xs font-bold text-slate-700 mb-1">
-                Daftar Fasilitas (1 baris per fasilitas)
+                Daftar Fasilitas (1 baris per fasilitas) <span className="text-[11px] text-slate-400 font-normal">(opsional)</span>
               </label>
               <textarea
                 rows={3}
@@ -654,7 +654,7 @@ export function PuskeswanProfilFormModal({
 
           <div>
             <label className="block text-xs font-bold text-slate-700 mb-1">
-              Keterangan / Catatan Tambahan
+              Keterangan / Catatan Tambahan <span className="text-[11px] text-slate-400 font-normal">(opsional)</span>
             </label>
             <input
               type="text"

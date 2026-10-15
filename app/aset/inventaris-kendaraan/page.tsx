@@ -8,6 +8,7 @@ import { ArrowLeft, Plus, Download } from 'lucide-react';
 import { KendaraanRecord, KendaraanFormData } from '@/components/aset/types';
 import { KendaraanModalForm } from '@/components/aset/KendaraanModalForm';
 import { KendaraanTable } from '@/components/aset/KendaraanTable';
+import { showToast, showConfirm } from '@/components/common/CustomToast';
 
 const initialFormData: KendaraanFormData = {
   namaPemegang: '',
@@ -86,36 +87,44 @@ export default function InventarisKendaraanPage() {
 
   const handleDelete = async (id: string) => {
     if (!canEdit) {
-      alert('Hanya Administrator yang memiliki hak akses untuk menghapus data!');
+      showToast.error('Hanya Administrator yang memiliki hak akses untuk menghapus data!');
       return;
     }
-    if (confirm('Apakah Anda yakin ingin menghapus data kendaraan dinas ini?')) {
-      try {
-        const res = await fetch(`/api/aset-kendaraan?id=${id}`, { method: 'DELETE' });
-        const json = await res.json();
-        if (json.success) {
-          setDataKendaraan((prev) => prev.filter((item) => item.id !== id));
-        } else {
-          alert('Gagal menghapus: ' + json.error);
-        }
-      } catch {
-        alert('Terjadi kesalahan saat menghapus data.');
+    const ok = await showConfirm({
+      title: 'Hapus Kendaraan Dinas',
+      message: 'Apakah Anda yakin ingin menghapus data kendaraan dinas ini?',
+      confirmText: 'Ya, Hapus',
+      cancelText: 'Batal',
+      type: 'danger',
+    });
+    if (!ok) return;
+
+    try {
+      const res = await fetch(`/api/aset-kendaraan?id=${id}`, { method: 'DELETE' });
+      const json = await res.json();
+      if (json.success) {
+        setDataKendaraan((prev) => prev.filter((item) => item.id !== id));
+        showToast.success('Data kendaraan dinas berhasil dihapus.');
+      } else {
+        showToast.error('Gagal menghapus: ' + json.error);
       }
+    } catch {
+      showToast.error('Terjadi kesalahan saat menghapus data.');
     }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (editingId && !canEdit) {
-      alert('Hanya Administrator yang memiliki hak akses untuk mengubah (edit) data!');
+      showToast.error('Hanya Administrator yang memiliki hak akses untuk mengubah (edit) data!');
       return;
     }
     if (!editingId && !canCreate) {
-      alert('Anda tidak memiliki hak akses untuk menambah data!');
+      showToast.error('Anda tidak memiliki hak akses untuk menambah data!');
       return;
     }
     if (!formData.namaPemegang) {
-      alert('Nama Pemegang kendaraan wajib diisi!');
+      showToast.warning('Nama Pemegang kendaraan wajib diisi!');
       return;
     }
     setSaving(true);
@@ -141,9 +150,9 @@ export default function InventarisKendaraanPage() {
           setDataKendaraan((prev) =>
             prev.map((item) => (item.id === editingId ? { ...item, ...formData } : item))
           );
-          alert('Data kendaraan dinas berhasil diperbarui!');
+          showToast.success('Data kendaraan dinas berhasil diperbarui!');
         } else {
-          alert('Gagal memperbarui: ' + json.error);
+          showToast.error('Gagal memperbarui: ' + json.error);
         }
       } else {
         const res = await fetch('/api/aset-kendaraan', {
@@ -166,13 +175,13 @@ export default function InventarisKendaraanPage() {
             ...formData,
           };
           setDataKendaraan((prev) => [...prev, newRecord]);
-          alert('Data kendaraan dinas baru berhasil ditambahkan!');
+          showToast.success('Data kendaraan dinas baru berhasil ditambahkan!');
         } else {
-          alert('Gagal menyimpan: ' + json.error);
+          showToast.error('Gagal menyimpan: ' + json.error);
         }
       }
     } catch {
-      alert('Terjadi kesalahan saat menyimpan data.');
+      showToast.error('Terjadi kesalahan saat menyimpan data.');
     } finally {
       setSaving(false);
     }

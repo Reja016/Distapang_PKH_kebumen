@@ -22,6 +22,7 @@ import PopulasiForm from '@/components/bitpro/populasi/PopulasiForm';
 import PopulasiTable from '@/components/bitpro/populasi/PopulasiTable';
 import BulkUploadModal from '@/components/bitpro/populasi/BulkUploadModal';
 import { UniversalAuditModal } from '@/components/common/UniversalAuditModal';
+import { showToast, showConfirm } from '@/components/common/CustomToast';
 
 function InputPopulasi2026Content() {
   const { isReady, canCreate, canEdit } = usePageAuth('bitpro', 'populasi-dan-produksi');
@@ -271,31 +272,40 @@ function InputPopulasi2026Content() {
 
   const handleDelete = async (idx: number) => {
     if (!canEdit) {
-      alert('Hanya Administrator yang berhak menghapus data populasi.');
+      showToast.error('Hanya Administrator yang berhak menghapus data populasi.');
       return;
     }
     const item = savedData[idx];
-    if (confirm(`Hapus entri data populasi desa ${item.desa}?`)) {
-      if (item.id) {
-        try {
-          const res = await fetch(`/api/populasi-2026?id=${item.id}`, { method: 'DELETE' });
-          const json = await res.json();
-          if (json.success) {
-            setSavedData(savedData.filter((_, i) => i !== idx));
-          } else {
-            alert('Gagal menghapus: ' + json.error);
-          }
-        } catch {
-          alert('Terjadi kesalahan koneksi.');
+    const ok = await showConfirm({
+      title: 'Hapus Data Populasi',
+      message: `Hapus entri data populasi desa ${item.desa}?`,
+      confirmText: 'Ya, Hapus',
+      cancelText: 'Batal',
+      type: 'danger',
+    });
+    if (!ok) return;
+
+    if (item.id) {
+      try {
+        const res = await fetch(`/api/populasi-2026?id=${item.id}`, { method: 'DELETE' });
+        const json = await res.json();
+        if (json.success) {
+          setSavedData(savedData.filter((_, i) => i !== idx));
+          showToast.success('Data populasi berhasil dihapus.');
+        } else {
+          showToast.error('Gagal menghapus: ' + json.error);
         }
-      } else {
-        setSavedData(savedData.filter((_, i) => i !== idx));
+      } catch {
+        showToast.error('Terjadi kesalahan koneksi.');
       }
+    } else {
+      setSavedData(savedData.filter((_, i) => i !== idx));
+      showToast.success('Data populasi berhasil dihapus.');
     }
   };
 
   const handleDownload = () => {
-    if (savedData.length === 0) return alert('Belum ada data desa untuk diexport.');
+    if (savedData.length === 0) return showToast.warning('Belum ada data desa untuk diexport.');
     const data = savedData.map((d, i) => {
       const row: Record<string, any> = {
         No: i + 1,

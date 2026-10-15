@@ -23,6 +23,7 @@ import {
 } from '@/components/kesmavet/rph-tph-tpu/types';
 import { RumpunTableTab } from '@/components/kesmavet/rph-tph-tpu/RumpunTableTab';
 import { KomoditasTableTab } from '@/components/kesmavet/rph-tph-tpu/KomoditasTableTab';
+import { showToast, showConfirm } from '@/components/common/CustomToast';
 import { RumahPotongTab } from '@/components/kesmavet/rph-tph-tpu/RumahPotongTab';
 import { RphFormModal } from '@/components/kesmavet/rph-tph-tpu/RphModals';
 
@@ -449,18 +450,29 @@ export default function RphTphTpuPage() {
 
   const handleDeleteRph = async (id: number) => {
     if (!isAdmin) {
-      alert('Hanya Administrator yang berhak menghapus unit pemotongan.');
+      showToast.error('Hanya Administrator yang berhak menghapus unit pemotongan.');
       return;
     }
-    if (!confirm('Apakah Anda yakin ingin menghapus unit pemotongan ini?')) return;
+    const ok = await showConfirm({
+      title: 'Hapus Unit Pemotongan',
+      message: 'Apakah Anda yakin ingin menghapus unit pemotongan ini?',
+      confirmText: 'Ya, Hapus',
+      cancelText: 'Batal',
+      type: 'danger',
+    });
+    if (!ok) return;
 
     try {
       const res = await fetch(`/api/pemotongan-hewan/${id}`, { method: 'DELETE' });
       if (res.ok) {
+        showToast.success('Unit pemotongan berhasil dihapus.');
         loadRphData();
+      } else {
+        showToast.error('Gagal menghapus unit pemotongan.');
       }
     } catch (err) {
       console.error('Delete error:', err);
+      showToast.error('Terjadi kesalahan saat menghapus data.');
     }
   };
 

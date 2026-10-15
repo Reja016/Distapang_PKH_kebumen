@@ -23,6 +23,7 @@ import {
 } from 'lucide-react';
 import JSZip from 'jszip';
 import { KelompokTani } from './types';
+import { showConfirm, showToast } from '@/components/common/CustomToast';
 
 export const STANDARD_CATEGORIES = [
   'Surat Keaktifan',
@@ -150,7 +151,7 @@ export default function KttDocumentModal({
       }
 
       if (filesToUpload.length === 0) {
-        alert('Tidak ada berkas valid yang dapat diunggah.');
+        showToast('Tidak ada berkas valid yang dapat diunggah.', 'warning');
         setIsUploading(false);
         setUploadProgress(null);
         return;
@@ -179,13 +180,13 @@ export default function KttDocumentModal({
       if (resJson.success) {
         await fetchDocuments();
         if (onDocumentsUpdated) onDocumentsUpdated();
-        alert(`Berhasil mengunggah ${filesToUpload.length} berkas ke arsip KTT ${ktt.namaKelompok}!`);
+        showToast(`Berhasil mengunggah ${filesToUpload.length} berkas ke arsip KTT ${ktt.namaKelompok}!`, 'success');
       } else {
-        alert(`Gagal mengunggah berkas: ${resJson.error || 'Terjadi kesalahan'}`);
+        showToast(`Gagal mengunggah berkas: ${resJson.error || 'Terjadi kesalahan'}`, 'error');
       }
     } catch (err: any) {
       console.error('Error saat upload:', err);
-      alert(`Terjadi kesalahan saat mengunggah: ${err.message}`);
+      showToast(`Terjadi kesalahan saat mengunggah: ${err.message}`, 'error');
     } finally {
       setIsUploading(false);
       setUploadProgress(null);
@@ -196,13 +197,17 @@ export default function KttDocumentModal({
   // Handle delete document (Hanya Administrator)
   const handleDeleteDocument = async (doc: KttDocument) => {
     if (!isAdmin) {
-      alert('Akses Ditolak: Hanya Administrator yang berhak menghapus berkas dokumen KTT.');
+      showToast('Akses Ditolak: Hanya Administrator yang berhak menghapus berkas dokumen KTT.', 'warning');
       return;
     }
 
-    const confirmDelete = window.confirm(
-      `Apakah Anda yakin ingin menghapus berkas:\n"${doc.title || doc.original_filename}"?\n\nTindakan ini tidak dapat dibatalkan.`
-    );
+    const confirmDelete = await showConfirm({
+      title: 'Hapus Berkas Dokumen KTT',
+      message: `Apakah Anda yakin ingin menghapus berkas "${doc.title || doc.original_filename}"? Tindakan ini tidak dapat dibatalkan.`,
+      confirmText: 'Ya, Hapus',
+      cancelText: 'Batal',
+      type: 'danger',
+    });
     if (!confirmDelete) return;
 
     try {
@@ -218,12 +223,13 @@ export default function KttDocumentModal({
         setDocuments((prev) => prev.filter((d) => d.id !== doc.id));
         if (previewDoc?.id === doc.id) setPreviewDoc(null);
         if (onDocumentsUpdated) onDocumentsUpdated();
+        showToast('Berkas berhasil dihapus', 'success');
       } else {
-        alert(`Gagal menghapus berkas: ${resJson.error}`);
+        showToast(`Gagal menghapus berkas: ${resJson.error}`, 'error');
       }
     } catch (e: any) {
       console.error('Gagal menghapus berkas:', e);
-      alert('Gagal menghubungi server untuk menghapus berkas.');
+      showToast('Gagal menghubungi server untuk menghapus berkas.', 'error');
     }
   };
 

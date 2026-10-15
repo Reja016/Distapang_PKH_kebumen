@@ -127,7 +127,7 @@ export function ModalCattleForm({
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
-            <label className="block text-xs font-bold mb-1 text-slate-700">Nama Peternak <span className="text-red-500">*</span></label>
+            <label className="block text-xs font-bold mb-1 text-slate-700">Nama Peternak</label>
             <input
               type="text"
               className="w-full min-h-touch h-11 px-3.5 border border-slate-200 rounded-xl bg-slate-50 focus:bg-white focus:outline-none focus:border-emerald-600 text-xs text-slate-900 font-bold"
@@ -137,7 +137,7 @@ export function ModalCattleForm({
             />
           </div>
           <div>
-            <label className="block text-xs font-bold mb-1 text-slate-700">No. Telepon Peternak</label>
+            <label className="block text-xs font-bold mb-1 text-slate-700">No. Telepon Peternak <span className="text-[11px] text-slate-400 font-normal">(opsional)</span></label>
             <input
               type="tel"
               className="w-full min-h-touch h-11 px-3.5 border border-slate-200 rounded-xl bg-slate-50 focus:bg-white focus:outline-none focus:border-emerald-600 text-xs text-slate-900 font-bold"
@@ -147,7 +147,7 @@ export function ModalCattleForm({
             />
           </div>
           <div>
-            <label className="block text-xs font-bold mb-1 text-slate-700">NIK Peternak</label>
+            <label className="block text-xs font-bold mb-1 text-slate-700">NIK Peternak <span className="text-[11px] text-slate-400 font-normal">(opsional)</span></label>
             <input
               type="text"
               inputMode="numeric"
@@ -159,7 +159,7 @@ export function ModalCattleForm({
             />
           </div>
           <div>
-            <label className="block text-xs font-bold mb-1 text-slate-700">No. Registrasi / Eartag Sapi</label>
+            <label className="block text-xs font-bold mb-1 text-slate-700">No. Registrasi / Eartag Sapi <span className="text-[11px] text-slate-400 font-normal">(opsional)</span></label>
             <input
               type="text"
               className="w-full min-h-touch h-11 px-3.5 border border-slate-200 rounded-xl bg-slate-50 focus:bg-white focus:outline-none focus:border-emerald-600 text-xs text-slate-900 font-bold"
@@ -169,7 +169,7 @@ export function ModalCattleForm({
             />
           </div>
           <div>
-            <label className="block text-xs font-bold mb-1 text-slate-700">Nama Sapi <span className="text-[11px] text-slate-400 font-normal">(Opsional)</span></label>
+            <label className="block text-xs font-bold mb-1 text-slate-700">Nama Sapi <span className="text-[11px] text-slate-400 font-normal">(opsional)</span></label>
             <input
               type="text"
               className="w-full min-h-touch h-11 px-3.5 border border-slate-200 rounded-xl bg-slate-50 focus:bg-white focus:outline-none focus:border-emerald-600 text-xs text-slate-900 font-bold"
@@ -179,7 +179,7 @@ export function ModalCattleForm({
             />
           </div>
           <div>
-            <label className="block text-xs font-bold mb-1 text-slate-700">Kecamatan <span className="text-red-500">*</span></label>
+            <label className="block text-xs font-bold mb-1 text-slate-700">Kecamatan</label>
             <select
               className="w-full min-h-touch h-11 px-3.5 border border-slate-200 rounded-xl bg-slate-50 focus:bg-white focus:outline-none focus:border-emerald-600 text-xs text-slate-900 font-medium cursor-pointer"
               value={formData.kecamatan ? formData.kecamatan.toUpperCase() : ''}
@@ -194,7 +194,7 @@ export function ModalCattleForm({
             </select>
           </div>
           <div>
-            <label className="block text-xs font-bold mb-1 text-slate-700">Desa <span className="text-red-500">*</span></label>
+            <label className="block text-xs font-bold mb-1 text-slate-700">Desa</label>
             <select
               className="w-full min-h-touch h-11 px-3.5 border border-slate-200 rounded-xl bg-slate-50 focus:bg-white focus:outline-none focus:border-emerald-600 text-xs text-slate-900 font-medium cursor-pointer disabled:bg-slate-100 disabled:text-slate-400 disabled:cursor-not-allowed"
               value={formData.desa || ''}
@@ -215,7 +215,7 @@ export function ModalCattleForm({
             </select>
           </div>
           <div>
-            <label className="block text-xs font-bold mb-1 text-slate-700">Ras Sapi</label>
+            <label className="block text-xs font-bold mb-1 text-slate-700">Ras Sapi <span className="text-[11px] text-slate-400 font-normal">(opsional)</span></label>
             <input
               type="text"
               className="w-full min-h-touch h-11 px-3.5 border border-slate-200 rounded-xl bg-slate-50 focus:bg-white focus:outline-none focus:border-emerald-600 text-xs text-slate-900"
@@ -225,7 +225,7 @@ export function ModalCattleForm({
             />
           </div>
           <div>
-            <label className="block text-xs font-bold mb-1 text-slate-700">Tanggal Lahir Sapi</label>
+            <label className="block text-xs font-bold mb-1 text-slate-700">Tanggal Lahir Sapi <span className="text-[11px] text-slate-400 font-normal">(opsional)</span></label>
             <input
               type="date"
               className="w-full min-h-touch h-11 px-3.5 border border-slate-200 rounded-xl bg-slate-50 focus:bg-white focus:outline-none focus:border-emerald-600 text-xs text-slate-900"
@@ -1062,7 +1062,7 @@ export function ModalLaporKondisiFisik({
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
             <label className="block text-xs font-bold text-slate-800 mb-1.5">
-              Kondisi Fisik Sapi Saat Ini <span className="text-red-500">*</span>
+              Kondisi Fisik Sapi Saat Ini
             </label>
             <div className="space-y-2">
               {[
@@ -1151,7 +1151,7 @@ export function ModalLaporKondisiFisik({
           {/* Catatan Tambahan */}
           <div>
             <label className="block text-xs font-bold text-slate-800 mb-1">
-              Catatan / Gejala Tambahan
+              Catatan / Gejala Tambahan <span className="text-[11px] text-slate-400 font-normal">(opsional)</span>
             </label>
             <textarea
               rows={2}
@@ -1166,7 +1166,7 @@ export function ModalLaporKondisiFisik({
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
               <label className="block text-xs font-bold text-slate-800 mb-1">
-                Nama Pelapor <span className="text-red-500">*</span>
+                Nama Pelapor
               </label>
               <input
                 type="text"
@@ -1179,7 +1179,7 @@ export function ModalLaporKondisiFisik({
             </div>
             <div>
               <label className="block text-xs font-bold text-slate-800 mb-1">
-                No. WhatsApp / HP
+                No. WhatsApp / HP <span className="text-[11px] text-slate-400 font-normal">(opsional)</span>
               </label>
               <input
                 type="text"

@@ -52,7 +52,7 @@ export default function NkvModal({
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1">
-                Nama Usaha <span className="text-red-500">*</span>
+                Nama Usaha
               </label>
               <input
                 type="text"
@@ -66,7 +66,7 @@ export default function NkvModal({
 
             <div>
               <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1">
-                Jenis Usaha
+                Jenis Usaha <span className="text-[11px] text-slate-400 font-normal">(opsional)</span>
               </label>
               <input
                 type="text"
@@ -80,7 +80,7 @@ export default function NkvModal({
 
           <div>
             <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1">
-              Proses
+              Proses <span className="text-[11px] text-slate-400 font-normal">(opsional)</span>
             </label>
             <input
               type="text"
@@ -98,7 +98,9 @@ export default function NkvModal({
             </h4>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div>
-                <label className="block text-[11px] font-bold text-slate-600 mb-1">Tanggal / Waktu Pembinaan 1</label>
+                <label className="block text-[11px] font-bold text-slate-600 mb-1">
+                  Tanggal / Waktu Pembinaan 1 <span className="text-[11px] text-slate-400 font-normal">(opsional)</span>
+                </label>
                 <input
                   type="text"
                   placeholder="Contoh: 14 Maret 2025"
@@ -108,7 +110,9 @@ export default function NkvModal({
                 />
               </div>
               <div>
-                <label className="block text-[11px] font-bold text-slate-600 mb-1">Hasil Pembinaan 1</label>
+                <label className="block text-[11px] font-bold text-slate-600 mb-1">
+                  Hasil Pembinaan 1 <span className="text-[11px] text-slate-400 font-normal">(opsional)</span>
+                </label>
                 <input
                   type="text"
                   placeholder="Hasil evaluasi / catatan pembinaan 1"
@@ -127,7 +131,9 @@ export default function NkvModal({
             </h4>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div>
-                <label className="block text-[11px] font-bold text-slate-600 mb-1">Tanggal / Waktu Pembinaan 2</label>
+                <label className="block text-[11px] font-bold text-slate-600 mb-1">
+                  Tanggal / Waktu Pembinaan 2 <span className="text-[11px] text-slate-400 font-normal">(opsional)</span>
+                </label>
                 <input
                   type="text"
                   placeholder="Contoh: 20 Mei 2025"
@@ -137,7 +143,9 @@ export default function NkvModal({
                 />
               </div>
               <div>
-                <label className="block text-[11px] font-bold text-slate-600 mb-1">Hasil Pembinaan 2</label>
+                <label className="block text-[11px] font-bold text-slate-600 mb-1">
+                  Hasil Pembinaan 2 <span className="text-[11px] text-slate-400 font-normal">(opsional)</span>
+                </label>
                 <input
                   type="text"
                   placeholder="Hasil evaluasi / catatan pembinaan 2"
@@ -153,7 +161,7 @@ export default function NkvModal({
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1">
-                Pelatihan Higiene Sanitasi
+                Pelatihan Higiene Sanitasi <span className="text-[11px] text-slate-400 font-normal">(opsional)</span>
               </label>
               <input
                 type="text"
@@ -166,7 +174,7 @@ export default function NkvModal({
 
             <div>
               <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1">
-                Pengeluaran Rekomendasi
+                Pengeluaran Rekomendasi <span className="text-[11px] text-slate-400 font-normal">(opsional)</span>
               </label>
               <input
                 type="text"
@@ -181,7 +189,7 @@ export default function NkvModal({
           {/* Keterangan */}
           <div>
             <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1">
-              Keterangan
+              Keterangan <span className="text-[11px] text-slate-400 font-normal">(opsional)</span>
             </label>
             <textarea
               rows={2}

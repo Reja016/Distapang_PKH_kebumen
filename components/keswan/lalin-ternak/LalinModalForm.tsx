@@ -199,7 +199,7 @@ export default function LalinModalForm({
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 p-3.5 rounded-2xl bg-slate-50 border border-slate-100">
             <div>
               <label className="block text-[11px] font-bold uppercase tracking-wider text-slate-600 mb-1.5">
-                Kategori Lalu Lintas <span className="text-red-500">*</span>
+                Kategori Lalu Lintas
               </label>
               <div className="grid grid-cols-2 gap-1.5 p-1 bg-white rounded-xl border border-slate-200">
                 <button
@@ -231,7 +231,7 @@ export default function LalinModalForm({
 
             <div>
               <label className="block text-[11px] font-bold uppercase tracking-wider text-slate-600 mb-1.5">
-                Wilayah Pasar Hewan <span className="text-red-500">*</span>
+                Wilayah Pasar Hewan
               </label>
               <div className="grid grid-cols-2 gap-1.5 p-1 bg-white rounded-xl border border-slate-200">
                 <button
@@ -266,7 +266,7 @@ export default function LalinModalForm({
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <label className="block text-xs font-bold text-slate-700 mb-1">
-                Tanggal Pengiriman / Masuk <span className="text-red-500">*</span>
+                Tanggal Pengiriman / Masuk
               </label>
               <input
                 type="date"
@@ -278,7 +278,7 @@ export default function LalinModalForm({
             </div>
             <div>
               <label className="block text-xs font-bold text-slate-700 mb-1">
-                Nomor SKKH <span className="text-slate-400 font-normal">(Opsional jika belum terbit)</span>
+                Nomor SKKH <span className="text-[11px] text-slate-400 font-normal">(opsional)</span>
               </label>
               <input
                 type="text"
@@ -294,7 +294,7 @@ export default function LalinModalForm({
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <label className="block text-xs font-bold text-slate-700 mb-1">
-                Nama Pemilik / Pedagang <span className="text-red-500">*</span>
+                Nama Pemilik / Pedagang
               </label>
               <input
                 type="text"
@@ -307,7 +307,7 @@ export default function LalinModalForm({
             </div>
             <div>
               <label className="block text-xs font-bold text-slate-700 mb-1">
-                Alamat Pemilik <span className="text-red-500">*</span>
+                Alamat Pemilik
               </label>
               <input
                 type="text"
@@ -324,7 +324,7 @@ export default function LalinModalForm({
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <label className="block text-xs font-bold text-slate-700 mb-1">
-                Jenis Ternak <span className="text-red-500">*</span>
+                Jenis Ternak
               </label>
               <input
                 type="text"
@@ -355,7 +355,7 @@ export default function LalinModalForm({
 
             <div>
               <label className="block text-xs font-bold text-slate-700 mb-1">
-                Umur Ternak <span className="text-slate-400 font-normal">(Opsional jika rombongan)</span>
+                Umur Ternak <span className="text-[11px] text-slate-400 font-normal">(opsional)</span>
               </label>
               <div className="flex gap-2">
                 <input
@@ -443,7 +443,7 @@ export default function LalinModalForm({
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <label className="block text-xs font-bold text-slate-700 mb-1">
-                Asal Ternak
+                Asal Ternak <span className="text-[11px] text-slate-400 font-normal">(opsional)</span>
               </label>
               <input
                 type="text"
@@ -455,7 +455,7 @@ export default function LalinModalForm({
             </div>
             <div>
               <label className="block text-xs font-bold text-slate-700 mb-1">
-                Tujuan Ternak
+                Tujuan Ternak <span className="text-[11px] text-slate-400 font-normal">(opsional)</span>
               </label>
               <input
                 type="text"
@@ -470,7 +470,7 @@ export default function LalinModalForm({
           {/* Baris 6: Keterangan */}
           <div>
             <label className="block text-xs font-bold text-slate-700 mb-1">
-              Keterangan Tambahan <span className="text-slate-400 font-normal">(Opsional)</span>
+              Keterangan Tambahan <span className="text-[11px] text-slate-400 font-normal">(opsional)</span>
             </label>
             <input
               type="text"

@@ -34,6 +34,7 @@ import {
 } from '@/components/bitpro/sapitime/SapiTimeModals';
 import { UniversalAuditModal } from '@/components/common/UniversalAuditModal';
 import NotificationBell from '@/components/common/NotificationBell';
+import { showConfirm } from '@/components/common/CustomToast';
 
 export default function SapiTimePage() {
   const router = useRouter();
@@ -285,17 +286,24 @@ export default function SapiTimePage() {
       alert('Hanya Administrator yang berhak menghapus data sapi.');
       return;
     }
-    if (confirm('Yakin hapus sapi ini? Semua riwayat IB juga akan terhapus!')) {
-      setCattleList(cattleList.filter((c) => c.id !== id));
-      const historyObj = {
-        type: 'cattle_deleted',
-        cattle: id,
-        cattleId: id,
-        description: `Sapi dihapus dari sistem`,
-        icon: '🗑️',
-      };
-      await executeApi('delete_cattle', { id }, historyObj);
-    }
+    const ok = await showConfirm({
+      title: 'Hapus Sapi',
+      message: 'Yakin hapus sapi ini? Semua riwayat IB juga akan terhapus!',
+      confirmText: 'Ya, Hapus',
+      cancelText: 'Batal',
+      type: 'danger',
+    });
+    if (!ok) return;
+
+    setCattleList(cattleList.filter((c) => c.id !== id));
+    const historyObj = {
+      type: 'cattle_deleted',
+      cattle: id,
+      cattleId: id,
+      description: `Sapi dihapus dari sistem`,
+      icon: '🗑️',
+    };
+    await executeApi('delete_cattle', { id }, historyObj);
   };
 
   const handleAddInsemination = async () => {

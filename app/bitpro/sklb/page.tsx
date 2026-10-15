@@ -30,6 +30,7 @@ import {
   ModalEditTotalSapiPO,
 } from '@/components/bitpro/sklb/SklbModals';
 import { UniversalAuditModal } from '@/components/common/UniversalAuditModal';
+import { showToast, showConfirm } from '@/components/common/CustomToast';
 
 export default function UnifiedSKLBPage() {
   const { isReady, canCreate, canEdit } = usePageAuth('bitpro', 'sklb');
@@ -366,21 +367,29 @@ export default function UnifiedSKLBPage() {
 
   const handleDeleteRekap = async (id: number) => {
     if (!canEdit) {
-      alert('Hanya Administrator yang berhak menghapus data rekapitulasi.');
+      showToast.error('Hanya Administrator yang berhak menghapus data rekapitulasi.');
       return;
     }
-    if (confirm('Hapus data rekap ini dari database?')) {
-      try {
-        const res = await fetch(`/api/sync-sklb-summary?id=${id}`, { method: 'DELETE' });
-        const json = await res.json();
-        if (json.success) {
-          setDataRekap((prev) => prev.filter((d) => d.id !== id));
-        } else {
-          alert('Gagal menghapus: ' + json.error);
-        }
-      } catch {
-        alert('Terjadi kesalahan saat menghapus data.');
+    const ok = await showConfirm({
+      title: 'Hapus Data Rekapitulasi',
+      message: 'Hapus data rekap ini dari database?',
+      confirmText: 'Ya, Hapus',
+      cancelText: 'Batal',
+      type: 'danger',
+    });
+    if (!ok) return;
+
+    try {
+      const res = await fetch(`/api/sync-sklb-summary?id=${id}`, { method: 'DELETE' });
+      const json = await res.json();
+      if (json.success) {
+        setDataRekap((prev) => prev.filter((d) => d.id !== id));
+        showToast.success('Data rekapitulasi berhasil dihapus.');
+      } else {
+        showToast.error('Gagal menghapus: ' + json.error);
       }
+    } catch {
+      showToast.error('Terjadi kesalahan saat menghapus data.');
     }
   };
 
@@ -388,11 +397,11 @@ export default function UnifiedSKLBPage() {
   const handleSaveDetail = async (e: React.FormEvent) => {
     e.preventDefault();
     if (modalDetail.mode === 'edit' && !canEdit) {
-      alert('Hanya Administrator yang berhak mengedit data detail ternak.');
+      showToast.error('Hanya Administrator yang berhak mengedit data detail ternak.');
       return;
     }
     if (modalDetail.mode === 'tambah' && !canCreate) {
-      alert('Anda tidak memiliki izin untuk menambah data.');
+      showToast.error('Anda tidak memiliki izin untuk menambah data.');
       return;
     }
     const formData = { ...modalDetail.data, tahun: selectedYear };
@@ -405,10 +414,10 @@ export default function UnifiedSKLBPage() {
         });
         const json = await res.json();
         if (json.success) {
-          alert('Data sapi berhasil disimpan ke database!');
+          showToast.success('Data sapi berhasil disimpan ke database!');
           loadTablesData(selectedYear);
         } else {
-          alert('Gagal menyimpan: ' + json.error);
+          showToast.error('Gagal menyimpan: ' + json.error);
         }
       } else {
         const res = await fetch('/api/sync-sklb-detail', {
@@ -418,35 +427,43 @@ export default function UnifiedSKLBPage() {
         });
         const json = await res.json();
         if (json.success) {
-          alert('Data sapi berhasil diperbarui di database!');
+          showToast.success('Data sapi berhasil diperbarui di database!');
           loadTablesData(selectedYear);
         } else {
-          alert('Gagal memperbarui: ' + json.error);
+          showToast.error('Gagal memperbarui: ' + json.error);
         }
       }
     } catch {
-      alert('Terjadi kesalahan saat menyimpan ke database.');
+      showToast.error('Terjadi kesalahan saat menyimpan ke database.');
     }
     setModalDetail({ open: false, mode: 'tambah', data: null });
   };
 
   const handleDeleteDetail = async (id: any) => {
     if (!canEdit) {
-      alert('Hanya Administrator yang berhak menghapus data sapi.');
+      showToast.error('Hanya Administrator yang berhak menghapus data sapi.');
       return;
     }
-    if (confirm('Hapus data sapi ini dari database?')) {
-      try {
-        const res = await fetch(`/api/sync-sklb-detail?id=${id}`, { method: 'DELETE' });
-        const json = await res.json();
-        if (json.success) {
-          setDataDetail((prev) => prev.filter((d) => d.id !== id));
-        } else {
-          alert('Gagal menghapus: ' + json.error);
-        }
-      } catch {
-        alert('Terjadi kesalahan saat menghapus data.');
+    const ok = await showConfirm({
+      title: 'Hapus Data Sapi',
+      message: 'Hapus data sapi ini dari database?',
+      confirmText: 'Ya, Hapus',
+      cancelText: 'Batal',
+      type: 'danger',
+    });
+    if (!ok) return;
+
+    try {
+      const res = await fetch(`/api/sync-sklb-detail?id=${id}`, { method: 'DELETE' });
+      const json = await res.json();
+      if (json.success) {
+        setDataDetail((prev) => prev.filter((d) => d.id !== id));
+        showToast.success('Data sapi berhasil dihapus.');
+      } else {
+        showToast.error('Gagal menghapus: ' + json.error);
       }
+    } catch {
+      showToast.error('Terjadi kesalahan saat menghapus data.');
     }
   };
 
