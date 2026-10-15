@@ -11,11 +11,9 @@ import {
   ArrowLeft,
   Clock,
   ExternalLink,
-  Megaphone,
 } from 'lucide-react';
 import { SubmenuItem } from './types';
 import NotificationBell from '@/components/common/NotificationBell';
-import BroadcastAnnouncementModal from '@/components/admin/broadcast/BroadcastAnnouncementModal';
 
 interface DashboardHeaderProps {
   isDark: boolean;
@@ -50,8 +48,6 @@ export default function DashboardHeader({
   onOpenBackupModal,
   toggleTheme,
 }: DashboardHeaderProps) {
-  const [showBroadcastModal, setShowBroadcastModal] = useState(false);
-
   return (
     <header
       className={`sticky top-0 z-30 h-14 border-b px-4 sm:px-6 flex items-center justify-between backdrop-blur-md shrink-0 ${
@@ -121,22 +117,6 @@ export default function DashboardHeader({
       </div>
 
       <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
-        {/* Tombol Broadcast Pengumuman Dinas (Khusus Admin) */}
-        {isAdmin && (
-          <button
-            onClick={() => setShowBroadcastModal(true)}
-            className={`p-1.5 sm:px-2.5 sm:py-1.5 rounded-lg border text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer ${
-              isDark
-                ? 'bg-amber-950/40 border-amber-800/80 text-amber-300 hover:bg-amber-900/60'
-                : 'bg-amber-50 border-amber-200 text-amber-800 hover:bg-amber-100 shadow-2xs'
-            }`}
-            title="Kirim Pengumuman / Broadcast Dinas"
-          >
-            <Megaphone size={15} className="text-amber-500 shrink-0" />
-            <span className="hidden sm:inline">Pengumuman</span>
-          </button>
-        )}
-
         {/* Lonceng Notifikasi Realtime & Push */}
         <NotificationBell isDark={isDark} />
 
@@ -224,15 +204,6 @@ export default function DashboardHeader({
           </>
         )}
       </div>
-
-      {/* Modal Broadcast Pengumuman Dinas */}
-      {showBroadcastModal && (
-        <BroadcastAnnouncementModal
-          isOpen={showBroadcastModal}
-          onClose={() => setShowBroadcastModal(false)}
-          isDark={isDark}
-        />
-      )}
     </header>
   );
 }

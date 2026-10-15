@@ -5,7 +5,11 @@ export const dynamic = 'force-dynamic';
 
 function formatAnimalName(name: string) {
   if (!name) return '-';
-  return name
+  const clean = name.trim();
+  if (clean.toLowerCase() === 'ayam_buras') return 'Ayam Kampung (Buras)';
+  if (clean.toLowerCase() === 'ayam_ras') return 'Ayam Ras Petelur';
+  if (clean.toLowerCase() === 'sapi_kurban') return 'Sapi Kurban';
+  return clean
     .split('_')
     .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
     .join(' ');
@@ -221,7 +225,7 @@ export async function GET() {
             hewan,
             ROUND(SUM(total), 2) AS total
           FROM produksi
-          WHERE jenis = 'pemotongan'
+          WHERE jenis = 'pemotongan' OR jenis = 'daging'
           GROUP BY hewan
           ORDER BY total DESC
         `);
