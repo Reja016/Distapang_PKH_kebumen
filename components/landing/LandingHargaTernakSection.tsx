@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Calendar,
   LayoutGrid,
@@ -17,7 +17,7 @@ export interface HargaTernakItem {
   perTanggal: string;
   satuan: string;
   keterangan: string;
-  tren: 'Stabil' | 'Naik';
+  tren: 'Stabil' | 'Naik' | 'Turun';
   icon: string;
 }
 
@@ -62,6 +62,44 @@ const DATA_HARGA_TERNAK: HargaTernakItem[] = [
 
 export default function LandingHargaTernakSection() {
   const [viewMode, setViewMode] = useState<'cards' | 'table'>('cards');
+  const [hargaList, setHargaList] = useState<HargaTernakItem[]>(DATA_HARGA_TERNAK);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+
+  useEffect(() => {
+    let isMounted = true;
+    async function fetchHarga() {
+      try {
+        setIsLoading(true);
+        const res = await fetch('/api/pasar-hewan/harga');
+        if (res.ok) {
+          const json = await res.json();
+          if (json.success && Array.isArray(json.data) && json.data.length > 0 && isMounted) {
+            const mapped: HargaTernakItem[] = json.data.map((item: any) => ({
+              id: item.id,
+              namaHewan: item.komoditas,
+              hargaKebumenPerKg: Number(item.harga_kebumen) || 0,
+              hargaGombongPerKg: Number(item.harga_gombong) || 0,
+              rataRataPerKg: Number(item.rata_rata) || 0,
+              perTanggal: item.per_tanggal || '',
+              satuan: item.satuan || 'per kg',
+              keterangan: item.keterangan || 'Harga timbang berat hidup ternak per kg',
+              tren: item.tren || 'Stabil',
+              icon: item.icon || '🐂',
+            }));
+            setHargaList(mapped);
+          }
+        }
+      } catch (e) {
+        console.warn('Gagal memuat harga ternak dari API, menggunakan data default:', e);
+      } finally {
+        if (isMounted) setIsLoading(false);
+      }
+    }
+    fetchHarga();
+    return () => {
+      isMounted = false;
+    };
+  }, []);
 
   const renderTable = () => (
     <div className="overflow-x-auto rounded-2xl border-2 border-slate-200/90 dark:border-slate-700 bg-white dark:bg-slate-800 shadow-2xs">
@@ -78,7 +116,7 @@ export default function LandingHargaTernakSection() {
           </tr>
         </thead>
         <tbody className="divide-y divide-slate-100 dark:divide-slate-700/80 text-slate-800 dark:text-slate-200">
-          {DATA_HARGA_TERNAK.map((item, idx) => (
+          {hargaList.map((item, idx) => (
             <tr key={item.id} className="hover:bg-slate-50/70 dark:hover:bg-slate-700/40 transition-colors">
               <td className="p-3.5 sm:p-4 text-center text-slate-400 font-bold text-xs sm:text-sm">{idx + 1}</td>
               <td className="p-3.5 sm:p-4 font-black text-slate-900 dark:text-white flex items-center gap-2.5 text-sm sm:text-lg">
@@ -111,7 +149,7 @@ export default function LandingHargaTernakSection() {
 
   const renderCards = () => (
     <div className="grid grid-cols-1 md:grid-cols-3 gap-5 sm:gap-6">
-      {DATA_HARGA_TERNAK.map((item) => (
+      {hargaList.map((item) => (
         <div
           key={item.id}
           className="p-5 sm:p-6 rounded-2xl bg-white dark:bg-slate-800 border-2 border-slate-200/90 dark:border-slate-700 flex flex-col justify-between gap-5 shadow-2xs hover:border-blue-400 dark:hover:border-blue-500 hover:shadow-md transition-all group"

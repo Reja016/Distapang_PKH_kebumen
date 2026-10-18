@@ -103,6 +103,7 @@ const formatModuleLabel = (moduleKey: string, submenuKey: string) => {
     nkv: 'Pembinaan NKV',
     'pakan-ternak': 'Pakan Ternak',
     'rph-tph-tpu': 'RPH / TPH / TPU',
+    'pasar-hewan': 'Pasar Hewan',
     'inventaris-kendaraan': 'Inventaris Kendaraan',
     'anggota': 'Kelola Anggota',
     'petugas-wilayah': 'Wilayah Kerja Petugas',

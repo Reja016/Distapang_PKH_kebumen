@@ -82,7 +82,7 @@ export const MODULES_METADATA = [
       { id: 'nkv', name: 'Nomor Kontrol Veteriner (NKV)', path: '/kesmavet/nkv' },
       { id: 'rph-tph-tpu', name: 'Data Pemotongan RPH, TPH, & TPU', path: '/kesmavet/rph-tph-tpu' },
       { id: 'pakan-ternak', name: 'Pakan Ternak', path: '/kesmavet/rph-tph-tpu' },
-      { id: 'pasar-hewan', name: 'Pasar Hewan', path: '/kesmavet/rph-tph-tpu' },
+      { id: 'pasar-hewan', name: 'Pasar Hewan', path: '/kesmavet/pasar-hewan' },
     ],
   },
   {
