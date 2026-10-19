@@ -15,6 +15,15 @@ interface LandingChartsSectionProps {
   populasiUnggas8: PopulasiItem[];
   totalUnggas: number;
   maxUnggas: number;
+
+  periodePopulasi?: {
+    tahun: number;
+    triwulan: number;
+    romawi: string;
+    bulan: string;
+    label: string;
+    shortLabel: string;
+  } | null;
 }
 
 export default function LandingChartsSection({
@@ -24,18 +33,27 @@ export default function LandingChartsSection({
   populasiUnggas8,
   totalUnggas,
   maxUnggas,
+  periodePopulasi,
 }: LandingChartsSectionProps) {
   return (
     <section className="grid grid-cols-1 lg:grid-cols-2 gap-3.5 sm:gap-6">
       {/* 1. POPULASI HEWAN TERNAK */}
       <div className="p-3.5 sm:p-6 rounded-2xl sm:rounded-3xl border-2 border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 shadow-xs space-y-3.5 sm:space-y-5 flex flex-col justify-between">
-        <div>
-          <h3 className="text-base sm:text-xl font-extrabold text-slate-900 dark:text-white">
-            Populasi Hewan Ternak
-          </h3>
-          <p className="text-xs sm:text-sm font-medium text-slate-600 dark:text-slate-300">
-            Distribusi populasi komoditas hewan ternak Kabupaten Kebumen
-          </p>
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+          <div>
+            <h3 className="text-base sm:text-xl font-extrabold text-slate-900 dark:text-white">
+              Populasi Hewan Ternak
+            </h3>
+            <p className="text-xs sm:text-sm font-medium text-slate-600 dark:text-slate-300">
+              Distribusi populasi komoditas hewan ternak Kabupaten Kebumen
+            </p>
+          </div>
+          {periodePopulasi && (
+            <span className="self-start sm:self-auto inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-black bg-emerald-50 dark:bg-emerald-950/70 border border-emerald-200 dark:border-emerald-800 text-emerald-800 dark:text-emerald-300 shrink-0 shadow-2xs">
+              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+              <span>{periodePopulasi.shortLabel}</span>
+            </span>
+          )}
         </div>
 
         {/* Vertical Bar Chart Container */}
@@ -79,13 +97,21 @@ export default function LandingChartsSection({
 
       {/* 2. POPULASI UNGGAS */}
       <div className="p-3.5 sm:p-6 rounded-2xl sm:rounded-3xl border-2 border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 shadow-xs space-y-3.5 sm:space-y-5 flex flex-col justify-between">
-        <div>
-          <h3 className="text-base sm:text-xl font-extrabold text-slate-900 dark:text-white">
-            Populasi Unggas
-          </h3>
-          <p className="text-xs sm:text-sm font-medium text-slate-600 dark:text-slate-300">
-            Distribusi populasi komoditas unggas Kabupaten Kebumen
-          </p>
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+          <div>
+            <h3 className="text-base sm:text-xl font-extrabold text-slate-900 dark:text-white">
+              Populasi Unggas
+            </h3>
+            <p className="text-xs sm:text-sm font-medium text-slate-600 dark:text-slate-300">
+              Distribusi populasi komoditas unggas Kabupaten Kebumen
+            </p>
+          </div>
+          {periodePopulasi && (
+            <span className="self-start sm:self-auto inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-black bg-blue-50 dark:bg-blue-950/70 border border-blue-200 dark:border-blue-800 text-blue-800 dark:text-blue-300 shrink-0 shadow-2xs">
+              <span className="w-2 h-2 rounded-full bg-blue-500 animate-pulse" />
+              <span>{periodePopulasi.shortLabel}</span>
+            </span>
+          )}
         </div>
 
         {/* Vertical Bar Chart Container */}

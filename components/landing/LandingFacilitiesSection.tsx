@@ -82,14 +82,6 @@ export default function LandingFacilitiesSection({
                 Rekapitulasi resmi cakupan kecamatan binaan, koordinator dokter hewan, dan pos pelayanan keliling (Pusling)
               </p>
             </div>
-
-            <Link
-              href="/keswan/puskeswan"
-              className="text-xs sm:text-sm font-bold text-blue-600 dark:text-blue-400 hover:text-blue-700 flex items-center gap-1 transition-colors self-start xs:self-auto shrink-0"
-            >
-              <span>Buka Modul Puskeswan</span>
-              <ChevronRight size={16} />
-            </Link>
           </div>
 
           {/* Search Toolbar Puskeswan */}
@@ -246,10 +238,6 @@ export default function LandingFacilitiesSection({
         <div className="space-y-4 sm:space-y-5 animate-in fade-in duration-200">
           <div className="flex flex-col xs:flex-row xs:items-center justify-between gap-2 sm:gap-3">
             <div>
-              <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-emerald-50 dark:bg-emerald-950/60 border border-emerald-200 dark:border-emerald-800 text-[11px] font-bold text-emerald-700 dark:text-emerald-300 mb-1">
-                <Building2 size={13} className="text-emerald-600 dark:text-emerald-400" />
-                <span>Fasilitas Rumah Potong Hewan (RPH) Resmi Daerah</span>
-              </div>
               <h2 className="text-base sm:text-xl font-bold text-slate-900 dark:text-white tracking-tight">
                 Rumah Potong Hewan (RPH) Kabupaten Kebumen
               </h2>
@@ -257,14 +245,6 @@ export default function LandingFacilitiesSection({
                 Fasilitas pemotongan ternak resmi berstandar ASUH (Aman, Sehat, Utuh, Halal) di RPH Kebumen dan RPH Gombong
               </p>
             </div>
-
-            <Link
-              href="/kesmavet/rph-tph-tpu"
-              className="text-xs font-bold text-blue-600 dark:text-blue-400 hover:text-blue-700 flex items-center gap-1 transition-colors self-start xs:self-auto shrink-0"
-            >
-              <span>Buka Modul RPH-TPH-TPU</span>
-              <ChevronRight size={14} />
-            </Link>
           </div>
 
           {/* Search Toolbar RPH */}
@@ -299,7 +279,6 @@ export default function LandingFacilitiesSection({
                   <th className="p-3 sm:p-3.5 w-12 text-center">NO</th>
                   <th className="p-3 sm:p-3.5">NAMA RUMAH POTONG HEWAN</th>
                   <th className="p-3 sm:p-3.5">LOKASI KECAMATAN</th>
-                  <th className="p-3 sm:p-3.5">STANDAR HYGIENE &amp; HALAL</th>
                   <th className="p-3 sm:p-3.5">LOKASI MAPS</th>
                 </tr>
               </thead>
@@ -316,12 +295,6 @@ export default function LandingFacilitiesSection({
                       </div>
                     </td>
                     <td className="p-3.5 text-slate-700 dark:text-slate-300">Kecamatan Kebumen</td>
-                    <td className="p-3.5">
-                      <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-50 dark:bg-emerald-950/50 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800">
-                        <CheckCircle2 size={12} />
-                        Sertifikat Halal Resmi &amp; Juleha
-                      </span>
-                    </td>
                     <td className="p-3.5">
                       <a
                         href="https://www.google.com/maps/search/?api=1&query=RPH+Kebumen"
@@ -349,12 +322,6 @@ export default function LandingFacilitiesSection({
                       </div>
                     </td>
                     <td className="p-3.5 text-slate-700 dark:text-slate-300">Kecamatan Gombong</td>
-                    <td className="p-3.5">
-                      <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-50 dark:bg-emerald-950/50 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800">
-                        <CheckCircle2 size={12} />
-                        Sertifikat Halal &amp; Tempat Khusus Babi
-                      </span>
-                    </td>
                     <td className="p-3.5">
                       <a
                         href="https://www.google.com/maps/search/?api=1&query=RPH+Gombong+Kebumen"

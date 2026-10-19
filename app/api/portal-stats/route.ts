@@ -17,13 +17,107 @@ function formatAnimalName(name: string) {
 
 export async function GET() {
   try {
-    // 1. QUERY POPULASI (Adaptif: Mendukung Skema Ternormalisasi maupun Skema Kolom Lebar)
+    // 1. QUERY POPULASI (Deteksi Otomatis Triwulan Terkini & Adaptif)
     let populasi16: { komoditas: string; total: number }[] = [];
     let populasiTernak8: { komoditas: string; total: number }[] = [];
     let populasiUnggas8: { komoditas: string; total: number }[] = [];
 
+    // Deteksi Otomatis Tahun & Triwulan (TW) Terkini dari Database
+    let activeTahun = 2025;
+    let activeTriwulan = 4;
+    let isFrom2026 = false;
+    let activeTwStr = 'TW 1';
+
+    try {
+      // 1. Cek apakah ada data di tabel populasi_2026 terlebih dahulu
+      const [p26Rows]: any = await pool.query(`
+        SELECT tw, COUNT(*) as cnt 
+        FROM populasi_2026 
+        GROUP BY tw 
+        ORDER BY tw DESC
+      `);
+      if (p26Rows && p26Rows.length > 0) {
+        // Cari TW tertinggi yang ada datanya (misal: 'TW 4', 'TW 3', 'TW 2', 'TW 1')
+        const sorted = p26Rows.sort((a: any, b: any) => {
+          const numA = parseInt(String(a.tw).replace(/\D/g, ''), 10) || 0;
+          const numB = parseInt(String(b.tw).replace(/\D/g, ''), 10) || 0;
+          return numB - numA;
+        });
+        if (sorted[0] && sorted[0].cnt > 0) {
+          activeTahun = 2026;
+          activeTwStr = sorted[0].tw;
+          activeTriwulan = parseInt(String(activeTwStr).replace(/\D/g, ''), 10) || 1;
+          isFrom2026 = true;
+        }
+      }
+    } catch (e26) {
+      // Abaikan jika tabel belum siap
+    }
+
+    if (!isFrom2026) {
+      try {
+        const [periodRows]: any = await pool.query(`
+          SELECT tahun, triwulan 
+          FROM populasi 
+          WHERE tahun IS NOT NULL AND triwulan IS NOT NULL
+          ORDER BY tahun DESC, triwulan DESC 
+          LIMIT 1
+        `);
+        if (periodRows && periodRows.length > 0) {
+          activeTahun = Number(periodRows[0].tahun) || 2025;
+          activeTriwulan = Number(periodRows[0].triwulan) || 4;
+        }
+      } catch (e) {
+        console.warn('Gagal mendeteksi triwulan populasi otomatis:', e);
+      }
+    }
+
+    const twRomawi = ['I', 'II', 'III', 'IV'][activeTriwulan - 1] || 'IV';
+    const twBulan = [
+      'Januari - Maret',
+      'April - Juni',
+      'Juli - September',
+      'Oktober - Desember',
+    ][activeTriwulan - 1] || 'Oktober - Desember';
+
+    const periodePopulasi = {
+      tahun: activeTahun,
+      triwulan: activeTriwulan,
+      romawi: twRomawi,
+      bulan: twBulan,
+      label: `Triwulan ${twRomawi} (${twBulan}) ${activeTahun}`,
+      shortLabel: `TW ${twRomawi} ${activeTahun}`,
+    };
+
     try {
       let popMap: Record<string, number> = {};
+
+      if (isFrom2026) {
+        // Ambil data langsung dari tabel populasi_2026
+        const [rows2026]: any = await pool.query(
+          'SELECT data_v FROM populasi_2026 WHERE tw = ?',
+          [activeTwStr]
+        );
+        for (const r of rows2026) {
+          const v = typeof r.data_v === 'string' ? JSON.parse(r.data_v) : (r.data_v || {});
+          popMap.sapi_potong = (popMap.sapi_potong || 0) + (Number(v['Total Sapi Potong'] || v['sapi_potong']) || 0);
+          popMap.sapi_perah = (popMap.sapi_perah || 0) + (Number(v['Total Sapi Perah'] || v['sapi_perah']) || 0);
+          popMap.kerbau = (popMap.kerbau || 0) + (Number(v['Total Kerbau'] || v['kerbau']) || 0);
+          popMap.kuda = (popMap.kuda || 0) + (Number(v['Total Kuda'] || v['kuda']) || 0);
+          popMap.kambing = (popMap.kambing || 0) + (Number(v['Total Kambing'] || v['kambing']) || 0);
+          popMap.domba = (popMap.domba || 0) + (Number(v['Total Domba'] || v['domba']) || 0);
+          popMap.babi = (popMap.babi || 0) + (Number(v['Total Babi'] || v['babi']) || 0);
+          popMap.ayam_kampung = (popMap.ayam_kampung || 0) + (Number(v['Ayam Kampung'] || v['ayam_kampung']) || 0);
+          popMap.ayam_petelur = (popMap.ayam_petelur || 0) + (Number(v['Ayam Petelur'] || v['ayam_petelur']) || 0);
+          popMap.ayam_broiler = (popMap.ayam_broiler || 0) + (Number(v['Ayam Broiler'] || v['ayam_broiler'] || v['ayam_broiller']) || 0);
+          popMap.puyuh = (popMap.puyuh || 0) + (Number(v['Puyuh'] || v['puyuh']) || 0);
+          popMap.itik = (popMap.itik || 0) + (Number(v['Itik'] || v['itik']) || 0);
+          popMap.entog = (popMap.entog || 0) + (Number(v['Entog'] || v['entog']) || 0);
+          popMap.angsa = (popMap.angsa || 0) + (Number(v['Angsa'] || v['angsa']) || 0);
+          popMap.merpati = (popMap.merpati || 0) + (Number(v['Merpati'] || v['merpati']) || 0);
+          popMap.kelinci = (popMap.kelinci || 0) + (Number(v['Kelinci Jantan']) || 0) + (Number(v['Kelinci Betina']) || 0) + (Number(v['kelinci']) || 0);
+        }
+      } else {
 
       // Strategi 1: Coba Skema Ternormalisasi (id_hewan + JOIN tabel hewan)
       try {
@@ -33,10 +127,10 @@ export async function GET() {
             SUM(p.total) as total
           FROM populasi p
           JOIN hewan h ON p.id_hewan = h.id_hewan
-          WHERE p.tahun = (SELECT COALESCE(MAX(tahun), 2025) FROM populasi)
-            AND p.triwulan = (SELECT COALESCE(MAX(triwulan), 4) FROM populasi WHERE tahun = (SELECT COALESCE(MAX(tahun), 2025) FROM populasi))
+          WHERE p.tahun = ?
+            AND p.triwulan = ?
           GROUP BY h.id_hewan, h.jenis_hewan
-        `);
+        `, [activeTahun, activeTriwulan]);
 
         if (normRows && normRows.length > 0) {
           const aliasMap: Record<string, string> = {
@@ -92,9 +186,9 @@ export async function GET() {
               COALESCE(SUM(merpati), 0) AS merpati,
               COALESCE(SUM(kelinci), 0) AS kelinci
             FROM populasi
-            WHERE tahun = (SELECT COALESCE(MAX(tahun), 2025) FROM populasi)
-              AND triwulan = (SELECT COALESCE(MAX(triwulan), 4) FROM populasi WHERE tahun = (SELECT COALESCE(MAX(tahun), 2025) FROM populasi))
-          `);
+            WHERE tahun = ?
+              AND triwulan = ?
+          `, [activeTahun, activeTriwulan]);
 
           if (popRows && popRows.length > 0) {
             const r = popRows[0];
@@ -140,8 +234,8 @@ export async function GET() {
                 COALESCE(SUM(merpati), 0) AS merpati,
                 COALESCE(SUM(kelinci), 0) AS kelinci
               FROM populasi
-              WHERE tahun = (SELECT COALESCE(MAX(tahun), 2025) FROM populasi)
-            `);
+              WHERE tahun = ?
+            `, [activeTahun]);
             if (fallbackPop && fallbackPop.length > 0) {
               const r = fallbackPop[0];
               popMap = {
@@ -167,6 +261,7 @@ export async function GET() {
         } catch (wideErr) {
           // Abaikan error wide table
         }
+      }
       }
 
       populasi16 = [
@@ -490,6 +585,7 @@ export async function GET() {
         vaksinasiList,
         rphList,
         nkvList,
+        periodePopulasi,
       },
     });
   } catch (error: any) {

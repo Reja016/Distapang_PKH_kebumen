@@ -35,17 +35,17 @@ export default function ProduksiTable({
         </span>
       </div>
 
-      <div className="overflow-x-auto">
-        <table className="w-full text-xs text-right whitespace-nowrap">
-          <thead className="bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-bold uppercase tracking-wider border-b border-slate-300 dark:border-slate-700">
+      <div className="overflow-x-auto overflow-y-auto max-h-[600px] border-b border-slate-200">
+        <table className="w-full text-xs text-right whitespace-nowrap border-separate border-spacing-0">
+          <thead className="bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-bold uppercase tracking-wider sticky top-0 z-20 shadow-xs">
             <tr>
-              <th className="p-3.5 text-left sticky left-0 bg-slate-100 dark:bg-slate-800 z-10 border-r border-slate-300 dark:border-slate-700">
+              <th className="p-3.5 text-left sticky left-0 top-0 bg-slate-100 dark:bg-slate-800 z-30 border-b border-r border-slate-300 dark:border-slate-700">
                 {firstColLabel}
               </th>
               {bulan.map((b) => (
-                <th key={b} className="p-3.5 border-r border-slate-300 dark:border-slate-700">{b}</th>
+                <th key={b} className="p-3.5 border-b border-r border-slate-300 dark:border-slate-700 sticky top-0 bg-slate-100 dark:bg-slate-800 z-20">{b}</th>
               ))}
-              <th className="p-3.5 bg-slate-200 dark:bg-slate-800 text-slate-900 dark:text-slate-100 font-bold border-l border-slate-300 dark:border-slate-700">
+              <th className="p-3.5 bg-slate-200 dark:bg-slate-800 text-slate-900 dark:text-slate-100 font-bold border-b border-l border-slate-300 dark:border-slate-700 sticky top-0 z-20">
                 TOTAL (KG)
               </th>
             </tr>

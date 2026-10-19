@@ -689,49 +689,52 @@ export default function LaporanPuskeswanPage() {
         </div>
       </header>
 
-      {/* ── SUBMENU / TABS NAVIGASI ── */}
-      <div className="bg-white border-b border-slate-200 sticky top-[80px] sm:top-[88px] z-20 shadow-2xs">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center gap-2 py-2.5 overflow-x-auto">
-            <button
-              onClick={() => setCurrentTab('rekap')}
-              className={`min-h-touch px-5 py-2.5 rounded-xl font-extrabold text-xs sm:text-sm flex items-center gap-2 transition-all cursor-pointer whitespace-nowrap ${
-                currentTab === 'rekap'
-                  ? 'bg-blue-600 text-white shadow-sm'
-                  : 'bg-slate-100 hover:bg-slate-200 text-slate-700'
-              }`}
-            >
-              <FileSpreadsheet size={16} strokeWidth={2.5} />
-              <span>1. Rekapitulasi Kinerja Bulanan</span>
-              <span className={`text-[10px] px-2 py-0.5 rounded-full font-black ${
-                currentTab === 'rekap' ? 'bg-blue-700 text-white' : 'bg-slate-200 text-slate-800'
-              }`}>
-                Laporan
-              </span>
-            </button>
-
-            <button
-              onClick={() => setCurrentTab('profil')}
-              className={`min-h-touch px-5 py-2.5 rounded-xl font-extrabold text-xs sm:text-sm flex items-center gap-2 transition-all cursor-pointer whitespace-nowrap ${
-                currentTab === 'profil'
-                  ? 'bg-blue-600 text-white shadow-sm'
-                  : 'bg-slate-100 hover:bg-slate-200 text-slate-700'
-              }`}
-            >
-              <Building2 size={16} strokeWidth={2.5} />
-              <span>2. Profil Puskeswan Kebumen</span>
-              <span className={`text-[10px] px-2 py-0.5 rounded-full font-black ${
-                currentTab === 'profil' ? 'bg-blue-700 text-white' : 'bg-slate-200 text-slate-800'
-              }`}>
-                {profilList.length} Unit
-              </span>
-            </button>
-          </div>
-        </div>
-      </div>
-
       {/* ── MAIN WORKSPACE ── */}
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 space-y-6 sm:space-y-8">
+        {/* ── SUBMENU / TABS NAVIGASI (Folder-Style Tab) ── */}
+        <div className="flex gap-2 border-b border-slate-200 dark:border-slate-800 pb-px overflow-x-auto no-scrollbar scroll-smooth -mx-4 px-4 sm:mx-0 sm:px-0">
+          <button
+            onClick={() => setCurrentTab('rekap')}
+            className={`min-h-touch h-11 px-4 sm:px-6 rounded-t-xl text-xs sm:text-sm font-bold flex items-center gap-2 border-t border-x transition-all shrink-0 whitespace-nowrap cursor-pointer ${
+              currentTab === 'rekap'
+                ? 'bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 text-blue-700 dark:text-blue-400 border-b-white dark:border-b-slate-900 translate-y-px shadow-xs'
+                : 'border-transparent text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white bg-slate-100/60 dark:bg-slate-800/40'
+            }`}
+          >
+            <FileSpreadsheet size={16} strokeWidth={2.5} />
+            <span>1. Rekapitulasi Kinerja Bulanan</span>
+            <span
+              className={`text-[10px] px-2 py-0.5 rounded-full font-black ${
+                currentTab === 'rekap'
+                  ? 'bg-blue-100 dark:bg-blue-950 text-blue-800 dark:text-blue-300'
+                  : 'bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300'
+              }`}
+            >
+              Laporan
+            </span>
+          </button>
+
+          <button
+            onClick={() => setCurrentTab('profil')}
+            className={`min-h-touch h-11 px-4 sm:px-6 rounded-t-xl text-xs sm:text-sm font-bold flex items-center gap-2 border-t border-x transition-all shrink-0 whitespace-nowrap cursor-pointer ${
+              currentTab === 'profil'
+                ? 'bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 text-blue-700 dark:text-blue-400 border-b-white dark:border-b-slate-900 translate-y-px shadow-xs'
+                : 'border-transparent text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white bg-slate-100/60 dark:bg-slate-800/40'
+            }`}
+          >
+            <Building2 size={16} strokeWidth={2.5} />
+            <span>2. Profil Puskeswan Kebumen</span>
+            <span
+              className={`text-[10px] px-2 py-0.5 rounded-full font-black ${
+                currentTab === 'profil'
+                  ? 'bg-blue-100 dark:bg-blue-950 text-blue-800 dark:text-blue-300'
+                  : 'bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300'
+              }`}
+            >
+              {profilList.length} Unit
+            </span>
+          </button>
+        </div>
         {currentTab === 'profil' && (
           <PuskeswanProfilTab
             filteredProfilList={filteredProfilList}

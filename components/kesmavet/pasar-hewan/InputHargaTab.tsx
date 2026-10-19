@@ -199,9 +199,6 @@ export default function InputHargaTab({
                     className="w-full h-11 pl-11 pr-3.5 rounded-xl border border-blue-200 dark:border-blue-800 bg-white dark:bg-slate-800 font-mono font-bold text-slate-900 dark:text-white outline-none focus:border-blue-600 text-sm"
                   />
                 </div>
-                <span className="text-[11px] text-slate-500 dark:text-slate-400 mt-1 block">
-                  Ketik angka, otomatis diformat dengan titik (contoh: 52.000)
-                </span>
               </div>
 
               <div className="p-4 rounded-2xl bg-indigo-50/60 dark:bg-indigo-950/30 border border-indigo-200/80 dark:border-indigo-900/50">
@@ -222,9 +219,6 @@ export default function InputHargaTab({
                     className="w-full h-11 pl-11 pr-3.5 rounded-xl border border-indigo-200 dark:border-indigo-800 bg-white dark:bg-slate-800 font-mono font-bold text-slate-900 dark:text-white outline-none focus:border-indigo-600 text-sm"
                   />
                 </div>
-                <span className="text-[11px] text-slate-500 dark:text-slate-400 mt-1 block">
-                  Ketik angka, otomatis diformat dengan titik (contoh: 53.000)
-                </span>
               </div>
             </div>
 
@@ -299,7 +293,7 @@ export default function InputHargaTab({
         <div className="p-4 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between">
           <div>
             <h3 className="text-sm font-black text-slate-900 dark:text-white">
-              Data Harga Pasar Terkini (Aktif di Portal Publik)
+              Data Harga Pasar Terkini
             </h3>
             <p className="text-xs text-slate-500 dark:text-slate-400">
               Berikut adalah daftar harga komoditas yang saat ini tampil di halaman depan website

@@ -39,6 +39,7 @@ export default function LandingPage() {
   const [vaksinasiList, setVaksinasiList] = useState<any[]>([]);
   const [rphList, setRphList] = useState<any[]>([]);
   const [nkvList, setNkvList] = useState<any[]>([]);
+  const [periodePopulasi, setPeriodePopulasi] = useState<any>(null);
   const [isDataLoading, setIsDataLoading] = useState(true);
 
   // State Auth Modal & Navigation
@@ -124,6 +125,9 @@ export default function LandingPage() {
             setVaksinasiList(d.vaksinasiList || []);
             setRphList(d.rphList || []);
             setNkvList(d.nkvList || []);
+            if (d.periodePopulasi) {
+              setPeriodePopulasi(d.periodePopulasi);
+            }
           }
         }
       } catch (err) {
@@ -287,6 +291,7 @@ export default function LandingPage() {
             populasiUnggas8={populasiUnggas8}
             totalUnggas={totalUnggas}
             maxUnggas={maxUnggas}
+            periodePopulasi={periodePopulasi}
           />
 
           {/* Section 4: Modul Pelayanan & Layanan Data */}

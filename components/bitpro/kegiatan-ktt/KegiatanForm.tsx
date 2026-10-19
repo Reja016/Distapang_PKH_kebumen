@@ -141,9 +141,6 @@ export function KegiatanForm({
             <label className="block text-xs font-bold uppercase tracking-wider text-slate-700">
               Nama Kelompok Tani Ternak (KTT)
             </label>
-            <span className="text-[11px] text-emerald-700 font-semibold">
-              Live Search Database KTT (ketik cth: &quot;gom&quot;)
-            </span>
           </div>
 
           <div className="relative">
@@ -268,7 +265,6 @@ export function KegiatanForm({
             <label className="block text-xs font-bold uppercase tracking-wider text-slate-700">
               Nama / Jenis Kegiatan
             </label>
-            <span className="text-[11px] text-slate-400">Pilih rekomendasi di bawah</span>
           </div>
           <input
             type="text"

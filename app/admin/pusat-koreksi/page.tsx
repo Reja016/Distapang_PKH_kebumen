@@ -104,6 +104,7 @@ const formatModuleLabel = (moduleKey: string, submenuKey: string) => {
     'pakan-ternak': 'Pakan Ternak',
     'rph-tph-tpu': 'RPH / TPH / TPU',
     'pasar-hewan': 'Pasar Hewan',
+    'hewan-kurban': 'Pemotongan Hewan Kurban',
     'inventaris-kendaraan': 'Inventaris Kendaraan',
     'anggota': 'Kelola Anggota',
     'petugas-wilayah': 'Wilayah Kerja Petugas',

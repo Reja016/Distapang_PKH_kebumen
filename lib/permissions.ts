@@ -50,6 +50,7 @@ export const DEFAULT_FULL_PERMISSIONS: UserPermissions = {
       'rph-tph-tpu': { enabled: true, mode: 'edit' },
       'pakan-ternak': { enabled: true, mode: 'edit' },
       'pasar-hewan': { enabled: true, mode: 'edit' },
+      'hewan-kurban': { enabled: true, mode: 'edit' },
     },
   },
   aset: {
@@ -95,6 +96,7 @@ export const DEFAULT_VIEW_ONLY_PERMISSIONS: UserPermissions = {
       'rph-tph-tpu': { enabled: true, mode: 'view' },
       'pakan-ternak': { enabled: true, mode: 'view' },
       'pasar-hewan': { enabled: true, mode: 'view' },
+      'hewan-kurban': { enabled: true, mode: 'view' },
     },
   },
   aset: {
