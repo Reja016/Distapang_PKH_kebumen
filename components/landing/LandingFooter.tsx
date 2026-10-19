@@ -65,7 +65,7 @@ export const FOOTER_CONFIG = {
     { nama: 'Kesehatan Masyarakat Veteriner (Kesmavet & NKV)', href: '#layanan' },
     { nama: 'Monitoring Vaksinasi PMK & LSD', href: '#fasilitas' },
     { nama: 'Sebaran Farm & Populasi Ternak Wilayah', href: '#grafik' },
-    { nama: 'Menu Khusus revejar', href: '#' },
+    { nama: 'Menu Khusus revejar', href: '/monyet.jpg' },
   ],
   tautanTerkait: [
     { nama: 'Portal Resmi Pemkab Kebumen', url: 'https://www.kebumenkab.go.id' },
