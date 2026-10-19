@@ -18,6 +18,7 @@ import {
   Send,
   Phone,
   AlertCircle,
+  Loader2,
 } from 'lucide-react';
 import { Cattle, Insemination, calculateAge, KECAMATAN_LIST, getDesaListForKecamatan } from './types';
 import { useUserAreaRestriction } from '@/hooks/useUserAreaRestriction';
@@ -77,6 +78,7 @@ interface ModalCattleFormProps {
   formData: any;
   setFormData: (val: any) => void;
   onSubmit: () => void;
+  isSaving?: boolean;
 }
 
 export function ModalCattleForm({
@@ -86,6 +88,7 @@ export function ModalCattleForm({
   formData,
   setFormData,
   onSubmit,
+  isSaving = false,
 }: ModalCattleFormProps) {
   const { isAdmin, filterKecamatanList, allowedKecamatan } = useUserAreaRestriction();
   const availableKecamatanList = filterKecamatanList(KECAMATAN_LIST);
@@ -279,10 +282,17 @@ export function ModalCattleForm({
           </button>
           <button
             onClick={onSubmit}
-            disabled={!formData.name || !formData.kecamatan || !formData.desa}
-            className="flex-1 min-h-touch h-11 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs sm:text-sm transition-colors shadow-xs disabled:opacity-40 cursor-pointer"
+            disabled={isSaving || !formData.name || !formData.kecamatan || !formData.desa}
+            className="flex-1 min-h-touch h-11 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs sm:text-sm transition-colors shadow-xs disabled:opacity-40 cursor-pointer flex items-center justify-center gap-2"
           >
-            Simpan Data
+            {isSaving ? (
+              <>
+                <Loader2 size={16} className="animate-spin" />
+                <span>Menyimpan...</span>
+              </>
+            ) : (
+              'Simpan Data'
+            )}
           </button>
         </div>
       </div>
@@ -297,6 +307,7 @@ interface ModalCatatIBProps {
   ibFormData: any;
   setIbFormData: (val: any) => void;
   handleAddInsemination: () => void;
+  isSaving?: boolean;
 }
 
 export function ModalCatatIB({
@@ -306,6 +317,7 @@ export function ModalCatatIB({
   ibFormData,
   setIbFormData,
   handleAddInsemination,
+  isSaving = false,
 }: ModalCatatIBProps) {
   const { isAdmin, filterKecamatanList, allowedKecamatan } = useUserAreaRestriction();
   const availableIbKecamatanList = filterKecamatanList(KECAMATAN_LIST);
@@ -510,10 +522,17 @@ export function ModalCatatIB({
           </button>
           <button
             onClick={handleAddInsemination}
-            disabled={!ibFormData.date || !ibFormData.inseminatorName}
-            className="flex-1 min-h-touch h-11 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs sm:text-sm shadow-xs disabled:opacity-40 transition-colors cursor-pointer"
+            disabled={isSaving || !ibFormData.date || !ibFormData.inseminatorName}
+            className="flex-1 min-h-touch h-11 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs sm:text-sm shadow-xs disabled:opacity-40 transition-colors cursor-pointer flex items-center justify-center gap-2"
           >
-            Simpan &amp; Kirim Data IB
+            {isSaving ? (
+              <>
+                <Loader2 size={16} className="animate-spin" />
+                <span>Menyimpan...</span>
+              </>
+            ) : (
+              'Simpan & Kirim Data IB'
+            )}
           </button>
         </div>
       </div>

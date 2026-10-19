@@ -58,6 +58,7 @@ export default function RphTphTpuPage() {
   const [showAddModal, setShowAddModal] = useState(false);
   const [editingItem, setEditingItem] = useState<any | null>(null);
   const [formRph, setFormRph] = useState<RphFormData>(INITIAL_RPH_FORM);
+  const [isSavingRph, setIsSavingRph] = useState(false);
 
   // ── 2. STATE TAB: INPUT PEMOTONGAN RUMAH POTONG HEWAN (4 TABEL RUMPUN SAPI HARIAN) ──
   const [rumpunData, setRumpunData] = useState<Record<string, any[]>>({
@@ -425,11 +426,13 @@ export default function RphTphTpuPage() {
 
   const handleSaveRph = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (isSavingRph) return;
     if (!canCreate && !canEdit) {
       alert('Anda tidak memiliki hak akses untuk menambah/mengedit data RPH.');
       return;
     }
 
+    setIsSavingRph(true);
     try {
       const method = editingItem ? 'PUT' : 'POST';
       const body = editingItem ? { ...formRph, id: editingItem.id } : formRph;
@@ -442,9 +445,15 @@ export default function RphTphTpuPage() {
       if (res.ok) {
         setShowAddModal(false);
         loadRphData();
+      } else {
+        const errJson = await res.json().catch(() => ({}));
+        alert(errJson.error || 'Gagal menyimpan data rumah potong.');
       }
     } catch (err) {
       console.error('Save error:', err);
+      alert('Terjadi kesalahan koneksi jaringan.');
+    } finally {
+      setIsSavingRph(false);
     }
   };
 
@@ -731,6 +740,7 @@ export default function RphTphTpuPage() {
         formRph={formRph}
         setFormRph={setFormRph}
         handleRphSubmit={handleSaveRph}
+        isSaving={isSavingRph}
       />
     </div>
   );

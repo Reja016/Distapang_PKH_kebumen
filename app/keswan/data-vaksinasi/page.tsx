@@ -88,6 +88,7 @@ export default function DataVaksinasiPMKPage() {
 
   const [showAuditModal, setShowAuditModal] = useState(false);
   const [auditTarget, setAuditTarget] = useState<any | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const showToast = (type: 'success' | 'error', msg: string) => {
     setToast({ type, msg });
@@ -332,6 +333,7 @@ export default function DataVaksinasiPMKPage() {
   };
   const submitBulanan = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (isSubmitting) return;
     if (!formBulanan.puskeswan.trim()) {
       showToast('error', 'Nama Puskeswan wajib diisi.');
       return;
@@ -348,6 +350,7 @@ export default function DataVaksinasiPMKPage() {
     const url = isEdit ? `/api/vaksinasi-pmk/bulanan/${modalBulanan.edit!.id}` : '/api/vaksinasi-pmk/bulanan';
     const method = isEdit ? 'PUT' : 'POST';
 
+    setIsSubmitting(true);
     try {
       const res = await fetch(url, {
         method,
@@ -364,6 +367,8 @@ export default function DataVaksinasiPMKPage() {
       }
     } catch {
       showToast('error', 'Terjadi kesalahan jaringan.');
+    } finally {
+      setIsSubmitting(false);
     }
   };
   const deleteBulanan = async (item: Bulanan) => {
@@ -410,6 +415,7 @@ export default function DataVaksinasiPMKPage() {
   };
   const submitDroping = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (isSubmitting) return;
     const isEdit = !!modalDroping.edit;
     if (isEdit && !canEdit) {
       showToast('error', 'Hanya Administrator yang memiliki hak akses untuk mengubah (edit) data droping!');
@@ -426,6 +432,7 @@ export default function DataVaksinasiPMKPage() {
     const url = isEdit ? `/api/vaksinasi-pmk/apbd-droping/${modalDroping.edit!.id}` : '/api/vaksinasi-pmk/apbd-droping';
     const method = isEdit ? 'PUT' : 'POST';
 
+    setIsSubmitting(true);
     try {
       const res = await fetch(url, {
         method,
@@ -442,6 +449,8 @@ export default function DataVaksinasiPMKPage() {
       }
     } catch {
       showToast('error', 'Terjadi kesalahan jaringan.');
+    } finally {
+      setIsSubmitting(false);
     }
   };
   const deleteDroping = async (item: Droping) => {
@@ -475,6 +484,7 @@ export default function DataVaksinasiPMKPage() {
   // ── SUBMIT HARIAN MANUAL DARI MODAL ──
   const submitHarianManual = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (isSubmitting) return;
     if (!canCreate) {
       showToast('error', 'Anda tidak memiliki hak akses untuk menambah data harian!');
       return;
@@ -484,6 +494,7 @@ export default function DataVaksinasiPMKPage() {
       return;
     }
 
+    setIsSubmitting(true);
     try {
       const res = await fetch('/api/vaksinasi-pmk/harian', {
         method: 'POST',
@@ -500,6 +511,8 @@ export default function DataVaksinasiPMKPage() {
       }
     } catch {
       showToast('error', 'Gagal terhubung ke server.');
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -763,6 +776,7 @@ export default function DataVaksinasiPMKPage() {
         formDroping={formDroping}
         setFormDroping={setFormDroping}
         submitDroping={submitDroping}
+        isSubmitting={isSubmitting}
       />
 
       <UniversalAuditModal

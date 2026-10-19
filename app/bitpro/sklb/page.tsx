@@ -91,6 +91,8 @@ export default function UnifiedSKLBPage() {
     mode: 'tambah',
     data: null,
   });
+  const [isSavingRekap, setIsSavingRekap] = useState(false);
+  const [isSavingDetail, setIsSavingDetail] = useState(false);
 
   // ── LOAD AVAILABLE YEARS ──
   const loadAvailableYears = async () => {
@@ -322,6 +324,7 @@ export default function UnifiedSKLBPage() {
   // ── REKAP CRUD HANDLERS ──
   const handleSaveRekap = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (isSavingRekap) return;
     if (modalRekap.mode === 'edit' && !canEdit) {
       alert('Hanya Administrator yang berhak mengedit data rekapitulasi.');
       return;
@@ -331,6 +334,7 @@ export default function UnifiedSKLBPage() {
       return;
     }
     const formData = { ...modalRekap.data, tahun: selectedYear };
+    setIsSavingRekap(true);
     try {
       if (modalRekap.mode === 'tambah') {
         const res = await fetch('/api/sync-sklb-summary', {
@@ -361,6 +365,8 @@ export default function UnifiedSKLBPage() {
       }
     } catch {
       alert('Terjadi kesalahan saat menyimpan ke database.');
+    } finally {
+      setIsSavingRekap(false);
     }
     setModalRekap({ open: false, mode: 'tambah', data: null });
   };
@@ -396,6 +402,7 @@ export default function UnifiedSKLBPage() {
   // ── DETAIL CRUD HANDLERS ──
   const handleSaveDetail = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (isSavingDetail) return;
     if (modalDetail.mode === 'edit' && !canEdit) {
       showToast.error('Hanya Administrator yang berhak mengedit data detail ternak.');
       return;
@@ -405,6 +412,7 @@ export default function UnifiedSKLBPage() {
       return;
     }
     const formData = { ...modalDetail.data, tahun: selectedYear };
+    setIsSavingDetail(true);
     try {
       if (modalDetail.mode === 'tambah') {
         const res = await fetch('/api/sync-sklb-detail', {
@@ -435,6 +443,8 @@ export default function UnifiedSKLBPage() {
       }
     } catch {
       showToast.error('Terjadi kesalahan saat menyimpan ke database.');
+    } finally {
+      setIsSavingDetail(false);
     }
     setModalDetail({ open: false, mode: 'tambah', data: null });
   };
@@ -723,6 +733,7 @@ export default function UnifiedSKLBPage() {
         modalRekap={modalRekap}
         setModalRekap={setModalRekap}
         handleSaveRekap={handleSaveRekap}
+        isSaving={isSavingRekap}
       />
 
       {/* MODAL: DETAIL SAPI */}
@@ -730,6 +741,7 @@ export default function UnifiedSKLBPage() {
         modalDetail={modalDetail}
         setModalDetail={setModalDetail}
         handleSaveDetail={handleSaveDetail}
+        isSaving={isSavingDetail}
       />
 
       <UniversalAuditModal

@@ -87,6 +87,7 @@ export default function KegiatanKTTPage() {
     lng: null as number | null,
     photo: null as string | null,
   });
+  const [isSaving, setIsSaving] = useState(false);
 
   // Fetch Data
   const fetchData = async () => {
@@ -393,6 +394,7 @@ export default function KegiatanKTTPage() {
   // Submit Simpan / Edit
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (isSaving) return;
     const isEdit = !!editingId;
     if (isEdit && !canEdit) {
       alert('Hanya Administrator yang berhak mengedit catatan kegiatan.');
@@ -405,6 +407,7 @@ export default function KegiatanKTTPage() {
     if (!formData.nama_ktt) return alert('Silakan pilih nama KTT!');
     if (!formData.nama_kegiatan) return alert('Silakan isi nama/jenis kegiatan!');
 
+    setIsSaving(true);
     try {
       const res = await fetch('/api/kegiatan-ktt', {
         method: 'POST',
@@ -428,6 +431,8 @@ export default function KegiatanKTTPage() {
       }
     } catch {
       alert('Terjadi kesalahan koneksi jaringan.');
+    } finally {
+      setIsSaving(false);
     }
   };
 
@@ -645,6 +650,7 @@ export default function KegiatanKTTPage() {
           setPreviewPhotoModal={setPreviewPhotoModal}
           handleSubmit={handleSubmit}
           resetForm={resetForm}
+          isSaving={isSaving}
         />
 
         {/* KPI Metrics */}

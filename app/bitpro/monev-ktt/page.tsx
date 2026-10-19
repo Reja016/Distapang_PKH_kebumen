@@ -119,6 +119,7 @@ export default function MonevKTT() {
   };
 
   const [editingId, setEditingId] = useState<string | null>(null);
+  const [isSaving, setIsSaving] = useState(false);
   const formSectionRef = useRef<HTMLDivElement>(null);
 
   // Kamera State
@@ -652,6 +653,7 @@ export default function MonevKTT() {
 
   const handleSubmitLapangan = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (isSaving) return;
     if (!formKec || !formDesa || !formKtt) return alert('Mohon lengkapi data kelompok!');
 
     const isEdit = !!editingId;
@@ -697,6 +699,7 @@ export default function MonevKTT() {
       isEdit,
     };
 
+    setIsSaving(true);
     try {
       await fetch('/api/monev-lapangan', {
         method: 'POST',
@@ -708,6 +711,8 @@ export default function MonevKTT() {
       resetForm();
     } catch {
       alert('Gagal menyimpan data ke database.');
+    } finally {
+      setIsSaving(false);
     }
   };
 
@@ -999,6 +1004,7 @@ export default function MonevKTT() {
               setShowAuditModal(true);
             }}
             kttMasterList={kttMasterList}
+            isSaving={isSaving}
           />
         )}
 

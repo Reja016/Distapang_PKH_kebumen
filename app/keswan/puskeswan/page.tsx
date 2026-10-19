@@ -57,6 +57,7 @@ export default function LaporanPuskeswanPage() {
   const [showProfilModal, setShowProfilModal] = useState<boolean>(false);
   const [editingProfilId, setEditingProfilId] = useState<string | null>(null);
   const [profilForm, setProfilForm] = useState<ProfilFormData>(INITIAL_PROFIL_FORM);
+  const [isSavingProfil, setIsSavingProfil] = useState<boolean>(false);
 
   // State Submenu 2: Rekapitulasi Kinerja Bulanan
   const [dataLaporan, setDataLaporan] = useState<any[]>(dataAwal);
@@ -242,6 +243,7 @@ export default function LaporanPuskeswanPage() {
 
   const handleSaveProfil = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (isSavingProfil) return;
     if (!profilForm.nama || !profilForm.alamat) {
       return alert('Nama dan Alamat Puskeswan wajib diisi!');
     }
@@ -265,6 +267,7 @@ export default function LaporanPuskeswanPage() {
     };
 
     try {
+      setIsSavingProfil(true);
       if (editingProfilId) {
         if (!isAdmin && !isPuskeswanAllowed(profilForm.nama) && !isPuskeswanAllowed(profilForm.kode)) {
           alert('Akses Ditolak: Anda tidak memiliki wewenang untuk mengubah profil Puskeswan ini!');
@@ -316,6 +319,8 @@ export default function LaporanPuskeswanPage() {
       setShowProfilModal(false);
     } catch {
       showToast('error', 'Gagal menyimpan data ke database.');
+    } finally {
+      setIsSavingProfil(false);
     }
   };
 
@@ -819,6 +824,7 @@ export default function LaporanPuskeswanPage() {
         handlePhotoFileUpload={handlePhotoFileUpload}
         handleAddPhotoUrl={handleAddPhotoUrl}
         handleRemovePhoto={handleRemovePhoto}
+        isSaving={isSavingProfil}
       />
     </div>
   );

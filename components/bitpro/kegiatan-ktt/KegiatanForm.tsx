@@ -9,6 +9,7 @@ import {
   Image as ImageIcon,
   CheckCircle2,
   X,
+  Loader2,
 } from 'lucide-react';
 import { DAFTAR_TIM_PELAKSANA, PRESET_KEGIATAN, KTTMaster } from './types';
 
@@ -44,6 +45,7 @@ interface KegiatanFormProps {
   setPreviewPhotoModal: (val: { url: string; title: string } | null) => void;
   handleSubmit: (e: React.FormEvent) => void;
   resetForm: () => void;
+  isSaving?: boolean;
 }
 
 export function KegiatanForm({
@@ -64,6 +66,7 @@ export function KegiatanForm({
   setPreviewPhotoModal,
   handleSubmit,
   resetForm,
+  isSaving = false,
 }: KegiatanFormProps) {
   if (!(canCreate ?? canEdit)) return null;
 
@@ -440,9 +443,17 @@ export function KegiatanForm({
           )}
           <button
             type="submit"
-            className="flex-1 min-h-touch h-11 px-6 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs sm:text-sm font-bold shadow-xs transition-all cursor-pointer"
+            disabled={isSaving}
+            className="flex-1 min-h-touch h-11 px-6 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs sm:text-sm font-bold shadow-xs transition-all cursor-pointer flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            {editingId ? 'Simpan Perubahan Kegiatan' : 'Simpan Log Kegiatan'}
+            {isSaving ? (
+              <>
+                <Loader2 size={16} className="animate-spin" />
+                <span>Menyimpan...</span>
+              </>
+            ) : (
+              editingId ? 'Simpan Perubahan Kegiatan' : 'Simpan Log Kegiatan'
+            )}
           </button>
         </div>
       </form>

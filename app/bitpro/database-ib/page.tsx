@@ -54,6 +54,7 @@ export default function DatabaseIBPage() {
 
   const [showAuditModal, setShowAuditModal] = useState(false);
   const [auditTarget, setAuditTarget] = useState<any | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   // 1. Tarik Data dari MySQL (API)
   const loadData = async () => {
@@ -148,97 +149,115 @@ export default function DatabaseIBPage() {
 
   // Simpan Hasil PKB
   const handleSavePkb = async () => {
+    if (isSubmitting) return;
     if (!selectedIbForPkb) return;
     if (!canCreate && !canEdit) {
       alert('Anda tidak memiliki izin untuk mencatat hasil PKB.');
       return;
     }
 
-    const effectiveOfficer = pkbFormData.officer || userName || 'Petugas';
-    const payload = {
-      ib_id: selectedIbForPkb.id,
-      cattle_id: selectedIbForPkb.cattleId,
-      pkbDateActual: pkbFormData.date,
-      pkbResult: pkbFormData.result,
-      pkbOfficer: effectiveOfficer,
-      pkbNotes: pkbFormData.notes,
-      pregnancyDate: pkbFormData.result === 'Bunting' ? selectedIbForPkb.date : null,
-      newCattleStatus: pkbFormData.result === 'Bunting' ? 'Bunting' : 'Estrus',
-    };
+    setIsSubmitting(true);
+    try {
+      const effectiveOfficer = pkbFormData.officer || userName || 'Petugas';
+      const payload = {
+        ib_id: selectedIbForPkb.id,
+        cattle_id: selectedIbForPkb.cattleId,
+        pkbDateActual: pkbFormData.date,
+        pkbResult: pkbFormData.result,
+        pkbOfficer: effectiveOfficer,
+        pkbNotes: pkbFormData.notes,
+        pregnancyDate: pkbFormData.result === 'Bunting' ? selectedIbForPkb.date : null,
+        newCattleStatus: pkbFormData.result === 'Bunting' ? 'Bunting' : 'Estrus',
+      };
 
-    const historyObj = {
-      type: 'pkb_recorded',
-      cattle: selectedIbForPkb.cattleName,
-      cattleId: selectedIbForPkb.cattleId,
-      description: `PKB Dicatat: Hasil ${pkbFormData.result} (Oleh: ${pkbFormData.officer})`,
-      icon: pkbFormData.result === 'Bunting' ? '🤰' : '❌',
-    };
+      const historyObj = {
+        type: 'pkb_recorded',
+        cattle: selectedIbForPkb.cattleName,
+        cattleId: selectedIbForPkb.cattleId,
+        description: `PKB Dicatat: Hasil ${pkbFormData.result} (Oleh: ${pkbFormData.officer})`,
+        icon: pkbFormData.result === 'Bunting' ? '🤰' : '❌',
+      };
 
-    await executeApi('record_pkb', payload, historyObj);
+      await executeApi('record_pkb', payload, historyObj);
 
-    setShowPkbModal(false);
-    setPkbFormData({ date: '', result: 'Bunting', officer: '', notes: '' });
-    setSelectedIbForPkb(null);
+      setShowPkbModal(false);
+      setPkbFormData({ date: '', result: 'Bunting', officer: '', notes: '' });
+      setSelectedIbForPkb(null);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   // Tandai Tidak PKB
   const handleSkipPkb = async () => {
+    if (isSubmitting) return;
     if (!selectedIbForSkip) return;
     if (!canCreate && !canEdit) {
       alert('Anda tidak memiliki izin untuk mengubah status PKB.');
       return;
     }
 
-    const payload = {
-      ib_id: selectedIbForSkip.id,
-      pkbSkipDate: skipFormData.date,
-      pkbSkipReason: skipFormData.reason,
-    };
+    setIsSubmitting(true);
+    try {
+      const payload = {
+        ib_id: selectedIbForSkip.id,
+        pkbSkipDate: skipFormData.date,
+        pkbSkipReason: skipFormData.reason,
+      };
 
-    const historyObj = {
-      type: 'pkb_skipped',
-      cattle: selectedIbForSkip.cattleName,
-      cattleId: selectedIbForSkip.cattleId,
-      description: `PKB Tidak Dilakukan${skipFormData.reason ? ` (Alasan: ${skipFormData.reason})` : ''}`,
-      icon: '🚫',
-    };
+      const historyObj = {
+        type: 'pkb_skipped',
+        cattle: selectedIbForSkip.cattleName,
+        cattleId: selectedIbForSkip.cattleId,
+        description: `PKB Tidak Dilakukan${skipFormData.reason ? ` (Alasan: ${skipFormData.reason})` : ''}`,
+        icon: '🚫',
+      };
 
-    await executeApi('skip_pkb', payload, historyObj);
+      await executeApi('skip_pkb', payload, historyObj);
 
-    setShowSkipPkbModal(false);
-    setSkipFormData({ date: '', reason: '' });
-    setSelectedIbForSkip(null);
+      setShowSkipPkbModal(false);
+      setSkipFormData({ date: '', reason: '' });
+      setSelectedIbForSkip(null);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   // Simpan Kelahiran
   const handleSaveBirth = async () => {
+    if (isSubmitting) return;
     if (!selectedIbForBirth) return;
     if (!canCreate && !canEdit) {
       alert('Anda tidak memiliki izin untuk mencatat kelahiran pedet.');
       return;
     }
 
-    const payload = {
-      ib_id: selectedIbForBirth.id,
-      cattle_id: selectedIbForBirth.cattleId,
-      birthDate: birthFormData.date,
-      calfGender: birthFormData.gender,
-      birthNotes: birthFormData.notes,
-    };
+    setIsSubmitting(true);
+    try {
+      const payload = {
+        ib_id: selectedIbForBirth.id,
+        cattle_id: selectedIbForBirth.cattleId,
+        birthDate: birthFormData.date,
+        calfGender: birthFormData.gender,
+        birthNotes: birthFormData.notes,
+      };
 
-    const historyObj = {
-      type: 'birth_recorded',
-      cattle: selectedIbForBirth.cattleName,
-      cattleId: selectedIbForBirth.cattleId,
-      description: `Kelahiran Pedet ${birthFormData.gender} sukses!`,
-      icon: '🍼',
-    };
+      const historyObj = {
+        type: 'birth_recorded',
+        cattle: selectedIbForBirth.cattleName,
+        cattleId: selectedIbForBirth.cattleId,
+        description: `Kelahiran Pedet ${birthFormData.gender} sukses!`,
+        icon: '🍼',
+      };
 
-    await executeApi('record_birth', payload, historyObj);
+      await executeApi('record_birth', payload, historyObj);
 
-    setShowBirthModal(false);
-    setBirthFormData({ date: '', gender: 'Jantan', notes: '' });
-    setSelectedIbForBirth(null);
+      setShowBirthModal(false);
+      setBirthFormData({ date: '', gender: 'Jantan', notes: '' });
+      setSelectedIbForBirth(null);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const calvingIntervals = useMemo(() => calculateCalvingIntervals(allIbHistory), [allIbHistory]);
@@ -463,6 +482,7 @@ export default function DatabaseIBPage() {
         setBirthFormData={setBirthFormData}
         onCloseBirth={() => setShowBirthModal(false)}
         onSaveBirth={handleSaveBirth}
+        isSubmitting={isSubmitting}
       />
 
       {showAuditModal && auditTarget && (

@@ -341,6 +341,29 @@ export async function POST(req: Request) {
     const kecIdNum = KECAMATAN_CODE_TO_ID[kecCode] || 1;
     const idPuskeswan = PUSKESWAN_ID_MAP[(puskeswan_id || '').toLowerCase()] || 7;
 
+    // Anti-duplikasi: Cek apakah laporan kasus serupa baru saja ditambahkan dalam 1 menit terakhir
+    try {
+      const [existing]: any = await pool.query(
+        hasDiagNama && hasKecId 
+          ? `SELECT id FROM keswan_laporan_penyakit 
+             WHERE tahun = ? AND kecamatan_id = ? AND diagnosa_nama = ? AND jumlah_kasus = ? AND created_at >= NOW() - INTERVAL 1 MINUTE
+             ORDER BY id DESC LIMIT 1`
+          : `SELECT id FROM keswan_laporan_penyakit 
+             WHERE tahun = ? AND id_kecamatan = ? AND jumlah_kasus = ? AND created_at >= NOW() - INTERVAL 1 MINUTE
+             ORDER BY id DESC LIMIT 1`,
+        hasDiagNama && hasKecId 
+          ? [Number(tahun) || 2026, kecCode, diagnosa_nama, Number(jumlah_kasus) || 0]
+          : [Number(tahun) || 2026, kecIdNum, Number(jumlah_kasus) || 0]
+      );
+      if (existing && existing.length > 0) {
+        return NextResponse.json({
+          success: true,
+          message: 'Data kasus penyakit sudah tersimpan (anti-duplikasi aktif).',
+          id: existing[0].id,
+        });
+      }
+    } catch {}
+
     let insertResult: any;
     if (hasDiagNama && hasKecId) {
       // Skema Flat (Online cPanel default)

@@ -92,15 +92,6 @@ export default function HewanKurbanPage() {
               <ArrowLeft size={18} />
             </Link>
             <div className="min-w-0">
-              <div className="flex items-center gap-1.5 sm:gap-2">
-                <span className="text-[10px] sm:text-[11px] font-black uppercase tracking-wider text-purple-600 dark:text-purple-400">
-                  Tim Kerja Kesmavet
-                </span>
-                <span className="text-slate-300 dark:text-slate-700">•</span>
-                <span className="text-[10px] sm:text-[11px] font-bold text-slate-500 dark:text-slate-400">
-                  Kebumen
-                </span>
-              </div>
               <h1 className="text-sm sm:text-xl font-black text-slate-900 dark:text-white truncate flex items-center gap-1.5 sm:gap-2">
                 <Beef size={18} className="text-purple-600 dark:text-purple-400 shrink-0" />
                 <span className="truncate">Pemotongan Hewan Kurban</span>

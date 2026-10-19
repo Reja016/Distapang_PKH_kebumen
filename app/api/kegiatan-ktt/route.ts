@@ -142,6 +142,16 @@ export async function POST(request: Request) {
           [tanggal, verifiedKttId, nama_ktt, kecamatan || '', desa || '', tim_pelaksana, nama_kegiatan, hasil_kegiatan, lat || null, lng || null, photo || null, finalId, finalId]
         );
       } else {
+        const [recentCheck]: any = await pool.query(
+          `SELECT id_kegiatan FROM kegiatan_ktt 
+           WHERE tanggal = ? AND nama_ktt = ? AND nama_kegiatan = ? AND tim_pelaksana = ? 
+             AND created_at >= NOW() - INTERVAL 1 MINUTE LIMIT 1`,
+          [tanggal, nama_ktt, nama_kegiatan, tim_pelaksana]
+        );
+        if (recentCheck && recentCheck.length > 0) {
+          return NextResponse.json({ success: true, message: 'Kegiatan sudah tercatat.', id: recentCheck[0].id_kegiatan });
+        }
+
         await pool.query(
           `INSERT INTO kegiatan_ktt 
            (id_kegiatan, tanggal, id_ktt, nama_ktt, kecamatan, desa, tim_pelaksana, nama_kegiatan, hasil_kegiatan, lat, lng, photo) 

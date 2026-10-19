@@ -18,6 +18,7 @@ import {
   Trash2,
   Maximize2,
   X,
+  Loader2,
 } from 'lucide-react';
 import { PuskeswanProfil, DEFAULT_JADWAL_HARIAN } from '@/lib/puskeswanData';
 import { ProfilFormData } from './types';
@@ -372,6 +373,7 @@ interface PuskeswanProfilFormModalProps {
   handlePhotoFileUpload: (e: React.ChangeEvent<HTMLInputElement>) => void;
   handleAddPhotoUrl: () => void;
   handleRemovePhoto: (idx: number) => void;
+  isSaving?: boolean;
 }
 
 export function PuskeswanProfilFormModal({
@@ -384,6 +386,7 @@ export function PuskeswanProfilFormModal({
   handlePhotoFileUpload,
   handleAddPhotoUrl,
   handleRemovePhoto,
+  isSaving = false,
 }: PuskeswanProfilFormModalProps) {
   if (!showProfilModal) return null;
 
@@ -675,9 +678,11 @@ export function PuskeswanProfilFormModal({
             </button>
             <button
               type="submit"
-              className="flex-1 min-h-touch h-11 px-6 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs sm:text-sm font-bold shadow-xs transition-all cursor-pointer"
+              disabled={isSaving}
+              className="flex-1 min-h-touch h-11 px-6 rounded-xl bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white text-xs sm:text-sm font-bold shadow-xs transition-all cursor-pointer flex items-center justify-center gap-2"
             >
-              Simpan Data Profil &amp; Foto
+              {isSaving && <Loader2 size={16} className="animate-spin" />}
+              <span>{isSaving ? 'Menyimpan...' : 'Simpan Data Profil & Foto'}</span>
             </button>
           </div>
         </form>

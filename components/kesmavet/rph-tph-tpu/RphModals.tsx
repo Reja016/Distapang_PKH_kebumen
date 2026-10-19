@@ -11,6 +11,7 @@ interface RphFormModalProps {
   formRph: RphFormData;
   setFormRph: React.Dispatch<React.SetStateAction<RphFormData>>;
   handleRphSubmit: (e: React.FormEvent) => void;
+  isSaving?: boolean;
 }
 
 export function RphFormModal({
@@ -20,6 +21,7 @@ export function RphFormModal({
   formRph,
   setFormRph,
   handleRphSubmit,
+  isSaving = false,
 }: RphFormModalProps) {
   if (!showAddModal) return null;
 
@@ -143,10 +145,11 @@ export function RphFormModal({
             </button>
             <button
               type="submit"
-              className="h-10 px-5 rounded-xl bg-purple-600 hover:bg-purple-700 text-white font-bold shadow-xs cursor-pointer flex items-center gap-2"
+              disabled={isSaving}
+              className="h-10 px-5 rounded-xl bg-purple-600 hover:bg-purple-700 disabled:opacity-50 text-white font-bold shadow-xs cursor-pointer flex items-center justify-center gap-2"
             >
-              <CheckCircle2 size={15} />
-              <span>Simpan Rumah Potong</span>
+              {isSaving ? <Loader2 size={15} className="animate-spin" /> : <CheckCircle2 size={15} />}
+              <span>{isSaving ? 'Menyimpan...' : 'Simpan Rumah Potong'}</span>
             </button>
           </div>
         </form>

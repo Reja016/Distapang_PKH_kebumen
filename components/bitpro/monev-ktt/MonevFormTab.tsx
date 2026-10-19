@@ -21,6 +21,7 @@ import {
   FileSpreadsheet,
   Printer,
   Clock,
+  Loader2,
 } from 'lucide-react';
 import {
   DATA_WILAYAH,
@@ -102,6 +103,7 @@ interface MonevFormTabProps {
   onDelete: (id: string) => void;
   kttMasterList?: Array<{ id: any; namaKelompok: string; kecamatan: string; desa: string; ketua?: string }>;
   onShowHistory?: (data: FieldData) => void;
+  isSaving?: boolean;
 }
 
 export function MonevFormTab({
@@ -160,6 +162,7 @@ export function MonevFormTab({
   onDelete,
   kttMasterList = [],
   onShowHistory,
+  isSaving = false,
 }: MonevFormTabProps) {
   const kalkulasi = hitungKondisi(formKondisi);
 
@@ -1631,9 +1634,17 @@ export function MonevFormTab({
             </button>
             <button
               type="submit"
-              className="w-full sm:flex-1 min-h-touch h-11 px-6 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs sm:text-sm font-bold shadow-xs transition-all cursor-pointer"
+              disabled={isSaving}
+              className="w-full sm:flex-1 min-h-touch h-11 px-6 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs sm:text-sm font-bold shadow-xs transition-all cursor-pointer flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {editingId ? 'Perbarui Data Monev Ruminansia' : 'Simpan Data Monev Ruminansia'}
+              {isSaving ? (
+                <>
+                  <Loader2 size={16} className="animate-spin" />
+                  <span>Menyimpan...</span>
+                </>
+              ) : (
+                editingId ? 'Perbarui Data Monev Ruminansia' : 'Simpan Data Monev Ruminansia'
+              )}
             </button>
           </div>
         </form>

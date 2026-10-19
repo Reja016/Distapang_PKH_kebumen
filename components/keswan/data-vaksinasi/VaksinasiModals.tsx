@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { Calendar } from 'lucide-react';
+import { Calendar, Loader2 } from 'lucide-react';
 import { Bulanan, Droping } from './types';
 import { useUserAreaRestriction } from '@/hooks/useUserAreaRestriction';
 
@@ -32,6 +32,7 @@ interface VaksinasiModalsProps {
   formDroping: any;
   setFormDroping: React.Dispatch<React.SetStateAction<any>>;
   submitDroping: (e: React.FormEvent) => Promise<void>;
+  isSubmitting?: boolean;
 }
 
 export default function VaksinasiModals({
@@ -60,6 +61,7 @@ export default function VaksinasiModals({
   formDroping,
   setFormDroping,
   submitDroping,
+  isSubmitting = false,
 }: VaksinasiModalsProps) {
   const { isAdmin, isPuskeswanAllowed } = useUserAreaRestriction();
   const allowedBulanan = isAdmin ? bulanan : bulanan.filter((b) => isPuskeswanAllowed(b.puskeswan));
@@ -231,9 +233,17 @@ export default function VaksinasiModals({
                 </button>
                 <button
                   type="submit"
-                  className="flex-1 min-h-touch h-10 rounded-xl bg-blue-600 text-white text-xs font-bold hover:bg-blue-700 transition-colors shadow-xs cursor-pointer"
+                  disabled={isSubmitting}
+                  className="flex-1 min-h-touch h-10 rounded-xl bg-blue-600 text-white text-xs font-bold hover:bg-blue-700 transition-colors shadow-xs cursor-pointer flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  Simpan Dosis Harian
+                  {isSubmitting ? (
+                    <>
+                      <Loader2 size={16} className="animate-spin" />
+                      <span>Menyimpan...</span>
+                    </>
+                  ) : (
+                    'Simpan Dosis Harian'
+                  )}
                 </button>
               </div>
             </form>
@@ -302,9 +312,17 @@ export default function VaksinasiModals({
                 </button>
                 <button
                   type="submit"
-                  className="flex-1 min-h-touch h-10 rounded-xl bg-blue-600 text-white text-xs font-bold hover:bg-blue-700 cursor-pointer shadow-xs"
+                  disabled={isSubmitting}
+                  className="flex-1 min-h-touch h-10 rounded-xl bg-blue-600 text-white text-xs font-bold hover:bg-blue-700 cursor-pointer shadow-xs flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  Simpan
+                  {isSubmitting ? (
+                    <>
+                      <Loader2 size={16} className="animate-spin" />
+                      <span>Menyimpan...</span>
+                    </>
+                  ) : (
+                    'Simpan'
+                  )}
                 </button>
               </div>
             </form>
@@ -370,9 +388,17 @@ export default function VaksinasiModals({
                 </button>
                 <button
                   type="submit"
-                  className="flex-1 min-h-touch h-10 rounded-xl bg-blue-600 text-white text-xs font-bold hover:bg-blue-700 cursor-pointer shadow-xs"
+                  disabled={isSubmitting}
+                  className="flex-1 min-h-touch h-10 rounded-xl bg-blue-600 text-white text-xs font-bold hover:bg-blue-700 cursor-pointer shadow-xs flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  Simpan
+                  {isSubmitting ? (
+                    <>
+                      <Loader2 size={16} className="animate-spin" />
+                      <span>Menyimpan...</span>
+                    </>
+                  ) : (
+                    'Simpan'
+                  )}
                 </button>
               </div>
             </form>

@@ -48,6 +48,7 @@ export default function DataFarmPage() {
   // GPS Geolocation state
   const [gpsLoading, setGpsLoading] = useState(false);
   const [gpsStatus, setGpsStatus] = useState<string | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   // SEDOT DATA DARI MYSQL
   const fetchData = async () => {
@@ -250,31 +251,33 @@ export default function DataFarmPage() {
   // Simpan atau Perbarui Data Farm (POST / PUT)
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    if (isSubmitting) return;
+    const cat = targetCategory === 'broiler' ? 'broiler' : targetCategory === 'petelur' ? 'petelur' : 'general';
+    const payload = {
+      ...formValues,
+      kecamatan: (formValues.kecamatan || '').toUpperCase(),
+      desa: formValues.desa || formValues.kelurahan_desa || '',
+      kelurahan_desa: formValues.desa || formValues.kelurahan_desa || '',
+      jenis_ternak: formValues.jenis_ternak || COMMODITY_META[targetCategory].jenisTernak || 'Lainnya',
+    };
+
+    const isEdit = !!editingItem?.db_id;
+    if (isEdit && !canEdit) {
+      alert('Hanya Administrator yang memiliki hak akses untuk mengubah (edit) data!');
+      return;
+    }
+    if (!isEdit && !canCreate) {
+      alert('Anda tidak memiliki hak akses untuk menambah data!');
+      return;
+    }
+    const url = '/api/get-farm';
+    const method = isEdit ? 'PUT' : 'POST';
+    const body = isEdit
+      ? { id: editingItem.db_id, kategori: cat, data: payload }
+      : { kategori: cat, data: payload };
+
+    setIsSubmitting(true);
     try {
-      const cat = targetCategory === 'broiler' ? 'broiler' : targetCategory === 'petelur' ? 'petelur' : 'general';
-      const payload = {
-        ...formValues,
-        kecamatan: (formValues.kecamatan || '').toUpperCase(),
-        desa: formValues.desa || formValues.kelurahan_desa || '',
-        kelurahan_desa: formValues.desa || formValues.kelurahan_desa || '',
-        jenis_ternak: formValues.jenis_ternak || COMMODITY_META[targetCategory].jenisTernak || 'Lainnya',
-      };
-
-      const isEdit = !!editingItem?.db_id;
-      if (isEdit && !canEdit) {
-        alert('Hanya Administrator yang memiliki hak akses untuk mengubah (edit) data!');
-        return;
-      }
-      if (!isEdit && !canCreate) {
-        alert('Anda tidak memiliki hak akses untuk menambah data!');
-        return;
-      }
-      const url = '/api/get-farm';
-      const method = isEdit ? 'PUT' : 'POST';
-      const body = isEdit
-        ? { id: editingItem.db_id, kategori: cat, data: payload }
-        : { kategori: cat, data: payload };
-
       const res = await fetch(url, {
         method,
         headers: { 'Content-Type': 'application/json' },
@@ -284,13 +287,15 @@ export default function DataFarmPage() {
       if (json.success) {
         alert(isEdit ? 'Data farm berhasil diperbarui!' : 'Data farm berhasil disimpan ke database MySQL!');
         fetchData();
+        closeModal();
       } else {
         alert('Gagal menyimpan: ' + json.error);
       }
     } catch {
       alert('Terjadi kesalahan saat menyimpan data farm.');
+    } finally {
+      setIsSubmitting(false);
     }
-    closeModal();
   };
 
   // Hapus Data Farm (DELETE)
@@ -516,6 +521,7 @@ export default function DataFarmPage() {
         gpsStatus={gpsStatus}
         currentDesaList={currentDesaList}
         handleSubmit={handleSubmit}
+        isSubmitting={isSubmitting}
       />
 
       {/* ── MODAL AUDIT LOGS ── */}

@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { Car } from 'lucide-react';
+import { Car, Loader2 } from 'lucide-react';
 import { KendaraanFormData } from './types';
 
 interface KendaraanModalFormProps {
@@ -11,6 +11,7 @@ interface KendaraanModalFormProps {
   setFormData: React.Dispatch<React.SetStateAction<KendaraanFormData>>;
   onClose: () => void;
   onSubmit: (e: React.FormEvent) => void;
+  isSubmitting?: boolean;
 }
 
 export function KendaraanModalForm({
@@ -20,6 +21,7 @@ export function KendaraanModalForm({
   setFormData,
   onClose,
   onSubmit,
+  isSubmitting = false,
 }: KendaraanModalFormProps) {
   if (!showModal) return null;
 
@@ -177,9 +179,17 @@ export function KendaraanModalForm({
             </button>
             <button
               type="submit"
-              className="flex-1 min-h-touch h-11 px-6 rounded-xl bg-amber-600 hover:bg-amber-700 text-white text-xs sm:text-sm font-bold shadow-xs transition-all cursor-pointer"
+              disabled={isSubmitting}
+              className="flex-1 min-h-touch h-11 px-6 rounded-xl bg-amber-600 hover:bg-amber-700 disabled:opacity-50 text-white text-xs sm:text-sm font-bold shadow-xs transition-all cursor-pointer flex items-center justify-center gap-2"
             >
-              {editingId ? 'Simpan Perubahan Kendaraan' : 'Simpan Kendaraan Baru'}
+              {isSubmitting && <Loader2 size={16} className="animate-spin" />}
+              <span>
+                {isSubmitting
+                  ? 'Menyimpan...'
+                  : editingId
+                  ? 'Simpan Perubahan Kendaraan'
+                  : 'Simpan Kendaraan Baru'}
+              </span>
             </button>
           </div>
 

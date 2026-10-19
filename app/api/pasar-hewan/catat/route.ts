@@ -117,6 +117,23 @@ export async function POST(req: NextRequest) {
 
     const petugasNama = session?.nama || 'Petugas Pasar';
 
+    // Anti-duplikasi: Cek apakah data yang sama persis baru dicatat dalam 1 menit terakhir
+    const [existing]: any = await pool.query(
+      `SELECT id FROM pasar_hewan_catat
+       WHERE tanggal = ? AND pasar = ? AND nama_pemilik = ? AND jenis_ternak = ? AND (bb = ? OR (bb IS NULL AND ? IS NULL)) AND warna = ?
+         AND created_at >= NOW() - INTERVAL 1 MINUTE
+       ORDER BY id DESC LIMIT 1`,
+      [tanggal, pasar, nama_pemilik, jenis_ternak, finalBb, finalBb, warna]
+    );
+
+    if (existing.length > 0) {
+      return NextResponse.json({
+        success: true,
+        message: 'Data pencatatan hewan sudah tersimpan sebelumnya (anti-duplikasi aktif).',
+        id: existing[0].id,
+      });
+    }
+
     const [result]: any = await pool.query(
       `INSERT INTO pasar_hewan_catat
         (tanggal, pasar, nama_pemilik, jenis_ternak, bb, warna, layanan, status_pkb, hasil_pkb, sudah_bayar, keterangan, petugas_nama)

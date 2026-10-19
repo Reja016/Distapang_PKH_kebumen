@@ -5,6 +5,7 @@ import {
   MapPin,
   Compass,
   CheckCircle2,
+  Loader2,
 } from 'lucide-react';
 import {
   CommodityKey,
@@ -25,6 +26,7 @@ interface FarmModalProps {
   gpsStatus: string | null;
   currentDesaList: string[];
   handleSubmit: (e: React.FormEvent<HTMLFormElement>) => Promise<void>;
+  isSubmitting?: boolean;
 }
 
 export default function FarmModal({
@@ -40,6 +42,7 @@ export default function FarmModal({
   gpsStatus,
   currentDesaList,
   handleSubmit,
+  isSubmitting = false,
 }: FarmModalProps) {
   if (!isModalOpen) return null;
 
@@ -392,9 +395,17 @@ export default function FarmModal({
             </button>
             <button
               type="submit"
-              className="min-h-touch h-11 px-6 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold active:scale-95 transition-all shadow-xs cursor-pointer"
+              disabled={isSubmitting}
+              className="min-h-touch h-11 px-6 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold active:scale-95 transition-all shadow-xs cursor-pointer flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              Simpan Data Farm
+              {isSubmitting ? (
+                <>
+                  <Loader2 size={16} className="animate-spin" />
+                  <span>Menyimpan...</span>
+                </>
+              ) : (
+                'Simpan Data Farm'
+              )}
             </button>
           </div>
         </form>

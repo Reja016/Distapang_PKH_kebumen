@@ -210,12 +210,14 @@ interface ModalRekapProps {
   modalRekap: ModalRekapState;
   setModalRekap: (val: ModalRekapState) => void;
   handleSaveRekap: (e: React.FormEvent) => void;
+  isSaving?: boolean;
 }
 
 export function ModalRekap({
   modalRekap,
   setModalRekap,
   handleSaveRekap,
+  isSaving = false,
 }: ModalRekapProps) {
   if (!modalRekap.open) return null;
 
@@ -325,9 +327,11 @@ export function ModalRekap({
             </button>
             <button
               type="submit"
-              className="h-10 px-5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold shadow-xs cursor-pointer"
+              disabled={isSaving}
+              className="h-10 px-5 rounded-xl bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 text-white font-bold shadow-xs cursor-pointer flex items-center justify-center gap-2"
             >
-              Simpan
+              {isSaving ? <Loader2 size={14} className="animate-spin" /> : null}
+              <span>{isSaving ? 'Menyimpan...' : 'Simpan'}</span>
             </button>
           </div>
         </form>
@@ -340,12 +344,14 @@ interface ModalDetailProps {
   modalDetail: ModalDetailState;
   setModalDetail: (val: ModalDetailState) => void;
   handleSaveDetail: (e: React.FormEvent) => void;
+  isSaving?: boolean;
 }
 
 export function ModalDetail({
   modalDetail,
   setModalDetail,
   handleSaveDetail,
+  isSaving = false,
 }: ModalDetailProps) {
   if (!modalDetail.open) return null;
 
@@ -498,9 +504,11 @@ export function ModalDetail({
             </button>
             <button
               type="submit"
-              className="h-10 px-5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold shadow-xs cursor-pointer"
+              disabled={isSaving}
+              className="h-10 px-5 rounded-xl bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 text-white font-bold shadow-xs cursor-pointer flex items-center justify-center gap-2"
             >
-              Simpan
+              {isSaving ? <Loader2 size={14} className="animate-spin" /> : null}
+              <span>{isSaving ? 'Menyimpan...' : 'Simpan'}</span>
             </button>
           </div>
         </form>

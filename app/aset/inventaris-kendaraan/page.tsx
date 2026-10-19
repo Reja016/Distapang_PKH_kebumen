@@ -25,7 +25,7 @@ export default function InventarisKendaraanPage() {
   const { isReady, canCreate, canEdit } = usePageAuth('aset', 'inventaris-kendaraan');
   const [dataKendaraan, setDataKendaraan] = useState<KendaraanRecord[]>([]);
   const [loading, setLoading] = useState(true);
-  const [, setSaving] = useState(false);
+  const [saving, setSaving] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [showModal, setShowModal] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -115,6 +115,7 @@ export default function InventarisKendaraanPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (saving) return;
     if (editingId && !canEdit) {
       showToast.error('Hanya Administrator yang memiliki hak akses untuk mengubah (edit) data!');
       return;
@@ -151,6 +152,7 @@ export default function InventarisKendaraanPage() {
             prev.map((item) => (item.id === editingId ? { ...item, ...formData } : item))
           );
           showToast.success('Data kendaraan dinas berhasil diperbarui!');
+          setShowModal(false);
         } else {
           showToast.error('Gagal memperbarui: ' + json.error);
         }
@@ -176,6 +178,7 @@ export default function InventarisKendaraanPage() {
           };
           setDataKendaraan((prev) => [...prev, newRecord]);
           showToast.success('Data kendaraan dinas baru berhasil ditambahkan!');
+          setShowModal(false);
         } else {
           showToast.error('Gagal menyimpan: ' + json.error);
         }
@@ -185,7 +188,6 @@ export default function InventarisKendaraanPage() {
     } finally {
       setSaving(false);
     }
-    setShowModal(false);
   };
 
   // Filter Data
@@ -296,6 +298,7 @@ export default function InventarisKendaraanPage() {
         setFormData={setFormData}
         onClose={() => setShowModal(false)}
         onSubmit={handleSubmit}
+        isSubmitting={saving}
       />
     </div>
   );

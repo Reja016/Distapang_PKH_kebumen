@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { ShieldCheck } from 'lucide-react';
+import { ShieldCheck, Loader2 } from 'lucide-react';
 import { NKVRecord } from './types';
 
 interface NkvModalProps {
@@ -11,6 +11,7 @@ interface NkvModalProps {
   setFormData: React.Dispatch<React.SetStateAction<Omit<NKVRecord, 'id'>>>;
   onClose: () => void;
   onSubmit: (e: React.FormEvent) => void;
+  isSubmitting?: boolean;
 }
 
 export default function NkvModal({
@@ -20,6 +21,7 @@ export default function NkvModal({
   setFormData,
   onClose,
   onSubmit,
+  isSubmitting = false,
 }: NkvModalProps) {
   if (!show) return null;
 
@@ -211,9 +213,17 @@ export default function NkvModal({
             </button>
             <button
               type="submit"
-              className="flex-1 min-h-touch h-11 px-6 rounded-xl bg-purple-600 hover:bg-purple-700 text-white text-xs sm:text-sm font-bold shadow-xs transition-all cursor-pointer"
+              disabled={isSubmitting}
+              className="flex-1 min-h-touch h-11 px-6 rounded-xl bg-purple-600 hover:bg-purple-700 disabled:opacity-50 text-white text-xs sm:text-sm font-bold shadow-xs transition-all cursor-pointer flex items-center justify-center gap-2"
             >
-              {editingId ? 'Simpan Perubahan NKV' : 'Simpan Unit Usaha NKV'}
+              {isSubmitting && <Loader2 size={16} className="animate-spin" />}
+              <span>
+                {isSubmitting
+                  ? 'Menyimpan...'
+                  : editingId
+                  ? 'Simpan Perubahan NKV'
+                  : 'Simpan Unit Usaha NKV'}
+              </span>
             </button>
           </div>
         </form>

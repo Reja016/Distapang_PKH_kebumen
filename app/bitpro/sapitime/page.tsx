@@ -81,6 +81,8 @@ export default function SapiTimePage() {
   const [showAuditModal, setShowAuditModal] = useState(false);
   const [auditTarget, setAuditTarget] = useState<any | null>(null);
   const [selectedCattleForLapor, setSelectedCattleForLapor] = useState<Cattle | null>(null);
+  const [isSavingModal, setIsSavingModal] = useState(false);
+  const [isSavingIB, setIsSavingIB] = useState(false);
 
   // Set default active tab saat role sudah siap
   useEffect(() => {
@@ -186,44 +188,51 @@ export default function SapiTimePage() {
 
   // --- CRUD KE MYSQL ---
   const handleAddCattle = async () => {
+    if (isSavingModal) return;
     if (!canCreate) {
       alert('Anda tidak memiliki izin untuk menambah data sapi.');
       return;
     }
-    const newId = `ST${String(cattleList.length + 1).padStart(3, '0')}`;
-    const fallbackName = (formData.name || '').trim() || (formData.registrationNumber || '').trim() || `Sapi ${newId}`;
+    setIsSavingModal(true);
+    try {
+      const newId = `ST${String(cattleList.length + 1).padStart(3, '0')}`;
+      const fallbackName = (formData.name || '').trim() || (formData.registrationNumber || '').trim() || `Sapi ${newId}`;
 
-    const newC: Cattle = {
-      id: newId,
-      name: fallbackName,
-      ownerName: formData.ownerName || '',
-      ownerPhone: formData.ownerPhone || '',
-      registrationNumber: formData.registrationNumber || '',
-      nik: formData.nik || '',
-      breed: formData.breed || 'PO',
-      birthDate: formData.birthDate || '',
-      status: formData.status || 'Estrus',
-      lastEstrus: formData.lastEstrus || '',
-      cycleLength: Number(formData.cycleLength) || 21,
-      inseminations: [],
-      notes: formData.notes || '',
-      pregnancyDate: formData.pregnancyDate || '',
-      kecamatan: formData.kecamatan || '',
-      desa: formData.desa || '',
-    };
+      const newC: Cattle = {
+        id: newId,
+        name: fallbackName,
+        ownerName: formData.ownerName || '',
+        ownerPhone: formData.ownerPhone || '',
+        registrationNumber: formData.registrationNumber || '',
+        nik: formData.nik || '',
+        breed: formData.breed || 'PO',
+        birthDate: formData.birthDate || '',
+        status: formData.status || 'Estrus',
+        lastEstrus: formData.lastEstrus || '',
+        cycleLength: Number(formData.cycleLength) || 21,
+        inseminations: [],
+        notes: formData.notes || '',
+        pregnancyDate: formData.pregnancyDate || '',
+        kecamatan: formData.kecamatan || '',
+        desa: formData.desa || '',
+      };
 
-    setShowAddModal(false);
-    setFormData({ status: 'Estrus', cycleLength: 21, kecamatan: '', desa: '', ownerName: '', ownerPhone: '', registrationNumber: '', nik: '' });
+      const historyObj = {
+        type: 'cattle_added',
+        cattle: newC.name,
+        cattleId: newC.id,
+        description: `Sapi baru ditambahkan (${newC.breed}, Pemilik: ${newC.ownerName || 'Peternak'})`,
+        icon: '🐄',
+      };
 
-    const historyObj = {
-      type: 'cattle_added',
-      cattle: newC.name,
-      cattleId: newC.id,
-      description: `Sapi baru ditambahkan (${newC.breed}, Pemilik: ${newC.ownerName || 'Peternak'})`,
-      icon: '🐄',
-    };
-
-    await executeApi('add_cattle', newC, historyObj);
+      const ok = await executeApi('add_cattle', newC, historyObj);
+      if (ok) {
+        setShowAddModal(false);
+        setFormData({ status: 'Estrus', cycleLength: 21, kecamatan: '', desa: '', ownerName: '', ownerPhone: '', registrationNumber: '', nik: '' });
+      }
+    } finally {
+      setIsSavingModal(false);
+    }
   };
 
   const handleEditCattle = (cattle: Cattle) => {
@@ -248,37 +257,44 @@ export default function SapiTimePage() {
 
   const handleUpdateCattle = async () => {
     if (!editingCattle) return;
-    const fallbackName = (formData.name || '').trim() || (formData.registrationNumber || '').trim() || editingCattle.id;
+    if (isSavingModal) return;
+    setIsSavingModal(true);
+    try {
+      const fallbackName = (formData.name || '').trim() || (formData.registrationNumber || '').trim() || editingCattle.id;
 
-    const updatedCattle: Cattle = {
-      ...editingCattle,
-      name: fallbackName,
-      ownerName: formData.ownerName,
-      ownerPhone: formData.ownerPhone,
-      registrationNumber: formData.registrationNumber,
-      nik: formData.nik,
-      breed: formData.breed,
-      birthDate: formData.birthDate,
-      status: formData.status,
-      lastEstrus: formData.lastEstrus,
-      cycleLength: Number(formData.cycleLength) || 21,
-      pregnancyDate: formData.pregnancyDate,
-      kecamatan: formData.kecamatan,
-      desa: formData.desa,
-    };
+      const updatedCattle: Cattle = {
+        ...editingCattle,
+        name: fallbackName,
+        ownerName: formData.ownerName,
+        ownerPhone: formData.ownerPhone,
+        registrationNumber: formData.registrationNumber,
+        nik: formData.nik,
+        breed: formData.breed,
+        birthDate: formData.birthDate,
+        status: formData.status,
+        lastEstrus: formData.lastEstrus,
+        cycleLength: Number(formData.cycleLength) || 21,
+        pregnancyDate: formData.pregnancyDate,
+        kecamatan: formData.kecamatan,
+        desa: formData.desa,
+      };
 
-    setShowEditModal(false);
-    setEditingCattle(null);
+      const historyObj = {
+        type: 'cattle_updated',
+        cattle: updatedCattle.name,
+        cattleId: updatedCattle.id,
+        description: `Data sapi diperbarui (Status: ${updatedCattle.status})`,
+        icon: '✏️',
+      };
 
-    const historyObj = {
-      type: 'cattle_updated',
-      cattle: updatedCattle.name,
-      cattleId: updatedCattle.id,
-      description: `Data sapi diperbarui (Status: ${updatedCattle.status})`,
-      icon: '✏️',
-    };
-
-    await executeApi('update_cattle', updatedCattle, historyObj);
+      const ok = await executeApi('update_cattle', updatedCattle, historyObj);
+      if (ok) {
+        setShowEditModal(false);
+        setEditingCattle(null);
+      }
+    } finally {
+      setIsSavingModal(false);
+    }
   };
 
   const handleDeleteCattle = async (id: string) => {
@@ -307,64 +323,70 @@ export default function SapiTimePage() {
   };
 
   const handleAddInsemination = async () => {
-    const pkbDate = new Date(ibFormData.date);
-    pkbDate.setDate(pkbDate.getDate() + 90);
-    const rekomendasiPkb = pkbDate.toLocaleDateString('id-ID');
+    if (isSavingIB) return;
+    setIsSavingIB(true);
+    try {
+      const pkbDate = new Date(ibFormData.date);
+      pkbDate.setDate(pkbDate.getDate() + 90);
+      const rekomendasiPkb = pkbDate.toLocaleDateString('id-ID');
 
-    const localUser = getAuthSession();
-    const effectiveInseminator = ibFormData.inseminatorName || userName || localUser?.nama || 'Petugas';
+      const localUser = getAuthSession();
+      const effectiveInseminator = ibFormData.inseminatorName || userName || localUser?.nama || 'Petugas';
 
-    const newIB = {
-      id: Date.now(),
-      cattle_id: selectedCattleForIB?.id,
-      ...ibFormData,
-      inseminatorName: effectiveInseminator,
-      id_user: localUser?.id,
-      rekomendasiPkb,
-    };
+      const newIB = {
+        id: Date.now(),
+        cattle_id: selectedCattleForIB?.id,
+        ...ibFormData,
+        inseminatorName: effectiveInseminator,
+        id_user: localUser?.id,
+        rekomendasiPkb,
+      };
 
-    const historyObj = {
-      type: 'insemination_added',
-      cattle: selectedCattleForIB?.name,
-      cattleId: selectedCattleForIB?.id,
-      description: `Inseminasi Buatan (${newIB.kecamatan}, ${newIB.desa}). Petugas: ${effectiveInseminator}. PKB: ${rekomendasiPkb}`,
-      icon: '💉',
-    };
+      const historyObj = {
+        type: 'insemination_added',
+        cattle: selectedCattleForIB?.name,
+        cattleId: selectedCattleForIB?.id,
+        description: `Inseminasi Buatan (${newIB.kecamatan}, ${newIB.desa}). Petugas: ${effectiveInseminator}. PKB: ${rekomendasiPkb}`,
+        icon: '💉',
+      };
 
-    fetch('https://empty-yak-8.hooks.n8n.cloud/webhook/8b511961-05c4-4392-b818-07c89ccff71d', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        statusOperasi: 'BARU',
-        idSapi: selectedCattleForIB?.id,
-        namaSapi: selectedCattleForIB?.name,
-        tanggalIB: newIB.date,
-        waktu: newIB.time,
-        kecamatan: newIB.kecamatan,
-        desa: newIB.desa,
-        inseminator: effectiveInseminator,
-        kodeStraw: newIB.strawCode,
-        namaPejantan: newIB.bullName,
-        rasPejantan: newIB.bullBreed,
-        rekomendasiPkb: newIB.rekomendasiPkb,
-        catatan: newIB.notes,
-        idInseminasi: newIB.id,
-      }),
-    }).catch(console.warn);
+      fetch('https://empty-yak-8.hooks.n8n.cloud/webhook/8b511961-05c4-4392-b818-07c89ccff71d', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          statusOperasi: 'BARU',
+          idSapi: selectedCattleForIB?.id,
+          namaSapi: selectedCattleForIB?.name,
+          tanggalIB: newIB.date,
+          waktu: newIB.time,
+          kecamatan: newIB.kecamatan,
+          desa: newIB.desa,
+          inseminator: effectiveInseminator,
+          kodeStraw: newIB.strawCode,
+          namaPejantan: newIB.bullName,
+          rasPejantan: newIB.bullBreed,
+          rekomendasiPkb: newIB.rekomendasiPkb,
+          catatan: newIB.notes,
+          idInseminasi: newIB.id,
+        }),
+      }).catch(console.warn);
 
-    setCattleList(
-      cattleList.map((c) =>
-        c.id === selectedCattleForIB?.id
-          ? { ...c, ibDate: newIB.date, inseminations: [...(c.inseminations || []), newIB] }
-          : c
-      )
-    );
-    setShowIBModal(false);
-    setIbFormData({});
-    setSelectedCattleForIB(null);
-    const success = await executeApi('add_ib', newIB, historyObj);
-    if (success) {
-      alert('Data pelayanan IB berhasil disimpan & disinkronkan ke Database!');
+      setCattleList(
+        cattleList.map((c) =>
+          c.id === selectedCattleForIB?.id
+            ? { ...c, ibDate: newIB.date, inseminations: [...(c.inseminations || []), newIB] }
+            : c
+        )
+      );
+      const success = await executeApi('add_ib', newIB, historyObj);
+      if (success) {
+        setShowIBModal(false);
+        setIbFormData({});
+        setSelectedCattleForIB(null);
+        alert('Data pelayanan IB berhasil disimpan & disinkronkan ke Database!');
+      }
+    } finally {
+      setIsSavingIB(false);
     }
   };
 
@@ -592,6 +614,7 @@ export default function SapiTimePage() {
         onSubmit={showEditModal ? handleUpdateCattle : handleAddCattle}
         formData={formData}
         setFormData={setFormData}
+        isSaving={isSavingModal}
       />
 
       {/* ── MODAL INPUT PELAYANAN IB ── */}
@@ -602,6 +625,7 @@ export default function SapiTimePage() {
         ibFormData={ibFormData}
         setIbFormData={setIbFormData}
         handleAddInsemination={handleAddInsemination}
+        isSaving={isSavingIB}
       />
 
       {/* ── MODAL TRACE SIKLUS SAPI ── */}

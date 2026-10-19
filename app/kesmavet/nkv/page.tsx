@@ -20,6 +20,7 @@ export default function NKVPage() {
   const [filterJenis, setFilterJenis] = useState('');
   const [showModal, setShowModal] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const [formData, setFormData] = useState<Omit<NKVRecord, 'id'>>({
     namaUsaha: '',
@@ -131,6 +132,7 @@ export default function NKVPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (isSubmitting) return;
     if (editingId && !canEdit) {
       showToast.error('Hanya Administrator yang berhak mengedit data NKV.');
       return;
@@ -143,7 +145,9 @@ export default function NKVPage() {
       showToast.warning('Nama Usaha wajib diisi!');
       return;
     }
+
     try {
+      setIsSubmitting(true);
       if (editingId) {
         const res = await fetch('/api/nkv', {
           method: 'PUT',
@@ -168,6 +172,7 @@ export default function NKVPage() {
             prev.map((item) => (item.id === editingId ? { ...item, ...formData } : item))
           );
           showToast.success('Data NKV berhasil diperbarui!');
+          setShowModal(false);
         } else {
           showToast.error('Gagal memperbarui: ' + json.error);
         }
@@ -196,14 +201,16 @@ export default function NKVPage() {
           };
           setDataNkv((prev) => [...prev, newRecord]);
           showToast.success('Data unit usaha baru berhasil ditambahkan!');
+          setShowModal(false);
         } else {
           showToast.error('Gagal menyimpan: ' + json.error);
         }
       }
     } catch {
       showToast.error('Terjadi kesalahan saat menyimpan data.');
+    } finally {
+      setIsSubmitting(false);
     }
-    setShowModal(false);
   };
 
   // Filter Data
@@ -324,6 +331,7 @@ export default function NKVPage() {
         setFormData={setFormData}
         onClose={() => setShowModal(false)}
         onSubmit={handleSubmit}
+        isSubmitting={isSubmitting}
       />
     </div>
   );
