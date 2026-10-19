@@ -144,6 +144,13 @@ export default function StokGudangKeswanPage() {
     loadGudangData();
   }, []);
 
+  // Redirect non-admin (petugas) ke tab distribusi jika mencoba mengakses tab dinas
+  useEffect(() => {
+    if (isReady && !isAdmin && (activeTab === 'dashboard' || activeTab === 'pemasukan')) {
+      setActiveTab('distribusi');
+    }
+  }, [isReady, isAdmin, activeTab]);
+
   // Handler Hapus Dropping
   const handleDeleteDropping = async (id: number) => {
     const ok = await showConfirm({
@@ -271,7 +278,7 @@ export default function StokGudangKeswanPage() {
             Refresh
           </button>
 
-          {canCreate && (
+          {isAdmin && canCreate && (
             <button
               onClick={() => {
                 setEditingBarang(null);
@@ -286,11 +293,15 @@ export default function StokGudangKeswanPage() {
         </div>
       </div>
 
-      {/* ── 4 TAB UTAMA (Folder Tab Model Monev KTT) ── */}
+      {/* ── TAB UTAMA (Folder Tab Model Monev KTT) ── */}
       <div className="flex gap-2 border-b border-slate-200 dark:border-slate-800 pb-px overflow-x-auto no-scrollbar scroll-smooth -mx-4 px-4 sm:mx-0 sm:px-0">
         {[
-          { key: 'dashboard', label: 'Dashboard & Stok Dinas', icon: Layers },
-          { key: 'pemasukan', label: `Pemasukan Dropping Dinas (${droppingDinas.length})`, icon: ArrowDownLeft },
+          ...(isAdmin
+            ? [
+                { key: 'dashboard', label: 'Dashboard & Stok Dinas', icon: Layers },
+                { key: 'pemasukan', label: `Pemasukan Dropping Dinas (${droppingDinas.length})`, icon: ArrowDownLeft },
+              ]
+            : []),
           { key: 'distribusi', label: `Distribusi & Berita Acara BA (${distribusi.length})`, icon: ArrowUpRight },
           { key: 'puskeswan', label: `Apotek Puskeswan & Rekam Penggunaan (${penggunaan.length})`, icon: Building2 },
         ].map((tab) => {
@@ -314,7 +325,7 @@ export default function StokGudangKeswanPage() {
       </div>
 
       {/* ── KONTEN TAB ── */}
-      {activeTab === 'dashboard' && (
+      {isAdmin && activeTab === 'dashboard' && (
         <GudangDashboardTab
           stokDinas={stokDinas}
           masterBarang={masterBarang}
@@ -331,7 +342,7 @@ export default function StokGudangKeswanPage() {
         />
       )}
 
-      {activeTab === 'pemasukan' && (
+      {isAdmin && activeTab === 'pemasukan' && (
         <PemasukanDinasTab
           droppings={droppingDinas}
           masterBarang={masterBarang}

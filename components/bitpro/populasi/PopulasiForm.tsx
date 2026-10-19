@@ -35,6 +35,7 @@ interface PopulasiFormProps {
   getCategoryCount: (catId: string) => number;
   calculateTotal: (prefix: string) => number;
   handleSave: (e: React.FormEvent) => Promise<void>;
+  isSaving?: boolean;
 }
 
 export default function PopulasiForm({
@@ -56,6 +57,7 @@ export default function PopulasiForm({
   getCategoryCount,
   calculateTotal,
   handleSave,
+  isSaving = false,
 }: PopulasiFormProps) {
   const currentIndex = CATEGORIES.findIndex((c) => c.id === activeCategory);
 
@@ -368,10 +370,20 @@ export default function PopulasiForm({
           )}
           <button
             type="submit"
-            className="w-full sm:w-auto min-h-touch h-11 px-6 rounded-xl bg-emerald-600 hover:bg-emerald-700 active:scale-95 text-white text-xs sm:text-sm font-bold shadow-xs transition-all cursor-pointer flex items-center justify-center gap-2"
+            disabled={isSaving}
+            className="w-full sm:w-auto min-h-touch h-11 px-6 rounded-xl bg-emerald-600 hover:bg-emerald-700 active:scale-95 disabled:opacity-60 disabled:cursor-not-allowed text-white text-xs sm:text-sm font-bold shadow-xs transition-all cursor-pointer flex items-center justify-center gap-2"
           >
-            <CheckCircle2 size={16} />
-            <span>{editIdx !== null ? 'Perbarui Data Desa' : 'Simpan Data Desa'}</span>
+            {isSaving ? (
+              <>
+                <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                <span>Menyimpan Data...</span>
+              </>
+            ) : (
+              <>
+                <CheckCircle2 size={16} />
+                <span>{editIdx !== null ? 'Perbarui Data Desa' : 'Simpan Data Desa'}</span>
+              </>
+            )}
           </button>
         </div>
       </div>

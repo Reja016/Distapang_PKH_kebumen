@@ -156,47 +156,90 @@ export async function POST(req: NextRequest) {
     const totals = calculateTotals(body);
     const petugas_nama = session?.nama || body.petugas_nama || 'Petugas Kesmavet';
 
-    const [result]: any = await pool.query(
-      `INSERT INTO hewan_kurban (
-        tanggal, tahun, kecamatan, desa, nama_lokasi, jenis_tempat,
-        sapi_jantan, sapi_betina, sapi_total,
-        kambing_jantan, kambing_betina, kambing_total,
-        domba_jantan, domba_betina, domba_total,
-        kerbau_jantan, kerbau_betina, kerbau_total,
-        total_hewan, keterangan, petugas_nama
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-      [
-        tanggal,
-        tahun,
-        kecamatan.trim(),
-        desa.trim(),
-        nama_lokasi.trim(),
-        (jenis_tempat || 'Masjid').trim(),
-        totals.sapi_jantan,
-        totals.sapi_betina,
-        totals.sapi_total,
-        totals.kambing_jantan,
-        totals.kambing_betina,
-        totals.kambing_total,
-        totals.domba_jantan,
-        totals.domba_betina,
-        totals.domba_total,
-        totals.kerbau_jantan,
-        totals.kerbau_betina,
-        totals.kerbau_total,
-        totals.total_hewan,
-        keterangan || null,
-        petugas_nama,
-      ]
+    // Cek apakah data untuk tanggal, kecamatan, desa, dan nama_lokasi yang sama sudah ada (mencegah duplikasi sinyal lag)
+    const [existing]: any = await pool.query(
+      `SELECT id FROM hewan_kurban WHERE tanggal = ? AND kecamatan = ? AND desa = ? AND nama_lokasi = ? LIMIT 1`,
+      [tanggal, kecamatan.trim(), desa.trim(), nama_lokasi.trim()]
     );
+
+    let recordId: number;
+
+    if (existing && existing.length > 0) {
+      recordId = existing[0].id;
+      await pool.query(
+        `UPDATE hewan_kurban SET
+          tahun = ?, jenis_tempat = ?,
+          sapi_jantan = ?, sapi_betina = ?, sapi_total = ?,
+          kambing_jantan = ?, kambing_betina = ?, kambing_total = ?,
+          domba_jantan = ?, domba_betina = ?, domba_total = ?,
+          kerbau_jantan = ?, kerbau_betina = ?, kerbau_total = ?,
+          total_hewan = ?, keterangan = ?, petugas_nama = ?
+        WHERE id = ?`,
+        [
+          tahun,
+          (jenis_tempat || 'Masjid').trim(),
+          totals.sapi_jantan,
+          totals.sapi_betina,
+          totals.sapi_total,
+          totals.kambing_jantan,
+          totals.kambing_betina,
+          totals.kambing_total,
+          totals.domba_jantan,
+          totals.domba_betina,
+          totals.domba_total,
+          totals.kerbau_jantan,
+          totals.kerbau_betina,
+          totals.kerbau_total,
+          totals.total_hewan,
+          keterangan || null,
+          petugas_nama,
+          recordId,
+        ]
+      );
+    } else {
+      const [result]: any = await pool.query(
+        `INSERT INTO hewan_kurban (
+          tanggal, tahun, kecamatan, desa, nama_lokasi, jenis_tempat,
+          sapi_jantan, sapi_betina, sapi_total,
+          kambing_jantan, kambing_betina, kambing_total,
+          domba_jantan, domba_betina, domba_total,
+          kerbau_jantan, kerbau_betina, kerbau_total,
+          total_hewan, keterangan, petugas_nama
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+        [
+          tanggal,
+          tahun,
+          kecamatan.trim(),
+          desa.trim(),
+          nama_lokasi.trim(),
+          (jenis_tempat || 'Masjid').trim(),
+          totals.sapi_jantan,
+          totals.sapi_betina,
+          totals.sapi_total,
+          totals.kambing_jantan,
+          totals.kambing_betina,
+          totals.kambing_total,
+          totals.domba_jantan,
+          totals.domba_betina,
+          totals.domba_total,
+          totals.kerbau_jantan,
+          totals.kerbau_betina,
+          totals.kerbau_total,
+          totals.total_hewan,
+          keterangan || null,
+          petugas_nama,
+        ]
+      );
+      recordId = result.insertId;
+    }
 
     // Non-blocking log activity
     logActivity({
       module: 'kesmavet',
       submenu: 'hewan-kurban',
       tableName: 'hewan_kurban',
-      recordId: result.insertId,
-      action: 'CREATE',
+      recordId,
+      action: existing && existing.length > 0 ? 'UPDATE' : 'CREATE',
       userName: petugas_nama,
       details: {
         lokasi: nama_lokasi,
@@ -209,7 +252,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({
       success: true,
       message: 'Data pemotongan hewan kurban berhasil dicatat!',
-      insertId: result.insertId,
+      insertId: recordId,
     });
   } catch (error: any) {
     console.error('Error POST /api/hewan-kurban:', error);

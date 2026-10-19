@@ -25,36 +25,38 @@ export async function GET() {
     // Deteksi Otomatis Tahun & Triwulan (TW) Terkini dari Database
     let activeTahun = 2025;
     let activeTriwulan = 4;
-    let isFrom2026 = false;
+    let isFromPopulasiDesa = false;
     let activeTwStr = 'TW 1';
 
     try {
-      // 1. Cek apakah ada data di tabel populasi_2026 terlebih dahulu
-      const [p26Rows]: any = await pool.query(`
-        SELECT tw, COUNT(*) as cnt 
-        FROM populasi_2026 
-        GROUP BY tw 
-        ORDER BY tw DESC
+      // 1. Cek apakah ada data di tabel universal populasi_desa
+      const [pdRows]: any = await pool.query(`
+        SELECT tahun, tw, COUNT(*) as cnt 
+        FROM populasi_desa 
+        GROUP BY tahun, tw 
+        ORDER BY tahun DESC, tw DESC
       `);
-      if (p26Rows && p26Rows.length > 0) {
-        // Cari TW tertinggi yang ada datanya (misal: 'TW 4', 'TW 3', 'TW 2', 'TW 1')
-        const sorted = p26Rows.sort((a: any, b: any) => {
+      if (pdRows && pdRows.length > 0) {
+        // Cari tahun tertinggi, lalu TW tertinggi di tahun tersebut
+        const sorted = pdRows.sort((a: any, b: any) => {
+          const yearDiff = (Number(b.tahun) || 0) - (Number(a.tahun) || 0);
+          if (yearDiff !== 0) return yearDiff;
           const numA = parseInt(String(a.tw).replace(/\D/g, ''), 10) || 0;
           const numB = parseInt(String(b.tw).replace(/\D/g, ''), 10) || 0;
           return numB - numA;
         });
         if (sorted[0] && sorted[0].cnt > 0) {
-          activeTahun = 2026;
+          activeTahun = Number(sorted[0].tahun) || 2026;
           activeTwStr = sorted[0].tw;
           activeTriwulan = parseInt(String(activeTwStr).replace(/\D/g, ''), 10) || 1;
-          isFrom2026 = true;
+          isFromPopulasiDesa = true;
         }
       }
-    } catch (e26) {
+    } catch (ePd) {
       // Abaikan jika tabel belum siap
     }
 
-    if (!isFrom2026) {
+    if (!isFromPopulasiDesa) {
       try {
         const [periodRows]: any = await pool.query(`
           SELECT tahun, triwulan 
@@ -92,13 +94,13 @@ export async function GET() {
     try {
       let popMap: Record<string, number> = {};
 
-      if (isFrom2026) {
-        // Ambil data langsung dari tabel populasi_2026
-        const [rows2026]: any = await pool.query(
-          'SELECT data_v FROM populasi_2026 WHERE tw = ?',
-          [activeTwStr]
+      if (isFromPopulasiDesa) {
+        // Ambil data langsung dari tabel universal populasi_desa
+        const [rowsPd]: any = await pool.query(
+          'SELECT data_v FROM populasi_desa WHERE tahun = ? AND tw = ?',
+          [activeTahun, activeTwStr]
         );
-        for (const r of rows2026) {
+        for (const r of rowsPd) {
           const v = typeof r.data_v === 'string' ? JSON.parse(r.data_v) : (r.data_v || {});
           popMap.sapi_potong = (popMap.sapi_potong || 0) + (Number(v['Total Sapi Potong'] || v['sapi_potong']) || 0);
           popMap.sapi_perah = (popMap.sapi_perah || 0) + (Number(v['Total Sapi Perah'] || v['sapi_perah']) || 0);

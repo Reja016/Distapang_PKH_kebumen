@@ -37,6 +37,7 @@ function InputPopulasi2026Content() {
   const [editIdx, setEditIdx] = useState<number | null>(null);
   const [showBulkUpload, setShowBulkUpload] = useState(false);
   const [isLoadingData, setIsLoadingData] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
 
   const [showAuditModal, setShowAuditModal] = useState(false);
   const [auditTarget, setAuditTarget] = useState<any | null>(null);
@@ -183,13 +184,13 @@ function InputPopulasi2026Content() {
   const fetchDatabaseData = async () => {
     try {
       setIsLoadingData(true);
-      const res = await fetch(`/api/populasi-2026?tw=${encodeURIComponent(tw)}`);
+      const res = await fetch(`/api/populasi-2026?year=${encodeURIComponent(year)}&tw=${encodeURIComponent(tw)}`);
       const json = await res.json();
       if (json.success && Array.isArray(json.data)) {
         setSavedData(json.data);
       }
     } catch (err) {
-      console.error('Gagal mengambil data populasi 2026:', err);
+      console.error('Gagal mengambil data populasi:', err);
     } finally {
       setIsLoadingData(false);
     }
@@ -197,10 +198,12 @@ function InputPopulasi2026Content() {
 
   useEffect(() => {
     fetchDatabaseData();
-  }, [tw]);
+  }, [year, tw]);
 
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (isSaving) return;
+
     const isEdit = editIdx !== null;
     if (isEdit && !canEdit) {
       alert('Hanya Administrator yang berhak mengedit data populasi.');
@@ -215,6 +218,7 @@ function InputPopulasi2026Content() {
       return;
     }
 
+    setIsSaving(true);
     const completeValues = { ...values };
     [...RUMINANT_BIG, ...RUMINANT_SMALL, ...MONOGASTRIC].forEach((r) => {
       const tot = calculateTotal(r.prefix);
@@ -227,6 +231,7 @@ function InputPopulasi2026Content() {
       const editingItem = editIdx !== null ? savedData[editIdx] : null;
       const payload = {
         id: editingItem ? editingItem.id : undefined,
+        tahun: Number(year) || 2026,
         tw,
         kec,
         desa,
@@ -253,6 +258,8 @@ function InputPopulasi2026Content() {
       }
     } catch {
       alert('Terjadi kesalahan saat menyimpan ke database.');
+    } finally {
+      setIsSaving(false);
     }
   };
 
@@ -359,6 +366,7 @@ function InputPopulasi2026Content() {
               }
             });
             return {
+              tahun: Number(year) || 2026,
               tw: r['Triwulan'] || r['TW'] || tw,
               kec: String(r['Kecamatan'] || '').toUpperCase(),
               desa: String(r['Desa'] || '').toUpperCase(),
@@ -468,6 +476,7 @@ function InputPopulasi2026Content() {
             getCategoryCount={getCategoryCount}
             calculateTotal={calculateTotal}
             handleSave={handleSave}
+            isSaving={isSaving}
           />
         )}
 
@@ -494,10 +503,11 @@ function InputPopulasi2026Content() {
             setAuditTarget(null);
           }}
           recordId={auditTarget.id}
-          tableName="populasi_2026"
+          tableName="populasi_desa"
           moduleKey="bitpro"
           submenuKey="populasi-dan-produksi"
           availableFields={{
+            tahun: 'Tahun',
             tw: 'Triwulan',
             kecamatan: 'Kecamatan',
             desa: 'Desa',

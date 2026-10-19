@@ -404,11 +404,8 @@ export default function GudangDashboardTab({
         <div className="px-6 py-3 bg-slate-50/90 dark:bg-slate-800/50 border-t border-slate-100 dark:border-slate-800 text-xs text-slate-500 dark:text-slate-400 flex flex-col sm:flex-row items-center justify-between gap-2">
           <div className="flex items-center gap-2">
             <span className="inline-block w-2 h-2 rounded-full bg-emerald-500"></span>
-            <span>Menampilkan seluruh <strong>{filteredList.length}</strong> jenis barang dalam frame bergulir (scrollable).</span>
+            <span>Menampilkan seluruh <strong>{filteredList.length}</strong></span>
           </div>
-          <span className="text-[11px] text-slate-400 dark:text-slate-500">
-            Tinggi frame terkunci (~10 baris) &bull; Judul kolom tetap diam saat digulir
-          </span>
         </div>
       </div>
     </div>
