@@ -160,7 +160,7 @@ export default function InputHargaTab({
               <label className="block mb-1.5 text-xs font-bold text-slate-700 dark:text-slate-300">
                 Pilih Komoditas Ternak
               </label>
-              <div className="grid grid-cols-2 sm:grid-cols-5 gap-2">
+              <div className="grid grid-cols-3 gap-2.5">
                 {KOMODITAS_OPTIONS.map((komo) => (
                   <button
                     key={komo.nama}

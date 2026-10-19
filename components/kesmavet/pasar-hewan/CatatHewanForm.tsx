@@ -144,7 +144,7 @@ export default function CatatHewanForm({
               {editingItem ? `Edit Catatan Hewan (No. Urut #${editingItem.id})` : 'Form Catat Hewan Masuk'}
             </h2>
             <p className="text-xs text-slate-500 dark:text-slate-400">
-              Input cepat timbang &amp; layanan retribusi pasar hewan
+              Input cepat timbang &amp; layanan pasar hewan
             </p>
           </div>
         </div>
@@ -335,7 +335,7 @@ export default function CatatHewanForm({
           )}
         </div>
 
-        {/* Baris 5: Hasil PKB (jika ada layanan PKB) & Status Retribusi */}
+        {/* Baris 5: Hasil PKB (jika ada layanan PKB) & Status */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
           {formLayanan !== 'Timbang' && (
             <div className="p-3.5 rounded-2xl bg-purple-50/70 dark:bg-purple-950/40 border border-purple-200 dark:border-purple-900">
@@ -369,7 +369,7 @@ export default function CatatHewanForm({
             </div>
           )}
 
-          {/* Toggle Retribusi Lunas */}
+          {/* Toggle Lunas */}
           <div
             onClick={() => setFormSudahBayar(!formSudahBayar)}
             className={`p-3.5 rounded-2xl border transition-all cursor-pointer flex items-center justify-between gap-3 ${
@@ -380,7 +380,7 @@ export default function CatatHewanForm({
           >
             <div>
               <span className="text-xs font-black block text-slate-900 dark:text-white">
-                Status Retribusi Pasar
+                Status Retribusi Timbangan
               </span>
               <span className="text-xs text-slate-600 dark:text-slate-300 font-medium">
                 {formSudahBayar ? 'Lunas / Sudah Bayar' : 'Belum Lunas'}

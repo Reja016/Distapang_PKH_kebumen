@@ -135,37 +135,37 @@ export default function PasarHewanPage() {
               </h1>
             </div>
           </div>
-
-          {/* Tab Navigasi Submenu */}
-          <div className="flex items-center gap-1.5 p-1 bg-slate-100 dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 shrink-0">
-            <button
-              onClick={() => setActiveTab('catat')}
-              className={`px-3 py-1.5 sm:px-4 sm:py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer ${
-                activeTab === 'catat'
-                  ? 'bg-purple-600 text-white shadow-2xs'
-                  : 'text-slate-600 dark:text-slate-300 hover:bg-slate-200/60 dark:hover:bg-slate-700'
-              }`}
-            >
-              <Scale size={15} />
-              <span>Catat Hewan</span>
-            </button>
-            <button
-              onClick={() => setActiveTab('harga')}
-              className={`px-3 py-1.5 sm:px-4 sm:py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer ${
-                activeTab === 'harga'
-                  ? 'bg-purple-600 text-white shadow-2xs'
-                  : 'text-slate-600 dark:text-slate-300 hover:bg-slate-200/60 dark:hover:bg-slate-700'
-              }`}
-            >
-              <Tag size={15} />
-              <span>Input Harga</span>
-            </button>
-          </div>
         </div>
       </header>
 
       {/* ── KONTEN UTAMA ── */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6 space-y-6">
+        {/* ── SUBMENU TABS: CATAT HEWAN & INPUT HARGA (Folder-Style Tab) ── */}
+        <div className="flex gap-2 border-b border-slate-200 dark:border-slate-800 pb-px overflow-x-auto no-scrollbar scroll-smooth -mx-4 px-4 sm:mx-0 sm:px-0">
+          <button
+            onClick={() => setActiveTab('catat')}
+            className={`min-h-touch h-11 px-5 sm:px-6 rounded-t-xl text-xs sm:text-sm font-bold flex items-center gap-2 border-t border-x transition-all shrink-0 whitespace-nowrap cursor-pointer ${
+              activeTab === 'catat'
+                ? 'bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 text-purple-700 dark:text-purple-400 border-b-white dark:border-b-slate-900 translate-y-px shadow-xs'
+                : 'border-transparent text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white bg-slate-100/60 dark:bg-slate-800/40'
+            }`}
+          >
+            <Scale size={16} strokeWidth={2.5} />
+            <span>Catat Hewan</span>
+          </button>
+          <button
+            onClick={() => setActiveTab('harga')}
+            className={`min-h-touch h-11 px-5 sm:px-6 rounded-t-xl text-xs sm:text-sm font-bold flex items-center gap-2 border-t border-x transition-all shrink-0 whitespace-nowrap cursor-pointer ${
+              activeTab === 'harga'
+                ? 'bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 text-purple-700 dark:text-purple-400 border-b-white dark:border-b-slate-900 translate-y-px shadow-xs'
+                : 'border-transparent text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white bg-slate-100/60 dark:bg-slate-800/40'
+            }`}
+          >
+            <Tag size={16} strokeWidth={2.5} />
+            <span>Input Harga</span>
+          </button>
+        </div>
+
         {/* SUBMENU 1: CATAT HEWAN (Form Langsung Terbuka + Tabel Data) */}
         {activeTab === 'catat' && (
           <div className="space-y-6">

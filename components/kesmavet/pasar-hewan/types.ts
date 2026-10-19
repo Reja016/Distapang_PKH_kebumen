@@ -41,8 +41,6 @@ export const KOMODITAS_OPTIONS = [
   { nama: 'Sapi', icon: '🐂' },
   { nama: 'Kambing', icon: '🐐' },
   { nama: 'Domba', icon: '🐑' },
-  { nama: 'Kerbau', icon: '🐃' },
-  { nama: 'Kuda', icon: '🐎' },
 ];
 
 /**

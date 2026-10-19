@@ -37,7 +37,6 @@ async function ensureHargaTable() {
       ['Sapi', 52000, 53000, 52500, todayStr, 'per kg', 'Harga timbang berat hidup ternak per kg', 'Stabil', '🐂', 'Sistem'],
       ['Kambing', 80000, 82000, 81000, todayStr, 'per kg', 'Harga timbang berat hidup ternak per kg', 'Stabil', '🐐', 'Sistem'],
       ['Domba', 75000, 76000, 75500, todayStr, 'per kg', 'Harga timbang berat hidup ternak per kg', 'Stabil', '🐑', 'Sistem'],
-      ['Kerbau', 50000, 51000, 50500, todayStr, 'per kg', 'Harga timbang berat hidup ternak per kg', 'Stabil', '🐃', 'Sistem'],
     ];
 
     for (const d of defaults) {
@@ -49,6 +48,9 @@ async function ensureHargaTable() {
       );
     }
   }
+
+  // Bersihkan data Kerbau dan Kuda jika sebelumnya sudah tersimpan di database
+  await pool.query("DELETE FROM pasar_hewan_harga WHERE komoditas IN ('Kerbau', 'Kuda')");
 }
 
 // GET: Ambil daftar harga pasar terkini
@@ -105,8 +107,6 @@ export async function POST(req: NextRequest) {
       Sapi: '🐂',
       Kambing: '🐐',
       Domba: '🐑',
-      Kerbau: '🐃',
-      Kuda: '🐎',
     };
 
     const finalIcon = icon || defaultIcons[komoditas] || '🏷️';
