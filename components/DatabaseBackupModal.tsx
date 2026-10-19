@@ -144,7 +144,7 @@ export default function DatabaseBackupModal({ isOpen, onClose }: DatabaseBackupM
 
         if (!res.ok) {
           const errJson = await res.json().catch(() => ({}));
-          throw new Error(errJson.error || 'Password otorisasi backup salah atau tidak berlaku hari ini!');
+          throw new Error(errJson.error || 'Password otorisasi salah!');
         }
 
         const blob = await res.blob();

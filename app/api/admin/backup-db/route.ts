@@ -55,7 +55,7 @@ export async function GET(req: Request) {
       return NextResponse.json(
         {
           success: false,
-          error: 'Password otorisasi backup salah atau tidak berlaku untuk hari ini. Format: DDMMYYYY.',
+          error: 'Password otorisasi backup salah!',
         },
         { status: 403 }
       );
@@ -171,7 +171,7 @@ export async function POST(req: Request) {
       return NextResponse.json(
         {
           success: false,
-          error: 'Password otorisasi pemulihan salah atau tidak berlaku untuk hari ini. Format: DDMMYYYY.',
+          error: 'Password otorisasi salah!',
         },
         { status: 403 }
       );
