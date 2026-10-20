@@ -36,6 +36,13 @@ export const STATUS_KELAYAKAN_OPTIONS = [
   'Ditolak',
 ] as const;
 
+export const STATUS_POTONG_OPTIONS = [
+  'Boleh Dipotong',
+  'Tidak Boleh Dipotong',
+] as const;
+
+export type StatusPotong = typeof STATUS_POTONG_OPTIONS[number];
+
 export interface PencatatanPemotonganItem {
   id: number;
   tanggal: string;
@@ -47,6 +54,7 @@ export interface PencatatanPemotonganItem {
   rumpun_hewan: string;
   kategori_hewan: string;
   jumlah_ekor: number;
+  status_potong?: string | null;
   pemeriksaan_antemortem?: string | null;
   pemeriksaan_postmortem?: string | null;
   status_kelayakan: string;
@@ -69,6 +77,7 @@ export interface PencatatanFormData {
   rumpun_hewan: string;
   kategori_hewan: string;
   jumlah_ekor: number;
+  status_potong: string;
   pemeriksaan_antemortem: string;
   pemeriksaan_postmortem: string;
   status_kelayakan: string;
@@ -88,6 +97,7 @@ export const INITIAL_PENCATATAN_FORM: PencatatanFormData = {
   rumpun_hewan: 'Sapi PO',
   kategori_hewan: 'Jantan',
   jumlah_ekor: 1,
+  status_potong: 'Boleh Dipotong',
   pemeriksaan_antemortem: '',
   pemeriksaan_postmortem: '',
   status_kelayakan: 'Layak Konsumsi',

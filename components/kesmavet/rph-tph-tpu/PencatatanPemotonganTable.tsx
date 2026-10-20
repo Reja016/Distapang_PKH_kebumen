@@ -85,6 +85,8 @@ export default function PencatatanPemotonganTable({
   // Total Ringkasan
   const summary = useMemo(() => {
     let totalEkor = 0;
+    let totalBoleh = 0;
+    let totalTidakBoleh = 0;
     let totalLayak = 0;
     let totalBersyarat = 0;
     let totalDitolak = 0;
@@ -92,12 +94,18 @@ export default function PencatatanPemotonganTable({
     filteredData.forEach((d) => {
       const ekor = Number(d.jumlah_ekor) || 1;
       totalEkor += ekor;
-      if (d.status_kelayakan === 'Layak Konsumsi') totalLayak += ekor;
-      else if (d.status_kelayakan === 'Layak dengan Syarat') totalBersyarat += ekor;
-      else if (d.status_kelayakan === 'Ditolak') totalDitolak += ekor;
+      const isBoleh = (d.status_potong || 'Boleh Dipotong') === 'Boleh Dipotong';
+      if (isBoleh) {
+        totalBoleh += ekor;
+        if (d.status_kelayakan === 'Layak Konsumsi') totalLayak += ekor;
+        else if (d.status_kelayakan === 'Layak dengan Syarat') totalBersyarat += ekor;
+        else if (d.status_kelayakan === 'Ditolak') totalDitolak += ekor;
+      } else {
+        totalTidakBoleh += ekor;
+      }
     });
 
-    return { totalEkor, totalLayak, totalBersyarat, totalDitolak };
+    return { totalEkor, totalBoleh, totalTidakBoleh, totalLayak, totalBersyarat, totalDitolak };
   }, [filteredData]);
 
   // Export Excel dalam format tabel yang rapi dan terstruktur
@@ -119,9 +127,10 @@ export default function PencatatanPemotonganTable({
         'Rumpun Hewan': d.rumpun_hewan || '',
         Kategori: d.kategori_hewan || '',
         'Jumlah (Ekor)': Number(d.jumlah_ekor) || 1,
+        'Izin Pemotongan': d.status_potong || 'Boleh Dipotong',
         'Pemeriksaan Antemortem': d.pemeriksaan_antemortem || '-',
-        'Pemeriksaan Postmortem': d.pemeriksaan_postmortem || '-',
-        'Status Kelayakan Daging': d.status_kelayakan || 'Layak Konsumsi',
+        'Pemeriksaan Postmortem': (d.status_potong || 'Boleh Dipotong') === 'Tidak Boleh Dipotong' ? 'Tidak Dilakukan (Hewan Ditolak Potong)' : (d.pemeriksaan_postmortem || '-'),
+        'Status Kelayakan Daging': (d.status_potong || 'Boleh Dipotong') === 'Tidak Boleh Dipotong' ? 'Tidak Dipotong' : (d.status_kelayakan || 'Layak Konsumsi'),
         'Foto Antemortem': d.foto_antemortem ? 'Ada Foto' : 'Tidak Ada',
         'Foto Postmortem': d.foto_postmortem ? 'Ada Foto' : 'Tidak Ada',
         'Dokumen PDF': d.dokumen_pdf_nama || (d.dokumen_pdf ? 'Ada Dokumen' : 'Tidak Ada'),
@@ -142,6 +151,7 @@ export default function PencatatanPemotonganTable({
         { wch: 18 }, // Rumpun
         { wch: 20 }, // Kategori
         { wch: 14 }, // Jumlah
+        { wch: 20 }, // Izin Pemotongan
         { wch: 32 }, // Antemortem
         { wch: 32 }, // Postmortem
         { wch: 22 }, // Status
@@ -169,10 +179,10 @@ export default function PencatatanPemotonganTable({
   return (
     <div className="space-y-5">
       {/* ── CARD STATISTIK RINGKASAN ── */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
         <div className="p-4 rounded-2xl bg-white dark:bg-slate-900 border border-purple-100 dark:border-slate-800 shadow-xs">
           <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider block">
-            Total Dipotong
+            Total Diperiksa
           </span>
           <span className="text-xl sm:text-2xl font-black text-purple-700 dark:text-purple-400 mt-1 block">
             {summary.totalEkor.toLocaleString('id-ID')} <span className="text-xs font-semibold text-slate-500">Ekor</span>
@@ -181,28 +191,37 @@ export default function PencatatanPemotonganTable({
 
         <div className="p-4 rounded-2xl bg-white dark:bg-slate-900 border border-emerald-100 dark:border-slate-800 shadow-xs">
           <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider block">
-            Layak Konsumsi
+            Boleh Dipotong
           </span>
           <span className="text-xl sm:text-2xl font-black text-emerald-600 dark:text-emerald-400 mt-1 block">
-            {summary.totalLayak.toLocaleString('id-ID')} <span className="text-xs font-semibold text-slate-500">Ekor</span>
-          </span>
-        </div>
-
-        <div className="p-4 rounded-2xl bg-white dark:bg-slate-900 border border-amber-100 dark:border-slate-800 shadow-xs">
-          <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider block">
-            Layak Bersyarat
-          </span>
-          <span className="text-xl sm:text-2xl font-black text-amber-600 dark:text-amber-400 mt-1 block">
-            {summary.totalBersyarat.toLocaleString('id-ID')} <span className="text-xs font-semibold text-slate-500">Ekor</span>
+            {summary.totalBoleh.toLocaleString('id-ID')} <span className="text-xs font-semibold text-slate-500">Ekor</span>
           </span>
         </div>
 
         <div className="p-4 rounded-2xl bg-white dark:bg-slate-900 border border-rose-100 dark:border-slate-800 shadow-xs">
           <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider block">
-            Ditolak / Afkir
+            Tidak Boleh Potong
           </span>
           <span className="text-xl sm:text-2xl font-black text-rose-600 dark:text-rose-400 mt-1 block">
-            {summary.totalDitolak.toLocaleString('id-ID')} <span className="text-xs font-semibold text-slate-500">Ekor</span>
+            {summary.totalTidakBoleh.toLocaleString('id-ID')} <span className="text-xs font-semibold text-slate-500">Ekor</span>
+          </span>
+        </div>
+
+        <div className="p-4 rounded-2xl bg-white dark:bg-slate-900 border border-teal-100 dark:border-slate-800 shadow-xs">
+          <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider block">
+            Daging Layak
+          </span>
+          <span className="text-xl sm:text-2xl font-black text-teal-600 dark:text-teal-400 mt-1 block">
+            {summary.totalLayak.toLocaleString('id-ID')} <span className="text-xs font-semibold text-slate-500">Ekor</span>
+          </span>
+        </div>
+
+        <div className="p-4 rounded-2xl bg-white dark:bg-slate-900 border border-amber-100 dark:border-slate-800 shadow-xs col-span-2 sm:col-span-1">
+          <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider block">
+            Layak Bersyarat
+          </span>
+          <span className="text-xl sm:text-2xl font-black text-amber-600 dark:text-amber-400 mt-1 block">
+            {summary.totalBersyarat.toLocaleString('id-ID')} <span className="text-xs font-semibold text-slate-500">Ekor</span>
           </span>
         </div>
       </div>
@@ -314,8 +333,9 @@ export default function PencatatanPemotonganTable({
                 <th className="p-3.5 border-r border-purple-800">Pemilik &amp; Alamat</th>
                 <th className="p-3.5 border-r border-purple-800">Jenis Ternak</th>
                 <th className="p-3.5 text-center border-r border-purple-800">Jumlah</th>
+                <th className="p-3.5 text-center border-r border-purple-800">Izin Potong</th>
                 <th className="p-3.5 border-r border-purple-800">Pemeriksaan</th>
-                <th className="p-3.5 text-center border-r border-purple-800">Kelayakan</th>
+                <th className="p-3.5 text-center border-r border-purple-800">Kelayakan Daging</th>
                 <th className="p-3.5 text-center border-r border-purple-800">Bukti</th>
                 <th className="p-3.5 text-center w-28">Aksi</th>
               </tr>
@@ -323,7 +343,7 @@ export default function PencatatanPemotonganTable({
             <tbody className="divide-y divide-slate-200 dark:divide-slate-800 text-slate-700 dark:text-slate-200 font-medium">
               {isLoading ? (
                 <tr>
-                  <td colSpan={10} className="p-10 text-center text-slate-400">
+                  <td colSpan={11} className="p-10 text-center text-slate-400">
                     <div className="flex items-center justify-center gap-2">
                       <div className="w-5 h-5 border-2 border-purple-600 border-t-transparent rounded-full animate-spin" />
                       <span>Memuat data pencatatan pemotongan...</span>
@@ -332,7 +352,7 @@ export default function PencatatanPemotonganTable({
                 </tr>
               ) : filteredData.length === 0 ? (
                 <tr>
-                  <td colSpan={10} className="p-10 text-center text-slate-400">
+                  <td colSpan={11} className="p-10 text-center text-slate-400">
                     Belum ada data pemotongan hewan yang sesuai dengan filter.
                   </td>
                 </tr>
@@ -409,6 +429,24 @@ export default function PencatatanPemotonganTable({
                         </span>
                       </td>
 
+                      {/* Izin Pemotongan */}
+                      <td className="p-3 text-center whitespace-nowrap">
+                        <span
+                          className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-xl text-[10px] font-black uppercase tracking-wider ${
+                            (row.status_potong || 'Boleh Dipotong') === 'Boleh Dipotong'
+                              ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-300'
+                              : 'bg-rose-100 text-rose-800 dark:bg-rose-950/60 dark:text-rose-300'
+                          }`}
+                        >
+                          {(row.status_potong || 'Boleh Dipotong') === 'Boleh Dipotong' ? (
+                            <CheckCircle2 size={12} />
+                          ) : (
+                            <XCircle size={12} />
+                          )}
+                          <span>{row.status_potong || 'Boleh Dipotong'}</span>
+                        </span>
+                      </td>
+
                       {/* Pemeriksaan (Antemortem / Postmortem Ringkas) */}
                       <td className="p-3 max-w-[200px]">
                         {row.pemeriksaan_antemortem && (
@@ -416,36 +454,46 @@ export default function PencatatanPemotonganTable({
                             <span className="font-bold text-purple-700">AM:</span> {row.pemeriksaan_antemortem}
                           </div>
                         )}
-                        {row.pemeriksaan_postmortem && (
+                        {(row.status_potong || 'Boleh Dipotong') === 'Tidak Boleh Dipotong' ? (
+                          <div className="text-[10px] text-rose-600 dark:text-rose-400 font-bold mt-0.5">
+                            Postmortem ditiadakan (Tolak Potong)
+                          </div>
+                        ) : row.pemeriksaan_postmortem ? (
                           <div className="truncate text-[11px] text-slate-700 dark:text-slate-300 mt-0.5" title={row.pemeriksaan_postmortem}>
                             <span className="font-bold text-emerald-700">PM:</span> {row.pemeriksaan_postmortem}
                           </div>
-                        )}
-                        {!row.pemeriksaan_antemortem && !row.pemeriksaan_postmortem && (
+                        ) : null}
+                        {!row.pemeriksaan_antemortem && !row.pemeriksaan_postmortem && (row.status_potong || 'Boleh Dipotong') === 'Boleh Dipotong' && (
                           <span className="text-slate-400 italic text-[11px]">Belum diisi</span>
                         )}
                       </td>
 
-                      {/* Status Kelayakan */}
+                      {/* Status Kelayakan Daging */}
                       <td className="p-3 text-center whitespace-nowrap">
-                        <span
-                          className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-xl text-[10px] font-black uppercase tracking-wider ${
-                            row.status_kelayakan === 'Layak Konsumsi'
-                              ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-300'
-                              : row.status_kelayakan === 'Layak dengan Syarat'
-                              ? 'bg-amber-100 text-amber-800 dark:bg-amber-950/60 dark:text-amber-300'
-                              : 'bg-rose-100 text-rose-800 dark:bg-rose-950/60 dark:text-rose-300'
-                          }`}
-                        >
-                          {row.status_kelayakan === 'Layak Konsumsi' ? (
-                            <CheckCircle2 size={12} />
-                          ) : row.status_kelayakan === 'Layak dengan Syarat' ? (
-                            <AlertTriangle size={12} />
-                          ) : (
-                            <XCircle size={12} />
-                          )}
-                          <span>{row.status_kelayakan}</span>
-                        </span>
+                        {(row.status_potong || 'Boleh Dipotong') === 'Tidak Boleh Dipotong' || row.status_kelayakan === 'Tidak Dipotong' ? (
+                          <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-xl text-[10px] font-bold bg-slate-100 text-slate-500 dark:bg-slate-800 dark:text-slate-400">
+                            - (Tidak Dipotong)
+                          </span>
+                        ) : (
+                          <span
+                            className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-xl text-[10px] font-black uppercase tracking-wider ${
+                              row.status_kelayakan === 'Layak Konsumsi'
+                                ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-300'
+                                : row.status_kelayakan === 'Layak dengan Syarat'
+                                ? 'bg-amber-100 text-amber-800 dark:bg-amber-950/60 dark:text-amber-300'
+                                : 'bg-rose-100 text-rose-800 dark:bg-rose-950/60 dark:text-rose-300'
+                            }`}
+                          >
+                            {row.status_kelayakan === 'Layak Konsumsi' ? (
+                              <CheckCircle2 size={12} />
+                            ) : row.status_kelayakan === 'Layak dengan Syarat' ? (
+                              <AlertTriangle size={12} />
+                            ) : (
+                              <XCircle size={12} />
+                            )}
+                            <span>{row.status_kelayakan || 'Layak Konsumsi'}</span>
+                          </span>
+                        )}
                       </td>
 
                       {/* Bukti Foto & Dokumen */}
@@ -501,28 +549,24 @@ export default function PencatatanPemotonganTable({
                           </button>
 
                           {/* Edit */}
-                          {canEdit && (
-                            <button
-                              type="button"
-                              onClick={() => onEdit(row)}
-                              className="p-1.5 rounded-lg text-slate-500 hover:text-blue-700 hover:bg-blue-50 dark:hover:bg-slate-800 transition-colors cursor-pointer"
-                              title="Edit Pencatatan"
-                            >
-                              <Edit2 size={15} />
-                            </button>
-                          )}
+                          <button
+                            type="button"
+                            onClick={() => onEdit(row)}
+                            className="p-1.5 rounded-lg text-slate-500 hover:text-blue-700 hover:bg-blue-50 dark:hover:bg-slate-800 transition-colors cursor-pointer"
+                            title="Edit Pencatatan"
+                          >
+                            <Edit2 size={15} />
+                          </button>
 
                           {/* Hapus */}
-                          {(canEdit || isAdmin) && (
-                            <button
-                              type="button"
-                              onClick={() => onDelete(row.id)}
-                              className="p-1.5 rounded-lg text-slate-500 hover:text-rose-700 hover:bg-rose-50 dark:hover:bg-slate-800 transition-colors cursor-pointer"
-                              title="Hapus Pencatatan"
-                            >
-                              <Trash2 size={15} />
-                            </button>
-                          )}
+                          <button
+                            type="button"
+                            onClick={() => onDelete(row.id)}
+                            className="p-1.5 rounded-lg text-slate-500 hover:text-rose-700 hover:bg-rose-50 dark:hover:bg-slate-800 transition-colors cursor-pointer"
+                            title="Hapus Pencatatan"
+                          >
+                            <Trash2 size={15} />
+                          </button>
                         </div>
                       </td>
                     </tr>
@@ -597,18 +641,31 @@ export default function PencatatanPemotonganTable({
               </div>
 
               <div className="p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-800/40 space-y-1">
-                <span className="text-slate-400 font-bold block">Status Kelayakan Daging</span>
-                <span
-                  className={`inline-block px-2.5 py-0.5 rounded-full text-xs font-black uppercase tracking-wider mt-0.5 ${
-                    detailItem.status_kelayakan === 'Layak Konsumsi'
-                      ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-300'
-                      : detailItem.status_kelayakan === 'Layak dengan Syarat'
-                      ? 'bg-amber-100 text-amber-800 dark:bg-amber-950/60 dark:text-amber-300'
-                      : 'bg-rose-100 text-rose-800 dark:bg-rose-950/60 dark:text-rose-300'
-                  }`}
-                >
-                  {detailItem.status_kelayakan}
-                </span>
+                <span className="text-slate-400 font-bold block">Izin &amp; Status Daging</span>
+                <div className="flex items-center gap-1.5 flex-wrap mt-0.5">
+                  <span
+                    className={`inline-block px-2.5 py-0.5 rounded-full text-xs font-black uppercase tracking-wider ${
+                      (detailItem.status_potong || 'Boleh Dipotong') === 'Boleh Dipotong'
+                        ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-300'
+                        : 'bg-rose-100 text-rose-800 dark:bg-rose-950/60 dark:text-rose-300'
+                    }`}
+                  >
+                    {detailItem.status_potong || 'Boleh Dipotong'}
+                  </span>
+                  {(detailItem.status_potong || 'Boleh Dipotong') === 'Boleh Dipotong' && (
+                    <span
+                      className={`inline-block px-2.5 py-0.5 rounded-full text-xs font-black uppercase tracking-wider ${
+                        detailItem.status_kelayakan === 'Layak Konsumsi'
+                          ? 'bg-teal-100 text-teal-800 dark:bg-teal-950/60 dark:text-teal-300'
+                          : detailItem.status_kelayakan === 'Layak dengan Syarat'
+                          ? 'bg-amber-100 text-amber-800 dark:bg-amber-950/60 dark:text-amber-300'
+                          : 'bg-rose-100 text-rose-800 dark:bg-rose-950/60 dark:text-rose-300'
+                      }`}
+                    >
+                      {detailItem.status_kelayakan || 'Layak Konsumsi'}
+                    </span>
+                  )}
+                </div>
               </div>
             </div>
 
@@ -633,24 +690,38 @@ export default function PencatatanPemotonganTable({
                 )}
               </div>
 
-              <div className="p-4 rounded-2xl bg-emerald-50/50 dark:bg-emerald-950/30 border border-emerald-100 dark:border-emerald-900/40">
-                <span className="text-xs font-black text-emerald-900 dark:text-emerald-300 block mb-1">
-                  Hasil Pemeriksaan Postmortem (Setelah Potong):
-                </span>
-                <p className="text-xs text-slate-700 dark:text-slate-300 leading-relaxed whitespace-pre-wrap">
-                  {detailItem.pemeriksaan_postmortem || 'Tidak ada catatan pemeriksaan postmortem.'}
-                </p>
-                {detailItem.foto_postmortem && (
-                  <div className="mt-3">
-                    <span className="text-[11px] font-bold text-slate-500 block mb-1">Foto Bukti Postmortem:</span>
-                    <img
-                      src={detailItem.foto_postmortem}
-                      alt="Foto Postmortem"
-                      className="max-h-60 rounded-xl object-contain border border-emerald-200 dark:border-slate-700"
-                    />
+              {(detailItem.status_potong || 'Boleh Dipotong') === 'Boleh Dipotong' ? (
+                <div className="p-4 rounded-2xl bg-emerald-50/50 dark:bg-emerald-950/30 border border-emerald-100 dark:border-emerald-900/40">
+                  <span className="text-xs font-black text-emerald-900 dark:text-emerald-300 block mb-1">
+                    Hasil Pemeriksaan Postmortem (Setelah Potong):
+                  </span>
+                  <p className="text-xs text-slate-700 dark:text-slate-300 leading-relaxed whitespace-pre-wrap">
+                    {detailItem.pemeriksaan_postmortem || 'Tidak ada catatan pemeriksaan postmortem.'}
+                  </p>
+                  {detailItem.foto_postmortem && (
+                    <div className="mt-3">
+                      <span className="text-[11px] font-bold text-slate-500 block mb-1">Foto Bukti Postmortem:</span>
+                      <img
+                        src={detailItem.foto_postmortem}
+                        alt="Foto Postmortem"
+                        className="max-h-60 rounded-xl object-contain border border-emerald-200 dark:border-slate-700"
+                      />
+                    </div>
+                  )}
+                </div>
+              ) : (
+                <div className="p-4 rounded-2xl bg-rose-50/50 dark:bg-rose-950/20 border border-rose-200 dark:border-rose-900/40 flex items-center gap-3">
+                  <AlertTriangle className="text-rose-600 shrink-0" size={20} />
+                  <div>
+                    <span className="text-xs font-black text-rose-900 dark:text-rose-200 block">
+                      Hewan Ditolak Potong
+                    </span>
+                    <p className="text-[11px] text-rose-700 dark:text-rose-300">
+                      Pemeriksaan postmortem dan uji kelayakan daging ditiadakan karena hewan tidak diizinkan untuk disembelih.
+                    </p>
                   </div>
-                )}
-              </div>
+                </div>
+              )}
             </div>
 
             {/* Dokumen PDF Lampiran */}

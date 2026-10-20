@@ -22,6 +22,7 @@ async function ensureTable() {
         rumpun_hewan VARCHAR(100) NOT NULL,
         kategori_hewan VARCHAR(50) NOT NULL,
         jumlah_ekor INT NOT NULL DEFAULT 1,
+        status_potong VARCHAR(50) NOT NULL DEFAULT 'Boleh Dipotong',
         pemeriksaan_antemortem TEXT NULL,
         pemeriksaan_postmortem TEXT NULL,
         status_kelayakan VARCHAR(50) NOT NULL DEFAULT 'Layak Konsumsi',
@@ -37,6 +38,17 @@ async function ensureTable() {
         INDEX idx_kec_desa (kecamatan, desa)
       ) ENGINE=InnoDB;
     `);
+
+    // Tambah kolom status_potong jika tabel sudah ada sebelumnya
+    try {
+      await pool.query(`
+        ALTER TABLE pencatatan_pemotongan 
+        ADD COLUMN status_potong VARCHAR(50) NOT NULL DEFAULT 'Boleh Dipotong' AFTER jumlah_ekor
+      `);
+    } catch {
+      // Abaikan jika kolom sudah ada
+    }
+
     hasEnsuredTable = true;
   } catch (err) {
     console.warn('[ensureTable pencatatan_pemotongan warning]:', err);
@@ -108,6 +120,7 @@ export async function POST(request: Request) {
       rumpun_hewan,
       kategori_hewan,
       jumlah_ekor,
+      status_potong,
       pemeriksaan_antemortem,
       pemeriksaan_postmortem,
       status_kelayakan,
@@ -124,14 +137,19 @@ export async function POST(request: Request) {
       );
     }
 
+    const isBolehPotong = (status_potong || 'Boleh Dipotong') === 'Boleh Dipotong';
+    const finalStatusKelayakan = isBolehPotong ? (status_kelayakan || 'Layak Konsumsi') : 'Tidak Dipotong';
+    const finalPostmortem = isBolehPotong ? (pemeriksaan_postmortem || null) : null;
+    const finalFotoPostmortem = isBolehPotong ? (foto_postmortem || null) : null;
+
     const petugasNama = session?.nama || 'Petugas Kesmavet';
 
     const [result]: any = await pool.query(
       `INSERT INTO pencatatan_pemotongan (
         tanggal, tempat_pemotongan, nama_tempat_lain, nama_pemilik, kecamatan, desa,
-        rumpun_hewan, kategori_hewan, jumlah_ekor, pemeriksaan_antemortem, pemeriksaan_postmortem,
+        rumpun_hewan, kategori_hewan, jumlah_ekor, status_potong, pemeriksaan_antemortem, pemeriksaan_postmortem,
         status_kelayakan, foto_antemortem, foto_postmortem, dokumen_pdf, dokumen_pdf_nama, petugas_nama
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       [
         tanggal,
         tempat_pemotongan,
@@ -142,11 +160,12 @@ export async function POST(request: Request) {
         rumpun_hewan,
         kategori_hewan || 'Jantan',
         Number(jumlah_ekor) || 1,
+        status_potong || 'Boleh Dipotong',
         pemeriksaan_antemortem || null,
-        pemeriksaan_postmortem || null,
-        status_kelayakan || 'Layak Konsumsi',
+        finalPostmortem,
+        finalStatusKelayakan,
         foto_antemortem || null,
-        foto_postmortem || null,
+        finalFotoPostmortem,
         dokumen_pdf || null,
         dokumen_pdf_nama || null,
         petugasNama,
@@ -193,6 +212,7 @@ export async function PUT(request: Request) {
       rumpun_hewan,
       kategori_hewan,
       jumlah_ekor,
+      status_potong,
       pemeriksaan_antemortem,
       pemeriksaan_postmortem,
       status_kelayakan,
@@ -206,11 +226,17 @@ export async function PUT(request: Request) {
       return NextResponse.json({ success: false, error: 'ID pencatatan diperlukan' }, { status: 400 });
     }
 
+    const isBolehPotong = (status_potong || 'Boleh Dipotong') === 'Boleh Dipotong';
+    const finalStatusKelayakan = isBolehPotong ? (status_kelayakan || 'Layak Konsumsi') : 'Tidak Dipotong';
+    const finalPostmortem = isBolehPotong ? (pemeriksaan_postmortem || null) : null;
+    const finalFotoPostmortem = isBolehPotong ? (foto_postmortem !== undefined ? foto_postmortem : null) : null;
+
     await pool.query(
       `UPDATE pencatatan_pemotongan SET
         tanggal = ?, tempat_pemotongan = ?, nama_tempat_lain = ?, nama_pemilik = ?, kecamatan = ?, desa = ?,
-        rumpun_hewan = ?, kategori_hewan = ?, jumlah_ekor = ?, pemeriksaan_antemortem = ?, pemeriksaan_postmortem = ?,
-        status_kelayakan = ?, foto_antemortem = COALESCE(?, foto_antemortem), foto_postmortem = COALESCE(?, foto_postmortem),
+        rumpun_hewan = ?, kategori_hewan = ?, jumlah_ekor = ?, status_potong = COALESCE(?, status_potong),
+        pemeriksaan_antemortem = ?, pemeriksaan_postmortem = ?, status_kelayakan = ?,
+        foto_antemortem = COALESCE(?, foto_antemortem), foto_postmortem = ?,
         dokumen_pdf = COALESCE(?, dokumen_pdf), dokumen_pdf_nama = COALESCE(?, dokumen_pdf_nama)
       WHERE id = ?`,
       [
@@ -223,11 +249,12 @@ export async function PUT(request: Request) {
         rumpun_hewan,
         kategori_hewan || 'Jantan',
         Number(jumlah_ekor) || 1,
+        status_potong || 'Boleh Dipotong',
         pemeriksaan_antemortem || null,
-        pemeriksaan_postmortem || null,
-        status_kelayakan || 'Layak Konsumsi',
+        finalPostmortem,
+        finalStatusKelayakan,
         foto_antemortem !== undefined ? foto_antemortem : null,
-        foto_postmortem !== undefined ? foto_postmortem : null,
+        finalFotoPostmortem,
         dokumen_pdf !== undefined ? dokumen_pdf : null,
         dokumen_pdf_nama !== undefined ? dokumen_pdf_nama : null,
         id,

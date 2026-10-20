@@ -86,20 +86,20 @@ export function RumahPotongTab({
                 <th className="p-3.5 border-r border-purple-800">LOKASI / ALAMAT</th>
                 <th className="p-3.5 text-center border-r border-purple-800">SERTIFIKAT HALAL</th>
                 <th className="p-3.5 text-center border-r border-purple-800">NKV</th>
-                {isAdmin && <th className="p-3.5 text-center w-24">AKSI</th>}
+                <th className="p-3.5 text-center w-24">AKSI</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-300 dark:divide-slate-700 text-slate-700 dark:text-slate-200">
               {isLoadingRph ? (
                 <tr>
-                  <td colSpan={isAdmin ? 9 : 8} className="p-8 text-center text-slate-400">
+                  <td colSpan={9} className="p-8 text-center text-slate-400">
                     <Loader2 className="animate-spin inline-block mr-2 text-purple-600" size={16} />
                     Memuat data rumah potong...
                   </td>
                 </tr>
               ) : filteredRph.length === 0 ? (
                 <tr>
-                  <td colSpan={isAdmin ? 9 : 8} className="p-8 text-center text-slate-400">
+                  <td colSpan={9} className="p-8 text-center text-slate-400">
                     Tidak ada data yang sesuai.
                   </td>
                 </tr>
@@ -138,26 +138,24 @@ export function RumahPotongTab({
                         {item.sertifikat_nkv || 'Belum'}
                       </span>
                     </td>
-                    {isAdmin && (
-                      <td className="p-3.5 text-center">
-                        <div className="flex items-center justify-center gap-1.5">
-                          <button
-                            onClick={() => onEditRph(item)}
-                            className="w-7 h-7 rounded-lg bg-purple-50 text-purple-700 hover:bg-purple-100 flex items-center justify-center transition-colors cursor-pointer"
-                            title="Edit"
-                          >
-                            <Edit2 size={13} />
-                          </button>
-                          <button
-                            onClick={() => onDeleteRph(item.id)}
-                            className="w-7 h-7 rounded-lg bg-rose-50 text-rose-600 hover:bg-rose-100 flex items-center justify-center transition-colors cursor-pointer"
-                            title="Hapus"
-                          >
-                            <Trash2 size={13} />
-                          </button>
-                        </div>
-                      </td>
-                    )}
+                    <td className="p-3.5 text-center">
+                      <div className="flex items-center justify-center gap-1.5">
+                        <button
+                          onClick={() => onEditRph(item)}
+                          className="w-7 h-7 rounded-lg bg-purple-50 text-purple-700 hover:bg-purple-100 flex items-center justify-center transition-colors cursor-pointer"
+                          title="Edit"
+                        >
+                          <Edit2 size={13} />
+                        </button>
+                        <button
+                          onClick={() => onDeleteRph(item.id)}
+                          className="w-7 h-7 rounded-lg bg-rose-50 text-rose-600 hover:bg-rose-100 flex items-center justify-center transition-colors cursor-pointer"
+                          title="Hapus"
+                        >
+                          <Trash2 size={13} />
+                        </button>
+                      </div>
+                    </td>
                   </tr>
                 ))
               )}

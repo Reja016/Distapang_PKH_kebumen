@@ -177,10 +177,6 @@ export default function RphTphTpuPage() {
   };
 
   const handleDeleteRph = async (id: number) => {
-    if (!isAdmin) {
-      showToast.error('Hanya Administrator yang berhak menghapus unit rumah potong.');
-      return;
-    }
     const ok = await showConfirm({
       title: 'Hapus Unit Pemotongan',
       message: 'Apakah Anda yakin ingin menghapus unit rumah potong ini?',

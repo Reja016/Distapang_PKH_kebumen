@@ -6,6 +6,7 @@ import {
   Building2,
   MapPin,
   Upload,
+  Camera,
   X,
   FileText,
   Image as ImageIcon,
@@ -26,7 +27,9 @@ import {
   KATEGORI_SAPI_OPTIONS,
   KATEGORI_BABI_OPTIONS,
   STATUS_KELAYAKAN_OPTIONS,
+  STATUS_POTONG_OPTIONS,
 } from './types';
+import CameraCaptureModal from './CameraCaptureModal';
 import { compressImageFile } from '@/lib/file-compressor';
 import { showToast } from '@/components/common/CustomToast';
 
@@ -55,9 +58,50 @@ export default function PencatatanPemotonganForm({
   const [isCompressingAntemortem, setIsCompressingAntemortem] = useState<boolean>(false);
   const [isCompressingPostmortem, setIsCompressingPostmortem] = useState<boolean>(false);
 
+  // Modal Kamera Aktif ('antemortem' | 'postmortem' | null)
+  const [cameraModalTarget, setCameraModalTarget] = useState<'antemortem' | 'postmortem' | null>(null);
+
   const fileAntemortemRef = useRef<HTMLInputElement>(null);
   const filePostmortemRef = useRef<HTMLInputElement>(null);
   const filePdfRef = useRef<HTMLInputElement>(null);
+
+  // Helper konversi Data URL Base64 ke File object
+  const dataUrlToFile = (dataUrl: string, filename: string): File => {
+    const arr = dataUrl.split(',');
+    const mime = arr[0].match(/:(.*?);/)?.[1] || 'image/jpeg';
+    const bstr = atob(arr[1]);
+    let n = bstr.length;
+    const u8arr = new Uint8Array(n);
+    while (n--) {
+      u8arr[n] = bstr.charCodeAt(n);
+    }
+    return new File([u8arr], filename, { type: mime });
+  };
+
+  // Handler hasil jepretan kamera langsung
+  const handleCameraCapture = async (b64: string) => {
+    try {
+      const file = dataUrlToFile(b64, `${cameraModalTarget || 'foto'}.jpg`);
+      const compressed = await compressImageFile(file, 1600, 0.8, 2 * 1024 * 1024);
+      if (cameraModalTarget === 'antemortem') {
+        setFormData((prev) => ({ ...prev, foto_antemortem: compressed }));
+        showToast.success('Foto antemortem berhasil diambil dari kamera!');
+      } else if (cameraModalTarget === 'postmortem') {
+        setFormData((prev) => ({ ...prev, foto_postmortem: compressed }));
+        showToast.success('Foto postmortem berhasil diambil dari kamera!');
+      }
+    } catch {
+      if (cameraModalTarget === 'antemortem') {
+        setFormData((prev) => ({ ...prev, foto_antemortem: b64 }));
+        showToast.success('Foto antemortem berhasil diambil dari kamera!');
+      } else if (cameraModalTarget === 'postmortem') {
+        setFormData((prev) => ({ ...prev, foto_postmortem: b64 }));
+        showToast.success('Foto postmortem berhasil diambil dari kamera!');
+      }
+    } finally {
+      setCameraModalTarget(null);
+    }
+  };
 
   // 1. Fetch master kecamatan & desa dari database
   useEffect(() => {
@@ -102,6 +146,7 @@ export default function PencatatanPemotonganForm({
         rumpun_hewan: editingItem.rumpun_hewan || 'Sapi PO',
         kategori_hewan: editingItem.kategori_hewan || 'Jantan',
         jumlah_ekor: editingItem.jumlah_ekor || 1,
+        status_potong: editingItem.status_potong || 'Boleh Dipotong',
         pemeriksaan_antemortem: editingItem.pemeriksaan_antemortem || '',
         pemeriksaan_postmortem: editingItem.pemeriksaan_postmortem || '',
         status_kelayakan: editingItem.status_kelayakan || 'Layak Konsumsi',
@@ -500,15 +545,51 @@ export default function PencatatanPemotonganForm({
             />
           </div>
 
-          {/* Status Kelayakan */}
+          {/* Izin Pemotongan Hewan */}
           <div>
             <label className="block mb-1.5 text-xs font-bold text-slate-700 dark:text-slate-300">
-              Status Kelayakan Daging
+              Izin Pemotongan Hewan
             </label>
+            <select
+              value={formData.status_potong}
+              onChange={(e) => {
+                const val = e.target.value;
+                setFormData((prev) => ({
+                  ...prev,
+                  status_potong: val,
+                  status_kelayakan: val === 'Boleh Dipotong' ? (prev.status_kelayakan === 'Tidak Dipotong' ? 'Layak Konsumsi' : prev.status_kelayakan) : 'Tidak Dipotong',
+                }));
+              }}
+              className={`w-full h-11 px-3.5 rounded-2xl border font-black text-xs sm:text-sm outline-none focus:border-purple-600 transition-colors ${
+                formData.status_potong === 'Boleh Dipotong'
+                  ? 'bg-emerald-50 text-emerald-800 border-emerald-300 dark:bg-emerald-950/40 dark:text-emerald-300 dark:border-emerald-800'
+                  : 'bg-rose-50 text-rose-800 border-rose-300 dark:bg-rose-950/40 dark:text-rose-300 dark:border-rose-800'
+              }`}
+            >
+              {STATUS_POTONG_OPTIONS.map((opt) => (
+                <option key={opt} value={opt}>
+                  {opt}
+                </option>
+              ))}
+            </select>
+          </div>
+        </div>
+
+        {/* Status Kelayakan Daging (Hanya diisi jika Boleh Dipotong) */}
+        {formData.status_potong === 'Boleh Dipotong' && (
+          <div className="p-4 rounded-2xl border border-emerald-200 dark:border-emerald-900/40 bg-emerald-50/40 dark:bg-emerald-950/20 flex flex-col sm:flex-row sm:items-center justify-between gap-3 animate-in fade-in duration-200">
+            <div>
+              <span className="text-xs font-extrabold text-emerald-950 dark:text-emerald-200 block">
+                Status Kelayakan Daging (Pemeriksaan Postmortem)
+              </span>
+              <span className="text-[11px] text-emerald-700/80 dark:text-emerald-300/80">
+                Tentukan hasil kelayakan daging karkas setelah pemotongan dilakukan.
+              </span>
+            </div>
             <select
               value={formData.status_kelayakan}
               onChange={(e) => setFormData({ ...formData, status_kelayakan: e.target.value })}
-              className={`w-full h-11 px-3.5 rounded-2xl border font-bold text-xs sm:text-sm outline-none focus:border-purple-600 ${
+              className={`min-w-[200px] h-11 px-3.5 rounded-2xl border font-bold text-xs sm:text-sm outline-none focus:border-purple-600 ${
                 formData.status_kelayakan === 'Layak Konsumsi'
                   ? 'bg-emerald-50 text-emerald-800 border-emerald-300 dark:bg-emerald-950/40 dark:text-emerald-300 dark:border-emerald-800'
                   : formData.status_kelayakan === 'Layak dengan Syarat'
@@ -523,16 +604,16 @@ export default function PencatatanPemotonganForm({
               ))}
             </select>
           </div>
-        </div>
+        )}
 
-        {/* ── BARIS 4: PEMERIKSAAN ANTEMORTEM & POSTMORTEM (MANUAL KETIK) ── */}
+        {/* ── BARIS 4: PEMERIKSAAN ANTEMORTEM & POSTMORTEM ── */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {/* Antemortem */}
           <div className="space-y-2 p-4 rounded-2xl border border-purple-100 dark:border-slate-800 bg-purple-50/30 dark:bg-purple-950/20">
             <div className="flex items-center justify-between">
               <label className="text-xs font-black text-purple-950 dark:text-purple-300 flex items-center gap-1.5">
                 <CheckCircle2 size={15} className="text-purple-600" />
-                <span>Pemeriksaan Antemortem (Sebelum Potong) <span className="text-[11px] font-normal text-slate-500">(opsional)</span></span>
+                <span>Pemeriksaan Antemortem (Sebelum Potong)</span>
               </label>
               <span className="text-[10px] text-slate-400 font-medium">Ketik manual</span>
             </div>
@@ -544,11 +625,11 @@ export default function PencatatanPemotonganForm({
               className="w-full p-3 rounded-xl border border-purple-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-xs font-medium text-slate-900 dark:text-white outline-none focus:border-purple-600"
             />
 
-            {/* Upload Foto Antemortem */}
+            {/* Foto Antemortem */}
             <div>
               <div className="flex items-center justify-between mt-1">
                 <span className="text-[11px] font-bold text-slate-700 dark:text-slate-300">
-                  Foto Bukti Antemortem <span className="font-normal text-slate-500">(opsional, maks. 2 MB)</span>
+                  Foto Bukti Antemortem
                 </span>
                 {isCompressingAntemortem && (
                   <span className="text-[10px] text-purple-600 font-bold animate-pulse">
@@ -561,6 +642,7 @@ export default function PencatatanPemotonganForm({
                 ref={fileAntemortemRef}
                 type="file"
                 accept="image/*"
+                capture="environment"
                 className="hidden"
                 onChange={handleUploadFotoAntemortem}
               />
@@ -570,98 +652,158 @@ export default function PencatatanPemotonganForm({
                   <img
                     src={formData.foto_antemortem}
                     alt="Foto Antemortem"
-                    className="w-32 h-24 object-cover"
+                    className="w-36 h-28 object-cover"
                   />
-                  <button
-                    type="button"
-                    onClick={() => setFormData({ ...formData, foto_antemortem: '' })}
-                    className="absolute top-1 right-1 w-6 h-6 rounded-full bg-rose-600 hover:bg-rose-700 text-white flex items-center justify-center transition-all cursor-pointer shadow-xs"
-                    title="Hapus Foto"
-                  >
-                    <X size={13} strokeWidth={2.5} />
-                  </button>
+                  <div className="absolute inset-0 bg-slate-950/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
+                    <button
+                      type="button"
+                      onClick={() => setCameraModalTarget('antemortem')}
+                      className="p-1.5 rounded-lg bg-purple-600 text-white hover:bg-purple-700 transition-colors cursor-pointer"
+                      title="Ambil Ulang via Kamera"
+                    >
+                      <Camera size={14} />
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setFormData({ ...formData, foto_antemortem: '' })}
+                      className="p-1.5 rounded-lg bg-rose-600 text-white hover:bg-rose-700 transition-colors cursor-pointer"
+                      title="Hapus Foto"
+                    >
+                      <X size={14} />
+                    </button>
+                  </div>
                 </div>
               ) : (
-                <button
-                  type="button"
-                  disabled={isCompressingAntemortem}
-                  onClick={() => fileAntemortemRef.current?.click()}
-                  className="mt-2 w-full h-10 px-3.5 rounded-xl border border-dashed border-purple-300 dark:border-purple-900/60 bg-white dark:bg-slate-900 hover:bg-purple-50 text-purple-700 dark:text-purple-300 text-xs font-bold flex items-center justify-center gap-2 transition-colors cursor-pointer"
-                >
-                  <Upload size={14} />
-                  <span>Upload Foto Antemortem (opsional)</span>
-                </button>
+                <div className="mt-2 flex flex-col sm:flex-row items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setCameraModalTarget('antemortem')}
+                    className="w-full sm:flex-1 h-10 px-3.5 rounded-xl bg-purple-600 hover:bg-purple-700 text-white text-xs font-bold flex items-center justify-center gap-2 transition-colors cursor-pointer shadow-xs"
+                  >
+                    <Camera size={15} />
+                    <span>Ambil Foto Antemortem (Kamera)</span>
+                  </button>
+                  <button
+                    type="button"
+                    disabled={isCompressingAntemortem}
+                    onClick={() => fileAntemortemRef.current?.click()}
+                    className="h-10 px-3 rounded-xl border border-purple-200 dark:border-purple-900/60 bg-white dark:bg-slate-900 hover:bg-purple-50 text-slate-600 dark:text-slate-300 text-xs font-semibold flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
+                    title="Upload dari file jika kamera tidak aktif"
+                  >
+                    <Upload size={13} />
+                    <span className="hidden sm:inline">Pilih File</span>
+                  </button>
+                </div>
               )}
             </div>
           </div>
 
-          {/* Postmortem */}
-          <div className="space-y-2 p-4 rounded-2xl border border-purple-100 dark:border-slate-800 bg-purple-50/30 dark:bg-purple-950/20">
-            <div className="flex items-center justify-between">
-              <label className="text-xs font-black text-purple-950 dark:text-purple-300 flex items-center gap-1.5">
-                <CheckCircle2 size={15} className="text-purple-600" />
-                <span>Pemeriksaan Postmortem (Setelah Potong) <span className="text-[11px] font-normal text-slate-500">(opsional)</span></span>
-              </label>
-              <span className="text-[10px] text-slate-400 font-medium">Ketik manual</span>
-            </div>
-            <textarea
-              rows={3}
-              placeholder="Contoh: Karkas bersih, warna merah segar, bau khas, organ hati bebas cacing hati (Fasciola sp.), paru-paru dan limpa normal, daging layak konsumsi..."
-              value={formData.pemeriksaan_postmortem}
-              onChange={(e) => setFormData({ ...formData, pemeriksaan_postmortem: e.target.value })}
-              className="w-full p-3 rounded-xl border border-purple-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-xs font-medium text-slate-900 dark:text-white outline-none focus:border-purple-600"
-            />
-
-            {/* Upload Foto Postmortem */}
-            <div>
-              <div className="flex items-center justify-between mt-1">
-                <span className="text-[11px] font-bold text-slate-700 dark:text-slate-300">
-                  Foto Bukti Postmortem <span className="font-normal text-slate-500">(opsional, maks. 2 MB)</span>
-                </span>
-                {isCompressingPostmortem && (
-                  <span className="text-[10px] text-purple-600 font-bold animate-pulse">
-                    Mengompres foto...
-                  </span>
-                )}
+          {/* Postmortem (Hanya jika Boleh Dipotong) ATAU Alert Penolakan */}
+          {formData.status_potong === 'Boleh Dipotong' ? (
+            <div className="space-y-2 p-4 rounded-2xl border border-purple-100 dark:border-slate-800 bg-purple-50/30 dark:bg-purple-950/20 animate-in fade-in duration-200">
+              <div className="flex items-center justify-between">
+                <label className="text-xs font-black text-purple-950 dark:text-purple-300 flex items-center gap-1.5">
+                  <CheckCircle2 size={15} className="text-purple-600" />
+                  <span>Pemeriksaan Postmortem (Setelah Potong)</span>
+                </label>
+                <span className="text-[10px] text-slate-400 font-medium">Ketik manual</span>
               </div>
-
-              <input
-                ref={filePostmortemRef}
-                type="file"
-                accept="image/*"
-                className="hidden"
-                onChange={handleUploadFotoPostmortem}
+              <textarea
+                rows={3}
+                placeholder="Contoh: Karkas bersih, warna merah segar, bau khas, organ hati bebas cacing hati (Fasciola sp.), daging layak konsumsi..."
+                value={formData.pemeriksaan_postmortem}
+                onChange={(e) => setFormData({ ...formData, pemeriksaan_postmortem: e.target.value })}
+                className="w-full p-3 rounded-xl border border-purple-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-xs font-medium text-slate-900 dark:text-white outline-none focus:border-purple-600"
               />
 
-              {formData.foto_postmortem ? (
-                <div className="relative mt-2 inline-block rounded-xl overflow-hidden border border-purple-200 dark:border-slate-700 group">
-                  <img
-                    src={formData.foto_postmortem}
-                    alt="Foto Postmortem"
-                    className="w-32 h-24 object-cover"
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setFormData({ ...formData, foto_postmortem: '' })}
-                    className="absolute top-1 right-1 w-6 h-6 rounded-full bg-rose-600 hover:bg-rose-700 text-white flex items-center justify-center transition-all cursor-pointer shadow-xs"
-                    title="Hapus Foto"
-                  >
-                    <X size={13} strokeWidth={2.5} />
-                  </button>
+              {/* Foto Postmortem */}
+              <div>
+                <div className="flex items-center justify-between mt-1">
+                  <span className="text-[11px] font-bold text-slate-700 dark:text-slate-300">
+                    Foto Bukti Postmortem
+                  </span>
+                  {isCompressingPostmortem && (
+                    <span className="text-[10px] text-purple-600 font-bold animate-pulse">
+                      Mengompres foto...
+                    </span>
+                  )}
                 </div>
-              ) : (
-                <button
-                  type="button"
-                  disabled={isCompressingPostmortem}
-                  onClick={() => filePostmortemRef.current?.click()}
-                  className="mt-2 w-full h-10 px-3.5 rounded-xl border border-dashed border-purple-300 dark:border-purple-900/60 bg-white dark:bg-slate-900 hover:bg-purple-50 text-purple-700 dark:text-purple-300 text-xs font-bold flex items-center justify-center gap-2 transition-colors cursor-pointer"
-                >
-                  <Upload size={14} />
-                  <span>Upload Foto Postmortem (opsional)</span>
-                </button>
-              )}
+
+                <input
+                  ref={filePostmortemRef}
+                  type="file"
+                  accept="image/*"
+                  capture="environment"
+                  className="hidden"
+                  onChange={handleUploadFotoPostmortem}
+                />
+
+                {formData.foto_postmortem ? (
+                  <div className="relative mt-2 inline-block rounded-xl overflow-hidden border border-purple-200 dark:border-slate-700 group">
+                    <img
+                      src={formData.foto_postmortem}
+                      alt="Foto Postmortem"
+                      className="w-36 h-28 object-cover"
+                    />
+                    <div className="absolute inset-0 bg-slate-950/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
+                      <button
+                        type="button"
+                        onClick={() => setCameraModalTarget('postmortem')}
+                        className="p-1.5 rounded-lg bg-purple-600 text-white hover:bg-purple-700 transition-colors cursor-pointer"
+                        title="Ambil Ulang via Kamera"
+                      >
+                        <Camera size={14} />
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setFormData({ ...formData, foto_postmortem: '' })}
+                        className="p-1.5 rounded-lg bg-rose-600 text-white hover:bg-rose-700 transition-colors cursor-pointer"
+                        title="Hapus Foto"
+                      >
+                        <X size={14} />
+                      </button>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="mt-2 flex flex-col sm:flex-row items-center gap-2">
+                    <button
+                      type="button"
+                      onClick={() => setCameraModalTarget('postmortem')}
+                      className="w-full sm:flex-1 h-10 px-3.5 rounded-xl bg-purple-600 hover:bg-purple-700 text-white text-xs font-bold flex items-center justify-center gap-2 transition-colors cursor-pointer shadow-xs"
+                    >
+                      <Camera size={15} />
+                      <span>Ambil Foto Postmortem (Kamera)</span>
+                    </button>
+                    <button
+                      type="button"
+                      disabled={isCompressingPostmortem}
+                      onClick={() => filePostmortemRef.current?.click()}
+                      className="h-10 px-3 rounded-xl border border-purple-200 dark:border-purple-900/60 bg-white dark:bg-slate-900 hover:bg-purple-50 text-slate-600 dark:text-slate-300 text-xs font-semibold flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
+                      title="Upload dari file jika kamera tidak aktif"
+                    >
+                      <Upload size={13} />
+                      <span className="hidden sm:inline">Pilih File</span>
+                    </button>
+                  </div>
+                )}
+              </div>
             </div>
-          </div>
+          ) : (
+            /* Box Info jika Hewan TIDAK Boleh Dipotong */
+            <div className="p-6 rounded-2xl border-2 border-dashed border-rose-200 dark:border-rose-900/40 bg-rose-50/50 dark:bg-rose-950/20 flex flex-col justify-center items-center text-center space-y-2.5 animate-in fade-in duration-200">
+              <div className="w-12 h-12 rounded-2xl bg-rose-100 dark:bg-rose-900/50 text-rose-600 dark:text-rose-300 flex items-center justify-center">
+                <AlertTriangle size={24} />
+              </div>
+              <div>
+                <h4 className="text-xs sm:text-sm font-black text-rose-900 dark:text-rose-200">
+                  Hewan Tidak Boleh Dipotong
+                </h4>
+                <p className="text-[11px] text-rose-700 dark:text-rose-300 max-w-sm mt-1 leading-relaxed">
+                  Pemeriksaan postmortem dan status kelayakan daging tidak perlu diisi karena hewan tidak disembelih. Masukkan alasan penolakan pada kolom Pemeriksaan Antemortem di sebelah kiri.
+                </p>
+              </div>
+            </div>
+          )}
         </div>
 
         {/* ── BARIS 5: UPLOAD DOKUMEN PDF (SKKH / BERITA ACARA) ── */}
@@ -669,7 +811,7 @@ export default function PencatatanPemotonganForm({
           <div className="flex items-center justify-between mb-2">
             <div>
               <span className="text-xs font-bold text-slate-800 dark:text-slate-200 block">
-                Dokumen Lampiran PDF (SKKH / Surat Keterangan / Berita Acara) <span className="font-normal text-slate-500">(opsional)</span>
+                Dokumen Lampiran PDF (SKKH / Surat Keterangan / Berita Acara)
               </span>
               <span className="text-[11px] text-slate-500">
                 Format PDF, ukuran maksimal 2 MB
@@ -744,6 +886,18 @@ export default function PencatatanPemotonganForm({
           </button>
         </div>
       </form>
+
+      {/* ── MODAL KAMERA INTERAKTIF ── */}
+      <CameraCaptureModal
+        isOpen={cameraModalTarget !== null}
+        onClose={() => setCameraModalTarget(null)}
+        onCapture={handleCameraCapture}
+        title={
+          cameraModalTarget === 'antemortem'
+            ? 'Kamera Pemeriksaan Antemortem (Sebelum Potong)'
+            : 'Kamera Pemeriksaan Postmortem (Setelah Potong)'
+        }
+      />
     </div>
   );
 }
