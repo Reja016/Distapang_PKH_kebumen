@@ -29,7 +29,6 @@ import {
   STATUS_KELAYAKAN_OPTIONS,
   STATUS_POTONG_OPTIONS,
 } from './types';
-import CameraCaptureModal from './CameraCaptureModal';
 import { compressImageFile } from '@/lib/file-compressor';
 import { showToast } from '@/components/common/CustomToast';
 
@@ -58,50 +57,12 @@ export default function PencatatanPemotonganForm({
   const [isCompressingAntemortem, setIsCompressingAntemortem] = useState<boolean>(false);
   const [isCompressingPostmortem, setIsCompressingPostmortem] = useState<boolean>(false);
 
-  // Modal Kamera Aktif ('antemortem' | 'postmortem' | null)
-  const [cameraModalTarget, setCameraModalTarget] = useState<'antemortem' | 'postmortem' | null>(null);
-
-  const fileAntemortemRef = useRef<HTMLInputElement>(null);
-  const filePostmortemRef = useRef<HTMLInputElement>(null);
+  // Native Camera & Gallery Input Refs
+  const fileAntemortemCameraRef = useRef<HTMLInputElement>(null);
+  const fileAntemortemGalleryRef = useRef<HTMLInputElement>(null);
+  const filePostmortemCameraRef = useRef<HTMLInputElement>(null);
+  const filePostmortemGalleryRef = useRef<HTMLInputElement>(null);
   const filePdfRef = useRef<HTMLInputElement>(null);
-
-  // Helper konversi Data URL Base64 ke File object
-  const dataUrlToFile = (dataUrl: string, filename: string): File => {
-    const arr = dataUrl.split(',');
-    const mime = arr[0].match(/:(.*?);/)?.[1] || 'image/jpeg';
-    const bstr = atob(arr[1]);
-    let n = bstr.length;
-    const u8arr = new Uint8Array(n);
-    while (n--) {
-      u8arr[n] = bstr.charCodeAt(n);
-    }
-    return new File([u8arr], filename, { type: mime });
-  };
-
-  // Handler hasil jepretan kamera langsung
-  const handleCameraCapture = async (b64: string) => {
-    try {
-      const file = dataUrlToFile(b64, `${cameraModalTarget || 'foto'}.jpg`);
-      const compressed = await compressImageFile(file, 1600, 0.8, 2 * 1024 * 1024);
-      if (cameraModalTarget === 'antemortem') {
-        setFormData((prev) => ({ ...prev, foto_antemortem: compressed }));
-        showToast.success('Foto antemortem berhasil diambil dari kamera!');
-      } else if (cameraModalTarget === 'postmortem') {
-        setFormData((prev) => ({ ...prev, foto_postmortem: compressed }));
-        showToast.success('Foto postmortem berhasil diambil dari kamera!');
-      }
-    } catch {
-      if (cameraModalTarget === 'antemortem') {
-        setFormData((prev) => ({ ...prev, foto_antemortem: b64 }));
-        showToast.success('Foto antemortem berhasil diambil dari kamera!');
-      } else if (cameraModalTarget === 'postmortem') {
-        setFormData((prev) => ({ ...prev, foto_postmortem: b64 }));
-        showToast.success('Foto postmortem berhasil diambil dari kamera!');
-      }
-    } finally {
-      setCameraModalTarget(null);
-    }
-  };
 
   // 1. Fetch master kecamatan & desa dari database
   useEffect(() => {
@@ -638,11 +599,21 @@ export default function PencatatanPemotonganForm({
                 )}
               </div>
 
+              {/* Input Kamera Bawaan HP Langsung */}
               <input
-                ref={fileAntemortemRef}
+                ref={fileAntemortemCameraRef}
                 type="file"
                 accept="image/*"
                 capture="environment"
+                className="hidden"
+                onChange={handleUploadFotoAntemortem}
+              />
+
+              {/* Input Galeri Foto / File Browser Bawaan HP */}
+              <input
+                ref={fileAntemortemGalleryRef}
+                type="file"
+                accept="image/*"
                 className="hidden"
                 onChange={handleUploadFotoAntemortem}
               />
@@ -657,11 +628,19 @@ export default function PencatatanPemotonganForm({
                   <div className="absolute inset-0 bg-slate-950/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
                     <button
                       type="button"
-                      onClick={() => setCameraModalTarget('antemortem')}
+                      onClick={() => fileAntemortemCameraRef.current?.click()}
                       className="p-1.5 rounded-lg bg-purple-600 text-white hover:bg-purple-700 transition-colors cursor-pointer"
-                      title="Ambil Ulang via Kamera"
+                      title="Foto Ulang via Kamera HP"
                     >
                       <Camera size={14} />
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => fileAntemortemGalleryRef.current?.click()}
+                      className="p-1.5 rounded-lg bg-indigo-600 text-white hover:bg-indigo-700 transition-colors cursor-pointer"
+                      title="Ganti dari Galeri"
+                    >
+                      <Upload size={14} />
                     </button>
                     <button
                       type="button"
@@ -677,21 +656,21 @@ export default function PencatatanPemotonganForm({
                 <div className="mt-2 flex flex-col sm:flex-row items-center gap-2">
                   <button
                     type="button"
-                    onClick={() => setCameraModalTarget('antemortem')}
+                    onClick={() => fileAntemortemCameraRef.current?.click()}
                     className="w-full sm:flex-1 h-10 px-3.5 rounded-xl bg-purple-600 hover:bg-purple-700 text-white text-xs font-bold flex items-center justify-center gap-2 transition-colors cursor-pointer shadow-xs"
                   >
                     <Camera size={15} />
-                    <span>Ambil Foto Antemortem (Kamera)</span>
+                    <span>Ambil Foto (Kamera HP)</span>
                   </button>
                   <button
                     type="button"
                     disabled={isCompressingAntemortem}
-                    onClick={() => fileAntemortemRef.current?.click()}
-                    className="h-10 px-3 rounded-xl border border-purple-200 dark:border-purple-900/60 bg-white dark:bg-slate-900 hover:bg-purple-50 text-slate-600 dark:text-slate-300 text-xs font-semibold flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
-                    title="Upload dari file jika kamera tidak aktif"
+                    onClick={() => fileAntemortemGalleryRef.current?.click()}
+                    className="w-full sm:w-auto h-10 px-3.5 rounded-xl border border-purple-200 dark:border-purple-900/60 bg-white dark:bg-slate-900 hover:bg-purple-50 text-slate-700 dark:text-slate-200 text-xs font-bold flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
+                    title="Pilih foto dari galeri / album perangkat"
                   >
                     <Upload size={13} />
-                    <span className="hidden sm:inline">Pilih File</span>
+                    <span>Pilih dari Galeri</span>
                   </button>
                 </div>
               )}
@@ -729,11 +708,21 @@ export default function PencatatanPemotonganForm({
                   )}
                 </div>
 
+                {/* Input Kamera Bawaan HP Langsung */}
                 <input
-                  ref={filePostmortemRef}
+                  ref={filePostmortemCameraRef}
                   type="file"
                   accept="image/*"
                   capture="environment"
+                  className="hidden"
+                  onChange={handleUploadFotoPostmortem}
+                />
+
+                {/* Input Galeri Foto / File Browser Bawaan HP */}
+                <input
+                  ref={filePostmortemGalleryRef}
+                  type="file"
+                  accept="image/*"
                   className="hidden"
                   onChange={handleUploadFotoPostmortem}
                 />
@@ -748,11 +737,19 @@ export default function PencatatanPemotonganForm({
                     <div className="absolute inset-0 bg-slate-950/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
                       <button
                         type="button"
-                        onClick={() => setCameraModalTarget('postmortem')}
+                        onClick={() => filePostmortemCameraRef.current?.click()}
                         className="p-1.5 rounded-lg bg-purple-600 text-white hover:bg-purple-700 transition-colors cursor-pointer"
-                        title="Ambil Ulang via Kamera"
+                        title="Foto Ulang via Kamera HP"
                       >
                         <Camera size={14} />
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => filePostmortemGalleryRef.current?.click()}
+                        className="p-1.5 rounded-lg bg-indigo-600 text-white hover:bg-indigo-700 transition-colors cursor-pointer"
+                        title="Ganti dari Galeri"
+                      >
+                        <Upload size={14} />
                       </button>
                       <button
                         type="button"
@@ -768,21 +765,21 @@ export default function PencatatanPemotonganForm({
                   <div className="mt-2 flex flex-col sm:flex-row items-center gap-2">
                     <button
                       type="button"
-                      onClick={() => setCameraModalTarget('postmortem')}
+                      onClick={() => filePostmortemCameraRef.current?.click()}
                       className="w-full sm:flex-1 h-10 px-3.5 rounded-xl bg-purple-600 hover:bg-purple-700 text-white text-xs font-bold flex items-center justify-center gap-2 transition-colors cursor-pointer shadow-xs"
                     >
                       <Camera size={15} />
-                      <span>Ambil Foto Postmortem (Kamera)</span>
+                      <span>Ambil Foto (Kamera HP)</span>
                     </button>
                     <button
                       type="button"
                       disabled={isCompressingPostmortem}
-                      onClick={() => filePostmortemRef.current?.click()}
-                      className="h-10 px-3 rounded-xl border border-purple-200 dark:border-purple-900/60 bg-white dark:bg-slate-900 hover:bg-purple-50 text-slate-600 dark:text-slate-300 text-xs font-semibold flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
-                      title="Upload dari file jika kamera tidak aktif"
+                      onClick={() => filePostmortemGalleryRef.current?.click()}
+                      className="w-full sm:w-auto h-10 px-3.5 rounded-xl border border-purple-200 dark:border-purple-900/60 bg-white dark:bg-slate-900 hover:bg-purple-50 text-slate-700 dark:text-slate-200 text-xs font-bold flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
+                      title="Pilih foto dari galeri / album perangkat"
                     >
                       <Upload size={13} />
-                      <span className="hidden sm:inline">Pilih File</span>
+                      <span>Pilih dari Galeri</span>
                     </button>
                   </div>
                 )}
@@ -886,18 +883,6 @@ export default function PencatatanPemotonganForm({
           </button>
         </div>
       </form>
-
-      {/* ── MODAL KAMERA INTERAKTIF ── */}
-      <CameraCaptureModal
-        isOpen={cameraModalTarget !== null}
-        onClose={() => setCameraModalTarget(null)}
-        onCapture={handleCameraCapture}
-        title={
-          cameraModalTarget === 'antemortem'
-            ? 'Kamera Pemeriksaan Antemortem (Sebelum Potong)'
-            : 'Kamera Pemeriksaan Postmortem (Setelah Potong)'
-        }
-      />
     </div>
   );
 }
