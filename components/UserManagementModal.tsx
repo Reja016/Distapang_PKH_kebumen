@@ -137,7 +137,14 @@ export default function UserManagementModal({
       const res = await fetch('/api/anggota');
       const data = await res.json();
       if (Array.isArray(data)) {
-        setMembers(data);
+        // Jaminan deduplikasi di level frontend: 1 ID = 1 baris
+        const uniqueMap = new Map<number, AnggotaUser>();
+        data.forEach((m: AnggotaUser) => {
+          if (m && m.id && !uniqueMap.has(m.id)) {
+            uniqueMap.set(m.id, m);
+          }
+        });
+        setMembers(Array.from(uniqueMap.values()));
       }
     } catch {
       // Fallback
@@ -220,6 +227,7 @@ export default function UserManagementModal({
       if (res.ok) {
         setMembers((prev) => prev.filter((m) => m.id !== id));
         showToast('Anggota berhasil dihapus', 'success');
+        await fetchMembers();
       } else {
         showToast('Gagal menghapus anggota', 'error');
       }
