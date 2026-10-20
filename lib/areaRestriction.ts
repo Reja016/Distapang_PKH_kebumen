@@ -269,9 +269,19 @@ export async function validateAreaAccess(
 
   // 1. Validasi Batas Waktu 3 Hari (Grace Period) untuk Petugas Non-Admin
   if (deadlineOptions) {
+    let isMasterUnlocked = false;
+    try {
+      const [settingRows]: any = await pool.query(
+        `SELECT setting_value FROM system_settings WHERE setting_key = 'master_unlock_gembok' LIMIT 1`
+      );
+      if (settingRows && settingRows.length > 0 && settingRows[0].setting_value === 'true') {
+        isMasterUnlocked = true;
+      }
+    } catch {}
+
     const { checkMonthlyDeadline, checkDailyDeadline } = await import('@/lib/deadlineCheck');
     if (deadlineOptions.tanggal) {
-      const check = checkDailyDeadline(deadlineOptions.tanggal, false);
+      const check = checkDailyDeadline(deadlineOptions.tanggal, false, isMasterUnlocked);
       if (check.isLocked) {
         return {
           allowed: false,
@@ -286,7 +296,7 @@ export async function validateAreaAccess(
       }
     }
     if (deadlineOptions.bulan && deadlineOptions.tahun) {
-      const check = checkMonthlyDeadline(deadlineOptions.bulan, deadlineOptions.tahun, false);
+      const check = checkMonthlyDeadline(deadlineOptions.bulan, deadlineOptions.tahun, false, isMasterUnlocked);
       if (check.isLocked) {
         return {
           allowed: false,

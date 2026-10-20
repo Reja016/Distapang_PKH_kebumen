@@ -34,7 +34,7 @@ import {
 } from '@/components/bitpro/sapitime/SapiTimeModals';
 import { UniversalAuditModal } from '@/components/common/UniversalAuditModal';
 import NotificationBell from '@/components/common/NotificationBell';
-import { showConfirm } from '@/components/common/CustomToast';
+import { showConfirm, showToast } from '@/components/common/CustomToast';
 
 export default function SapiTimePage() {
   const router = useRouter();
@@ -193,6 +193,10 @@ export default function SapiTimePage() {
       alert('Anda tidak memiliki izin untuk menambah data sapi.');
       return;
     }
+    if (!formData.breed || !formData.breed.trim()) {
+      showToast.error('Ras Sapi wajib diisi.');
+      return;
+    }
     setIsSavingModal(true);
     try {
       const newId = `ST${String(cattleList.length + 1).padStart(3, '0')}`;
@@ -258,6 +262,10 @@ export default function SapiTimePage() {
   const handleUpdateCattle = async () => {
     if (!editingCattle) return;
     if (isSavingModal) return;
+    if (!formData.breed || !formData.breed.trim()) {
+      showToast.error('Ras Sapi wajib diisi.');
+      return;
+    }
     setIsSavingModal(true);
     try {
       const fallbackName = (formData.name || '').trim() || (formData.registrationNumber || '').trim() || editingCattle.id;

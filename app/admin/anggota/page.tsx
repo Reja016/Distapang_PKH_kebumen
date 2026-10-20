@@ -3,6 +3,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import Link from 'next/link';
 import { usePageAuth } from '@/hooks/usePageAuth';
+import { useMasterSystemLock } from '@/hooks/useMasterSystemLock';
 import { showConfirm } from '@/components/common/CustomToast';
 import {
   Users,
@@ -114,6 +115,7 @@ interface AnggotaUser {
 
 export default function AdminAnggotaPage() {
   const { isReady, isAdmin, userName, handleLogout } = usePageAuth('bitpro', 'anggota');
+  const { isMasterUnlocked, isLoading: isLockLoading, toggleMasterLock } = useMasterSystemLock();
 
   // Active Tab: 'users' (Kelola Akun & Hak Akses) atau 'territory' (Wilayah Kerja Petugas)
   const [activeTab, setActiveTab] = useState<'users' | 'territory'>('users');
@@ -627,6 +629,88 @@ export default function AdminAnggotaPage() {
 
       {/* ── MAIN CONTENT CONTAINER ── */}
       <main className="max-w-7xl mx-auto px-4 sm:px-8 py-6 space-y-6">
+
+        {/* ── KONTROL MASTER GEMBOK PERIODE SISTEM (BUKA/KUNCI SEMUA TABEL) ── */}
+        <div className={`p-4 sm:p-5 rounded-3xl border transition-all shadow-xs ${
+          isMasterUnlocked
+            ? 'bg-amber-500/10 border-amber-300 dark:border-amber-800'
+            : 'bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700'
+        }`}>
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div className="flex items-start gap-3.5">
+              <div className={`p-3 rounded-2xl text-white shrink-0 ${
+                isMasterUnlocked ? 'bg-amber-500 shadow-xs' : 'bg-slate-700 dark:bg-slate-600'
+              }`}>
+                {isMasterUnlocked ? <Unlock size={22} strokeWidth={2.5} /> : <Lock size={22} strokeWidth={2.5} />}
+              </div>
+              <div className="space-y-0.5">
+                <div className="flex flex-wrap items-center gap-2">
+                  <h2 className="text-sm sm:text-base font-extrabold text-slate-900 dark:text-white">
+                    Kontrol Master Gembok Periode &amp; Deadline Tabel
+                  </h2>
+                  <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider ${
+                    isMasterUnlocked
+                      ? 'bg-amber-500 text-white animate-pulse'
+                      : 'bg-emerald-100 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-300'
+                  }`}>
+                    {isMasterUnlocked ? '🔓 SEMUA GEMBOK TERBUKA' : '🔒 BATAS WAKTU AKTIF'}
+                  </span>
+                </div>
+                <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed max-w-3xl">
+                  {isMasterUnlocked
+                    ? 'Mode Buka Gembok Darurat Aktif: Seluruh batas waktu deadline dan gembok tabel (RPH/TPH/TPU, Puskeswan, Vaksinasi PMK, dll) saat ini DIBUKA untuk semua petugas dan dapat diedit.'
+                    : 'Batas waktu deadline normal sedang berjalan: Data periode atau hari lampau terkunci secara otomatis. Klik tombol di kanan jika perlu membuka semua gembok tabel untuk petugas.'}
+                </p>
+              </div>
+            </div>
+
+            <div className="shrink-0 flex items-center">
+              <button
+                type="button"
+                disabled={isLockLoading}
+                onClick={async () => {
+                  const nextState = !isMasterUnlocked;
+                  const ok = await showConfirm({
+                    title: nextState ? 'Buka Semua Gembok Sistem?' : 'Kunci Kembali Sistem?',
+                    message: nextState
+                      ? 'Apakah Anda yakin ingin MEMBUKA seluruh gembok tabel di semua modul? Seluruh akun petugas dapat menginput atau mengedit data periode lampau.'
+                      : 'Apakah Anda yakin ingin MENGUNCI kembali seluruh gembok tabel dan mengaktifkan deadline normal?',
+                    confirmText: nextState ? 'Ya, Buka Semua' : 'Ya, Kunci Kembali',
+                    cancelText: 'Batal',
+                    type: nextState ? 'warning' : 'info',
+                  });
+                  if (ok) {
+                    const success = await toggleMasterLock(nextState);
+                    if (success) {
+                      showToast('success', nextState ? 'Semua gembok tabel berhasil DIBUKA.' : 'Deadline normal sistem berhasil DIAKTIFKAN kembali.');
+                    } else {
+                      showToast('error', 'Gagal mengubah status gembok sistem.');
+                    }
+                  }
+                }}
+                className={`min-h-[42px] px-4 rounded-xl font-bold text-xs flex items-center justify-center gap-2 transition-all cursor-pointer shadow-xs ${
+                  isMasterUnlocked
+                    ? 'bg-amber-600 hover:bg-amber-700 text-white'
+                    : 'bg-slate-900 dark:bg-slate-700 hover:bg-slate-800 dark:hover:bg-slate-600 text-white'
+                }`}
+              >
+                {isLockLoading ? (
+                  <RefreshCw size={15} className="animate-spin" />
+                ) : isMasterUnlocked ? (
+                  <>
+                    <Lock size={15} />
+                    <span>Kunci Kembali Sistem (Normal)</span>
+                  </>
+                ) : (
+                  <>
+                    <Unlock size={15} />
+                    <span>Buka Semua Gembok (Darurat)</span>
+                  </>
+                )}
+              </button>
+            </div>
+          </div>
+        </div>
 
         {/* ======================================================== */}
         {/* TAB 1: KELOLA AKUN & HAK AKSES                           */}

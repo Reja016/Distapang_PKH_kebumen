@@ -13,7 +13,9 @@ import NkvModal from '@/components/kesmavet/nkv/NkvModal';
 import { showToast, showConfirm } from '@/components/common/CustomToast';
 
 export default function NKVPage() {
-  const { isReady, canCreate, canEdit } = usePageAuth('kesmavet', 'nkv');
+  const { isReady, canCreate, canEdit, isAdmin } = usePageAuth('kesmavet', 'nkv');
+  // Sesuai instruksi pimpinan: berikan hak kelola (tambah, edit, hapus) NKV untuk seluruh akun petugas
+  const canManageNkv = true;
   const [dataNkv, setDataNkv] = useState<NKVRecord[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
@@ -103,10 +105,6 @@ export default function NKVPage() {
   };
 
   const handleDelete = async (id: string) => {
-    if (!canEdit) {
-      showToast.error('Hanya Administrator yang berhak menghapus data NKV.');
-      return;
-    }
     const ok = await showConfirm({
       title: 'Hapus Unit Usaha NKV',
       message: 'Apakah Anda yakin ingin menghapus data unit usaha NKV ini?',
@@ -133,14 +131,6 @@ export default function NKVPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (isSubmitting) return;
-    if (editingId && !canEdit) {
-      showToast.error('Hanya Administrator yang berhak mengedit data NKV.');
-      return;
-    }
-    if (!editingId && !canCreate) {
-      showToast.error('Anda tidak memiliki izin untuk menambah data.');
-      return;
-    }
     if (!formData.namaUsaha) {
       showToast.warning('Nama Usaha wajib diisi!');
       return;
@@ -290,7 +280,7 @@ export default function NKVPage() {
               <Download size={16} strokeWidth={2.5} />
               <span className="hidden sm:inline">Export Excel</span>
             </button>
-            {canCreate && (
+            {canManageNkv && (
               <button
                 onClick={handleOpenAdd}
                 className="min-h-touch min-w-touch h-11 px-4 rounded-xl bg-purple-600 hover:bg-purple-700 text-white text-xs sm:text-sm font-bold flex items-center gap-2 transition-all shadow-xs cursor-pointer"
@@ -317,7 +307,7 @@ export default function NKVPage() {
           filterJenis={filterJenis}
           setFilterJenis={setFilterJenis}
           uniqueJenis={uniqueJenis}
-          canEdit={canEdit}
+          canEdit={canManageNkv}
           onEdit={handleOpenEdit}
           onDelete={handleDelete}
         />

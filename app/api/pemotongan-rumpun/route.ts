@@ -226,6 +226,17 @@ export async function POST(req: Request) {
     const now = new Date();
     const today = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 0, 0, 0, 0);
 
+    // Cek status master unlock gembok sistem
+    let isMasterUnlocked = false;
+    try {
+      const [settingRows]: any = await pool.query(
+        `SELECT setting_value FROM system_settings WHERE setting_key = 'master_unlock_gembok' LIMIT 1`
+      );
+      if (settingRows && settingRows.length > 0 && settingRows[0].setting_value === 'true') {
+        isMasterUnlocked = true;
+      }
+    } catch {}
+
     // ── 2. SAVE DAILY DATA (PER HARI) ──
     if (bulan) {
       const bulanNum = Number(bulan);
@@ -237,8 +248,8 @@ export async function POST(req: Request) {
           const hariNum = Number(row.hari);
           if (!hariNum) continue;
 
-          // Cek aturan 3 hari jika bukan Administrator
-          if (!isAdmin) {
+          // Cek aturan 3 hari jika bukan Administrator dan master unlock tidak aktif
+          if (!isAdmin && !isMasterUnlocked) {
             const target = new Date(tahun, bulanNum - 1, hariNum, 0, 0, 0, 0);
             if (target.getTime() > today.getTime()) {
               // Tanggal di masa depan, abaikan perubahan

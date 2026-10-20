@@ -9,103 +9,110 @@ import {
   Download,
   Plus,
   Building2,
-  Save,
-  Loader2,
+  FileText,
   Calendar,
-  Table as TableIcon,
-  FileSpreadsheet,
+  Layers,
+  Sparkles,
 } from 'lucide-react';
 import {
-  BULAN_NAMES,
-  LOKASI_CONFIGS,
   RphFormData,
   INITIAL_RPH_FORM,
+  PencatatanPemotonganItem,
 } from '@/components/kesmavet/rph-tph-tpu/types';
-import { RumpunTableTab } from '@/components/kesmavet/rph-tph-tpu/RumpunTableTab';
-import { KomoditasTableTab } from '@/components/kesmavet/rph-tph-tpu/KomoditasTableTab';
-import { showToast, showConfirm } from '@/components/common/CustomToast';
+import PencatatanPemotonganForm from '@/components/kesmavet/rph-tph-tpu/PencatatanPemotonganForm';
+import PencatatanPemotonganTable from '@/components/kesmavet/rph-tph-tpu/PencatatanPemotonganTable';
 import { RumahPotongTab } from '@/components/kesmavet/rph-tph-tpu/RumahPotongTab';
 import { RphFormModal } from '@/components/kesmavet/rph-tph-tpu/RphModals';
+import { showToast, showConfirm } from '@/components/common/CustomToast';
 
 export default function RphTphTpuPage() {
   const { isReady, canCreate, canEdit, isAdmin: isAuthAdmin, userRole } = usePageAuth('kesmavet', 'rph-tph-tpu');
 
   // Role Admin Check: strictly only Administrator
   const isAdmin = useMemo(() => {
-    return isAuthAdmin || canEdit || userRole === 'Administrator';
-  }, [isAuthAdmin, canEdit, userRole]);
+    return isAuthAdmin || userRole === 'Administrator';
+  }, [isAuthAdmin, userRole]);
 
-  // Navigation tabs (1. Input Pemotongan, 2. TPH, 3. Data Rumah Potong)
-  const [activeTab, setActiveTab] = useState<'pemotongan_rumpun' | 'rekap_komoditas' | 'rumah_potong'>('pemotongan_rumpun');
+  // Petugas & Admin dapat mengelola dan menginput tabel pemotongan
+  const canManage = true;
 
-  // Tab 1 & 2 Location Switcher
-  const [selectedLokasiKey, setSelectedLokasiKey] = useState<string>('rph_kebumen');
+  // Active Tab: 'pencatatan_pemotongan' (Input & Tabel Baru) | 'rumah_potong' (Data RPH / TPH / TPU)
+  const [activeTab, setActiveTab] = useState<'pencatatan_pemotongan' | 'rumah_potong'>('pencatatan_pemotongan');
 
-  // Year & Month filter
-  const currentYear = new Date().getFullYear();
-  const currentMonth = new Date().getMonth() + 1;
+  // ── 1. STATE PENCATATAN PEMOTONGAN HEWAN (TAB 1) ──
+  const [pencatatanList, setPencatatanList] = useState<PencatatanPemotonganItem[]>([]);
+  const [isLoadingPencatatan, setIsLoadingPencatatan] = useState<boolean>(true);
+  const [editingPencatatan, setEditingPencatatan] = useState<PencatatanPemotonganItem | null>(null);
 
-  const [selectedYear, setSelectedYear] = useState<number>(currentYear);
-  const [selectedMonth, setSelectedMonth] = useState<number>(currentMonth);
-  const [availableYears, setAvailableYears] = useState<number[]>([2027, 2026, 2025, 2024]);
+  // Filter State Pencatatan
+  const [selectedTahun, setSelectedTahun] = useState<string>('ALL');
+  const [selectedBulan, setSelectedBulan] = useState<string>('ALL');
+  const [selectedTempat, setSelectedTempat] = useState<string>('ALL');
+  const [searchQuery, setSearchQuery] = useState<string>('');
 
-  // ── 1. STATE TAB: DATA RUMAH POTONG (RPH / TPH / TPU) ──
-  const [rphList, setRphList] = useState<any[]>([]);
-  const [isLoadingRph, setIsLoadingRph] = useState(true);
-  const [searchRph, setSearchRph] = useState('');
-  const [filterJenis, setFilterJenis] = useState('ALL');
-  const [filterHalal, setFilterHalal] = useState('ALL');
-  const [showAddModal, setShowAddModal] = useState(false);
-  const [editingItem, setEditingItem] = useState<any | null>(null);
-  const [formRph, setFormRph] = useState<RphFormData>(INITIAL_RPH_FORM);
-  const [isSavingRph, setIsSavingRph] = useState(false);
-
-  // ── 2. STATE TAB: INPUT PEMOTONGAN RUMAH POTONG HEWAN (4 TABEL RUMPUN SAPI HARIAN) ──
-  const [rumpunData, setRumpunData] = useState<Record<string, any[]>>({
-    rph_kebumen: [],
-    luar_rph_kebumen: [],
-    rph_gombong: [],
-    luar_rph_gombong: [],
-  });
-  const [isLoadingRumpun, setIsLoadingRumpun] = useState(false);
-  const [isSavingRumpun, setIsSavingRumpun] = useState(false);
-  const [rumpunSaveMessage, setRumpunSaveMessage] = useState('');
-
-  // ── 3. STATE TAB: TEMPAT PEMOTONGAN HEWAN (TPH) / KOMODITAS TERNAK HARIAN ──
-  const [komoditasData, setKomoditasData] = useState<Record<string, any[]>>({
-    rph_kebumen: [],
-    luar_rph_kebumen: [],
-    rph_gombong: [],
-    luar_rph_gombong: [],
-  });
-  const [isLoadingKomoditas, setIsLoadingKomoditas] = useState(false);
-  const [isSavingKomoditas, setIsSavingKomoditas] = useState(false);
-  const [komoditasSaveMessage, setKomoditasSaveMessage] = useState('');
-
-  // ── FETCH AVAILABLE YEARS ──
-  const loadAvailableYears = async () => {
+  // Fetch Data Pencatatan Pemotongan
+  const loadPencatatanData = async () => {
     try {
-      const [res1, res2] = await Promise.all([
-        fetch('/api/pemotongan-rumpun?action=years'),
-        fetch('/api/pemotongan-komoditas?action=years'),
-      ]);
-      const json1 = await res1.json();
-      const json2 = await res2.json();
+      setIsLoadingPencatatan(true);
+      const params = new URLSearchParams();
+      if (selectedTahun !== 'ALL') params.append('tahun', selectedTahun);
+      if (selectedBulan !== 'ALL') params.append('bulan', selectedBulan);
+      if (selectedTempat !== 'ALL') params.append('tempat', selectedTempat);
+      if (searchQuery.trim()) params.append('q', searchQuery.trim());
 
-      const yearsSet = new Set<number>([2027, 2026, 2025, 2024]);
-      if (json1.success && Array.isArray(json1.years)) {
-        json1.years.forEach((y: number) => yearsSet.add(Number(y)));
+      const res = await fetch(`/api/pencatatan-pemotongan?${params.toString()}`);
+      const json = await res.json();
+      if (json.success && Array.isArray(json.data)) {
+        setPencatatanList(json.data);
       }
-      if (json2.success && Array.isArray(json2.years)) {
-        json2.years.forEach((y: number) => yearsSet.add(Number(y)));
-      }
-      setAvailableYears(Array.from(yearsSet).sort((a, b) => b - a));
     } catch (err) {
-      console.warn('Gagal memuat tahun unik:', err);
+      console.error('Gagal memuat data pencatatan pemotongan:', err);
+      showToast.error('Gagal memuat data pencatatan pemotongan.');
+    } finally {
+      setIsLoadingPencatatan(false);
     }
   };
 
-  // ── 1. LOAD DATA RUMAH POTONG ──
+  useEffect(() => {
+    loadPencatatanData();
+  }, [selectedTahun, selectedBulan, selectedTempat]);
+
+  // Handle Hapus Pencatatan
+  const handleDeletePencatatan = async (id: number) => {
+    const ok = await showConfirm({
+      title: 'Hapus Pencatatan Pemotongan',
+      message: 'Apakah Anda yakin ingin menghapus data pemotongan hewan ini? Tindakan ini tidak dapat dibatalkan.',
+      confirmText: 'Ya, Hapus',
+      cancelText: 'Batal',
+      type: 'danger',
+    });
+    if (!ok) return;
+
+    try {
+      const res = await fetch(`/api/pencatatan-pemotongan?id=${id}`, { method: 'DELETE' });
+      const json = await res.json();
+      if (json.success) {
+        showToast.success('Data pemotongan berhasil dihapus!');
+        loadPencatatanData();
+      } else {
+        showToast.error(json.error || 'Gagal menghapus data.');
+      }
+    } catch (err: any) {
+      showToast.error('Terjadi kesalahan koneksi: ' + err.message);
+    }
+  };
+
+  // ── 2. STATE DATA RUMAH POTONG (TAB 2) ──
+  const [rphList, setRphList] = useState<any[]>([]);
+  const [isLoadingRph, setIsLoadingRph] = useState<boolean>(true);
+  const [searchRph, setSearchRph] = useState<string>('');
+  const [filterJenis, setFilterJenis] = useState<string>('ALL');
+  const [filterHalal, setFilterHalal] = useState<string>('ALL');
+  const [showAddModal, setShowAddModal] = useState<boolean>(false);
+  const [editingRphItem, setEditingRphItem] = useState<any | null>(null);
+  const [formRph, setFormRph] = useState<RphFormData>(INITIAL_RPH_FORM);
+  const [isSavingRph, setIsSavingRph] = useState<boolean>(false);
+
   const loadRphData = async () => {
     try {
       setIsLoadingRph(true);
@@ -121,293 +128,9 @@ export default function RphTphTpuPage() {
     }
   };
 
-  // ── 2. LOAD DATA PEMOTONGAN RUMPUN SAPI HARIAN ──
-  const loadRumpunData = async (year: number, month: number) => {
-    try {
-      setIsLoadingRumpun(true);
-      const res = await fetch(`/api/pemotongan-rumpun?tahun=${year}&bulan=${month}&mode=daily&_t=${Date.now()}`);
-      const json = await res.json();
-      if (json.success && json.data) {
-        setRumpunData({
-          rph_kebumen: json.data.rph_kebumen || [],
-          luar_rph_kebumen: json.data.luar_rph_kebumen || [],
-          rph_gombong: json.data.rph_gombong || [],
-          luar_rph_gombong: json.data.luar_rph_gombong || [],
-        });
-      }
-    } catch (err) {
-      console.error('Gagal memuat data pemotongan rumpun harian:', err);
-    } finally {
-      setIsLoadingRumpun(false);
-    }
-  };
-
-  // ── 3. LOAD DATA REKAP KOMODITAS TERNAK HARIAN ──
-  const loadKomoditasData = async (year: number, month: number) => {
-    try {
-      setIsLoadingKomoditas(true);
-      const res = await fetch(`/api/pemotongan-komoditas?tahun=${year}&bulan=${month}&mode=daily&_t=${Date.now()}`);
-      const json = await res.json();
-      if (json.success && json.data) {
-        setKomoditasData({
-          rph_kebumen: json.data.rph_kebumen || [],
-          luar_rph_kebumen: json.data.luar_rph_kebumen || [],
-          rph_gombong: json.data.rph_gombong || [],
-          luar_rph_gombong: json.data.luar_rph_gombong || [],
-        });
-      }
-    } catch (err) {
-      console.error('Gagal memuat data komoditas harian:', err);
-    } finally {
-      setIsLoadingKomoditas(false);
-    }
-  };
-
   useEffect(() => {
-    loadAvailableYears();
     loadRphData();
   }, []);
-
-  useEffect(() => {
-    loadRumpunData(selectedYear, selectedMonth);
-    loadKomoditasData(selectedYear, selectedMonth);
-  }, [selectedYear, selectedMonth]);
-
-  // ── CELL CHANGE TAB 1: RUMPUN SAPI HARIAN ──
-  const handleRumpunCellChange = (lokasiKey: string, dayIndex: number, field: string, value: any) => {
-    const num = Math.max(0, parseInt(value, 10) || 0);
-
-    setRumpunData((prev) => {
-      const copy = { ...prev };
-      const lokasiRows = [...(copy[lokasiKey] || [])];
-      if (lokasiRows[dayIndex]) {
-        lokasiRows[dayIndex] = {
-          ...lokasiRows[dayIndex],
-          [field]: num,
-        };
-      }
-      copy[lokasiKey] = lokasiRows;
-      return copy;
-    });
-  };
-
-  // ── CELL CHANGE TAB 2: KOMODITAS HARIAN ──
-  const handleKomoditasCellChange = (lokasiKey: string, dayIndex: number, field: string, value: any) => {
-    const num = Math.max(0, parseInt(value, 10) || 0);
-
-    setKomoditasData((prev) => {
-      const copy = { ...prev };
-      const lokasiRows = [...(copy[lokasiKey] || [])];
-      if (lokasiRows[dayIndex]) {
-        lokasiRows[dayIndex] = {
-          ...lokasiRows[dayIndex],
-          [field]: num,
-        };
-      }
-      copy[lokasiKey] = lokasiRows;
-      return copy;
-    });
-  };
-
-  // ── SAVE TAB 1: RUMPUN SAPI HARIAN ──
-  const handleSaveRumpun = async () => {
-    try {
-      setIsSavingRumpun(true);
-      setRumpunSaveMessage('');
-      const res = await fetch('/api/pemotongan-rumpun', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          tahun: selectedYear,
-          bulan: selectedMonth,
-          data: rumpunData,
-          isAdmin,
-        }),
-      });
-      const json = await res.json();
-      if (json.success) {
-        setRumpunSaveMessage('✓ Data Pemotongan Rumpun Harian berhasil disimpan!');
-        setTimeout(() => setRumpunSaveMessage(''), 4000);
-      } else {
-        alert('Gagal menyimpan: ' + json.error);
-      }
-    } catch (err: any) {
-      alert('Terjadi kesalahan saat menyimpan: ' + err.message);
-    } finally {
-      setIsSavingRumpun(false);
-    }
-  };
-
-  // ── SAVE TAB 2: KOMODITAS HARIAN ──
-  const handleSaveKomoditas = async () => {
-    try {
-      setIsSavingKomoditas(true);
-      setKomoditasSaveMessage('');
-      const res = await fetch('/api/pemotongan-komoditas', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          tahun: selectedYear,
-          bulan: selectedMonth,
-          data: komoditasData,
-          isAdmin,
-        }),
-      });
-      const json = await res.json();
-      if (json.success) {
-        setKomoditasSaveMessage('✓ Data Pemotongan Komoditas Harian berhasil disimpan!');
-        setTimeout(() => setKomoditasSaveMessage(''), 4000);
-      } else {
-        alert('Gagal menyimpan: ' + json.error);
-      }
-    } catch (err: any) {
-      alert('Terjadi kesalahan: ' + err.message);
-    } finally {
-      setIsSavingKomoditas(false);
-    }
-  };
-
-  // ── EXPORT EXCEL HANDLERS ──
-  const exportRphToExcel = () => {
-    try {
-      const ws = XLSX.utils.json_to_sheet(
-        rphList.map((r, i) => ({
-          No: i + 1,
-          'Nama Usaha': r.nama_usaha,
-          Jenis: r.jenis,
-          Pemilik: r.pemilik,
-          Kontak: r.kontak,
-          Lokasi: r.lokasi || r.alamat_pemilik,
-          'Sertifikat Halal': r.sertifikat_halal ? 'Sudah' : 'Belum',
-          'Sertifikat NKV': r.sertifikat_nkv || 'Belum',
-        }))
-      );
-      const wb = XLSX.utils.book_new();
-      XLSX.utils.book_append_sheet(wb, ws, 'Data Rumah Potong');
-      XLSX.writeFile(wb, `Data_Rumah_Potong_Kebumen_${new Date().toISOString().split('T')[0]}.xlsx`);
-    } catch {
-      alert('Gagal mengekspor data RPH.');
-    }
-  };
-
-  const exportRumpunToExcel = () => {
-    try {
-      const wb = XLSX.utils.book_new();
-      const bulanName = BULAN_NAMES[selectedMonth - 1];
-
-      LOKASI_CONFIGS.forEach((cfg) => {
-        const rows = rumpunData[cfg.key] || [];
-        const isGombong = cfg.key === 'rph_gombong' || cfg.key === 'luar_rph_gombong';
-
-        const data = rows.map((r) => {
-          const pj = Number(r.po_jantan) || 0;
-          const pbp = Number(r.po_betina_prod) || 0;
-          const pbnp = Number(r.po_betina_non_prod) || 0;
-          const sj = Number(r.so_jantan) || 0;
-          const sbp = Number(r.so_betina_prod) || 0;
-          const sbnp = Number(r.so_betina_non_prod) || 0;
-          const smj = Number(r.simmental_jantan) || 0;
-          const smbp = Number(r.simmental_betina_prod) || 0;
-          const smbnp = Number(r.simmental_betina_non_prod) || 0;
-          const lj = Number(r.limousine_jantan) || 0;
-          const lbp = Number(r.limousine_betina_prod) || 0;
-          const lbnp = Number(r.limousine_betina_non_prod) || 0;
-          const bj = Number(r.babi_jantan) || 0;
-          const bb = Number(r.babi_betina_prod) || Number(r.babi_betina) || 0;
-
-          const totJ = pj + sj + smj + lj + (isGombong ? bj : 0);
-          const totBP = pbp + sbp + smbp + lbp + (isGombong ? bb : 0);
-          const totBNP = pbnp + sbnp + smbnp + lbnp;
-          const totHari = totJ + totBP + totBNP;
-
-          const item: any = {
-            Hari: `Tgl ${r.hari}`,
-            'PO Jantan': pj,
-            'PO Betina Prod': pbp,
-            'PO Betina Non-P': pbnp,
-            'SO Jantan': sj,
-            'SO Betina Prod': sbp,
-            'SO Betina Non-P': sbnp,
-            'Simmental Jantan': smj,
-            'Simmental Betina Prod': smbp,
-            'Simmental Betina Non-P': smbnp,
-            'Limousine Jantan': lj,
-            'Limousine Betina Prod': lbp,
-            'Limousine Betina Non-P': lbnp,
-          };
-
-          if (isGombong) {
-            item['Babi Jantan'] = bj;
-            item['Babi Betina'] = bb;
-          }
-
-          item['Total Jantan'] = totJ;
-          item['Total Betina Prod'] = totBP;
-          item['Total Betina Non-P'] = totBNP;
-          item['Total Hari'] = totHari;
-
-          return item;
-        });
-
-        const ws = XLSX.utils.json_to_sheet(data);
-        XLSX.utils.book_append_sheet(wb, ws, cfg.label.substring(0, 31));
-      });
-
-      XLSX.writeFile(wb, `Pemotongan_Rumpun_${bulanName}_${selectedYear}.xlsx`);
-    } catch {
-      alert('Gagal mengekspor data pemotongan.');
-    }
-  };
-
-  const exportKomoditasToExcel = () => {
-    try {
-      const wb = XLSX.utils.book_new();
-      const bulanName = BULAN_NAMES[selectedMonth - 1];
-
-      LOKASI_CONFIGS.forEach((cfg) => {
-        const rows = komoditasData[cfg.key] || [];
-        const data = rows.map((r) => {
-          const sj = Number(r.sapi_jantan) || 0;
-          const sb = Number(r.sapi_betina) || 0;
-          const kj = Number(r.kuda_jantan) || 0;
-          const kb = Number(r.kuda_betina) || 0;
-          const bj = Number(r.babi_jantan) || 0;
-          const bb = Number(r.babi_betina) || 0;
-          const kmj = Number(r.kambing_jantan) || 0;
-          const kmb = Number(r.kambing_betina) || 0;
-          const dj = Number(r.domba_jantan) || 0;
-          const db = Number(r.domba_betina) || 0;
-
-          const totJ = sj + kj + bj + kmj + dj;
-          const totB = sb + kb + bb + kmb + db;
-
-          return {
-            Hari: `Tgl ${r.hari}`,
-            'Sapi Potong J': sj,
-            'Sapi Potong B': sb,
-            'Kuda J': kj,
-            'Kuda B': kb,
-            'Babi J': bj,
-            'Babi B': bb,
-            'Kambing J': kmj,
-            'Kambing B': kmb,
-            'Domba J': dj,
-            'Domba B': db,
-            'Total Jantan': totJ,
-            'Total Betina': totB,
-            'Total Hari': totJ + totB,
-          };
-        });
-
-        const ws = XLSX.utils.json_to_sheet(data);
-        XLSX.utils.book_append_sheet(wb, ws, cfg.label.substring(0, 31));
-      });
-
-      XLSX.writeFile(wb, `Pemotongan_Komoditas_${bulanName}_${selectedYear}.xlsx`);
-    } catch {
-      alert('Gagal mengekspor rekap komoditas.');
-    }
-  };
 
   const filteredRph = useMemo(() => {
     return rphList.filter((r) => {
@@ -427,15 +150,11 @@ export default function RphTphTpuPage() {
   const handleSaveRph = async (e: React.FormEvent) => {
     e.preventDefault();
     if (isSavingRph) return;
-    if (!canCreate && !canEdit) {
-      alert('Anda tidak memiliki hak akses untuk menambah/mengedit data RPH.');
-      return;
-    }
 
     setIsSavingRph(true);
     try {
-      const method = editingItem ? 'PUT' : 'POST';
-      const body = editingItem ? { ...formRph, id: editingItem.id } : formRph;
+      const method = editingRphItem ? 'PUT' : 'POST';
+      const body = editingRphItem ? { ...formRph, id: editingRphItem.id } : formRph;
       const res = await fetch('/api/pemotongan-hewan', {
         method,
         headers: { 'Content-Type': 'application/json' },
@@ -445,13 +164,13 @@ export default function RphTphTpuPage() {
       if (res.ok) {
         setShowAddModal(false);
         loadRphData();
+        showToast.success('Data rumah potong berhasil disimpan!');
       } else {
         const errJson = await res.json().catch(() => ({}));
-        alert(errJson.error || 'Gagal menyimpan data rumah potong.');
+        showToast.error(errJson.error || 'Gagal menyimpan data rumah potong.');
       }
-    } catch (err) {
-      console.error('Save error:', err);
-      alert('Terjadi kesalahan koneksi jaringan.');
+    } catch (err: any) {
+      showToast.error('Koneksi bermasalah: ' + err.message);
     } finally {
       setIsSavingRph(false);
     }
@@ -459,12 +178,12 @@ export default function RphTphTpuPage() {
 
   const handleDeleteRph = async (id: number) => {
     if (!isAdmin) {
-      showToast.error('Hanya Administrator yang berhak menghapus unit pemotongan.');
+      showToast.error('Hanya Administrator yang berhak menghapus unit rumah potong.');
       return;
     }
     const ok = await showConfirm({
       title: 'Hapus Unit Pemotongan',
-      message: 'Apakah Anda yakin ingin menghapus unit pemotongan ini?',
+      message: 'Apakah Anda yakin ingin menghapus unit rumah potong ini?',
       confirmText: 'Ya, Hapus',
       cancelText: 'Batal',
       type: 'danger',
@@ -474,14 +193,35 @@ export default function RphTphTpuPage() {
     try {
       const res = await fetch(`/api/pemotongan-hewan/${id}`, { method: 'DELETE' });
       if (res.ok) {
-        showToast.success('Unit pemotongan berhasil dihapus.');
+        showToast.success('Unit rumah potong berhasil dihapus.');
         loadRphData();
       } else {
-        showToast.error('Gagal menghapus unit pemotongan.');
+        showToast.error('Gagal menghapus unit rumah potong.');
       }
-    } catch (err) {
-      console.error('Delete error:', err);
+    } catch (err: any) {
       showToast.error('Terjadi kesalahan saat menghapus data.');
+    }
+  };
+
+  const exportRphToExcel = () => {
+    try {
+      const ws = XLSX.utils.json_to_sheet(
+        rphList.map((r, i) => ({
+          No: i + 1,
+          'Nama Usaha': r.nama_usaha,
+          Jenis: r.jenis,
+          Pemilik: r.pemilik,
+          Kontak: r.kontak,
+          Lokasi: r.lokasi || r.alamat_pemilik,
+          'Sertifikat Halal': r.sertifikat_halal ? 'Sudah' : 'Belum',
+          'Sertifikat NKV': r.sertifikat_nkv || 'Belum',
+        }))
+      );
+      const wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, ws, 'Data Rumah Potong');
+      XLSX.writeFile(wb, `Data_Rumah_Potong_Kebumen_${new Date().toISOString().split('T')[0]}.xlsx`);
+    } catch {
+      showToast.error('Gagal mengekspor data RPH.');
     }
   };
 
@@ -516,55 +256,10 @@ export default function RphTphTpuPage() {
           </div>
 
           <div className="flex flex-wrap items-center gap-2 shrink-0">
-            {activeTab === 'pemotongan_rumpun' && (
-              <>
-                <button
-                  onClick={exportRumpunToExcel}
-                  className="h-10 px-4 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 text-xs font-bold flex items-center gap-1.5 transition-all shadow-xs cursor-pointer"
-                >
-                  <Download size={15} strokeWidth={2.5} />
-                  <span>Export Excel</span>
-                </button>
-
-                {(canEdit || isAdmin) && (
-                  <button
-                    onClick={handleSaveRumpun}
-                    disabled={isSavingRumpun}
-                    className="h-10 px-4 rounded-xl bg-purple-600 hover:bg-purple-700 disabled:opacity-50 text-white text-xs font-bold flex items-center gap-1.5 shadow-xs transition-colors cursor-pointer"
-                  >
-                    {isSavingRumpun ? <Loader2 size={15} className="animate-spin" /> : <Save size={15} />}
-                    <span>Simpan Perubahan</span>
-                  </button>
-                )}
-              </>
-            )}
-
-            {activeTab === 'rekap_komoditas' && (
-              <>
-                <button
-                  onClick={exportKomoditasToExcel}
-                  className="h-10 px-4 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 text-xs font-bold flex items-center gap-1.5 transition-all shadow-xs cursor-pointer"
-                >
-                  <Download size={15} strokeWidth={2.5} />
-                  <span>Export Excel</span>
-                </button>
-
-                {(canEdit || isAdmin) && (
-                  <button
-                    onClick={handleSaveKomoditas}
-                    disabled={isSavingKomoditas}
-                    className="h-10 px-4 rounded-xl bg-purple-600 hover:bg-purple-700 disabled:opacity-50 text-white text-xs font-bold flex items-center gap-1.5 shadow-xs transition-colors cursor-pointer"
-                  >
-                    {isSavingKomoditas ? <Loader2 size={15} className="animate-spin" /> : <Save size={15} />}
-                    <span>Simpan Perubahan</span>
-                  </button>
-                )}
-              </>
-            )}
-
             {activeTab === 'rumah_potong' && (
               <>
                 <button
+                  type="button"
                   onClick={exportRphToExcel}
                   className="h-10 px-4 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 text-xs font-bold flex items-center gap-1.5 transition-all shadow-xs cursor-pointer"
                 >
@@ -572,19 +267,18 @@ export default function RphTphTpuPage() {
                   <span>Export Excel</span>
                 </button>
 
-                {canCreate && (
-                  <button
-                    onClick={() => {
-                      setEditingItem(null);
-                      setFormRph(INITIAL_RPH_FORM);
-                      setShowAddModal(true);
-                    }}
-                    className="h-10 px-4 rounded-xl bg-purple-600 hover:bg-purple-700 text-white text-xs font-bold flex items-center gap-1.5 shadow-xs transition-colors cursor-pointer"
-                  >
-                    <Plus size={15} strokeWidth={2.5} />
-                    <span>Tambah Rumah Potong</span>
-                  </button>
-                )}
+                <button
+                  type="button"
+                  onClick={() => {
+                    setEditingRphItem(null);
+                    setFormRph(INITIAL_RPH_FORM);
+                    setShowAddModal(true);
+                  }}
+                  className="h-10 px-4 rounded-xl bg-purple-600 hover:bg-purple-700 text-white text-xs font-bold flex items-center gap-1.5 shadow-xs transition-colors cursor-pointer"
+                >
+                  <Plus size={15} strokeWidth={2.5} />
+                  <span>Tambah Rumah Potong</span>
+                </button>
               </>
             )}
           </div>
@@ -593,70 +287,23 @@ export default function RphTphTpuPage() {
 
       {/* ── WORKSPACE ── */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 space-y-6">
-        {/* Opsi Pilihan Tahun & Bulan (Output Per Hari) */}
-        <div className="flex flex-wrap items-center justify-center gap-3 bg-white dark:bg-slate-900 p-3.5 rounded-2xl border border-purple-200 dark:border-slate-800 shadow-xs max-w-2xl mx-auto">
-          {/* Pilih Tahun */}
-          <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl border border-purple-200 dark:border-purple-900/50 bg-purple-50/70 dark:bg-purple-950/30">
-            <Calendar className="text-purple-700 dark:text-purple-400" size={16} />
-            <span className="text-xs font-bold text-purple-900 dark:text-purple-200">Pilih Tahun:</span>
-            <select
-              value={selectedYear}
-              onChange={(e) => setSelectedYear(Number(e.target.value))}
-              className="bg-transparent text-xs font-black text-purple-800 dark:text-purple-300 focus:outline-none cursor-pointer"
-            >
-              {availableYears.map((yr) => (
-                <option key={yr} value={yr} className="bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100">
-                  Tahun {yr}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          {/* Pilih Bulan */}
-          <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl border border-purple-200 dark:border-purple-900/50 bg-purple-50/70 dark:bg-purple-950/30">
-            <Calendar className="text-purple-700 dark:text-purple-400" size={16} />
-            <span className="text-xs font-bold text-purple-900 dark:text-purple-200">Pilih Bulan:</span>
-            <select
-              value={selectedMonth}
-              onChange={(e) => setSelectedMonth(Number(e.target.value))}
-              className="bg-transparent text-xs font-black text-purple-800 dark:text-purple-300 focus:outline-none cursor-pointer"
-            >
-              {BULAN_NAMES.map((bln, idx) => (
-                <option key={bln} value={idx + 1} className="bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100">
-                  {bln}
-                </option>
-              ))}
-            </select>
-          </div>
-        </div>
-
-        {/* ── MAIN TAB NAVIGATION ── */}
-        <div className="flex gap-2 border-b border-purple-200 dark:border-slate-800 pb-px overflow-x-auto no-scrollbar scroll-smooth -mx-4 px-4 sm:mx-0 sm:px-0">
+        {/* TAB SWITCHER */}
+        <div className="flex items-center gap-2 border-b border-purple-200 dark:border-slate-800 overflow-x-auto">
           <button
-            onClick={() => setActiveTab('pemotongan_rumpun')}
+            type="button"
+            onClick={() => setActiveTab('pencatatan_pemotongan')}
             className={`min-h-touch h-11 px-4 sm:px-6 rounded-t-xl text-xs sm:text-sm font-bold flex items-center gap-2 border-t border-x transition-all shrink-0 whitespace-nowrap cursor-pointer ${
-              activeTab === 'pemotongan_rumpun'
+              activeTab === 'pencatatan_pemotongan'
                 ? 'bg-white dark:bg-slate-900 border-purple-200 dark:border-slate-800 text-purple-700 dark:text-purple-400 border-b-white dark:border-b-slate-900 translate-y-px shadow-xs'
                 : 'border-transparent text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 bg-purple-50/60 dark:bg-slate-800/60'
             }`}
           >
-            <TableIcon size={16} strokeWidth={2.5} />
-            <span>1. Input Pemotongan Rumah Potong Hewan</span>
+            <FileText size={16} strokeWidth={2.5} />
+            <span>1. Pencatatan Pemotongan Hewan</span>
           </button>
 
           <button
-            onClick={() => setActiveTab('rekap_komoditas')}
-            className={`min-h-touch h-11 px-4 sm:px-6 rounded-t-xl text-xs sm:text-sm font-bold flex items-center gap-2 border-t border-x transition-all shrink-0 whitespace-nowrap cursor-pointer ${
-              activeTab === 'rekap_komoditas'
-                ? 'bg-white dark:bg-slate-900 border-purple-200 dark:border-slate-800 text-purple-700 dark:text-purple-400 border-b-white dark:border-b-slate-900 translate-y-px shadow-xs'
-                : 'border-transparent text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 bg-purple-50/60 dark:bg-slate-800/60'
-            }`}
-          >
-            <FileSpreadsheet size={16} strokeWidth={2.5} />
-            <span>2. Tempat Pemotongan Hewan (TPH)</span>
-          </button>
-
-          <button
+            type="button"
             onClick={() => setActiveTab('rumah_potong')}
             className={`min-h-touch h-11 px-4 sm:px-6 rounded-t-xl text-xs sm:text-sm font-bold flex items-center gap-2 border-t border-x transition-all shrink-0 whitespace-nowrap cursor-pointer ${
               activeTab === 'rumah_potong'
@@ -665,42 +312,52 @@ export default function RphTphTpuPage() {
             }`}
           >
             <Building2 size={16} strokeWidth={2.5} />
-            <span>3. Data Rumah Potong</span>
+            <span>2. Data Rumah Potong (RPH / TPH / TPU)</span>
+            <span className="px-2 py-0.5 rounded-full text-[10px] bg-purple-100 text-purple-800 dark:bg-purple-950 dark:text-purple-300 font-extrabold">
+              {rphList.length}
+            </span>
           </button>
         </div>
 
-        {/* TAB 1: RUMPUN SAPI HARIAN */}
-        {activeTab === 'pemotongan_rumpun' && (
-          <RumpunTableTab
-            selectedLokasiKey={selectedLokasiKey}
-            setSelectedLokasiKey={setSelectedLokasiKey}
-            rumpunData={rumpunData}
-            selectedYear={selectedYear}
-            selectedMonth={selectedMonth}
-            canEdit={canEdit}
-            isAdmin={isAdmin}
-            rumpunSaveMessage={rumpunSaveMessage}
-            handleRumpunCellChange={handleRumpunCellChange}
-          />
+        {/* ── TAB 1: PENCATATAN PEMOTONGAN HEWAN (FORM INPUT & TABEL TRANSAKSI) ── */}
+        {activeTab === 'pencatatan_pemotongan' && (
+          <div className="space-y-6">
+            {/* Form Input Pemotongan */}
+            <PencatatanPemotonganForm
+              onSuccess={() => {
+                setEditingPencatatan(null);
+                loadPencatatanData();
+              }}
+              editingItem={editingPencatatan}
+              onCancelEdit={() => setEditingPencatatan(null)}
+              canEdit={canManage}
+            />
+
+            {/* Tabel Riwayat Pemotongan */}
+            <PencatatanPemotonganTable
+              dataList={pencatatanList}
+              isLoading={isLoadingPencatatan}
+              onRefresh={loadPencatatanData}
+              onEdit={(item) => {
+                setEditingPencatatan(item);
+                window.scrollTo({ top: 120, behavior: 'smooth' });
+              }}
+              onDelete={handleDeletePencatatan}
+              canEdit={canManage}
+              isAdmin={isAdmin}
+              selectedTahun={selectedTahun}
+              setSelectedTahun={setSelectedTahun}
+              selectedBulan={selectedBulan}
+              setSelectedBulan={setSelectedBulan}
+              selectedTempat={selectedTempat}
+              setSelectedTempat={setSelectedTempat}
+              searchQuery={searchQuery}
+              setSearchQuery={setSearchQuery}
+            />
+          </div>
         )}
 
-        {/* TAB 2: REKAP KOMODITAS HARIAN */}
-        {activeTab === 'rekap_komoditas' && (
-          <KomoditasTableTab
-            selectedLokasiKey={selectedLokasiKey}
-            setSelectedLokasiKey={setSelectedLokasiKey}
-            komoditasSaveMessage={komoditasSaveMessage}
-            isLoadingKomoditas={isLoadingKomoditas}
-            komoditasData={komoditasData}
-            selectedYear={selectedYear}
-            selectedMonth={selectedMonth}
-            canEdit={canEdit}
-            isAdmin={isAdmin}
-            handleKomoditasCellChange={handleKomoditasCellChange}
-          />
-        )}
-
-        {/* TAB 3: DATA RUMAH POTONG */}
+        {/* ── TAB 2: DATA RUMAH POTONG (RPH / TPH / TPU) ── */}
         {activeTab === 'rumah_potong' && (
           <RumahPotongTab
             searchRph={searchRph}
@@ -713,7 +370,7 @@ export default function RphTphTpuPage() {
             isLoadingRph={isLoadingRph}
             isAdmin={isAdmin}
             onEditRph={(item) => {
-              setEditingItem(item);
+              setEditingRphItem(item);
               setFormRph({
                 nama_usaha: item.nama_usaha || '',
                 jenis: item.jenis || 'TPU',
@@ -736,7 +393,7 @@ export default function RphTphTpuPage() {
       <RphFormModal
         showAddModal={showAddModal}
         setShowAddModal={setShowAddModal}
-        editingItem={editingItem}
+        editingItem={editingRphItem}
         formRph={formRph}
         setFormRph={setFormRph}
         handleRphSubmit={handleSaveRph}

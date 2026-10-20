@@ -218,13 +218,14 @@ export function ModalCattleForm({
             </select>
           </div>
           <div>
-            <label className="block text-xs font-bold mb-1 text-slate-700">Ras Sapi <span className="text-[11px] text-slate-400 font-normal">(opsional)</span></label>
+            <label className="block text-xs font-bold mb-1 text-slate-700">Ras Sapi <span className="text-rose-500">*</span></label>
             <input
               type="text"
+              required
               className="w-full min-h-touch h-11 px-3.5 border border-slate-200 rounded-xl bg-slate-50 focus:bg-white focus:outline-none focus:border-emerald-600 text-xs text-slate-900"
               value={formData.breed || ''}
               onChange={(e) => setFormData({ ...formData, breed: e.target.value })}
-              placeholder="PO / Simmental / Limousin"
+              placeholder="Contoh: PO / Simmental / Limousin"
             />
           </div>
           <div>
