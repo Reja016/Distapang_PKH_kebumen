@@ -31,12 +31,17 @@ import {
 import { KarcisRetribusiDetailModal } from './PelayananMedikModals';
 import { UniversalAuditModal } from '@/components/common/UniversalAuditModal';
 import {
-  KARCIS_RETRIBUSI_GROUPS,
-  KARCIS_ITEM_MAP,
+  LAYANAN_RETRIBUSI_GROUPS as KARCIS_RETRIBUSI_GROUPS,
+  LAYANAN_ITEM_MAP as KARCIS_ITEM_MAP,
   calculateTotalTarif,
-  formatRupiah,
-} from '@/lib/karcisRetribusiData';
+} from '@/lib/layananMedikData';
+import { formatRupiah } from '@/lib/formatters';
 import { showConfirm } from '@/components/common/CustomToast';
+import AlamatWilayahFields, {
+  getMasterWilayah,
+  formatAlamatString,
+  parseAlamatString,
+} from '@/components/common/AlamatWilayahFields';
 
 interface PelayananMedikTabProps {
   canEdit: boolean;
@@ -66,6 +71,11 @@ export function PelayananMedikTab({
   const [isSaving, setIsSaving] = useState(false);
   const [customDiagnosa, setCustomDiagnosa] = useState(false);
   const [newDiagInput, setNewDiagInput] = useState('');
+
+  // Alamat Wilayah (Kecamatan & Desa dari Database)
+  const [formKecamatan, setFormKecamatan] = useState<string>('');
+  const [formDesa, setFormDesa] = useState<string>('');
+  const [formDetailAlamat, setFormDetailAlamat] = useState<string>('');
 
   // Filters
   const [selectedPuskeswan, setSelectedPuskeswan] = useState<string>('all');
@@ -138,6 +148,9 @@ export function PelayananMedikTab({
     });
     setCustomDiagnosa(false);
     setNewDiagInput('');
+    setFormKecamatan('');
+    setFormDesa('');
+    setFormDetailAlamat('');
   };
 
   const handleOpenEdit = (item: PelayananMedikRecord) => {
@@ -159,6 +172,14 @@ export function PelayananMedikTab({
     setCustomDiagnosa(false);
     setNewDiagInput('');
 
+    // Parse alamat kecamatan & desa dari master wilayah database
+    getMasterWilayah().then((wil) => {
+      const parsed = parseAlamatString(item.alamat, wil.kecamatan, wil.desaMap);
+      setFormKecamatan(parsed.kecamatan);
+      setFormDesa(parsed.desa);
+      setFormDetailAlamat(parsed.detail);
+    });
+
     // Scroll ke form input
     if (formRef.current) {
       formRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -172,6 +193,13 @@ export function PelayananMedikTab({
       return;
     }
 
+    if (!formKecamatan || !formDesa) {
+      alert('Kecamatan dan Desa wajib dipilih dari daftar!');
+      return;
+    }
+
+    const finalAlamat = formatAlamatString(formKecamatan, formDesa, formDetailAlamat);
+
     setIsSaving(true);
     try {
       const finalDiagnosa = customDiagnosa && newDiagInput.trim() ? newDiagInput.trim() : formData.diagnosa_nama;
@@ -179,6 +207,7 @@ export function PelayananMedikTab({
       const method = editingId ? 'PUT' : 'POST';
       const body = {
         ...formData,
+        alamat: finalAlamat,
         diagnosa_nama: finalDiagnosa,
         ...(editingId ? { id: editingId, id_laporan_penyakit: editingLinkedLaporanId } : {}),
       };
@@ -267,9 +296,6 @@ export function PelayananMedikTab({
                 <h3 className="text-base font-bold">
                   {editingId ? 'Edit Pelayanan Jasa Medik' : 'Form Pelayanan Jasa Medik Veteriner'}
                 </h3>
-                <p className="text-xs text-blue-100">
-                  Pelayanan Semi Aktif & Karcis Retribusi (Perda No. 10 Th. 2025)
-                </p>
               </div>
             </div>
             {editingId && (
@@ -328,7 +354,7 @@ export function PelayananMedikTab({
             </div>
 
             {/* Bagian 2: Identitas Pasien & Pemilik */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="space-y-4">
               <div>
                 <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
                   Nama Pemilik / Peternak <span className="text-rose-500">*</span>
@@ -343,19 +369,37 @@ export function PelayananMedikTab({
                 />
               </div>
 
-              <div>
-                <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
-                  Alamat Lengkap <span className="text-rose-500">*</span>
-                </label>
-                <input
-                  type="text"
-                  required
-                  value={formData.alamat}
-                  onChange={(e) => setFormData({ ...formData, alamat: e.target.value })}
-                  placeholder="Desa / RT-RW / Kecamatan"
-                  className="w-full px-3 py-2 text-sm bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
-                />
-              </div>
+              {/* Alamat Terintegrasi Database: Dropdown Kecamatan & Desa + Alamat Lengkap */}
+              <AlamatWilayahFields
+                kecamatan={formKecamatan}
+                desa={formDesa}
+                detailAlamat={formDetailAlamat}
+                onChangeKecamatan={(kec) => {
+                  setFormKecamatan(kec);
+                  setFormData((prev) => ({
+                    ...prev,
+                    alamat: formatAlamatString(kec, formDesa, formDetailAlamat),
+                  }));
+                }}
+                onChangeDesa={(d) => {
+                  setFormDesa(d);
+                  setFormData((prev) => ({
+                    ...prev,
+                    alamat: formatAlamatString(formKecamatan, d, formDetailAlamat),
+                  }));
+                }}
+                onChangeDetail={(det) => {
+                  setFormDetailAlamat(det);
+                  setFormData((prev) => ({
+                    ...prev,
+                    alamat: formatAlamatString(formKecamatan, formDesa, det),
+                  }));
+                }}
+                required={true}
+              />
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
 
               <div>
                 <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
@@ -452,10 +496,6 @@ export function PelayananMedikTab({
                 </select>
               )}
 
-              <p className="text-[11px] text-amber-800 dark:text-amber-300/80 leading-relaxed">
-                <span className="font-semibold">Sinkronisasi Database:</span> Kasus diagnosa yang dicatat di sini
-                otomatis terhubung dan menambah statistik kasus di menu <strong>Laporan Kasus Penyakit</strong>.
-              </p>
             </div>
 
             {/* Bagian 4: Checklist Karcis Retribusi (Perda No. 10 Th. 2025) */}
@@ -775,7 +815,7 @@ export function PelayananMedikTab({
                         <button
                           onClick={() => setViewKarcisRecord(item)}
                           className="p-1.5 text-indigo-600 hover:text-indigo-800 hover:bg-indigo-50 dark:hover:bg-indigo-950/50 rounded-lg transition cursor-pointer"
-                          title="Lihat Karcis Retribusi"
+                          title="Lihat Bukti Retribusi"
                         >
                           <FileText className="w-4 h-4" />
                         </button>

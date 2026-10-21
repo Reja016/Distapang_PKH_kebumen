@@ -338,15 +338,6 @@ export default function LaporanPuskeswanPage() {
           >
             <Stethoscope size={16} />
             <span>1. Pelayanan Jasa Medik Veteriner</span>
-            <span
-              className={`text-[10px] px-2 py-0.5 rounded-full font-black ${
-                currentTab === 'pelayanan'
-                  ? 'bg-blue-100 dark:bg-blue-950 text-blue-800 dark:text-blue-300'
-                  : 'bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300'
-              }`}
-            >
-              Karcis Retribusi
-            </span>
           </button>
 
           <button
@@ -359,15 +350,6 @@ export default function LaporanPuskeswanPage() {
           >
             <Truck size={16} />
             <span>2. Puskeswan Keliling (Puskeswanling)</span>
-            <span
-              className={`text-[10px] px-2 py-0.5 rounded-full font-black ${
-                currentTab === 'puskeswanling'
-                  ? 'bg-blue-100 dark:bg-blue-950 text-blue-800 dark:text-blue-300'
-                  : 'bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300'
-              }`}
-            >
-              Layanan Bergerak
-            </span>
           </button>
 
           <button
@@ -380,15 +362,6 @@ export default function LaporanPuskeswanPage() {
           >
             <Building2 size={16} />
             <span>3. Profil Puskeswan Kebumen</span>
-            <span
-              className={`text-[10px] px-2 py-0.5 rounded-full font-black ${
-                currentTab === 'profil'
-                  ? 'bg-blue-100 dark:bg-blue-950 text-blue-800 dark:text-blue-300'
-                  : 'bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300'
-              }`}
-            >
-              {profilList.length} Unit
-            </span>
           </button>
         </div>
 

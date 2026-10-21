@@ -10,9 +10,9 @@ import {
   DollarSign,
 } from 'lucide-react';
 import {
-  KARCIS_ITEM_MAP,
-  formatRupiah,
-} from '@/lib/karcisRetribusiData';
+  LAYANAN_ITEM_MAP as KARCIS_ITEM_MAP,
+} from '@/lib/layananMedikData';
+import { formatRupiah } from '@/lib/formatters';
 import { PelayananMedikRecord } from './types';
 
 // ══════════════════════════════════════════════════════════════════════════

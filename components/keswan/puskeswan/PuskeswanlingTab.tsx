@@ -25,8 +25,13 @@ import {
 } from 'lucide-react';
 import { UniversalAuditModal } from '@/components/common/UniversalAuditModal';
 import { showConfirm } from '@/components/common/CustomToast';
-import { formatRupiah } from '@/lib/karcisRetribusiData';
+import { formatRupiah } from '@/lib/formatters';
 import { DAFTAR_PUSKESWAN, DAFTAR_BULAN } from './types';
+import AlamatWilayahFields, {
+  getMasterWilayah,
+  formatAlamatString,
+  parseAlamatString,
+} from '@/components/common/AlamatWilayahFields';
 
 interface PuskeswanlingRecord {
   id: number;
@@ -100,6 +105,11 @@ export function PuskeswanlingTab({
   const [customDiagnosa, setCustomDiagnosa] = useState(false);
   const [newDiagInput, setNewDiagInput] = useState('');
 
+  // Alamat Wilayah (Kecamatan & Desa dari Database)
+  const [formKecamatan, setFormKecamatan] = useState<string>('');
+  const [formDesa, setFormDesa] = useState<string>('');
+  const [formDetailAlamat, setFormDetailAlamat] = useState<string>('');
+
   // Filters
   const [selectedPuskeswan, setSelectedPuskeswan] = useState<string>('all');
   const [selectedTahun, setSelectedTahun] = useState<string>('2026');
@@ -155,6 +165,9 @@ export function PuskeswanlingTab({
     });
     setCustomDiagnosa(false);
     setNewDiagInput('');
+    setFormKecamatan('');
+    setFormDesa('');
+    setFormDetailAlamat('');
   };
 
   const handleOpenEdit = (item: PuskeswanlingRecord) => {
@@ -175,6 +188,14 @@ export function PuskeswanlingTab({
     setCustomDiagnosa(false);
     setNewDiagInput('');
 
+    // Parse alamat kecamatan & desa dari master wilayah database
+    getMasterWilayah().then((wil) => {
+      const parsed = parseAlamatString(item.alamat, wil.kecamatan, wil.desaMap);
+      setFormKecamatan(parsed.kecamatan);
+      setFormDesa(parsed.desa);
+      setFormDetailAlamat(parsed.detail);
+    });
+
     if (formRef.current) {
       formRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
@@ -187,12 +208,20 @@ export function PuskeswanlingTab({
       return;
     }
 
+    if (!formKecamatan || !formDesa) {
+      alert('Kecamatan dan Desa wajib dipilih dari daftar!');
+      return;
+    }
+
+    const finalAlamat = formatAlamatString(formKecamatan, formDesa, formDetailAlamat);
+
     setIsSaving(true);
     try {
       const finalDiagnosa = customDiagnosa && newDiagInput.trim() ? newDiagInput.trim() : formData.diagnosa_nama;
 
       const payload = {
         ...formData,
+        alamat: finalAlamat,
         diagnosa_nama: finalDiagnosa,
         jumlah_pad: Number(formData.jumlah_pad) || 0,
         setara_sapi_kerbau: Number(formData.setara_sapi_kerbau) || 0,
@@ -328,7 +357,7 @@ export function PuskeswanlingTab({
               </div>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="space-y-4">
               <div>
                 <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
                   Nama Peternak / Pemilik <span className="text-rose-500">*</span>
@@ -343,19 +372,34 @@ export function PuskeswanlingTab({
                 />
               </div>
 
-              <div>
-                <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
-                  Alamat / Wilayah Binaan <span className="text-rose-500">*</span>
-                </label>
-                <input
-                  type="text"
-                  required
-                  value={formData.alamat}
-                  onChange={(e) => setFormData({ ...formData, alamat: e.target.value })}
-                  placeholder="Desa / RT-RW / Kecamatan"
-                  className="w-full px-3 py-2 text-sm bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
-                />
-              </div>
+              {/* Alamat Terintegrasi Database: Dropdown Kecamatan & Desa + Alamat Lengkap */}
+              <AlamatWilayahFields
+                kecamatan={formKecamatan}
+                desa={formDesa}
+                detailAlamat={formDetailAlamat}
+                onChangeKecamatan={(kec) => {
+                  setFormKecamatan(kec);
+                  setFormData((prev) => ({
+                    ...prev,
+                    alamat: formatAlamatString(kec, formDesa, formDetailAlamat),
+                  }));
+                }}
+                onChangeDesa={(d) => {
+                  setFormDesa(d);
+                  setFormData((prev) => ({
+                    ...prev,
+                    alamat: formatAlamatString(formKecamatan, d, formDetailAlamat),
+                  }));
+                }}
+                onChangeDetail={(det) => {
+                  setFormDetailAlamat(det);
+                  setFormData((prev) => ({
+                    ...prev,
+                    alamat: formatAlamatString(formKecamatan, formDesa, det),
+                  }));
+                }}
+                required={true}
+              />
             </div>
 
             <div>

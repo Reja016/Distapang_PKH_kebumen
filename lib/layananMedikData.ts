@@ -1,17 +1,19 @@
-export interface KarcisItem {
+import { formatRupiah } from './formatters';
+
+export interface LayananRetribusiItem {
   id: string;
   label: string;
   kategori: string;
   tarif: number;
 }
 
-export interface KarcisKategoriGroup {
+export interface LayananKategoriGroup {
   id: string;
   judul: string;
-  items: KarcisItem[];
+  items: LayananRetribusiItem[];
 }
 
-export const KARCIS_RETRIBUSI_GROUPS: KarcisKategoriGroup[] = [
+export const LAYANAN_RETRIBUSI_GROUPS: LayananKategoriGroup[] = [
   {
     id: 'terapi_besar',
     judul: '1. Terapi Ternak Besar',
@@ -77,23 +79,22 @@ export const KARCIS_RETRIBUSI_GROUPS: KarcisKategoriGroup[] = [
   },
 ];
 
-export const ALL_KARCIS_ITEMS: KarcisItem[] = KARCIS_RETRIBUSI_GROUPS.flatMap((g) => g.items);
+export const ALL_LAYANAN_ITEMS: LayananRetribusiItem[] = LAYANAN_RETRIBUSI_GROUPS.flatMap((g) => g.items);
 
-export const KARCIS_ITEM_MAP: Record<string, KarcisItem> = Object.fromEntries(
-  ALL_KARCIS_ITEMS.map((item) => [item.id, item])
+export const LAYANAN_ITEM_MAP: Record<string, LayananRetribusiItem> = Object.fromEntries(
+  ALL_LAYANAN_ITEMS.map((item) => [item.id, item])
 );
 
 export function calculateTotalTarif(selectedIds: string[]): number {
   return selectedIds.reduce((sum, id) => {
-    const item = KARCIS_ITEM_MAP[id];
+    const item = LAYANAN_ITEM_MAP[id];
     return sum + (item ? item.tarif : 0);
   }, 0);
 }
 
-export function formatRupiah(amount: number): string {
-  return new Intl.NumberFormat('id-ID', {
-    style: 'currency',
-    currency: 'IDR',
-    maximumFractionDigits: 0,
-  }).format(amount);
-}
+// Backward-compatible aliases
+export type KarcisItem = LayananRetribusiItem;
+export type KarcisKategoriGroup = LayananKategoriGroup;
+export const KARCIS_RETRIBUSI_GROUPS = LAYANAN_RETRIBUSI_GROUPS;
+export const KARCIS_ITEM_MAP = LAYANAN_ITEM_MAP;
+export { formatRupiah };
