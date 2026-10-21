@@ -33,9 +33,6 @@ export default function RphTphTpuPage() {
     return isAuthAdmin || userRole === 'Administrator';
   }, [isAuthAdmin, userRole]);
 
-  // Petugas & Admin dapat mengelola dan menginput tabel pemotongan
-  const canManage = true;
-
   // Active Tab: 'pencatatan_pemotongan' (Input & Tabel Baru) | 'rumah_potong' (Data RPH / TPH / TPU)
   const [activeTab, setActiveTab] = useState<'pencatatan_pemotongan' | 'rumah_potong'>('pencatatan_pemotongan');
 
@@ -326,7 +323,7 @@ export default function RphTphTpuPage() {
               }}
               editingItem={editingPencatatan}
               onCancelEdit={() => setEditingPencatatan(null)}
-              canEdit={canManage}
+              canEdit={canEdit}
             />
 
             {/* Tabel Riwayat Pemotongan */}
@@ -339,7 +336,7 @@ export default function RphTphTpuPage() {
                 window.scrollTo({ top: 120, behavior: 'smooth' });
               }}
               onDelete={handleDeletePencatatan}
-              canEdit={canManage}
+              canEdit={canEdit}
               isAdmin={isAdmin}
               selectedTahun={selectedTahun}
               setSelectedTahun={setSelectedTahun}

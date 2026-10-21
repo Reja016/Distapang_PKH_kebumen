@@ -169,7 +169,7 @@ export default function PasarHewanPage() {
         {/* SUBMENU 1: CATAT HEWAN (Form Langsung Terbuka + Tabel Data) */}
         {activeTab === 'catat' && (
           <div className="space-y-6">
-            {/* Form Masuk Cepat (Langsung di halaman, aktif untuk seluruh akun petugas pasar) */}
+            {/* Form Masuk Cepat */}
             <CatatHewanForm
               editingItem={editingItem}
               onSuccess={() => {
@@ -190,7 +190,7 @@ export default function PasarHewanPage() {
                 setAuditTarget(item);
                 setShowAuditModal(true);
               }}
-              canEdit={canEdit}
+              canEdit={true}
               isAdmin={isAdmin}
               selectedBulan={selectedBulan}
               setSelectedBulan={setSelectedBulan}
@@ -210,7 +210,7 @@ export default function PasarHewanPage() {
             hargaList={hargaList}
             isLoading={isLoadingHarga}
             onRefresh={loadHargaData}
-            canEdit={canEdit || canCreate || isAdmin || true}
+            canEdit={canEdit}
           />
         )}
       </main>

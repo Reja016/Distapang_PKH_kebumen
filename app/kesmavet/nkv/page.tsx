@@ -14,8 +14,6 @@ import { showToast, showConfirm } from '@/components/common/CustomToast';
 
 export default function NKVPage() {
   const { isReady, canCreate, canEdit, isAdmin } = usePageAuth('kesmavet', 'nkv');
-  // Sesuai instruksi pimpinan: berikan hak kelola (tambah, edit, hapus) NKV untuk seluruh akun petugas
-  const canManageNkv = true;
   const [dataNkv, setDataNkv] = useState<NKVRecord[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
@@ -280,7 +278,7 @@ export default function NKVPage() {
               <Download size={16} strokeWidth={2.5} />
               <span className="hidden sm:inline">Export Excel</span>
             </button>
-            {canManageNkv && (
+            {canEdit && (
               <button
                 onClick={handleOpenAdd}
                 className="min-h-touch min-w-touch h-11 px-4 rounded-xl bg-purple-600 hover:bg-purple-700 text-white text-xs sm:text-sm font-bold flex items-center gap-2 transition-all shadow-xs cursor-pointer"
@@ -307,7 +305,7 @@ export default function NKVPage() {
           filterJenis={filterJenis}
           setFilterJenis={setFilterJenis}
           uniqueJenis={uniqueJenis}
-          canEdit={canManageNkv}
+          canEdit={canEdit}
           onEdit={handleOpenEdit}
           onDelete={handleDelete}
         />

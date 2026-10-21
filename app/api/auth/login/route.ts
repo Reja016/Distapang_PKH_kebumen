@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { pool } from '@/lib/db';
-import { DEFAULT_FULL_PERMISSIONS } from '@/lib/permissions';
+import { DEFAULT_FULL_PERMISSIONS, getDefaultPermissionsForRole } from '@/lib/permissions';
 import { verifyPassword, hashPassword, isHashed } from '@/lib/password';
 import { createSessionToken } from '@/lib/session';
 import { checkRateLimit, resetRateLimit, getClientIp } from '@/lib/rate-limit';
@@ -167,16 +167,19 @@ export async function POST(req: Request) {
           );
         }
 
-        let perms = DEFAULT_FULL_PERMISSIONS;
+        const userRole = user.role || 'Petugas Lapangan';
+        let perms = getDefaultPermissionsForRole(userRole);
         try {
-          perms = typeof user.permissions === 'string' ? JSON.parse(user.permissions) : user.permissions;
+          if (user.permissions) {
+            perms = typeof user.permissions === 'string' ? JSON.parse(user.permissions) : user.permissions;
+          }
         } catch {}
 
         const userPayload = {
           id: user.id,
           nama: user.nama,
           nip_username: user.nip_username,
-          role: user.role || 'Petugas Teknis',
+          role: userRole,
           status: user.status || 'Aktif',
           permissions: perms,
         };

@@ -3,6 +3,7 @@ import { pool } from '@/lib/db';
 import {
   DEFAULT_FULL_PERMISSIONS,
   DEFAULT_VIEW_ONLY_PERMISSIONS,
+  getDefaultPermissionsForRole,
 } from '@/lib/permissions';
 import { hashPassword } from '@/lib/password';
 import { requireAdmin } from '@/lib/session';
@@ -311,8 +312,11 @@ export async function POST(req: Request) {
     }
 
     const hashedPassword = hashPassword(password);
-    const permStr = typeof permissions === 'object' ? JSON.stringify(permissions) : JSON.stringify(DEFAULT_FULL_PERMISSIONS);
     const userRole = role || 'Petugas Lapangan';
+    const permStr =
+      typeof permissions === 'object' && permissions !== null
+        ? JSON.stringify(permissions)
+        : JSON.stringify(getDefaultPermissionsForRole(userRole));
     const userStatus = status || 'Aktif';
 
     try {

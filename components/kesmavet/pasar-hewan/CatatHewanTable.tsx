@@ -398,34 +398,32 @@ export default function CatatHewanTable({
                     </td>
                     <td className="p-3 text-center">
                       <div className="flex items-center justify-center gap-1">
-                        {/* Tombol Riwayat & Ajukan Koreksi / Hapus ke Admin */}
+                        {/* Tombol Edit Langsung untuk Petugas & Admin */}
+                        <button
+                          onClick={() => onEdit(item)}
+                          className="w-7 h-7 rounded-lg bg-blue-50 dark:bg-blue-950/60 text-blue-600 dark:text-blue-400 hover:bg-blue-100 dark:hover:bg-blue-900/40 flex items-center justify-center transition-colors cursor-pointer"
+                          title="Edit Catatan Hewan"
+                        >
+                          <Edit2 size={13} />
+                        </button>
+
+                        {/* Tombol Hapus Langsung untuk Petugas & Admin */}
+                        <button
+                          onClick={() => handleDelete(item)}
+                          className="w-7 h-7 rounded-lg bg-rose-50 dark:bg-rose-950/60 text-rose-600 dark:text-rose-400 hover:bg-rose-100 dark:hover:bg-rose-900/40 flex items-center justify-center transition-colors cursor-pointer"
+                          title="Hapus Catatan Hewan"
+                        >
+                          <Trash2 size={13} />
+                        </button>
+
+                        {/* Tombol Riwayat / Audit */}
                         <button
                           onClick={() => onOpenAudit(item)}
                           className="w-7 h-7 rounded-lg bg-amber-50 dark:bg-amber-950/60 text-amber-600 dark:text-amber-400 hover:bg-amber-100 dark:hover:bg-amber-900/40 flex items-center justify-center transition-colors cursor-pointer"
-                          title="Riwayat & Ajukan Koreksi / Hapus ke Admin"
+                          title="Riwayat Perubahan Data"
                         >
                           <Clock size={13} />
                         </button>
-
-                        {/* Tombol Langsung Edit & Hapus (Hanya untuk yang memiliki hak canEdit) */}
-                        {canEdit && (
-                          <>
-                            <button
-                              onClick={() => onEdit(item)}
-                              className="w-7 h-7 rounded-lg bg-blue-50 dark:bg-blue-950/60 text-blue-600 dark:text-blue-400 hover:bg-blue-100 dark:hover:bg-blue-900/40 flex items-center justify-center transition-colors cursor-pointer"
-                              title="Edit Data Langsung"
-                            >
-                              <Edit2 size={13} />
-                            </button>
-                            <button
-                              onClick={() => handleDelete(item)}
-                              className="w-7 h-7 rounded-lg bg-rose-50 dark:bg-rose-950/60 text-rose-600 dark:text-rose-400 hover:bg-rose-100 dark:hover:bg-rose-900/40 flex items-center justify-center transition-colors cursor-pointer"
-                              title="Hapus Data Langsung"
-                            >
-                              <Trash2 size={13} />
-                            </button>
-                          </>
-                        )}
                       </div>
                     </td>
                   </tr>

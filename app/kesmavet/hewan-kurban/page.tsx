@@ -103,8 +103,8 @@ export default function HewanKurbanPage() {
 
       {/* ── KONTEN UTAMA ── */}
       <main className="max-w-7xl mx-auto px-3.5 sm:px-6 lg:px-8 pt-4 sm:pt-6 space-y-4 sm:space-y-6">
-        {/* Form Pemotongan Hewan Kurban (Langsung terbuka) */}
-        {(canCreate || canEdit) && (
+        {/* Form Pemotongan Hewan Kurban (Hanya untuk pengguna dengan hak edit) */}
+        {canEdit && (
           <HewanKurbanForm
             editingItem={editingItem}
             onSuccess={() => {

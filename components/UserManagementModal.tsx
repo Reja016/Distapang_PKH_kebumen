@@ -30,6 +30,7 @@ import {
   UserPermissions,
   DEFAULT_FULL_PERMISSIONS,
   DEFAULT_VIEW_ONLY_PERMISSIONS,
+  getDefaultPermissionsForRole,
 } from '@/lib/permissions';
 import { getAuthSession } from '@/lib/auth';
 import { showConfirm, showToast } from '@/components/common/CustomToast';
@@ -70,7 +71,7 @@ export const MODULES_METADATA = [
       { id: 'data-vaksinasi', name: 'Data Vaksinasi PMK & Penyakit Menular', path: '/keswan/data-vaksinasi' },
       { id: 'lalu-lintas-ternak', name: 'Lalu Lintas Ternak (SKKH)', path: '/keswan/lalu-lintas-ternak' },
       { id: 'laporan-penyakit', name: 'Laporan Penyakit Ternak', path: '/keswan/laporan-penyakit' },
-      { id: 'puskeswan', name: 'Kinerja Pelayanan Puskeswan', path: '/keswan/puskeswan' },
+      { id: 'puskeswan', name: 'Pusat Kesehatan Hewan & Puskeswanling', path: '/keswan/puskeswan' },
       { id: 'stok-gudang', name: 'Stok Gudang Keswan', path: '/keswan/stok-gudang' },
     ],
   },
@@ -189,9 +190,9 @@ export default function UserManagementModal({
     setFormNipUsername('');
     setFormPassword('');
     setShowPassword(false);
-    setFormRole('Petugas Teknis');
+    setFormRole('Tim Keswan');
     setFormStatus('Aktif');
-    setFormPermissions(JSON.parse(JSON.stringify(DEFAULT_FULL_PERMISSIONS)));
+    setFormPermissions(getDefaultPermissionsForRole('Tim Keswan'));
     setFormError('');
     setShowFormModal(true);
   };
@@ -204,11 +205,16 @@ export default function UserManagementModal({
     setFormNipUsername(m.nip_username);
     setFormPassword('');
     setShowPassword(false);
-    setFormRole(m.role || 'Petugas Teknis');
+    setFormRole(m.role || 'Petugas Lapangan');
     setFormStatus(m.status || 'Aktif');
-    setFormPermissions(m.permissions || JSON.parse(JSON.stringify(DEFAULT_FULL_PERMISSIONS)));
+    setFormPermissions(m.permissions || getDefaultPermissionsForRole(m.role || 'Petugas Lapangan'));
     setFormError('');
     setShowFormModal(true);
+  };
+
+  const handleRoleChange = (newRole: string) => {
+    setFormRole(newRole);
+    setFormPermissions(getDefaultPermissionsForRole(newRole));
   };
 
   // Delete Member
@@ -780,13 +786,16 @@ export default function UserManagementModal({
                       <label className="block text-xs font-bold text-slate-700">Jabatan / Role</label>
                       <select
                         value={formRole}
-                        onChange={(e) => setFormRole(e.target.value)}
+                        onChange={(e) => handleRoleChange(e.target.value)}
                         className="w-full min-h-touch h-10 px-3 rounded-xl border border-slate-200 bg-slate-50 text-xs font-semibold text-slate-800 outline-none"
                       >
                         <option value="Administrator">Administrator</option>
-                        <option value="Petugas Teknis">Petugas Teknis</option>
-                        <option value="Enumerator">Enumerator</option>
-                        <option value="Staf Administrasi">Staf Administrasi</option>
+                        <option value="Petugas Lapangan">Petugas Lapangan</option>
+                        <option value="Tim Bitpro">Tim Bitpro</option>
+                        <option value="Tim Keswan">Tim Keswan</option>
+                        <option value="Tim Kesmavet">Tim Kesmavet</option>
+                        <option value="Puskeswan">Puskeswan</option>
+                        <option value="Petugas PKB">Petugas PKB</option>
                       </select>
                     </div>
 
@@ -845,6 +854,13 @@ export default function UserManagementModal({
                       className="px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 text-[11px] font-bold transition-colors"
                     >
                       Keswan Saja
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => applyPreset('kesmavet')}
+                      className="px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 text-[11px] font-bold transition-colors"
+                    >
+                      Kesmavet Saja
                     </button>
                   </div>
                 </div>

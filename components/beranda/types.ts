@@ -171,7 +171,7 @@ export const MODULE_NAV_DATA: ModuleNavGroup[] = [
         name: 'Pusat Kesehatan Hewan',
         href: '/keswan/puskeswan',
         icon: Building2,
-        desc: 'Pelayanan Pasien & Puskeswan',
+        desc: 'Pelayanan Pasien, Puskeswanling & Profil',
       },
       {
         id: 'stok-gudang',

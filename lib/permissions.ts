@@ -142,13 +142,17 @@ export function getDefaultPermissionsForRole(role: string): UserPermissions {
     base.keswan.submenus['laporan-penyakit'] = { enabled: true, mode: 'edit' };
     base.keswan.submenus['lalu-lintas-ternak'] = { enabled: true, mode: 'edit' };
   } else if (r === 'petugas pkb') {
-    // Petugas PKB memiliki akses pemeriksaan ke SapiTime dan Database IB
+    // Petugas PKB memiliki akses pemeriksaan ke SapiTime, Database IB, dan Pasar Hewan
     base.bitpro.enabled = true;
     base.bitpro.mode = 'edit';
     base.bitpro.submenus['sapitime'] = { enabled: true, mode: 'edit' };
     base.bitpro.submenus['database-ib'] = { enabled: true, mode: 'edit' };
+
+    base.kesmavet.enabled = true;
+    base.kesmavet.mode = 'edit';
+    base.kesmavet.submenus['pasar-hewan'] = { enabled: true, mode: 'edit' };
   } else if (r === 'petugas lapangan') {
-    // Form IB & Keswan
+    // Form IB, Keswan, dan Pasar Hewan
     base.bitpro.enabled = true;
     base.bitpro.mode = 'edit';
     base.bitpro.submenus['sapitime'] = { enabled: true, mode: 'edit' };
@@ -159,6 +163,10 @@ export function getDefaultPermissionsForRole(role: string): UserPermissions {
     base.keswan.submenus['data-vaksinasi'] = { enabled: true, mode: 'edit' };
     base.keswan.submenus['laporan-penyakit'] = { enabled: true, mode: 'edit' };
     base.keswan.submenus['puskeswan'] = { enabled: true, mode: 'edit' };
+
+    base.kesmavet.enabled = true;
+    base.kesmavet.mode = 'edit';
+    base.kesmavet.submenus['pasar-hewan'] = { enabled: true, mode: 'edit' };
   }
 
   return base;
