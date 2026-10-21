@@ -221,6 +221,8 @@ export function PuskeswanlingTab({
 
       const payload = {
         ...formData,
+        kecamatan: formKecamatan,
+        desa: formDesa,
         alamat: finalAlamat,
         diagnosa_nama: finalDiagnosa,
         jumlah_pad: Number(formData.jumlah_pad) || 0,

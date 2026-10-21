@@ -207,6 +207,8 @@ export function PelayananMedikTab({
       const method = editingId ? 'PUT' : 'POST';
       const body = {
         ...formData,
+        kecamatan: formKecamatan,
+        desa: formDesa,
         alamat: finalAlamat,
         diagnosa_nama: finalDiagnosa,
         ...(editingId ? { id: editingId, id_laporan_penyakit: editingLinkedLaporanId } : {}),

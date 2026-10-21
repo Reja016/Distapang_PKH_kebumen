@@ -7,13 +7,20 @@ import {
   updateDiseaseCaseInLaporanPenyakit,
   deleteDiseaseCaseFromLaporanPenyakit,
   ensureDiagnosaTables,
+  repairMismatchedCases,
 } from '@/lib/penyakitSync';
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
 
+let hasRepaired = false;
+
 async function ensureTable() {
   await ensureDiagnosaTables();
+  if (!hasRepaired) {
+    hasRepaired = true;
+    repairMismatchedCases().catch(() => {});
+  }
   await pool.query(`
     CREATE TABLE IF NOT EXISTS puskeswanling (
       id INT AUTO_INCREMENT PRIMARY KEY,
@@ -120,6 +127,8 @@ export async function POST(req: Request) {
     const {
       tanggal,
       puskeswan,
+      kecamatan,
+      desa,
       nama,
       alamat,
       jenis,
@@ -140,12 +149,15 @@ export async function POST(req: Request) {
     const tgl = tanggal || new Date().toISOString().split('T')[0];
     const petugasNama = session?.nama || 'Petugas Keswan';
 
-    // 1. Sinkronisasi Diagnosa Penyakit ke tabel `keswan_laporan_penyakit`
+    // 1. Sinkronisasi Diagnosa Penyakit ke tabel `keswan_laporan_penyakit` (dengan kecamatan pasien)
     let idLaporan: number | null = null;
     if (diagnosa_nama && diagnosa_nama.trim()) {
       idLaporan = await syncDiseaseCaseToLaporanPenyakit({
         tanggal: tgl,
         puskeswan,
+        kecamatan,
+        desa,
+        alamat,
         diagnosa_nama: diagnosa_nama.trim(),
         jumlah_kasus: Number(jumlah_kasus) || 1,
         keterangan: `Puskeswan Keliling (Puskeswanling) - Peternak: ${nama} (${jenis || 'Ternak'})`,
@@ -215,6 +227,8 @@ export async function PUT(req: Request) {
       id,
       tanggal,
       puskeswan,
+      kecamatan,
+      desa,
       nama,
       alamat,
       jenis,
@@ -233,12 +247,15 @@ export async function PUT(req: Request) {
     const tgl = tanggal || new Date().toISOString().split('T')[0];
     const petugasNama = session?.nama || 'Petugas Keswan';
 
-    // Update / Sinkronisasi Kasus Penyakit
+    // Update / Sinkronisasi Kasus Penyakit (dengan kecamatan pasien)
     let updatedIdLaporan = id_laporan_penyakit;
     if (diagnosa_nama && diagnosa_nama.trim()) {
       updatedIdLaporan = await updateDiseaseCaseInLaporanPenyakit(id_laporan_penyakit, {
         tanggal: tgl,
         puskeswan,
+        kecamatan,
+        desa,
+        alamat,
         diagnosa_nama: diagnosa_nama.trim(),
         jumlah_kasus: Number(jumlah_kasus) || 1,
         keterangan: `Puskeswan Keliling (Puskeswanling) - Peternak: ${nama} (${jenis || 'Ternak'})`,

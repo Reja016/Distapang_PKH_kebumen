@@ -3,6 +3,7 @@ import pool from '@/lib/db';
 import { getSessionFromRequest } from '@/lib/session';
 import { logActivity } from '@/lib/auditLog';
 import { getZoneByKecamatanId, DIAGNOSA_LIST } from '@/lib/penyakitData';
+import { repairMismatchedCases } from '@/lib/penyakitSync';
 
 export const dynamic = 'force-dynamic';
 
@@ -131,6 +132,11 @@ async function ensureTables() {
     // Bersihkan data dengan jumlah kasus 0 atau negatif jika pernah tersimpan
     try {
       await pool.execute('DELETE FROM keswan_laporan_penyakit WHERE jumlah_kasus <= 0');
+    } catch {}
+
+    // Sinkronkan kasus lama yang belum memiliki kecamatan_id sesuai alamat
+    try {
+      await repairMismatchedCases();
     } catch {}
   } catch (e: any) {
     console.warn('Gagal ensureTables di laporan-penyakit:', e.message);
