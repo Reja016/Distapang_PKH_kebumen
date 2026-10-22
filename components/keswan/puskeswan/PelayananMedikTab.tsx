@@ -58,6 +58,7 @@ export function PelayananMedikTab({
 }: PelayananMedikTabProps) {
   const [data, setData] = useState<PelayananMedikRecord[]>([]);
   const [diagnosaList, setDiagnosaList] = useState<string[]>([]);
+  const [selectedDiagnosas, setSelectedDiagnosas] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
 
   // Form State (Langsung di halaman / Inline Form)
@@ -67,10 +68,8 @@ export function PelayananMedikTab({
     puskeswan: defaultPuskeswan,
   });
   const [editingId, setEditingId] = useState<number | null>(null);
-  const [editingLinkedLaporanId, setEditingLinkedLaporanId] = useState<number | null>(null);
+  const [editingLinkedLaporanId, setEditingLinkedLaporanId] = useState<string | number | null>(null);
   const [isSaving, setIsSaving] = useState(false);
-  const [customDiagnosa, setCustomDiagnosa] = useState(false);
-  const [newDiagInput, setNewDiagInput] = useState('');
 
   // Alamat Wilayah (Kecamatan & Desa dari Database)
   const [formKecamatan, setFormKecamatan] = useState<string>('');
@@ -146,8 +145,7 @@ export function PelayananMedikTab({
       tanggal: new Date().toISOString().split('T')[0],
       puskeswan: defaultPuskeswan,
     });
-    setCustomDiagnosa(false);
-    setNewDiagInput('');
+    setSelectedDiagnosas([]);
     setFormKecamatan('');
     setFormDesa('');
     setFormDetailAlamat('');
@@ -169,8 +167,11 @@ export function PelayananMedikTab({
       diagnosa_nama: item.diagnosa_nama || '',
       catatan: item.catatan || '',
     });
-    setCustomDiagnosa(false);
-    setNewDiagInput('');
+
+    const parsedDiags = item.diagnosa_nama
+      ? item.diagnosa_nama.split(',').map((s) => s.trim()).filter(Boolean)
+      : [];
+    setSelectedDiagnosas(parsedDiags);
 
     // Parse alamat kecamatan & desa dari master wilayah database
     getMasterWilayah().then((wil) => {
@@ -202,7 +203,7 @@ export function PelayananMedikTab({
 
     setIsSaving(true);
     try {
-      const finalDiagnosa = customDiagnosa && newDiagInput.trim() ? newDiagInput.trim() : formData.diagnosa_nama;
+      const finalDiagnosa = selectedDiagnosas.join(', ');
       const url = '/api/pelayanan-medik';
       const method = editingId ? 'PUT' : 'POST';
       const body = {
@@ -459,45 +460,68 @@ export function PelayananMedikTab({
               </div>
             </div>
 
-            {/* Bagian 3: Diagnosa Penyakit (Tersambung ke Laporan Kasus Penyakit) */}
+            {/* Bagian 3: Diagnosa Penyakit (Tersambung ke Laporan Kasus Penyakit, Multi-Penyakit) */}
             <div className="p-4 bg-amber-50/70 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-800/40 rounded-xl space-y-3">
               <div className="flex items-center justify-between">
                 <label className="text-xs font-bold text-amber-900 dark:text-amber-300 flex items-center gap-1.5">
                   <Stethoscope className="w-4 h-4 text-amber-600 dark:text-amber-400" />
-                  Nama Penyakit (Diagnosa)
+                  Nama Penyakit / Diagnosa (Bisa Pilih Lebih dari 1)
                 </label>
-                <button
-                  type="button"
-                  onClick={() => setCustomDiagnosa(!customDiagnosa)}
-                  className="text-xs text-amber-700 dark:text-amber-400 hover:underline cursor-pointer"
-                >
-                  {customDiagnosa ? 'Pilih dari Dropdown' : '+ Ketik Diagnosa Baru'}
-                </button>
+                {selectedDiagnosas.length > 0 && (
+                  <button
+                    type="button"
+                    onClick={() => setSelectedDiagnosas([])}
+                    className="text-xs text-rose-600 hover:text-rose-700 dark:text-rose-400 hover:underline cursor-pointer font-medium"
+                  >
+                    Hapus Semua ({selectedDiagnosas.length})
+                  </button>
+                )}
               </div>
 
-              {customDiagnosa ? (
-                <input
-                  type="text"
-                  value={newDiagInput}
-                  onChange={(e) => setNewDiagInput(e.target.value)}
-                  placeholder="Ketik nama diagnosa penyakit baru..."
-                  className="w-full px-3 py-2 text-sm bg-white dark:bg-slate-800 border border-amber-300 dark:border-amber-700 rounded-lg focus:ring-2 focus:ring-amber-500 outline-none"
-                />
-              ) : (
-                <select
-                  value={formData.diagnosa_nama}
-                  onChange={(e) => setFormData({ ...formData, diagnosa_nama: e.target.value })}
-                  className="w-full px-3 py-2 text-sm bg-white dark:bg-slate-800 border border-amber-300 dark:border-amber-700 rounded-lg focus:ring-2 focus:ring-amber-500 outline-none font-medium"
-                >
-                  <option value="">-- Pilih Diagnosa Penyakit (Opsional) --</option>
-                  {diagnosaList.map((d) => (
-                    <option key={d} value={d}>
-                      {d}
-                    </option>
-                  ))}
-                </select>
-              )}
+              {/* Dropdown Pemilihan Penyakit */}
+              <select
+                value=""
+                onChange={(e) => {
+                  const val = e.target.value;
+                  if (val && !selectedDiagnosas.includes(val)) {
+                    setSelectedDiagnosas([...selectedDiagnosas, val]);
+                  }
+                }}
+                className="w-full px-3 py-2 text-sm bg-white dark:bg-slate-800 border border-amber-300 dark:border-amber-700 rounded-lg focus:ring-2 focus:ring-amber-500 outline-none font-medium"
+              >
+                <option value="">-- Pilih Nama Penyakit dari Dropdown (Klik untuk Menambah) --</option>
+                {diagnosaList.map((d) => (
+                  <option key={d} value={d} disabled={selectedDiagnosas.includes(d)}>
+                    {d} {selectedDiagnosas.includes(d) ? '✓ (Sudah Dipilih)' : ''}
+                  </option>
+                ))}
+              </select>
 
+              {/* List Badges Penyakit Terpilih */}
+              {selectedDiagnosas.length > 0 ? (
+                <div className="flex flex-wrap gap-2 pt-1">
+                  {selectedDiagnosas.map((diag) => (
+                    <span
+                      key={diag}
+                      className="inline-flex items-center gap-1.5 px-3 py-1 bg-amber-100 dark:bg-amber-900/50 text-amber-950 dark:text-amber-200 border border-amber-300 dark:border-amber-700 rounded-lg text-xs font-bold shadow-sm"
+                    >
+                      {diag}
+                      <button
+                        type="button"
+                        onClick={() => setSelectedDiagnosas(selectedDiagnosas.filter((d) => d !== diag))}
+                        className="text-amber-700 hover:text-rose-600 dark:text-amber-400 dark:hover:text-rose-400 transition cursor-pointer p-0.5"
+                        title={`Hapus ${diag}`}
+                      >
+                        <X className="w-3.5 h-3.5" />
+                      </button>
+                    </span>
+                  ))}
+                </div>
+              ) : (
+                <p className="text-xs text-slate-500 italic">
+                  Belum ada penyakit yang dipilih. Silakan pilih dari dropdown di atas (bisa lebih dari 1, misal: Cacingan, Bloat, BEF).
+                </p>
+              )}
             </div>
 
             {/* Bagian 4: Checklist Karcis Retribusi (Perda No. 10 Th. 2025) */}
@@ -802,9 +826,16 @@ export function PelayananMedikTab({
                     </td>
                     <td className="py-3 px-3">
                       {item.diagnosa_nama ? (
-                        <span className="px-2 py-0.5 bg-amber-50 dark:bg-amber-950/40 text-amber-700 dark:text-amber-400 border border-amber-200 dark:border-amber-800 rounded font-medium">
-                          {item.diagnosa_nama}
-                        </span>
+                        <div className="flex flex-wrap gap-1 max-w-xs">
+                          {item.diagnosa_nama.split(',').map((diag, dIdx) => (
+                            <span
+                              key={dIdx}
+                              className="px-2 py-0.5 bg-amber-50 dark:bg-amber-950/40 text-amber-800 dark:text-amber-300 border border-amber-200 dark:border-amber-800/80 rounded font-medium text-[11px]"
+                            >
+                              {diag.trim()}
+                            </span>
+                          ))}
+                        </div>
                       ) : (
                         <span className="text-slate-400 italic">-</span>
                       )}

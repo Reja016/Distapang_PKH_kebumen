@@ -13,7 +13,6 @@ import {
   Truck,
   DollarSign,
   Users,
-  Stethoscope,
   Clock,
   Building2,
   AlertCircle,
@@ -42,9 +41,6 @@ interface PuskeswanlingRecord {
   jenis: string;
   jumlah_pad: number;
   setara_sapi_kerbau: number;
-  diagnosa_nama: string | null;
-  jumlah_kasus: number;
-  id_laporan_penyakit: number | null;
   keterangan: string | null;
   petugas_nama?: string;
   created_at?: string;
@@ -58,8 +54,6 @@ interface PuskeswanlingFormData {
   jenis: string;
   jumlah_pad: number | string;
   setara_sapi_kerbau: number | string;
-  diagnosa_nama: string;
-  jumlah_kasus: number | string;
   keterangan: string;
 }
 
@@ -71,8 +65,6 @@ const INITIAL_FORM: PuskeswanlingFormData = {
   jenis: 'Sapi',
   jumlah_pad: 0,
   setara_sapi_kerbau: 1,
-  diagnosa_nama: '',
-  jumlah_kasus: 1,
   keterangan: '',
 };
 
@@ -90,7 +82,6 @@ export function PuskeswanlingTab({
   defaultPuskeswan = 'KEBUMEN',
 }: PuskeswanlingTabProps) {
   const [data, setData] = useState<PuskeswanlingRecord[]>([]);
-  const [diagnosaList, setDiagnosaList] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
 
   // Form State (Langsung di Halaman / Inline Form)
@@ -100,10 +91,7 @@ export function PuskeswanlingTab({
     puskeswan: defaultPuskeswan,
   });
   const [editingId, setEditingId] = useState<number | null>(null);
-  const [editingLinkedLaporanId, setEditingLinkedLaporanId] = useState<number | null>(null);
   const [isSaving, setIsSaving] = useState(false);
-  const [customDiagnosa, setCustomDiagnosa] = useState(false);
-  const [newDiagInput, setNewDiagInput] = useState('');
 
   // Alamat Wilayah (Kecamatan & Desa dari Database)
   const [formKecamatan, setFormKecamatan] = useState<string>('');
@@ -131,9 +119,6 @@ export function PuskeswanlingTab({
       const json = await res.json();
       if (json.success) {
         setData(json.data || []);
-        if (json.diagnosaList) {
-          setDiagnosaList(json.diagnosaList);
-        }
       }
     } catch (err) {
       console.error('Gagal mengambil data puskeswanling:', err);
@@ -151,20 +136,16 @@ export function PuskeswanlingTab({
     const totalKegiatan = data.length;
     const totalPAD = data.reduce((acc, r) => acc + (Number(r.jumlah_pad) || 0), 0);
     const totalSetaraTernak = data.reduce((acc, r) => acc + (Number(r.setara_sapi_kerbau) || 0), 0);
-    const totalKasus = data.reduce((acc, r) => acc + (r.diagnosa_nama ? (Number(r.jumlah_kasus) || 1) : 0), 0);
-    return { totalKegiatan, totalPAD, totalSetaraTernak, totalKasus };
+    return { totalKegiatan, totalPAD, totalSetaraTernak };
   }, [data]);
 
   const handleResetForm = () => {
     setEditingId(null);
-    setEditingLinkedLaporanId(null);
     setFormData({
       ...INITIAL_FORM,
       tanggal: new Date().toISOString().split('T')[0],
       puskeswan: defaultPuskeswan,
     });
-    setCustomDiagnosa(false);
-    setNewDiagInput('');
     setFormKecamatan('');
     setFormDesa('');
     setFormDetailAlamat('');
@@ -172,7 +153,6 @@ export function PuskeswanlingTab({
 
   const handleOpenEdit = (item: PuskeswanlingRecord) => {
     setEditingId(item.id);
-    setEditingLinkedLaporanId(item.id_laporan_penyakit || null);
     setFormData({
       tanggal: item.tanggal,
       puskeswan: item.puskeswan || defaultPuskeswan,
@@ -181,12 +161,8 @@ export function PuskeswanlingTab({
       jenis: item.jenis,
       jumlah_pad: item.jumlah_pad,
       setara_sapi_kerbau: item.setara_sapi_kerbau,
-      diagnosa_nama: item.diagnosa_nama || '',
-      jumlah_kasus: item.jumlah_kasus || 1,
       keterangan: item.keterangan || '',
     });
-    setCustomDiagnosa(false);
-    setNewDiagInput('');
 
     // Parse alamat kecamatan & desa dari master wilayah database
     getMasterWilayah().then((wil) => {
@@ -217,18 +193,13 @@ export function PuskeswanlingTab({
 
     setIsSaving(true);
     try {
-      const finalDiagnosa = customDiagnosa && newDiagInput.trim() ? newDiagInput.trim() : formData.diagnosa_nama;
-
       const payload = {
         ...formData,
         kecamatan: formKecamatan,
         desa: formDesa,
         alamat: finalAlamat,
-        diagnosa_nama: finalDiagnosa,
         jumlah_pad: Number(formData.jumlah_pad) || 0,
         setara_sapi_kerbau: Number(formData.setara_sapi_kerbau) || 0,
-        jumlah_kasus: Number(formData.jumlah_kasus) || 1,
-        id_laporan_penyakit: editingLinkedLaporanId,
         ...(editingId ? { id: editingId } : {}),
       };
 
@@ -254,7 +225,7 @@ export function PuskeswanlingTab({
 
   const handleDelete = async (id: number, nama: string) => {
     const confirmed = await showConfirm(
-      `Hapus data pelayanan Puskeswanling untuk ${nama}? Sinkronisasi kasus penyakit terkait juga akan dihapus.`
+      `Hapus data pelayanan Puskeswanling untuk ${nama}?`
     );
     if (!confirmed) return;
 
@@ -287,8 +258,6 @@ export function PuskeswanlingTab({
       'Jenis Ternak': r.jenis,
       'Jumlah PAD (Rp)': r.jumlah_pad,
       'Setara Sapi/Kerbau (Ekor)': r.setara_sapi_kerbau,
-      'Diagnosa Penyakit': r.diagnosa_nama || '-',
-      'Jumlah Kasus': r.jumlah_kasus,
       Keterangan: r.keterangan || '-',
       'Petugas Pencatat': r.petugas_nama || '-',
     }));
@@ -473,67 +442,6 @@ export function PuskeswanlingTab({
               </div>
             </div>
 
-            {/* Bagian Diagnosa Penyakit (Tersambung ke Database Laporan Kasus Penyakit) */}
-            <div className="p-4 bg-amber-50/70 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-800/40 rounded-xl space-y-3">
-              <div className="flex items-center justify-between">
-                <label className="text-xs font-bold text-amber-900 dark:text-amber-300 flex items-center gap-1.5">
-                  <Stethoscope className="w-4 h-4 text-amber-600 dark:text-amber-400" />
-                  Diagnosa Kasus Penyakit (Tersambung ke Database Laporan Kasus Penyakit)
-                </label>
-                <button
-                  type="button"
-                  onClick={() => setCustomDiagnosa(!customDiagnosa)}
-                  className="text-xs text-amber-700 dark:text-amber-400 hover:underline cursor-pointer"
-                >
-                  {customDiagnosa ? 'Pilih dari Dropdown' : '+ Ketik Diagnosa Baru'}
-                </button>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-                <div className="md:col-span-2">
-                  {customDiagnosa ? (
-                    <input
-                      type="text"
-                      value={newDiagInput}
-                      onChange={(e) => setNewDiagInput(e.target.value)}
-                      placeholder="Ketik diagnosa baru..."
-                      className="w-full px-3 py-2 text-sm bg-white dark:bg-slate-800 border border-amber-300 dark:border-amber-700 rounded-lg focus:ring-2 focus:ring-amber-500 outline-none"
-                    />
-                  ) : (
-                    <select
-                      value={formData.diagnosa_nama}
-                      onChange={(e) => setFormData({ ...formData, diagnosa_nama: e.target.value })}
-                      className="w-full px-3 py-2 text-sm bg-white dark:bg-slate-800 border border-amber-300 dark:border-amber-700 rounded-lg focus:ring-2 focus:ring-amber-500 outline-none font-medium"
-                    >
-                      <option value="">-- Pilih Diagnosa Penyakit (Opsional) --</option>
-                      {diagnosaList.map((d) => (
-                        <option key={d} value={d}>
-                          {d}
-                        </option>
-                      ))}
-                    </select>
-                  )}
-                </div>
-
-                <div>
-                  <input
-                    type="number"
-                    min="1"
-                    value={formData.jumlah_kasus}
-                    onChange={(e) => setFormData({ ...formData, jumlah_kasus: e.target.value })}
-                    placeholder="Jml Kasus"
-                    className="w-full px-3 py-2 text-sm bg-white dark:bg-slate-800 border border-amber-300 dark:border-amber-700 rounded-lg focus:ring-2 focus:ring-amber-500 outline-none font-mono"
-                    title="Jumlah Kasus"
-                  />
-                </div>
-              </div>
-
-              <p className="text-[11px] text-amber-800 dark:text-amber-300/80 leading-relaxed">
-                Setiap kasus yang didiagnosa di Puskeswanling akan langsung terakumulasi pada database
-                <strong> Laporan Kasus Penyakit</strong>.
-              </p>
-            </div>
-
             <div>
               <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
                 Keterangan Tambahan (Opsional)
@@ -569,7 +477,7 @@ export function PuskeswanlingTab({
       )}
 
       {/* KPI Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-3 gap-4">
         <div className="p-4 bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm flex items-center justify-between">
           <div>
             <p className="text-xs font-medium text-slate-500">Total Kunjungan</p>
@@ -604,18 +512,6 @@ export function PuskeswanlingTab({
           </div>
           <div className="p-2.5 bg-indigo-50 dark:bg-indigo-950/50 text-indigo-600 dark:text-indigo-400 rounded-xl">
             <Beef className="w-5 h-5" />
-          </div>
-        </div>
-
-        <div className="p-4 bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm flex items-center justify-between">
-          <div>
-            <p className="text-xs font-medium text-slate-500">Kasus Penyakit Terdata</p>
-            <h3 className="text-xl font-black text-amber-600 dark:text-amber-400 mt-0.5">
-              {stats.totalKasus} <span className="text-xs font-medium text-slate-400">Kasus</span>
-            </h3>
-          </div>
-          <div className="p-2.5 bg-amber-50 dark:bg-amber-950/50 text-amber-600 dark:text-amber-400 rounded-xl">
-            <Stethoscope className="w-5 h-5" />
           </div>
         </div>
       </div>
@@ -720,7 +616,6 @@ export function PuskeswanlingTab({
                 <th className="py-3 px-3">JENIS TERNAK</th>
                 <th className="py-3 px-3 text-right">JUMLAH PAD (RP)</th>
                 <th className="py-3 px-3 text-center">SETARA SAPI/KERBAU</th>
-                <th className="py-3 px-3">DIAGNOSA KASUS</th>
                 <th className="py-3 px-3">KETERANGAN</th>
                 <th className="py-3 px-3 text-center">AKSI</th>
               </tr>
@@ -728,14 +623,14 @@ export function PuskeswanlingTab({
             <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
               {isLoading ? (
                 <tr>
-                  <td colSpan={11} className="py-12 text-center text-slate-500">
+                  <td colSpan={10} className="py-12 text-center text-slate-500">
                     <RefreshCw className="w-6 h-6 animate-spin mx-auto text-blue-600 mb-2" />
                     Memuat data Puskeswanling...
                   </td>
                 </tr>
               ) : data.length === 0 ? (
                 <tr>
-                  <td colSpan={11} className="py-12 text-center text-slate-500">
+                  <td colSpan={10} className="py-12 text-center text-slate-500">
                     <AlertCircle className="w-8 h-8 text-slate-400 mx-auto mb-2" />
                     Belum ada data pelayanan Puskeswanling yang tercatat.
                   </td>
@@ -771,20 +666,6 @@ export function PuskeswanlingTab({
                     </td>
                     <td className="py-3 px-3 text-center font-bold text-slate-800 dark:text-slate-200">
                       {item.setara_sapi_kerbau} ekor
-                    </td>
-                    <td className="py-3 px-3">
-                      {item.diagnosa_nama ? (
-                        <div className="flex items-center gap-1.5">
-                          <span className="px-2 py-0.5 bg-amber-50 dark:bg-amber-950/40 text-amber-700 dark:text-amber-400 border border-amber-200 dark:border-amber-800 rounded font-medium">
-                            {item.diagnosa_nama}
-                          </span>
-                          <span className="text-[10px] text-slate-400 font-mono">
-                            ({item.jumlah_kasus} kasus)
-                          </span>
-                        </div>
-                      ) : (
-                        <span className="text-slate-400 italic">-</span>
-                      )}
                     </td>
                     <td className="py-3 px-3 text-slate-500 dark:text-slate-400 max-w-xs truncate">
                       {item.keterangan || '-'}
@@ -834,8 +715,6 @@ export function PuskeswanlingTab({
           'jenis',
           'jumlah_pad',
           'setara_sapi_kerbau',
-          'diagnosa_nama',
-          'jumlah_kasus',
           'keterangan',
         ]}
       />

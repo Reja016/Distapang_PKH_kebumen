@@ -345,3 +345,93 @@ export async function deleteDiseaseCaseFromLaporanPenyakit(idLaporan: number | n
     console.error('Gagal hapus keswan_laporan_penyakit:', err);
   }
 }
+
+export async function syncMultipleDiseaseCasesToLaporanPenyakit({
+  tanggal,
+  puskeswan,
+  kecamatan,
+  desa,
+  alamat,
+  diagnosas,
+  keterangan = '',
+}: {
+  tanggal?: string;
+  puskeswan: string;
+  kecamatan?: string;
+  desa?: string;
+  alamat?: string;
+  diagnosas: string[] | string;
+  keterangan?: string;
+}): Promise<number[]> {
+  const list = (Array.isArray(diagnosas) ? diagnosas : (diagnosas || '').split(','))
+    .map((s) => s.trim())
+    .filter(Boolean);
+
+  if (list.length === 0) return [];
+
+  await ensureDiagnosaTables();
+
+  const d = tanggal ? new Date(tanggal) : new Date();
+  const tahun = isNaN(d.getFullYear()) ? new Date().getFullYear() : d.getFullYear();
+  const monthIdx = isNaN(d.getMonth()) ? new Date().getMonth() : d.getMonth();
+  const bulan = BULAN_NAMES[monthIdx] || 'JANUARI';
+
+  const { id_puskeswan, id_kecamatan, kecNama } = resolveKecamatanIds(kecamatan, puskeswan, alamat);
+  const insertedIds: number[] = [];
+
+  for (const diag of list) {
+    const id_diagnosa = await getOrCreateDiagnosaId(diag);
+    try {
+      const [res]: any = await pool.query(
+        `INSERT INTO keswan_laporan_penyakit (
+          tahun, bulan, id_puskeswan, id_kecamatan, id_diagnosa, kategori_penyakit, jumlah_kasus, keterangan
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+        [
+          tahun,
+          bulan,
+          id_puskeswan,
+          id_kecamatan,
+          id_diagnosa,
+          'Umum',
+          1,
+          keterangan || `Pelayanan Medik (${kecNama})`,
+        ]
+      );
+      if (res.insertId) insertedIds.push(Number(res.insertId));
+    } catch (err: any) {
+      console.error('Gagal sinkronisasi penyakit multiple:', err);
+    }
+  }
+
+  return insertedIds;
+}
+
+export async function deleteMultipleDiseaseCasesFromLaporanPenyakit(
+  idLaporans: string | number | number[] | null | undefined
+): Promise<void> {
+  if (!idLaporans) return;
+  const ids: number[] = [];
+  if (Array.isArray(idLaporans)) {
+    ids.push(...idLaporans.map(Number).filter((n) => !isNaN(n) && n > 0));
+  } else if (typeof idLaporans === 'number') {
+    ids.push(idLaporans);
+  } else if (typeof idLaporans === 'string') {
+    ids.push(
+      ...idLaporans
+        .split(',')
+        .map((s) => Number(s.trim()))
+        .filter((n) => !isNaN(n) && n > 0)
+    );
+  }
+
+  if (ids.length === 0) return;
+
+  try {
+    await pool.query(
+      `DELETE FROM keswan_laporan_penyakit WHERE id_laporan_penyakit IN (?)`,
+      [ids]
+    );
+  } catch (err: any) {
+    console.error('Gagal delete multiple penyakit:', err);
+  }
+}

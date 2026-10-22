@@ -38,7 +38,7 @@ export interface PelayananMedikRecord {
   layanan_terpilih: string[];
   total_retribusi: number;
   diagnosa_nama: string | null;
-  id_laporan_penyakit: number | null;
+  id_laporan_penyakit?: number | string | null;
   catatan?: string;
   petugas_nama?: string;
   created_at?: string;

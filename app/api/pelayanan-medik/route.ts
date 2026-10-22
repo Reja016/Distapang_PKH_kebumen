@@ -3,9 +3,8 @@ import pool from '@/lib/db';
 import { getSessionFromRequest } from '@/lib/session';
 import { logActivity } from '@/lib/auditLog';
 import {
-  syncDiseaseCaseToLaporanPenyakit,
-  updateDiseaseCaseInLaporanPenyakit,
-  deleteDiseaseCaseFromLaporanPenyakit,
+  syncMultipleDiseaseCasesToLaporanPenyakit,
+  deleteMultipleDiseaseCasesFromLaporanPenyakit,
   ensureDiagnosaTables,
   repairMismatchedCases,
 } from '@/lib/penyakitSync';
@@ -33,14 +32,20 @@ async function ensureTable() {
       umur VARCHAR(50) DEFAULT '',
       layanan_terpilih LONGTEXT NULL,
       total_retribusi DECIMAL(12,2) DEFAULT 0,
-      diagnosa_nama VARCHAR(150) NULL,
-      id_laporan_penyakit INT NULL,
+      diagnosa_nama TEXT NULL,
+      id_laporan_penyakit VARCHAR(255) NULL,
       catatan TEXT NULL,
       petugas_nama VARCHAR(150) NULL,
       created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
       updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
   `);
+
+  // Pastikan diagnosa_nama dan id_laporan_penyakit dapat menampung multiple penyakit/IDs
+  try {
+    await pool.query('ALTER TABLE pelayanan_medik_veteriner MODIFY COLUMN diagnosa_nama TEXT NULL');
+    await pool.query('ALTER TABLE pelayanan_medik_veteriner MODIFY COLUMN id_laporan_penyakit VARCHAR(255) NULL');
+  } catch {}
 
   // Hapus bersih kolom nomor_seri dari database jika masih ada
   try {
@@ -166,19 +171,30 @@ export async function POST(req: Request) {
     const tgl = tanggal || new Date().toISOString().split('T')[0];
     const petugasNama = session?.nama || 'Petugas Keswan';
 
-    // 1. Sinkronisasi Diagnosa Penyakit ke tabel `keswan_laporan_penyakit` (dengan kecamatan pasien)
-    let idLaporan: number | null = null;
-    if (diagnosa_nama && diagnosa_nama.trim()) {
-      idLaporan = await syncDiseaseCaseToLaporanPenyakit({
-        tanggal: tgl,
-        puskeswan,
-        kecamatan,
-        desa,
-        alamat,
-        diagnosa_nama: diagnosa_nama.trim(),
-        jumlah_kasus: 1,
-        keterangan: `Pelayanan Medik Veteriner - Pemilik: ${nama_pemilik} (${jenis_hewan})`,
-      });
+    // 1. Sinkronisasi Diagnosa Penyakit (Bisa Multiple) ke tabel `keswan_laporan_penyakit`
+    let idLaporansStr: string | null = null;
+    let finalDiagnosaStr: string | null = null;
+
+    if (diagnosa_nama) {
+      const list = (Array.isArray(diagnosa_nama) ? diagnosa_nama : String(diagnosa_nama).split(','))
+        .map((s: string) => s.trim())
+        .filter(Boolean);
+
+      if (list.length > 0) {
+        finalDiagnosaStr = list.join(', ');
+        const insertedIds = await syncMultipleDiseaseCasesToLaporanPenyakit({
+          tanggal: tgl,
+          puskeswan,
+          kecamatan,
+          desa,
+          alamat,
+          diagnosas: list,
+          keterangan: `Pelayanan Medik Veteriner - Pemilik: ${nama_pemilik} (${jenis_hewan || 'Hewan'})`,
+        });
+        if (insertedIds.length > 0) {
+          idLaporansStr = insertedIds.join(',');
+        }
+      }
     }
 
     const jsonLayanan = JSON.stringify(Array.isArray(layanan_terpilih) ? layanan_terpilih : []);
@@ -198,8 +214,8 @@ export async function POST(req: Request) {
         umur || '',
         jsonLayanan,
         Number(total_retribusi) || 0,
-        diagnosa_nama ? diagnosa_nama.trim() : null,
-        idLaporan,
+        finalDiagnosaStr,
+        idLaporansStr,
         catatan || '',
         petugasNama,
       ]
@@ -218,8 +234,8 @@ export async function POST(req: Request) {
         nama_pemilik,
         puskeswan,
         total_retribusi,
-        diagnosa_nama,
-        id_laporan_penyakit: idLaporan,
+        diagnosa_nama: finalDiagnosaStr,
+        id_laporan_penyakit: idLaporansStr,
       },
     });
 
@@ -227,7 +243,7 @@ export async function POST(req: Request) {
       success: true,
       message: 'Pelayanan Jasa Medik Veteriner berhasil disimpan!',
       id: insertedId,
-      id_laporan_penyakit: idLaporan,
+      id_laporan_penyakit: idLaporansStr,
     });
   } catch (err: any) {
     console.error('Error POST pelayanan-medik:', err);
@@ -266,22 +282,35 @@ export async function PUT(req: Request) {
     const tgl = tanggal || new Date().toISOString().split('T')[0];
     const petugasNama = session?.nama || 'Petugas Keswan';
 
-    // Update / Sinkronisasi Kasus Penyakit (dengan kecamatan pasien)
-    let updatedIdLaporan = id_laporan_penyakit;
-    if (diagnosa_nama && diagnosa_nama.trim()) {
-      updatedIdLaporan = await updateDiseaseCaseInLaporanPenyakit(id_laporan_penyakit, {
-        tanggal: tgl,
-        puskeswan,
-        kecamatan,
-        desa,
-        alamat,
-        diagnosa_nama: diagnosa_nama.trim(),
-        jumlah_kasus: 1,
-        keterangan: `Pelayanan Medik Veteriner - Pemilik: ${nama_pemilik} (${jenis_hewan})`,
-      });
-    } else if (id_laporan_penyakit) {
-      await deleteDiseaseCaseFromLaporanPenyakit(id_laporan_penyakit);
-      updatedIdLaporan = null;
+    // 1. Hapus sinkronisasi penyakit yang lama jika ada
+    if (id_laporan_penyakit) {
+      await deleteMultipleDiseaseCasesFromLaporanPenyakit(id_laporan_penyakit);
+    }
+
+    // 2. Buat sinkronisasi baru untuk penyakit yang terpilih
+    let updatedIdLaporansStr: string | null = null;
+    let finalDiagnosaStr: string | null = null;
+
+    if (diagnosa_nama) {
+      const list = (Array.isArray(diagnosa_nama) ? diagnosa_nama : String(diagnosa_nama).split(','))
+        .map((s: string) => s.trim())
+        .filter(Boolean);
+
+      if (list.length > 0) {
+        finalDiagnosaStr = list.join(', ');
+        const insertedIds = await syncMultipleDiseaseCasesToLaporanPenyakit({
+          tanggal: tgl,
+          puskeswan,
+          kecamatan,
+          desa,
+          alamat,
+          diagnosas: list,
+          keterangan: `Pelayanan Medik Veteriner - Pemilik: ${nama_pemilik} (${jenis_hewan || 'Hewan'})`,
+        });
+        if (insertedIds.length > 0) {
+          updatedIdLaporansStr = insertedIds.join(',');
+        }
+      }
     }
 
     const jsonLayanan = JSON.stringify(Array.isArray(layanan_terpilih) ? layanan_terpilih : []);
@@ -302,8 +331,8 @@ export async function PUT(req: Request) {
         umur || '',
         jsonLayanan,
         Number(total_retribusi) || 0,
-        diagnosa_nama ? diagnosa_nama.trim() : null,
-        updatedIdLaporan,
+        finalDiagnosaStr,
+        updatedIdLaporansStr,
         catatan || '',
         id,
       ]
@@ -320,14 +349,14 @@ export async function PUT(req: Request) {
         nama_pemilik,
         puskeswan,
         total_retribusi,
-        diagnosa_nama,
+        diagnosa_nama: finalDiagnosaStr,
       },
     });
 
     return NextResponse.json({
       success: true,
       message: 'Data pelayanan berhasil diperbarui!',
-      id_laporan_penyakit: updatedIdLaporan,
+      id_laporan_penyakit: updatedIdLaporansStr,
     });
   } catch (err: any) {
     console.error('Error PUT pelayanan-medik:', err);
@@ -350,7 +379,7 @@ export async function DELETE(req: Request) {
     const existing = rows && rows[0];
 
     if (existing?.id_laporan_penyakit) {
-      await deleteDiseaseCaseFromLaporanPenyakit(existing.id_laporan_penyakit);
+      await deleteMultipleDiseaseCasesFromLaporanPenyakit(existing.id_laporan_penyakit);
     }
 
     await pool.query('DELETE FROM pelayanan_medik_veteriner WHERE id = ?', [id]);
