@@ -1,7 +1,9 @@
 'use client';
 
 import React, { useState, useEffect, useCallback } from 'react';
+import Link from 'next/link';
 import {
+  ArrowLeft,
   ArrowDownLeft,
   ArrowUpRight,
 } from 'lucide-react';
@@ -129,26 +131,54 @@ export default function LaluLintasTernakPage() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 text-slate-900 pb-16 font-sans">
+    <div className="min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 pb-16 font-sans">
+      {/* ── TOP HEADER (Tema Biru Keswan) ── */}
+      <header className="border-b border-blue-100 dark:border-slate-800 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md sticky top-0 z-30 shadow-xs">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 sm:py-5 min-h-[64px] sm:min-h-[88px] flex items-center justify-between gap-3">
+          <div className="flex items-center gap-3 min-w-0 flex-1">
+            <Link
+              href="/keswan"
+              className="min-h-touch min-w-touch w-10 h-10 sm:w-11 sm:h-11 rounded-2xl bg-blue-600 hover:bg-blue-700 text-white flex items-center justify-center transition-all shadow-xs shrink-0"
+              aria-label="Kembali ke Keswan"
+            >
+              <ArrowLeft size={18} strokeWidth={2.5} />
+            </Link>
+
+            <div className="min-w-0">
+              <div className="flex items-center gap-2 mb-0.5">
+                <Link href="/keswan" className="text-xs font-semibold text-slate-500 dark:text-slate-400 hover:text-blue-700 dark:hover:text-blue-400 transition-colors truncate">
+                  Keswan
+                </Link>
+                <span className="text-slate-300 dark:text-slate-600">/</span>
+                <span className="text-xs font-bold text-blue-700 dark:text-blue-400 whitespace-nowrap">Lalu Lintas Ternak</span>
+              </div>
+              <h1 className="text-base sm:text-xl font-bold text-slate-900 dark:text-white tracking-tight leading-tight truncate">
+                Lalu Lintas Ternak Pasar Hewan
+              </h1>
+            </div>
+          </div>
+        </div>
+      </header>
+
       {/* ── KONTEN UTAMA ── */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
-        {/* ── 2 VIEW TABS: PEMASUKAN vs PENGELUARAN ── */}
-        <div className="flex gap-2 border-b border-slate-200 pb-px overflow-x-auto no-scrollbar scroll-smooth -mx-4 px-4 sm:mx-0 sm:px-0">
+        {/* ── 2 VIEW TABS: PEMASUKAN vs PENGELUARAN (Folder Tab Model Monev KTT) ── */}
+        <div className="flex gap-2 border-b border-slate-200 dark:border-slate-800 pb-px overflow-x-auto no-scrollbar scroll-smooth -mx-4 px-4 sm:mx-0 sm:px-0">
           <button
             onClick={() => setActiveKategori('Pemasukkan')}
             className={`min-h-touch h-11 px-4 sm:px-6 rounded-t-xl text-xs sm:text-sm font-bold flex items-center gap-2 border-t border-x transition-all shrink-0 whitespace-nowrap cursor-pointer ${
               activeKategori === 'Pemasukkan'
-                ? 'bg-white border-slate-200 text-emerald-700 border-b-white translate-y-px shadow-xs'
-                : 'border-transparent text-slate-500 hover:text-slate-900 bg-slate-100/60'
+                ? 'bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 text-blue-600 dark:text-blue-400 border-b-white dark:border-b-slate-900 translate-y-px shadow-xs'
+                : 'border-transparent text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white bg-slate-100/60 dark:bg-slate-800/40'
             }`}
           >
             <ArrowDownLeft size={16} strokeWidth={2.5} />
             <span>Data Pemasukan Ternak</span>
             <span
-              className={`px-2 py-0.5 rounded-full text-[10px] font-black ${
+              className={`px-2 py-0.5 rounded-full text-[10px] font-bold border transition-colors ${
                 activeKategori === 'Pemasukkan'
-                  ? 'bg-emerald-100 text-emerald-700'
-                  : 'bg-slate-200/70 text-slate-600'
+                  ? 'bg-blue-50 dark:bg-blue-950/50 text-blue-700 dark:text-blue-300 border-blue-200 dark:border-blue-800'
+                  : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 border-slate-200 dark:border-slate-700'
               }`}
             >
               {(summary.pemasukan.total_ekor || 0).toLocaleString('id-ID')} Ekor
@@ -159,17 +189,17 @@ export default function LaluLintasTernakPage() {
             onClick={() => setActiveKategori('Pengeluaran')}
             className={`min-h-touch h-11 px-4 sm:px-6 rounded-t-xl text-xs sm:text-sm font-bold flex items-center gap-2 border-t border-x transition-all shrink-0 whitespace-nowrap cursor-pointer ${
               activeKategori === 'Pengeluaran'
-                ? 'bg-white border-slate-200 text-emerald-700 border-b-white translate-y-px shadow-xs'
-                : 'border-transparent text-slate-500 hover:text-slate-900 bg-slate-100/60'
+                ? 'bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 text-blue-600 dark:text-blue-400 border-b-white dark:border-b-slate-900 translate-y-px shadow-xs'
+                : 'border-transparent text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white bg-slate-100/60 dark:bg-slate-800/40'
             }`}
           >
             <ArrowUpRight size={16} strokeWidth={2.5} />
             <span>Data Pengeluaran Ternak</span>
             <span
-              className={`px-2 py-0.5 rounded-full text-[10px] font-black ${
+              className={`px-2 py-0.5 rounded-full text-[10px] font-bold border transition-colors ${
                 activeKategori === 'Pengeluaran'
-                  ? 'bg-emerald-100 text-emerald-700'
-                  : 'bg-slate-200/70 text-slate-600'
+                  ? 'bg-blue-50 dark:bg-blue-950/50 text-blue-700 dark:text-blue-300 border-blue-200 dark:border-blue-800'
+                  : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 border-slate-200 dark:border-slate-700'
               }`}
             >
               {(summary.pengeluaran.total_ekor || 0).toLocaleString('id-ID')} Ekor

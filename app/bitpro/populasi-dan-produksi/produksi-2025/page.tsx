@@ -164,11 +164,11 @@ export default function Produksi2025() {
             {/* ── 2 DIAGRAM LINGKARAN (PRODUKSI DAGING & PRODUKSI TELUR 2025) ── */}
             <section className="space-y-3">
               <div>
-                <h2 className="text-base sm:text-lg font-extrabold text-slate-900 flex items-center gap-2">
-                  <PieChartIcon size={20} strokeWidth={2.5} className="text-emerald-600" />
+                <h2 className="text-base sm:text-lg font-extrabold text-slate-900 dark:text-white flex items-center gap-2">
+                  <PieChartIcon size={20} strokeWidth={2.5} className="text-emerald-600 dark:text-emerald-400" />
                   <span>Visualisasi Proporsi Kontribusi Produksi 2025</span>
                 </h2>
-                <p className="text-xs text-slate-500">
+                <p className="text-xs text-slate-500 dark:text-slate-400">
                   Perbandingan persentase tonase komoditas daging dan produksi butir telur di Kabupaten Kebumen tahun 2025
                 </p>
               </div>

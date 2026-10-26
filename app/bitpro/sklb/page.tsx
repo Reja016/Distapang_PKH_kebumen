@@ -501,7 +501,7 @@ export default function UnifiedSKLBPage() {
     <div className="min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 font-sans selection:bg-emerald-600 selection:text-white pb-24">
       
       {/* ── TOP HEADER (Tema Hijau Bitpro) ── */}
-      <header className="border-b border-emerald-100 bg-white/95 backdrop-blur-md sticky top-0 z-30 shadow-xs print:hidden">
+      <header className="border-b border-emerald-100 dark:border-slate-800 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md sticky top-0 z-30 shadow-xs print:hidden">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-5 min-h-[80px] sm:min-h-[88px] flex flex-col md:flex-row md:items-center justify-between gap-4">
           
           <div className="flex items-center gap-3 min-w-0 flex-1">
@@ -515,13 +515,13 @@ export default function UnifiedSKLBPage() {
 
             <div className="min-w-0">
               <div className="flex items-center gap-2 mb-0.5">
-                <Link href="/bitpro" className="text-xs font-semibold text-slate-500 hover:text-emerald-700 transition-colors truncate">
+                <Link href="/bitpro" className="text-xs font-semibold text-slate-500 dark:text-slate-400 hover:text-emerald-700 dark:hover:text-emerald-400 transition-colors truncate">
                   Bitpro
                 </Link>
-                <span className="text-slate-300">/</span>
-                <span className="text-xs font-bold text-emerald-700 whitespace-nowrap">Surat Keterangan Layak Bibit (SKLB)</span>
+                <span className="text-slate-300 dark:text-slate-600">/</span>
+                <span className="text-xs font-bold text-emerald-700 dark:text-emerald-400 whitespace-nowrap">Surat Keterangan Layak Bibit (SKLB)</span>
               </div>
-              <h1 className="text-base sm:text-xl font-extrabold text-slate-900 tracking-tight leading-tight truncate">
+              <h1 className="text-base sm:text-xl font-extrabold text-slate-900 dark:text-white tracking-tight leading-tight truncate">
                 Surat Keterangan Layak Bibit (SKLB)
               </h1>
             </div>
@@ -550,7 +550,7 @@ export default function UnifiedSKLBPage() {
 
             <button
               onClick={handleExportExcel}
-              className="h-10 px-3.5 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 text-xs font-bold flex items-center gap-1.5 shadow-xs transition-colors cursor-pointer"
+              className="h-10 px-3.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 text-xs font-bold flex items-center gap-1.5 shadow-xs transition-colors cursor-pointer"
             >
               <Download size={15} />
               <span>Export Excel</span>
@@ -564,17 +564,17 @@ export default function UnifiedSKLBPage() {
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 space-y-6">
         
         {/* Opsi Pilihan Tahun */}
-        <div className="flex flex-col sm:flex-row items-center justify-center gap-3 bg-white p-3.5 rounded-2xl border border-emerald-200 shadow-xs max-w-xl mx-auto">
-          <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl border border-emerald-200 bg-emerald-50/70">
-            <Calendar className="text-emerald-700" size={16} />
-            <span className="text-xs font-bold text-emerald-900">Pilih Tahun:</span>
+        <div className="flex flex-col sm:flex-row items-center justify-center gap-3 bg-white dark:bg-slate-900 p-3.5 rounded-2xl border border-emerald-200 dark:border-emerald-800 shadow-xs max-w-xl mx-auto">
+          <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl border border-emerald-200 dark:border-emerald-800 bg-emerald-50/70 dark:bg-emerald-950/40">
+            <Calendar className="text-emerald-700 dark:text-emerald-400" size={16} />
+            <span className="text-xs font-bold text-emerald-900 dark:text-emerald-300">Pilih Tahun:</span>
             <select
               value={selectedYear}
               onChange={(e) => setSelectedYear(Number(e.target.value))}
-              className="bg-transparent text-xs font-black text-emerald-900 focus:outline-none cursor-pointer"
+              className="bg-transparent text-xs font-black text-emerald-900 dark:text-emerald-300 dark:bg-slate-900 focus:outline-none cursor-pointer"
             >
               {availableYears.map((yr) => (
-                <option key={yr} value={yr}>Tahun {yr}</option>
+                <option key={yr} value={yr} className="dark:bg-slate-900">Tahun {yr}</option>
               ))}
             </select>
           </div>
@@ -614,10 +614,10 @@ export default function UnifiedSKLBPage() {
 
         {/* 2. TABEL CAPAIAN SKLB & DETAIL TERNAK */}
         <section className="space-y-4">
-          <div className="flex items-center justify-between border-b border-slate-200 pb-3">
+          <div className="flex items-center justify-between border-b border-slate-200 dark:border-slate-800 pb-3">
             <div>
-              <h3 className="text-base sm:text-lg font-black text-slate-900">Tabel Capaian &amp; Database SKLB {selectedYear}</h3>
-              <p className="text-xs text-slate-500">Rekapitulasi jadwal lapangan dan daftar ternak layak bibit</p>
+              <h3 className="text-base sm:text-lg font-black text-slate-900 dark:text-white">Tabel Capaian &amp; Database SKLB {selectedYear}</h3>
+              <p className="text-xs text-slate-500 dark:text-slate-400">Rekapitulasi jadwal lapangan dan daftar ternak layak bibit</p>
             </div>
 
             {/* Sync Buttons */}
@@ -627,7 +627,7 @@ export default function UnifiedSKLBPage() {
                   onClick={handleSyncRekap}
                   disabled={isSyncingRekap}
                   title="Tarik Data Rekap"
-                  className="h-9 px-4 bg-emerald-700 text-white text-xs font-bold flex items-center gap-1.5 hover:bg-emerald-800 disabled:opacity-50 transition-all shadow-xs cursor-pointer"
+                  className="h-9 px-4 rounded-xl bg-emerald-700 text-white text-xs font-bold flex items-center gap-1.5 hover:bg-emerald-800 disabled:opacity-50 transition-all shadow-xs cursor-pointer"
                 >
                   <RefreshCw size={13} className={isSyncingRekap ? 'animate-spin' : ''} />
                   <span>{isSyncingRekap ? 'Menyinkronkan...' : 'Tarik Data Rekap'}</span>
@@ -637,7 +637,7 @@ export default function UnifiedSKLBPage() {
                   onClick={handleSyncDetail}
                   disabled={isSyncingDetail}
                   title="Tarik Data Detail"
-                  className="h-9 px-4 bg-emerald-700 text-white text-xs font-bold flex items-center gap-1.5 hover:bg-emerald-800 disabled:opacity-50 transition-all shadow-xs cursor-pointer"
+                  className="h-9 px-4 rounded-xl bg-emerald-700 text-white text-xs font-bold flex items-center gap-1.5 hover:bg-emerald-800 disabled:opacity-50 transition-all shadow-xs cursor-pointer"
                 >
                   <RefreshCw size={13} className={isSyncingDetail ? 'animate-spin' : ''} />
                   <span>{isSyncingDetail ? 'Menyinkronkan Data...' : 'Tarik Data Detail'}</span>

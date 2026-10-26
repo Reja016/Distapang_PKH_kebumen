@@ -58,10 +58,10 @@ export default function VaksinasiHarianTab({
   return (
     <div className="space-y-6 animate-in fade-in duration-200">
       {/* Control Bar: Selector Tahun & Tambah Tahun (Centered) */}
-      <div className="flex flex-col sm:flex-row items-center justify-center gap-3 bg-white p-3.5 sm:p-4 rounded-2xl border-2 border-slate-300 shadow-xs max-w-xl mx-auto">
-        <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl border border-blue-200 bg-blue-50/70">
-          <Calendar size={16} className="text-blue-700" />
-          <span className="text-xs font-bold text-blue-950">Pilih Tahun:</span>
+      <div className="flex flex-col sm:flex-row items-center justify-center gap-3 bg-white dark:bg-slate-900 p-3.5 sm:p-4 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-xs max-w-xl mx-auto">
+        <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl border border-blue-200 dark:border-blue-800 bg-blue-50/70 dark:bg-blue-950/40">
+          <Calendar size={16} className="text-blue-700 dark:text-blue-400" />
+          <span className="text-xs font-bold text-blue-950 dark:text-blue-300">Pilih Tahun:</span>
           <select
             value={selectedYear}
             onChange={(e) => {
@@ -69,10 +69,10 @@ export default function VaksinasiHarianTab({
               setSelectedYear(yr);
               fetchAll(yr);
             }}
-            className="bg-transparent text-xs font-black text-blue-900 focus:outline-none cursor-pointer font-mono"
+            className="bg-transparent text-xs font-black text-blue-900 dark:text-blue-300 dark:bg-slate-900 focus:outline-none cursor-pointer font-mono"
           >
             {daftarTahun.map((yr) => (
-              <option key={yr} value={yr}>
+              <option key={yr} value={yr} className="dark:bg-slate-900">
                 Tahun {yr} {yr === 2026 ? '(Aktif)' : ''}
               </option>
             ))}
@@ -85,7 +85,7 @@ export default function VaksinasiHarianTab({
             <button
               type="button"
               onClick={() => setShowAddYearModal(true)}
-              className="h-9 px-3.5 rounded-xl bg-blue-50 hover:bg-blue-100 border border-blue-200 text-blue-700 text-xs font-bold flex items-center gap-1.5 transition-colors cursor-pointer"
+              className="h-9 px-3.5 rounded-xl bg-blue-50 dark:bg-blue-950/50 hover:bg-blue-100 dark:hover:bg-blue-900/60 border border-blue-200 dark:border-blue-800 text-blue-700 dark:text-blue-300 text-xs font-bold flex items-center gap-1.5 transition-colors cursor-pointer"
             >
               <Plus size={14} />
               <span>Tahun Baru</span>
@@ -121,7 +121,7 @@ export default function VaksinasiHarianTab({
               className={`min-h-touch h-9 px-4 rounded-xl text-xs font-bold whitespace-nowrap transition-all border cursor-pointer ${
                 isSelected
                   ? 'bg-blue-600 text-white border-blue-600 shadow-sm'
-                  : 'bg-white text-slate-600 border-slate-200 hover:bg-slate-50'
+                  : 'bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-300 border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800'
               }`}
             >
               {label} {selectedYear}
@@ -131,35 +131,35 @@ export default function VaksinasiHarianTab({
       </div>
 
       {/* Matrix Table with Click-to-Edit */}
-      <div className="border-2 border-slate-700 bg-white shadow-md rounded-xl overflow-hidden -mx-4 sm:mx-0">
-        <div className="p-3.5 sm:p-5 border-b-2 border-slate-700 flex flex-wrap items-center justify-between gap-3 bg-slate-100">
+      <div className="border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm rounded-2xl overflow-hidden -mx-4 sm:mx-0">
+        <div className="p-3.5 sm:p-5 border-b border-slate-200 dark:border-slate-800 flex flex-wrap items-center justify-between gap-3 bg-slate-50 dark:bg-slate-800/60">
           <div>
-            <h3 className="font-black text-sm sm:text-base text-slate-900">
+            <h3 className="font-extrabold text-sm sm:text-base text-slate-900 dark:text-white">
               Matriks Log Harian — Bulan {BULAN_LONG[activeMonth]} {selectedYear}
             </h3>
-            <p className="text-xs font-semibold text-slate-700">
+            <p className="text-xs font-medium text-slate-500 dark:text-slate-400">
               Klik langsung pada kotak sel tanggal untuk mengisi/mengubah dosis vaksinasi (Click-to-Edit)
             </p>
           </div>
-          <span className="px-3.5 py-1 rounded-full bg-blue-700 text-white font-black text-xs shadow-xs">
+          <span className="px-3.5 py-1 rounded-full bg-blue-600 dark:bg-blue-700 text-white font-bold text-xs shadow-xs">
             {daysInMonth(activeMonth, selectedYear)} Hari Aktif
           </span>
         </div>
 
         <div className="overflow-x-auto touch-pan-x max-h-[70vh]">
           <table className="w-full text-xs text-left whitespace-nowrap border-collapse">
-            <thead className="bg-slate-200 text-slate-900 font-extrabold uppercase tracking-wider sticky top-0 z-20 border-b-2 border-slate-700">
+            <thead className="bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-200 font-extrabold uppercase tracking-wider sticky top-0 z-20 border-b border-slate-200 dark:border-slate-800">
               <tr>
-                <th className="p-3 sticky left-0 bg-slate-300 z-30 border-r-2 border-slate-700 shadow-[2px_0_4px_-1px_rgba(0,0,0,0.15)] font-black text-slate-950">PUSKESWAN</th>
-                <th className="p-3 text-right font-sans border-r-2 border-slate-500 font-black">TARGET</th>
-                <th className="p-3 text-right font-sans border-r-2 border-slate-500 font-black">AMBIL</th>
-                <th className="p-3 text-right font-sans text-emerald-950 bg-emerald-100 border-r-2 border-slate-500 font-black">REALISASI</th>
+                <th className="p-3 sticky left-0 bg-slate-200 dark:bg-slate-800 z-30 border-r border-slate-200 dark:border-slate-700 shadow-[2px_0_4px_-1px_rgba(0,0,0,0.1)] font-bold text-slate-900 dark:text-white">PUSKESWAN</th>
+                <th className="p-3 text-right font-sans border-r border-slate-200 dark:border-slate-700 font-bold">TARGET</th>
+                <th className="p-3 text-right font-sans border-r border-slate-200 dark:border-slate-700 font-bold">AMBIL</th>
+                <th className="p-3 text-right font-sans text-emerald-800 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-950/40 border-r border-slate-200 dark:border-slate-700 font-bold">REALISASI</th>
                 {Array.from({ length: daysInMonth(activeMonth, selectedYear) }, (_, i) => i + 1).map((d) => (
-                  <th key={d} className="p-2 text-center font-sans w-11 min-w-[44px] border-r-2 border-slate-500 bg-slate-200 font-black text-slate-950">{d}</th>
+                  <th key={d} className="p-2 text-center font-sans w-11 min-w-[44px] border-r border-slate-200 dark:border-slate-700 bg-slate-100 dark:bg-slate-800 font-bold text-slate-700 dark:text-slate-300">{d}</th>
                 ))}
               </tr>
             </thead>
-            <tbody className="divide-y-2 divide-slate-400 text-slate-900 font-medium">
+            <tbody className="divide-y divide-slate-200 dark:divide-slate-800 text-slate-800 dark:text-slate-200 font-medium">
               {bulanan.map((row, idx) => {
                 const days = Array.from({ length: daysInMonth(activeMonth, selectedYear) }, (_, i) => i + 1);
                 const realisasiBulanIni = Object.entries(harianMap[row.puskeswan] || {})
@@ -170,18 +170,18 @@ export default function VaksinasiHarianTab({
                 return (
                   <tr
                     key={row.id || row.puskeswan}
-                    className={`transition-colors border-b-2 border-slate-400 ${
-                      isEven ? 'bg-white hover:bg-blue-50/50' : 'bg-slate-100 hover:bg-blue-50/70'
+                    className={`transition-colors border-b border-slate-200 dark:border-slate-800 ${
+                      isEven ? 'bg-white dark:bg-slate-900/60 hover:bg-blue-50/40 dark:hover:bg-slate-800/60' : 'bg-slate-50/70 dark:bg-slate-800/40 hover:bg-blue-50/40 dark:hover:bg-slate-800/70'
                     }`}
                   >
-                    <td className={`p-3 font-black text-slate-950 sticky left-0 z-10 border-r-2 border-slate-700 shadow-[2px_0_4px_-1px_rgba(0,0,0,0.12)] ${
-                      isEven ? 'bg-white' : 'bg-slate-100'
+                    <td className={`p-3 font-bold text-slate-900 dark:text-white sticky left-0 z-10 border-r border-slate-200 dark:border-slate-700 shadow-[2px_0_4px_-1px_rgba(0,0,0,0.08)] ${
+                      isEven ? 'bg-white dark:bg-slate-900' : 'bg-slate-50 dark:bg-slate-850'
                     }`}>
                       {row.puskeswan}
                     </td>
-                    <td className={`p-3 text-right font-sans font-bold border-r-2 border-slate-400 ${isEven ? 'bg-slate-50/50' : 'bg-slate-100/60'}`}>{row.target.toLocaleString('id-ID')}</td>
-                    <td className={`p-3 text-right font-sans font-bold border-r-2 border-slate-400 ${isEven ? 'bg-slate-50/50' : 'bg-slate-100/60'}`}>{row.pengambilan}</td>
-                    <td className="p-3 text-right font-sans font-black text-emerald-950 bg-emerald-100/70 border-r-2 border-slate-400">
+                    <td className={`p-3 text-right font-sans font-bold border-r border-slate-200 dark:border-slate-700 ${isEven ? 'bg-slate-50/40 dark:bg-slate-900/40' : 'bg-slate-100/50 dark:bg-slate-800/50'}`}>{row.target.toLocaleString('id-ID')}</td>
+                    <td className={`p-3 text-right font-sans font-bold border-r border-slate-200 dark:border-slate-700 ${isEven ? 'bg-slate-50/40 dark:bg-slate-900/40' : 'bg-slate-100/50 dark:bg-slate-800/50'}`}>{row.pengambilan}</td>
+                    <td className="p-3 text-right font-sans font-extrabold text-emerald-700 dark:text-emerald-400 bg-emerald-50/70 dark:bg-emerald-950/30 border-r border-slate-200 dark:border-slate-700">
                       {realisasiBulanIni.toLocaleString('id-ID')}
                     </td>
                     {days.map((d) => {
@@ -202,7 +202,7 @@ export default function VaksinasiHarianTab({
                                 if (e.key === 'Enter') saveEditHarian();
                                 else if (e.key === 'Escape') setEditingHarian(null);
                               }}
-                              className="w-full text-center py-1 px-1 text-xs font-black font-sans bg-white border-2 border-blue-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400 text-blue-900 shadow-sm"
+                              className="w-full text-center py-1 px-1 text-xs font-black font-sans bg-white dark:bg-slate-900 border-2 border-blue-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400 text-blue-900 dark:text-blue-300 shadow-sm"
                             />
                           </td>
                         );
@@ -214,14 +214,14 @@ export default function VaksinasiHarianTab({
                       const isCellEditable = isAllowed && !isLocked;
 
                       let cellTitle = `Klik untuk ubah dosis ${row.puskeswan} tgl ${d}`;
-                      let cellClass = 'cursor-pointer ' + (val && val > 0 ? 'bg-blue-100 text-blue-950 font-black hover:bg-blue-200' : 'bg-white hover:bg-blue-100/60 text-slate-400 hover:text-blue-900 font-bold');
+                      let cellClass = 'cursor-pointer ' + (val && val > 0 ? 'bg-blue-50 dark:bg-blue-950/40 text-blue-900 dark:text-blue-200 font-bold hover:bg-blue-100 dark:hover:bg-blue-900/50' : 'bg-white dark:bg-slate-900 hover:bg-blue-50/50 dark:hover:bg-slate-800 text-slate-400 hover:text-blue-900 dark:hover:text-blue-300 font-medium');
 
                       if (!isAllowed) {
                         cellTitle = `Akses Ditolak: Wilayah ${row.puskeswan} di luar wewenang tugas Anda`;
-                        cellClass = 'bg-slate-100/80 text-slate-300 cursor-not-allowed';
+                        cellClass = 'bg-slate-100/80 dark:bg-slate-800/60 text-slate-400 dark:text-slate-600 cursor-not-allowed';
                       } else if (isLocked) {
                         cellTitle = deadline.reason || `Tanggal ${dateStr} telah dikunci (Batas waktu 3 hari berakhir). Hubungi Administrator.`;
-                        cellClass = 'bg-slate-100/90 text-slate-400 cursor-not-allowed';
+                        cellClass = 'bg-slate-100/90 dark:bg-slate-800/80 text-slate-400 dark:text-slate-500 cursor-not-allowed';
                       }
 
                       return (
@@ -239,7 +239,7 @@ export default function VaksinasiHarianTab({
                             startEditHarian(row.puskeswan, dateStr);
                           }}
                           title={cellTitle}
-                          className={`p-1.5 text-center font-sans border-r-2 border-slate-400 select-none transition-all ${cellClass}`}
+                          className={`p-1.5 text-center font-sans border-r border-slate-200 dark:border-slate-700 select-none transition-all ${cellClass}`}
                         >
                           {val && val > 0 ? (
                             <div className="flex items-center justify-center gap-1">
@@ -254,7 +254,7 @@ export default function VaksinasiHarianTab({
                                     onShowHistory(harianMap[row.puskeswan][dateStr]);
                                   }
                                 }}
-                                className="p-1 border border-blue-200 bg-blue-50 text-blue-600 hover:bg-blue-100 rounded-md transition-colors"
+                                className="p-1 border border-blue-200 dark:border-blue-800 bg-blue-50 dark:bg-blue-950/50 text-blue-600 dark:text-blue-400 hover:bg-blue-100 dark:hover:bg-blue-900 rounded-md transition-colors"
                                 title="Riwayat"
                               >
                                 <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-clock"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>

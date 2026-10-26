@@ -291,7 +291,7 @@ export default function CatatHewanTable({
       <div className="rounded-3xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-2xs overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-left text-xs whitespace-nowrap">
-            <thead className="bg-slate-50/80 dark:bg-slate-800/60 text-slate-600 dark:text-slate-400 font-bold border-b border-slate-200 dark:border-slate-800">
+            <thead className="bg-slate-50 dark:bg-slate-800/80 text-slate-700 dark:text-slate-300 font-extrabold uppercase tracking-wider text-[10px] border-b border-slate-200 dark:border-slate-800">
               <tr>
                 <th className="p-3 w-10 text-center">NO</th>
                 <th className="p-3">TANGGAL</th>
@@ -343,7 +343,7 @@ export default function CatatHewanTable({
                     </td>
                     <td className="p-3">
                       <span
-                        className={`px-2 py-0.5 rounded-md font-bold text-[11px] ${
+                        className={`inline-flex items-center px-2.5 py-0.5 rounded-full font-bold text-[10px] sm:text-xs ${
                           item.pasar === 'Kebumen'
                             ? 'bg-blue-50 dark:bg-blue-950/70 text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-800'
                             : 'bg-indigo-50 dark:bg-indigo-950/70 text-indigo-700 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-800'
@@ -357,7 +357,7 @@ export default function CatatHewanTable({
                     </td>
                     <td className="p-3 font-semibold">{item.jenis_ternak}</td>
                     <td className="p-3">
-                      <span className="px-2 py-0.5 rounded-md font-bold text-[11px] bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300">
+                      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full font-bold text-[10px] sm:text-xs bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700">
                         {item.layanan}
                       </span>
                     </td>
@@ -368,7 +368,7 @@ export default function CatatHewanTable({
                     <td className="p-3 text-center">
                       {item.hasil_pkb ? (
                         <span
-                          className={`px-2 py-0.5 rounded-md font-bold text-[11px] ${
+                          className={`inline-flex items-center px-2.5 py-0.5 rounded-full font-bold text-[10px] sm:text-xs ${
                             item.hasil_pkb === 'Bunting'
                               ? 'bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800'
                               : 'bg-rose-50 dark:bg-rose-950/60 text-rose-700 dark:text-rose-300 border border-rose-200 dark:border-rose-800'
@@ -382,12 +382,12 @@ export default function CatatHewanTable({
                     </td>
                     <td className="p-3 text-center">
                       {item.sudah_bayar ? (
-                        <span className="inline-flex items-center gap-1 font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/60 px-2 py-0.5 rounded-md border border-emerald-200 dark:border-emerald-800 text-[11px]">
+                        <span className="inline-flex items-center gap-1 font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/60 px-2.5 py-0.5 rounded-full border border-emerald-200 dark:border-emerald-800 text-[10px] sm:text-xs">
                           <CheckCircle2 size={13} />
                           <span>Lunas</span>
                         </span>
                       ) : (
-                        <span className="inline-flex items-center gap-1 font-bold text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-950/60 px-2 py-0.5 rounded-md border border-amber-200 dark:border-amber-800 text-[11px]">
+                        <span className="inline-flex items-center gap-1 font-bold text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-950/60 px-2.5 py-0.5 rounded-full border border-amber-200 dark:border-amber-800 text-[10px] sm:text-xs">
                           <XCircle size={13} />
                           <span>Belum</span>
                         </span>

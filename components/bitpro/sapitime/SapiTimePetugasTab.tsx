@@ -473,7 +473,7 @@ export function SapiTimePetugasTab({
             </span>
             <span className="text-xs text-emerald-200/90 font-semibold">Monitoring Capaian Bulanan</span>
           </div>
-          <h2 className="text-xl sm:text-2xl font-black tracking-tight flex items-center gap-2.5">
+          <h2 className="text-xl sm:text-2xl font-black tracking-tight flex items-center gap-2.5 text-white">
             <Award className="text-amber-300" size={24} />
             <span>Trace Pencapaian Kinerja Petugas Inseminasi Buatan</span>
           </h2>

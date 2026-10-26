@@ -279,7 +279,7 @@ export function PuskeswanlingTab({
           <div className="px-6 py-4 bg-gradient-to-r from-blue-600 to-indigo-600 text-white flex items-center justify-between">
             <div className="flex items-center gap-2.5">
               <Truck className="w-5 h-5" />
-              <h3 className="text-base font-bold">
+              <h3 className="text-base font-bold text-white">
                 {editingId ? 'Edit Pelayanan Puskeswanling' : 'Form Pelayanan Puskeswan Keliling (Puskeswanling)'}
               </h3>
             </div>
@@ -607,7 +607,7 @@ export function PuskeswanlingTab({
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse text-xs">
             <thead>
-              <tr className="bg-slate-50 dark:bg-slate-800/70 border-b border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400 font-bold uppercase tracking-wider">
+              <tr className="bg-slate-50 dark:bg-slate-800/80 border-b border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 font-extrabold uppercase tracking-wider text-[10px]">
                 <th className="py-3 px-3 w-10 text-center">NO</th>
                 <th className="py-3 px-3">TANGGAL</th>
                 <th className="py-3 px-3">PUSKESWAN</th>
@@ -623,14 +623,14 @@ export function PuskeswanlingTab({
             <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
               {isLoading ? (
                 <tr>
-                  <td colSpan={10} className="py-12 text-center text-slate-500">
+                  <td colSpan={10} className="py-12 text-center text-slate-400 dark:text-slate-500">
                     <RefreshCw className="w-6 h-6 animate-spin mx-auto text-blue-600 mb-2" />
                     Memuat data Puskeswanling...
                   </td>
                 </tr>
               ) : data.length === 0 ? (
                 <tr>
-                  <td colSpan={10} className="py-12 text-center text-slate-500">
+                  <td colSpan={10} className="py-12 text-center text-slate-400 dark:text-slate-500">
                     <AlertCircle className="w-8 h-8 text-slate-400 mx-auto mb-2" />
                     Belum ada data pelayanan Puskeswanling yang tercatat.
                   </td>
@@ -639,9 +639,9 @@ export function PuskeswanlingTab({
                 data.map((item, index) => (
                   <tr
                     key={item.id}
-                    className="hover:bg-slate-50/80 dark:hover:bg-slate-800/40 transition"
+                    className="hover:bg-slate-50/80 dark:hover:bg-slate-800/40 transition-colors"
                   >
-                    <td className="py-3 px-3 text-center text-slate-400 font-mono">
+                    <td className="py-3 px-3 text-center text-slate-500 dark:text-slate-400 font-mono">
                       {index + 1}
                     </td>
                     <td className="py-3 px-3 text-slate-600 dark:text-slate-400 whitespace-nowrap">
@@ -657,7 +657,7 @@ export function PuskeswanlingTab({
                       {item.alamat}
                     </td>
                     <td className="py-3 px-3">
-                      <span className="px-2 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-medium">
+                      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700">
                         {item.jenis}
                       </span>
                     </td>

@@ -199,26 +199,26 @@ export default function PuskeswanApotekTab({
 
       {/* ── 4A. TAMPILAN TABEL SALDO STOK PUSKESWAN (Boleh habis sampai 0) ── */}
       {activeSubTab === 'stok' && (
-        <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-300 dark:border-slate-700 shadow-xs overflow-hidden">
+        <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden">
           <div className="overflow-x-auto">
             <table className="w-full text-left text-xs border-collapse">
               <thead>
-                <tr className="bg-slate-100 dark:bg-slate-800/60 text-slate-700 dark:text-slate-300 font-semibold border-b border-slate-300 dark:border-slate-700">
-                  <th className="p-3.5 text-center w-12 border-r border-slate-300 dark:border-slate-700">No</th>
-                  <th className="p-3.5 border-r border-slate-300 dark:border-slate-700">Nama Produk / Obat</th>
-                  <th className="p-3.5 border-r border-slate-300 dark:border-slate-700">No. Batch</th>
-                  <th className="p-3.5 border-r border-slate-300 dark:border-slate-700">Sumber Anggaran</th>
-                  <th className="p-3.5 text-center border-r border-slate-300 dark:border-slate-700">T.A</th>
-                  <th className="p-3.5 text-center border-r border-slate-300 dark:border-slate-700">Tgl Kadaluarsa</th>
-                  <th className="p-3.5 text-center border-r border-slate-300 dark:border-slate-700">Kemasan</th>
-                  <th className="p-3.5 text-center border-r border-slate-300 dark:border-slate-700">Diterima</th>
-                  <th className="p-3.5 text-center border-r border-slate-300 dark:border-slate-700">Terpakai</th>
-                  <th className="p-3.5 text-center border-r border-slate-300 dark:border-slate-700">Sisa Stok</th>
-                  <th className="p-3.5 text-center border-r border-slate-300 dark:border-slate-700">Status</th>
+                <tr className="bg-slate-50 dark:bg-slate-800/80 text-slate-700 dark:text-slate-300 font-extrabold uppercase tracking-wider text-[10px] border-b border-slate-200 dark:border-slate-800">
+                  <th className="p-3.5 text-center w-12 border-r border-slate-200 dark:border-slate-800">No</th>
+                  <th className="p-3.5 border-r border-slate-200 dark:border-slate-800">Nama Produk / Obat</th>
+                  <th className="p-3.5 border-r border-slate-200 dark:border-slate-800">No. Batch</th>
+                  <th className="p-3.5 border-r border-slate-200 dark:border-slate-800">Sumber Anggaran</th>
+                  <th className="p-3.5 text-center border-r border-slate-200 dark:border-slate-800">T.A</th>
+                  <th className="p-3.5 text-center border-r border-slate-200 dark:border-slate-800">Tgl Kadaluarsa</th>
+                  <th className="p-3.5 text-center border-r border-slate-200 dark:border-slate-800">Kemasan</th>
+                  <th className="p-3.5 text-center border-r border-slate-200 dark:border-slate-800">Diterima</th>
+                  <th className="p-3.5 text-center border-r border-slate-200 dark:border-slate-800">Terpakai</th>
+                  <th className="p-3.5 text-center border-r border-slate-200 dark:border-slate-800">Sisa Stok</th>
+                  <th className="p-3.5 text-center border-r border-slate-200 dark:border-slate-800">Status</th>
                   <th className="p-3.5 text-center w-28">Aksi</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-300 dark:divide-slate-700 text-slate-700 dark:text-slate-200">
+              <tbody className="divide-y divide-slate-100 dark:divide-slate-800 text-slate-700 dark:text-slate-200">
                 {currentPuskStockList.length === 0 ? (
                   <tr>
                     <td colSpan={12} className="p-8 text-center text-slate-400">
@@ -229,34 +229,34 @@ export default function PuskeswanApotekTab({
                   currentPuskStockList.map((item, idx) => (
                     <tr
                       key={item.id_stok_puskeswan || idx}
-                      className="odd:bg-white even:bg-slate-100 dark:odd:bg-slate-900/60 dark:even:bg-slate-800/50 hover:bg-blue-50/60 dark:hover:bg-slate-800/80 transition-colors"
+                      className="hover:bg-slate-50/80 dark:hover:bg-slate-800/40 transition-colors"
                     >
-                      <td className="p-3.5 text-center font-mono text-slate-500 dark:text-slate-400 border-r border-slate-300 dark:border-slate-700">{idx + 1}</td>
-                      <td className="p-3.5 border-r border-slate-300 dark:border-slate-700">
+                      <td className="p-3.5 text-center font-mono text-slate-500 dark:text-slate-400 border-r border-slate-200 dark:border-slate-800">{idx + 1}</td>
+                      <td className="p-3.5 border-r border-slate-200 dark:border-slate-800">
                         <div className="font-bold text-slate-900 dark:text-slate-100">
                           {item.nama_barang}
                         </div>
                       </td>
-                      <td className="p-3.5 font-mono text-slate-700 dark:text-slate-300 font-semibold border-r border-slate-300 dark:border-slate-700">
+                      <td className="p-3.5 font-mono text-slate-700 dark:text-slate-300 font-semibold border-r border-slate-200 dark:border-slate-800">
                         {item.nomor_batch}
                       </td>
-                      <td className="p-3.5 border-r border-slate-300 dark:border-slate-700">
-                        <span className="px-2 py-0.5 rounded-md text-[10px] font-semibold bg-blue-50 dark:bg-blue-950/60 text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-800">
+                      <td className="p-3.5 border-r border-slate-200 dark:border-slate-800">
+                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-blue-50 dark:bg-blue-950/50 text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-800">
                           {item.sumber_anggaran}
                         </span>
                       </td>
-                      <td className="p-3.5 text-center border-r border-slate-300 dark:border-slate-700">{item.tahun_anggaran}</td>
-                      <td className="p-3.5 text-center whitespace-nowrap border-r border-slate-300 dark:border-slate-700">
+                      <td className="p-3.5 text-center border-r border-slate-200 dark:border-slate-800">{item.tahun_anggaran}</td>
+                      <td className="p-3.5 text-center whitespace-nowrap border-r border-slate-200 dark:border-slate-800">
                         {item.tanggal_kadaluarsa ? String(item.tanggal_kadaluarsa).slice(0, 10) : '-'}
                       </td>
-                      <td className="p-3.5 text-center border-r border-slate-300 dark:border-slate-700">{item.satuan_kemasan}</td>
-                      <td className="p-3.5 text-center font-semibold text-slate-600 dark:text-slate-400 border-r border-slate-300 dark:border-slate-700">
+                      <td className="p-3.5 text-center border-r border-slate-200 dark:border-slate-800">{item.satuan_kemasan}</td>
+                      <td className="p-3.5 text-center font-semibold text-slate-600 dark:text-slate-400 border-r border-slate-200 dark:border-slate-800">
                         {item.stok_masuk.toLocaleString('id-ID')}
                       </td>
-                      <td className="p-3.5 text-center font-semibold text-rose-600 dark:text-rose-400 border-r border-slate-300 dark:border-slate-700">
+                      <td className="p-3.5 text-center font-semibold text-rose-600 dark:text-rose-400 border-r border-slate-200 dark:border-slate-800">
                         {item.stok_keluar.toLocaleString('id-ID')}
                       </td>
-                      <td className="p-3.5 text-center font-black text-sm border-r border-slate-300 dark:border-slate-700">
+                      <td className="p-3.5 text-center font-black text-sm border-r border-slate-200 dark:border-slate-800">
                         <span
                           className={
                             item.sisa_stok === 0
@@ -267,13 +267,13 @@ export default function PuskeswanApotekTab({
                           {item.sisa_stok.toLocaleString('id-ID')}
                         </span>
                       </td>
-                      <td className="p-3.5 text-center border-r border-slate-300 dark:border-slate-700">
+                      <td className="p-3.5 text-center border-r border-slate-200 dark:border-slate-800">
                         {item.sisa_stok > 0 ? (
-                          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-800">
+                          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-emerald-50 dark:bg-emerald-950/50 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800">
                             <CheckCircle2 className="w-3 h-3" /> TERSEDIA
                           </span>
                         ) : (
-                          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-rose-100 dark:bg-rose-950/60 text-rose-700 dark:text-rose-300 border border-rose-300 dark:border-rose-800">
+                          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-rose-50 dark:bg-rose-950/50 text-rose-700 dark:text-rose-300 border border-rose-200 dark:border-rose-800">
                             <AlertCircle className="w-3 h-3" /> HABIS (0)
                           </span>
                         )}
@@ -342,24 +342,24 @@ export default function PuskeswanApotekTab({
           <div className="overflow-x-auto">
             <table className="w-full text-left text-xs border-collapse">
               <thead>
-                <tr className="bg-slate-100 dark:bg-slate-800/60 text-slate-700 dark:text-slate-300 font-semibold border-b border-slate-300 dark:border-slate-700">
-                  <th className="p-3.5 text-center w-12 border-r border-slate-300 dark:border-slate-700">No</th>
-                  <th className="p-3.5 border-r border-slate-300 dark:border-slate-700">Tanggal</th>
-                  <th className="p-3.5 font-bold border-r border-slate-300 dark:border-slate-700">1. Nama Produk</th>
-                  <th className="p-3.5 font-mono border-r border-slate-300 dark:border-slate-700">2. Nomor Batch</th>
-                  <th className="p-3.5 font-bold border-r border-slate-300 dark:border-slate-700">3. Sumber Anggaran</th>
-                  <th className="p-3.5 text-center font-bold border-r border-slate-300 dark:border-slate-700">4. T.A</th>
-                  <th className="p-3.5 text-center font-bold border-r border-slate-300 dark:border-slate-700">5. Tgl Kadaluarsa</th>
-                  <th className="p-3.5 text-right font-bold text-rose-600 dark:text-rose-400 border-r border-slate-300 dark:border-slate-700">
+                <tr className="bg-slate-50 dark:bg-slate-800/80 text-slate-700 dark:text-slate-300 font-extrabold uppercase tracking-wider text-[10px] border-b border-slate-200 dark:border-slate-800">
+                  <th className="p-3.5 text-center w-12 border-r border-slate-200 dark:border-slate-800">No</th>
+                  <th className="p-3.5 border-r border-slate-200 dark:border-slate-800">Tanggal</th>
+                  <th className="p-3.5 font-bold border-r border-slate-200 dark:border-slate-800">1. Nama Produk</th>
+                  <th className="p-3.5 font-mono border-r border-slate-200 dark:border-slate-800">2. Nomor Batch</th>
+                  <th className="p-3.5 font-bold border-r border-slate-200 dark:border-slate-800">3. Sumber Anggaran</th>
+                  <th className="p-3.5 text-center font-bold border-r border-slate-200 dark:border-slate-800">4. T.A</th>
+                  <th className="p-3.5 text-center font-bold border-r border-slate-200 dark:border-slate-800">5. Tgl Kadaluarsa</th>
+                  <th className="p-3.5 text-right font-bold text-rose-600 dark:text-rose-400 border-r border-slate-200 dark:border-slate-800">
                     6. Jmlh Penggunaan
                   </th>
-                  <th className="p-3.5 text-center font-bold border-r border-slate-300 dark:border-slate-700">7. Kemasan</th>
-                  <th className="p-3.5 border-r border-slate-300 dark:border-slate-700">Keterangan / Kasus</th>
-                  <th className="p-3.5 border-r border-slate-300 dark:border-slate-700">Petugas</th>
+                  <th className="p-3.5 text-center font-bold border-r border-slate-200 dark:border-slate-800">7. Kemasan</th>
+                  <th className="p-3.5 border-r border-slate-200 dark:border-slate-800">Keterangan / Kasus</th>
+                  <th className="p-3.5 border-r border-slate-200 dark:border-slate-800">Petugas</th>
                   <th className="p-3.5 text-center w-24">Aksi</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-300 dark:divide-slate-700 text-slate-700 dark:text-slate-200">
+              <tbody className="divide-y divide-slate-100 dark:divide-slate-800 text-slate-700 dark:text-slate-200">
                 {currentPuskPenggunaanList.length === 0 ? (
                   <tr>
                     <td colSpan={12} className="p-8 text-center text-slate-400">
@@ -370,32 +370,32 @@ export default function PuskeswanApotekTab({
                   currentPuskPenggunaanList.map((item, idx) => (
                     <tr
                       key={item.id_penggunaan}
-                      className="odd:bg-white even:bg-slate-100 dark:odd:bg-slate-900/60 dark:even:bg-slate-800/50 hover:bg-blue-50/60 dark:hover:bg-slate-800/80 transition-colors"
+                      className="hover:bg-slate-50/80 dark:hover:bg-slate-800/40 transition-colors"
                     >
-                      <td className="p-3.5 text-center font-mono text-slate-500 dark:text-slate-400 border-r border-slate-300 dark:border-slate-700">{idx + 1}</td>
-                      <td className="p-3.5 whitespace-nowrap text-slate-600 dark:text-slate-400 border-r border-slate-300 dark:border-slate-700">
+                      <td className="p-3.5 text-center font-mono text-slate-500 dark:text-slate-400 border-r border-slate-200 dark:border-slate-800">{idx + 1}</td>
+                      <td className="p-3.5 whitespace-nowrap text-slate-600 dark:text-slate-400 border-r border-slate-200 dark:border-slate-800">
                         {item.tanggal ? String(item.tanggal).slice(0, 10) : '-'}
                       </td>
-                      <td className="p-3.5 font-bold text-slate-900 dark:text-slate-100 border-r border-slate-300 dark:border-slate-700">
+                      <td className="p-3.5 font-bold text-slate-900 dark:text-slate-100 border-r border-slate-200 dark:border-slate-800">
                         {item.nama_produk}
                       </td>
-                      <td className="p-3.5 font-mono text-slate-700 dark:text-slate-300 font-semibold border-r border-slate-300 dark:border-slate-700">
+                      <td className="p-3.5 font-mono text-slate-700 dark:text-slate-300 font-semibold border-r border-slate-200 dark:border-slate-800">
                         {item.nomor_batch}
                       </td>
-                      <td className="p-3.5 border-r border-slate-300 dark:border-slate-700">
-                        <span className="px-2 py-0.5 rounded-md text-[10px] font-semibold bg-blue-50 dark:bg-blue-950/60 text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-800">
+                      <td className="p-3.5 border-r border-slate-200 dark:border-slate-800">
+                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-blue-50 dark:bg-blue-950/50 text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-800">
                           {item.sumber_anggaran}
                         </span>
                       </td>
-                      <td className="p-3.5 text-center border-r border-slate-300 dark:border-slate-700">{item.tahun_anggaran}</td>
-                      <td className="p-3.5 text-center whitespace-nowrap text-slate-500 dark:text-slate-400 border-r border-slate-300 dark:border-slate-700">
+                      <td className="p-3.5 text-center border-r border-slate-200 dark:border-slate-800">{item.tahun_anggaran}</td>
+                      <td className="p-3.5 text-center whitespace-nowrap text-slate-500 dark:text-slate-400 border-r border-slate-200 dark:border-slate-800">
                         {item.tanggal_kadaluarsa ? String(item.tanggal_kadaluarsa).slice(0, 10) : '-'}
                       </td>
-                      <td className="p-3.5 text-right font-black text-rose-600 dark:text-rose-400 text-sm border-r border-slate-300 dark:border-slate-700">
+                      <td className="p-3.5 text-right font-black text-rose-600 dark:text-rose-400 text-sm border-r border-slate-200 dark:border-slate-800">
                         {item.jumlah_penggunaan.toLocaleString('id-ID')}
                       </td>
-                      <td className="p-3.5 text-center border-r border-slate-300 dark:border-slate-700">{item.kemasan}</td>
-                      <td className="p-3.5 text-slate-600 dark:text-slate-300 border-r border-slate-300 dark:border-slate-700">
+                      <td className="p-3.5 text-center border-r border-slate-200 dark:border-slate-800">{item.kemasan}</td>
+                      <td className="p-3.5 text-slate-600 dark:text-slate-300 border-r border-slate-200 dark:border-slate-800">
                         {item.keterangan || '-'}
                       </td>
                       <td className="p-3.5 text-slate-500 dark:text-slate-400 text-[11px] whitespace-nowrap border-r border-slate-300 dark:border-slate-700">

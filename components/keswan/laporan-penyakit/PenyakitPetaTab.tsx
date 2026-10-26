@@ -28,13 +28,13 @@ export default function PenyakitPetaTab({
   kecAggregates,
 }: PenyakitPetaTabProps) {
   return (
-    <div className="bg-white rounded-3xl border border-slate-200 shadow-xs p-5 sm:p-8 space-y-6 print:border-none print:shadow-none print:p-0">
+    <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm p-5 sm:p-8 space-y-6 print:border-none print:shadow-none print:p-0">
       {/* Header Judul Peta */}
-      <div className="text-center pb-4 border-b border-slate-100">
-        <h2 className="text-xl sm:text-3xl font-black text-slate-900 tracking-tight uppercase">
+      <div className="text-center pb-4 border-b border-slate-100 dark:border-slate-800">
+        <h2 className="text-xl sm:text-3xl font-black text-slate-900 dark:text-white tracking-tight uppercase">
           PETA SEBARAN PENYAKIT HEWAN
         </h2>
-        <p className="text-lg sm:text-2xl font-extrabold text-blue-700 tracking-tight uppercase">
+        <p className="text-lg sm:text-2xl font-extrabold text-blue-600 dark:text-blue-400 tracking-tight uppercase">
           DI KABUPATEN KEBUMEN TAHUN {selectedYear}
         </p>
       </div>
@@ -42,13 +42,13 @@ export default function PenyakitPetaTab({
       {/* Layout Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
         {/* LEFT & CENTER: PETA INTERAKTIF SVG */}
-        <div className="lg:col-span-8 bg-slate-50/70 rounded-3xl border border-slate-200/90 p-4 sm:p-6 relative overflow-hidden shadow-inner">
+        <div className="lg:col-span-8 bg-slate-50/70 dark:bg-slate-800/40 rounded-2xl border border-slate-200/90 dark:border-slate-800 p-4 sm:p-6 relative overflow-hidden shadow-inner">
           {/* Reset button when kecamatan is selected */}
           {selectedKecamatan && (
             <div className="absolute top-6 right-6 z-20">
               <button
                 onClick={() => setSelectedKecamatan(null)}
-                className="px-3.5 py-1.5 rounded-xl bg-white border border-slate-200 shadow-md text-xs font-extrabold text-slate-700 hover:bg-slate-50 flex items-center gap-1.5 cursor-pointer"
+                className="px-3.5 py-1.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 shadow-md text-xs font-extrabold text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800 flex items-center gap-1.5 cursor-pointer transition-colors"
               >
                 <X size={14} />
                 <span>Reset Fokus</span>
@@ -168,16 +168,16 @@ export default function PenyakitPetaTab({
 
           {/* Detail Box Saat Kecamatan Dipilih */}
           {selectedKecamatan && (
-            <div className="mt-4 p-4.5 bg-white rounded-2xl border border-blue-200 shadow-xs space-y-2 animate-in fade-in">
+            <div className="mt-4 p-4.5 bg-white dark:bg-slate-900 rounded-2xl border border-blue-200 dark:border-blue-900/60 shadow-sm space-y-2 animate-in fade-in">
               <div className="flex items-center justify-between">
-                <h4 className="text-sm font-extrabold text-slate-900 flex items-center gap-2">
+                <h4 className="text-sm font-extrabold text-slate-900 dark:text-white flex items-center gap-2">
                   <span
                     className="w-3.5 h-3.5 rounded-full"
                     style={{ backgroundColor: getZoneByKecamatanId(selectedKecamatan.id).colorHex }}
                   />
                   <span>Kecamatan {selectedKecamatan.nama}</span>
                 </h4>
-                <span className="text-xs font-bold text-blue-800 bg-blue-50 px-3 py-1 rounded-xl border border-blue-200">
+                <span className="text-xs font-bold text-blue-700 dark:text-blue-300 bg-blue-50 dark:bg-blue-950/50 px-3 py-1 rounded-full border border-blue-200 dark:border-blue-800">
                   Wilayah {getZoneByKecamatanId(selectedKecamatan.id).nama}
                 </span>
               </div>
@@ -194,8 +194,8 @@ export default function PenyakitPetaTab({
                   if (validCaseEntries.length === 0) {
                     return (
                       <div>
-                        <p className="text-xs font-bold text-slate-600 mb-1">Diagnosa Penyakit Terlaporkan:</p>
-                        <p className="text-xs text-slate-400 italic">Belum ada laporan penyakit pada tahun {selectedYear}.</p>
+                        <p className="text-xs font-bold text-slate-600 dark:text-slate-400 mb-1">Diagnosa Penyakit Terlaporkan:</p>
+                        <p className="text-xs text-slate-400 dark:text-slate-500 italic">Belum ada laporan penyakit pada tahun {selectedYear}.</p>
                       </div>
                     );
                   }
@@ -203,8 +203,8 @@ export default function PenyakitPetaTab({
                   return (
                     <div>
                       <div className="flex items-center justify-between mb-2">
-                        <p className="text-xs font-bold text-slate-700">Diagnosa Penyakit Terlaporkan:</p>
-                        <span className="text-[11px] font-black text-rose-700 bg-rose-50 px-2 py-0.5 rounded-lg border border-rose-200">
+                        <p className="text-xs font-bold text-slate-700 dark:text-slate-300">Diagnosa Penyakit Terlaporkan:</p>
+                        <span className="text-[11px] font-bold text-rose-700 dark:text-rose-300 bg-rose-50 dark:bg-rose-950/50 px-2.5 py-0.5 rounded-full border border-rose-200 dark:border-rose-800">
                           Total: {totalKecKasus} Kasus
                         </span>
                       </div>
@@ -212,14 +212,14 @@ export default function PenyakitPetaTab({
                         {validCaseEntries.map(([diag, count]) => (
                           <span
                             key={diag}
-                            className="px-3 py-1.5 rounded-xl text-xs font-bold flex items-center gap-2 border border-slate-200 bg-slate-50 text-slate-800 shadow-2xs"
+                            className="px-3 py-1.5 rounded-xl text-xs font-bold flex items-center gap-2 border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/60 text-slate-800 dark:text-slate-200 shadow-2xs"
                           >
                             <span
                               className="w-3 h-3 rounded-full shrink-0"
                               style={{ backgroundColor: DIAGNOSA_COLOR_MAP[diag] || '#64748B' }}
                             />
                             <span>{diag}:</span>
-                            <span className="font-mono font-black text-blue-700 bg-blue-100/70 px-1.5 py-0.5 rounded-md">
+                            <span className="font-mono font-bold text-blue-700 dark:text-blue-300 bg-blue-100/70 dark:bg-blue-900/50 px-1.5 py-0.5 rounded-md">
                               {Number(count)} Kasus
                             </span>
                           </span>
@@ -234,20 +234,20 @@ export default function PenyakitPetaTab({
         </div>
 
         {/* RIGHT: KETERANGAN DIAGNOSA PENYAKIT & ZONASI PUSKESWAN */}
-        <div className="lg:col-span-4 bg-slate-50/80 rounded-3xl border border-slate-200 p-5 space-y-5">
+        <div className="lg:col-span-4 bg-slate-50/80 dark:bg-slate-800/40 rounded-2xl border border-slate-200 dark:border-slate-800 p-5 space-y-5">
           <div>
-            <h3 className="text-sm font-black text-slate-900 tracking-wider uppercase border-b border-slate-200 pb-2">
+            <h3 className="text-sm font-extrabold text-slate-900 dark:text-white tracking-wider uppercase border-b border-slate-200 dark:border-slate-800 pb-2">
               KETERANGAN DIAGNOSA
             </h3>
-            <p className="text-xs font-extrabold text-blue-900 mt-2">Daftar Diagnosa Penyakit Hewan</p>
+            <p className="text-xs font-bold text-blue-600 dark:text-blue-400 mt-2">Daftar Diagnosa Penyakit Hewan</p>
           </div>
 
           {/* Grid Diagnosa Dots */}
-          <div className="grid grid-cols-2 sm:grid-cols-3 gap-x-2 gap-y-2 max-h-[360px] overflow-y-auto pr-1 text-[11px] font-semibold text-slate-800">
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-x-2 gap-y-2 max-h-[360px] overflow-y-auto pr-1 text-[11px] font-semibold text-slate-800 dark:text-slate-200">
             {DIAGNOSA_LIST.map((d, i) => (
               <div key={i} className="flex items-center gap-1.5 py-0.5 truncate" title={d.nama}>
                 <span
-                  className="w-3 h-3 rounded-full shrink-0 border border-black/10 shadow-2xs"
+                  className="w-3 h-3 rounded-full shrink-0 border border-black/10 dark:border-white/10 shadow-2xs"
                   style={{ backgroundColor: d.color }}
                 />
                 <span className="truncate">{d.nama}</span>
@@ -256,19 +256,19 @@ export default function PenyakitPetaTab({
           </div>
 
           {/* Zonasi Puskeswan */}
-          <div className="border-t border-slate-200 pt-4 space-y-3">
-            <h4 className="text-xs font-black text-slate-900 uppercase tracking-wider">8 Wilayah Kerja Puskeswan</h4>
+          <div className="border-t border-slate-200 dark:border-slate-800 pt-4 space-y-3">
+            <h4 className="text-xs font-extrabold text-slate-900 dark:text-white uppercase tracking-wider">8 Wilayah Kerja Puskeswan</h4>
             <div className="space-y-1.5">
               {Object.values(PUSKESWAN_ZONES).map((zone) => (
                 <div
                   key={zone.id}
-                  className="flex items-center justify-between text-xs p-2 rounded-xl bg-white border border-slate-200 shadow-2xs"
+                  className="flex items-center justify-between text-xs p-2 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-2xs"
                 >
                   <div className="flex items-center gap-2">
                     <span className="w-3.5 h-3.5 rounded-full shrink-0" style={{ backgroundColor: zone.colorHex }} />
-                    <span className="font-bold text-slate-900">{zone.nama}</span>
+                    <span className="font-bold text-slate-900 dark:text-white">{zone.nama}</span>
                   </div>
-                  <span className="text-[10px] text-slate-500 font-medium">
+                  <span className="text-[10px] text-slate-500 dark:text-slate-400 font-medium">
                     Kantor: Kec. {zone.nama.replace('Puskeswan ', '')}
                   </span>
                 </div>

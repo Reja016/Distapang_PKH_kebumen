@@ -120,17 +120,17 @@ export default function LalinTable({
   };
 
   return (
-    <div className="bg-white rounded-3xl border border-slate-200 shadow-sm overflow-hidden flex flex-col">
+    <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden flex flex-col">
       {/* ── TOOLBAR ATAS: Filter Pasar, Pencarian, Tombol Aksi ── */}
-      <div className="p-5 border-b border-slate-100 flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-4">
+      <div className="p-5 border-b border-slate-100 dark:border-slate-800 flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-4">
         {/* Filter Wilayah Pasar Hewan */}
-        <div className="flex items-center gap-1.5 p-1 bg-slate-100 rounded-2xl border border-slate-200/80 overflow-x-auto shrink-0">
+        <div className="flex items-center gap-1.5 p-1 bg-slate-100 dark:bg-slate-800/80 rounded-2xl border border-slate-200/80 dark:border-slate-700 overflow-x-auto shrink-0">
           <button
             onClick={() => setActiveWilayah('ALL')}
             className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
               activeWilayah === 'ALL'
-                ? 'bg-white text-slate-900 shadow-xs'
-                : 'text-slate-600 hover:text-slate-900'
+                ? 'bg-white dark:bg-slate-900 text-slate-900 dark:text-white shadow-xs'
+                : 'text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white'
             }`}
           >
             Semua Pasar
@@ -140,7 +140,7 @@ export default function LalinTable({
             className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1 cursor-pointer ${
               activeWilayah === 'Kebumen'
                 ? 'bg-purple-600 text-white shadow-xs'
-                : 'text-slate-600 hover:text-slate-900'
+                : 'text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white'
             }`}
           >
             <Store size={13} />
@@ -151,7 +151,7 @@ export default function LalinTable({
             className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1 cursor-pointer ${
               activeWilayah === 'Gombong'
                 ? 'bg-amber-600 text-white shadow-xs'
-                : 'text-slate-600 hover:text-slate-900'
+                : 'text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white'
             }`}
           >
             <Store size={13} />
@@ -163,23 +163,23 @@ export default function LalinTable({
         <div className="flex flex-col sm:flex-row items-center gap-2.5 w-full lg:w-auto">
           {/* Input Search */}
           <div className="relative w-full sm:w-64">
-            <Search size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
+            <Search size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 dark:text-slate-500" />
             <input
               type="text"
               placeholder="Cari pemilik, SKKH, asal, tujuan..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full min-h-touch h-10 pl-10 pr-3.5 border border-slate-200 rounded-xl bg-slate-50 focus:bg-white focus:outline-none focus:border-emerald-600 text-xs text-slate-900 placeholder:text-slate-400"
+              className="w-full min-h-touch h-10 pl-10 pr-3.5 border border-slate-200 dark:border-slate-700 rounded-xl bg-slate-50 dark:bg-slate-800 focus:bg-white dark:focus:bg-slate-900 focus:outline-none focus:border-blue-600 text-xs text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-500"
             />
           </div>
 
           {/* Tombol Export Excel */}
           <button
             onClick={handleExportExcel}
-            className="w-full sm:w-auto min-h-touch h-10 px-3.5 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 text-xs font-bold flex items-center justify-center gap-1.5 transition-colors shadow-2xs cursor-pointer"
+            className="w-full sm:w-auto min-h-touch h-10 px-3.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 text-xs font-bold flex items-center justify-center gap-1.5 transition-colors shadow-2xs cursor-pointer"
             title="Download file Excel"
           >
-            <FileSpreadsheet size={15} className="text-emerald-600" />
+            <FileSpreadsheet size={15} className="text-blue-600 dark:text-blue-400" />
             <span>Export Excel</span>
           </button>
 
@@ -187,7 +187,7 @@ export default function LalinTable({
           {canEdit && (
             <button
               onClick={onAdd}
-              className="w-full sm:w-auto min-h-touch h-10 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold flex items-center justify-center gap-1.5 shadow-xs transition-colors cursor-pointer"
+              className="w-full sm:w-auto min-h-touch h-10 px-4 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold flex items-center justify-center gap-1.5 shadow-xs transition-colors cursor-pointer"
             >
               <Plus size={16} />
               <span>Tambah {kategori === 'Pemasukkan' ? 'Pemasukan' : 'Pengeluaran'}</span>
@@ -200,7 +200,7 @@ export default function LalinTable({
       <div className="overflow-x-auto">
         <table className="w-full text-left text-xs border-collapse">
           <thead>
-            <tr className="bg-slate-50/90 text-slate-700 font-extrabold uppercase tracking-wider border-b border-slate-200 text-[10px]">
+            <tr className="bg-slate-50 dark:bg-slate-800/80 text-slate-700 dark:text-slate-300 font-extrabold uppercase tracking-wider border-b border-slate-200 dark:border-slate-800 text-[10px]">
               <th className="py-3 px-3 text-center w-10">No.</th>
               <th className="py-3 px-3">Tanggal</th>
               <th className="py-3 px-3">Pasar</th>
@@ -216,20 +216,20 @@ export default function LalinTable({
               <th className="py-3 px-3 text-center w-24">Aksi</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-slate-100 text-slate-800">
+          <tbody className="divide-y divide-slate-100 dark:divide-slate-800 text-slate-800 dark:text-slate-200">
             {isLoading ? (
               <tr>
-                <td colSpan={13} className="py-12 text-center text-slate-400">
+                <td colSpan={13} className="py-12 text-center text-slate-400 dark:text-slate-500">
                   Memuat data lalu lintas ternak...
                 </td>
               </tr>
             ) : filteredData.length === 0 ? (
               <tr>
                 <td colSpan={13} className="py-14 text-center">
-                  <p className="text-slate-500 font-bold text-sm">
+                  <p className="text-slate-700 dark:text-slate-300 font-bold text-sm">
                     Belum ada data {kategori.toLowerCase()} ternak
                   </p>
-                  <p className="text-slate-400 text-xs mt-1">
+                  <p className="text-slate-400 dark:text-slate-500 text-xs mt-1">
                     Silakan klik tombol Tambah Data untuk memasukkan catatan baru
                   </p>
                 </td>
@@ -238,65 +238,65 @@ export default function LalinTable({
               filteredData.map((item, idx) => (
                 <tr
                   key={item.id_lalin}
-                  className="hover:bg-slate-50/80 transition-colors group"
+                  className="hover:bg-blue-50/40 dark:hover:bg-slate-800/60 transition-colors group"
                 >
-                  <td className="py-3 px-3 text-center font-bold text-slate-400">
+                  <td className="py-3 px-3 text-center font-bold text-slate-400 dark:text-slate-500">
                     {idx + 1}
                   </td>
-                  <td className="py-3 px-3 font-semibold whitespace-nowrap text-slate-700">
+                  <td className="py-3 px-3 font-semibold whitespace-nowrap text-slate-700 dark:text-slate-300">
                     {item.tanggal_pengiriman}
                   </td>
                   <td className="py-3 px-3 whitespace-nowrap">
                     <span
-                      className={`px-2 py-0.5 rounded-md text-[10px] font-bold ${
+                      className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-bold border transition-colors ${
                         item.wilayah === 'Kebumen'
-                          ? 'bg-purple-50 text-purple-700 border border-purple-200'
-                          : 'bg-amber-50 text-amber-700 border border-amber-200'
+                          ? 'bg-purple-50 dark:bg-purple-950/50 text-purple-700 dark:text-purple-300 border-purple-200 dark:border-purple-800'
+                          : 'bg-amber-50 dark:bg-amber-950/50 text-amber-700 dark:text-amber-300 border-amber-200 dark:border-amber-800'
                       }`}
                     >
                       {item.wilayah}
                     </span>
                   </td>
-                  <td className="py-3 px-3 font-mono text-[11px] whitespace-nowrap text-slate-600">
+                  <td className="py-3 px-3 font-mono text-[11px] whitespace-nowrap text-slate-600 dark:text-slate-400">
                     {item.no_skkh ? (
-                      <span className="font-semibold text-emerald-700 bg-emerald-50 px-1.5 py-0.5 rounded border border-emerald-200/60">
+                      <span className="font-semibold text-blue-700 dark:text-blue-300 bg-blue-50 dark:bg-blue-950/50 px-2.5 py-0.5 rounded-full border border-blue-200 dark:border-blue-800">
                         {item.no_skkh}
                       </span>
                     ) : (
                       <span className="text-slate-400 italic">-</span>
                     )}
                   </td>
-                  <td className="py-3 px-3 font-bold text-slate-900 whitespace-nowrap">
+                  <td className="py-3 px-3 font-bold text-slate-900 dark:text-white whitespace-nowrap">
                     {item.nama_pemilik}
                   </td>
-                  <td className="py-3 px-3 text-slate-600 whitespace-nowrap">
+                  <td className="py-3 px-3 text-slate-600 dark:text-slate-400 whitespace-nowrap">
                     {item.alamat_pemilik}
                   </td>
-                  <td className="py-3 px-3 font-semibold text-slate-800 whitespace-nowrap">
+                  <td className="py-3 px-3 font-semibold text-slate-800 dark:text-slate-200 whitespace-nowrap">
                     {item.jenis_ternak}
                   </td>
-                  <td className="py-3 px-3 text-center text-slate-500 whitespace-nowrap">
+                  <td className="py-3 px-3 text-center text-slate-500 dark:text-slate-400 whitespace-nowrap">
                     {item.umur ? `${item.umur} ${item.satuan_umur || 'thn'}` : '-'}
                   </td>
                   <td className="py-3 px-3 text-center whitespace-nowrap">
                     <div className="inline-flex flex-col items-center">
-                      <span className="font-black text-slate-900 text-xs">
+                      <span className="font-black text-slate-900 dark:text-white text-xs">
                         {item.jumlah} {item.satuan_jumlah || 'ekor'}
                       </span>
                       {(item.jumlah_jantan > 0 || item.jumlah_betina > 0) && (
-                        <span className="text-[10px] text-slate-500 font-medium">
+                        <span className="text-[10px] text-slate-500 dark:text-slate-400 font-medium">
                           (♂{item.jumlah_jantan}, ♀{item.jumlah_betina})
                         </span>
                       )}
                     </div>
                   </td>
-                  <td className="py-3 px-3 text-slate-700 whitespace-nowrap">
+                  <td className="py-3 px-3 text-slate-700 dark:text-slate-300 whitespace-nowrap">
                     {item.asal_ternak || '-'}
                   </td>
-                  <td className="py-3 px-3 text-slate-700 whitespace-nowrap font-medium">
+                  <td className="py-3 px-3 text-slate-700 dark:text-slate-300 whitespace-nowrap font-medium">
                     {item.tujuan_ternak || '-'}
                   </td>
-                  <td className="py-3 px-3 text-slate-500 max-w-xs truncate" title={item.ket || ''}>
+                  <td className="py-3 px-3 text-slate-500 dark:text-slate-400 max-w-xs truncate" title={item.ket || ''}>
                     {item.ket || '-'}
                   </td>
                   <td className="py-3 px-3 text-center whitespace-nowrap">
@@ -304,7 +304,7 @@ export default function LalinTable({
                       {/* Tombol Audit Log */}
                       <button
                         onClick={() => onAudit(item)}
-                        className="p-1.5 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors"
+                        className="p-1.5 rounded-lg text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
                         title="Riwayat Audit"
                       >
                         <History size={14} />
@@ -314,7 +314,7 @@ export default function LalinTable({
                       {canEdit && (
                         <button
                           onClick={() => onEdit(item)}
-                          className="p-1.5 rounded-lg text-blue-600 hover:bg-blue-50 transition-colors"
+                          className="p-1.5 rounded-lg text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-slate-800 transition-colors"
                           title="Edit Data"
                         >
                           <Edit2 size={14} />
@@ -325,7 +325,7 @@ export default function LalinTable({
                       {canEdit && (
                         <button
                           onClick={() => onDelete(item.id_lalin)}
-                          className="p-1.5 rounded-lg text-red-600 hover:bg-red-50 transition-colors"
+                          className="p-1.5 rounded-lg text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-slate-800 transition-colors"
                           title="Hapus Data"
                         >
                           <Trash2 size={14} />
@@ -338,24 +338,24 @@ export default function LalinTable({
             )}
           </tbody>
 
-          {/* ── FOOTER TABEL: Baris Total Jumlah (Persis seperti di Excel) ── */}
+          {/* ── FOOTER TABEL: Baris Total Jumlah ── */}
           {filteredData.length > 0 && (
             <tfoot>
-              <tr className="bg-slate-100/90 font-black text-slate-900 border-t-2 border-slate-300 text-xs">
-                <td colSpan={8} className="py-3 px-4 text-right uppercase tracking-wider text-slate-700">
+              <tr className="bg-slate-100 dark:bg-slate-800/90 font-extrabold text-slate-900 dark:text-white border-t border-slate-300 dark:border-slate-700 text-xs">
+                <td colSpan={8} className="py-3 px-4 text-right uppercase tracking-wider text-slate-700 dark:text-slate-300">
                   Jumlah Total:
                 </td>
                 <td className="py-3 px-3 text-center">
                   <div className="inline-flex flex-col items-center">
-                    <span className="text-sm font-black text-emerald-800">
+                    <span className="text-sm font-black text-blue-700 dark:text-blue-400">
                       {totalEkor.toLocaleString('id-ID')} Ekor
                     </span>
-                    <span className="text-[10px] text-slate-600 font-semibold">
+                    <span className="text-[10px] text-slate-600 dark:text-slate-400 font-semibold">
                       (♂ {totalJantan} Ekor, ♀ {totalBetina} Ekor)
                     </span>
                   </div>
                 </td>
-                <td colSpan={4} className="py-3 px-3 text-slate-500 font-normal italic">
+                <td colSpan={4} className="py-3 px-3 text-slate-500 dark:text-slate-400 font-normal italic">
                   {filteredData.length} baris pengiriman
                 </td>
               </tr>

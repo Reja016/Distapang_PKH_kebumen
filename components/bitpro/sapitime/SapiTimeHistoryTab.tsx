@@ -220,7 +220,7 @@ export function SapiTimeHistoryTab({
                   Analisis Efektivitas Reproduksi
                 </span>
               </div>
-              <h2 className="text-xl sm:text-2xl font-black mt-1 tracking-tight">
+              <h2 className="text-xl sm:text-2xl font-black mt-1 tracking-tight text-white">
                 Kinerja Petugas &amp; Riwayat Pelayanan SapiTime
               </h2>
               <p className="text-xs sm:text-sm text-emerald-100/90 mt-1 max-w-2xl">

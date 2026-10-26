@@ -296,7 +296,7 @@ export function SapiTimePkbTab({
               Pemeriksaan Kebuntingan Ternak
             </span>
           </div>
-          <h2 className="text-xl sm:text-2xl font-black tracking-tight flex items-center gap-2.5">
+          <h2 className="text-xl sm:text-2xl font-black tracking-tight flex items-center gap-2.5 text-white">
             <Stethoscope className="text-amber-300" size={24} />
             <span>Monitoring &amp; Pemeriksaan PKB Sapi</span>
           </h2>

@@ -327,17 +327,17 @@ export default function PencatatanPemotonganTable({
           <table className="w-full text-xs text-left border-collapse">
             <thead className="bg-purple-900 text-white font-extrabold text-[11px] uppercase tracking-wider">
               <tr>
-                <th className="p-3.5 text-center w-12 border-r border-purple-800">No</th>
-                <th className="p-3.5 border-r border-purple-800 whitespace-nowrap">Tanggal</th>
-                <th className="p-3.5 border-r border-purple-800">Tempat Pemotongan</th>
-                <th className="p-3.5 border-r border-purple-800">Pemilik &amp; Alamat</th>
-                <th className="p-3.5 border-r border-purple-800">Jenis Ternak</th>
-                <th className="p-3.5 text-center border-r border-purple-800">Jumlah</th>
-                <th className="p-3.5 text-center border-r border-purple-800">Izin Potong</th>
-                <th className="p-3.5 border-r border-purple-800">Pemeriksaan</th>
-                <th className="p-3.5 text-center border-r border-purple-800">Kelayakan Daging</th>
-                <th className="p-3.5 text-center border-r border-purple-800">Bukti</th>
-                <th className="p-3.5 text-center w-28">Aksi</th>
+                <th className="p-3.5 text-center w-12 border-r border-purple-800 text-white">No</th>
+                <th className="p-3.5 border-r border-purple-800 whitespace-nowrap text-white">Tanggal</th>
+                <th className="p-3.5 border-r border-purple-800 text-white">Tempat Pemotongan</th>
+                <th className="p-3.5 border-r border-purple-800 text-white">Pemilik &amp; Alamat</th>
+                <th className="p-3.5 border-r border-purple-800 text-white">Jenis Ternak</th>
+                <th className="p-3.5 text-center border-r border-purple-800 text-white">Jumlah</th>
+                <th className="p-3.5 text-center border-r border-purple-800 text-white">Izin Potong</th>
+                <th className="p-3.5 border-r border-purple-800 text-white">Pemeriksaan</th>
+                <th className="p-3.5 text-center border-r border-purple-800 text-white">Kelayakan Daging</th>
+                <th className="p-3.5 text-center border-r border-purple-800 text-white">Bukti</th>
+                <th className="p-3.5 text-center w-28 text-white">Aksi</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-200 dark:divide-slate-800 text-slate-700 dark:text-slate-200 font-medium">

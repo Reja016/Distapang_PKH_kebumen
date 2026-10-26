@@ -813,7 +813,7 @@ export default function MonevKTT() {
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 font-sans selection:bg-emerald-600 selection:text-white pb-20">
       {/* ── TOP HEADER (Tema Hijau Bitpro - Solid Icons) ── */}
-      <header className="border-b border-emerald-100 bg-white/95 backdrop-blur-md sticky top-0 z-30 shadow-xs">
+      <header className="border-b border-emerald-100 dark:border-slate-800 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md sticky top-0 z-30 shadow-xs">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-5 min-h-[80px] sm:min-h-[88px] flex items-center justify-between gap-3">
           <div className="flex items-center gap-3 min-w-0 flex-1">
             <Link
@@ -826,13 +826,13 @@ export default function MonevKTT() {
 
             <div className="min-w-0">
               <div className="flex items-center gap-2 mb-0.5">
-                <Link href="/bitpro" className="text-xs font-semibold text-slate-500 hover:text-emerald-700 transition-colors truncate">
+                <Link href="/bitpro" className="text-xs font-semibold text-slate-500 dark:text-slate-400 hover:text-emerald-700 dark:hover:text-emerald-400 transition-colors truncate">
                   Bitpro
                 </Link>
-                <span className="text-slate-300">/</span>
-                <span className="text-xs font-bold text-emerald-700 whitespace-nowrap">Monev KTT</span>
+                <span className="text-slate-300 dark:text-slate-600">/</span>
+                <span className="text-xs font-bold text-emerald-700 dark:text-emerald-400 whitespace-nowrap">Monev KTT</span>
               </div>
-              <h1 className="text-sm sm:text-xl font-bold text-slate-900 tracking-tight leading-tight line-clamp-2 sm:line-clamp-none">
+              <h1 className="text-sm sm:text-xl font-bold text-slate-900 dark:text-white tracking-tight leading-tight line-clamp-2 sm:line-clamp-none">
                 Monitoring &amp; Evaluasi Kelompok Tani Ternak
               </h1>
             </div>
@@ -856,57 +856,57 @@ export default function MonevKTT() {
       <main className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 pt-4 sm:pt-10 pb-28 sm:pb-12 space-y-6 sm:space-y-8">
         {/* KPI Stat Cards (Solid Icon Styling) */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
-          <div className="p-3.5 sm:p-5 rounded-2xl border border-slate-200 bg-white shadow-sm flex items-center gap-3.5 sm:gap-4">
+          <div className="p-3.5 sm:p-5 rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm flex items-center gap-3.5 sm:gap-4">
             <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl sm:rounded-2xl bg-emerald-600 text-white flex items-center justify-center shrink-0 shadow-xs">
               <Calendar className="w-5 h-5 sm:w-[22px] sm:h-[22px]" strokeWidth={2.5} />
             </div>
             <div className="min-w-0">
-              <p className="text-xs font-sans font-semibold uppercase tracking-wider text-slate-500 mb-0.5 truncate">
+              <p className="text-xs font-sans font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-0.5 truncate">
                 Kelompok Terpantau
               </p>
-              <p className="font-sans text-xl sm:text-2xl lg:text-3xl font-extrabold text-slate-900">
+              <p className="font-sans text-xl sm:text-2xl lg:text-3xl font-extrabold text-slate-900 dark:text-white">
                 {dbLapangan.length} <span className="text-xs font-semibold text-slate-400">KTT</span>
               </p>
             </div>
           </div>
 
-          <div className="p-3.5 sm:p-5 rounded-2xl border border-slate-200 bg-white shadow-sm flex items-center gap-3.5 sm:gap-4">
+          <div className="p-3.5 sm:p-5 rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm flex items-center gap-3.5 sm:gap-4">
             <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl sm:rounded-2xl bg-emerald-600 text-white flex items-center justify-center shrink-0 shadow-xs">
               <Layers className="w-5 h-5 sm:w-[22px] sm:h-[22px]" strokeWidth={2.5} />
             </div>
             <div className="min-w-0">
-              <p className="text-xs font-sans font-semibold uppercase tracking-wider text-slate-500 mb-0.5 truncate">
+              <p className="text-xs font-sans font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-0.5 truncate">
                 Total Aset Ternak
               </p>
-              <p className="font-sans text-xl sm:text-2xl lg:text-3xl font-extrabold text-emerald-700">
+              <p className="font-sans text-xl sm:text-2xl lg:text-3xl font-extrabold text-emerald-700 dark:text-emerald-400">
                 {dbLapangan.reduce((acc, curr) => acc + hitungKondisi(curr.kondisi).i, 0)} <span className="text-xs font-semibold text-slate-400">Ekor</span>
               </p>
             </div>
           </div>
 
-          <div className="p-3.5 sm:p-5 rounded-2xl border border-slate-200 bg-white shadow-sm flex items-center gap-3.5 sm:gap-4">
+          <div className="p-3.5 sm:p-5 rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm flex items-center gap-3.5 sm:gap-4">
             <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl sm:rounded-2xl bg-emerald-600 text-white flex items-center justify-center shrink-0 shadow-xs">
               <MapPin className="w-5 h-5 sm:w-[22px] sm:h-[22px]" strokeWidth={2.5} />
             </div>
             <div className="min-w-0">
-              <p className="text-xs font-sans font-semibold uppercase tracking-wider text-slate-500 mb-0.5 truncate">
+              <p className="text-xs font-sans font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-0.5 truncate">
                 Sebaran Kecamatan
               </p>
-              <p className="font-sans text-xl sm:text-2xl lg:text-3xl font-extrabold text-slate-900">
+              <p className="font-sans text-xl sm:text-2xl lg:text-3xl font-extrabold text-slate-900 dark:text-white">
                 {kecamatanTerpakai.length} <span className="text-xs font-semibold text-slate-400">Wilayah</span>
               </p>
             </div>
           </div>
 
-          <div className="p-3.5 sm:p-5 rounded-2xl border border-slate-200 bg-white shadow-sm flex items-center gap-3.5 sm:gap-4">
+          <div className="p-3.5 sm:p-5 rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm flex items-center gap-3.5 sm:gap-4">
             <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl sm:rounded-2xl bg-emerald-600 text-white flex items-center justify-center shrink-0 shadow-xs">
               <CheckCircle2 className="w-5 h-5 sm:w-[22px] sm:h-[22px]" strokeWidth={2.5} />
             </div>
             <div className="min-w-0">
-              <p className="text-xs font-sans font-semibold uppercase tracking-wider text-slate-500 mb-0.5 truncate">
+              <p className="text-xs font-sans font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-0.5 truncate">
                 Terverifikasi GPS
               </p>
-              <p className="font-sans text-xl sm:text-2xl lg:text-3xl font-extrabold text-emerald-700">
+              <p className="font-sans text-xl sm:text-2xl lg:text-3xl font-extrabold text-emerald-700 dark:text-emerald-400">
                 {dbLapangan.filter((d) => d.lat !== null).length} <span className="text-xs font-semibold text-slate-400">Titik</span>
               </p>
             </div>
@@ -914,7 +914,7 @@ export default function MonevKTT() {
         </div>
 
         {/* ── 3 VIEW TABS: RUMINANSIA (TAB 1), UNGGAS (TAB 2), PETA & LAPORAN (TAB 3) ── */}
-        <div className="flex gap-2 border-b border-slate-200 pb-px overflow-x-auto no-scrollbar scroll-smooth -mx-4 px-4 sm:mx-0 sm:px-0">
+        <div className="flex gap-2 border-b border-slate-200 dark:border-slate-800 pb-px overflow-x-auto no-scrollbar scroll-smooth -mx-4 px-4 sm:mx-0 sm:px-0">
           {[
             ...((canCreate || canEdit)
               ? [
@@ -932,8 +932,8 @@ export default function MonevKTT() {
                 onClick={() => setActiveTab(tab.key as any)}
                 className={`min-h-touch h-11 px-4 sm:px-6 rounded-t-xl text-xs sm:text-sm font-bold flex items-center gap-2 border-t border-x transition-all shrink-0 whitespace-nowrap cursor-pointer ${
                   active
-                    ? 'bg-white border-slate-200 text-emerald-700 border-b-white translate-y-px shadow-xs'
-                    : 'border-transparent text-slate-500 hover:text-slate-900 bg-slate-100/60'
+                    ? 'bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 text-emerald-700 dark:text-emerald-400 border-b-white dark:border-b-slate-900 translate-y-px shadow-xs'
+                    : 'border-transparent text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white bg-slate-100/60 dark:bg-slate-800/40'
                 }`}
               >
                 <Icon size={16} strokeWidth={2.5} />

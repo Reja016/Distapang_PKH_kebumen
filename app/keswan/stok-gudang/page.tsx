@@ -238,7 +238,7 @@ export default function StokGudangKeswanPage() {
   }
 
   return (
-    <div className="min-h-screen bg-slate-50/50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 p-4 sm:p-6 lg:p-8 space-y-6">
+    <div className="min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 pb-16">
       {/* ── TOAST NOTIFIKASI ── */}
       {toast && (
         <div className="fixed bottom-6 right-6 z-50 animate-bounce">
@@ -255,46 +255,63 @@ export default function StokGudangKeswanPage() {
         </div>
       )}
 
-      {/* ── HEADER HALAMAN & BREADCRUMB ── */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white dark:bg-slate-900 p-5 rounded-3xl border border-slate-200/80 dark:border-slate-800 shadow-xs">
-        <div>
-          <h1 className="text-xl sm:text-2xl font-black tracking-tight text-slate-900 dark:text-slate-100 flex items-center gap-2.5">
-            <Boxes className="w-6 h-6 text-blue-600 dark:text-blue-400" />
-            Stok Gudang Obat &amp; Alat Keswan
-          </h1>
-          <p className="text-xs sm:text-sm text-slate-500 mt-0.5">
-            Pengelolaan inventaris farmasi dinas, alokasi droping 8 puskeswan, Berita Acara, dan rekam apotek
-          </p>
-        </div>
-
-        <div className="flex items-center gap-2 shrink-0">
-          <button
-            onClick={loadGudangData}
-            disabled={isLoading}
-            className="flex items-center gap-1.5 px-3.5 py-2 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 font-semibold rounded-xl text-xs transition-all cursor-pointer"
-            title="Refresh Data"
-          >
-            <RefreshCw className={`w-3.5 h-3.5 ${isLoading ? 'animate-spin text-blue-600' : ''}`} />
-            Refresh
-          </button>
-
-          {isAdmin && canCreate && (
-            <button
-              onClick={() => {
-                setEditingBarang(null);
-                setIsModalBarangOpen(true);
-              }}
-              className="flex items-center gap-1.5 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl text-xs shadow-md transition-all cursor-pointer"
+      {/* ── TOP HEADER (Tema Biru Keswan) ── */}
+      <header className="border-b border-blue-100 dark:border-slate-800 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md sticky top-0 z-30 shadow-xs">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 sm:py-5 min-h-[64px] sm:min-h-[88px] flex items-center justify-between gap-3">
+          <div className="flex items-center gap-3 min-w-0 flex-1">
+            <Link
+              href="/keswan"
+              className="min-h-touch min-w-touch w-10 h-10 sm:w-11 sm:h-11 rounded-xl sm:rounded-2xl bg-blue-600 hover:bg-blue-700 text-white flex items-center justify-center transition-all shadow-xs shrink-0"
+              aria-label="Kembali ke Keswan"
             >
-              <Plus className="w-3.5 h-3.5" />
-              Barang
-            </button>
-          )}
-        </div>
-      </div>
+              <ArrowLeft size={18} strokeWidth={2.5} />
+            </Link>
 
-      {/* ── TAB UTAMA (Folder Tab Model Monev KTT) ── */}
-      <div className="flex gap-2 border-b border-slate-200 dark:border-slate-800 pb-px overflow-x-auto no-scrollbar scroll-smooth -mx-4 px-4 sm:mx-0 sm:px-0">
+            <div className="min-w-0">
+              <div className="flex items-center gap-2 mb-0.5">
+                <Link href="/keswan" className="text-xs font-semibold text-slate-500 dark:text-slate-400 hover:text-blue-700 dark:hover:text-blue-400 transition-colors truncate">
+                  Keswan
+                </Link>
+                <span className="text-slate-300 dark:text-slate-600">/</span>
+                <span className="text-xs font-bold text-blue-700 dark:text-blue-400 whitespace-nowrap">Stok Gudang</span>
+              </div>
+              <h1 className="text-base sm:text-xl font-bold text-slate-900 dark:text-white tracking-tight leading-tight truncate">
+                Stok Gudang Obat &amp; Alat Keswan
+              </h1>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-2 shrink-0">
+            <button
+              onClick={loadGudangData}
+              disabled={isLoading}
+              className="min-h-touch min-w-touch h-10 sm:h-11 px-3.5 sm:px-4 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 text-xs sm:text-sm font-semibold flex items-center justify-center gap-1.5 transition-colors shadow-xs cursor-pointer"
+              title="Refresh Data"
+            >
+              <RefreshCw className={`w-3.5 h-3.5 ${isLoading ? 'animate-spin text-blue-600' : ''}`} />
+              <span className="hidden sm:inline">Refresh</span>
+            </button>
+
+            {isAdmin && canCreate && (
+              <button
+                onClick={() => {
+                  setEditingBarang(null);
+                  setIsModalBarangOpen(true);
+                }}
+                className="min-h-touch min-w-touch h-10 sm:h-11 px-4 sm:px-5 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl text-xs sm:text-sm shadow-md transition-all cursor-pointer flex items-center gap-1.5"
+              >
+                <Plus className="w-4 h-4" />
+                <span>Barang</span>
+              </button>
+            )}
+          </div>
+        </div>
+      </header>
+
+      {/* ── MAIN WORKSPACE ── */}
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
+        {/* ── TAB UTAMA (Folder Tab Model Monev KTT) ── */}
+        <div className="flex gap-2 border-b border-slate-200 dark:border-slate-800 pb-px overflow-x-auto no-scrollbar scroll-smooth -mx-4 px-4 sm:mx-0 sm:px-0">
         {[
           ...(isAdmin
             ? [
@@ -388,6 +405,7 @@ export default function StokGudangKeswanPage() {
           onOpenAudit={handleOpenAudit}
         />
       )}
+      </main>
 
       {/* ── MODALS ── */}
       {isModalBarangOpen && (

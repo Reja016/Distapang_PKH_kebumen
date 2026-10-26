@@ -305,8 +305,8 @@ export default function LaporanPenyakitPage() {
 
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 font-sans selection:bg-blue-600 selection:text-white pb-24">
-      {/* ── TOP HEADER ── */}
-      <header className="border-b border-blue-100 bg-white/95 backdrop-blur-md sticky top-0 z-30 shadow-xs print:hidden">
+      {/* ── TOP HEADER (Tema Biru Keswan) ── */}
+      <header className="border-b border-blue-100 dark:border-slate-800 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md sticky top-0 z-30 shadow-xs print:hidden">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 sm:py-5 min-h-[64px] sm:min-h-[88px] flex items-center justify-between gap-3">
           <div className="flex items-center gap-3 min-w-0 flex-1">
             <Link
@@ -319,13 +319,13 @@ export default function LaporanPenyakitPage() {
 
             <div className="min-w-0">
               <div className="flex items-center gap-2 mb-0.5">
-                <Link href="/keswan" className="text-xs font-semibold text-slate-500 hover:text-blue-700 transition-colors truncate">
+                <Link href="/keswan" className="text-xs font-semibold text-slate-500 dark:text-slate-400 hover:text-blue-700 dark:hover:text-blue-400 transition-colors truncate">
                   Kesehatan Hewan (Keswan)
                 </Link>
-                <span className="text-slate-300">/</span>
-                <span className="text-xs font-bold text-blue-700 whitespace-nowrap">Laporan Penyakit</span>
+                <span className="text-slate-300 dark:text-slate-600">/</span>
+                <span className="text-xs font-bold text-blue-700 dark:text-blue-400 whitespace-nowrap">Laporan Penyakit</span>
               </div>
-              <h1 className="text-sm sm:text-xl font-extrabold text-slate-900 tracking-tight leading-tight line-clamp-2 sm:line-clamp-none">
+              <h1 className="text-sm sm:text-xl font-extrabold text-slate-900 dark:text-white tracking-tight leading-tight line-clamp-2 sm:line-clamp-none">
                 Peta &amp; Rekapitulasi Kasus Penyakit Hewan
               </h1>
             </div>
@@ -336,7 +336,7 @@ export default function LaporanPenyakitPage() {
               onClick={() => window.print()}
               title="Cetak / PDF"
               aria-label="Cetak / PDF"
-              className="min-h-touch min-w-touch h-10 w-10 sm:w-auto sm:px-3.5 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 text-xs font-bold flex items-center justify-center sm:gap-1.5 shadow-xs transition-colors cursor-pointer"
+              className="min-h-touch min-w-touch h-10 w-10 sm:w-auto sm:px-3.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 text-xs font-bold flex items-center justify-center sm:gap-1.5 shadow-xs transition-colors cursor-pointer"
             >
               <Printer size={15} />
               <span className="hidden sm:inline">Cetak / PDF</span>
@@ -346,7 +346,7 @@ export default function LaporanPenyakitPage() {
               onClick={handleExportExcel}
               title="Export Excel"
               aria-label="Export Excel"
-              className="min-h-touch min-w-touch h-10 w-10 sm:w-auto sm:px-3.5 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 text-xs font-bold flex items-center justify-center sm:gap-1.5 shadow-xs transition-colors cursor-pointer"
+              className="min-h-touch min-w-touch h-10 w-10 sm:w-auto sm:px-3.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 text-xs font-bold flex items-center justify-center sm:gap-1.5 shadow-xs transition-colors cursor-pointer"
             >
               <Download size={15} />
               <span className="hidden sm:inline">Export Excel</span>
@@ -381,17 +381,17 @@ export default function LaporanPenyakitPage() {
       {/* ── WORKSPACE ── */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 space-y-6">
         {/* Opsi Pilihan Tahun di Tengah */}
-        <div className="flex flex-col sm:flex-row items-center justify-center gap-3 bg-white p-3.5 rounded-2xl border border-blue-200 shadow-xs max-w-xl mx-auto print:hidden">
-          <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl border border-blue-200 bg-blue-50/70">
-            <Calendar className="text-blue-700" size={16} />
-            <span className="text-xs font-bold text-blue-900">Pilih Tahun:</span>
+        <div className="flex flex-col sm:flex-row items-center justify-center gap-3 bg-white dark:bg-slate-900 p-3.5 rounded-2xl border border-blue-200 dark:border-blue-800 shadow-xs max-w-xl mx-auto print:hidden">
+          <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl border border-blue-200 dark:border-blue-800 bg-blue-50/70 dark:bg-blue-950/40">
+            <Calendar className="text-blue-700 dark:text-blue-400" size={16} />
+            <span className="text-xs font-bold text-blue-900 dark:text-blue-300">Pilih Tahun:</span>
             <select
               value={selectedYear}
               onChange={(e) => setSelectedYear(Number(e.target.value))}
-              className="bg-transparent text-xs font-black text-blue-800 focus:outline-none cursor-pointer"
+              className="bg-transparent text-xs font-black text-blue-800 dark:text-blue-300 dark:bg-slate-900 focus:outline-none cursor-pointer"
             >
               {availableYears.map((yr) => (
-                <option key={yr} value={yr}>Tahun {yr}</option>
+                <option key={yr} value={yr} className="dark:bg-slate-900">Tahun {yr}</option>
               ))}
             </select>
           </div>
@@ -413,47 +413,47 @@ export default function LaporanPenyakitPage() {
 
         {/* KPI Metrik Ringkasan */}
         <div className="grid grid-cols-1 sm:grid-cols-4 gap-4 print:hidden">
-          <div className="bg-white p-4.5 rounded-3xl border border-slate-200 shadow-xs flex items-center gap-3.5">
+          <div className="bg-white dark:bg-slate-900 p-4.5 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-xs flex items-center gap-3.5">
             <div className="w-11 h-11 rounded-2xl bg-blue-600 text-white flex items-center justify-center font-bold shadow-xs shrink-0">
               <Activity size={22} />
             </div>
             <div className="min-w-0">
-              <p className="text-[11px] font-bold uppercase tracking-wider text-slate-400 truncate">Total Kasus Penyakit</p>
-              <p className="text-xl font-black text-slate-900">{totalKasus.toLocaleString('id-ID')} <span className="text-xs text-slate-500 font-semibold">Kasus</span></p>
+              <p className="text-[11px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 truncate">Total Kasus Penyakit</p>
+              <p className="text-xl font-black text-slate-900 dark:text-white">{totalKasus.toLocaleString('id-ID')} <span className="text-xs text-slate-500 dark:text-slate-400 font-semibold">Kasus</span></p>
             </div>
           </div>
 
-          <div className="bg-white p-4.5 rounded-3xl border border-slate-200 shadow-xs flex items-center gap-3.5">
+          <div className="bg-white dark:bg-slate-900 p-4.5 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-xs flex items-center gap-3.5">
             <div className="w-11 h-11 rounded-2xl bg-rose-600 text-white flex items-center justify-center font-bold shadow-xs shrink-0">
               <AlertTriangle size={22} />
             </div>
             <div className="min-w-0">
-              <p className="text-[11px] font-bold uppercase tracking-wider text-slate-400 truncate">Diagnosa Tertinggi</p>
-              <p className="text-base font-extrabold text-slate-900 truncate">
-                {topDiagnosa.nama} <span className="text-xs text-rose-600 font-bold">({topDiagnosa.count})</span>
+              <p className="text-[11px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 truncate">Diagnosa Tertinggi</p>
+              <p className="text-base font-extrabold text-slate-900 dark:text-white truncate">
+                {topDiagnosa.nama} <span className="text-xs text-rose-600 dark:text-rose-400 font-bold">({topDiagnosa.count})</span>
               </p>
             </div>
           </div>
 
-          <div className="bg-white p-4.5 rounded-3xl border border-slate-200 shadow-xs flex items-center gap-3.5">
+          <div className="bg-white dark:bg-slate-900 p-4.5 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-xs flex items-center gap-3.5">
             <div className="w-11 h-11 rounded-2xl bg-amber-600 text-white flex items-center justify-center font-bold shadow-xs shrink-0">
               <MapPin size={22} />
             </div>
             <div className="min-w-0">
-              <p className="text-[11px] font-bold uppercase tracking-wider text-slate-400 truncate">Wilayah Kasus Terbanyak</p>
-              <p className="text-base font-extrabold text-slate-900 truncate">
-                Kec. {topKecamatan.nama} <span className="text-xs text-amber-600 font-bold">({topKecamatan.count})</span>
+              <p className="text-[11px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 truncate">Wilayah Kasus Terbanyak</p>
+              <p className="text-base font-extrabold text-slate-900 dark:text-white truncate">
+                Kec. {topKecamatan.nama} <span className="text-xs text-amber-600 dark:text-amber-400 font-bold">({topKecamatan.count})</span>
               </p>
             </div>
           </div>
 
-          <div className="bg-white p-4.5 rounded-3xl border border-slate-200 shadow-xs flex items-center gap-3.5">
+          <div className="bg-white dark:bg-slate-900 p-4.5 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-xs flex items-center gap-3.5">
             <div className="w-11 h-11 rounded-2xl bg-indigo-600 text-white flex items-center justify-center font-bold shadow-xs shrink-0">
               <ShieldCheck size={22} />
             </div>
             <div className="min-w-0">
-              <p className="text-[11px] font-bold uppercase tracking-wider text-slate-400 truncate">Status Hak Akses</p>
-              <p className="text-xs font-black text-slate-900 flex items-center gap-1.5 truncate">
+              <p className="text-[11px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 truncate">Status Hak Akses</p>
+              <p className="text-xs font-black text-slate-900 dark:text-white flex items-center gap-1.5 truncate">
                 <span className={`w-2 h-2 rounded-full ${isAdmin ? 'bg-blue-600' : 'bg-emerald-500'}`} />
                 <span>{isAdmin ? 'Administrator (Full CRUD)' : canEdit ? 'Operator (Bisa Edit)' : 'Pengunjung (View-Only)'}</span>
               </p>

@@ -598,8 +598,8 @@ export default function DataVaksinasiPMKPage() {
         </div>
       )}
 
-      {/* ── TOP HEADER ── */}
-      <header className="border-b border-blue-100 bg-white/95 backdrop-blur-md sticky top-0 z-30 shadow-xs">
+      {/* ── TOP HEADER (Tema Biru Keswan) ── */}
+      <header className="border-b border-blue-100 dark:border-slate-800 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md sticky top-0 z-30 shadow-xs">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 sm:py-5 min-h-[64px] sm:min-h-[88px] flex items-center justify-between gap-3">
           <div className="flex items-center gap-3 min-w-0 flex-1">
             <Link
@@ -612,13 +612,13 @@ export default function DataVaksinasiPMKPage() {
 
             <div className="min-w-0">
               <div className="flex items-center gap-2 mb-0.5">
-                <Link href="/keswan" className="text-xs font-semibold text-slate-500 hover:text-blue-700 transition-colors truncate">
+                <Link href="/keswan" className="text-xs font-semibold text-slate-500 dark:text-slate-400 hover:text-blue-700 dark:hover:text-blue-400 transition-colors truncate">
                   Keswan
                 </Link>
-                <span className="text-slate-300">/</span>
-                <span className="text-xs font-bold text-blue-700 whitespace-nowrap">Data Vaksinasi</span>
+                <span className="text-slate-300 dark:text-slate-600">/</span>
+                <span className="text-xs font-bold text-blue-700 dark:text-blue-400 whitespace-nowrap">Data Vaksinasi</span>
               </div>
-              <h1 className="text-base sm:text-xl font-bold text-slate-900 tracking-tight leading-tight truncate">
+              <h1 className="text-base sm:text-xl font-bold text-slate-900 dark:text-white tracking-tight leading-tight truncate">
                 Rekapitulasi &amp; Pemantauan Vaksinasi PMK
               </h1>
             </div>
@@ -629,7 +629,7 @@ export default function DataVaksinasiPMKPage() {
               onClick={handleExportExcel}
               title="Export Excel"
               aria-label="Export Excel"
-              className="min-h-touch min-w-touch h-11 w-11 sm:w-auto sm:px-5 rounded-xl border border-slate-200 bg-slate-50 hover:bg-slate-100 text-slate-700 text-xs sm:text-sm font-bold flex items-center justify-center sm:gap-2 transition-colors shadow-xs cursor-pointer"
+              className="min-h-touch min-w-touch h-11 w-11 sm:w-auto sm:px-5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 text-xs sm:text-sm font-bold flex items-center justify-center sm:gap-2 transition-colors shadow-xs cursor-pointer"
             >
               <Download size={16} />
               <span className="hidden sm:inline">Export Excel</span>
@@ -650,10 +650,10 @@ export default function DataVaksinasiPMKPage() {
       {/* ── MAIN WORKSPACE ── */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-10 space-y-6">
         {/* Banner Info Inline Edit */}
-        <div className="flex items-center gap-3 p-3.5 bg-blue-50 border border-blue-200 rounded-2xl text-blue-900 text-xs sm:text-sm">
-          <Info size={18} className="text-blue-600 shrink-0" />
+        <div className="flex items-center gap-3 p-3.5 bg-blue-50 dark:bg-blue-950/40 border border-blue-200 dark:border-blue-800 rounded-2xl text-blue-900 dark:text-blue-200 text-xs sm:text-sm">
+          <Info size={18} className="text-blue-600 dark:text-blue-400 shrink-0" />
           <p>
-            <strong>Mode Click-to-Edit Aktif:</strong> Klik langsung pada kotak tanggal harian atau angka target/pengambilan untuk mengubah dosis. Tekan <kbd className="px-1.5 py-0.5 bg-white border border-blue-300 rounded font-mono text-xs font-bold text-blue-700">Enter</kbd> atau klik di luar sel untuk menyimpan otomatis ke database.
+            <strong>Mode Click-to-Edit Aktif:</strong> Klik langsung pada kotak tanggal harian atau angka target/pengambilan untuk mengubah dosis. Tekan <kbd className="px-1.5 py-0.5 bg-white dark:bg-slate-900 border border-blue-300 dark:border-blue-700 rounded font-mono text-xs font-bold text-blue-700 dark:text-blue-300">Enter</kbd> atau klik di luar sel untuk menyimpan otomatis ke database.
           </p>
         </div>
 

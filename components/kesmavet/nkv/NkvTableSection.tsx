@@ -91,23 +91,23 @@ export default function NkvTableSection({
 
         <div className="overflow-x-auto">
           <table className="w-full text-xs text-left border-collapse whitespace-nowrap">
-            <thead className="bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-extrabold uppercase tracking-wider border-b border-slate-300 dark:border-slate-700">
+            <thead className="bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-extrabold uppercase tracking-wider border-b border-slate-200 dark:border-slate-800">
               <tr>
-                <th className="p-3.5 text-center w-12 border-r border-slate-300 dark:border-slate-700">No</th>
-                <th className="p-3.5 border-r border-slate-300 dark:border-slate-700">Nama Usaha</th>
-                <th className="p-3.5 border-r border-slate-300 dark:border-slate-700">Jenis Usaha</th>
-                <th className="p-3.5 border-r border-slate-300 dark:border-slate-700">Proses</th>
-                <th className="p-3.5 border-r border-slate-300 dark:border-slate-700">Pembinaan 1</th>
-                <th className="p-3.5 border-r border-slate-300 dark:border-slate-700">Hasil (1)</th>
-                <th className="p-3.5 border-r border-slate-300 dark:border-slate-700">Pembinaan 2</th>
-                <th className="p-3.5 border-r border-slate-300 dark:border-slate-700">Hasil (2)</th>
-                <th className="p-3.5 border-r border-slate-300 dark:border-slate-700">Pelatihan Higiene Sanitasi</th>
-                <th className="p-3.5 border-r border-slate-300 dark:border-slate-700">Pengeluaran Rekomendasi</th>
-                <th className="p-3.5 border-r border-slate-300 dark:border-slate-700">Keterangan</th>
-                {canEdit && <th className="p-3.5 text-center sticky right-0 bg-slate-100 dark:bg-slate-800 z-10 border-l border-slate-300 dark:border-slate-700">Aksi</th>}
+                <th className="p-3.5 text-center w-12 border-r border-slate-200 dark:border-slate-800">No</th>
+                <th className="p-3.5 border-r border-slate-200 dark:border-slate-800">Nama Usaha</th>
+                <th className="p-3.5 border-r border-slate-200 dark:border-slate-800">Jenis Usaha</th>
+                <th className="p-3.5 border-r border-slate-200 dark:border-slate-800">Proses</th>
+                <th className="p-3.5 border-r border-slate-200 dark:border-slate-800">Pembinaan 1</th>
+                <th className="p-3.5 border-r border-slate-200 dark:border-slate-800">Hasil (1)</th>
+                <th className="p-3.5 border-r border-slate-200 dark:border-slate-800">Pembinaan 2</th>
+                <th className="p-3.5 border-r border-slate-200 dark:border-slate-800">Hasil (2)</th>
+                <th className="p-3.5 border-r border-slate-200 dark:border-slate-800">Pelatihan Higiene Sanitasi</th>
+                <th className="p-3.5 border-r border-slate-200 dark:border-slate-800">Pengeluaran Rekomendasi</th>
+                <th className="p-3.5 border-r border-slate-200 dark:border-slate-800">Keterangan</th>
+                {canEdit && <th className="p-3.5 text-center sticky right-0 bg-slate-100 dark:bg-slate-800 z-10 border-l border-slate-200 dark:border-slate-800">Aksi</th>}
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-300 dark:divide-slate-700 text-slate-800 dark:text-slate-200 font-medium">
+            <tbody className="divide-y divide-slate-200 dark:divide-slate-800 text-slate-800 dark:text-slate-200 font-medium">
               {filteredData.length === 0 ? (
                 <tr>
                   <td colSpan={canEdit ? 12 : 11} className="p-8 text-center text-slate-400 font-medium text-xs">
@@ -123,41 +123,41 @@ export default function NkvTableSection({
                       className={`transition-colors group ${
                         isEven
                           ? 'bg-white dark:bg-slate-900/60 hover:bg-purple-50/40 dark:hover:bg-purple-950/20'
-                          : 'bg-slate-100 dark:bg-slate-800/50 hover:bg-purple-50/60 dark:hover:bg-purple-950/30'
+                          : 'bg-slate-50/60 dark:bg-slate-800/40 hover:bg-purple-50/60 dark:hover:bg-purple-950/30'
                       }`}
                     >
-                      <td className="p-3.5 text-center font-bold text-slate-500 dark:text-slate-400 border-r border-slate-300 dark:border-slate-700">
+                      <td className="p-3.5 text-center font-bold text-slate-500 dark:text-slate-400 border-r border-slate-200 dark:border-slate-800">
                         {index + 1}
                       </td>
-                      <td className="p-3.5 font-bold text-slate-900 dark:text-slate-100 border-r border-slate-300 dark:border-slate-700">
+                      <td className="p-3.5 font-bold text-slate-900 dark:text-slate-100 border-r border-slate-200 dark:border-slate-800">
                         {row.namaUsaha}
                       </td>
-                      <td className="p-3.5 font-semibold text-purple-700 dark:text-purple-400 border-r border-slate-300 dark:border-slate-700">
+                      <td className="p-3.5 font-semibold text-purple-700 dark:text-purple-400 border-r border-slate-200 dark:border-slate-800">
                         {row.jenisUsaha || '-'}
                       </td>
-                      <td className="p-3.5 border-r border-slate-300 dark:border-slate-700">
-                        <span className="px-2 py-0.5 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-bold text-[11px]">
+                      <td className="p-3.5 border-r border-slate-200 dark:border-slate-800">
+                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-bold text-[10px] sm:text-xs border border-slate-200 dark:border-slate-700">
                           {row.proses || '-'}
                         </span>
                       </td>
-                      <td className="p-3.5 border-r border-slate-300 dark:border-slate-700 text-slate-600 dark:text-slate-400">
+                      <td className="p-3.5 border-r border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400">
                         {row.pembinaan1 || '-'}
                       </td>
-                      <td className="p-3.5 border-r border-slate-300 dark:border-slate-700 text-slate-700 dark:text-slate-300 max-w-[200px] truncate" title={row.hasil1}>
+                      <td className="p-3.5 border-r border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 max-w-[200px] truncate" title={row.hasil1}>
                         {row.hasil1 || '-'}
                       </td>
-                      <td className="p-3.5 border-r border-slate-300 dark:border-slate-700 text-slate-600 dark:text-slate-400">
+                      <td className="p-3.5 border-r border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400">
                         {row.pembinaan2 || '-'}
                       </td>
-                      <td className="p-3.5 border-r border-slate-300 dark:border-slate-700 text-slate-700 dark:text-slate-300 max-w-[200px] truncate" title={row.hasil2}>
+                      <td className="p-3.5 border-r border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 max-w-[200px] truncate" title={row.hasil2}>
                         {row.hasil2 || '-'}
                       </td>
-                      <td className="p-3.5 border-r border-slate-300 dark:border-slate-700 font-semibold text-slate-800 dark:text-slate-200">
+                      <td className="p-3.5 border-r border-slate-200 dark:border-slate-800 font-semibold text-slate-800 dark:text-slate-200">
                         {row.pelatihanHigiene || '-'}
                       </td>
-                      <td className="p-3.5 border-r border-slate-300 dark:border-slate-700">
+                      <td className="p-3.5 border-r border-slate-200 dark:border-slate-800">
                         <span
-                          className={`px-2.5 py-1 rounded-full text-[11px] font-extrabold ${
+                          className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] sm:text-xs font-extrabold ${
                             row.pengeluaranRekomendasi.toLowerCase().includes('diterbitkan')
                               ? 'bg-emerald-50 dark:bg-emerald-950/40 text-emerald-800 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800'
                               : 'bg-amber-50 dark:bg-amber-950/40 text-amber-800 dark:text-amber-300 border border-amber-200 dark:border-amber-800'
@@ -166,27 +166,27 @@ export default function NkvTableSection({
                           {row.pengeluaranRekomendasi || '-'}
                         </span>
                       </td>
-                      <td className="p-3.5 border-r border-slate-300 dark:border-slate-700 text-slate-500 dark:text-slate-400 max-w-[220px] truncate" title={row.keterangan}>
+                      <td className="p-3.5 border-r border-slate-200 dark:border-slate-800 text-slate-500 dark:text-slate-400 max-w-[220px] truncate" title={row.keterangan}>
                         {row.keterangan || '-'}
                       </td>
                       {canEdit && (
-                        <td className={`p-3.5 text-center sticky right-0 z-10 border-l border-slate-300 dark:border-slate-700 ${
+                        <td className={`p-3.5 text-center sticky right-0 z-10 border-l border-slate-200 dark:border-slate-800 ${
                           isEven
                             ? 'bg-white dark:bg-slate-900 group-hover:bg-purple-50/40 dark:group-hover:bg-purple-950/20'
-                            : 'bg-slate-100 dark:bg-slate-800 group-hover:bg-purple-50/60 dark:group-hover:bg-purple-950/30'
+                            : 'bg-slate-50 dark:bg-slate-800 group-hover:bg-purple-50/60 dark:group-hover:bg-purple-950/30'
                         }`}>
                         <div className="flex items-center justify-center gap-1.5">
                           <button
                             onClick={() => onEdit(row)}
                             title="Edit Data"
-                            className="w-8 h-8 rounded-lg bg-slate-100 hover:bg-purple-100 hover:text-purple-800 text-slate-600 flex items-center justify-center transition-colors cursor-pointer"
+                            className="w-8 h-8 rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-purple-100 dark:hover:bg-purple-950/40 hover:text-purple-800 dark:hover:text-purple-300 text-slate-600 dark:text-slate-300 flex items-center justify-center transition-colors cursor-pointer"
                           >
                             <Edit2 size={13} strokeWidth={2.5} />
                           </button>
                           <button
                             onClick={() => onDelete(row.id)}
                             title="Hapus Data"
-                            className="w-8 h-8 rounded-lg bg-red-50 hover:bg-red-100 text-red-600 flex items-center justify-center transition-colors cursor-pointer"
+                            className="w-8 h-8 rounded-lg bg-red-50 dark:bg-red-950/40 hover:bg-red-100 dark:hover:bg-red-900/60 text-red-600 dark:text-red-400 flex items-center justify-center transition-colors cursor-pointer"
                           >
                             <Trash2 size={13} strokeWidth={2.5} />
                           </button>

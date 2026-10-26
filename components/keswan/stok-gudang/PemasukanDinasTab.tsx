@@ -158,26 +158,26 @@ export default function PemasukanDinasTab({
       </div>
 
       {/* ── 3. TABEL DATA DROPPING DINAS ── */}
-      <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-300 dark:border-slate-700 shadow-xs overflow-hidden">
+      <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-left text-xs border-collapse">
             <thead>
-              <tr className="bg-slate-100 dark:bg-slate-800/60 text-slate-700 dark:text-slate-300 font-semibold border-b border-slate-300 dark:border-slate-700">
-                <th className="p-3.5 text-center w-12 border-r border-slate-300 dark:border-slate-700">No</th>
-                <th className="p-3.5 border-r border-slate-300 dark:border-slate-700">Periode / Bulan</th>
-                <th className="p-3.5 border-r border-slate-300 dark:border-slate-700">Nama Produk / Obat</th>
-                <th className="p-3.5 border-r border-slate-300 dark:border-slate-700">No. Batch</th>
-                <th className="p-3.5 text-center border-r border-slate-300 dark:border-slate-700">Tgl Expired</th>
-                <th className="p-3.5 border-r border-slate-300 dark:border-slate-700">Sumber Anggaran</th>
-                <th className="p-3.5 text-center border-r border-slate-300 dark:border-slate-700">Kemasan</th>
-                <th className="p-3.5 text-right border-r border-slate-300 dark:border-slate-700">Jumlah Stok</th>
-                <th className="p-3.5 text-right border-r border-slate-300 dark:border-slate-700">Harga Satuan</th>
-                <th className="p-3.5 text-right border-r border-slate-300 dark:border-slate-700">Total Nilai</th>
-                <th className="p-3.5 border-r border-slate-300 dark:border-slate-700">Penyerah &amp; Penerima</th>
+              <tr className="bg-slate-50 dark:bg-slate-800/80 text-slate-700 dark:text-slate-300 font-extrabold uppercase tracking-wider text-[10px] border-b border-slate-200 dark:border-slate-800">
+                <th className="p-3.5 text-center w-12 border-r border-slate-200 dark:border-slate-800">No</th>
+                <th className="p-3.5 border-r border-slate-200 dark:border-slate-800">Periode / Bulan</th>
+                <th className="p-3.5 border-r border-slate-200 dark:border-slate-800">Nama Produk / Obat</th>
+                <th className="p-3.5 border-r border-slate-200 dark:border-slate-800">No. Batch</th>
+                <th className="p-3.5 text-center border-r border-slate-200 dark:border-slate-800">Tgl Expired</th>
+                <th className="p-3.5 border-r border-slate-200 dark:border-slate-800">Sumber Anggaran</th>
+                <th className="p-3.5 text-center border-r border-slate-200 dark:border-slate-800">Kemasan</th>
+                <th className="p-3.5 text-right border-r border-slate-200 dark:border-slate-800">Jumlah Stok</th>
+                <th className="p-3.5 text-right border-r border-slate-200 dark:border-slate-800">Harga Satuan</th>
+                <th className="p-3.5 text-right border-r border-slate-200 dark:border-slate-800">Total Nilai</th>
+                <th className="p-3.5 border-r border-slate-200 dark:border-slate-800">Penyerah &amp; Penerima</th>
                 <th className="p-3.5 text-center w-24">Aksi</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-300 dark:divide-slate-700 text-slate-700 dark:text-slate-200">
+            <tbody className="divide-y divide-slate-100 dark:divide-slate-800 text-slate-700 dark:text-slate-200">
               {filteredList.length === 0 ? (
                 <tr>
                   <td colSpan={12} className="p-8 text-center text-slate-400">
@@ -188,36 +188,36 @@ export default function PemasukanDinasTab({
                 filteredList.map((item, idx) => (
                   <tr
                     key={item.id_dropping_dinas}
-                    className="odd:bg-white even:bg-slate-100 dark:odd:bg-slate-900/60 dark:even:bg-slate-800/50 hover:bg-blue-50/60 dark:hover:bg-slate-800/80 transition-colors"
+                    className="hover:bg-slate-50/80 dark:hover:bg-slate-800/40 transition-colors"
                   >
-                    <td className="p-3.5 text-center font-mono text-slate-500 dark:text-slate-400 border-r border-slate-300 dark:border-slate-700">{idx + 1}</td>
-                    <td className="p-3.5 font-medium whitespace-nowrap border-r border-slate-300 dark:border-slate-700">
+                    <td className="p-3.5 text-center font-mono text-slate-500 dark:text-slate-400 border-r border-slate-200 dark:border-slate-800">{idx + 1}</td>
+                    <td className="p-3.5 font-medium whitespace-nowrap border-r border-slate-200 dark:border-slate-800">
                       {item.bulan} {item.tahun}
                     </td>
-                    <td className="p-3.5 border-r border-slate-300 dark:border-slate-700">
+                    <td className="p-3.5 border-r border-slate-200 dark:border-slate-800">
                       <div className="font-bold text-slate-900 dark:text-slate-100">
                         {item.nama_barang || `Barang #${item.id_barang}`}
                       </div>
                     </td>
-                    <td className="p-3.5 font-mono text-slate-700 dark:text-slate-300 font-semibold border-r border-slate-300 dark:border-slate-700">
+                    <td className="p-3.5 font-mono text-slate-700 dark:text-slate-300 font-semibold border-r border-slate-200 dark:border-slate-800">
                       {item.nomor_batch || '-'}
                     </td>
-                    <td className="p-3.5 text-center whitespace-nowrap border-r border-slate-300 dark:border-slate-700">
+                    <td className="p-3.5 text-center whitespace-nowrap border-r border-slate-200 dark:border-slate-800">
                       {item.tanggal_kadaluarsa ? String(item.tanggal_kadaluarsa).slice(0, 10) : '-'}
                     </td>
-                    <td className="p-3.5 border-r border-slate-300 dark:border-slate-700">
-                      <span className="px-2 py-0.5 rounded-md text-[10px] font-semibold bg-blue-50 dark:bg-blue-950/60 text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-800">
+                    <td className="p-3.5 border-r border-slate-200 dark:border-slate-800">
+                      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-blue-50 dark:bg-blue-950/50 text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-800">
                         {item.sumber_anggaran || 'APBD Kabupaten'}
                       </span>
                     </td>
-                    <td className="p-3.5 text-center border-r border-slate-300 dark:border-slate-700">{item.satuan_kemasan || 'Botol'}</td>
-                    <td className="p-3.5 text-right font-black text-emerald-600 dark:text-emerald-400 text-sm border-r border-slate-300 dark:border-slate-700">
+                    <td className="p-3.5 text-center border-r border-slate-200 dark:border-slate-800">{item.satuan_kemasan || 'Botol'}</td>
+                    <td className="p-3.5 text-right font-black text-emerald-600 dark:text-emerald-400 text-sm border-r border-slate-200 dark:border-slate-800">
                       {Number(item.jumlah || 0).toLocaleString('id-ID')}
                     </td>
-                    <td className="p-3.5 text-right text-slate-500 dark:text-slate-400 whitespace-nowrap border-r border-slate-300 dark:border-slate-700">
+                    <td className="p-3.5 text-right text-slate-500 dark:text-slate-400 whitespace-nowrap border-r border-slate-200 dark:border-slate-800">
                       Rp {Number(item.harga_satuan || 0).toLocaleString('id-ID')}
                     </td>
-                    <td className="p-3.5 text-right font-bold text-slate-800 dark:text-slate-100 whitespace-nowrap border-r border-slate-300 dark:border-slate-700">
+                    <td className="p-3.5 text-right font-bold text-slate-800 dark:text-slate-100 whitespace-nowrap border-r border-slate-200 dark:border-slate-800">
                       Rp {Number(item.harga_total || 0).toLocaleString('id-ID')}
                     </td>
                     <td className="p-3.5 text-[11px] text-slate-500 dark:text-slate-400 border-r border-slate-300 dark:border-slate-700">
