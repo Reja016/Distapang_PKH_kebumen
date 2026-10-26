@@ -614,20 +614,20 @@ export default function UnifiedSKLBPage() {
 
         {/* 2. TABEL CAPAIAN SKLB & DETAIL TERNAK */}
         <section className="space-y-4">
-          <div className="flex items-center justify-between border-b border-slate-200 dark:border-slate-800 pb-3">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-200 dark:border-slate-800 pb-3">
             <div>
               <h3 className="text-base sm:text-lg font-black text-slate-900 dark:text-white">Tabel Capaian &amp; Database SKLB {selectedYear}</h3>
               <p className="text-xs text-slate-500 dark:text-slate-400">Rekapitulasi jadwal lapangan dan daftar ternak layak bibit</p>
             </div>
 
             {/* Sync Buttons */}
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 self-start sm:self-auto w-full sm:w-auto">
               {activeTab === 'rekap' ? (
                 <button
                   onClick={handleSyncRekap}
                   disabled={isSyncingRekap}
                   title="Tarik Data Rekap"
-                  className="h-9 px-4 rounded-xl bg-emerald-700 text-white text-xs font-bold flex items-center gap-1.5 hover:bg-emerald-800 disabled:opacity-50 transition-all shadow-xs cursor-pointer"
+                  className="h-9 px-4 rounded-xl bg-emerald-700 text-white text-xs font-bold flex items-center justify-center gap-1.5 hover:bg-emerald-800 disabled:opacity-50 transition-all shadow-xs cursor-pointer w-full sm:w-auto"
                 >
                   <RefreshCw size={13} className={isSyncingRekap ? 'animate-spin' : ''} />
                   <span>{isSyncingRekap ? 'Menyinkronkan...' : 'Tarik Data Rekap'}</span>
@@ -637,7 +637,7 @@ export default function UnifiedSKLBPage() {
                   onClick={handleSyncDetail}
                   disabled={isSyncingDetail}
                   title="Tarik Data Detail"
-                  className="h-9 px-4 rounded-xl bg-emerald-700 text-white text-xs font-bold flex items-center gap-1.5 hover:bg-emerald-800 disabled:opacity-50 transition-all shadow-xs cursor-pointer"
+                  className="h-9 px-4 rounded-xl bg-emerald-700 text-white text-xs font-bold flex items-center justify-center gap-1.5 hover:bg-emerald-800 disabled:opacity-50 transition-all shadow-xs cursor-pointer w-full sm:w-auto"
                 >
                   <RefreshCw size={13} className={isSyncingDetail ? 'animate-spin' : ''} />
                   <span>{isSyncingDetail ? 'Menyinkronkan Data...' : 'Tarik Data Detail'}</span>

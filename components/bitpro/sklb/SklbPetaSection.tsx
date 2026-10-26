@@ -1,7 +1,7 @@
 'use client';
 
-import React from 'react';
-import { Sparkles, X, MapPin, Edit2, Loader2 } from 'lucide-react';
+import React, { useState, useRef } from 'react';
+import { X, MapPin, Edit2, Loader2, ZoomIn, ZoomOut, RotateCcw } from 'lucide-react';
 import {
   KECAMATAN_ITEMS,
   KEBUMEN_MAP_VIEWBOX,
@@ -42,6 +42,81 @@ export function SklbPetaSection({
   onShowHistory,
   isLoading,
 }: SklbPetaSectionProps) {
+  // Zoom & Pan state
+  const [zoomScale, setZoomScale] = useState<number>(1);
+  const [panOffset, setPanOffset] = useState<{ x: number; y: number }>({ x: 0, y: 0 });
+  const [isDragging, setIsDragging] = useState(false);
+  const dragStartRef = useRef<{ x: number; y: number }>({ x: 0, y: 0 });
+  const panStartRef = useRef<{ x: number; y: number }>({ x: 0, y: 0 });
+  const hasMovedRef = useRef(false);
+
+  const handleZoomIn = () => {
+    setZoomScale((prev) => Math.min(Number((prev + 0.3).toFixed(1)), 2.5));
+  };
+
+  const handleZoomOut = () => {
+    setZoomScale((prev) => {
+      const next = Math.max(Number((prev - 0.3).toFixed(1)), 1);
+      if (next === 1) setPanOffset({ x: 0, y: 0 });
+      return next;
+    });
+  };
+
+  const handleResetZoom = () => {
+    setZoomScale(1);
+    setPanOffset({ x: 0, y: 0 });
+  };
+
+  const handleMouseDown = (e: React.MouseEvent) => {
+    if (zoomScale <= 1) return;
+    setIsDragging(true);
+    hasMovedRef.current = false;
+    dragStartRef.current = { x: e.clientX, y: e.clientY };
+    panStartRef.current = { ...panOffset };
+  };
+
+  const handleMouseMove = (e: React.MouseEvent) => {
+    if (!isDragging) return;
+    const dx = e.clientX - dragStartRef.current.x;
+    const dy = e.clientY - dragStartRef.current.y;
+    if (Math.abs(dx) > 3 || Math.abs(dy) > 3) {
+      hasMovedRef.current = true;
+    }
+    setPanOffset({
+      x: panStartRef.current.x + dx,
+      y: panStartRef.current.y + dy,
+    });
+  };
+
+  const handleMouseUp = () => {
+    setIsDragging(false);
+  };
+
+  const handleTouchStart = (e: React.TouchEvent) => {
+    if (zoomScale <= 1 || e.touches.length !== 1) return;
+    setIsDragging(true);
+    hasMovedRef.current = false;
+    dragStartRef.current = { x: e.touches[0].clientX, y: e.touches[0].clientY };
+    panStartRef.current = { ...panOffset };
+  };
+
+  const handleTouchMove = (e: React.TouchEvent) => {
+    if (!isDragging || e.touches.length !== 1) return;
+    const dx = e.touches[0].clientX - dragStartRef.current.x;
+    const dy = e.touches[0].clientY - dragStartRef.current.y;
+    if (Math.abs(dx) > 3 || Math.abs(dy) > 3) {
+      hasMovedRef.current = true;
+    }
+    setPanOffset({
+      x: panStartRef.current.x + dx,
+      y: panStartRef.current.y + dy,
+    });
+  };
+
+  const handleTouchEnd = () => {
+    setIsDragging(false);
+  };
+
   return (
     <section className="bg-white rounded-3xl border border-slate-200/90 shadow-xs p-5 sm:p-8 space-y-6 relative overflow-hidden">
       {/* Header Judul Peta Rapi */}
@@ -61,145 +136,197 @@ export function SklbPetaSection({
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
         {/* ── AREA PETA INTERAKTIF SVG ── */}
         <div className="lg:col-span-8 xl:col-span-9 bg-slate-50/70 border border-slate-200/90 rounded-3xl p-4 sm:p-6 relative overflow-hidden flex flex-col items-center">
-          {/* Petunjuk & Reset Button */}
-          <div className="w-full flex items-center justify-between text-xs text-slate-500 mb-3">
-            <span className="flex items-center gap-1.5 font-bold text-emerald-800 bg-emerald-50 px-3 py-1 rounded-xl border border-emerald-200">
-              <Sparkles size={14} className="text-emerald-600 shrink-0" />
-              <span>Klik kecamatan di peta untuk melihat rincian &amp; edit data</span>
-            </span>
-
-            {selectedKecamatan && (
+          {/* Reset Fokus Bar (saat kecamatan dipilih) */}
+          {selectedKecamatan && (
+            <div className="w-full flex items-center justify-end text-xs text-slate-500 mb-3">
               <button
                 onClick={() => setSelectedKecamatan(null)}
                 className="px-3 py-1 rounded-xl bg-white border border-slate-200 shadow-xs text-xs font-bold text-slate-700 hover:bg-slate-50 flex items-center gap-1 cursor-pointer"
               >
                 <X size={13} />
-                <span>Reset Fokus</span>
+                <span>Reset Fokus ({selectedKecamatan.nama})</span>
               </button>
-            )}
-          </div>
+            </div>
+          )}
 
-          {/* Peta SVG Kebumen */}
-          <div className="relative w-full aspect-[16/11] min-h-[480px] sm:min-h-[580px] flex items-center justify-center select-none">
-            <svg
-              viewBox={KEBUMEN_MAP_VIEWBOX}
-              className="w-full h-full"
-              style={{ filter: 'drop-shadow(0 4px 10px rgba(0,0,0,0.05))' }}
+          {/* Peta SVG Kebumen dengan Zoom & Pan */}
+          <div
+            className={`relative w-full aspect-[16/11] min-h-[340px] sm:min-h-[540px] flex items-center justify-center select-none overflow-hidden rounded-2xl touch-none ${
+              zoomScale > 1 ? (isDragging ? 'cursor-grabbing' : 'cursor-grab') : ''
+            }`}
+            onMouseDown={handleMouseDown}
+            onMouseMove={handleMouseMove}
+            onMouseUp={handleMouseUp}
+            onMouseLeave={handleMouseUp}
+            onTouchStart={handleTouchStart}
+            onTouchMove={handleTouchMove}
+            onTouchEnd={handleTouchEnd}
+          >
+            <div
+              className="w-full h-full flex items-center justify-center transition-transform duration-100 ease-out"
+              style={{
+                transform: `scale(${zoomScale}) translate(${panOffset.x / zoomScale}px, ${panOffset.y / zoomScale}px)`,
+                transformOrigin: 'center center',
+              }}
             >
-              {/* Background Reset Area */}
-              <rect
-                x="-6000"
-                y="1000"
-                width="35000"
-                height="28000"
-                fill="transparent"
-                onClick={() => setSelectedKecamatan(null)}
-              />
+              <svg
+                viewBox={KEBUMEN_MAP_VIEWBOX}
+                className="w-full h-full pointer-events-auto"
+                style={{ filter: 'drop-shadow(0 4px 10px rgba(0,0,0,0.05))' }}
+              >
+                {/* Background Reset Area */}
+                <rect
+                  x="-6000"
+                  y="1000"
+                  width="35000"
+                  height="28000"
+                  fill="transparent"
+                  onClick={() => {
+                    if (hasMovedRef.current) return;
+                    setSelectedKecamatan(null);
+                  }}
+                />
 
-              {/* 26 Poligon Kecamatan */}
-              {KECAMATAN_ITEMS.map((kec) => {
-                const cleanId = kec.id.toLowerCase().replace('k_', '');
-                const pop = sapiPOKecMap[cleanId] || sapiPOKecMap[kec.id] || 0;
-                const colorInfo = getSapiPOColor(pop);
+                {/* 26 Poligon Kecamatan */}
+                {KECAMATAN_ITEMS.map((kec) => {
+                  const cleanId = kec.id.toLowerCase().replace('k_', '');
+                  const pop = sapiPOKecMap[cleanId] || sapiPOKecMap[kec.id] || 0;
+                  const colorInfo = getSapiPOColor(pop);
 
-                const isSelected = selectedKecamatan?.id === kec.id;
-                const isHovered = hoveredKecamatan?.id === kec.id;
+                  const isSelected = selectedKecamatan?.id === kec.id;
+                  const isHovered = hoveredKecamatan?.id === kec.id;
 
-                const commonProps = {
-                  fill: colorInfo.fill,
-                  stroke: isSelected ? '#451A03' : isHovered ? '#78350F' : '#FFFFFF',
-                  strokeWidth: isSelected ? 90 : isHovered ? 60 : 35,
-                  strokeLinejoin: 'round' as const,
-                  strokeLinecap: 'round' as const,
-                  className: 'cursor-pointer transition-all duration-150 opacity-95 hover:opacity-100',
-                  onMouseEnter: () => setHoveredKecamatan(kec),
-                  onMouseLeave: () => setHoveredKecamatan(null),
-                  onClick: (e: React.MouseEvent) => {
-                    e.stopPropagation();
-                    setSelectedKecamatan(kec);
-                  },
-                };
-
-                if (kec.tagName === 'polygon' && kec.points) {
-                  return <polygon key={kec.id} points={kec.points} {...commonProps} />;
-                } else if (kec.d) {
-                  return <path key={kec.id} d={kec.d} {...commonProps} />;
-                }
-                return null;
-              })}
-
-              {/* Label Nama Kecamatan & Angka Populasi */}
-              {KECAMATAN_ITEMS.map((kec) => {
-                const cleanId = kec.id.toLowerCase().replace('k_', '');
-                const pop = sapiPOKecMap[cleanId] || sapiPOKecMap[kec.id] || 0;
-                const colorInfo = getSapiPOColor(pop);
-
-                return (
-                  <g
-                    key={`label-${kec.id}`}
-                    transform={`translate(${kec.centerX}, ${kec.centerY})`}
-                    className="cursor-pointer pointer-events-auto"
-                    onClick={(e) => {
+                  const commonProps = {
+                    fill: colorInfo.fill,
+                    stroke: isSelected ? '#451A03' : isHovered ? '#78350F' : '#FFFFFF',
+                    strokeWidth: isSelected ? 90 : isHovered ? 60 : 35,
+                    strokeLinejoin: 'round' as const,
+                    strokeLinecap: 'round' as const,
+                    className: 'cursor-pointer transition-all duration-150 opacity-95 hover:opacity-100',
+                    onMouseEnter: () => setHoveredKecamatan(kec),
+                    onMouseLeave: () => setHoveredKecamatan(null),
+                    onClick: (e: React.MouseEvent) => {
+                      if (hasMovedRef.current) return;
                       e.stopPropagation();
                       setSelectedKecamatan(kec);
-                    }}
-                    onMouseEnter={() => setHoveredKecamatan(kec)}
-                    onMouseLeave={() => setHoveredKecamatan(null)}
-                  >
-                    <text
-                      x="0"
-                      y="-160"
-                      textAnchor="middle"
-                      fill={colorInfo.textColor}
-                      fontSize="320"
-                      fontWeight="800"
-                      fontFamily="system-ui, -apple-system, sans-serif"
-                      style={
-                        colorInfo.textColor === '#FFFFFF'
-                          ? { paintOrder: 'stroke', stroke: '#451A03', strokeWidth: '55px' }
-                          : { paintOrder: 'stroke', stroke: '#FFFFFF', strokeWidth: '40px' }
-                      }
-                    >
-                      {kec.nama}
-                    </text>
+                    },
+                  };
 
-                    <text
-                      x="0"
-                      y="180"
-                      textAnchor="middle"
-                      fill={colorInfo.textColor}
-                      fontSize="440"
-                      fontWeight="900"
-                      fontFamily="system-ui, -apple-system, sans-serif"
-                      style={
-                        colorInfo.textColor === '#FFFFFF'
-                          ? { paintOrder: 'stroke', stroke: '#451A03', strokeWidth: '65px' }
-                          : { paintOrder: 'stroke', stroke: '#FFFFFF', strokeWidth: '50px' }
-                      }
-                    >
-                      {pop.toLocaleString('id-ID')}
-                    </text>
+                  if (kec.tagName === 'polygon' && kec.points) {
+                    return <polygon key={kec.id} points={kec.points} {...commonProps} />;
+                  } else if (kec.d) {
+                    return <path key={kec.id} d={kec.d} {...commonProps} />;
+                  }
+                  return null;
+                })}
 
-                    <text
-                      x="0"
-                      y="420"
-                      textAnchor="middle"
-                      fill={colorInfo.textColor}
-                      fontSize="240"
-                      fontWeight="700"
-                      fontFamily="system-ui, -apple-system, sans-serif"
-                      style={
-                        colorInfo.textColor === '#FFFFFF'
-                          ? { paintOrder: 'stroke', stroke: '#451A03', strokeWidth: '45px' }
-                          : { paintOrder: 'stroke', stroke: '#FFFFFF', strokeWidth: '35px' }
-                      }
+                {/* Label Nama Kecamatan & Angka Populasi */}
+                {KECAMATAN_ITEMS.map((kec) => {
+                  const cleanId = kec.id.toLowerCase().replace('k_', '');
+                  const pop = sapiPOKecMap[cleanId] || sapiPOKecMap[kec.id] || 0;
+                  const colorInfo = getSapiPOColor(pop);
+
+                  return (
+                    <g
+                      key={`label-${kec.id}`}
+                      transform={`translate(${kec.centerX}, ${kec.centerY})`}
+                      className="cursor-pointer pointer-events-auto"
+                      onClick={(e) => {
+                        if (hasMovedRef.current) return;
+                        e.stopPropagation();
+                        setSelectedKecamatan(kec);
+                      }}
+                      onMouseEnter={() => setHoveredKecamatan(kec)}
+                      onMouseLeave={() => setHoveredKecamatan(null)}
                     >
-                      ekor
-                    </text>
-                  </g>
-                );
-              })}
-            </svg>
+                      <text
+                        x="0"
+                        y="-160"
+                        textAnchor="middle"
+                        fill={colorInfo.textColor}
+                        fontSize="320"
+                        fontWeight="800"
+                        fontFamily="system-ui, -apple-system, sans-serif"
+                        style={
+                          colorInfo.textColor === '#FFFFFF'
+                            ? { paintOrder: 'stroke', stroke: '#451A03', strokeWidth: '55px' }
+                            : { paintOrder: 'stroke', stroke: '#FFFFFF', strokeWidth: '40px' }
+                        }
+                      >
+                        {kec.nama}
+                      </text>
+
+                      <text
+                        x="0"
+                        y="180"
+                        textAnchor="middle"
+                        fill={colorInfo.textColor}
+                        fontSize="440"
+                        fontWeight="900"
+                        fontFamily="system-ui, -apple-system, sans-serif"
+                        style={
+                          colorInfo.textColor === '#FFFFFF'
+                            ? { paintOrder: 'stroke', stroke: '#451A03', strokeWidth: '65px' }
+                            : { paintOrder: 'stroke', stroke: '#FFFFFF', strokeWidth: '50px' }
+                        }
+                      >
+                        {pop.toLocaleString('id-ID')}
+                      </text>
+
+                      <text
+                        x="0"
+                        y="420"
+                        textAnchor="middle"
+                        fill={colorInfo.textColor}
+                        fontSize="240"
+                        fontWeight="700"
+                        fontFamily="system-ui, -apple-system, sans-serif"
+                        style={
+                          colorInfo.textColor === '#FFFFFF'
+                            ? { paintOrder: 'stroke', stroke: '#451A03', strokeWidth: '45px' }
+                            : { paintOrder: 'stroke', stroke: '#FFFFFF', strokeWidth: '35px' }
+                        }
+                      >
+                        ekor
+                      </text>
+                    </g>
+                  );
+                })}
+              </svg>
+            </div>
+
+            {/* Floating Zoom & Reset Controls */}
+            <div className="absolute bottom-3 right-3 sm:bottom-4 sm:right-4 z-10 flex items-center gap-1.5 bg-white/95 backdrop-blur-md p-1.5 rounded-2xl border border-slate-200/90 shadow-md">
+              <button
+                type="button"
+                onClick={handleZoomIn}
+                disabled={zoomScale >= 2.5}
+                title="Perbesar Peta"
+                className="w-8 h-8 rounded-xl bg-slate-100 hover:bg-slate-200 active:scale-95 disabled:opacity-40 flex items-center justify-center text-slate-700 transition-all cursor-pointer"
+              >
+                <ZoomIn size={16} />
+              </button>
+              <button
+                type="button"
+                onClick={handleZoomOut}
+                disabled={zoomScale <= 1}
+                title="Perkecil Peta"
+                className="w-8 h-8 rounded-xl bg-slate-100 hover:bg-slate-200 active:scale-95 disabled:opacity-40 flex items-center justify-center text-slate-700 transition-all cursor-pointer"
+              >
+                <ZoomOut size={16} />
+              </button>
+              {zoomScale > 1 && (
+                <button
+                  type="button"
+                  onClick={handleResetZoom}
+                  title="Kembalikan Ukuran Normal"
+                  className="px-2.5 h-8 rounded-xl bg-amber-50 hover:bg-amber-100 active:scale-95 text-amber-800 text-[11px] font-bold flex items-center gap-1 border border-amber-200/80 transition-all cursor-pointer"
+                >
+                  <RotateCcw size={13} />
+                  <span>{Math.round(zoomScale * 100)}%</span>
+                </button>
+              )}
+            </div>
           </div>
 
           {/* Detail Box Saat Kecamatan Dipilih */}

@@ -289,9 +289,6 @@ export function SapiTimePkbTab({
       <div className="bg-gradient-to-r from-emerald-800 via-teal-800 to-emerald-900 text-white p-6 sm:p-7 rounded-3xl shadow-sm flex flex-col md:flex-row items-start md:items-center justify-between gap-5">
         <div>
           <div className="flex items-center gap-2 mb-1.5 flex-wrap">
-            <span className="px-2.5 py-0.5 rounded-full bg-white/20 text-white text-[10px] font-bold uppercase tracking-wider backdrop-blur-sm">
-              Role: Petugas PKB &amp; Administrator
-            </span>
             <span className="text-xs text-emerald-200/90 font-semibold">
               Pemeriksaan Kebuntingan Ternak
             </span>
@@ -329,67 +326,75 @@ export function SapiTimePkbTab({
       </div>
 
       {/* ── KARTU STATISTIK KPI PKB ── */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
-        <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-4 sm:p-5 shadow-2xs">
-          <div className="flex items-center justify-between">
-            <span className="text-slate-400 text-[10px] sm:text-xs font-bold uppercase tracking-wider">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-4">
+        <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl sm:rounded-3xl p-3 sm:p-5 shadow-2xs flex flex-col justify-between">
+          <div className="flex items-start justify-between gap-1.5">
+            <span className="text-slate-500 dark:text-slate-400 text-[10px] sm:text-xs font-bold uppercase tracking-wider leading-tight">
               Total Akseptor IB
             </span>
-            <div className="w-9 h-9 rounded-xl bg-blue-50 dark:bg-blue-950/60 text-blue-600 flex items-center justify-center">
-              <FileText size={18} />
+            <div className="w-7 h-7 sm:w-9 sm:h-9 rounded-lg sm:rounded-xl bg-blue-50 dark:bg-blue-950/60 text-blue-600 flex items-center justify-center shrink-0">
+              <FileText size={16} />
             </div>
           </div>
-          <p className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white mt-2">
-            {summaryKpi.totalSapiIb}
-          </p>
-          <p className="text-[11px] text-slate-500 mt-0.5">Sapi tercatat disuntik IB</p>
+          <div className="mt-2 sm:mt-3">
+            <p className="text-xl sm:text-3xl font-black text-slate-900 dark:text-white leading-tight">
+              {summaryKpi.totalSapiIb}
+            </p>
+            <p className="text-[10px] sm:text-[11px] text-slate-500 mt-0.5 truncate">Sapi disuntik IB</p>
+          </div>
         </div>
 
-        <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-4 sm:p-5 shadow-2xs">
-          <div className="flex items-center justify-between">
-            <span className="text-amber-600 text-[10px] sm:text-xs font-bold uppercase tracking-wider">
-              Mendekati Waktu PKB
+        <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl sm:rounded-3xl p-3 sm:p-5 shadow-2xs flex flex-col justify-between">
+          <div className="flex items-start justify-between gap-1.5">
+            <span className="text-amber-600 dark:text-amber-400 text-[10px] sm:text-xs font-bold uppercase tracking-wider leading-tight">
+              Mendekati PKB
             </span>
-            <div className="w-9 h-9 rounded-xl bg-amber-50 dark:bg-amber-950/60 text-amber-600 flex items-center justify-center">
-              <Clock size={18} />
+            <div className="w-7 h-7 sm:w-9 sm:h-9 rounded-lg sm:rounded-xl bg-amber-50 dark:bg-amber-950/60 text-amber-600 dark:text-amber-400 flex items-center justify-center shrink-0">
+              <Clock size={16} />
             </div>
           </div>
-          <p className="text-2xl sm:text-3xl font-black text-amber-600 mt-2">
-            {summaryKpi.mendekatiJadwal}
-          </p>
-          <p className="text-[11px] text-amber-600 font-semibold mt-0.5">H-7 s/d H+14 jadwal PKB</p>
+          <div className="mt-2 sm:mt-3">
+            <p className="text-xl sm:text-3xl font-black text-amber-600 dark:text-amber-400 leading-tight">
+              {summaryKpi.mendekatiJadwal}
+            </p>
+            <p className="text-[10px] sm:text-[11px] text-amber-600 dark:text-amber-400 font-semibold mt-0.5 truncate">H-7 s/d H+14 jadwal</p>
+          </div>
         </div>
 
-        <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-4 sm:p-5 shadow-2xs">
-          <div className="flex items-center justify-between">
-            <span className="text-emerald-600 text-[10px] sm:text-xs font-bold uppercase tracking-wider">
+        <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl sm:rounded-3xl p-3 sm:p-5 shadow-2xs flex flex-col justify-between">
+          <div className="flex items-start justify-between gap-1.5">
+            <span className="text-emerald-700 dark:text-emerald-400 text-[10px] sm:text-xs font-bold uppercase tracking-wider leading-tight">
               Sudah di-PKB
             </span>
-            <div className="w-9 h-9 rounded-xl bg-emerald-50 dark:bg-emerald-950/60 text-emerald-600 flex items-center justify-center">
-              <CheckCircle2 size={18} />
+            <div className="w-7 h-7 sm:w-9 sm:h-9 rounded-lg sm:rounded-xl bg-emerald-50 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0">
+              <CheckCircle2 size={16} />
             </div>
           </div>
-          <p className="text-2xl sm:text-3xl font-black text-emerald-700 dark:text-emerald-400 mt-2">
-            {summaryKpi.sudahPkb}
-          </p>
-          <p className="text-[11px] text-emerald-600 font-semibold mt-0.5">
-            {summaryKpi.buntingCount} ekor positif bunting
-          </p>
+          <div className="mt-2 sm:mt-3">
+            <p className="text-xl sm:text-3xl font-black text-emerald-700 dark:text-emerald-400 leading-tight">
+              {summaryKpi.sudahPkb}
+            </p>
+            <p className="text-[10px] sm:text-[11px] text-emerald-600 dark:text-emerald-400 font-semibold mt-0.5 truncate">
+              {summaryKpi.buntingCount} positif bunting
+            </p>
+          </div>
         </div>
 
-        <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-4 sm:p-5 shadow-2xs">
-          <div className="flex items-center justify-between">
-            <span className="text-rose-600 text-[10px] sm:text-xs font-bold uppercase tracking-wider">
-              Lewat Jadwal Belum PKB
+        <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl sm:rounded-3xl p-3 sm:p-5 shadow-2xs flex flex-col justify-between">
+          <div className="flex items-start justify-between gap-1.5">
+            <span className="text-rose-700 dark:text-rose-400 text-[10px] sm:text-xs font-bold uppercase tracking-wider leading-tight">
+              Lewat Jadwal
             </span>
-            <div className="w-9 h-9 rounded-xl bg-rose-50 dark:bg-rose-950/60 text-rose-600 flex items-center justify-center">
-              <AlertTriangle size={18} />
+            <div className="w-7 h-7 sm:w-9 sm:h-9 rounded-lg sm:rounded-xl bg-rose-50 dark:bg-rose-950/60 text-rose-600 dark:text-rose-400 flex items-center justify-center shrink-0">
+              <AlertTriangle size={16} />
             </div>
           </div>
-          <p className="text-2xl sm:text-3xl font-black text-rose-700 dark:text-rose-400 mt-2">
-            {summaryKpi.lewatJadwal}
-          </p>
-          <p className="text-[11px] text-rose-600 font-semibold mt-0.5">&gt; 14 hari belum diperiksa</p>
+          <div className="mt-2 sm:mt-3">
+            <p className="text-xl sm:text-3xl font-black text-rose-700 dark:text-rose-400 leading-tight">
+              {summaryKpi.lewatJadwal}
+            </p>
+            <p className="text-[10px] sm:text-[11px] text-rose-600 dark:text-rose-400 font-semibold mt-0.5 truncate">&gt;14 hr blm diperiksa</p>
+          </div>
         </div>
       </div>
 

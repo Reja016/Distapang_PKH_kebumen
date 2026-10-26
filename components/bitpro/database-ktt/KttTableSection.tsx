@@ -215,7 +215,7 @@ export default function KttTableSection({
                         </td>
 
                         {/* 5. KELAS (Mobile & Desktop) */}
-                        <td className="px-2.5 sm:px-3 py-3 text-center whitespace-nowrap border-r border-slate-300 dark:border-slate-700">
+                        <td className="px-1.5 sm:px-3 py-3 text-center border-r border-slate-300 dark:border-slate-700 overflow-hidden">
                           <KelasBadge kelas={row.kelasKelompok} />
                         </td>
 

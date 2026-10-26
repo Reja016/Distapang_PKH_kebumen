@@ -468,9 +468,6 @@ export function SapiTimePetugasTab({
       <div className="bg-gradient-to-r from-emerald-800 via-teal-800 to-emerald-900 text-white p-6 sm:p-7 rounded-3xl shadow-sm flex flex-col md:flex-row items-start md:items-center justify-between gap-5">
         <div>
           <div className="flex items-center gap-2 mb-1.5">
-            <span className="px-2.5 py-0.5 rounded-full bg-white/20 text-white text-[10px] font-bold uppercase tracking-wider backdrop-blur-sm">
-              Khusus Administrator
-            </span>
             <span className="text-xs text-emerald-200/90 font-semibold">Monitoring Capaian Bulanan</span>
           </div>
           <h2 className="text-xl sm:text-2xl font-black tracking-tight flex items-center gap-2.5 text-white">

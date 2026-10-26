@@ -304,7 +304,7 @@ export function MonevSuratPernyataanTab({
   return (
     <div className="space-y-8 animate-in fade-in duration-200">
       {/* ── 1. PILIH KTT SUMBER (DATA MENGIKUT DARI PENDATAAN LAPANGAN) ── */}
-      <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs space-y-4">
+      <div className="bg-white p-5 rounded-2xl border border-slate-300 shadow-xs space-y-4">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
           <div>
             <h3 className="font-bold text-sm text-slate-900 flex items-center gap-2">
@@ -342,7 +342,7 @@ export function MonevSuratPernyataanTab({
       </div>
 
       {/* ── 2. FORMULIR SURAT PERNYATAAN (SEPERTI LEMBAR SURAT RESMI) ── */}
-      <div className="bg-white p-6 sm:p-8 rounded-2xl border border-slate-200 shadow-xs space-y-6">
+      <div className="bg-white p-6 sm:p-8 rounded-2xl border border-slate-300 shadow-xs space-y-6">
         <div className="flex flex-wrap items-center justify-between gap-3 pb-4 border-b border-slate-200">
           <div>
             <h3 className="font-bold text-base sm:text-lg text-slate-900 flex items-center gap-2">

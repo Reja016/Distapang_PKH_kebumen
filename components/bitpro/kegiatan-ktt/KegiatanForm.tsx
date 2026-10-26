@@ -71,26 +71,29 @@ export function KegiatanForm({
   if (!(canCreate ?? canEdit)) return null;
 
   return (
-    <section id="form-catat-kegiatan" className="bg-white rounded-3xl border border-slate-200 shadow-sm p-6 sm:p-8 space-y-6">
-      <div className="flex items-center justify-between pb-4 border-b border-slate-100">
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-2xl bg-emerald-600 text-white flex items-center justify-center font-bold shadow-xs">
-            <Plus size={20} strokeWidth={2.5} />
+    <section id="form-catat-kegiatan" className="bg-white rounded-3xl border border-slate-300 shadow-sm p-4 sm:p-7 space-y-5 sm:space-y-6">
+      <div className="flex items-center justify-between pb-3.5 border-b border-slate-200">
+        <div className="flex items-center gap-2.5 sm:gap-3 min-w-0">
+          <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl sm:rounded-2xl bg-emerald-600 text-white flex items-center justify-center font-bold shadow-xs shrink-0">
+            <Plus size={18} strokeWidth={2.5} className="sm:hidden" />
+            <Plus size={20} strokeWidth={2.5} className="hidden sm:block" />
           </div>
-          <div>
-            <h3 className="font-extrabold text-slate-900 text-base sm:text-lg flex items-center gap-2">
+          <div className="min-w-0">
+            <h3 className="font-extrabold text-slate-900 text-sm sm:text-lg flex items-center gap-2 truncate leading-snug">
               {editingId ? (
                 <>
-                  <Edit2 size={18} className="text-emerald-700" />
-                  <span>Edit Catatan Kegiatan Lapangan</span>
+                  <Edit2 size={16} className="text-emerald-700 shrink-0" />
+                  <span className="truncate">Edit Catatan Kegiatan</span>
                 </>
               ) : (
-                <span>Catat Kegiatan / Pembinaan KTT Baru</span>
+                <span className="truncate">Catat Kegiatan Baru</span>
               )}
             </h3>
-            <p className="text-xs text-slate-500">
-              {editingId ? `Sedang mengubah data ID: ${editingId}` : 'Formulir pencatatan langsung aktivitas pendampingan kelompok tani ternak'}
-            </p>
+            {editingId && (
+              <p className="text-[11px] sm:text-xs text-slate-500 truncate">
+                Sedang mengubah data ID: {editingId}
+              </p>
+            )}
           </div>
         </div>
 
@@ -98,9 +101,9 @@ export function KegiatanForm({
           <button
             type="button"
             onClick={resetForm}
-            className="text-xs font-bold px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 transition-colors cursor-pointer"
+            className="text-xs font-bold px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 transition-colors cursor-pointer shrink-0"
           >
-            ✕ Batalkan Edit
+            ✕ Batal
           </button>
         )}
       </div>

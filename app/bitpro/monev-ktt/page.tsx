@@ -856,7 +856,7 @@ export default function MonevKTT() {
       <main className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 pt-4 sm:pt-10 pb-28 sm:pb-12 space-y-6 sm:space-y-8">
         {/* KPI Stat Cards (Solid Icon Styling) */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
-          <div className="p-3.5 sm:p-5 rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm flex items-center gap-3.5 sm:gap-4">
+          <div className="p-3.5 sm:p-5 rounded-2xl border border-slate-300 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm flex items-center gap-3.5 sm:gap-4">
             <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl sm:rounded-2xl bg-emerald-600 text-white flex items-center justify-center shrink-0 shadow-xs">
               <Calendar className="w-5 h-5 sm:w-[22px] sm:h-[22px]" strokeWidth={2.5} />
             </div>
@@ -870,7 +870,7 @@ export default function MonevKTT() {
             </div>
           </div>
 
-          <div className="p-3.5 sm:p-5 rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm flex items-center gap-3.5 sm:gap-4">
+          <div className="p-3.5 sm:p-5 rounded-2xl border border-slate-300 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm flex items-center gap-3.5 sm:gap-4">
             <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl sm:rounded-2xl bg-emerald-600 text-white flex items-center justify-center shrink-0 shadow-xs">
               <Layers className="w-5 h-5 sm:w-[22px] sm:h-[22px]" strokeWidth={2.5} />
             </div>
@@ -884,7 +884,7 @@ export default function MonevKTT() {
             </div>
           </div>
 
-          <div className="p-3.5 sm:p-5 rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm flex items-center gap-3.5 sm:gap-4">
+          <div className="p-3.5 sm:p-5 rounded-2xl border border-slate-300 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm flex items-center gap-3.5 sm:gap-4">
             <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl sm:rounded-2xl bg-emerald-600 text-white flex items-center justify-center shrink-0 shadow-xs">
               <MapPin className="w-5 h-5 sm:w-[22px] sm:h-[22px]" strokeWidth={2.5} />
             </div>
@@ -898,7 +898,7 @@ export default function MonevKTT() {
             </div>
           </div>
 
-          <div className="p-3.5 sm:p-5 rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm flex items-center gap-3.5 sm:gap-4">
+          <div className="p-3.5 sm:p-5 rounded-2xl border border-slate-300 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm flex items-center gap-3.5 sm:gap-4">
             <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl sm:rounded-2xl bg-emerald-600 text-white flex items-center justify-center shrink-0 shadow-xs">
               <CheckCircle2 className="w-5 h-5 sm:w-[22px] sm:h-[22px]" strokeWidth={2.5} />
             </div>
@@ -914,7 +914,7 @@ export default function MonevKTT() {
         </div>
 
         {/* ── 3 VIEW TABS: RUMINANSIA (TAB 1), UNGGAS (TAB 2), PETA & LAPORAN (TAB 3) ── */}
-        <div className="flex gap-2 border-b border-slate-200 dark:border-slate-800 pb-px overflow-x-auto no-scrollbar scroll-smooth -mx-4 px-4 sm:mx-0 sm:px-0">
+        <div className="flex gap-2 border-b border-slate-300 dark:border-slate-800 pb-px overflow-x-auto no-scrollbar scroll-smooth -mx-4 px-4 sm:mx-0 sm:px-0">
           {[
             ...((canCreate || canEdit)
               ? [
@@ -932,7 +932,7 @@ export default function MonevKTT() {
                 onClick={() => setActiveTab(tab.key as any)}
                 className={`min-h-touch h-11 px-4 sm:px-6 rounded-t-xl text-xs sm:text-sm font-bold flex items-center gap-2 border-t border-x transition-all shrink-0 whitespace-nowrap cursor-pointer ${
                   active
-                    ? 'bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 text-emerald-700 dark:text-emerald-400 border-b-white dark:border-b-slate-900 translate-y-px shadow-xs'
+                    ? 'bg-white dark:bg-slate-900 border-slate-300 dark:border-slate-800 text-emerald-700 dark:text-emerald-400 border-b-white dark:border-b-slate-900 translate-y-px shadow-xs'
                     : 'border-transparent text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white bg-slate-100/60 dark:bg-slate-800/40'
                 }`}
               >

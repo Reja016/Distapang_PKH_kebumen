@@ -47,9 +47,6 @@ export default function VaksinasiBulananTab({
           <h3 className="font-extrabold text-base text-slate-900 dark:text-white">
             Capaian Vaksinasi Per Puskeswan (Akumulasi Bulanan {selectedYear})
           </h3>
-          <p className="text-xs text-slate-600 dark:text-slate-400 font-medium">
-            Target dan realisasi droping vaksin per puskeswan tahun {selectedYear} &bull; Klik kotak Target / Ambil untuk edit langsung
-          </p>
         </div>
         {isAdmin && (canCreate ?? canEdit) && (
           <button
@@ -63,13 +60,13 @@ export default function VaksinasiBulananTab({
 
       </div>
 
-      <div className="rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm overflow-hidden -mx-4 sm:mx-0">
+      <div className="rounded-2xl border border-slate-300 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm overflow-hidden -mx-4 sm:mx-0">
         <div className="overflow-x-auto touch-pan-x">
           <table className="w-full text-xs text-left whitespace-nowrap border-collapse">
             <thead className="bg-slate-50 dark:bg-slate-800/80 text-slate-800 dark:text-slate-200 font-extrabold uppercase tracking-wider border-b border-slate-200 dark:border-slate-800">
               <tr>
-                <th className="p-3 text-center w-12 sticky left-0 bg-slate-100 dark:bg-slate-800 z-10 border-r border-slate-200 dark:border-slate-700 font-bold">NO</th>
-                <th className="p-3 sticky left-12 bg-slate-100 dark:bg-slate-800 z-10 border-r border-slate-200 dark:border-slate-700 shadow-[2px_0_4px_-1px_rgba(0,0,0,0.08)] font-bold text-slate-900 dark:text-white">PUSKESWAN</th>
+                <th className="p-3 text-center w-12 border-r border-slate-200 dark:border-slate-700 font-bold">NO</th>
+                <th className="p-3 border-r border-slate-200 dark:border-slate-700 font-bold text-slate-900 dark:text-white">PUSKESWAN</th>
                 <th className="p-3 text-right font-sans border-r border-slate-200 dark:border-slate-700 min-w-[100px] font-bold">TARGET</th>
                 <th className="p-3 text-right font-sans border-r border-slate-200 dark:border-slate-700 min-w-[100px] font-bold">AMBIL</th>
                 <th className="p-3 text-right font-sans text-emerald-800 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-950/40 font-bold border-r border-slate-200 dark:border-slate-700">REALISASI</th>
@@ -94,14 +91,10 @@ export default function VaksinasiBulananTab({
                       isEven ? 'bg-white dark:bg-slate-900/60 hover:bg-blue-50/40 dark:hover:bg-slate-800/60' : 'bg-slate-50/70 dark:bg-slate-800/40 hover:bg-blue-50/40 dark:hover:bg-slate-800/70'
                     }`}
                   >
-                    <td className={`p-3 text-center font-bold text-slate-600 dark:text-slate-400 sticky left-0 z-10 border-r border-slate-200 dark:border-slate-700 ${
-                      isEven ? 'bg-white dark:bg-slate-900' : 'bg-slate-50 dark:bg-slate-850'
-                    }`}>
+                    <td className="p-3 text-center font-bold text-slate-600 dark:text-slate-400 border-r border-slate-200 dark:border-slate-700">
                       {row.no_urut}
                     </td>
-                    <td className={`p-3 font-bold text-slate-900 dark:text-white sticky left-12 z-10 border-r border-slate-200 dark:border-slate-700 shadow-[2px_0_4px_-1px_rgba(0,0,0,0.08)] ${
-                      isEven ? 'bg-white dark:bg-slate-900' : 'bg-slate-50 dark:bg-slate-850'
-                    }`}>
+                    <td className="p-3 font-bold text-slate-900 dark:text-white border-r border-slate-200 dark:border-slate-700">
                       {row.puskeswan}
                     </td>
 
@@ -210,7 +203,7 @@ export default function VaksinasiBulananTab({
 
               {/* Total Row */}
               <tr className="bg-slate-100 dark:bg-slate-800/90 font-extrabold text-slate-900 dark:text-white border-t border-slate-300 dark:border-slate-700">
-                <td colSpan={2} className="p-3 text-center sticky left-0 bg-slate-100 dark:bg-slate-800 z-10 border-r border-slate-200 dark:border-slate-700">
+                <td colSpan={2} className="p-3 text-center border-r border-slate-200 dark:border-slate-700">
                   JUMLAH TOTAL
                 </td>
                 <td className="p-3 text-right font-sans border-r border-slate-200 dark:border-slate-700">{totalBulanan.target.toLocaleString('id-ID')}</td>

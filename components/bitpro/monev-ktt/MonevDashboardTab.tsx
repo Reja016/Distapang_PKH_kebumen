@@ -40,7 +40,7 @@ export function MonevDashboardTab({
   return (
     <div className="space-y-6 animate-in fade-in duration-200">
       {/* Interactive Leaflet Map dengan Filter Dropdown Kecamatan */}
-      <div className="rounded-2xl border border-slate-200 bg-white shadow-sm overflow-hidden p-4 sm:p-5 space-y-4">
+      <div className="rounded-2xl border border-slate-300 bg-white shadow-sm overflow-hidden p-4 sm:p-5 space-y-4">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <div>
             <h3 className="font-bold text-sm sm:text-base text-slate-900 flex items-center gap-2">
@@ -73,7 +73,7 @@ export function MonevDashboardTab({
           </div>
         </div>
 
-        <div className="w-full h-[420px] rounded-xl overflow-hidden border border-slate-200 bg-slate-100 relative">
+        <div className="w-full h-[420px] rounded-xl overflow-hidden border border-slate-300 bg-slate-100 relative">
           <div id="map-dashboard" className="w-full h-full absolute inset-0 z-0" />
         </div>
       </div>
@@ -87,8 +87,8 @@ export function MonevDashboardTab({
             const totalTernakKec = dataKec.reduce((acc, curr) => acc + hitungKondisi(curr.kondisi).i, 0);
 
             return (
-              <div key={kec} className="rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm overflow-hidden">
-                <div className="bg-slate-50 dark:bg-slate-800/80 p-4 border-b border-slate-200 dark:border-slate-700 flex flex-wrap items-center justify-between gap-2">
+              <div key={kec} className="rounded-2xl border border-slate-300 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm overflow-hidden">
+                <div className="bg-slate-50 dark:bg-slate-800/80 p-4 border-b border-slate-300 dark:border-slate-700 flex flex-wrap items-center justify-between gap-2">
                   <h4 className="font-bold text-slate-900 dark:text-slate-100 text-sm flex items-center gap-2">
                     <MapPin size={16} strokeWidth={2.5} className="text-emerald-600 dark:text-emerald-400" />
                     <span>Kecamatan {kec}</span>

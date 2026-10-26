@@ -343,24 +343,13 @@ export function MonevUnggasTab({
   return (
     <div className="space-y-8 animate-in fade-in duration-200">
       {/* ── 1. FILTER TAHUN BANTUAN & KECAMATAN ── */}
-      <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs space-y-4">
+      <div className="bg-white p-5 rounded-2xl border border-slate-300 shadow-xs space-y-4">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
           <div>
             <h3 className="font-bold text-sm text-slate-900 flex items-center gap-2">
               <Filter size={16} strokeWidth={2.5} className="text-amber-600" />
-              <span>Filter Data Lapangan Unggas (Tahun &amp; Kecamatan)</span>
+              <span>Filter Data Lapangan</span>
             </h3>
-            <p className="text-xs text-slate-500">
-              Saring daftar kelompok penerima hibah unggas berdasarkan tahun bantuan dan kecamatan
-            </p>
-          </div>
-          <div className="flex items-center gap-2">
-            <span className="text-xs font-bold px-3 py-1 rounded-full bg-amber-50 text-amber-800 border border-amber-200">
-              Tahun: {tahunBantuanFilter}
-            </span>
-            <span className="text-xs font-bold px-3 py-1 rounded-full bg-slate-100 text-slate-700 border border-slate-200">
-              {filterKecamatan}
-            </span>
           </div>
         </div>
 
@@ -400,18 +389,12 @@ export function MonevUnggasTab({
       </div>
 
       {/* ── 2. TABEL DAFTAR DATA UNGGAS (REPOSISI KE ATAS FORM) ── */}
-      <div className="bg-white border border-slate-200 rounded-2xl shadow-xs overflow-hidden">
-        <div className="p-4 sm:p-6 border-b border-slate-100 flex flex-wrap items-center justify-between gap-3 bg-white">
+      <div className="bg-white border border-slate-300 rounded-2xl shadow-xs overflow-hidden">
+        <div className="p-4 sm:p-6 border-b border-slate-200 flex flex-wrap items-center justify-between gap-3 bg-white">
           <div>
             <h3 className="font-bold text-base sm:text-lg text-slate-900 flex items-center gap-2">
-              <span>Daftar Data Lapangan Unggas ({tahunBantuanFilter} · {filterKecamatan})</span>
-              <span className="bg-amber-50 text-amber-800 border border-amber-200 text-xs font-bold px-2.5 py-0.5 rounded-full">
-                {dbUnggasTabel.length} Kelompok
-              </span>
+              <span>Daftar Data Lapangan Unggas</span>
             </h3>
-            <p className="text-xs text-slate-500 mt-0.5">
-              Pencatatan evaluasi komoditas ayam KUB, petelur, broiler, dan itik
-            </p>
           </div>
         </div>
 
@@ -580,7 +563,7 @@ export function MonevUnggasTab({
       </div>
 
       {/* ── 3. FORMULIR INPUT MONEV TERNAK HIBAH UNGGAS ── */}
-      <div ref={formSectionRef} className="bg-white p-6 sm:p-8 rounded-2xl border border-slate-200 shadow-xs space-y-6">
+      <div ref={formSectionRef} className="bg-white p-6 sm:p-8 rounded-2xl border border-slate-300 shadow-xs space-y-6">
         <div className="flex items-center justify-between pb-4 border-b border-slate-200">
           <div>
             <h3 className="font-bold text-base sm:text-lg text-slate-900 flex items-center gap-2">
@@ -603,7 +586,7 @@ export function MonevUnggasTab({
 
         <form onSubmit={handleSubmit} className="space-y-6">
           {/* Bagian 1: Informasi Wilayah & Kelompok Unggas */}
-          <div className="p-5 rounded-2xl border border-slate-200 bg-slate-50/70 space-y-4">
+          <div className="p-5 rounded-2xl border border-slate-300 bg-slate-50/70 space-y-4">
             <h4 className="font-sans text-xs font-bold uppercase tracking-wider text-slate-700">
               1. Informasi Kelompok &amp; Komoditas Unggas
             </h4>
@@ -752,7 +735,7 @@ export function MonevUnggasTab({
           </div>
 
           {/* Bagian 2: Kondisi Ternak Unggas (Sesuai Page 2 PDF) */}
-          <div className="p-5 rounded-2xl border border-slate-200 bg-white space-y-4 shadow-2xs">
+          <div className="p-5 rounded-2xl border border-slate-300 bg-white space-y-4 shadow-2xs">
             <h4 className="font-sans text-xs font-bold uppercase tracking-wider text-slate-700">
               2. Kondisi Perkembangan Ternak Unggas (Sesuai Lembar Monev Unggas)
             </h4>
@@ -790,15 +773,17 @@ export function MonevUnggasTab({
             </div>
 
             {/* Perhitungan Populasi Unggas Saat Ini */}
-            <div className="p-4 rounded-xl border border-amber-200 bg-amber-50/60 flex items-center justify-between">
+            <div className="p-4 rounded-2xl border border-amber-300 bg-amber-50/70 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-2xs">
               <div>
                 <span className="text-xs font-bold text-amber-900 block uppercase tracking-wider">
                   4. Populasi Ternak Saat Ini (a - b - c)
                 </span>
                 <span className="text-xs text-slate-600">Terhitung otomatis oleh sistem monev</span>
               </div>
-              <div className="text-right">
-                <span className="font-extrabold text-2xl text-amber-800">{kalkulasiUnggas.populasiSaatIni} Ekor</span>
+              <div className="self-start sm:self-auto">
+                <span className="inline-block font-extrabold text-xl sm:text-2xl text-amber-800 bg-white/90 px-3.5 py-1 rounded-xl border border-amber-200 shadow-2xs">
+                  {kalkulasiUnggas.populasiSaatIni} Ekor
+                </span>
               </div>
             </div>
 
@@ -842,7 +827,7 @@ export function MonevUnggasTab({
           </div>
 
           {/* Bagian 3: GPS (Wajib) & Foto Dokumentasi Unggas */}
-          <div className="p-5 rounded-2xl border border-slate-200 bg-slate-50/70 space-y-4">
+          <div className="p-5 rounded-2xl border border-slate-300 bg-slate-50/70 space-y-4">
             <h4 className="font-sans text-xs font-bold uppercase tracking-wider text-slate-700 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
               <span className="flex items-start sm:items-center gap-1.5">
                 <MapPin size={16} strokeWidth={2.5} className="text-amber-600 shrink-0 mt-0.5 sm:mt-0" />

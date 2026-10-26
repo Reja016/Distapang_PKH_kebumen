@@ -213,92 +213,111 @@ export function SapiTimeHistoryTab({
       <div className="space-y-5">
         {/* Header Kinerja */}
         <div className="bg-gradient-to-r from-emerald-800 to-teal-800 text-white p-6 sm:p-7 rounded-3xl shadow-sm">
-          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-            <div>
-              <div className="flex items-center gap-2">
-                <span className="px-2.5 py-0.5 rounded-full bg-emerald-700/80 text-emerald-100 text-[10px] font-bold uppercase tracking-wider">
-                  Analisis Efektivitas Reproduksi
-                </span>
-              </div>
-              <h2 className="text-xl sm:text-2xl font-black mt-1 tracking-tight text-white">
-                Kinerja Petugas &amp; Riwayat Pelayanan SapiTime
-              </h2>
-              <p className="text-xs sm:text-sm text-emerald-100/90 mt-1 max-w-2xl">
-                Pantau rekam jejak penyuntikan Inseminasi Buatan, tracing siklus kebuntingan per ekor sapi, dan persentase keberhasilan per inseminator.
-              </p>
-            </div>
-            <div className="bg-white/10 backdrop-blur-xs px-4 py-2 rounded-2xl border border-white/20 text-right">
-              <span className="text-[10px] uppercase font-bold text-emerald-200 block">Total Tindakan IB</span>
-              <span className="text-2xl font-black">{summaryDinas.totalIb} <span className="text-xs font-semibold text-emerald-200">Kali</span></span>
-            </div>
+          <div className="max-w-3xl">
+            <h2 className="text-xl sm:text-2xl font-black tracking-tight text-white">
+              Kinerja Petugas &amp; Riwayat Pelayanan SapiTime
+            </h2>
+            <p className="text-xs sm:text-sm text-emerald-100/90 mt-1 max-w-2xl">
+              Pantau rekam jejak penyuntikan Inseminasi Buatan, tracing siklus kebuntingan per ekor sapi, dan persentase keberhasilan per inseminator.
+            </p>
           </div>
         </div>
 
         {/* 5 Kartu KPI Ringkasan Reproduksi (S/C & CR) */}
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3.5">
-          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-4 shadow-2xs">
-            <div className="flex items-center justify-between">
-              <span className="text-slate-400 dark:text-slate-500 text-[10px] font-bold uppercase tracking-wider">Inseminator</span>
-              <div className="w-8 h-8 rounded-xl bg-blue-50 dark:bg-blue-950/60 text-blue-600 dark:text-blue-400 flex items-center justify-center">
-                <User size={16} />
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2.5 sm:gap-3.5">
+          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-3 sm:p-4 shadow-2xs flex flex-col justify-between">
+            <div className="flex items-start justify-between gap-1">
+              <span className="text-slate-500 dark:text-slate-400 text-[10px] sm:text-xs font-bold uppercase tracking-wider leading-tight">
+                Inseminator
+              </span>
+              <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg sm:rounded-xl bg-blue-50 dark:bg-blue-950/60 text-blue-600 dark:text-blue-400 flex items-center justify-center shrink-0">
+                <User size={15} />
               </div>
             </div>
-            <p className="text-2xl font-black text-slate-900 dark:text-slate-100 mt-2">{summaryDinas.totalPetugas}</p>
-            <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">Petugas aktif tercatat</p>
+            <div className="mt-2 sm:mt-2.5">
+              <p className="text-xl sm:text-2xl font-black text-slate-900 dark:text-slate-100 leading-tight">
+                {summaryDinas.totalPetugas}
+              </p>
+              <p className="text-[10px] sm:text-[11px] text-slate-500 dark:text-slate-400 mt-0.5 truncate">Petugas aktif</p>
+            </div>
           </div>
 
-          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-4 shadow-2xs">
-            <div className="flex items-center justify-between">
-              <span className="text-slate-400 dark:text-slate-500 text-[10px] font-bold uppercase tracking-wider">Total Tindakan IB</span>
-              <div className="w-8 h-8 rounded-xl bg-emerald-50 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400 flex items-center justify-center">
-                <Syringe size={16} />
+          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-3 sm:p-4 shadow-2xs flex flex-col justify-between">
+            <div className="flex items-start justify-between gap-1">
+              <span className="text-slate-500 dark:text-slate-400 text-[10px] sm:text-xs font-bold uppercase tracking-wider leading-tight">
+                Total Tindakan
+              </span>
+              <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg sm:rounded-xl bg-emerald-50 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0">
+                <Syringe size={15} />
               </div>
             </div>
-            <p className="text-2xl font-black text-slate-900 dark:text-slate-100 mt-2">{summaryDinas.totalIb}</p>
-            <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">Total suntikan pelayanan</p>
+            <div className="mt-2 sm:mt-2.5">
+              <p className="text-xl sm:text-2xl font-black text-slate-900 dark:text-slate-100 leading-tight">
+                {summaryDinas.totalIb}
+              </p>
+              <p className="text-[10px] sm:text-[11px] text-slate-500 dark:text-slate-400 mt-0.5 truncate">Suntikan IB</p>
+            </div>
           </div>
 
-          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-4 shadow-2xs">
-            <div className="flex items-center justify-between">
-              <span className="text-slate-400 dark:text-slate-500 text-[10px] font-bold uppercase tracking-wider">Jadi (Bunting)</span>
-              <div className="w-8 h-8 rounded-xl bg-emerald-50 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400 flex items-center justify-center">
-                <CheckCircle2 size={16} />
+          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-3 sm:p-4 shadow-2xs flex flex-col justify-between">
+            <div className="flex items-start justify-between gap-1">
+              <span className="text-slate-500 dark:text-slate-400 text-[10px] sm:text-xs font-bold uppercase tracking-wider leading-tight">
+                Jadi (Bunting)
+              </span>
+              <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg sm:rounded-xl bg-emerald-50 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0">
+                <CheckCircle2 size={15} />
               </div>
             </div>
-            <p className="text-2xl font-black text-emerald-700 dark:text-emerald-400 mt-2">{summaryDinas.totalBerhasil}</p>
-            <p className="text-[11px] text-emerald-600 dark:text-emerald-400/90 font-semibold mt-0.5">Konsepsi tercatat</p>
+            <div className="mt-2 sm:mt-2.5">
+              <p className="text-xl sm:text-2xl font-black text-emerald-700 dark:text-emerald-400 leading-tight">
+                {summaryDinas.totalBerhasil}
+              </p>
+              <p className="text-[10px] sm:text-[11px] text-emerald-600 dark:text-emerald-400/90 font-semibold mt-0.5 truncate">Konsepsi tercatat</p>
+            </div>
           </div>
 
-          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-4 shadow-2xs">
-            <div className="flex items-center justify-between">
-              <span className="text-slate-400 dark:text-slate-500 text-[10px] font-bold uppercase tracking-wider">S/C (Service/Conc.)</span>
-              <div className="w-8 h-8 rounded-xl bg-purple-50 dark:bg-purple-950/60 text-purple-700 dark:text-purple-300 flex items-center justify-center font-black text-[11px]">
+          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-3 sm:p-4 shadow-2xs flex flex-col justify-between">
+            <div className="flex items-start justify-between gap-1">
+              <span className="text-slate-500 dark:text-slate-400 text-[10px] sm:text-xs font-bold uppercase tracking-wider leading-tight">
+                S/C Service
+              </span>
+              <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg sm:rounded-xl bg-purple-50 dark:bg-purple-950/60 text-purple-700 dark:text-purple-300 flex items-center justify-center font-black text-[10px] shrink-0">
                 S/C
               </div>
             </div>
-            <div className="flex items-baseline gap-1 mt-2">
-              <p className="text-2xl font-black text-purple-900 dark:text-purple-300">{summaryDinas.scDinas}</p>
-              <span className="text-[10px] font-bold text-purple-600 dark:text-purple-400">x / bunting</span>
+            <div className="mt-2 sm:mt-2.5">
+              <div className="flex items-baseline gap-1">
+                <p className="text-xl sm:text-2xl font-black text-purple-900 dark:text-purple-300 leading-tight">
+                  {summaryDinas.scDinas}
+                </p>
+                <span className="text-[10px] font-bold text-purple-600 dark:text-purple-400">x / bunting</span>
+              </div>
+              <p className="text-[10px] sm:text-[11px] text-slate-500 dark:text-slate-400 mt-0.5 truncate">
+                Ideal: <strong className="text-slate-700 dark:text-slate-200">1.6 – 2.0</strong>
+              </p>
             </div>
-            <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">
-              Ideal: <strong className="text-slate-700 dark:text-slate-200">1.6 – 2.0</strong>
-            </p>
           </div>
 
-          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-4 shadow-2xs col-span-2 sm:col-span-1">
-            <div className="flex items-center justify-between">
-              <span className="text-slate-400 dark:text-slate-500 text-[10px] font-bold uppercase tracking-wider">CR (Conception Rate)</span>
-              <div className="w-8 h-8 rounded-xl bg-teal-50 dark:bg-teal-950/60 text-teal-600 dark:text-teal-400 flex items-center justify-center">
-                <Award size={16} />
+          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-3 sm:p-4 shadow-2xs col-span-2 sm:col-span-1 flex flex-col justify-between">
+            <div className="flex items-start justify-between gap-1">
+              <span className="text-slate-500 dark:text-slate-400 text-[10px] sm:text-xs font-bold uppercase tracking-wider leading-tight">
+                CR Konsepsi
+              </span>
+              <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg sm:rounded-xl bg-teal-50 dark:bg-teal-950/60 text-teal-600 dark:text-teal-400 flex items-center justify-center shrink-0">
+                <Award size={15} />
               </div>
             </div>
-            <div className="flex items-baseline gap-1 mt-2">
-              <p className="text-2xl font-black text-teal-800 dark:text-teal-300">{summaryDinas.crDinas}%</p>
-              <span className="text-[10px] font-bold text-teal-600 dark:text-teal-400">IB ke-1</span>
+            <div className="mt-2 sm:mt-2.5">
+              <div className="flex items-baseline gap-1">
+                <p className="text-xl sm:text-2xl font-black text-teal-800 dark:text-teal-300 leading-tight">
+                  {summaryDinas.crDinas}%
+                </p>
+                <span className="text-[10px] font-bold text-teal-600 dark:text-teal-400">IB ke-1</span>
+              </div>
+              <p className="text-[10px] sm:text-[11px] text-slate-500 dark:text-slate-400 mt-0.5 truncate">
+                Ideal: <strong className="text-slate-700 dark:text-slate-200">60% – 75%</strong>
+              </p>
             </div>
-            <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">
-              Ideal: <strong className="text-slate-700 dark:text-slate-200">60% – 75%</strong>
-            </p>
           </div>
         </div>
 

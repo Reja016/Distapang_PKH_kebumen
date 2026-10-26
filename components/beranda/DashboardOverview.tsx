@@ -209,16 +209,6 @@ export default function DashboardOverview({
                         <p className="text-xs text-slate-500">{module.shortDesc}</p>
                       </div>
                     </div>
-
-                    <span
-                      className={`text-xs font-semibold px-2.5 py-1 rounded-lg border ${
-                        isDark
-                          ? module.color.darkBadge
-                          : module.color.lightBadge
-                      }`}
-                    >
-                      {module.badge}
-                    </span>
                   </div>
 
                   {/* Submenu Pills 1-Klik Langsung */}

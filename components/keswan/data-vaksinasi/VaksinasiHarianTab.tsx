@@ -137,9 +137,6 @@ export default function VaksinasiHarianTab({
             <h3 className="font-extrabold text-sm sm:text-base text-slate-900 dark:text-white">
               Matriks Log Harian — Bulan {BULAN_LONG[activeMonth]} {selectedYear}
             </h3>
-            <p className="text-xs font-medium text-slate-500 dark:text-slate-400">
-              Klik langsung pada kotak sel tanggal untuk mengisi/mengubah dosis vaksinasi (Click-to-Edit)
-            </p>
           </div>
           <span className="px-3.5 py-1 rounded-full bg-blue-600 dark:bg-blue-700 text-white font-bold text-xs shadow-xs">
             {daysInMonth(activeMonth, selectedYear)} Hari Aktif

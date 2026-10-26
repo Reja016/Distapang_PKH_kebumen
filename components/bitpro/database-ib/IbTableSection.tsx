@@ -32,11 +32,8 @@ export default function IbTableSection({
       {/* Header Pencarian */}
       <div className="p-4 sm:p-6 border-b border-slate-100 dark:border-slate-800 flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-white dark:bg-slate-900">
         <div>
-          <h2 className="text-base sm:text-lg font-bold text-slate-900 dark:text-white flex items-center gap-2.5">
-            <span>Pelacakan Siklus Reproduksi Inseminasi Buatan</span>
-            <span className="bg-emerald-50 dark:bg-emerald-950/50 border border-emerald-200 dark:border-emerald-800 text-emerald-700 dark:text-emerald-300 px-2.5 py-0.5 rounded-full text-xs font-bold">
-              {filteredIB.length} Record
-            </span>
+          <h2 className="text-base sm:text-lg font-bold text-slate-900 dark:text-white">
+            Pelacakan Siklus Reproduksi Inseminasi Buatan
           </h2>
           <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
             Monitoring pelaksanaan IB, verifikasi PKB 90 hari, dan estimasi kelahiran
@@ -53,11 +50,6 @@ export default function IbTableSection({
             className="w-full min-h-touch h-11 pl-10 pr-4 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:bg-white dark:focus:bg-slate-900 focus:border-emerald-600 text-xs text-slate-900 dark:text-slate-100 transition-colors"
           />
         </div>
-      </div>
-
-      {/* Mobile Scroll Hint */}
-      <div className="px-4 py-2 bg-slate-50 dark:bg-slate-800/60 border-b border-slate-200 dark:border-slate-800 text-[11px] text-slate-500 dark:text-slate-400 sm:hidden flex items-center justify-between">
-        <span>👉 Geser tabel ke samping untuk melihat kolom lengkap</span>
       </div>
 
       <div className="overflow-x-auto w-full">

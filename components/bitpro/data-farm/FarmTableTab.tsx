@@ -33,7 +33,7 @@ export default function FarmTableTab({
   return (
     <div className="space-y-6 animate-in fade-in duration-200">
       {/* Header Action Bar */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white dark:bg-slate-900 p-5 sm:p-6 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white dark:bg-slate-900 p-4 sm:p-6 rounded-2xl border border-slate-300 dark:border-slate-800 shadow-sm">
         <div className="flex items-center gap-3.5">
           <div className={`w-12 h-12 rounded-2xl flex items-center justify-center border text-2xl ${meta.iconColor} shrink-0`}>
             <span>{meta.emoji}</span>
@@ -48,28 +48,27 @@ export default function FarmTableTab({
           </div>
         </div>
 
-        <div className="flex flex-wrap items-center gap-2.5">
-          <div className="relative min-w-[200px] sm:min-w-[260px]">
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5 w-full md:w-auto">
+          <div className="relative w-full sm:w-64 md:w-72">
             <Search size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 dark:text-slate-500" />
             <input
               type="text"
               placeholder="Cari farm, desa, kecamatan..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full min-h-touch h-10 pl-9 pr-4 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-xs font-medium text-slate-900 dark:text-white focus:outline-none focus:border-emerald-600 focus:bg-white dark:focus:bg-slate-900 transition-all shadow-2xs"
+              className="w-full min-h-touch h-10 pl-9 pr-4 rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-xs font-medium text-slate-900 dark:text-white focus:outline-none focus:border-emerald-600 focus:bg-white dark:focus:bg-slate-900 transition-all shadow-2xs"
             />
           </div>
 
           {(canCreate ?? canEdit) && (
             <button
               onClick={() => openAddModal(activeCommodity)}
-              className="min-h-touch h-10 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold flex items-center gap-1.5 active:scale-95 transition-all shadow-xs shrink-0 cursor-pointer"
+              className="min-h-touch h-10 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold flex items-center justify-center gap-2 active:scale-95 transition-all shadow-xs shrink-0 cursor-pointer"
             >
-              <Plus size={16} />
+              <Plus size={16} strokeWidth={2.5} />
               <span>Tambah Data Farm</span>
             </button>
           )}
-
         </div>
       </div>
 

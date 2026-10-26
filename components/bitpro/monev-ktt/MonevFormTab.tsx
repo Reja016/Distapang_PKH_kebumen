@@ -572,24 +572,13 @@ export function MonevFormTab({
   return (
     <div ref={formSectionRef} className="space-y-8 animate-in fade-in duration-200">
       {/* ── 1. FILTER TAHUN BANTUAN & KECAMATAN (FILTER DATABASE) ── */}
-      <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs space-y-4">
+      <div className="bg-white p-5 rounded-2xl border border-slate-300 shadow-xs space-y-4">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
           <div>
             <h3 className="font-bold text-sm text-slate-900 flex items-center gap-2">
               <Filter size={16} strokeWidth={2.5} className="text-emerald-600" />
-              <span>Filter Data Lapangan (Tahun &amp; Kecamatan)</span>
+              <span>Filter Data Lapangan</span>
             </h3>
-            <p className="text-xs text-slate-500">
-              Saring daftar kelompok tani ternak berdasarkan tahun bantuan dan wilayah kecamatan
-            </p>
-          </div>
-          <div className="flex items-center gap-2">
-            <span className="text-xs font-bold px-3 py-1 rounded-full bg-emerald-50 text-emerald-800 border border-emerald-200">
-              Tahun: {tahunBantuanFilter}
-            </span>
-            <span className="text-xs font-bold px-3 py-1 rounded-full bg-slate-100 text-slate-700 border border-slate-200">
-              {filterKecamatan}
-            </span>
           </div>
         </div>
 
@@ -629,28 +618,22 @@ export function MonevFormTab({
       </div>
 
       {/* ── 2. TABEL DAFTAR DATA LAPANGAN (REPOSISI KE BAWAH FILTER) ── */}
-      <div className="bg-white border border-slate-200 rounded-2xl shadow-xs overflow-hidden">
-        <div className="p-4 sm:p-6 border-b border-slate-100 flex flex-wrap items-center justify-between gap-3 bg-white">
+      <div className="bg-white border border-slate-300 rounded-2xl shadow-xs overflow-hidden">
+        <div className="p-4 sm:p-6 border-b border-slate-200 flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-white">
           <div>
             <h3 className="font-bold text-base sm:text-lg text-slate-900 flex items-center gap-2">
-              <span>Daftar Data Lapangan Ruminansia ({tahunBantuanFilter} · {filterKecamatan})</span>
-              <span className="bg-emerald-50 text-emerald-800 border border-emerald-200 text-xs font-bold px-2.5 py-0.5 rounded-full">
-                {dbLapanganTabel.length} Kelompok
-              </span>
+              <span>Daftar Data Lapangan Ruminansia</span>
             </h3>
-            <p className="text-xs text-slate-500 mt-0.5">
-              Data terekam di sistem monev lapangan Dinas Pertanian dan Pangan
-            </p>
           </div>
 
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 w-full sm:w-auto">
             <button
               type="button"
               onClick={downloadTemplateExcel}
-              className="min-h-touch h-9 px-3 rounded-xl border border-slate-200 bg-slate-50 hover:bg-slate-100 text-slate-700 text-xs font-bold flex items-center gap-1.5 transition-colors cursor-pointer shadow-2xs"
+              className="flex-1 sm:flex-none min-h-touch h-9 px-3.5 rounded-xl border border-slate-300 bg-slate-50 hover:bg-slate-100 text-slate-700 text-xs font-bold flex items-center justify-center gap-1.5 transition-colors cursor-pointer shadow-2xs"
               title="Unduh format template Excel untuk pengisian data massal"
             >
-              <Download size={13} strokeWidth={2.5} className="text-emerald-700" />
+              <Download size={14} strokeWidth={2.5} className="text-emerald-700" />
               <span>Unduh Template</span>
             </button>
 
@@ -667,7 +650,7 @@ export function MonevFormTab({
                   type="button"
                   disabled={isImporting}
                   onClick={() => excelFileInputRef.current?.click()}
-                  className="min-h-touch h-9 px-3.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold flex items-center gap-1.5 transition-colors cursor-pointer shadow-xs disabled:opacity-50"
+                  className="flex-1 sm:flex-none min-h-touch h-9 px-3.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold flex items-center justify-center gap-1.5 transition-colors cursor-pointer shadow-xs disabled:opacity-50"
                   title="Unggah file Excel untuk mengisi data KTT secara otomatis (Khusus Administrator)"
                 >
                   <FileSpreadsheet size={14} strokeWidth={2.5} />
@@ -1651,28 +1634,22 @@ export function MonevFormTab({
       </div>
 
       {/* ── 4. TABEL REKAPITULASI KONDISI TERKINI TERNAK ── */}
-      <div className="bg-white border border-slate-200 rounded-2xl shadow-xs overflow-hidden">
-        <div className="p-4 sm:p-6 border-b border-slate-100 flex flex-wrap items-center justify-between gap-3 bg-white">
+      <div className="bg-white border border-slate-300 rounded-2xl shadow-xs overflow-hidden">
+        <div className="p-4 sm:p-6 border-b border-slate-200 flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-white">
           <div>
             <h3 className="font-bold text-base sm:text-lg text-slate-900 flex items-center gap-2">
               <span>Tabel Rekapitulasi Kondisi Terkini Ternak</span>
-              <span className="bg-emerald-50 text-emerald-800 border border-emerald-200 text-xs font-bold px-2.5 py-0.5 rounded-full">
-                {tahunBantuanFilter} · {filterKecamatan}
-              </span>
-              <span className="bg-slate-100 text-slate-700 border border-slate-200 text-xs font-bold px-2.5 py-0.5 rounded-full">
-                {dbLapanganTabel.length} Kelompok
-              </span>
             </h3>
             <p className="text-xs text-slate-500 mt-0.5">
               Rekapitulasi kondisi terkini ternak mengikuti data monitoring &amp; evaluasi di atas
             </p>
           </div>
 
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 w-full sm:w-auto">
             <button
               type="button"
               onClick={downloadExcelKondisiTerkini}
-              className="min-h-touch h-9 px-3.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold flex items-center gap-1.5 transition-colors cursor-pointer shadow-xs"
+              className="flex-1 sm:flex-none min-h-touch h-9 px-3.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold flex items-center justify-center gap-1.5 transition-colors cursor-pointer shadow-xs"
               title="Unduh Tabel Rekapitulasi Kondisi Terkini Ternak format Excel"
             >
               <Download size={14} strokeWidth={2.5} />
