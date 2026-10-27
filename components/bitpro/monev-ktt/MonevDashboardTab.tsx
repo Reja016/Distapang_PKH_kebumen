@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
 import {
   MapPin,
   CheckCircle2,
@@ -9,14 +9,17 @@ import {
   Edit2,
   Trash2,
   Clock,
+  Filter,
 } from 'lucide-react';
-import { FieldData, hitungKondisi } from './types';
+import { FieldData, hitungKondisi, DAFTAR_PUSKESWAN_BINAAN, getPuskeswanByKecamatan } from './types';
 
 interface MonevDashboardTabProps {
   dbLapangan: FieldData[];
   dbLapanganUntukPeta: FieldData[];
   filterPetaKecamatan: string;
   setFilterPetaKecamatan: (val: string) => void;
+  filterPuskeswan?: string;
+  setFilterPuskeswan?: (val: string) => void;
   kecamatanTerpakai: string[];
   setPreviewPhotoModal: (val: { url: string; title: string } | null) => void;
   canEdit?: boolean;
@@ -30,6 +33,8 @@ export function MonevDashboardTab({
   dbLapanganUntukPeta,
   filterPetaKecamatan,
   setFilterPetaKecamatan,
+  filterPuskeswan,
+  setFilterPuskeswan,
   kecamatanTerpakai,
   setPreviewPhotoModal,
   canEdit,
@@ -37,6 +42,14 @@ export function MonevDashboardTab({
   onDelete,
   onShowHistory,
 }: MonevDashboardTabProps) {
+  const [internalPusk, setInternalPusk] = useState<string>('Semua');
+  const currentPuskeswan = filterPuskeswan ?? internalPusk;
+  const updatePuskeswan = setFilterPuskeswan ?? setInternalPusk;
+
+  const filteredKecamatanList = kecamatanTerpakai.filter((kec) => {
+    if (currentPuskeswan === 'Semua' || currentPuskeswan === 'Semua Wilayah Binaan') return true;
+    return getPuskeswanByKecamatan(kec) === currentPuskeswan;
+  });
   return (
     <div className="space-y-6 animate-in fade-in duration-200">
       {/* Interactive Leaflet Map dengan Filter Dropdown Kecamatan */}
@@ -52,24 +65,45 @@ export function MonevDashboardTab({
             </p>
           </div>
 
-          {/* Dropdown Filter Kecamatan Peta */}
-          <div className="flex items-center gap-2">
-            <span className="text-xs font-bold text-slate-600 whitespace-nowrap">Filter Titik:</span>
-            <select
-              value={filterPetaKecamatan}
-              onChange={(e) => setFilterPetaKecamatan(e.target.value)}
-              className="min-h-touch h-10 px-3 rounded-xl border border-slate-300 bg-slate-50 hover:bg-white focus:bg-white text-xs font-bold text-slate-800 focus:border-emerald-600 outline-none transition-colors cursor-pointer"
-            >
-              <option value="Semua">🗺️ Semua Titik (Seluruh Kecamatan)</option>
-              {kecamatanTerpakai.map((kec) => {
-                const count = dbLapangan.filter((d) => d.kec === kec && d.lat !== null).length;
-                return (
-                  <option key={kec} value={kec}>
-                    📍 Kecamatan {kec} ({count} Titik)
+          {/* Dropdown Filter Wilayah Binaan & Kecamatan Peta */}
+          <div className="flex flex-wrap items-center gap-2">
+            <div className="flex items-center gap-1.5">
+              <span className="text-xs font-bold text-slate-600 whitespace-nowrap">Wilayah:</span>
+              <select
+                value={currentPuskeswan}
+                onChange={(e) => {
+                  updatePuskeswan(e.target.value);
+                  setFilterPetaKecamatan('Semua');
+                }}
+                className="min-h-touch h-10 px-3 rounded-xl border border-slate-300 bg-slate-50 hover:bg-white focus:bg-white text-xs font-bold text-slate-800 focus:border-emerald-600 outline-none transition-colors cursor-pointer"
+              >
+                <option value="Semua">🏥 Semua Wilayah Binaan</option>
+                {DAFTAR_PUSKESWAN_BINAAN.map((p) => (
+                  <option key={p} value={p}>
+                    {p}
                   </option>
-                );
-              })}
-            </select>
+                ))}
+              </select>
+            </div>
+
+            <div className="flex items-center gap-1.5">
+              <span className="text-xs font-bold text-slate-600 whitespace-nowrap">Kecamatan:</span>
+              <select
+                value={filterPetaKecamatan}
+                onChange={(e) => setFilterPetaKecamatan(e.target.value)}
+                className="min-h-touch h-10 px-3 rounded-xl border border-slate-300 bg-slate-50 hover:bg-white focus:bg-white text-xs font-bold text-slate-800 focus:border-emerald-600 outline-none transition-colors cursor-pointer"
+              >
+                <option value="Semua">🗺️ Semua Titik Kecamatan</option>
+                {filteredKecamatanList.map((kec) => {
+                  const count = dbLapangan.filter((d) => d.kec === kec && d.lat !== null).length;
+                  return (
+                    <option key={kec} value={kec}>
+                      📍 Kecamatan {kec} ({count} Titik)
+                    </option>
+                  );
+                })}
+              </select>
+            </div>
           </div>
         </div>
 
@@ -80,7 +114,7 @@ export function MonevDashboardTab({
 
       {/* List Grouped by Kecamatan (Menyesuaikan Filter Dropdown Peta) */}
       <div className="space-y-6">
-        {kecamatanTerpakai
+        {filteredKecamatanList
           .filter((kec) => (filterPetaKecamatan === 'Semua' ? true : kec === filterPetaKecamatan))
           .map((kec) => {
             const dataKec = dbLapangan.filter((d) => d.kec === kec);

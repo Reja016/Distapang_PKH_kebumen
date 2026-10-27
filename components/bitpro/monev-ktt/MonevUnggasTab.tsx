@@ -27,6 +27,8 @@ import {
   KONDISI_KOSONG,
   KONDISI_UNGGAS_KOSONG,
   hitungKondisiUnggas,
+  DAFTAR_PUSKESWAN_BINAAN,
+  getPuskeswanByKecamatan,
 } from './types';
 import { compressImageFile, validatePdfFile } from '@/lib/file-compressor';
 import { cetakLaporanUnggas } from './monev-pdf-printer';
@@ -37,6 +39,8 @@ interface MonevUnggasTabProps {
   tahunBantuanFilter: string;
   onSelectTahunBantuan: (th: string) => void;
   daftarTahunAktif: string[];
+  filterPuskeswan?: string;
+  setFilterPuskeswan?: (val: string) => void;
   dbLapangan: FieldData[];
   canEdit: boolean;
   onSaveUnggas: (data: any) => Promise<void>;
@@ -51,6 +55,8 @@ export function MonevUnggasTab({
   tahunBantuanFilter,
   onSelectTahunBantuan,
   daftarTahunAktif,
+  filterPuskeswan,
+  setFilterPuskeswan,
   dbLapangan,
   canEdit,
   onSaveUnggas,
@@ -60,9 +66,17 @@ export function MonevUnggasTab({
   kttMasterList,
   onShowHistory,
 }: MonevUnggasTabProps) {
-  // ── FILTER KECAMATAN ──
+  // ── FILTER WILAYAH BINAAN & KECAMATAN ──
+  const [internalPuskeswan, setInternalPuskeswan] = useState<string>('Semua Wilayah Binaan');
+  const currentPuskeswan = filterPuskeswan ?? internalPuskeswan;
+  const updatePuskeswan = setFilterPuskeswan ?? setInternalPuskeswan;
+
   const [filterKecamatan, setFilterKecamatan] = useState<string>('Semua Kecamatan');
-  const daftarKecamatan = useMemo(() => Object.keys(DATA_WILAYAH).sort(), []);
+  const daftarKecamatan = useMemo(() => {
+    const all = Object.keys(DATA_WILAYAH).sort();
+    if (currentPuskeswan === 'Semua Wilayah Binaan') return all;
+    return all.filter((kec) => getPuskeswanByKecamatan(kec) === currentPuskeswan);
+  }, [currentPuskeswan]);
 
   // Filter Data Unggas
   const dbUnggasTabel = useMemo(() => {
@@ -70,10 +84,14 @@ export function MonevUnggasTab({
       const isUnggas = d.kategori === 'Unggas' || DAFTAR_JENIS_UNGGAS.some((u) => d.jenis?.toLowerCase().includes(u.toLowerCase()) || (d.jenis || '').toLowerCase().includes('ayam') || (d.jenis || '').toLowerCase().includes('itik') || (d.jenis || '').toLowerCase().includes('unggas'));
       if (!isUnggas) return false;
       if (tahunBantuanFilter !== 'Semua Tahun' && d.tahun !== tahunBantuanFilter) return false;
+      if (currentPuskeswan !== 'Semua Wilayah Binaan') {
+        const puskeswanItem = getPuskeswanByKecamatan(d.kec);
+        if (puskeswanItem !== currentPuskeswan) return false;
+      }
       if (filterKecamatan !== 'Semua Kecamatan' && (d.kec || '').toUpperCase() !== filterKecamatan.toUpperCase()) return false;
       return true;
     });
-  }, [dbLapangan, tahunBantuanFilter, filterKecamatan]);
+  }, [dbLapangan, tahunBantuanFilter, currentPuskeswan, filterKecamatan]);
 
   // Form State Unggas
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -353,7 +371,7 @@ export function MonevUnggasTab({
           </div>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-1">
           <div>
             <label className="block text-xs font-bold text-slate-600 mb-1">Pilih Tahun Bantuan</label>
             <select
@@ -365,6 +383,25 @@ export function MonevUnggasTab({
               {daftarTahunAktif.map((th) => (
                 <option key={th} value={th}>
                   Tahun Bantuan {th}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <div>
+            <label className="block text-xs font-bold text-slate-600 mb-1">Pilih Wilayah Binaan (Puskeswan)</label>
+            <select
+              value={currentPuskeswan}
+              onChange={(e) => {
+                updatePuskeswan(e.target.value);
+                setFilterKecamatan('Semua Kecamatan');
+              }}
+              className="w-full min-h-touch h-10 px-3.5 rounded-xl border border-slate-300 bg-white font-bold text-xs text-slate-800 focus:border-amber-600 focus:ring-2 focus:ring-amber-500/20 outline-none transition-all shadow-2xs cursor-pointer"
+            >
+              <option value="Semua Wilayah Binaan">🏥 Semua Wilayah Binaan</option>
+              {DAFTAR_PUSKESWAN_BINAAN.map((p) => (
+                <option key={p} value={p}>
+                  {p}
                 </option>
               ))}
             </select>
@@ -1017,9 +1054,9 @@ export function MonevUnggasTab({
 
             {/* Grid Tanda Tangan: Desktop Samping Kanan-Kiri, Mobile Atas-Bawah */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="p-3.5 rounded-xl border border-slate-200 bg-white/90 space-y-2.5 shadow-2xs">
+              <div className="p-4 rounded-xl border border-slate-200 bg-white space-y-3 shadow-2xs">
                 <div>
-                  <label className="block text-xs font-sans font-bold uppercase tracking-wider text-slate-600 mb-1">
+                  <label className="block text-xs font-sans font-bold uppercase tracking-wider text-slate-600 mb-1.5">
                     Nama Petugas Monev 1
                   </label>
                   <input
@@ -1030,17 +1067,19 @@ export function MonevUnggasTab({
                     className="w-full h-10 px-3 rounded-xl border border-slate-200 bg-white text-xs font-semibold focus:border-amber-500 outline-none"
                   />
                 </div>
-                <DigitalSignaturePad
-                  label="Tanda Tangan Petugas 1"
-                  value={kondisiUnggas.ttdPetugas1}
-                  onChange={(val) => updateKondisiUnggas('ttdPetugas1', val)}
-                  helperText="Goreskan tanda tangan digital untuk Petugas Monev 1."
-                />
+                <div className="pt-2 border-t border-slate-100">
+                  <DigitalSignaturePad
+                    label="Tanda Tangan Petugas 1"
+                    value={kondisiUnggas.ttdPetugas1}
+                    onChange={(val) => updateKondisiUnggas('ttdPetugas1', val)}
+                    helperText="Goreskan tanda tangan digital untuk Petugas Monev 1."
+                  />
+                </div>
               </div>
 
-              <div className="p-3.5 rounded-xl border border-slate-200 bg-white/90 space-y-2.5 shadow-2xs">
+              <div className="p-4 rounded-xl border border-slate-200 bg-white space-y-3 shadow-2xs">
                 <div>
-                  <label className="block text-xs font-sans font-bold uppercase tracking-wider text-slate-600 mb-1">
+                  <label className="block text-xs font-sans font-bold uppercase tracking-wider text-slate-600 mb-1.5">
                     Nama Petugas Monev 2 (Opsional)
                   </label>
                   <input
@@ -1051,12 +1090,14 @@ export function MonevUnggasTab({
                     className="w-full h-10 px-3 rounded-xl border border-slate-200 bg-white text-xs font-semibold focus:border-amber-500 outline-none"
                   />
                 </div>
-                <DigitalSignaturePad
-                  label="Tanda Tangan Petugas 2 (Opsional)"
-                  value={kondisiUnggas.ttdPetugas2}
-                  onChange={(val) => updateKondisiUnggas('ttdPetugas2', val)}
-                  helperText="Goreskan tanda tangan digital untuk Petugas Monev 2."
-                />
+                <div className="pt-2 border-t border-slate-100">
+                  <DigitalSignaturePad
+                    label="Tanda Tangan Petugas 2 (Opsional)"
+                    value={kondisiUnggas.ttdPetugas2}
+                    onChange={(val) => updateKondisiUnggas('ttdPetugas2', val)}
+                    helperText="Goreskan tanda tangan digital untuk Petugas Monev 2."
+                  />
+                </div>
               </div>
             </div>
           </div>

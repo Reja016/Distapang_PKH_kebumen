@@ -484,11 +484,13 @@ export async function GET() {
       try {
         const [vakRelRows]: any = await pool.query(`
           SELECT 
-            puskeswan,
+            COALESCE(wb.nama_puskeswan, v.nama, 'Puskeswan') AS puskeswan,
             3000 AS target,
-            SUM(jumlah) AS realisasi,
-            ROUND((SUM(jumlah) / 3000) * 100, 1) AS persen
-          FROM vaksinasi
+            SUM(v.jumlah) AS realisasi,
+            ROUND((SUM(v.jumlah) / 3000) * 100, 1) AS persen
+          FROM vaksinasi v
+          LEFT JOIN (SELECT DISTINCT id_puskeswan, nama_puskeswan FROM wilayah_binaan) wb 
+            ON v.id_puskeswan = wb.id_puskeswan
           GROUP BY puskeswan
           ORDER BY puskeswan ASC
         `);

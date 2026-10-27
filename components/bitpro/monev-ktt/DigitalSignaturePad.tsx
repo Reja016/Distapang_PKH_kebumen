@@ -151,7 +151,7 @@ export function DigitalSignaturePad({
   };
 
   return (
-    <div className="space-y-1.5">
+    <div className="space-y-2">
       <div className="flex items-center justify-between">
         <label className="block text-xs font-sans font-bold uppercase tracking-wider text-slate-600">
           {label}
@@ -164,8 +164,8 @@ export function DigitalSignaturePad({
       </div>
 
       {value && !isEditing ? (
-        // Mode Preview Tanda Tangan
-        <div className="relative p-3.5 rounded-2xl border border-slate-300 bg-white shadow-xs group transition-all hover:border-emerald-500">
+        // Mode Preview Tanda Tangan (Bersih tanpa nested card ganda)
+        <div className="space-y-2">
           <div className="h-28 flex items-center justify-center bg-slate-50/70 rounded-xl p-2 border border-dashed border-slate-300">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
@@ -174,7 +174,7 @@ export function DigitalSignaturePad({
               className="max-h-full max-w-full object-contain filter contrast-125"
             />
           </div>
-          <div className="mt-2.5 flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 text-xs pt-2.5 border-t border-slate-200">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs pt-1">
             <span className="text-[11px] text-slate-500 font-medium flex items-center gap-1.5">
               <span className="w-2 h-2 rounded-full bg-emerald-500 shrink-0 inline-block animate-pulse" />
               Tanda Tangan Digital Aktif
@@ -186,7 +186,7 @@ export function DigitalSignaturePad({
                   setIsEditing(true);
                   setHasDrawn(false);
                 }}
-                className="flex-1 sm:flex-none min-h-touch h-9 px-3.5 text-xs font-bold text-emerald-700 bg-emerald-50 hover:bg-emerald-100 rounded-xl border border-emerald-300 transition-colors flex items-center justify-center gap-1.5 cursor-pointer shadow-2xs"
+                className="flex-1 sm:flex-none min-h-touch h-8.5 px-3 text-xs font-bold text-emerald-700 bg-emerald-50 hover:bg-emerald-100 rounded-lg border border-emerald-300 transition-colors flex items-center justify-center gap-1.5 cursor-pointer shadow-2xs"
               >
                 <PenTool size={13} /> Ubah / TTD Ulang
               </button>
@@ -197,7 +197,7 @@ export function DigitalSignaturePad({
                   setIsEditing(true);
                   setHasDrawn(false);
                 }}
-                className="flex-1 sm:flex-none min-h-touch h-9 px-3.5 text-xs font-bold text-red-600 bg-red-50 hover:bg-red-100 rounded-xl border border-red-200 transition-colors flex items-center justify-center gap-1.5 cursor-pointer shadow-2xs"
+                className="flex-1 sm:flex-none min-h-touch h-8.5 px-3 text-xs font-bold text-red-600 bg-red-50 hover:bg-red-100 rounded-lg border border-red-200 transition-colors flex items-center justify-center gap-1.5 cursor-pointer shadow-2xs"
               >
                 <Trash2 size={13} /> Hapus
               </button>
@@ -205,8 +205,8 @@ export function DigitalSignaturePad({
           </div>
         </div>
       ) : (
-        // Mode Canvas Menggores Tanda Tangan
-        <div className="rounded-2xl border border-slate-300 bg-white p-3 sm:p-3.5 shadow-xs space-y-2.5">
+        // Mode Canvas Menggores Tanda Tangan (Bersih langsung menyatu dalam card petugas)
+        <div className="space-y-2">
           <div className="relative">
             <canvas
               ref={canvasRef}
@@ -215,7 +215,7 @@ export function DigitalSignaturePad({
               onPointerUp={stopDrawing}
               onPointerCancel={stopDrawing}
               style={{ touchAction: 'none' }}
-              className="w-full h-28 bg-slate-50/50 rounded-xl border border-dashed border-slate-300 cursor-crosshair active:bg-slate-100/60"
+              className="w-full h-28 bg-slate-50/70 hover:bg-slate-50 rounded-xl border border-dashed border-slate-300 cursor-crosshair active:bg-slate-100/60 transition-colors"
             />
             {!hasDrawn && !value && (
               <div className="absolute inset-0 pointer-events-none flex flex-col items-center justify-center text-slate-400 gap-1">
@@ -225,50 +225,47 @@ export function DigitalSignaturePad({
             )}
           </div>
 
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 pt-1">
-            <div className="flex items-center gap-2 w-full sm:w-auto">
+          <div className="flex flex-wrap items-center gap-2 pt-0.5">
+            <button
+              type="button"
+              onClick={handleClear}
+              className="flex-1 min-w-[110px] min-h-touch h-8.5 px-3 text-xs font-bold text-slate-700 bg-slate-100 hover:bg-slate-200 active:scale-95 rounded-lg border border-slate-200 transition-all flex items-center justify-center gap-1.5 cursor-pointer shadow-2xs"
+              title="Bersihkan kanvas tanda tangan"
+            >
+              <RotateCcw size={13} /> Bersihkan
+            </button>
+
+            <label className="flex-1 min-w-[110px] min-h-touch h-8.5 px-3 text-xs font-bold text-slate-700 bg-slate-100 hover:bg-slate-200 active:scale-95 rounded-lg border border-slate-200 transition-all flex items-center justify-center gap-1.5 cursor-pointer shadow-2xs">
+              <Upload size={13} /> Unggah File
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/png, image/jpeg, image/webp"
+                onChange={handleFileUpload}
+                className="hidden"
+              />
+            </label>
+
+            {value && (
               <button
                 type="button"
-                onClick={handleClear}
-                className="flex-1 sm:flex-none min-h-touch h-9 px-3 text-xs font-bold text-slate-700 bg-slate-100 hover:bg-slate-200 active:scale-95 rounded-xl border border-slate-300 transition-all flex items-center justify-center gap-1.5 cursor-pointer shadow-2xs"
-                title="Bersihkan kanvas tanda tangan"
+                onClick={() => setIsEditing(false)}
+                className="min-h-touch h-8.5 px-2.5 text-xs font-bold text-slate-600 hover:text-slate-800 transition-colors cursor-pointer"
               >
-                <RotateCcw size={13} /> Ulangi / Bersihkan
+                Batal
               </button>
+            )}
 
-              <label className="flex-1 sm:flex-none min-h-touch h-9 px-3 text-xs font-bold text-slate-700 bg-slate-100 hover:bg-slate-200 active:scale-95 rounded-xl border border-slate-300 transition-all flex items-center justify-center gap-1.5 cursor-pointer shadow-2xs">
-                <Upload size={13} /> Unggah File
-                <input
-                  ref={fileInputRef}
-                  type="file"
-                  accept="image/png, image/jpeg, image/webp"
-                  onChange={handleFileUpload}
-                  className="hidden"
-                />
-              </label>
-            </div>
-
-            <div className="flex items-center gap-2 w-full sm:w-auto justify-end">
-              {value && (
-                <button
-                  type="button"
-                  onClick={() => setIsEditing(false)}
-                  className="min-h-touch h-9 px-3 text-xs font-bold text-slate-600 hover:text-slate-800 transition-colors cursor-pointer"
-                >
-                  Batal
-                </button>
-              )}
-              <button
-                type="button"
-                onClick={handleApplySignature}
-                disabled={!hasDrawn && !value}
-                className="flex-1 sm:flex-none min-h-touch h-9.5 px-4 text-xs font-bold text-white bg-emerald-600 hover:bg-emerald-700 active:scale-95 disabled:bg-slate-300 disabled:cursor-not-allowed rounded-xl shadow-xs transition-all flex items-center justify-center gap-1.5 cursor-pointer"
-              >
-                <Check size={14} strokeWidth={3} /> Terapkan TTD
-              </button>
-            </div>
+            <button
+              type="button"
+              onClick={handleApplySignature}
+              disabled={!hasDrawn && !value}
+              className="w-full sm:w-auto sm:ml-auto min-h-touch h-8.5 px-3.5 text-xs font-bold text-white bg-emerald-600 hover:bg-emerald-700 active:scale-95 disabled:bg-slate-300 disabled:cursor-not-allowed rounded-lg shadow-2xs transition-all flex items-center justify-center gap-1.5 cursor-pointer"
+            >
+              <Check size={14} strokeWidth={3} /> Terapkan TTD
+            </button>
           </div>
-          <p className="text-[10px] text-slate-400 italic px-0.5">{helperText}</p>
+          <p className="text-[10px] text-slate-400 italic">{helperText}</p>
         </div>
       )}
     </div>

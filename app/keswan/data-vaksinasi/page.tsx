@@ -39,15 +39,18 @@ export default function DataVaksinasiPMKPage() {
   const { isReady, canCreate, canEdit } = usePageAuth('keswan', 'data-vaksinasi');
   const { isAdmin, isPuskeswanAllowed } = useUserAreaRestriction();
 
-  // Posisi default: Matriks Input Harian
+  // Posisi default: Matriks Input Harian (Otomatis bulan dan tahun saat ini)
   const [activeTab, setActiveTab] = useState<'harian' | 'bulanan' | 'apbd'>('harian');
-  const [activeMonth, setActiveMonth] = useState<number>(1);
+  const [activeMonth, setActiveMonth] = useState<number>(() => new Date().getMonth() + 1);
 
-  // State Manajemen Tahun (Default 2026, Dinamis & Persisten)
-  const [selectedYear, setSelectedYear] = useState<number>(2026);
-  const [daftarTahun, setDaftarTahun] = useState<number[]>([2028, 2027, 2026, 2025]);
+  // State Manajemen Tahun (Default Tahun Berjalan Dinamis & Persisten)
+  const [selectedYear, setSelectedYear] = useState<number>(() => new Date().getFullYear());
+  const [daftarTahun, setDaftarTahun] = useState<number[]>(() => {
+    const curY = new Date().getFullYear();
+    return [curY + 1, curY, curY - 1, curY - 2];
+  });
   const [showAddYearModal, setShowAddYearModal] = useState<boolean>(false);
-  const [inputTahunBaru, setInputTahunBaru] = useState<string>('2028');
+  const [inputTahunBaru, setInputTahunBaru] = useState<string>(() => String(new Date().getFullYear() + 1));
 
   const [bulanan, setBulanan] = useState<Bulanan[]>(fallbackPuskeswan);
   const [harian, setHarian] = useState<Harian[]>([]);
@@ -80,10 +83,16 @@ export default function DataVaksinasiPMKPage() {
   const [formDroping, setFormDroping] = useState<any>(emptyDropingForm);
 
   const [modalHarianManual, setModalHarianManual] = useState<boolean>(false);
-  const [formHarianManual, setFormHarianManual] = useState<{ puskeswan: string; tanggal: string; jumlah: number }>({
-    puskeswan: 'MIRIT',
-    tanggal: '2027-01-01',
-    jumlah: 0,
+  const [formHarianManual, setFormHarianManual] = useState<{ puskeswan: string; tanggal: string; jumlah: number }>(() => {
+    const now = new Date();
+    const yyyy = now.getFullYear();
+    const mm = String(now.getMonth() + 1).padStart(2, '0');
+    const dd = String(now.getDate()).padStart(2, '0');
+    return {
+      puskeswan: 'MIRIT',
+      tanggal: `${yyyy}-${mm}-${dd}`,
+      jumlah: 0,
+    };
   });
 
   const [showAuditModal, setShowAuditModal] = useState(false);
@@ -95,14 +104,23 @@ export default function DataVaksinasiPMKPage() {
     setTimeout(() => setToast(null), 3000);
   };
 
+  // Pastikan saat pertama kali menu dibuka langsung ke bulan & tahun berjalan
+  useEffect(() => {
+    const now = new Date();
+    setActiveMonth(now.getMonth() + 1);
+    setSelectedYear(now.getFullYear());
+  }, []);
+
   // Muat daftar tahun tersimpan dari localStorage saat pertama kali render
   useEffect(() => {
     try {
+      const curY = new Date().getFullYear();
+      const defaultList = [curY + 1, curY, curY - 1, curY - 2];
       const savedYears = localStorage.getItem('distapang_vaksin_pmk_years');
       if (savedYears) {
         const parsed = JSON.parse(savedYears);
         if (Array.isArray(parsed) && parsed.length > 0) {
-          const merged = Array.from(new Set([...parsed, 2028, 2027, 2026, 2025])).sort((a, b) => b - a);
+          const merged = Array.from(new Set([...parsed, ...defaultList])).sort((a, b) => b - a);
           setDaftarTahun(merged);
         }
       }

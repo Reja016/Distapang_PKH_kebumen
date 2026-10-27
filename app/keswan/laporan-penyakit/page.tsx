@@ -40,11 +40,16 @@ export default function LaporanPenyakitPage() {
   // View state: 'map' (Peta Spasial) or 'table' (Rekapitulasi CRUD)
   const [activeView, setActiveView] = useState<'map' | 'table'>('map');
 
-  // Year filter & dynamic multi-year state
-  const [selectedYear, setSelectedYear] = useState<number>(2026);
-  const [availableYears, setAvailableYears] = useState<number[]>([2025, 2026]);
+  // Year filter & dynamic multi-year state (Otomatis Tahun Berjalan)
+  const currentYear = useMemo(() => new Date().getFullYear(), []);
+  const [selectedYear, setSelectedYear] = useState<number>(new Date().getFullYear());
+  const [availableYears, setAvailableYears] = useState<number[]>([
+    new Date().getFullYear() + 1,
+    new Date().getFullYear(),
+    new Date().getFullYear() - 1,
+  ]);
   const [showAddYearModal, setShowAddYearModal] = useState<boolean>(false);
-  const [newYearInput, setNewYearInput] = useState<number>(2027);
+  const [newYearInput, setNewYearInput] = useState<number>(new Date().getFullYear() + 1);
   const [isAddingYear, setIsAddingYear] = useState<boolean>(false);
 
   // Data Kasus Penyakit dari Database
@@ -79,13 +84,19 @@ export default function LaporanPenyakitPage() {
   const [showAuditModal, setShowAuditModal] = useState(false);
   const [auditTarget, setAuditTarget] = useState<any | null>(null);
 
-  // ── LOAD AVAILABLE YEARS ──
+  // ── LOAD AVAILABLE YEARS (Sinkronisasi Otomatis dengan Tahun Berjalan) ──
   const loadAvailableYears = async () => {
     try {
       const res = await fetch('/api/laporan-penyakit?action=years');
       const json = await res.json();
       if (json.success && Array.isArray(json.years)) {
-        setAvailableYears(json.years);
+        const merged = Array.from(new Set<number>([
+          currentYear + 1,
+          currentYear,
+          currentYear - 1,
+          ...json.years.map(Number),
+        ])).sort((a, b) => b - a);
+        setAvailableYears(merged);
       }
     } catch (err) {
       console.warn('Gagal memuat tahun laporan penyakit:', err);
@@ -391,24 +402,12 @@ export default function LaporanPenyakitPage() {
               className="bg-transparent text-xs font-black text-blue-800 dark:text-blue-300 dark:bg-slate-900 focus:outline-none cursor-pointer"
             >
               {availableYears.map((yr) => (
-                <option key={yr} value={yr} className="dark:bg-slate-900">Tahun {yr}</option>
+                <option key={yr} value={yr} className="dark:bg-slate-900">
+                  Tahun {yr} {yr === currentYear ? '(Tahun Ini)' : ''}
+                </option>
               ))}
             </select>
           </div>
-
-          {isAdmin && (
-            <button
-              onClick={() => {
-                const maxYear = Math.max(...availableYears, 2026);
-                setNewYearInput(maxYear + 1);
-                setShowAddYearModal(true);
-              }}
-              className="h-9 px-3.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold flex items-center gap-1.5 shadow-xs transition-colors cursor-pointer"
-            >
-              <Plus size={14} />
-              <span>Tambah Tahun Baru</span>
-            </button>
-          )}
         </div>
 
         {/* KPI Metrik Ringkasan */}

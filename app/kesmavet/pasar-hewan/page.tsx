@@ -104,6 +104,12 @@ export default function PasarHewanPage() {
     }
   }, [isReady, selectedBulan, selectedTahun, selectedPasarFilter, searchQuery]);
 
+  useEffect(() => {
+    if (!canEdit && activeTab === 'harga') {
+      setActiveTab('catat');
+    }
+  }, [canEdit, activeTab]);
+
   const handleEditClick = (item: CatatHewanItem) => {
     setEditingItem(item);
     // Smooth scroll ke formulir di atas
@@ -160,32 +166,36 @@ export default function PasarHewanPage() {
             <Scale size={16} strokeWidth={2.5} />
             <span>Catat Hewan</span>
           </button>
-          <button
-            onClick={() => setActiveTab('harga')}
-            className={`flex-1 sm:flex-none min-h-touch h-11 px-4 sm:px-6 rounded-t-xl text-xs sm:text-sm font-bold flex items-center justify-center gap-2 border-t border-x transition-all shrink-0 whitespace-nowrap cursor-pointer ${
-              activeTab === 'harga'
-                ? 'bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 text-purple-700 dark:text-purple-400 border-b-white dark:border-b-slate-900 translate-y-px shadow-xs'
-                : 'border-transparent text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white bg-slate-100/60 dark:bg-slate-800/40'
-            }`}
-          >
-            <Tag size={16} strokeWidth={2.5} />
-            <span>Input Harga</span>
-          </button>
+          {canEdit && (
+            <button
+              onClick={() => setActiveTab('harga')}
+              className={`flex-1 sm:flex-none min-h-touch h-11 px-4 sm:px-6 rounded-t-xl text-xs sm:text-sm font-bold flex items-center justify-center gap-2 border-t border-x transition-all shrink-0 whitespace-nowrap cursor-pointer ${
+                activeTab === 'harga'
+                  ? 'bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 text-purple-700 dark:text-purple-400 border-b-white dark:border-b-slate-900 translate-y-px shadow-xs'
+                  : 'border-transparent text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white bg-slate-100/60 dark:bg-slate-800/40'
+              }`}
+            >
+              <Tag size={16} strokeWidth={2.5} />
+              <span>Input Harga</span>
+            </button>
+          )}
         </div>
 
         {/* SUBMENU 1: CATAT HEWAN (Form Langsung Terbuka + Tabel Data) */}
         {activeTab === 'catat' && (
           <div className="space-y-6">
             {/* Form Masuk Cepat */}
-            <CatatHewanForm
-              editingItem={editingItem}
-              onSuccess={() => {
-                setEditingItem(null);
-                loadCatatData();
-              }}
-              onCancelEdit={() => setEditingItem(null)}
-              canEdit={true}
-            />
+            {canEdit && (
+              <CatatHewanForm
+                editingItem={editingItem}
+                onSuccess={() => {
+                  setEditingItem(null);
+                  loadCatatData();
+                }}
+                onCancelEdit={() => setEditingItem(null)}
+                canEdit={canEdit}
+              />
+            )}
 
             {/* Tabel Catat Hewan & Statistik */}
             <CatatHewanTable
@@ -197,7 +207,7 @@ export default function PasarHewanPage() {
                 setAuditTarget(item);
                 setShowAuditModal(true);
               }}
-              canEdit={true}
+              canEdit={canEdit}
               isAdmin={isAdmin}
               selectedBulan={selectedBulan}
               setSelectedBulan={setSelectedBulan}
@@ -212,7 +222,7 @@ export default function PasarHewanPage() {
         )}
 
         {/* SUBMENU 2: INPUT HARGA (Auto Tren & Format Ribuan Titik) */}
-        {activeTab === 'harga' && (
+        {activeTab === 'harga' && canEdit && (
           <InputHargaTab
             hargaList={hargaList}
             isLoading={isLoadingHarga}

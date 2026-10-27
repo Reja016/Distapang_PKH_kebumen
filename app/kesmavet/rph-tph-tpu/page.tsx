@@ -261,19 +261,21 @@ export default function RphTphTpuPage() {
                   <span className="hidden sm:inline">Export Excel</span>
                 </button>
 
-                <button
-                  type="button"
-                  onClick={() => {
-                    setEditingRphItem(null);
-                    setFormRph(INITIAL_RPH_FORM);
-                    setShowAddModal(true);
-                  }}
-                  className="min-h-touch min-w-touch h-10 px-3 sm:px-4 rounded-xl bg-purple-600 hover:bg-purple-700 text-white text-xs font-bold flex items-center justify-center gap-1.5 shadow-xs transition-colors cursor-pointer"
-                  title="Tambah Rumah Potong Hewan"
-                >
-                  <Plus size={15} strokeWidth={2.5} />
-                  <span className="hidden sm:inline">Tambah Rumah Potong</span>
-                </button>
+                {(canCreate || canEdit) && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setEditingRphItem(null);
+                      setFormRph(INITIAL_RPH_FORM);
+                      setShowAddModal(true);
+                    }}
+                    className="min-h-touch min-w-touch h-10 px-3 sm:px-4 rounded-xl bg-purple-600 hover:bg-purple-700 text-white text-xs font-bold flex items-center justify-center gap-1.5 shadow-xs transition-colors cursor-pointer"
+                    title="Tambah Rumah Potong Hewan"
+                  >
+                    <Plus size={15} strokeWidth={2.5} />
+                    <span className="hidden sm:inline">Tambah Rumah Potong</span>
+                  </button>
+                )}
               </>
             )}
           </div>
@@ -318,15 +320,17 @@ export default function RphTphTpuPage() {
         {activeTab === 'pencatatan_pemotongan' && (
           <div className="space-y-6">
             {/* Form Input Pemotongan */}
-            <PencatatanPemotonganForm
-              onSuccess={() => {
-                setEditingPencatatan(null);
-                loadPencatatanData();
-              }}
-              editingItem={editingPencatatan}
-              onCancelEdit={() => setEditingPencatatan(null)}
-              canEdit={canEdit}
-            />
+            {(canCreate || canEdit) && (
+              <PencatatanPemotonganForm
+                onSuccess={() => {
+                  setEditingPencatatan(null);
+                  loadPencatatanData();
+                }}
+                editingItem={editingPencatatan}
+                onCancelEdit={() => setEditingPencatatan(null)}
+                canEdit={canEdit}
+              />
+            )}
 
             {/* Tabel Riwayat Pemotongan */}
             <PencatatanPemotonganTable
@@ -364,6 +368,7 @@ export default function RphTphTpuPage() {
             filteredRph={filteredRph}
             isLoadingRph={isLoadingRph}
             isAdmin={isAdmin}
+            canEdit={canEdit}
             onEditRph={(item) => {
               setEditingRphItem(item);
               setFormRph({

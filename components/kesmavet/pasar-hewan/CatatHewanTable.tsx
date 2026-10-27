@@ -371,22 +371,26 @@ export default function CatatHewanTable({
                     <td className="p-3 text-center">
                       <div className="flex items-center justify-center gap-1">
                         {/* Tombol Edit Langsung untuk Petugas & Admin */}
-                        <button
-                          onClick={() => onEdit(item)}
-                          className="w-7 h-7 rounded-lg bg-blue-50 dark:bg-blue-950/60 text-blue-600 dark:text-blue-400 hover:bg-blue-100 dark:hover:bg-blue-900/40 flex items-center justify-center transition-colors cursor-pointer"
-                          title="Edit Catatan Hewan"
-                        >
-                          <Edit2 size={13} />
-                        </button>
+                        {canEdit && (
+                          <button
+                            onClick={() => onEdit(item)}
+                            className="w-7 h-7 rounded-lg bg-blue-50 dark:bg-blue-950/60 text-blue-600 dark:text-blue-400 hover:bg-blue-100 dark:hover:bg-blue-900/40 flex items-center justify-center transition-colors cursor-pointer"
+                            title="Edit Catatan Hewan"
+                          >
+                            <Edit2 size={13} />
+                          </button>
+                        )}
 
                         {/* Tombol Hapus Langsung untuk Petugas & Admin */}
-                        <button
-                          onClick={() => handleDelete(item)}
-                          className="w-7 h-7 rounded-lg bg-rose-50 dark:bg-rose-950/60 text-rose-600 dark:text-rose-400 hover:bg-rose-100 dark:hover:bg-rose-900/40 flex items-center justify-center transition-colors cursor-pointer"
-                          title="Hapus Catatan Hewan"
-                        >
-                          <Trash2 size={13} />
-                        </button>
+                        {canEdit && (
+                          <button
+                            onClick={() => handleDelete(item)}
+                            className="w-7 h-7 rounded-lg bg-rose-50 dark:bg-rose-950/60 text-rose-600 dark:text-rose-400 hover:bg-rose-100 dark:hover:bg-rose-900/40 flex items-center justify-center transition-colors cursor-pointer"
+                            title="Hapus Catatan Hewan"
+                          >
+                            <Trash2 size={13} />
+                          </button>
+                        )}
 
                         {/* Tombol Riwayat / Audit */}
                         <button

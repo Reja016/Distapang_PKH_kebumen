@@ -13,6 +13,7 @@ interface RumahPotongTabProps {
   filteredRph: any[];
   isLoadingRph: boolean;
   isAdmin: boolean;
+  canEdit?: boolean;
   onEditRph: (item: any) => void;
   onDeleteRph: (id: number) => void;
 }
@@ -27,6 +28,7 @@ export function RumahPotongTab({
   filteredRph,
   isLoadingRph,
   isAdmin,
+  canEdit = false,
   onEditRph,
   onDeleteRph,
 }: RumahPotongTabProps) {
@@ -141,20 +143,26 @@ export function RumahPotongTab({
                     </td>
                     <td className="p-3.5 text-center">
                       <div className="flex items-center justify-center gap-1.5">
-                        <button
-                          onClick={() => onEditRph(item)}
-                          className="w-7 h-7 rounded-lg bg-purple-50 dark:bg-purple-950/50 text-purple-700 dark:text-purple-300 hover:bg-purple-100 dark:hover:bg-purple-900/50 flex items-center justify-center transition-colors cursor-pointer"
-                          title="Edit"
-                        >
-                          <Edit2 size={13} />
-                        </button>
-                        <button
-                          onClick={() => onDeleteRph(item.id)}
-                          className="w-7 h-7 rounded-lg bg-rose-50 dark:bg-rose-950/50 text-rose-600 dark:text-rose-400 hover:bg-rose-100 dark:hover:bg-rose-900/50 flex items-center justify-center transition-colors cursor-pointer"
-                          title="Hapus"
-                        >
-                          <Trash2 size={13} />
-                        </button>
+                        {(isAdmin || canEdit) ? (
+                          <>
+                            <button
+                              onClick={() => onEditRph(item)}
+                              className="w-7 h-7 rounded-lg bg-purple-50 dark:bg-purple-950/50 text-purple-700 dark:text-purple-300 hover:bg-purple-100 dark:hover:bg-purple-900/50 flex items-center justify-center transition-colors cursor-pointer"
+                              title="Edit"
+                            >
+                              <Edit2 size={13} />
+                            </button>
+                            <button
+                              onClick={() => onDeleteRph(item.id)}
+                              className="w-7 h-7 rounded-lg bg-rose-50 dark:bg-rose-950/50 text-rose-600 dark:text-rose-400 hover:bg-rose-100 dark:hover:bg-rose-900/50 flex items-center justify-center transition-colors cursor-pointer"
+                              title="Hapus"
+                            >
+                              <Trash2 size={13} />
+                            </button>
+                          </>
+                        ) : (
+                          <span className="text-xs text-slate-400 font-medium">-</span>
+                        )}
                       </div>
                     </td>
                   </tr>

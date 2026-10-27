@@ -600,7 +600,7 @@ export default function SapiTimePage() {
             cattleList={displayCattleList}
             historyList={displayHistoryList}
             onTraceCattle={handleOpenTrace}
-            onEditStatusIb={handleOpenEditStatus}
+            onEditStatusIb={canEdit ? handleOpenEditStatus : undefined}
           />
         )}
       </main>
@@ -641,9 +641,9 @@ export default function SapiTimePage() {
         isOpen={showTraceModal}
         onClose={() => setShowTraceModal(false)}
         cattle={selectedCattleForTrace}
-        onEditStatusIb={(ib, c) => {
+        onEditStatusIb={canEdit ? (ib, c) => {
           handleOpenEditStatus(ib, c);
-        }}
+        } : undefined}
       />
 
       {/* ── MODAL EDIT STATUS KEBERHASILAN IB ── */}

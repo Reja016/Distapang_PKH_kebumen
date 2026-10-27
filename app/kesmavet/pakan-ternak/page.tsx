@@ -24,12 +24,17 @@ import PakanModals from '@/components/kesmavet/pakan-ternak/PakanModals';
 export default function PakanTernakPage() {
   const { isReady, canEdit } = usePageAuth('kesmavet', 'pakan-ternak');
 
-  // State Multi-Tahun
-  const [selectedYear, setSelectedYear] = useState<number>(2025);
-  const [availableYears, setAvailableYears] = useState<number[]>([2026, 2025, 2024]);
+  // State Multi-Tahun (Otomatis Tahun Berjalan)
+  const currentYear = useMemo(() => new Date().getFullYear(), []);
+  const [selectedYear, setSelectedYear] = useState<number>(new Date().getFullYear());
+  const [availableYears, setAvailableYears] = useState<number[]>([
+    new Date().getFullYear() + 1,
+    new Date().getFullYear(),
+    new Date().getFullYear() - 1,
+  ]);
   const [showAddYearModal, setShowAddYearModal] = useState<boolean>(false);
-  const [newYearInput, setNewYearInput] = useState<number>(2026);
-  const [copyFromYearInput, setCopyFromYearInput] = useState<number>(2025);
+  const [newYearInput, setNewYearInput] = useState<number>(new Date().getFullYear() + 1);
+  const [copyFromYearInput, setCopyFromYearInput] = useState<number>(new Date().getFullYear());
   const [isAddingYear, setIsAddingYear] = useState<boolean>(false);
 
   // State Mobile Tab: 'map' (Peta Visual) atau 'table' (Tabel Data)
@@ -58,13 +63,19 @@ export default function PakanTernakPage() {
     setTimeout(() => setToast(null), 3000);
   };
 
-  // Muat Daftar Tahun dari API
+  // Muat Daftar Tahun dari API (Sinkronisasi Otomatis dengan Tahun Berjalan)
   const loadYears = async () => {
     try {
       const res = await fetch('/api/pakan-ternak?action=years');
       const result = await res.json();
       if (result.success && Array.isArray(result.years) && result.years.length > 0) {
-        setAvailableYears(result.years);
+        const merged = Array.from(new Set<number>([
+          currentYear + 1,
+          currentYear,
+          currentYear - 1,
+          ...result.years.map(Number),
+        ])).sort((a, b) => b - a);
+        setAvailableYears(merged);
       }
     } catch {
       console.warn('Gagal memuat daftar tahun');
@@ -340,24 +351,11 @@ export default function PakanTernakPage() {
             >
               {availableYears.map((yr) => (
                 <option key={yr} value={yr} className="bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100">
-                  Tahun {yr}
+                  Tahun {yr} {yr === currentYear ? '(Tahun Berjalan)' : ''}
                 </option>
               ))}
             </select>
           </div>
-
-          {canEdit && (
-            <button
-              onClick={() => {
-                setNewYearInput(new Date().getFullYear() + 1);
-                setCopyFromYearInput(selectedYear);
-                setShowAddYearModal(true);
-              }}
-              className="h-9 px-3.5 rounded-xl bg-purple-600 hover:bg-purple-700 text-white text-xs font-bold flex items-center gap-1.5 shadow-xs transition-colors cursor-pointer"
-            >
-              <span>+ Tambah Tahun Baru</span>
-            </button>
-          )}
         </div>
 
         {/* ── TAB UTAMA SUBMENU (Folder Tab Model) ── */}

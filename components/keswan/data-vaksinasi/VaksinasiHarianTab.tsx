@@ -1,5 +1,5 @@
-import React from 'react';
-import { Calendar, Plus } from 'lucide-react';
+import React, { useMemo } from 'react';
+import { Calendar } from 'lucide-react';
 import { Bulanan, BULAN_LABEL, BULAN_LONG, daysInMonth } from './types';
 import { useUserAreaRestriction } from '@/hooks/useUserAreaRestriction';
 import { checkDailyDeadline } from '@/lib/deadlineCheck';
@@ -11,7 +11,6 @@ interface VaksinasiHarianTabProps {
   canEdit: boolean;
   canCreate?: boolean;
   activeMonth: number;
-
   setActiveMonth: (m: number) => void;
   bulanan: Bulanan[];
   harianMap: Record<string, Record<string, { id: number; jumlah: number }>>;
@@ -22,9 +21,9 @@ interface VaksinasiHarianTabProps {
   setEditingHarian: (val: { puskeswan: string; tanggal: string } | null) => void;
   startEditHarian: (puskeswan: string, tanggal: string) => void;
   harianInputRef: React.RefObject<HTMLInputElement | null>;
-  setShowAddYearModal: (show: boolean) => void;
-  setFormHarianManual: (form: { puskeswan: string; tanggal: string; jumlah: number }) => void;
-  setModalHarianManual: (show: boolean) => void;
+  setShowAddYearModal?: (show: boolean) => void;
+  setFormHarianManual?: (form: { puskeswan: string; tanggal: string; jumlah: number }) => void;
+  setModalHarianManual?: (show: boolean) => void;
   fetchAll: (yr: number) => void;
   onShowHistory?: (row: any) => void;
 }
@@ -36,7 +35,6 @@ export default function VaksinasiHarianTab({
   canEdit,
   canCreate,
   activeMonth,
-
   setActiveMonth,
   bulanan,
   harianMap,
@@ -47,21 +45,23 @@ export default function VaksinasiHarianTab({
   setEditingHarian,
   startEditHarian,
   harianInputRef,
-  setShowAddYearModal,
-  setFormHarianManual,
-  setModalHarianManual,
   fetchAll,
   onShowHistory,
 }: VaksinasiHarianTabProps) {
   const { isAdmin, isPuskeswanAllowed } = useUserAreaRestriction();
+  const currentYear = useMemo(() => new Date().getFullYear(), []);
+  const today = useMemo(() => new Date(), []);
+  const isCurrentYearActive = today.getFullYear() === selectedYear;
+  const isCurrentMonthActive = isCurrentYearActive && (today.getMonth() + 1) === activeMonth;
+  const todayDay = today.getDate();
 
   return (
     <div className="space-y-6 animate-in fade-in duration-200">
-      {/* Control Bar: Selector Tahun & Tambah Tahun (Centered) */}
-      <div className="flex flex-col sm:flex-row items-center justify-center gap-3 bg-white dark:bg-slate-900 p-3.5 sm:p-4 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-xs max-w-xl mx-auto">
-        <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl border border-blue-200 dark:border-blue-800 bg-blue-50/70 dark:bg-blue-950/40">
-          <Calendar size={16} className="text-blue-700 dark:text-blue-400" />
-          <span className="text-xs font-bold text-blue-950 dark:text-blue-300">Pilih Tahun:</span>
+      {/* Control Bar: Selector Tahun Otomatis (Centered, Tanpa Tombol Manual) */}
+      <div className="flex items-center justify-center bg-white dark:bg-slate-900 p-3 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-xs max-w-sm mx-auto">
+        <div className="flex items-center gap-2 px-3.5 py-1.5 rounded-xl border border-blue-200 dark:border-blue-800 bg-blue-50/70 dark:bg-blue-950/40 w-full justify-center">
+          <Calendar size={16} className="text-blue-700 dark:text-blue-400 shrink-0" />
+          <span className="text-xs font-bold text-blue-950 dark:text-blue-300 whitespace-nowrap">Pilih Tahun:</span>
           <select
             value={selectedYear}
             onChange={(e) => {
@@ -73,58 +73,35 @@ export default function VaksinasiHarianTab({
           >
             {daftarTahun.map((yr) => (
               <option key={yr} value={yr} className="dark:bg-slate-900">
-                Tahun {yr} {yr === 2026 ? '(Aktif)' : ''}
+                Tahun {yr} {yr === currentYear ? '(Tahun Berjalan)' : ''}
               </option>
             ))}
           </select>
         </div>
-
-        {(canCreate ?? canEdit) && (
-          <div className="flex items-center gap-2">
-
-            <button
-              type="button"
-              onClick={() => setShowAddYearModal(true)}
-              className="h-9 px-3.5 rounded-xl bg-blue-50 dark:bg-blue-950/50 hover:bg-blue-100 dark:hover:bg-blue-900/60 border border-blue-200 dark:border-blue-800 text-blue-700 dark:text-blue-300 text-xs font-bold flex items-center gap-1.5 transition-colors cursor-pointer"
-            >
-              <Plus size={14} />
-              <span>Tahun Baru</span>
-            </button>
-
-            <button
-              onClick={() => {
-                const allowedList = isAdmin ? bulanan : bulanan.filter(b => isPuskeswanAllowed(b.puskeswan));
-                setFormHarianManual({
-                  puskeswan: allowedList[0]?.puskeswan || bulanan[0]?.puskeswan || 'MIRIT',
-                  tanggal: `${selectedYear}-${String(activeMonth).padStart(2, '0')}-01`,
-                  jumlah: 0,
-                });
-                setModalHarianManual(true);
-              }}
-              className="h-9 px-3.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold flex items-center gap-1.5 shadow-xs transition-all cursor-pointer"
-            >
-              <Plus size={14} />
-              <span>Tambah Harian</span>
-            </button>
-          </div>
-        )}
       </div>
 
       {/* Month Filter Selector */}
       <div className="flex items-center gap-1.5 overflow-x-auto pb-2 no-scrollbar">
         {BULAN_LABEL.slice(1).map((label, idx) => {
-          const isSelected = activeMonth === idx + 1;
+          const monthNum = idx + 1;
+          const isSelected = activeMonth === monthNum;
+          const isNowMonth = isCurrentYearActive && (today.getMonth() + 1) === monthNum;
           return (
             <button
               key={label}
-              onClick={() => setActiveMonth(idx + 1)}
+              onClick={() => setActiveMonth(monthNum)}
               className={`min-h-touch h-9 px-4 rounded-xl text-xs font-bold whitespace-nowrap transition-all border cursor-pointer ${
                 isSelected
                   ? 'bg-blue-600 text-white border-blue-600 shadow-sm'
                   : 'bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-300 border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800'
               }`}
             >
-              {label} {selectedYear}
+              <span>{label} {selectedYear}</span>
+              {isNowMonth && (
+                <span className={`ml-1.5 text-[10px] px-1.5 py-0.5 rounded-full font-extrabold ${isSelected ? 'bg-white/25 text-white' : 'bg-blue-100 dark:bg-blue-950 text-blue-700 dark:text-blue-300'}`}>
+                  Bulan Ini
+                </span>
+              )}
             </button>
           );
         })}
@@ -151,9 +128,29 @@ export default function VaksinasiHarianTab({
                 <th className="p-3 text-right font-sans border-r border-slate-200 dark:border-slate-700 font-bold">TARGET</th>
                 <th className="p-3 text-right font-sans border-r border-slate-200 dark:border-slate-700 font-bold">AMBIL</th>
                 <th className="p-3 text-right font-sans text-emerald-800 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-950/40 border-r border-slate-200 dark:border-slate-700 font-bold">REALISASI</th>
-                {Array.from({ length: daysInMonth(activeMonth, selectedYear) }, (_, i) => i + 1).map((d) => (
-                  <th key={d} className="p-2 text-center font-sans w-11 min-w-[44px] border-r border-slate-200 dark:border-slate-700 bg-slate-100 dark:bg-slate-800 font-bold text-slate-700 dark:text-slate-300">{d}</th>
-                ))}
+                {Array.from({ length: daysInMonth(activeMonth, selectedYear) }, (_, i) => i + 1).map((d) => {
+                  const isToday = isCurrentMonthActive && todayDay === d;
+                  return (
+                    <th
+                      key={d}
+                      className={`p-2 text-center font-sans w-11 min-w-[44px] border-r border-slate-200 dark:border-slate-700 font-bold transition-all ${
+                        isToday
+                          ? 'bg-blue-600 text-white font-extrabold ring-2 ring-blue-400 z-10 shadow-xs'
+                          : 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300'
+                      }`}
+                      title={isToday ? `Hari ini: Tanggal ${d} ${BULAN_LONG[activeMonth]} ${selectedYear}` : undefined}
+                    >
+                      <div className="flex flex-col items-center">
+                        <span>{d}</span>
+                        {isToday && (
+                          <span className="text-[8px] uppercase tracking-tighter text-blue-100 font-extrabold leading-none mt-0.5">
+                            Hari Ini
+                          </span>
+                        )}
+                      </div>
+                    </th>
+                  );
+                })}
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-200 dark:divide-slate-800 text-slate-800 dark:text-slate-200 font-medium">
@@ -210,8 +207,13 @@ export default function VaksinasiHarianTab({
                       const isLocked = !isAdmin && deadline.isLocked;
                       const isCellEditable = isAllowed && !isLocked;
 
+                      const isToday = isCurrentMonthActive && todayDay === d;
                       let cellTitle = `Klik untuk ubah dosis ${row.puskeswan} tgl ${d}`;
                       let cellClass = 'cursor-pointer ' + (val && val > 0 ? 'bg-blue-50 dark:bg-blue-950/40 text-blue-900 dark:text-blue-200 font-bold hover:bg-blue-100 dark:hover:bg-blue-900/50' : 'bg-white dark:bg-slate-900 hover:bg-blue-50/50 dark:hover:bg-slate-800 text-slate-400 hover:text-blue-900 dark:hover:text-blue-300 font-medium');
+
+                      if (isToday) {
+                        cellClass += ' ring-2 ring-inset ring-blue-500/80 bg-blue-50/80 dark:bg-blue-950/50';
+                      }
 
                       if (!isAllowed) {
                         cellTitle = `Akses Ditolak: Wilayah ${row.puskeswan} di luar wewenang tugas Anda`;

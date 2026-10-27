@@ -544,24 +544,28 @@ export default function PencatatanPemotonganTable({
                           </button>
 
                           {/* Edit */}
-                          <button
-                            type="button"
-                            onClick={() => onEdit(row)}
-                            className="p-1.5 rounded-lg text-slate-500 hover:text-blue-700 hover:bg-blue-50 dark:hover:bg-slate-800 transition-colors cursor-pointer"
-                            title="Edit Pencatatan"
-                          >
-                            <Edit2 size={15} />
-                          </button>
+                          {canEdit && (
+                            <button
+                              type="button"
+                              onClick={() => onEdit(row)}
+                              className="p-1.5 rounded-lg text-slate-500 hover:text-blue-700 hover:bg-blue-50 dark:hover:bg-slate-800 transition-colors cursor-pointer"
+                              title="Edit Pencatatan"
+                            >
+                              <Edit2 size={15} />
+                            </button>
+                          )}
 
                           {/* Hapus */}
-                          <button
-                            type="button"
-                            onClick={() => onDelete(row.id)}
-                            className="p-1.5 rounded-lg text-slate-500 hover:text-rose-700 hover:bg-rose-50 dark:hover:bg-slate-800 transition-colors cursor-pointer"
-                            title="Hapus Pencatatan"
-                          >
-                            <Trash2 size={15} />
-                          </button>
+                          {canEdit && (
+                            <button
+                              type="button"
+                              onClick={() => onDelete(row.id)}
+                              className="p-1.5 rounded-lg text-slate-500 hover:text-rose-700 hover:bg-rose-50 dark:hover:bg-slate-800 transition-colors cursor-pointer"
+                              title="Hapus Pencatatan"
+                            >
+                              <Trash2 size={15} />
+                            </button>
+                          )}
                         </div>
                       </td>
                     </tr>

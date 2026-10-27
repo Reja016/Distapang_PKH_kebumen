@@ -123,15 +123,13 @@ export default function LandingFacilitiesSection({
                   <th className="p-3 sm:p-3.5">NAMA PUSKESWAN</th>
                   <th className="p-3 sm:p-3.5">KOORDINATOR MEDIK</th>
                   <th className="p-3 sm:p-3.5">WILAYAH BINAAN KECAMATAN</th>
-                  <th className="p-3 sm:p-3.5">STATUS OPERASIONAL</th>
                   <th className="p-3 sm:p-3.5">LOKASI MAPS</th>
-                  <th className="p-3 sm:p-3.5">LAYANAN</th>
                 </tr>
               </thead>
               <tbody className="divide-y-2 divide-slate-100 dark:divide-slate-700 text-slate-800 dark:text-slate-200">
                 {filteredPuskeswan.length === 0 ? (
                   <tr>
-                    <td colSpan={7} className="p-8 text-center text-slate-400 text-xs">
+                    <td colSpan={5} className="p-8 text-center text-slate-400 text-xs">
                       Tidak ditemukan Puskeswan dengan kata kunci &quot;<span className="font-semibold">{searchPuskeswan}</span>&quot;
                     </td>
                   </tr>
@@ -164,12 +162,6 @@ export default function LandingFacilitiesSection({
                         </div>
                       </td>
                       <td className="p-3 sm:p-3.5">
-                        <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-50 dark:bg-emerald-950/50 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800">
-                          <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                          {row.status || 'Aktif Melayani'}
-                        </span>
-                      </td>
-                      <td className="p-3 sm:p-3.5">
                         <a
                           href={row.mapUrl}
                           target="_blank"
@@ -180,49 +172,6 @@ export default function LandingFacilitiesSection({
                           <span>Buka Maps</span>
                           <ExternalLink size={11} className="text-emerald-600 dark:text-emerald-400" />
                         </a>
-                      </td>
-                      <td className="p-3 sm:p-3.5">
-                        <div className="relative">
-                          <button
-                            type="button"
-                            onClick={() =>
-                              setExpandedTableLayanan(
-                                expandedTableLayanan === (row.no || idx + 1) ? null : (row.no || idx + 1)
-                              )
-                            }
-                            className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-blue-50 dark:bg-blue-950/50 hover:bg-blue-100 dark:hover:bg-blue-900/60 text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-800 text-xs font-semibold transition-all cursor-pointer"
-                          >
-                            <Stethoscope size={13} className="text-blue-600 dark:text-blue-400" />
-                            <span>Fasilitas &amp; Layanan ({row.layanan?.length || 4})</span>
-                            <ChevronDown
-                              size={13}
-                              className={`transition-transform duration-200 ${
-                                expandedTableLayanan === (row.no || idx + 1) ? 'rotate-180' : ''
-                              }`}
-                            />
-                          </button>
-
-                          {/* Table Dropdown Menu */}
-                          {expandedTableLayanan === (row.no || idx + 1) && (
-                            <div className="absolute right-0 top-full mt-1.5 w-64 p-3 rounded-xl bg-white dark:bg-slate-900 border-2 border-slate-200 dark:border-slate-700 shadow-xl z-30 animate-in fade-in zoom-in-95 duration-150 space-y-1.5">
-                              <p className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider pb-1 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between">
-                                <span>{row.nama}</span>
-                                <span className="text-blue-600 dark:text-blue-400 font-semibold">{row.layanan?.length || 4} Layanan</span>
-                              </p>
-                              <div className="space-y-1">
-                                {(row.layanan || ['Pelayanan Klinik', 'Pusling', 'IB & PKB', 'Vaksinasi']).map((lay: string, layIdx: number) => (
-                                  <div
-                                    key={layIdx}
-                                    className="flex items-center gap-2 text-xs font-medium text-slate-800 dark:text-slate-200 py-1 px-1.5 rounded-lg bg-slate-50 dark:bg-slate-800 border border-slate-100 dark:border-slate-700"
-                                  >
-                                    <CheckCircle2 size={12} className="text-emerald-600 shrink-0" />
-                                    <span className="truncate">{lay}</span>
-                                  </div>
-                                ))}
-                              </div>
-                            </div>
-                          )}
-                        </div>
                       </td>
                     </tr>
                   ))

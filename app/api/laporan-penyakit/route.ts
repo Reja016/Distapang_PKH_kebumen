@@ -150,23 +150,26 @@ export async function GET(req: Request) {
     const { searchParams } = new URL(req.url);
     const action = searchParams.get('action');
 
-    // 1. Ambil daftar tahun unik
+    const currentYear = new Date().getFullYear();
+
+    // 1. Ambil daftar tahun unik (Otomatis Tahun Berjalan)
     if (action === 'years') {
       try {
         const [yearRows]: any = await pool.query(
-          `SELECT DISTINCT tahun FROM keswan_laporan_penyakit WHERE (jumlah_kasus > 0 OR jumlah_kasus IS NULL) ORDER BY 1 ASC`
+          `SELECT DISTINCT tahun FROM keswan_laporan_penyakit WHERE (jumlah_kasus > 0 OR jumlah_kasus IS NULL) ORDER BY 1 DESC`
         );
         let years: number[] = yearRows ? yearRows.map((r: any) => Number(r.tahun)).filter(Boolean) : [];
-        if (!years.includes(2025)) years.push(2025);
-        if (!years.includes(2026)) years.push(2026);
-        years = Array.from(new Set<number>(years)).sort((a, b) => a - b);
+        if (!years.includes(currentYear - 1)) years.push(currentYear - 1);
+        if (!years.includes(currentYear)) years.push(currentYear);
+        if (!years.includes(currentYear + 1)) years.push(currentYear + 1);
+        years = Array.from(new Set<number>(years)).sort((a, b) => b - a);
         return NextResponse.json({ success: true, years });
       } catch {
-        return NextResponse.json({ success: true, years: [2025, 2026] });
+        return NextResponse.json({ success: true, years: [currentYear + 1, currentYear, currentYear - 1] });
       }
     }
 
-    const tahun = Number(searchParams.get('tahun')) || 2026;
+    const tahun = Number(searchParams.get('tahun')) || currentYear;
 
     // 2. Ambil seluruh data kasus pada tahun tersebut secara adaptif (hanya yang jumlah kasus > 0)
     let rawRows: any[] = [];

@@ -6,6 +6,7 @@ import {
   LayoutGrid,
   List,
   Scale,
+  AlertCircle,
 } from 'lucide-react';
 
 export interface HargaTernakItem {
@@ -108,9 +109,9 @@ export default function LandingHargaTernakSection() {
           <tr>
             <th className="p-3.5 sm:p-4 w-12 text-center text-xs sm:text-sm">NO</th>
             <th className="p-3.5 sm:p-4 text-xs sm:text-sm">NAMA HEWAN</th>
-            <th className="p-3.5 sm:p-4 text-right text-xs sm:text-sm">PASAR KEBUMEN (PER KG)</th>
-            <th className="p-3.5 sm:p-4 text-right text-xs sm:text-sm">PASAR GOMBONG (PER KG)</th>
-            <th className="p-3.5 sm:p-4 text-right text-xs sm:text-sm">RATA-RATA (PER KG)</th>
+            <th className="p-3.5 sm:p-4 text-right text-xs sm:text-sm">PASAR KEBUMEN (ESTIMASI/KG)</th>
+            <th className="p-3.5 sm:p-4 text-right text-xs sm:text-sm">PASAR GOMBONG (ESTIMASI/KG)</th>
+            <th className="p-3.5 sm:p-4 text-right text-xs sm:text-sm">RATA-RATA ESTIMASI (PER KG)</th>
             <th className="p-3.5 sm:p-4 text-center text-xs sm:text-sm">TANGGAL PANTAUAN</th>
             <th className="p-3.5 sm:p-4 text-xs sm:text-sm">KETERANGAN</th>
           </tr>
@@ -183,7 +184,12 @@ export default function LandingHargaTernakSection() {
                 </h3>
                 <span className="inline-flex items-center gap-1.5 text-xs sm:text-sm font-bold text-slate-600 dark:text-slate-400 mt-0.5">
                   <Scale size={13} className="text-blue-600 dark:text-blue-400" />
-                  <span>Harga Satuan: Per-Kg</span>
+                  <span>Harga Satuan: Per-Kg
+                    <span> </span>
+                    <span className="px-2.5 py-0.5 rounded-full text-xs font-extrabold bg-amber-100 text-amber-900 dark:bg-amber-950/70 dark:text-amber-300 border border-amber-300 dark:border-amber-700 uppercase tracking-wider">
+                      Estimasi
+                    </span>
+                  </span>
                 </span>
               </div>
             </div>
@@ -247,12 +253,11 @@ export default function LandingHargaTernakSection() {
       {/* ── HEADER JUDUL & DESKRIPSI ── */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
-          <h2 className="text-xl sm:text-3xl font-black text-slate-900 dark:text-white tracking-tight">
-            Informasi Harga Ternak
-          </h2>
-          <p className="text-sm sm:text-base text-slate-600 dark:text-slate-300 font-medium mt-1">
-            Data harga ternak hidup (per-kg) berdasarkan hasil pantauan di Pasar Hewan Kebumen dan Pasar Hewan Gombong
-          </p>
+          <div className="flex items-center gap-2.5 flex-wrap">
+            <h2 className="text-xl sm:text-3xl font-black text-slate-900 dark:text-white tracking-tight">
+              Informasi Harga Ternak
+            </h2>
+          </div>
         </div>
 
         {/* View Switcher (Khusus Layar Desktop / Tablet) */}
@@ -283,6 +288,19 @@ export default function LandingHargaTernakSection() {
             <List size={15} />
             <span>Tampilan Tabel</span>
           </button>
+        </div>
+      </div>
+
+      {/* ── BANNER PERINGATAN / ESTIMASI HARGA ── */}
+      <div className="flex items-start gap-3 p-3.5 sm:p-4 rounded-2xl bg-amber-50 dark:bg-amber-950/40 border border-amber-200/90 dark:border-amber-800 text-amber-900 dark:text-amber-200 text-xs sm:text-sm">
+        <AlertCircle size={18} className="shrink-0 text-amber-600 dark:text-amber-400 mt-0.5" />
+        <div className="leading-relaxed space-y-0.5">
+          <p className="font-bold text-amber-950 dark:text-amber-100">
+            Catatan Perkiraan Harga:
+          </p>
+          <p className="text-amber-800 dark:text-amber-300">
+            Data harga ternak yang tercantum merupakan estimasi pantauan lapangan. Harga dapat berubah sewaktu-waktu tanpa pemberitahuan sebelumnya dan dapat berbeda dengan transaksi di pasar atau di tingkat peternak tergantung bobot, kondisi kesehatan ternak, serta mekanisme tawar-menawar.
+          </p>
         </div>
       </div>
 
