@@ -2,10 +2,10 @@
 import mysql from "mysql2/promise";
 
 export const dbPoolAI = mysql.createPool({
-  host: process.env.DB_HOST_AI || "localhost",
-  user: process.env.DB_USER_AI || "agent_simantap",
-  password: process.env.DB_PASS_AI || "revejar123",
-  database: (process.env.DB_NAME_AI || "simantap_cld_db").trim(),
+  host: process.env.DB_HOST_AI || process.env.DB_HOST || "localhost",
+  user: process.env.DB_USER_AI || process.env.DB_USER || "root",
+  password: process.env.DB_PASS_AI !== undefined ? process.env.DB_PASS_AI : (process.env.DB_PASSWORD || ""),
+  database: (process.env.DB_NAME_AI || process.env.DB_NAME || "simantap_cld_db").trim(),
 });
 
 // Fungsi RAG: Mengambil seluruh skema tabel (DDL) secara otomatis dari MySQL
@@ -29,21 +29,23 @@ TABEL & FOREIGN KEY UTAMA SIMANTAP KEBUMEN:
 - detil_sapi(id_sapi, nama_sapi, breed, id_desa -> desa.id_desa, status, tanggal_lahir)
 - desa(id_desa, desa, id_kecamatan -> kecamatan.id_kecamatan)
 - kecamatan(id_kecamatan, kecamatan)
-- hewan(id_hewan, jenis_hewan)
-- populasi(id, id_hewan, id_desa, tahun, triwulan, anak_jantan, anak_betina, muda_jantan, muda_ntina, dewasa_jantan, dewasa_betina  total)
-- produksi(id_produksi, jenis ('pemotongan','telur'), id_hewan -> hewan.id_hewan, tahun, triwulan, jan, feb, mar, apr, mei, jun, jul, agt, sept, okt, nov, des, total, jan_ekor_butir, feb_ekor_butir, mar_ekor_butir, apr_ekor_butir, mei_ekor_butir, jun_ekor_butir, jul_ekor_butir, agt_ekor_butir, sept_ekor_butir, okt_ekor_butir, nov_ekor_butir, des_ekor_butir)
-- data_farm(id, nama_badan_usaha, pemilik, id_hewan, id_desa, kapasitas, populasi, kategori)
-- ktt_master(id_ktt, nama_kelompok, kecamatan, desa, kelas, gapoktan_induk, jenis_kelompok, luas_lahan_ha, nama_ketua, anggota_laki, anggota_perempuan) -- Gunakan LIKE '%nama%' saat mencari nama_kelompok.
-- kegiatan_ktt(id, id_ktt ->ktt_master.id_ktt, tanggal, kegiatan)
-- monev_lapangan(id_monev, tahun, kec, desa, namaKtt, kegiatan)
-- monev_kondisi_ternak(id_kondisi, id_monev->monev_lapangan.id_monev, mati_bangkai_jantan, mati_bangkai_betina)
-- puskeswan_profil(id_puskeswan, nama_puskeswan, dokter_hewan)
+- hewan(id_hewan, jenis_hewan) -- Daftar jenis hewan: Sapi, sapi_potong, Sapi PO, Sapi Perah, sapi_kurban, Kambing, Domba, Ayam, Ayam Kampung, Ayam Petelur, ayam_broiler, ayam_buras, ayam_ras, Kerbau, Kuda, Kelinci, Itik, Bebek, Entog, Angsa, Merpati, Puyuh, babi.
+- populasi(id_populasi, id_hewan -> hewan.id_hewan, id_desa -> desa.id_desa, tahun, triwulan, anak_jantan, anak_betina, muda_jantan, muda_betina, dewasa_jantan, dewasa_betina, total) -- WAJIB JOIN hewan h ON p.id_hewan = h.id_hewan untuk filter nama hewan (misal Sapi, sapi_potong, Kambing, Domba, dll.), dan gunakan SUM(p.total) untuk total populasi.
+- produksi(id_produksi, jenis ('pemotongan','telur'), id_hewan -> hewan.id_hewan, tahun, triwulan, total, total_ekor_butir, hewan) -- Untuk produksi telur, filter WHERE jenis = 'telur'. Kolom total adalah jumlah produksi dalam KILOGRAM (kg). Kolom total_ekor_butir adalah jumlah butir telur.
+- data_farm(id, kategori ('broiler','petelur','general'), hewan ('ayam_broiler','sapi_potong','Domba','babi','Ayam Petelur'), nama_badan_usaha, nama_unit_farm, jumlah_populasi, kapasitas_gudang, kecamatan, desa) -- Untuk menghitung JUMLAH PETERNAKAN/FARM (misal ayam broiler, petelur, sapi), gunakan COUNT(*) AS jumlah_unit_farm dengan filter hewan LIKE '%broiler%' OR kategori = 'broiler'.
+- ktt_master(id_ktt, nama_kelompok, kecamatan, desa, kelas_kelompok, gapoktan_induk, jenis_kelompok, luas_lahan_ha, nama_ketua, anggota_laki, anggota_perempuan) -- WAJIB gunakan kolom kelas_kelompok (bukan kelas) saat mencari kelas KTT (nilai: 'Pemula', 'Lanjut', 'Madya', 'Utama'). Gunakan LIKE '%nama%' saat mencari nama_kelompok.
+- kegiatan_ktt(id_kegiatan, tanggal, id_ktt, nama_ktt, nama_kegiatan, tim_pelaksana, hasil_kegiatan, kecamatan, desa) -- Kolom nama kegiatan adalah nama_kegiatan (bukan kegiatan).
+- capaian_sklb(id, no_urut, grup, tanggal, id_desa, target, capaian, selisih, tahun, desa, kecamatan) -- Untuk menghitung capaian/target SKLB: gunakan SUM(capaian) AS total_capaian, SUM(target) AS total_target, SUM(selisih) AS total_selisih.
+- puskeswan_profil(id_puskeswan, nama_puskeswan, dokter_hewan, wilayah_binaan, alamat, kontak, jam_operasional, layanan, fasilitas) -- Berisi 8 Puskeswan di Kebumen, dokter hewan pengampu, dan wilayah binaannya.
 - wilayah_binaan(id_binaan, id_puskeswan, id_kecamatan, binaan)
+- laporan_puskeswan(id, tahun, bulan, puskeswan, retribusi, bef, cacingan, scabies, orf, pmk_diag, lsd_diag)
+- barang(id_barang, nama_barang, jenis_barang ('Vaksin','Obat','Straw','Alat'), merk, satuan, kategori) -- Master barang dinas dan puskeswan.
+- stok_barang_dinas(id_stock_dinas, id_barang -> barang.id_barang, jumlah_stok, stok_minimum, lokasi_penyimpanan, tahun, bulan) -- Kolom nama_barang di stok_barang_dinas kosong. WAJIB JOIN barang b ON s.id_barang = b.id_barang untuk mengambil b.nama_barang, b.jenis_barang, dan b.satuan.
+- stok_puskeswan(id_stok, id_puskeswan, nama_barang, jumlah_stok, satuan)
+- dropping_keswan(id_dropping_keswan, id_puskeswan, nama_barang, jumlah, satuan, tahun, bulan)
 - diagnosa(id_diagnosa, diagnosa_nama, kategori_penyakit) -- Nama penyakit seperti PMK, LSD, BEF, Cacingan, Scabies, ORF, dll. disimpan di kolom diagnosa_nama.
 - keswan_laporan_penyakit(id_laporan_penyakit, tahun, bulan, id_puskeswan -> puskeswan_profil.id_puskeswan, id_diagnosa -> diagnosa.id_diagnosa, id_kecamatan -> kecamatan.id_kecamatan, jumlah_kasus, keterangan) -- WAJIB JOIN diagnosa untuk mencari nama penyakit (diagnosa_nama), gunakan SUM(jumlah_kasus) untuk total kasus penyakit, dan LEFT JOIN kecamatan karena id_kecamatan bisa NULL.
 - lalin_ternak(id_lalin, kategori, wilayah, tanggal_pengiriman, no_skkh, nama_pemilik, alamat_pemilik, jenis_ternak, umur, satuan_umur, jumlah, satuan_jumlah, asal_ternak, tujuan_ternak, ket)
-- stok_puskeswan(id_stok, id_puskeswan, nama_barang, jumlah_stok, satuan)
-- dropping_keswan(id_dropping_keswan, id_puskeswan, nama_barang, jumlah, satuan, tahun, bulan)
 - vaksin_apbd_target(id_target, id_puskeswan, target_pmk, realisasi_pmk)
 - capaian_vaksin_pmk_2026(id, kecamatan, desa, target, capaian)
 - vaksinasi(id_vaksinasi, id_puskeswan, id_user, nama, tanggal, bulan, triwulan, tahun, id_vaksin, id_hewan, jumlah)
@@ -55,9 +57,8 @@ TABEL & FOREIGN KEY UTAMA SIMANTAP KEBUMEN:
 - sapitime_master(id, name, ownerName, breed, kecamatan, desa, status, pregnancyDate)
 - sapitime_ib(id_ib, cattle_id, date, strawCode, pkbStatus, pkbResult, kecamatan, desa, inseminatorName, bullName, bullBreed)
 - bitpro_sklb_populasi_sapi_po(id, tahun, triwulan, populasi)
-- capaian_sklb(id, grup, tanggal, id_desa, target, capaian, selisih, tahun, desa, kecamatan)
-- stok_barang_dinas(id_stock_dinas, nama_barang, jenis_detail, jumlah_stok, stok_minimum, lokasi_penyimpanan)
-- laporan_puskeswan(id, tahun, bulan, puskeswan, retribusi, bef, cacingan, scabies, orf, pmk_diag, lsd_diag)
+- monev_lapangan(id_monev, tahun, kec, desa, namaKtt, kegiatan)
+- monev_kondisi_ternak(id_kondisi, id_monev->monev_lapangan.id_monev, mati_bangkai_jantan, mati_bangkai_betina)
 - pemotongan_hewan(id_pemotongan, nama_usaha, jenis, pemilik, kontak, alamat_pemilik)
 - pemotongan_komoditas_bulanan(id, komoditas, tahun, jan_jantan, jan_betina, total)
 - pemotongan_rumpun_bulanan(id, tahun, lokasi_kategori, bulan, po_jantan, po_betina_prod, simmental_jantan, limousine_jantan)
@@ -138,6 +139,37 @@ SQL: SELECT h.jenis_hewan, SUM(p.no) AS total_populasi FROM populasi p JOIN hewa
 Contoh 16 (Multi-Table Star Schema Join - 4 Tabel):
 Pertanyaan: "Tampilkan riwayat kasus penyakit hewan tahun 2025 lengkap dengan nama puskeswan, nama diagnosa penyakit, dan kecamatannya!"
 SQL: SELECT lp.tahun, lp.bulan, p.nama_puskeswan, diag.diagnosa_nama, diag.kategori_penyakit, k.kecamatan FROM keswan_laporan_penyakit lp JOIN puskeswan_profil p ON lp.id_puskeswan = p.id_puskeswan JOIN diagnosa diag ON lp.id_diagnosa = diag.id_diagnosa JOIN kecamatan k ON lp.id_kecamatan = k.id_kecamatan WHERE lp.tahun = 2025;
+Contoh 17 (Capaian & Target SKLB):
+Pertanyaan: "Berapa capaian, target, dan selisih SKLB di Kebumen?"
+SQL: SELECT SUM(target) AS total_target, SUM(capaian) AS total_capaian, SUM(selisih) AS total_selisih FROM capaian_sklb;
+
+Contoh 18 (Database KTT Berdasarkan Kelas):
+Pertanyaan: "Berapa jumlah KTT kelas Pemula dan Lanjut?"
+SQL: SELECT kelas_kelompok, COUNT(*) AS jumlah_ktt FROM ktt_master WHERE kelas_kelompok IN ('Pemula', 'Lanjut') GROUP BY kelas_kelompok;
+
+Contoh 19 (Kegiatan KTT):
+Pertanyaan: "Berapa banyak kegiatan KTT yang sudah tercatat?"
+SQL: SELECT COUNT(*) AS total_kegiatan FROM kegiatan_ktt;
+
+Contoh 20 (Populasi Ternak Hewan):
+Pertanyaan: "Berapa total populasi sapi potong di Kebumen?"
+SQL: SELECT SUM(p.total) AS total_populasi FROM populasi p JOIN hewan h ON p.id_hewan = h.id_hewan WHERE h.jenis_hewan LIKE '%sapi_potong%' OR h.jenis_hewan = 'Sapi';
+
+Contoh 21 (Produksi Telur dalam KILOGRAM):
+Pertanyaan: "Berapa total produksi telur di Kebumen?"
+SQL: SELECT SUM(total) AS total_kg_telur FROM produksi WHERE jenis = 'telur';
+
+Contoh 22 (Jumlah Peternakan Farm Broiler dalam UNIT):
+Pertanyaan: "Berapa jumlah peternakan ayam broiler di Kebumen?"
+SQL: SELECT COUNT(*) AS jumlah_unit_farm FROM data_farm WHERE hewan LIKE '%broiler%' OR kategori = 'broiler';
+
+Contoh 23 (Profil Puskeswan & Dokter Hewan):
+Pertanyaan: "Sebutkan daftar nama Puskeswan dan dokter hewan pengampunya!"
+SQL: SELECT nama_puskeswan, dokter_hewan, wilayah_binaan FROM puskeswan_profil;
+
+Contoh 24 (Stok Barang Dinas - JOIN Barang pada ID_BARANG):
+Pertanyaan: "Tampilkan sisa stok barang dan obat di gudang dinas!"
+SQL: SELECT b.nama_barang, b.jenis_barang, s.jumlah_stok, b.satuan FROM stok_barang_dinas s JOIN barang b ON s.id_barang = b.id_barang ORDER BY s.jumlah_stok DESC LIMIT 15;
 
 Contoh 17 (Top-5 Diagnosa Penyakit Terbanyak):
 Pertanyaan: "Apa saja 5 penyakit hewan yang paling sering terjadi sepanjang tahun 2025?"

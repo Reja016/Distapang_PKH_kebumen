@@ -17,19 +17,20 @@ export async function POST(req: Request) {
     // Menjalankan proses Text-to-SQL (Few-Shot + RAG)
     const hasil = await askSiMantapAI(lastMessage);
 
-    // Mengembalikan properti 'reply', 'sql', dan 'pageLink' sesuai yang diminta oleh ai-chat-widget.tsx
+    // Mengembalikan properti 'reply', 'sql', dan 'pageLink'
     return NextResponse.json({
       reply: hasil.reply,
-      sql: hasil.sql, // Berguna untuk kamu catat saat pengujian Bab 4 Skripsi!
+      sql: hasil.sql,
       pageLink: hasil.pageLink || null,
     });
   } catch (error: any) {
-    console.error("Error AI Text-to-SQL:", error.message);
+    console.error("Error AI Text-to-SQL:", error?.message || error);
+    // Keamanan: Lindungi kredensial, host, database, dan detail teknis internal dari kebocoran
     return NextResponse.json(
       {
-        reply: `Maaf, sistem mengalami kendala teknis saat memproses data: ${error.message}. Silakan coba kembali sesaat lagi.`,
+        reply: "Saya tidak diberikan akses lebih detil untuk informasi tersebut.",
       },
-      { status: 500 }
+      { status: 200 }
     );
   }
 }

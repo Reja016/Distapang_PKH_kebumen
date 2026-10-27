@@ -1,0 +1,1010 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- SIMANTAP - Maskot Sapi Chibi -->
+<svg id="maskot-stage-svg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 5600 6200" style="shape-rendering:geometricPrecision; text-rendering:geometricPrecision; fill-rule:evenodd; clip-rule:evenodd; overflow:visible;" class="mascot-state-pose1" width="100%" height="100%"><metadata id="simantap-project"><![CDATA[{"format":"simantap-project-v2","data":{"t":{"rig-calf-right-stand":"translate(-445, 1255) scale(0.9, 0.9)","rig-calf-left-stand":"translate(485, 1225) scale(0.9, 0.9)","rig-hip-bridge-stand":"translate(0, 845)","rig-shoulder-right":"translate(-795, -295) rotate(-24) scale(0.97, 0.97)","rig-elbow-right":"translate(-416.9, 193.1) rotate(33)","hand-right-fist-back":"translate(63.9, 717.2) rotate(133) scale(0.78, 0.78)","hand-right-open":"translate(129.2, 769.7) rotate(200) scale(0.85, 0.85)","rig-shoulder-left":"translate(760, -340) rotate(28.5) scale(0.95, 0.95)","rig-elbow-left":"translate(561.7, 217.2) rotate(-40)","hand-left-fist-back":"translate(-4, 737.7) rotate(-140) scale(0.78, 0.78)"},"ts":{"collapsed":{"rig-ekor-pos":"translate(685, 855) scale(0.85, 0.85)"},"opening":{"rig-elbow-right":"translate(-436, 591.1) rotate(120.5)","rig-shoulder-right":"translate(-795, -295) rotate(-66) scale(0.97, 0.97)","hand-right-open":"translate(128.1, 711.6) rotate(200) scale(0.85, 0.85)","rig-elbow-left":"translate(503.7, 298) rotate(-40)"},"idle":{"rig-elbow-right":"translate(-436, 317) rotate(22)","rig-shoulder-right":"translate(-903.1, -273.7) rotate(-16) scale(0.97, 0.97)","rig-ear-left":"translate(905.9, -1002.6) scale(0.95, 0.95)","rig-ear-right":"translate(-773.4, -1107.2) rotate(4) scale(0.96, 0.96)"},"explaining":{},"pose1":{"rig-elbow-right":"translate(162.7, -267) rotate(33)","badan-kerah-dada-overlay":"translate(1847.7, 2533.5) scale(0.6, 0.6)","rig-badan":"translate(-1373, -1825.1) scale(0.31, 0.31)","rig-head-base":"translate(10.7, -932.5) scale(1.24, 1.22)","rig-shoulder-left":"translate(37.7, 205.3) rotate(28.5) scale(0.54, 0.54)","rig-shoulder-right":"translate(155.2, -47.3) rotate(-24) scale(0.97, 0.97)","rig-hip-bridge-stand":"translate(108.6, -77.9)","rig-calf-right-stand":"translate(-114.9, -33.9) scale(0.47, 0.47)","rig-calf-left-stand":"translate(266.1, 436.9) scale(0.47, 0.47)","rig-ekor-pos":"translate(974.1, 954.2) scale(0.85, 0.85)","rig-neck":"translate(49.9, 1176.9)","hand-right-fist-back":"translate(64.5, 720.9) rotate(133) scale(0.78, 0.78)","hand-left-fist-back":"translate(-67, 343) rotate(-140) scale(0.78, 0.78)","rig-elbow-left":"translate(-284.4, 453.5) rotate(-40)","rig-ear-left":"translate(857.3, -902.9) scale(0.95, 0.95)","rig-ear-right":"translate(-723, -880.7) rotate(4) scale(0.96, 0.96)","rig-nose":"translate(-218.7, -231.3) scale(1.42, 1.42)","rig-mouth":"translate(-288.3, -118.9)","rig-eyes":"translate(-114.1, -1029.9)","rona_pipi_kanan":"translate(-929.9, 27.9) scale(0.72, 0.72)","rona_pipi_kiri":"translate(550.1, 158.1) scale(0.72, 0.72)"}},"o":{"anim-upper-arm-right":["e77","rig-elbow-right","e89"],"anim-upper-arm-left":["e107","rig-elbow-left","e119"]},"mo":{"rig-character-root":[{"ty":"bounce","st":"pose1","amp":60,"dur":1.5,"delay":0,"ease":"ease-in-out","loop":"loop"}],"rig-ear-right":[{"ty":"rotate","st":"pose1","amp":15,"dur":1.5,"delay":0,"ease":"ease-in-out","loop":"loop"}],"rig-ear-left":[{"ty":"rotate","st":"pose1","amp":15,"dur":1.5,"delay":0,"ease":"ease-in-out","loop":"loop"}]},"bi":{},"cu":[],"poses":[{"id":"pose1","name":"widget","base":""}],"hiddenBuiltins":[],"vis":{"collapsed":{"mouth-open-group":false},"opening":{},"idle":{"mouth-open-group":false},"explaining":{},"pose1":{}},"groups":[]}}]]></metadata><style id="mascot-export-css">
+/* =========================================================================
+ * ATURAN KETAT MATA &amp; MULUT (ANTI-TUMPUK)
+ * ========================================================================= */
+#eyes-open-group { display: block !important; }
+#eyes-blink-group { display: none !important; }
+#mouth-smile-group { display: block !important; }
+#mouth-open-group { display: none !important; }
+.mascot-blinking #eyes-open-group { display: none !important; }
+.mascot-blinking #eyes-blink-group { display: block !important; }
+.mascot-mouth-open #mouth-smile-group { display: none !important; }
+.mascot-mouth-open #mouth-open-group { display: block !important; }
+
+/* =========================================================================
+ * DEFAULT FALLBACK VISIBILITY RULES (STANDALONE SVG COMPATIBILITY)
+ * Mencegah bentrok visual saat SVG dibuka di Inkscape / Adobe Illustrator / Browser
+ * ========================================================================= */
+#rig-legs-crossed,
+#rig-upper-arms-under-body,
+#rig-arms-front-layer,
+#hand-right-open,
+#hand-left-open,
+#front-hand-right-explain,
+#front-hand-left-explain,
+#front-hand-right-sidakep,
+#front-hand-left-sidakep {
+  display: none !important;
+}
+.rig-joint { transform-origin: 0px 0px; transition: transform 0.42s cubic-bezier(0.34, 1.56, 0.64, 1); will-change: transform; }
+#rig-shadow { transform-origin: 2800px 5760px; transition: transform 0.42s, opacity 0.42s; }
+#eyes-open-group { display: block !important; }
+#eyes-blink-group { display: none !important; }
+#mouth-smile-group { display: block !important; }
+#mouth-open-group { display: none !important; }
+.mascot-blinking #eyes-open-group { display: none !important; }
+.mascot-blinking #eyes-blink-group { display: block !important; }
+.mascot-mouth-open #mouth-smile-group { display: none !important; }
+.mascot-mouth-open #mouth-open-group { display: block !important; }
+.mascot-state-collapsed #rig-legs-standing { display: none !important; }
+.mascot-state-collapsed #rig-legs-crossed { display: block !important; }
+.mascot-state-collapsed #rig-arms-standing-layer { display: none !important; }
+.mascot-state-collapsed #rig-upper-arms-under-body { display: block !important; }
+.mascot-state-collapsed #rig-arms-front-layer { display: block !important; }
+.mascot-state-collapsed #front-hand-right-sidakep, .mascot-state-collapsed #front-hand-left-sidakep { display: block !important; }
+.mascot-state-collapsed #front-hand-right-explain, .mascot-state-collapsed #front-hand-left-explain { display: none !important; }
+.mascot-state-collapsed #hand-right-open, .mascot-state-collapsed #hand-right-fist-back, .mascot-state-collapsed #hand-left-open, .mascot-state-collapsed #hand-left-fist-back { display: none !important; }
+.mascot-state-collapsed #anim-root-bounce { transform: translateY(200px); transition: transform 0.42s cubic-bezier(0.34, 1.4, 0.64, 1); }
+.mascot-state-collapsed #rig-shadow { transform: scaleX(1.18) scaleY(1.1); }
+.mascot-state-collapsed #anim-under-upper-arm-right, .mascot-state-collapsed #anim-front-upper-arm-right { transform: rotate(-8deg); }
+.mascot-state-collapsed #anim-front-lower-arm-right { transform: rotate(-74deg); }
+.mascot-state-collapsed #anim-under-upper-arm-left, .mascot-state-collapsed #anim-front-upper-arm-left { transform: rotate(8deg); }
+.mascot-state-collapsed #anim-front-lower-arm-left { transform: rotate(74deg); }
+.mascot-state-collapsed #anim-torso { animation: 3.4s ease-in-out 0s infinite normal none running breatheChill; }
+.mascot-state-collapsed #anim-head { animation: 4.5s ease-in-out 0s infinite normal none running headChill; }
+.mascot-state-collapsed #anim-ear-right { animation: 3.4s ease-in-out 0s infinite normal none running earRightIdle; }
+.mascot-state-collapsed #anim-ear-left { animation: 3.4s ease-in-out 0s infinite normal none running earLeftIdle; }
+.mascot-state-collapsed #anim-ekor { animation: 3.4s ease-in-out 0s infinite normal none running tailWagSlow; }
+.mascot-state-collapsed #anim-thigh-cross-right { animation: 3.4s ease-in-out 0s infinite normal none running crossedThighRightMove; }
+.mascot-state-collapsed #anim-thigh-cross-left { animation: 3.4s ease-in-out 0s infinite normal none running crossedThighLeftMove; }
+.mascot-state-collapsed #anim-calf-cross-right { animation: 2.6s ease-in-out 0s infinite normal none running crossedCalfRightMove; }
+.mascot-state-collapsed #anim-calf-cross-left { animation: 2.6s ease-in-out 0s infinite normal none running crossedCalfLeftMove; }
+.mascot-state-opening #rig-legs-standing { display: block !important; }
+.mascot-state-opening #rig-legs-crossed { display: none !important; }
+.mascot-state-opening #rig-arms-standing-layer { display: block !important; }
+.mascot-state-opening #rig-upper-arms-under-body { display: none !important; }
+.mascot-state-opening #rig-arms-front-layer { display: none !important; }
+.mascot-state-opening #hand-right-open { display: block !important; }
+.mascot-state-opening #hand-right-fist-back { display: none !important; }
+.mascot-state-opening #hand-left-fist-back { display: block !important; }
+.mascot-state-opening #hand-left-open { display: none !important; }
+.mascot-state-opening #front-hand-right-sidakep, .mascot-state-opening #front-hand-left-sidakep, .mascot-state-opening #front-hand-right-explain, .mascot-state-opening #front-hand-left-explain { display: none !important; }
+.mascot-state-opening #anim-root-bounce { animation: 0.65s cubic-bezier(0.22, 1, 0.36, 1) 0s 1 normal forwards running standUpPop; }
+.mascot-state-opening #anim-torso { animation: 1.2s ease-in-out 0s 1 normal forwards running waveTorsoBounce; }
+.mascot-state-opening #anim-upper-arm-right { animation: 1.2s ease-in-out 0s 1 normal forwards running waveUpperArmOnce; }
+.mascot-state-opening #anim-lower-arm-right { animation: 1.2s ease-in-out 0s 1 normal forwards running waveForearmOnce; }
+.mascot-state-opening #anim-hand-wave { animation: 1.2s ease-in-out 0s 1 normal forwards running waveHandOnce; }
+.mascot-state-opening #anim-upper-arm-left { animation: 1.2s ease-in-out 0s 1 normal forwards running waveLeftArmCounter; }
+.mascot-state-opening #anim-lower-arm-left { transform: rotate(0deg); }
+.mascot-state-opening #anim-head { animation: 1.2s ease-in-out 0s 1 normal forwards running waveHeadTilt; }
+.mascot-state-opening #anim-ear-right { animation: 0.8s ease-in-out 0s infinite normal none running earRightIdle; }
+.mascot-state-opening #anim-ear-left { animation: 0.8s ease-in-out 0s infinite normal none running earLeftIdle; }
+.mascot-state-opening #anim-ekor { animation: 0.6s ease-in-out 0s infinite normal none running tailWagFast; }
+.mascot-state-idle #rig-legs-standing { display: block !important; }
+.mascot-state-idle #rig-legs-crossed { display: none !important; }
+.mascot-state-idle #rig-arms-standing-layer { display: block !important; }
+.mascot-state-idle #rig-upper-arms-under-body { display: none !important; }
+.mascot-state-idle #rig-arms-front-layer { display: none !important; }
+.mascot-state-idle #hand-right-fist-back { display: block !important; }
+.mascot-state-idle #hand-right-open { display: none !important; }
+.mascot-state-idle #hand-left-fist-back { display: block !important; }
+.mascot-state-idle #hand-left-open { display: none !important; }
+.mascot-state-idle #front-hand-right-sidakep, .mascot-state-idle #front-hand-left-sidakep, .mascot-state-idle #front-hand-right-explain, .mascot-state-idle #front-hand-left-explain { display: none !important; }
+.mascot-state-idle #anim-root-bounce { transform: translateY(0px); transition: transform 0.4s; }
+.mascot-state-idle #anim-upper-arm-right { animation: 2.8s ease-in-out 0s infinite normal none running idleArmRight; }
+.mascot-state-idle #anim-lower-arm-right { transform: rotate(0deg); }
+.mascot-state-idle #anim-upper-arm-left { animation: 2.8s ease-in-out 0s infinite normal none running idleArmLeft; }
+.mascot-state-idle #anim-lower-arm-left { transform: rotate(0deg); }
+.mascot-state-idle #anim-torso { animation: 2.8s ease-in-out 0s infinite normal none running breatheIdle; }
+.mascot-state-idle #anim-head { animation: 3.6s ease-in-out 0s infinite normal none running headIdle; }
+.mascot-state-idle #anim-ear-right { animation: 2.8s ease-in-out 0s infinite normal none running earRightIdle; }
+.mascot-state-idle #anim-ear-left { animation: 2.8s ease-in-out 0s infinite normal none running earLeftIdle; }
+.mascot-state-idle #anim-ekor { animation: 2.4s ease-in-out 0s infinite normal none running tailWagIdle; }
+.mascot-state-explaining #rig-legs-standing { display: block !important; }
+.mascot-state-explaining #rig-legs-crossed { display: none !important; }
+.mascot-state-explaining #rig-arms-standing-layer { display: none !important; }
+.mascot-state-explaining #rig-upper-arms-under-body { display: block !important; }
+.mascot-state-explaining #rig-arms-front-layer { display: block !important; }
+.mascot-state-explaining #front-hand-right-explain, .mascot-state-explaining #front-hand-left-explain { display: block !important; }
+.mascot-state-explaining #front-hand-right-sidakep, .mascot-state-explaining #front-hand-left-sidakep { display: none !important; }
+.mascot-state-explaining #hand-right-open, .mascot-state-explaining #hand-right-fist-back, .mascot-state-explaining #hand-left-open, .mascot-state-explaining #hand-left-fist-back { display: none !important; }
+.mascot-state-explaining #anim-root-bounce { transform: translateY(0px); }
+.mascot-state-explaining #anim-torso { animation: 1.8s ease-in-out 0s infinite normal none running explainTorso; }
+.mascot-state-explaining #anim-under-upper-arm-right, .mascot-state-explaining #anim-front-upper-arm-right { animation: 2s ease-in-out 0s infinite normal none running explainUpperRight; }
+.mascot-state-explaining #anim-front-lower-arm-right { animation: 1.3s ease-in-out 0s infinite normal none running explainLowerRight; }
+.mascot-state-explaining #anim-under-upper-arm-left, .mascot-state-explaining #anim-front-upper-arm-left { animation: 2.2s ease-in-out 0s infinite normal none running explainUpperLeft; }
+.mascot-state-explaining #anim-front-lower-arm-left { animation: 1.5s ease-in-out 0s infinite normal none running explainLowerLeft; }
+.mascot-state-explaining #anim-head { animation: 1.9s ease-in-out 0s infinite normal none running explainHeadNod; }
+.mascot-state-explaining #anim-ear-right { animation: 1.9s ease-in-out 0s infinite normal none running earRightIdle; }
+.mascot-state-explaining #anim-ear-left { animation: 1.9s ease-in-out 0s infinite normal none running earLeftIdle; }
+.mascot-state-explaining #anim-ekor { animation: 1.2s ease-in-out 0s infinite normal none running tailWagFast; }
+.mascot-state-idle #anim-legs-breath { animation: 2.8s ease-in-out 0s infinite normal none running legBreatheIdle; }
+.mascot-state-explaining #anim-legs-breath { animation: 1.8s ease-in-out 0s infinite normal none running legBreatheExplain; }
+.mascot-state-opening #anim-legs-breath { animation: 1.2s ease-in-out 0s 1 normal forwards running legBreatheWave; }
+@keyframes headChill { 
+  0%, 100% { transform: rotate(-2deg) translateY(0px); }
+  50% { transform: rotate(2deg) translateY(-18px); }
+}
+@keyframes crossedThighRightMove { 
+  0%, 100% { transform: rotate(0deg) translateY(0px); }
+  50% { transform: rotate(-2.5deg) translateY(-14px); }
+}
+@keyframes crossedThighLeftMove { 
+  0%, 100% { transform: rotate(0deg) translateY(0px); }
+  50% { transform: rotate(2.5deg) translateY(-14px); }
+}
+@keyframes crossedCalfRightMove { 
+  0%, 100% { transform: rotate(0deg) translateY(0px); }
+  50% { transform: rotate(3.8deg) translateY(-20px); }
+}
+@keyframes crossedCalfLeftMove { 
+  0%, 100% { transform: rotate(0deg) translateY(0px); }
+  50% { transform: rotate(-3.8deg) translateY(-20px); }
+}
+@keyframes standUpPop { 
+  0% { transform: translateY(200px) scaleY(0.92); }
+  45% { transform: translateY(-100px) scaleY(1.04); }
+  75% { transform: translateY(20px) scaleY(0.98); }
+  100% { transform: translateY(0px) scaleY(1); }
+}
+@keyframes waveUpperArmOnce { 
+  0% { transform: translate(-75px, -20px) rotate(72deg); }
+  22% { transform: translate(-75px, -26px) rotate(82deg); }
+  48% { transform: translate(-75px, -18px) rotate(75deg); }
+  74% { transform: translate(-75px, -26px) rotate(84deg); }
+  100% { transform: translate(-75px, -20px) rotate(78deg); }
+}
+@keyframes waveForearmOnce { 
+  0% { transform: rotate(20deg); }
+  18% { transform: rotate(38deg); }
+  40% { transform: rotate(14deg); }
+  62% { transform: rotate(38deg); }
+  82% { transform: rotate(14deg); }
+  100% { transform: rotate(24deg); }
+}
+@keyframes waveHandOnce { 
+  0% { transform: rotate(-6deg); }
+  22% { transform: rotate(26deg); }
+  44% { transform: rotate(-24deg); }
+  66% { transform: rotate(26deg); }
+  86% { transform: rotate(-18deg); }
+  100% { transform: rotate(0deg); }
+}
+@keyframes waveTorsoBounce { 
+  0%, 100% { transform: translateY(-45px) rotate(0deg); }
+  25% { transform: translateY(-75px) rotate(2deg); }
+  50% { transform: translateY(-35px) rotate(-1.5deg); }
+  75% { transform: translateY(-70px) rotate(2deg); }
+}
+@keyframes waveHeadTilt { 
+  0%, 100% { transform: rotate(-2deg) translateY(0px); }
+  25% { transform: rotate(4.5deg) translateY(-22px); }
+  50% { transform: rotate(-3deg) translateY(8px); }
+  75% { transform: rotate(4.5deg) translateY(-18px); }
+}
+@keyframes waveLeftArmCounter { 
+  0%, 100% { transform: rotate(-12deg); }
+  50% { transform: rotate(-20deg); }
+}
+@keyframes breatheIdle { 
+  0%, 100% { transform: translateY(-55px); }
+  50% { transform: translateY(-92px); }
+}
+@keyframes idleLegRight { 
+  0%, 100% { transform: translateY(0px) rotate(0deg) scaleY(1); }
+  50% { transform: translateY(-16px) rotate(2.5deg) scaleY(1.02); }
+}
+@keyframes idleLegLeft { 
+  0%, 100% { transform: translateY(-16px) rotate(-2.5deg) scaleY(1.02); }
+  50% { transform: translateY(0px) rotate(0deg) scaleY(1); }
+}
+@keyframes idleArmRight { 
+  0%, 100% { transform: rotate(0deg); }
+  50% { transform: rotate(3.5deg); }
+}
+@keyframes idleArmLeft { 
+  0%, 100% { transform: rotate(0deg); }
+  50% { transform: rotate(-3.5deg); }
+}
+@keyframes headIdle { 
+  0%, 100% { transform: rotate(0deg) translateY(0px); }
+  50% { transform: rotate(1.5deg) translateY(-20px); }
+}
+@keyframes earRightIdle { 
+  0%, 100% { transform: rotate(0deg); }
+  50% { transform: rotate(-4deg); }
+}
+@keyframes earLeftIdle { 
+  0%, 100% { transform: rotate(0deg); }
+  50% { transform: rotate(4deg); }
+}
+@keyframes tailWagSlow { 
+  0%, 100% { transform: rotate(8deg); }
+  50% { transform: rotate(20deg); }
+}
+@keyframes tailWagIdle { 
+  0%, 100% { transform: rotate(6deg); }
+  50% { transform: rotate(22deg); }
+}
+@keyframes tailWagFast { 
+  0%, 100% { transform: rotate(2deg); }
+  50% { transform: rotate(26deg); }
+}
+@keyframes explainTorso { 
+  0%, 100% { transform: translateY(-55px) rotate(0deg); }
+  50% { transform: translateY(-88px) rotate(1deg); }
+}
+@keyframes explainUpperRight { 
+  0%, 100% { transform: rotate(6deg); }
+  50% { transform: rotate(16deg); }
+}
+@keyframes explainLowerRight { 
+  0%, 100% { transform: rotate(-84deg); }
+  50% { transform: rotate(-98deg); }
+}
+@keyframes explainUpperLeft { 
+  0%, 100% { transform: rotate(-6deg); }
+  50% { transform: rotate(-15deg); }
+}
+@keyframes explainLowerLeft { 
+  0%, 100% { transform: rotate(74deg); }
+  50% { transform: rotate(90deg); }
+}
+@keyframes explainHeadNod { 
+  0%, 100% { transform: rotate(-2.5deg) translateY(0px); }
+  35% { transform: rotate(3deg) translateY(-25px); }
+  70% { transform: rotate(-1deg) translateY(12px); }
+}
+.mascot-state-pose1 #rig-legs-standing { display: block !important; }
+.mascot-state-pose1 #rig-legs-crossed { display: none !important; }
+.mascot-state-pose1 #rig-arms-standing-layer { display: block !important; }
+.mascot-state-pose1 #rig-upper-arms-under-body { display: none !important; }
+.mascot-state-pose1 #rig-arms-front-layer { display: none !important; }
+.mascot-state-pose1 #hand-right-fist-back { display: block !important; }
+.mascot-state-pose1 #hand-left-fist-back { display: block !important; }
+.mascot-state-pose1 #hand-right-open { display: none !important; }
+.mascot-state-pose1 #hand-left-open { display: none !important; }
+.mascot-state-pose1 #anim-root-bounce, .mascot-state-pose1 #anim-torso, .mascot-state-pose1 #anim-head, .mascot-state-pose1 #anim-ekor, .mascot-state-pose1 #anim-legs-breath, .mascot-state-pose1 #anim-upper-arm-right, .mascot-state-pose1 #anim-lower-arm-right, .mascot-state-pose1 #anim-upper-arm-left, .mascot-state-pose1 #anim-lower-arm-left { animation: auto ease 0s 1 normal none running none !important; }
+@property --edx { syntax: "&lt;length&gt;"; inherits: false; initial-value: 0px; }
+@property --edy { syntax: "&lt;length&gt;"; inherits: false; initial-value: 0px; }
+@property --edr { syntax: "&lt;angle&gt;"; inherits: false; initial-value: 0deg; }
+@property --eds { syntax: "&lt;number&gt;"; inherits: false; initial-value: 1; }
+#rig-character-root { translate: var(--edx) var(--edy); rotate: var(--edr); scale: var(--eds); transform-origin: 2800px 3750px; }
+@keyframes edm0 { 
+  0%, 100% { --edy: 0px; translate: 0px 0px; }
+  50% { --edy: -60px; translate: 0px -60px; }
+}
+.mascot-state-pose1 #rig-character-root { animation: 1.5s ease-in-out 0s infinite normal none running edm0; }
+#rig-ear-right { translate: var(--edx) var(--edy); rotate: var(--edr); scale: var(--eds); transform-origin: -773.4px -1107.2px; }
+@keyframes edm1 { 
+  0%, 100% { --edr: 0deg; rotate: 0deg; }
+  50% { --edr: 15deg; rotate: 15deg; }
+}
+.mascot-state-pose1 #rig-ear-right { animation: 1.5s ease-in-out 0s infinite normal none running edm1; }
+#rig-ear-left { translate: var(--edx) var(--edy); rotate: var(--edr); scale: var(--eds); transform-origin: 935.9px -1057.6px; }
+@keyframes edm2 { 
+  0%, 100% { --edr: 0deg; rotate: 0deg; }
+  50% { --edr: -15deg; rotate: -15deg; }
+}
+.mascot-state-pose1 #rig-ear-left { animation: 1.5s ease-in-out 0s infinite normal none running edm2; }
+.mascot-state-collapsed #mouth-open-group{display:none !important;}
+.mascot-state-idle #mouth-open-group{display:none !important;}
+</style>
+  <!-- ===================================================================== -->
+  <!-- PANDUAN EDIT POSISI & ROTASI DI SVG:                                  -->
+  <!-- 1. translate(X, Y):                                                   -->
+  <!--    • X negatif (-) = geser ke KIRI   | X positif (+) = geser ke KANAN -->
+  <!--    • Y negatif (-) = geser ke ATAS   | Y positif (+) = geser ke BAWAH -->
+  <!-- 2. rotate(derajat):                                                   -->
+  <!--    • Positif (+) = putar searah jarum jam                             -->
+  <!--    • Negatif (-) = putar berlawanan jarum jam                         -->
+  <!-- 3. scale(X, Y): mengatur ukuran bagian tubuh (misal lebar bahu)       -->
+  <!-- ===================================================================== -->
+  <defs>
+    <style type="text/css">
+      .fil12 {fill:#2C110D}
+      .fil1 {fill:#2E1211}
+      .fil9 {fill:#45130C}
+      .fil15 {fill:#53423B}
+      .fil14 {fill:#644D47}
+      .fil21 {fill:#644D47}
+      .fil23 {fill:#764712}
+      .fil22 {fill:#8F6D57}
+      .fil4 {fill:#927661}
+      .fil3 {fill:#BC9A7E}
+      .fil11 {fill:#BFC4CA}
+      .fil2 {fill:#C1C2C9}
+      .fil7 {fill:#CC8A85}
+      .fil16 {fill:#D57A73}
+      .fil18 {fill:#D99625}
+      .fil5 {fill:#E8C6AC}
+      .fil17 {fill:#F5BD27}
+      .fil19 {fill:#F5BD27}
+      .fil13 {fill:#F6ADA3}
+      .fil6 {fill:#F6B0A4}
+      .fil20 {fill:#FCE387}
+      .fil8 {fill:#FECCC4}
+      .fil0 {fill:#FEFEFE}
+      .fil10 {fill:#FFFFFF}
+    </style>
+
+    <!-- ================================================================= -->
+    <!-- DEFINISI CLIP PATHS (<clipPath>)                                  -->
+    <!-- ================================================================= -->
+    <clipPath id="clip-lengan-kanan-atas" clipPathUnits="userSpaceOnUse">
+      <rect x="2000" y="4450" width="1550" height="1300" rx="350" ry="350"/>
+    </clipPath>
+
+    <clipPath id="clip-lengan-kanan-bawah" clipPathUnits="userSpaceOnUse">
+      <rect x="2000" y="5050" width="1200" height="1300" rx="350" ry="350"/>
+    </clipPath>
+
+    <clipPath id="clip-lengan-kiri-atas" clipPathUnits="userSpaceOnUse">
+      <rect x="5900" y="4450" width="1600" height="1300" rx="350" ry="350"/>
+    </clipPath>
+
+    <clipPath id="clip-lengan-kiri-bawah" clipPathUnits="userSpaceOnUse">
+      <rect x="6250" y="5050" width="1250" height="1300" rx="350" ry="350"/>
+    </clipPath>
+
+    <!-- ClipPath untuk menjaga Kerah Hoodie & Dada berada di atas Bahu yang dilebarkan -->
+    <clipPath id="clip-kerah-dada-badan" clipPathUnits="userSpaceOnUse">
+      <rect x="3740" y="4700" width="1960" height="600"/>
+      <rect x="3938" y="5150" width="1560" height="1700"/>
+    </clipPath>
+
+    <clipPath id="clip-kepala-area" clipPathUnits="userSpaceOnUse">
+      <path d="M1570.6 2038.13c19.5,137.86 30.63,92.24 66.53,154.31 -23.84,-2.66 -49.85,-4.48 -69.84,-17.54 -31.84,-6.75 -122.95,-44.47 -141.13,-24.84 62.22,46.42 62.74,109.95 221.01,140.57 -36.91,32.04 -119.81,24.23 -150.61,-6.11 -49.7,-4.27 -60.1,-33.45 -72.19,-35.14 -135.77,35.1 -234.2,96.65 -309.66,166.42 -58.97,54.53 -144.71,183.35 -181.36,292.27 -46.71,138.78 -49.35,256.06 -69.17,404.69 -19.37,145.19 -87.05,247.67 -33.8,401.21 30.84,22.87 42.07,62.98 103.13,115.93 137.09,118.86 252.32,167.26 454.98,204.43 341.27,62.59 796.76,17.2 1000.38,-255.52 76.28,-102.15 97.64,-190.09 74.21,-344.22 -31.97,-210.35 2,-350.47 -82.74,-577.27 -20.53,-54.95 -59.87,-111.68 -70.57,-153.79 -24.52,-59.68 -102.88,-124.12 -166.2,-166.74 -126.07,-84.86 -207.48,-74.97 -234.53,-95.67 -25.89,-25.78 -32.92,-61.38 -60.07,-84.03 -65.48,-54.62 -89.93,-6.76 -272.23,-134.38 -9.55,7.12 -11.7,-16.11 -6.14,15.42z" clip-rule="nonzero"/>
+    </clipPath>
+
+    <clipPath id="clip-rongga-mulut" clipPathUnits="userSpaceOnUse">
+      <ellipse cx="7005" cy="9963" rx="345" ry="250"/>
+    </clipPath>
+  </defs>
+
+  <!-- Bayangan Lantai Chibi (Ground Shadow) -->
+  <ellipse id="rig-shadow" cx="2800" cy="5760" rx="1080" ry="165" fill="rgba(44, 17, 13, 0.12)"/>
+
+  <!-- ===================================================================== -->
+  <!-- ROOT KARAKTER (Pusat Torso berada di X=2800, Y=3750)                  -->
+  <!-- ===================================================================== -->
+  <g id="rig-character-root" transform="translate(2800, 3750)">
+    <g id="anim-root-bounce">
+
+      <!-- ================================================================= -->
+      <!-- 1. EKOR (Source: id="ekor")                                       -->
+      <!-- Posisi: Di sisi kanan layar (X=680, Y=860)                        -->
+      <!-- Ubah translate(680, 860) untuk menggeser posisi ekor              -->
+      <!-- ================================================================= -->
+      <g id="rig-ekor-pos" transform="translate(680, 860) scale(0.85, 0.85)">
+        <g id="anim-ekor" class="rig-joint" data-pivot="Pangkal Ekor">
+          <!-- Source SVG: id="ekor" | Titik Putar (Pivot): (680, 5120) -->
+<g transform="translate(-680, -5120)">
+  <path class="fil12" d="M649.67 5130.97l-2.97 -57.68c77.03,-63.98 206.44,-97.77 328.6,-60.28 213.2,65.44 296.68,321.9 535.65,283.94 82.34,-13.08 140.36,-64.26 191.55,-121.69 38.21,-42.87 11.67,-40.24 51.66,-62.67l21.52 14.08c-87.75,240.69 -281.45,335.41 -498.41,244.24 -160.08,-67.27 -242.09,-218.06 -428.78,-177.6 -27.45,5.95 -51.55,14.51 -74,27.68 -29.74,17.44 -33.62,30.49 -63.11,39.99 -33.9,-30.55 -52.61,-75.28 -61.71,-130.01zm1312.45 -589.15c174.07,257.84 36.28,595.82 -169.69,532.46 -43.94,-13.52 -84.76,-71.71 -90.37,-136.13 -9.16,-105.22 46.61,-165.81 113.48,-226.47 163.07,-147.91 81.43,-94.69 146.58,-169.86zm-43.72 -81.63c-51.19,143.12 33.76,80.9 -127.68,219.27 -68.88,59.03 -119.19,119.54 -131.04,216.12 -12.79,104.28 26.43,123.27 48.53,187.68 -16.66,19.43 -26.63,39.76 -40.87,57.15 -10.43,12.72 -35.07,36.21 -50.5,50.62 -172.48,161.16 -346.72,-32.94 -419.97,-95.26 -69.94,-59.49 -136.51,-126.67 -269.82,-143.9 -104.66,-13.53 -268.89,29.77 -321.27,94.24 -31.9,110.25 40.65,244.8 105.6,271.18 38.19,3.37 106.42,-118.16 261.38,-73.45 52.67,15.19 73.68,36.99 111.22,66.47 30.9,24.27 71.14,51.93 111.97,74.58 245.06,135.93 479.25,53.26 597.66,-160.89 38.69,-69.97 2.13,-78.96 83.47,-93.47 378.24,-67.47 175.78,-728.72 41.32,-670.34z"/>
+  <path class="fil14" d="M1962.12 4541.82c-65.15,75.17 16.49,21.95 -146.58,169.86 -66.87,60.66 -122.64,121.25 -113.48,226.47 5.61,64.42 46.43,122.61 90.37,136.13 205.97,63.36 343.76,-274.62 169.69,-532.46z"/>
+  <path class="fil10" d="M649.67 5130.97c57.92,-23.5 261.31,-30.28 357.39,1.39 47.5,15.66 98.02,51.57 129.81,74.05 40.26,28.46 70.91,52.29 115.85,78.47 87.74,51.12 208.91,89.11 317.38,45.56 100.45,-40.33 178.21,-152.75 184.06,-217.85 -39.99,22.43 -13.45,19.8 -51.66,62.67 -51.19,57.43 -109.21,108.61 -191.55,121.69 -238.97,37.96 -322.45,-218.5 -535.65,-283.94 -122.16,-37.49 -251.57,-3.7 -328.6,60.28l2.97 57.68z"/>
+  <path class="fil11" d="M649.67 5130.97c9.1,54.73 27.81,99.46 61.71,130.01 29.49,-9.5 33.37,-22.55 63.11,-39.99 22.45,-13.17 46.55,-21.73 74,-27.68 186.69,-40.46 268.7,110.33 428.78,177.6 216.96,91.17 410.66,-3.55 498.41,-244.24l-21.52 -14.08c-5.85,65.1 -83.61,177.52 -184.06,217.85 -108.47,43.55 -229.64,5.56 -317.38,-45.56 -44.94,-26.18 -75.59,-50.01 -115.85,-78.47 -31.79,-22.48 -82.31,-58.39 -129.81,-74.05 -96.08,-31.67 -299.47,-24.89 -357.39,-1.39z"/>
+</g>
+        </g>
+      </g>
+
+      <!-- ================================================================= -->
+      <!-- 2A. KAKI CHIBI BERDIRI (Aktif pada Pose 2 Opening, 3 Idle, 4 Explain) -->
+      <!-- Source: id="kaki_kanan", id="kaki_kiri"                           -->
+      <!-- Posisi Y=1080 diturunkan agar saat Idle posisi Body lebih ke atas -->
+      <!-- ================================================================= -->
+      <g id="rig-legs-standing">
+        <!-- ============================================================= -->
+        <!-- #anim-legs-breath = SATU grup (pinggul + kedua kaki) yang ikut "bernapas"  -->
+        <!-- naik-turun halus mengikuti badan (lebih kecil dari bounce badan).          -->
+        <!-- Atur besar bounce di @keyframes legBreatheIdle / legBreatheExplain / legBreatheWave -->
+        <!-- ============================================================= -->
+        <g id="anim-legs-breath">
+          <!-- Kaki Kanan Karakter (Kiri Layar) | Ubah translate(-370, 1230) untuk geser kaki berdiri -->
+          <g id="rig-calf-right-stand" transform="translate(-445, 1255) scale(0.9, 0.9)">
+            <g id="anim-leg-stand-right">
+              <!-- Source SVG: id="kaki_kanan" | Titik Putar (Pivot): (1411, 9150) -->
+<g transform="translate(-1411, -9150)">
+  <path class="fil10" d="M1143.48 9212.65c50.83,33.06 88.63,79.61 158.9,107.4 73.22,28.96 138.27,33.51 215.46,22.59 -32.18,68.66 -171.28,101.13 -266.06,91.67 0.86,108.14 -37.95,194.86 -59.64,290.6 163.05,-9.77 213.43,27.81 330.06,83.88 1.5,-1.78 3.05,-4.42 3.85,-5.84 0.79,-1.4 2.73,-4.15 3.64,-5.9l11.99 -31.9c4.65,-15.91 8.42,-28.92 13.41,-46.1 9.14,-31.45 15.6,-62.95 22.93,-95.49 13.58,-60.26 30.85,-127.62 35.34,-189.56 5.25,-72.54 6.66,-150.14 22.91,-217.98 18.57,-77.45 31.75,-107.96 13.76,-192.74 -13.64,-64.3 -26.72,-74.91 -102.47,-134.35 -112.75,-88.46 -220.49,-260.72 -261.86,-426.96 -266.69,-114.89 -297,24.84 -286.87,271.17 6.19,150.76 62.5,391.82 144.65,479.51z"/>
+  <path class="fil11" d="M1522.2 9808.79c58.88,51.32 42.59,26.5 100.7,90.05 0.93,1.02 2.83,3.25 4.47,4.65 13.91,-23.12 237.3,-862.94 235.1,-889.39 -5.14,-61.9 -61.24,-146.05 -90.6,-188.27 -102.91,-147.99 -327.02,-315.82 -486.17,-363.86 41.37,166.24 149.11,338.5 261.86,426.96 75.75,59.44 88.83,70.05 102.47,134.35 17.99,84.78 4.81,115.29 -13.76,192.74 -16.25,67.84 -17.66,145.44 -22.91,217.98 -4.49,61.94 -21.76,129.3 -35.34,189.56 -7.33,32.54 -13.79,64.04 -22.93,95.49 -4.99,17.18 -8.76,30.19 -13.41,46.1l-11.99 31.9c-0.91,1.75 -2.85,4.5 -3.64,5.9 -0.8,1.42 -2.35,4.06 -3.85,5.84z"/>
+  <path class="fil12" d="M1005 9992.99c-8.5,-77 44.61,-155.74 80.6,-185.37 93.45,-76.92 304.68,-36.86 395.96,27.27 32.58,22.88 116.43,99.92 126.83,125.78 -77.28,61.49 -282.29,89.79 -406.78,73.6 -3.66,-7.03 -4.93,-7.72 -6.93,-23.18 -1.63,-12.57 -1.25,-10.82 0.28,-23.31l28.18 -125.79c-74.13,29.61 -61.02,87.94 -95.3,158.95 -43.3,-2.68 -93.15,-11.81 -122.84,-27.95zm280.7 -1531.02c159.15,48.04 383.26,215.87 486.17,363.86 29.36,42.22 85.46,126.37 90.6,188.27 2.2,26.45 -221.19,866.27 -235.1,889.39 -1.64,-1.4 -3.54,-3.63 -4.47,-4.65 -58.11,-63.55 -41.82,-38.73 -100.7,-90.05 -116.63,-56.07 -167.01,-93.65 -330.06,-83.88 21.69,-95.74 60.5,-182.46 59.64,-290.6 -21.84,-132.6 -77.76,-136.73 -108.3,-221.66 -82.15,-87.69 -138.46,-328.75 -144.65,-479.51 -10.13,-246.33 20.18,-386.06 286.87,-271.17zm-223.03 -77.7c-164.89,63.35 -120.15,410.27 -80.62,579.03 74.9,319.74 233.09,348.28 221.36,506.28 -4.9,65.99 -32.73,155.24 -51.98,218.64 -11.3,37.23 -6.92,40.19 -36.25,56.43 -85.13,47.14 -140.46,106.17 -154.2,211.7 -21.45,164.73 446,133.92 571.03,95.66 122.66,-37.53 133.12,-68.17 163.16,-193.45l149.32 -578.41c25.18,-83.91 80.35,-210.1 59.4,-298.83 -37.89,-160.53 -213.14,-335.65 -319.31,-408.82 -86.82,-59.84 -372.9,-245.47 -521.91,-188.23z"/>
+  <path class="fil14" d="M1005 9992.99c29.69,16.14 79.54,25.27 122.84,27.95 34.28,-71.01 21.17,-129.34 95.3,-158.95l-28.18 125.79c-1.53,12.49 -1.91,10.74 -0.28,23.31 2,15.46 3.27,16.15 6.93,23.18 124.49,16.19 329.5,-12.11 406.78,-73.6 -10.4,-25.86 -94.25,-102.9 -126.83,-125.78 -91.28,-64.13 -302.51,-104.19 -395.96,-27.27 -35.99,29.63 -89.1,108.37 -80.6,185.37z"/>
+  <path class="fil11" d="M1251.78 9434.31c94.78,9.46 233.88,-23.01 266.06,-91.67 -77.19,10.92 -142.24,6.37 -215.46,-22.59 -70.27,-27.79 -108.07,-74.34 -158.9,-107.4 30.54,84.93 86.46,89.06 108.3,221.66z"/>
+</g>
+            </g>
+          </g>
+          <!-- Kaki Kiri Karakter (Kanan Layar) -->
+          <g id="rig-calf-left-stand" transform="translate(485, 1225) scale(0.9, 0.9)">
+            <g id="anim-leg-stand-left">
+              <!-- Source SVG: id="kaki_kiri" | Titik Putar (Pivot): (2639, 9150) -->
+<g transform="translate(-2639, -9150)">
+  <path class="fil10" d="M2753.39 8463.56c-26.72,56.01 -28.89,112.99 -63.12,171.73 -157.21,269.72 -298.04,286.54 -311.79,392.06 -12.62,96.83 3.33,111.47 22.63,193.8 19.43,82.92 38.06,500.3 116.28,586.06 37.94,-11.88 83.74,-45.85 138.51,-62.93 64.78,-20.2 117.25,-25.12 187.61,-17.67 -15.76,-83.57 -47.98,-150.08 -55.36,-241.69l-16.52 -49.38c-54.36,4.83 -104.36,-1.85 -151.02,-19.11 -41.37,-15.3 -76.72,-38.85 -101.81,-71.25 88.32,3.36 132.87,7.57 212.54,-25.15 39.35,-16.16 45.6,-21.62 81.26,-45.21 35.12,-23.23 40.86,-42.08 76.55,-59.17 95.34,-51.73 217.22,-599.47 110.59,-754.4 -41.2,-59.86 -199.29,-34.25 -246.35,2.31z"/>
+  <path class="fil11" d="M2517.39 9807.21c-78.22,-85.76 -96.85,-503.14 -116.28,-586.06 -19.3,-82.33 -35.25,-96.97 -22.63,-193.8 13.75,-105.52 154.58,-122.34 311.79,-392.06 34.23,-58.74 36.4,-115.72 63.12,-171.73 -59.59,14.84 -140.95,62.33 -192.98,93.28 -127.86,76.06 -372.46,296.57 -386.62,455.41l234.11 893.83 109.49 -98.87z"/>
+  <path class="fil12" d="M2843.1 10034.13c-124.31,20.25 -359.42,-14.16 -416.42,-81.92 16.47,-25.93 32.46,-36.89 57.81,-56.85 87.43,-68.82 98.49,-100.65 256.68,-125.81 74.74,-11.89 153.67,-12.96 206.47,38.41 53.46,52.02 84.75,86.97 85.15,186.54 -26.37,9.3 -76.38,23.55 -118.49,30.49 -21.82,-31.93 -16.11,-57.43 -35.85,-96.38 -21.72,-42.85 -38.72,-42.25 -58.8,-62.88 -3.48,41.21 25.98,104.42 23.45,168.4zm46.05 -818.48c-31.56,104.28 -109.87,90.21 -101,269.27 7.38,91.61 39.6,158.12 55.36,241.69 -70.36,-7.45 -122.83,-2.53 -187.61,17.67 -54.77,17.08 -100.57,51.05 -138.51,62.93l-109.49 98.87 -234.11 -893.83c14.16,-158.84 258.76,-379.35 386.62,-455.41 52.03,-30.95 133.39,-78.44 192.98,-93.28 47.06,-36.56 205.15,-62.17 246.35,-2.31 106.63,154.93 -15.25,702.67 -110.59,754.4zm-35.68 -834.36c-154.21,28.82 -392.6,169.26 -472.94,249.47 -36.33,36.27 -54.75,47.42 -89.28,88.96 -79.79,95.99 -197.5,227.81 -154.8,375.81 53.81,186.5 111.54,375.39 157.78,570.98 20.69,87.5 44.49,208.23 75.73,288.01 62.22,158.93 429.28,128.76 566.01,112.02 248.95,-30.47 110.33,-233.94 32.35,-295.5 -61.27,-48.37 -57.22,0.42 -87.6,-98.19 -109.31,-354.75 -3.87,-278.87 111.58,-531.95 42.62,-93.43 63.71,-169.72 81.33,-282.07 15.4,-98.26 21.7,-247.16 -0.26,-343.66 -25.56,-112.38 -87.88,-158.56 -219.9,-133.88z"/>
+  <path class="fil14" d="M2843.1 10034.13c2.53,-63.98 -26.93,-127.19 -23.45,-168.4 20.08,20.63 37.08,20.03 58.8,62.88 19.74,38.95 14.03,64.45 35.85,96.38 42.11,-6.94 92.12,-21.19 118.49,-30.49 -0.4,-99.57 -31.69,-134.52 -85.15,-186.54 -52.8,-51.37 -131.73,-50.3 -206.47,-38.41 -158.19,25.16 -169.25,56.99 -256.68,125.81 -25.35,19.96 -41.34,30.92 -57.81,56.85 57,67.76 292.11,102.17 416.42,81.92z"/>
+  <path class="fil11" d="M2788.15 9484.92c-8.87,-179.06 69.44,-164.99 101,-269.27 -35.69,17.09 -41.43,35.94 -76.55,59.17 -35.66,23.59 -41.91,29.05 -81.26,45.21 -79.67,32.72 -124.22,28.51 -212.54,25.15 25.09,32.4 60.44,55.95 101.81,71.25 46.66,17.26 96.66,23.94 151.02,19.11l16.52 49.38z"/>
+</g>
+            </g>
+          </g>
+          <!-- PINGGUL / CELANA PUTIH berbentuk V terbalik, digambar SETELAH kaki agar menutup pangkal kaki. -->
+          <!-- Ubah translate(0, 860) untuk naik/turun pinggul (angka kecil = lebih ke atas / tubuh lebih pendek) -->
+          <g id="rig-hip-bridge-stand" transform="translate(0, 845)">
+            <clipPath id="clip-hip-stand"><path d="M-540 0 L540 0 C540 120 440 250 300 350 C200 420 80 450 0 450 C-80 450 -200 420 -300 350 C-440 250 -540 120 -540 0 Z"/></clipPath>
+            <path d="M-540 0 L540 0 C540 120 440 250 300 350 C200 420 80 450 0 450 C-80 450 -200 420 -300 350 C-440 250 -540 120 -540 0 Z" fill="#FFFFFF" stroke="#2C110D" stroke-width="76" stroke-linejoin="round"/>
+            <path d="M-540 0 L540 0 C540 120 440 250 300 350 C200 420 80 450 0 450 C-80 450 -200 420 -300 350 C-440 250 -540 120 -540 0 Z" fill="#FFFFFF"/>
+            <ellipse cx="0" cy="-95" rx="560" ry="140" fill="#BFC4CA" clip-path="url(#clip-hip-stand)"/>
+          </g>
+        </g>
+      </g>
+
+      <!-- ================================================================= -->
+      <!-- 2B. KAKI DUDUK BERSILA (Aktif pada Pose 1 Collapsed / Tertutup)   -->
+      <!-- Source: id="paha_kiri_atas", id="paha_kanan_atas", id="kaki_kanan", id="kaki_kiri" -->
+      <!-- Paha (+940) & Kaki Bawah (+1480) diturunkan dari body agar paha   -->
+      <!-- sinkron menyambung ke lutut kaki bawah dan tidak terlihat bentek! -->
+      <!-- ================================================================= -->
+      <g id="rig-legs-crossed" style="display:none;">
+        <!-- Pangkal Celana/Pinggul Belakang saat Bersila -->
+        <ellipse cx="0" cy="1160" rx="520" ry="240" fill="#BFC4CA" stroke="#2C110D" stroke-width="70"/>
+        <!-- Paha Kanan Karakter (Kiri Layar) | Ubah translate(-380, 940) & rotate(30) untuk atur paha -->
+        <g id="rig-thigh-cross-right" transform="translate(-380, 940) rotate(30) scale(0.96, 0.96)">
+          <g id="anim-thigh-cross-right" class="rig-joint" data-pivot="Paha Kanan Bersila">
+            <!-- Source SVG: id="paha_kiri_atas" | Titik Putar (Pivot): (1550, 6850) -->
+<g transform="translate(-1550, -6850)">
+  <path class="fil10" d="M980.86 7653.68l11.05 -9.87c143.49,-141.12 373.6,-34.87 431.2,80.59 84.27,-78.51 164.82,-271.85 167.78,-431.54 -15,-15.21 -92.19,-65.23 -124.97,-100.48 -41.69,-44.83 -73.86,-71.06 -108.68,-119.72 -45.5,-63.59 -158.09,-216.94 -107.69,-308.08 -87.24,12.93 -189.19,263.37 -228.68,379.79 -64.08,188.9 -91.01,304.56 -40.01,509.31z"/>
+  <path class="fil11" d="M980.86 7653.68c52.34,78.87 63.12,119.06 159.51,178.05 77.46,47.4 190.89,57.1 281.79,19.06 148.26,-62.03 209.67,-237.24 302,-384.32 44.74,-71.27 98.25,-134.15 71.12,-247.2 -61.6,-256.71 -458.92,-534.28 -545.73,-454.69 -50.4,91.14 62.19,244.49 107.69,308.08 34.82,48.66 66.99,74.89 108.68,119.72 32.78,35.25 109.97,85.27 124.97,100.48 -2.96,159.69 -83.51,353.03 -167.78,431.54 -57.6,-115.46 -287.71,-221.71 -431.2,-80.59l-11.05 9.87z"/>
+  <path class="fil12" d="M980.86 7653.68c-51,-204.75 -24.07,-320.41 40.01,-509.31 39.49,-116.42 141.44,-366.86 228.68,-379.79 86.81,-79.59 484.13,197.98 545.73,454.69 27.13,113.05 -26.38,175.93 -71.12,247.2 -92.33,147.08 -153.74,322.29 -302,384.32 -90.9,38.04 -204.33,28.34 -281.79,-19.06 -96.39,-58.99 -107.17,-99.18 -159.51,-178.05zm254.44 -940.56c-154.98,51.48 -542.67,859.64 -168.19,1124.02 120.05,84.75 261.47,116.65 412.22,37.06 109.08,-57.6 166.43,-179.68 233.39,-300.67 61.95,-111.93 177.99,-217.54 119.89,-391.56 -19.12,-57.26 -61.72,-124.69 -93.47,-169.21 -69.2,-97.01 -173.8,-197.03 -288.66,-253.61 -58.58,-28.86 -142.06,-70.32 -215.18,-46.03z"/>
+</g>
+          </g>
+        </g>
+        <!-- Paha Kiri Karakter (Kanan Layar) | Ubah translate(380, 940) & rotate(-30) untuk atur paha -->
+        <g id="rig-thigh-cross-left" transform="translate(380, 940) rotate(-30) scale(0.96, 0.96)">
+          <g id="anim-thigh-cross-left" class="rig-joint" data-pivot="Paha Kiri Bersila">
+            <!-- Source SVG: id="paha_kanan_atas" | Titik Putar (Pivot): (2400, 6850) -->
+<g transform="translate(-2400, -6850)">
+  <path class="fil10" d="M3000.88 7655.29c71.24,-150.73 16.99,-360.72 -33.03,-508.57 -36.19,-106.95 -143.43,-371.91 -222.89,-383.31 -13.75,20.31 -2.02,-10.26 0.89,38.75 9.23,155.45 -190.81,367.68 -288.19,441.6 -20.8,15.8 -45.26,32.75 -61.72,49.92 -5.22,138.81 91.18,361.58 162.76,431.48 19.58,-16.03 56.24,-101.73 192.61,-136.82 136.73,-35.17 181.67,1.13 249.57,66.95z"/>
+  <path class="fil11" d="M3000.88 7655.29c-67.9,-65.82 -112.84,-102.12 -249.57,-66.95 -136.37,35.09 -173.03,120.79 -192.61,136.82 -71.58,-69.9 -167.98,-292.67 -162.76,-431.48 16.46,-17.17 40.92,-34.12 61.72,-49.92 97.38,-73.92 297.42,-286.15 288.19,-441.6 -2.91,-49.01 -14.64,-18.44 -0.89,-38.75l-33.89 -13c-56.35,-5.69 -176.6,53.5 -216.83,80.89 -116.37,79.24 -257.04,237.22 -299.87,377.28 -35.85,117.25 22.8,181.51 67.45,254.82 88.39,145.15 157.07,327.3 294.24,383.26 209.73,85.57 389.46,-46.33 444.82,-191.37z"/>
+  <path class="fil12" d="M2744.96 6763.41c79.46,11.4 186.7,276.36 222.89,383.31 50.02,147.85 104.27,357.84 33.03,508.57 -55.36,145.04 -235.09,276.94 -444.82,191.37 -137.17,-55.96 -205.85,-238.11 -294.24,-383.26 -44.65,-73.31 -103.3,-137.57 -67.45,-254.82 42.83,-140.06 183.5,-298.04 299.87,-377.28 40.23,-27.39 160.48,-86.58 216.83,-80.89l33.89 13zm-96.85 -50.6c-132.41,37.06 -267.45,137.48 -328.57,206.06 -57.49,64.52 -178.3,222.52 -182.72,358.21 -3.58,109.59 108.57,235.06 171.69,359.86 60.76,120.13 136.38,229.95 274.47,268.1 274.58,75.84 547.43,-145.28 487.82,-546.06 -23.31,-156.65 -132.17,-454.59 -229,-576.79 -41.83,-52.8 -94.59,-97.11 -193.69,-69.38z"/>
+</g>
+          </g>
+        </g>
+        <!-- Kaki Bawah Kanan (Kiri Layar) menyambung di lutut paha (-740, 1480) -->
+        <g id="rig-calf-cross-right" transform="translate(-740, 1480) rotate(-74) scale(0.86, 0.86)">
+          <g id="anim-calf-cross-right" class="rig-joint" data-pivot="Kaki Bawah Kanan Bersila">
+            <!-- Source SVG: id="kaki_kanan" | Titik Putar (Pivot): (1380, 8620) -->
+<g transform="translate(-1380, -8620)">
+  <path class="fil10" d="M1143.48 9212.65c50.83,33.06 88.63,79.61 158.9,107.4 73.22,28.96 138.27,33.51 215.46,22.59 -32.18,68.66 -171.28,101.13 -266.06,91.67 0.86,108.14 -37.95,194.86 -59.64,290.6 163.05,-9.77 213.43,27.81 330.06,83.88 1.5,-1.78 3.05,-4.42 3.85,-5.84 0.79,-1.4 2.73,-4.15 3.64,-5.9l11.99 -31.9c4.65,-15.91 8.42,-28.92 13.41,-46.1 9.14,-31.45 15.6,-62.95 22.93,-95.49 13.58,-60.26 30.85,-127.62 35.34,-189.56 5.25,-72.54 6.66,-150.14 22.91,-217.98 18.57,-77.45 31.75,-107.96 13.76,-192.74 -13.64,-64.3 -26.72,-74.91 -102.47,-134.35 -112.75,-88.46 -220.49,-260.72 -261.86,-426.96 -266.69,-114.89 -297,24.84 -286.87,271.17 6.19,150.76 62.5,391.82 144.65,479.51z"/>
+  <path class="fil11" d="M1522.2 9808.79c58.88,51.32 42.59,26.5 100.7,90.05 0.93,1.02 2.83,3.25 4.47,4.65 13.91,-23.12 237.3,-862.94 235.1,-889.39 -5.14,-61.9 -61.24,-146.05 -90.6,-188.27 -102.91,-147.99 -327.02,-315.82 -486.17,-363.86 41.37,166.24 149.11,338.5 261.86,426.96 75.75,59.44 88.83,70.05 102.47,134.35 17.99,84.78 4.81,115.29 -13.76,192.74 -16.25,67.84 -17.66,145.44 -22.91,217.98 -4.49,61.94 -21.76,129.3 -35.34,189.56 -7.33,32.54 -13.79,64.04 -22.93,95.49 -4.99,17.18 -8.76,30.19 -13.41,46.1l-11.99 31.9c-0.91,1.75 -2.85,4.5 -3.64,5.9 -0.8,1.42 -2.35,4.06 -3.85,5.84z"/>
+  <path class="fil12" d="M1005 9992.99c-8.5,-77 44.61,-155.74 80.6,-185.37 93.45,-76.92 304.68,-36.86 395.96,27.27 32.58,22.88 116.43,99.92 126.83,125.78 -77.28,61.49 -282.29,89.79 -406.78,73.6 -3.66,-7.03 -4.93,-7.72 -6.93,-23.18 -1.63,-12.57 -1.25,-10.82 0.28,-23.31l28.18 -125.79c-74.13,29.61 -61.02,87.94 -95.3,158.95 -43.3,-2.68 -93.15,-11.81 -122.84,-27.95zm280.7 -1531.02c159.15,48.04 383.26,215.87 486.17,363.86 29.36,42.22 85.46,126.37 90.6,188.27 2.2,26.45 -221.19,866.27 -235.1,889.39 -1.64,-1.4 -3.54,-3.63 -4.47,-4.65 -58.11,-63.55 -41.82,-38.73 -100.7,-90.05 -116.63,-56.07 -167.01,-93.65 -330.06,-83.88 21.69,-95.74 60.5,-182.46 59.64,-290.6 -21.84,-132.6 -77.76,-136.73 -108.3,-221.66 -82.15,-87.69 -138.46,-328.75 -144.65,-479.51 -10.13,-246.33 20.18,-386.06 286.87,-271.17zm-223.03 -77.7c-164.89,63.35 -120.15,410.27 -80.62,579.03 74.9,319.74 233.09,348.28 221.36,506.28 -4.9,65.99 -32.73,155.24 -51.98,218.64 -11.3,37.23 -6.92,40.19 -36.25,56.43 -85.13,47.14 -140.46,106.17 -154.2,211.7 -21.45,164.73 446,133.92 571.03,95.66 122.66,-37.53 133.12,-68.17 163.16,-193.45l149.32 -578.41c25.18,-83.91 80.35,-210.1 59.4,-298.83 -37.89,-160.53 -213.14,-335.65 -319.31,-408.82 -86.82,-59.84 -372.9,-245.47 -521.91,-188.23z"/>
+  <path class="fil14" d="M1005 9992.99c29.69,16.14 79.54,25.27 122.84,27.95 34.28,-71.01 21.17,-129.34 95.3,-158.95l-28.18 125.79c-1.53,12.49 -1.91,10.74 -0.28,23.31 2,15.46 3.27,16.15 6.93,23.18 124.49,16.19 329.5,-12.11 406.78,-73.6 -10.4,-25.86 -94.25,-102.9 -126.83,-125.78 -91.28,-64.13 -302.51,-104.19 -395.96,-27.27 -35.99,29.63 -89.1,108.37 -80.6,185.37z"/>
+  <path class="fil11" d="M1251.78 9434.31c94.78,9.46 233.88,-23.01 266.06,-91.67 -77.19,10.92 -142.24,6.37 -215.46,-22.59 -70.27,-27.79 -108.07,-74.34 -158.9,-107.4 30.54,84.93 86.46,89.06 108.3,221.66z"/>
+</g>
+          </g>
+        </g>
+        <!-- Kaki Bawah Kiri (Kanan Layar) menyambung di lutut paha (740, 1480) -->
+        <g id="rig-calf-cross-left" transform="translate(740, 1480) rotate(74) scale(0.86, 0.86)">
+          <g id="anim-calf-cross-left" class="rig-joint" data-pivot="Kaki Bawah Kiri Bersila">
+            <!-- Source SVG: id="kaki_kiri" | Titik Putar (Pivot): (2670, 8620) -->
+<g transform="translate(-2670, -8620)">
+  <path class="fil10" d="M2753.39 8463.56c-26.72,56.01 -28.89,112.99 -63.12,171.73 -157.21,269.72 -298.04,286.54 -311.79,392.06 -12.62,96.83 3.33,111.47 22.63,193.8 19.43,82.92 38.06,500.3 116.28,586.06 37.94,-11.88 83.74,-45.85 138.51,-62.93 64.78,-20.2 117.25,-25.12 187.61,-17.67 -15.76,-83.57 -47.98,-150.08 -55.36,-241.69l-16.52 -49.38c-54.36,4.83 -104.36,-1.85 -151.02,-19.11 -41.37,-15.3 -76.72,-38.85 -101.81,-71.25 88.32,3.36 132.87,7.57 212.54,-25.15 39.35,-16.16 45.6,-21.62 81.26,-45.21 35.12,-23.23 40.86,-42.08 76.55,-59.17 95.34,-51.73 217.22,-599.47 110.59,-754.4 -41.2,-59.86 -199.29,-34.25 -246.35,2.31z"/>
+  <path class="fil11" d="M2517.39 9807.21c-78.22,-85.76 -96.85,-503.14 -116.28,-586.06 -19.3,-82.33 -35.25,-96.97 -22.63,-193.8 13.75,-105.52 154.58,-122.34 311.79,-392.06 34.23,-58.74 36.4,-115.72 63.12,-171.73 -59.59,14.84 -140.95,62.33 -192.98,93.28 -127.86,76.06 -372.46,296.57 -386.62,455.41l234.11 893.83 109.49 -98.87z"/>
+  <path class="fil12" d="M2843.1 10034.13c-124.31,20.25 -359.42,-14.16 -416.42,-81.92 16.47,-25.93 32.46,-36.89 57.81,-56.85 87.43,-68.82 98.49,-100.65 256.68,-125.81 74.74,-11.89 153.67,-12.96 206.47,38.41 53.46,52.02 84.75,86.97 85.15,186.54 -26.37,9.3 -76.38,23.55 -118.49,30.49 -21.82,-31.93 -16.11,-57.43 -35.85,-96.38 -21.72,-42.85 -38.72,-42.25 -58.8,-62.88 -3.48,41.21 25.98,104.42 23.45,168.4zm46.05 -818.48c-31.56,104.28 -109.87,90.21 -101,269.27 7.38,91.61 39.6,158.12 55.36,241.69 -70.36,-7.45 -122.83,-2.53 -187.61,17.67 -54.77,17.08 -100.57,51.05 -138.51,62.93l-109.49 98.87 -234.11 -893.83c14.16,-158.84 258.76,-379.35 386.62,-455.41 52.03,-30.95 133.39,-78.44 192.98,-93.28 47.06,-36.56 205.15,-62.17 246.35,-2.31 106.63,154.93 -15.25,702.67 -110.59,754.4zm-35.68 -834.36c-154.21,28.82 -392.6,169.26 -472.94,249.47 -36.33,36.27 -54.75,47.42 -89.28,88.96 -79.79,95.99 -197.5,227.81 -154.8,375.81 53.81,186.5 111.54,375.39 157.78,570.98 20.69,87.5 44.49,208.23 75.73,288.01 62.22,158.93 429.28,128.76 566.01,112.02 248.95,-30.47 110.33,-233.94 32.35,-295.5 -61.27,-48.37 -57.22,0.42 -87.6,-98.19 -109.31,-354.75 -3.87,-278.87 111.58,-531.95 42.62,-93.43 63.71,-169.72 81.33,-282.07 15.4,-98.26 21.7,-247.16 -0.26,-343.66 -25.56,-112.38 -87.88,-158.56 -219.9,-133.88z"/>
+  <path class="fil14" d="M2843.1 10034.13c2.53,-63.98 -26.93,-127.19 -23.45,-168.4 20.08,20.63 37.08,20.03 58.8,62.88 19.74,38.95 14.03,64.45 35.85,96.38 42.11,-6.94 92.12,-21.19 118.49,-30.49 -0.4,-99.57 -31.69,-134.52 -85.15,-186.54 -52.8,-51.37 -131.73,-50.3 -206.47,-38.41 -158.19,25.16 -169.25,56.99 -256.68,125.81 -25.35,19.96 -41.34,30.92 -57.81,56.85 57,67.76 292.11,102.17 416.42,81.92z"/>
+  <path class="fil11" d="M2788.15 9484.92c-8.87,-179.06 69.44,-164.99 101,-269.27 -35.69,17.09 -41.43,35.94 -76.55,59.17 -35.66,23.59 -41.91,29.05 -81.26,45.21 -79.67,32.72 -124.22,28.51 -212.54,25.15 25.09,32.4 60.44,55.95 101.81,71.25 46.66,17.26 96.66,23.94 151.02,19.11l16.52 49.38z"/>
+</g>
+          </g>
+        </g>
+      </g>
+
+      <!-- ================================================================= -->
+      <!-- 3. GRUP TORSO / BADAN UTAMA                                       -->
+      <!-- ================================================================= -->
+      <g id="anim-torso" class="rig-joint" data-pivot="Pinggang / Torso">
+
+        <!-- =============================================================== -->
+        <!-- 3A. LAYER LENGAN MODE BERDIRI (POSE 2 MELAMBAI & POSE 3 IDLE)   -->
+        <!-- Berada DI BAWAH Body (#rig-badan) dan menempel di dalam Bahu    -->
+        <!-- yang sudah dilebarkan!                                          -->
+        <!-- Urutan Layer dari Bawah ke Atas:                                -->
+        <!--   1. Lengan Bawah (paling bawah)                                -->
+        <!--   2. Kepalan / Telapak Tangan (DI ATAS Lengan Bawah)            -->
+        <!--   3. Lengan Atas (DI ATAS Lengan Bawah & DI BAWAH Body)         -->
+        <!--   4. Badan Hoodie dengan Bahu Dilebarkan (DI ATAS Lengan Atas)  -->
+        <!-- =============================================================== -->
+        <g id="rig-arms-standing-layer">
+
+          <!-- LENGAN KANAN KARAKTER (Kiri Layar) | Geser translate(-730, -365) untuk atur posisi bahu -->
+          <g id="rig-shoulder-right" transform="translate(-795, -295) rotate(-24) scale(0.97, 0.97)">
+            <g id="anim-upper-arm-right" class="rig-joint" data-pivot="Bahu Kanan"><g transform="translate(-3150, -5000)" clip-path="url(#clip-lengan-kanan-atas)">
+  <path d="M2482.46 5269.26c60.03,-13.01 145.37,11.65 193.05,36.84 46.05,24.35 111.92,93.95 129.46,99.55 30.57,-32.86 79.51,0.02 131.05,-71.27 21.7,-30.03 67.52,-100.66 85.78,-143.7 84.51,-199.26 43.1,-360.15 58.94,-406.02 -0.15,-25.9 -3.62,-29.73 -21.91,-47.59 -12.81,7.32 -18.64,-8.73 -98.47,29.26 -160.93,76.57 -234.28,221.04 -336.02,357.33 -20.21,27.06 -39.95,51.17 -59.68,76.25 -35.85,45.57 -33.47,40.73 -28.93,51.98 12.85,31.86 24.57,-17.95 5.24,2.7l-58.51 14.67z" fill="none" stroke="#2C110D" stroke-width="96" stroke-linejoin="round" stroke-linecap="round"/>
+  <path d="M2804.97 5405.65c14.21,31.12 28.22,48.9 39.43,86.91 8.83,29.94 11.35,65.57 26.37,88.38 48.76,-43.54 215.11,-224.37 249.4,-300.27 45.45,-100.58 19.02,-432.06 -39.43,-496.01 -15.84,45.87 25.57,206.76 -58.94,406.02 -18.26,43.04 -64.08,113.67 -85.78,143.7 -51.54,71.29 -100.48,38.41 -131.05,71.27z" fill="none" stroke="#2C110D" stroke-width="96" stroke-linejoin="round" stroke-linecap="round"/>
+  <path d="M3172.83 5247.54c179.16,-76.79 171.96,-463.62 -55.72,-505.82 56.41,203.19 74.31,277.83 55.72,505.82z" fill="none" stroke="#2C110D" stroke-width="96" stroke-linejoin="round" stroke-linecap="round"/>
+  <path d="M2482.46 5269.26l58.51 -14.67c19.33,-20.65 7.61,29.16 -5.24,-2.7 -4.54,-11.25 -6.92,-6.41 28.93,-51.98 19.73,-25.08 39.47,-49.19 59.68,-76.25 101.74,-136.29 175.09,-280.76 336.02,-357.33 79.83,-37.99 85.66,-21.94 98.47,-29.26l-15.36 -25.99c-136.81,-15.02 -272.64,139.23 -340.45,229.35 -74.49,99.01 -165.26,231.6 -245.12,321.19 10.95,14.57 -3.2,3.85 24.56,7.64z" fill="none" stroke="#2C110D" stroke-width="96" stroke-linejoin="round" stroke-linecap="round"/>
+  <ellipse cx="2630" cy="5360" rx="240" ry="220" fill="#2C110D"/>
+  <ellipse cx="2630" cy="5360" rx="192" ry="172" fill="#F5BD27"/>
+  <path class="fil17" d="M2482.46 5269.26c60.03,-13.01 145.37,11.65 193.05,36.84 46.05,24.35 111.92,93.95 129.46,99.55 30.57,-32.86 79.51,0.02 131.05,-71.27 21.7,-30.03 67.52,-100.66 85.78,-143.7 84.51,-199.26 43.1,-360.15 58.94,-406.02 -0.15,-25.9 -3.62,-29.73 -21.91,-47.59 -12.81,7.32 -18.64,-8.73 -98.47,29.26 -160.93,76.57 -234.28,221.04 -336.02,357.33 -20.21,27.06 -39.95,51.17 -59.68,76.25 -35.85,45.57 -33.47,40.73 -28.93,51.98 12.85,31.86 24.57,-17.95 5.24,2.7l-58.51 14.67z"/>
+  <path class="fil18" d="M2804.97 5405.65c14.21,31.12 28.22,48.9 39.43,86.91 8.83,29.94 11.35,65.57 26.37,88.38 48.76,-43.54 215.11,-224.37 249.4,-300.27 45.45,-100.58 19.02,-432.06 -39.43,-496.01 -15.84,45.87 25.57,206.76 -58.94,406.02 -18.26,43.04 -64.08,113.67 -85.78,143.7 -51.54,71.29 -100.48,38.41 -131.05,71.27z"/>
+  <path class="fil19" d="M3172.83 5247.54c179.16,-76.79 171.96,-463.62 -55.72,-505.82 56.41,203.19 74.31,277.83 55.72,505.82z"/>
+  <path class="fil20" d="M2482.46 5269.26l58.51 -14.67c19.33,-20.65 7.61,29.16 -5.24,-2.7 -4.54,-11.25 -6.92,-6.41 28.93,-51.98 19.73,-25.08 39.47,-49.19 59.68,-76.25 101.74,-136.29 175.09,-280.76 336.02,-357.33 79.83,-37.99 85.66,-21.94 98.47,-29.26l-15.36 -25.99c-136.81,-15.02 -272.64,139.23 -340.45,229.35 -74.49,99.01 -165.26,231.6 -245.12,321.19 10.95,14.57 -3.2,3.85 24.56,7.64z"/>
+  
+</g><g id="rig-elbow-right" transform="translate(-416.9, 193.1) rotate(33)">
+                <g id="anim-lower-arm-right" class="rig-joint" data-pivot="Siku Kanan">
+                  <!-- Gambar Lengan Kanan Bawah -->
+                  <!-- Segmen Lengan Kanan Bawah | Source: lengan_kanan[1,8,5,7] | Pivot Siku: (2560, 5400) -->
+<g transform="translate(-2560, -5400)" clip-path="url(#clip-lengan-kanan-bawah)">
+  <path d="M2674.88 5820.43c24.28,-23.85 48.62,16.16 92.08,-55.03 32.98,-54.01 -17.05,-168.67 -41.42,-221.85 -16.56,-36.16 -44.93,-63.54 -50.38,-94.68 39.79,0.32 70.84,7.48 95.25,24.43 0.98,9.97 -1.56,4.27 -8.55,16.73l49.61 41.97c-31.61,-182.28 -332.76,-327.14 -454.28,-141.29 -42.19,64.52 -61.21,216.78 -68.75,304.03 -11.31,130.8 -16.27,238.8 84,297.87 31.64,-17.31 121.77,-174.16 302.44,-172.18z" fill="none" stroke="#2C110D" stroke-width="96" stroke-linejoin="round" stroke-linecap="round"/>
+  <path d="M2674.88 5820.43c56.44,-5.4 111.67,-6.26 160.49,20.87 17.23,9.58 25.87,18.03 39.3,13.04 28.67,-67.67 -17.32,-165.1 -43.08,-221.83 -34.31,-75.58 -90.09,-111.08 -120.67,-160.32l50.94 17.84c6.99,-12.46 9.53,-6.76 8.55,-16.73 -24.41,-16.95 -55.46,-24.11 -95.25,-24.43 5.45,31.14 33.82,58.52 50.38,94.68 24.37,53.18 74.4,167.84 41.42,221.85 -43.46,71.19 -67.8,31.18 -92.08,55.03z" fill="none" stroke="#2C110D" stroke-width="96" stroke-linejoin="round" stroke-linecap="round"/>
+  <path d="M2470.8 6062.05c102.73,-101.45 243.49,-136.36 388,-113.97 -3.65,-81.14 -33.88,-89.71 -113.43,-95.37 -116.05,-8.26 -217.9,26.38 -294.72,105.32 -48.65,49.99 -32.22,60.31 -5.92,127.43l26.07 -23.41z" fill="none" stroke="#2C110D" stroke-width="96" stroke-linejoin="round" stroke-linecap="round"/>
+  <path d="M2484.94 6113.24c133.29,30.77 348.22,-41.82 374.85,-127.04 -94.02,-10.44 -143.69,-15.04 -234.15,19.6 -49.88,19.11 -139.08,59.55 -140.7,107.44z" fill="none" stroke="#2C110D" stroke-width="96" stroke-linejoin="round" stroke-linecap="round"/>
+  <path class="fil17" d="M2674.88 5820.43c24.28,-23.85 48.62,16.16 92.08,-55.03 32.98,-54.01 -17.05,-168.67 -41.42,-221.85 -16.56,-36.16 -44.93,-63.54 -50.38,-94.68 39.79,0.32 70.84,7.48 95.25,24.43 0.98,9.97 -1.56,4.27 -8.55,16.73l49.61 41.97c-31.61,-182.28 -332.76,-327.14 -454.28,-141.29 -42.19,64.52 -61.21,216.78 -68.75,304.03 -11.31,130.8 -16.27,238.8 84,297.87 31.64,-17.31 121.77,-174.16 302.44,-172.18z"/>
+  <path class="fil18" d="M2674.88 5820.43c56.44,-5.4 111.67,-6.26 160.49,20.87 17.23,9.58 25.87,18.03 39.3,13.04 28.67,-67.67 -17.32,-165.1 -43.08,-221.83 -34.31,-75.58 -90.09,-111.08 -120.67,-160.32l50.94 17.84c6.99,-12.46 9.53,-6.76 8.55,-16.73 -24.41,-16.95 -55.46,-24.11 -95.25,-24.43 5.45,31.14 33.82,58.52 50.38,94.68 24.37,53.18 74.4,167.84 41.42,221.85 -43.46,71.19 -67.8,31.18 -92.08,55.03z"/>
+  <path class="fil17" d="M2470.8 6062.05c102.73,-101.45 243.49,-136.36 388,-113.97 -3.65,-81.14 -33.88,-89.71 -113.43,-95.37 -116.05,-8.26 -217.9,26.38 -294.72,105.32 -48.65,49.99 -32.22,60.31 -5.92,127.43l26.07 -23.41z" stroke="#2C110D" stroke-width="56" stroke-linejoin="round"/>
+  <path class="fil18" d="M2484.94 6113.24c133.29,30.77 348.22,-41.82 374.85,-127.04 -94.02,-10.44 -143.69,-15.04 -234.15,19.6 -49.88,19.11 -139.08,59.55 -140.7,107.44z" stroke="#2C110D" stroke-width="56" stroke-linejoin="round"/>
+  
+</g>
+
+                  <!-- 2. Tangan Kanan (Digambar SETELAH Lengan Bawah agar berada DI ATAS Lengan Bawah) -->
+                  <g id="rig-wrist-right">
+                    <!-- POSE 3 IDLE: Kepalan tangan menghadap belakang di-rotasi 180 derajat! -->
+                    <!-- Source: id="tangan_kanan_mengepal_ke_belakang" (jempol menghadap ke dalam ke arah body) -->
+                    <!-- Ubah translate(-35, 620) untuk geser posisi kepalan kiri layar -->
+                    <g id="hand-right-fist-back" transform="translate(63.9, 717.2) rotate(133) scale(0.78, 0.78)">
+                      <!-- Source SVG: id="tangan_kanan_mengepal_ke_belakang" | Titik Putar (Pivot): (4130, 7650) -->
+<g transform="translate(-4130, -7650)">
+  <path class="fil14" d="M3797.48 7346.18c-4.39,103.07 39.88,178.81 92.42,225.34 53.46,47.35 105.34,104.63 193.43,112.81 298.86,27.78 217.19,-279.65 355.24,-247.94 12.18,22.74 9.28,35.15 25.09,53.86 12.77,-151.56 -79.17,-168.69 -195.93,-118.69 18.25,-57.78 47.27,-65.05 118.25,-63.06 -26.6,-130.44 -151.37,-129.03 -218.26,-92.59 -36,19.61 -41.64,40.67 -54.81,47.51 5.81,-48.54 47.49,-68.58 87.76,-86.85 59,-26.75 21.2,8.14 42.85,-35.25 -33.77,-22.62 -54,-44.32 -118.27,-38.37 -169.36,15.69 -183.9,168.85 -227.49,208.32 -5.08,-89.13 23.6,-72.77 35.69,-129.07 -86.83,13.77 -118.5,82.35 -135.97,163.98z"/>
+  <path class="fil12" d="M4463.66 7490.25c-5.95,44.24 -25.3,66.43 -63.46,78.33l13.99 -90.43c-63.6,37.13 -44.62,158.64 -105.23,236.84 -95.24,122.9 -320.06,113.9 -453.97,-83.84 -46.07,-68.02 -78.41,-192.56 -57.51,-284.97 17.47,-81.63 49.14,-150.21 135.97,-163.98 -12.09,56.3 -40.77,39.94 -35.69,129.07 43.59,-39.47 58.13,-192.63 227.49,-208.32 64.27,-5.95 84.5,15.75 118.27,38.37 -21.65,43.39 16.15,8.5 -42.85,35.25 -40.27,18.27 -81.95,38.31 -87.76,86.85 13.17,-6.84 18.81,-27.9 54.81,-47.51 66.89,-36.44 191.66,-37.85 218.26,92.59 -70.98,-1.99 -100,5.28 -118.25,63.06 116.76,-50 208.7,-32.87 195.93,118.69zm-357.84 -421.95c-79.06,12.19 -82.18,34.98 -127.17,61.84 -40.92,24.43 -92.78,8.61 -145.34,49.56 -66.4,51.74 -91.62,182.19 -77.42,295.44 14,111.73 57.26,185.14 127.77,254.77 146.94,145.12 407.74,153 495.51,-55.43 3.65,-8.68 7.66,-22.93 11.47,-31.19 24.05,-52.1 35.94,-13.84 79.1,-64.41 31.22,-36.59 47.8,-97.39 36.53,-157.22 -15.03,-79.77 -62.28,-95.68 -73.38,-114.08 -34.4,-56.98 -5.23,-69.09 -74.93,-120.03 -21.09,-15.42 -44.26,-18.09 -62.52,-30.15 -26.12,-17.25 -52.02,-110.31 -189.62,-89.1z"/>
+  <path class="fil15" d="M4463.66 7490.25c-15.81,-18.71 -12.91,-31.12 -25.09,-53.86 -138.05,-31.71 -56.38,275.72 -355.24,247.94 -88.09,-8.18 -139.97,-65.46 -193.43,-112.81 -52.54,-46.53 -96.81,-122.27 -92.42,-225.34 -20.9,92.41 11.44,216.95 57.51,284.97 133.91,197.74 358.73,206.74 453.97,83.84 60.61,-78.2 41.63,-199.71 105.23,-236.84l-13.99 90.43c38.16,-11.9 57.51,-34.09 63.46,-78.33z"/>
+</g>
+                    </g>
+
+                    <!-- POSE 2 MELAMBAI: Telapak tangan kanan terbuka -->
+                    <!-- Source: id="tangan_kanan_terbuka" | Ubah translate(-10, 680) & rotate(-118) untuk atur posisi tangan melambai -->
+                    <g id="hand-right-open" transform="translate(129.2, 769.7) rotate(200) scale(0.85, 0.85)" style="display:none;">
+                      <g id="anim-hand-wave" class="rig-joint" data-pivot="Pergelangan Tangan Melambai">
+                        <!-- Source SVG: id="tangan_kanan_terbuka" | Titik Putar (Pivot): (5613, 8550) -->
+<g transform="translate(-5613, -8550)">
+  <path class="fil14" d="M5777.16 8316.66c-63.27,25.86 -104.18,48.51 -112.23,131.49 28.81,-27.56 23.36,-39.63 66.19,-71.26 42.28,-31.21 65.19,-17.33 91.05,-44.11 21.32,-22.07 27.76,-46.14 65.86,-70.1 37.66,-23.68 117.42,-35.37 114.78,31.91 -1.32,33.78 -34.63,58.53 -59.04,100.62 -46.39,79.97 -54.15,198.24 -179.86,242.21 -212.05,74.17 -258.25,86.44 -406.56,-134.71 -38.7,-57.7 -44.73,-47.58 -76.92,-75.78 -84.01,-73.6 -112.53,-100.13 -82.23,-168.49 72.22,-16.63 118.44,17.86 180.35,71.18 47.11,40.56 3.37,21.31 16.78,58.95 22.21,-13.87 52.13,-61.73 116.39,-95.72 34.97,-18.5 144.95,-46.93 159.25,-56.97l-53.75 -6.37c-24.14,-183.39 24.21,-324.05 92.01,-223.02 49.44,73.67 52.09,220.52 67.93,310.17z"/>
+  <path class="fil12" d="M5777.16 8316.66c-15.84,-89.65 -18.49,-236.5 -67.93,-310.17 -67.8,-101.03 -116.15,39.63 -92.01,223.02l53.75 6.37c-14.3,10.04 -124.28,38.47 -159.25,56.97 -64.26,33.99 -94.18,81.85 -116.39,95.72 -13.41,-37.64 30.33,-18.39 -16.78,-58.95 -61.91,-53.32 -108.13,-87.81 -180.35,-71.18 -30.3,68.36 -1.78,94.89 82.23,168.49 32.19,28.2 38.22,18.08 76.92,75.78 148.31,221.15 194.51,208.88 406.56,134.71 125.71,-43.97 133.47,-162.24 179.86,-242.21 24.41,-42.09 57.72,-66.84 59.04,-100.62 2.64,-67.28 -77.12,-55.59 -114.78,-31.91 -38.1,23.96 -44.54,48.03 -65.86,70.1 -25.86,26.78 -48.77,12.9 -91.05,44.11 -42.83,31.63 -37.38,43.7 -66.19,71.26 8.05,-82.98 48.96,-105.63 112.23,-131.49zm-219.64 -80.78c-29.8,-78.96 -98.72,-205.15 -202.57,-193.03 -32.43,135.73 49.91,181.43 66.64,277.42 10.28,-5.32 128.63,-77.51 135.93,-84.39zm250.32 36.74c31.39,-4.61 17.25,-29.24 81.38,-59.65 42.51,-20.16 98.74,-15.85 129.89,8.75 79.95,63.14 -19.73,165.62 -46.59,218.83 -44.76,88.65 -47.33,144.15 -115.85,197.66 -27.98,21.86 -186.43,87.48 -228.77,93.18 -103.88,13.97 -176.95,-32.88 -224.21,-80.6 -54.52,-55.06 -71.73,-126.03 -140.29,-181.27 -48.93,-39.43 -136.52,-123.4 -120.06,-196.97 29.32,-131.07 195.46,-20.26 206.31,-14.95 -5.1,-21.11 -108.7,-227.17 14.74,-256.61 104.2,-24.86 161.31,98.52 203.96,155.18 0.11,-56.2 1.24,-126.35 25.73,-169.94 24.13,-42.94 79.17,-69.32 128.29,-26.64 70.34,61.11 73.35,201.22 85.47,313.03z"/>
+  <path class="fil14" d="M5557.52 8235.88c-7.3,6.88 -125.65,79.07 -135.93,84.39 -16.73,-95.99 -99.07,-141.69 -66.64,-277.42 103.85,-12.12 172.77,114.07 202.57,193.03z"/>
+</g>
+                      </g>
+                    </g>
+                  </g>
+                </g>
+              </g></g>
+          </g>
+
+          <!-- LENGAN KIRI KARAKTER (Kanan Layar) | Geser translate(760, -365) untuk atur posisi bahu -->
+          <g id="rig-shoulder-left" transform="translate(760, -340) rotate(28.5) scale(0.95, 0.95)">
+            <g id="anim-upper-arm-left" class="rig-joint" data-pivot="Bahu Kiri"><g transform="translate(-6220, -5050)" clip-path="url(#clip-lengan-kiri-atas)">
+  <path d="M6346.37 4821.32c2.13,140.23 11.7,276.15 72.56,397.91 29.84,59.69 65.33,98.99 95.96,141.94 55.27,77.54 88.14,43.67 160.99,76.34 33.29,-43.85 52.2,-67.82 96.23,-102.36 32.11,-25.19 114.98,-49.75 135.77,-69.03l-11.17 -0.19c42.57,-11.97 12.5,9.87 25.46,-24.81 -85.53,-64.17 -272.34,-326.58 -382.65,-387.83 -131,-72.74 -169.56,-39.18 -187.55,-49.54l-5.6 17.57z" fill="none" stroke="#2C110D" stroke-width="96" stroke-linejoin="round" stroke-linecap="round"/>
+  <path d="M6675.88 5437.51c-72.85,-32.67 -105.72,1.2 -160.99,-76.34 -30.63,-42.95 -66.12,-82.25 -95.96,-141.94 -60.86,-121.76 -70.43,-257.68 -72.56,-397.91 -12.22,12.91 -4.29,-1.79 -14.82,22.88 -3.98,9.32 -4.81,15.25 -7.26,26.41 -16.55,75.39 -18.64,117.07 -19.31,196.33 -2.14,253.31 29.89,277.17 164.76,415.39l155.9 139.69c3.01,-70.78 27.84,-129.94 50.24,-184.51z" fill="none" stroke="#2C110D" stroke-width="96" stroke-linejoin="round" stroke-linecap="round"/>
+  <path d="M6292.05 5312.79c-28.74,-195.78 -49.39,-308.74 6.48,-507.38 -118.76,22.24 -223.05,226.94 -120.66,409.94 18.38,32.85 71.48,86.02 114.18,97.44z" fill="none" stroke="#2C110D" stroke-width="96" stroke-linejoin="round" stroke-linecap="round"/>
+  <path d="M6351.97 4803.75c17.99,10.36 56.55,-23.2 187.55,49.54 110.31,61.25 297.12,323.66 382.65,387.83 -12.96,34.68 17.11,12.84 -25.46,24.81l11.17 0.19 87.43 1.35c-17.12,-25.89 -43.79,-48.76 -65.05,-76.32l-142.35 -153.69c-84.88,-94.48 -188.35,-228.88 -337.4,-264.72 -59.93,-14.41 -79.56,-16.65 -98.54,31.01z" fill="none" stroke="#2C110D" stroke-width="96" stroke-linejoin="round" stroke-linecap="round"/>
+  <ellipse cx="6840" cy="5400" rx="240" ry="220" fill="#2C110D"/>
+  <ellipse cx="6840" cy="5400" rx="192" ry="172" fill="#F5BD27"/>
+  <path class="fil17" d="M6346.37 4821.32c2.13,140.23 11.7,276.15 72.56,397.91 29.84,59.69 65.33,98.99 95.96,141.94 55.27,77.54 88.14,43.67 160.99,76.34 33.29,-43.85 52.2,-67.82 96.23,-102.36 32.11,-25.19 114.98,-49.75 135.77,-69.03l-11.17 -0.19c42.57,-11.97 12.5,9.87 25.46,-24.81 -85.53,-64.17 -272.34,-326.58 -382.65,-387.83 -131,-72.74 -169.56,-39.18 -187.55,-49.54l-5.6 17.57z"/>
+  <path class="fil18" d="M6675.88 5437.51c-72.85,-32.67 -105.72,1.2 -160.99,-76.34 -30.63,-42.95 -66.12,-82.25 -95.96,-141.94 -60.86,-121.76 -70.43,-257.68 -72.56,-397.91 -12.22,12.91 -4.29,-1.79 -14.82,22.88 -3.98,9.32 -4.81,15.25 -7.26,26.41 -16.55,75.39 -18.64,117.07 -19.31,196.33 -2.14,253.31 29.89,277.17 164.76,415.39l155.9 139.69c3.01,-70.78 27.84,-129.94 50.24,-184.51z"/>
+  <path class="fil19" d="M6292.05 5312.79c-28.74,-195.78 -49.39,-308.74 6.48,-507.38 -118.76,22.24 -223.05,226.94 -120.66,409.94 18.38,32.85 71.48,86.02 114.18,97.44z"/>
+  <path class="fil20" d="M6351.97 4803.75c17.99,10.36 56.55,-23.2 187.55,49.54 110.31,61.25 297.12,323.66 382.65,387.83 -12.96,34.68 17.11,12.84 -25.46,24.81l11.17 0.19 87.43 1.35c-17.12,-25.89 -43.79,-48.76 -65.05,-76.32l-142.35 -153.69c-84.88,-94.48 -188.35,-228.88 -337.4,-264.72 -59.93,-14.41 -79.56,-16.65 -98.54,31.01z"/>
+  
+</g><g id="rig-elbow-left" transform="translate(561.7, 217.2) rotate(-40)">
+                <g id="anim-lower-arm-left" class="rig-joint" data-pivot="Siku Kiri">
+                  <!-- Gambar Lengan Kiri Bawah -->
+                  <!-- Segmen Lengan Kiri Bawah | Source: lengan_kiri[0,5,7] | Pivot Siku: (6910, 5440) -->
+<g transform="translate(-6910, -5440)" clip-path="url(#clip-lengan-kiri-bawah)">
+  <path d="M6671.98 5560.97c24.04,-14.41 27.82,-22.4 48.11,-41.43 18.72,-17.55 25.64,-23.93 53.23,-28.3 -42.42,51.28 -196.87,295.24 -125.22,403.71 81.6,-50.85 147.09,-79.76 281.44,-49.81 125.81,28.04 159.03,65.75 226.56,132.14 94.43,-64.26 76.97,-180.61 50.92,-300.07 -24.35,-111.63 -61.28,-351.85 -202.74,-368.04 -154.43,-17.66 -302.32,99.28 -332.3,251.8z" fill="none" stroke="#2C110D" stroke-width="96" stroke-linejoin="round" stroke-linecap="round"/>
+  <path d="M6668.28 5986.5c127.95,-48.42 354.61,-1.14 415.78,91.73 19.03,-17.69 32.76,-53.3 34.25,-74.78 4.2,-60.52 -191.34,-163.19 -361.29,-123.62 -73.12,17.02 -87.86,28.75 -88.74,106.67z" fill="none" stroke="#2C110D" stroke-width="96" stroke-linejoin="round" stroke-linecap="round"/>
+  <path d="M6677.2 6027.66c39.73,52.65 81.49,70.09 160.05,87.39 74.11,16.32 157.56,13.39 226.28,-4.69 -36.28,-91.7 -278.98,-136.67 -386.33,-82.7z" fill="none" stroke="#2C110D" stroke-width="96" stroke-linejoin="round" stroke-linecap="round"/>
+  <path class="fil17" d="M6671.98 5560.97c24.04,-14.41 27.82,-22.4 48.11,-41.43 18.72,-17.55 25.64,-23.93 53.23,-28.3 -42.42,51.28 -196.87,295.24 -125.22,403.71 81.6,-50.85 147.09,-79.76 281.44,-49.81 125.81,28.04 159.03,65.75 226.56,132.14 94.43,-64.26 76.97,-180.61 50.92,-300.07 -24.35,-111.63 -61.28,-351.85 -202.74,-368.04 -154.43,-17.66 -302.32,99.28 -332.3,251.8z"/>
+  <path class="fil17" d="M6668.28 5986.5c127.95,-48.42 354.61,-1.14 415.78,91.73 19.03,-17.69 32.76,-53.3 34.25,-74.78 4.2,-60.52 -191.34,-163.19 -361.29,-123.62 -73.12,17.02 -87.86,28.75 -88.74,106.67z" stroke="#2C110D" stroke-width="56" stroke-linejoin="round"/>
+  <path class="fil18" d="M6677.2 6027.66c39.73,52.65 81.49,70.09 160.05,87.39 74.11,16.32 157.56,13.39 226.28,-4.69 -36.28,-91.7 -278.98,-136.67 -386.33,-82.7z" stroke="#2C110D" stroke-width="56" stroke-linejoin="round"/>
+  
+</g>
+
+                  <!-- 2. Tangan Kiri (Digambar SETELAH Lengan Bawah agar berada DI ATAS Lengan Bawah) -->
+                  <g id="rig-wrist-left">
+                    <!-- POSE 2 MELAMBAI & POSE 3 IDLE: Kepalan tangan menghadap belakang di-rotasi 180 derajat! -->
+                    <!-- Source: id="tangan_kiri_mengepal_ke_belakang" (jempol menghadap ke dalam ke arah body) -->
+                    <!-- Ubah translate(35, 620) untuk geser posisi kepalan kanan layar -->
+                    <g id="hand-left-fist-back" transform="translate(-4, 737.7) rotate(-140) scale(0.78, 0.78)">
+                      <!-- Source SVG: id="tangan_kiri_mengepal_ke_belakang" | Titik Putar (Pivot): (6906, 8550) -->
+<g transform="translate(-6906, -8550)">
+  <path class="fil14" d="M7238.42 8246.05c4.39,103.07 -39.88,178.81 -92.42,225.34 -53.46,47.35 -105.34,104.63 -193.43,112.81 -298.86,27.78 -217.19,-279.65 -355.24,-247.94 -12.18,22.74 -9.28,35.15 -25.09,53.86 -12.77,-151.56 79.17,-168.69 195.93,-118.69 -18.25,-57.78 -47.27,-65.05 -118.25,-63.06 26.6,-130.44 151.37,-129.03 218.26,-92.59 36,19.61 41.64,40.67 54.81,47.51 -5.81,-48.54 -47.49,-68.58 -87.76,-86.85 -59,-26.75 -21.2,8.14 -42.85,-35.25 33.77,-22.62 54,-44.32 118.27,-38.37 169.36,15.69 183.9,168.85 227.49,208.32 5.08,-89.13 -23.6,-72.77 -35.69,-129.07 86.83,13.77 118.5,82.35 135.97,163.98z"/>
+  <path class="fil12" d="M6572.24 8390.12c5.95,44.24 25.3,66.43 63.46,78.33l-13.99 -90.43c63.6,37.13 44.62,158.64 105.23,236.84 95.24,122.9 320.06,113.9 453.97,-83.84 46.07,-68.02 78.41,-192.56 57.51,-284.97 -17.47,-81.63 -49.14,-150.21 -135.97,-163.98 12.09,56.3 40.77,39.94 35.69,129.07 -43.59,-39.47 -58.13,-192.63 -227.49,-208.32 -64.27,-5.95 -84.5,15.75 -118.27,38.37 21.65,43.39 -16.15,8.5 42.85,35.25 40.27,18.27 81.95,38.31 87.76,86.85 -13.17,-6.84 -18.81,-27.9 -54.81,-47.51 -66.89,-36.44 -191.66,-37.85 -218.26,92.59 70.98,-1.99 100,5.28 118.25,63.06 -116.76,-50 -208.7,-32.87 -195.93,118.69zm357.84 -421.95c79.06,12.19 82.18,34.98 127.17,61.84 40.92,24.43 92.78,8.61 145.34,49.56 66.4,51.74 91.62,182.19 77.42,295.44 -14,111.73 -57.26,185.14 -127.77,254.77 -146.94,145.12 -407.74,153 -495.51,-55.43 -3.65,-8.68 -7.66,-22.93 -11.47,-31.19 -24.05,-52.1 -35.94,-13.84 -79.1,-64.41 -31.22,-36.59 -47.8,-97.39 -36.53,-157.22 15.03,-79.77 62.28,-95.68 73.38,-114.08 34.4,-56.98 5.23,-69.09 74.93,-120.03 21.09,-15.42 44.26,-18.09 62.52,-30.15 26.12,-17.25 52.02,-110.31 189.62,-89.1z"/>
+  <path class="fil15" d="M6572.24 8390.12c15.81,-18.71 12.91,-31.12 25.09,-53.86 138.05,-31.71 56.38,275.72 355.24,247.94 88.09,-8.18 139.97,-65.46 193.43,-112.81 52.54,-46.53 96.81,-122.27 92.42,-225.34 20.9,92.41 -11.44,216.95 -57.51,284.97 -133.91,197.74 -358.73,206.74 -453.97,83.84 -60.61,-78.2 -41.63,-199.71 -105.23,-236.84l13.99 90.43c-38.16,-11.9 -57.51,-34.09 -63.46,-78.33z"/>
+</g>
+                    </g>
+
+                    <!-- Telapak tangan kiri terbuka -->
+                    <g id="hand-left-open" transform="translate(-40, 590) rotate(145) scale(0.80, 0.80)" style="display:none;">
+                      <!-- Source SVG: id="tangan_kiri_terbuka" | Titik Putar (Pivot): (5422, 7650) -->
+<g transform="translate(-5422, -7650)">
+  <path class="fil14" d="M5258.74 7416.79c63.27,25.86 104.18,48.51 112.23,131.49 -28.81,-27.56 -23.36,-39.63 -66.19,-71.26 -42.28,-31.21 -65.19,-17.33 -91.05,-44.11 -21.32,-22.07 -27.76,-46.14 -65.86,-70.1 -37.66,-23.68 -117.42,-35.37 -114.78,31.91 1.32,33.78 34.63,58.53 59.04,100.62 46.39,79.97 54.15,198.24 179.86,242.21 212.05,74.17 258.25,86.44 406.56,-134.71 38.7,-57.7 44.73,-47.58 76.92,-75.78 84.01,-73.6 112.53,-100.13 82.23,-168.49 -72.22,-16.63 -118.44,17.86 -180.35,71.18 -47.11,40.56 -3.37,21.31 -16.78,58.95 -22.21,-13.87 -52.13,-61.73 -116.39,-95.72 -34.97,-18.5 -144.95,-46.93 -159.25,-56.97l53.75 -6.37c24.14,-183.39 -24.21,-324.05 -92.01,-223.02 -49.44,73.67 -52.09,220.52 -67.93,310.17z"/>
+  <path class="fil12" d="M5258.74 7416.79c15.84,-89.65 18.49,-236.5 67.93,-310.17 67.8,-101.03 116.15,39.63 92.01,223.02l-53.75 6.37c14.3,10.04 124.28,38.47 159.25,56.97 64.26,33.99 94.18,81.85 116.39,95.72 13.41,-37.64 -30.33,-18.39 16.78,-58.95 61.91,-53.32 108.13,-87.81 180.35,-71.18 30.3,68.36 1.78,94.89 -82.23,168.49 -32.19,28.2 -38.22,18.08 -76.92,75.78 -148.31,221.15 -194.51,208.88 -406.56,134.71 -125.71,-43.97 -133.47,-162.24 -179.86,-242.21 -24.41,-42.09 -57.72,-66.84 -59.04,-100.62 -2.64,-67.28 77.12,-55.59 114.78,-31.91 38.1,23.96 44.54,48.03 65.86,70.1 25.86,26.78 48.77,12.9 91.05,44.11 42.83,31.63 37.38,43.7 66.19,71.26 -8.05,-82.98 -48.96,-105.63 -112.23,-131.49zm219.64 -80.78c29.8,-78.96 98.72,-205.15 202.57,-193.03 32.43,135.73 -49.91,181.43 -66.64,277.42 -10.28,-5.32 -128.63,-77.51 -135.93,-84.39zm-250.32 36.74c-31.39,-4.61 -17.25,-29.24 -81.38,-59.65 -42.51,-20.16 -98.74,-15.85 -129.89,8.75 -79.95,63.14 19.73,165.62 46.59,218.83 44.76,88.65 47.33,144.15 115.85,197.66 27.98,21.86 186.43,87.48 228.77,93.18 103.88,13.97 176.95,-32.88 224.21,-80.6 54.52,-55.06 71.73,-126.03 140.29,-181.27 48.93,-39.43 136.52,-123.4 120.06,-196.97 -29.32,-131.07 -195.46,-20.26 -206.31,-14.95 5.1,-21.11 108.7,-227.17 -14.74,-256.61 -104.2,-24.86 -161.31,98.52 -203.96,155.18 -0.11,-56.2 -1.24,-126.35 -25.73,-169.94 -24.13,-42.94 -79.17,-69.32 -128.29,-26.64 -70.34,61.11 -73.35,201.22 -85.47,313.03z"/>
+  <path class="fil14" d="M5478.38 7336.01c7.3,6.88 125.65,79.07 135.93,84.39 16.73,-95.99 99.07,-141.69 66.64,-277.42 -103.85,-12.12 -172.77,114.07 -202.57,193.03z"/>
+</g>
+                    </g>
+                  </g>
+                </g>
+              </g></g>
+          </g>
+
+        </g>
+
+        <!-- =============================================================== -->
+        <!-- 3B. LAYER LENGAN ATAS DI BAWAH BODY (Khusus POSE 1 BERSILA      -->
+        <!--     & POSE 4 MENJELASKAN)                                       -->
+        <!-- Sesuai instruksi: Bahu dilebarkan dan Lengan Atas berada        -->
+        <!-- DI BAWAH Body layernya, sedangkan Lengan Bawah + Tangan         -->
+        <!-- berada DI ATAS Lengan Atas & Body (#rig-arms-front-layer)!      -->
+        <!-- =============================================================== -->
+        <g id="rig-upper-arms-under-body" style="display:none;">
+          <g id="rig-under-shoulder-right" transform="translate(-710, -360) scale(0.95, 0.95)">
+            <g id="anim-under-upper-arm-right" class="rig-joint">
+              <!-- Segmen Lengan Kanan Atas | Source: lengan_kanan[2,3,4,6] | Pivot Bahu: (3150, 5000) -->
+<g transform="translate(-3150, -5000)" clip-path="url(#clip-lengan-kanan-atas)">
+  <path d="M2482.46 5269.26c60.03,-13.01 145.37,11.65 193.05,36.84 46.05,24.35 111.92,93.95 129.46,99.55 30.57,-32.86 79.51,0.02 131.05,-71.27 21.7,-30.03 67.52,-100.66 85.78,-143.7 84.51,-199.26 43.1,-360.15 58.94,-406.02 -0.15,-25.9 -3.62,-29.73 -21.91,-47.59 -12.81,7.32 -18.64,-8.73 -98.47,29.26 -160.93,76.57 -234.28,221.04 -336.02,357.33 -20.21,27.06 -39.95,51.17 -59.68,76.25 -35.85,45.57 -33.47,40.73 -28.93,51.98 12.85,31.86 24.57,-17.95 5.24,2.7l-58.51 14.67z" fill="none" stroke="#2C110D" stroke-width="96" stroke-linejoin="round" stroke-linecap="round"/>
+  <path d="M2804.97 5405.65c14.21,31.12 28.22,48.9 39.43,86.91 8.83,29.94 11.35,65.57 26.37,88.38 48.76,-43.54 215.11,-224.37 249.4,-300.27 45.45,-100.58 19.02,-432.06 -39.43,-496.01 -15.84,45.87 25.57,206.76 -58.94,406.02 -18.26,43.04 -64.08,113.67 -85.78,143.7 -51.54,71.29 -100.48,38.41 -131.05,71.27z" fill="none" stroke="#2C110D" stroke-width="96" stroke-linejoin="round" stroke-linecap="round"/>
+  <path d="M3172.83 5247.54c179.16,-76.79 171.96,-463.62 -55.72,-505.82 56.41,203.19 74.31,277.83 55.72,505.82z" fill="none" stroke="#2C110D" stroke-width="96" stroke-linejoin="round" stroke-linecap="round"/>
+  <path d="M2482.46 5269.26l58.51 -14.67c19.33,-20.65 7.61,29.16 -5.24,-2.7 -4.54,-11.25 -6.92,-6.41 28.93,-51.98 19.73,-25.08 39.47,-49.19 59.68,-76.25 101.74,-136.29 175.09,-280.76 336.02,-357.33 79.83,-37.99 85.66,-21.94 98.47,-29.26l-15.36 -25.99c-136.81,-15.02 -272.64,139.23 -340.45,229.35 -74.49,99.01 -165.26,231.6 -245.12,321.19 10.95,14.57 -3.2,3.85 24.56,7.64z" fill="none" stroke="#2C110D" stroke-width="96" stroke-linejoin="round" stroke-linecap="round"/>
+  <ellipse cx="2630" cy="5360" rx="240" ry="220" fill="#2C110D"/>
+  <ellipse cx="2630" cy="5360" rx="192" ry="172" fill="#F5BD27"/>
+  <path class="fil17" d="M2482.46 5269.26c60.03,-13.01 145.37,11.65 193.05,36.84 46.05,24.35 111.92,93.95 129.46,99.55 30.57,-32.86 79.51,0.02 131.05,-71.27 21.7,-30.03 67.52,-100.66 85.78,-143.7 84.51,-199.26 43.1,-360.15 58.94,-406.02 -0.15,-25.9 -3.62,-29.73 -21.91,-47.59 -12.81,7.32 -18.64,-8.73 -98.47,29.26 -160.93,76.57 -234.28,221.04 -336.02,357.33 -20.21,27.06 -39.95,51.17 -59.68,76.25 -35.85,45.57 -33.47,40.73 -28.93,51.98 12.85,31.86 24.57,-17.95 5.24,2.7l-58.51 14.67z"/>
+  <path class="fil18" d="M2804.97 5405.65c14.21,31.12 28.22,48.9 39.43,86.91 8.83,29.94 11.35,65.57 26.37,88.38 48.76,-43.54 215.11,-224.37 249.4,-300.27 45.45,-100.58 19.02,-432.06 -39.43,-496.01 -15.84,45.87 25.57,206.76 -58.94,406.02 -18.26,43.04 -64.08,113.67 -85.78,143.7 -51.54,71.29 -100.48,38.41 -131.05,71.27z"/>
+  <path class="fil19" d="M3172.83 5247.54c179.16,-76.79 171.96,-463.62 -55.72,-505.82 56.41,203.19 74.31,277.83 55.72,505.82z"/>
+  <path class="fil20" d="M2482.46 5269.26l58.51 -14.67c19.33,-20.65 7.61,29.16 -5.24,-2.7 -4.54,-11.25 -6.92,-6.41 28.93,-51.98 19.73,-25.08 39.47,-49.19 59.68,-76.25 101.74,-136.29 175.09,-280.76 336.02,-357.33 79.83,-37.99 85.66,-21.94 98.47,-29.26l-15.36 -25.99c-136.81,-15.02 -272.64,139.23 -340.45,229.35 -74.49,99.01 -165.26,231.6 -245.12,321.19 10.95,14.57 -3.2,3.85 24.56,7.64z"/>
+  
+</g>
+            </g>
+          </g>
+          <g id="rig-under-shoulder-left" transform="translate(780, -360) scale(0.95, 0.95)">
+            <g id="anim-under-upper-arm-left" class="rig-joint">
+              <!-- Segmen Lengan Kiri Atas | Source: lengan_kiri[2,3,4,6] | Pivot Bahu: (6220, 5050) -->
+<g transform="translate(-6220, -5050)" clip-path="url(#clip-lengan-kiri-atas)">
+  <path d="M6346.37 4821.32c2.13,140.23 11.7,276.15 72.56,397.91 29.84,59.69 65.33,98.99 95.96,141.94 55.27,77.54 88.14,43.67 160.99,76.34 33.29,-43.85 52.2,-67.82 96.23,-102.36 32.11,-25.19 114.98,-49.75 135.77,-69.03l-11.17 -0.19c42.57,-11.97 12.5,9.87 25.46,-24.81 -85.53,-64.17 -272.34,-326.58 -382.65,-387.83 -131,-72.74 -169.56,-39.18 -187.55,-49.54l-5.6 17.57z" fill="none" stroke="#2C110D" stroke-width="96" stroke-linejoin="round" stroke-linecap="round"/>
+  <path d="M6675.88 5437.51c-72.85,-32.67 -105.72,1.2 -160.99,-76.34 -30.63,-42.95 -66.12,-82.25 -95.96,-141.94 -60.86,-121.76 -70.43,-257.68 -72.56,-397.91 -12.22,12.91 -4.29,-1.79 -14.82,22.88 -3.98,9.32 -4.81,15.25 -7.26,26.41 -16.55,75.39 -18.64,117.07 -19.31,196.33 -2.14,253.31 29.89,277.17 164.76,415.39l155.9 139.69c3.01,-70.78 27.84,-129.94 50.24,-184.51z" fill="none" stroke="#2C110D" stroke-width="96" stroke-linejoin="round" stroke-linecap="round"/>
+  <path d="M6292.05 5312.79c-28.74,-195.78 -49.39,-308.74 6.48,-507.38 -118.76,22.24 -223.05,226.94 -120.66,409.94 18.38,32.85 71.48,86.02 114.18,97.44z" fill="none" stroke="#2C110D" stroke-width="96" stroke-linejoin="round" stroke-linecap="round"/>
+  <path d="M6351.97 4803.75c17.99,10.36 56.55,-23.2 187.55,49.54 110.31,61.25 297.12,323.66 382.65,387.83 -12.96,34.68 17.11,12.84 -25.46,24.81l11.17 0.19 87.43 1.35c-17.12,-25.89 -43.79,-48.76 -65.05,-76.32l-142.35 -153.69c-84.88,-94.48 -188.35,-228.88 -337.4,-264.72 -59.93,-14.41 -79.56,-16.65 -98.54,31.01z" fill="none" stroke="#2C110D" stroke-width="96" stroke-linejoin="round" stroke-linecap="round"/>
+  <ellipse cx="6840" cy="5400" rx="240" ry="220" fill="#2C110D"/>
+  <ellipse cx="6840" cy="5400" rx="192" ry="172" fill="#F5BD27"/>
+  <path class="fil17" d="M6346.37 4821.32c2.13,140.23 11.7,276.15 72.56,397.91 29.84,59.69 65.33,98.99 95.96,141.94 55.27,77.54 88.14,43.67 160.99,76.34 33.29,-43.85 52.2,-67.82 96.23,-102.36 32.11,-25.19 114.98,-49.75 135.77,-69.03l-11.17 -0.19c42.57,-11.97 12.5,9.87 25.46,-24.81 -85.53,-64.17 -272.34,-326.58 -382.65,-387.83 -131,-72.74 -169.56,-39.18 -187.55,-49.54l-5.6 17.57z"/>
+  <path class="fil18" d="M6675.88 5437.51c-72.85,-32.67 -105.72,1.2 -160.99,-76.34 -30.63,-42.95 -66.12,-82.25 -95.96,-141.94 -60.86,-121.76 -70.43,-257.68 -72.56,-397.91 -12.22,12.91 -4.29,-1.79 -14.82,22.88 -3.98,9.32 -4.81,15.25 -7.26,26.41 -16.55,75.39 -18.64,117.07 -19.31,196.33 -2.14,253.31 29.89,277.17 164.76,415.39l155.9 139.69c3.01,-70.78 27.84,-129.94 50.24,-184.51z"/>
+  <path class="fil19" d="M6292.05 5312.79c-28.74,-195.78 -49.39,-308.74 6.48,-507.38 -118.76,22.24 -223.05,226.94 -120.66,409.94 18.38,32.85 71.48,86.02 114.18,97.44z"/>
+  <path class="fil20" d="M6351.97 4803.75c17.99,10.36 56.55,-23.2 187.55,49.54 110.31,61.25 297.12,323.66 382.65,387.83 -12.96,34.68 17.11,12.84 -25.46,24.81l11.17 0.19 87.43 1.35c-17.12,-25.89 -43.79,-48.76 -65.05,-76.32l-142.35 -153.69c-84.88,-94.48 -188.35,-228.88 -337.4,-264.72 -59.93,-14.41 -79.56,-16.65 -98.54,31.01z"/>
+  
+</g>
+            </g>
+          </g>
+        </g>
+
+        <!-- =============================================================== -->
+        <!-- 4. BADAN HOODIE KUNING DENGAN BAHU DILEBARKAN (Source: "badan") -->
+        <!-- Berada DI ATAS Lengan Atas sehingga pangkal Lengan Atas masuk   -->
+        <!-- dengan rapi ke dalam bahu (#bahu-body-kanan & #bahu-body-kiri). -->
+        <!-- =============================================================== -->
+        <g id="rig-badan" transform="translate(-4691, -5868)">
+<!-- 4A. Base Torso Badan Hoodie -->
+          <path class="fil17" d="M5101.81 5816.91c-4.32,-33.5 -5.94,-34.21 5.36,-60.72l25.69 29.44c13.31,-34.43 2.5,-15.96 33.14,-32.01l-7.67 64.88c-9.88,-9.23 -20.21,1.19 -10.51,-25.33 -13.71,19.88 -26.4,10.12 -26.66,10.16 -16.45,2.07 2.19,5.99 -19.35,13.58zm-74.52 -51.19c19.18,-16.93 -5.8,-11.26 32.5,-11.33 1.41,15.59 -5.22,16.28 -15.83,19.79 29.56,15.22 13.92,4.12 28.46,21.55l9.35 -38.43c17.01,18.32 11.59,25.63 9.33,54.71l-58.01 5.09c1.18,-26.48 -2.55,-8.32 19.76,-19.08 -33.94,-15.47 -26.84,3.62 -25.56,-32.3zm-959.7 -733.97c15.01,16.91 -16.54,18.45 70.32,-10.34 265.08,-87.85 665.49,-93.36 934.89,-55.07 53.37,7.59 107.24,18.45 154.24,32.54 26.32,7.88 45.78,14.57 71.39,22.17 73.34,21.77 54.25,26.15 54.31,10.76 -3.33,-12.07 -2.62,-13.21 -20.73,-20.26 44.83,5.91 100.65,42.77 114.33,71.61 73.14,154.12 -306.83,187.6 -543.07,380.85 -186.84,152.85 -160.3,253.88 -232.79,149.86 -177.46,-254.66 -496.85,-316.11 -632.51,-400.91 -104.47,-65.3 -91.07,-137.54 27.8,-193.97 7.64,6.42 20.4,-11.95 1.82,12.76zm1273.85 1542.5c280.93,-128.79 134.92,-550.54 113.78,-860.69l19.41 15.95c-28.24,-152.75 -35.87,-200.36 20.64,-338.82 -80.67,29.36 -170.09,74.92 -250.68,110.41 -88.33,38.91 -184.87,59.84 -272.93,99.24 -7.22,64.21 18.73,221.8 20.33,305.03 0.44,22.9 -0.92,49.4 5.13,69.69 7.54,25.27 21.79,26.06 11.54,60.61 -12.88,43.42 -12.81,1.39 -24.48,49.11 -9.69,39.59 -4.05,36.76 -22.91,62.83 -43.6,7.4 -55.64,2.65 -61.25,-41.03l-9.52 -52.13c-40.87,-98.48 8.81,-25.64 8.7,-131.87 -0.04,-38.12 -2,-80.26 -4.81,-118.32 -9.65,-130.76 -64.25,-256.63 5.99,-274.64 30.97,-7.93 36.31,6.28 61.82,29.17 1.17,1.04 3.76,3.13 4.72,3.97 0.96,0.84 3.07,2.76 4.78,3.9 76.19,-29.6 537.17,-228.02 573.15,-226.3l-15.11 58.35c102.64,-42.39 136.31,-142.89 80.89,-259.17 -111.53,-234.02 -670.25,-255.54 -901.4,-253.58 -235.18,2 -456.94,21.35 -671.96,92.6 -114.84,38.06 -175.81,65.09 -219.94,162.1 -48.56,106.75 -25.48,234.03 87.78,257.57l-20.58 -57.43c46.37,1.6 490.19,195 581.23,226.2 28.39,-51.28 56.57,-47.59 95.46,-14.1 10.75,18.16 -41.47,314.32 -31.74,394.98 6.49,53.75 16.7,15.92 22.69,61.62l-38.83 132.61c-61.17,49.3 -63.21,-54.6 -73.67,-77.9 -43.64,-97.25 -3.38,-24.27 -4.39,-141.7 -0.86,-100.64 31.04,-252.1 24.35,-326.78 -106.15,-22.46 -276.54,-98.94 -388.7,-144.24 -40.65,-16.42 -92.87,-43.85 -130.31,-53.63 61.17,135.27 47.95,220.78 11.75,367.73 -39.98,162.31 -178.12,606.86 -135.13,752.86 28.62,97.2 167.18,152.34 283.15,168.73 -31.36,-320.27 22.24,-142.3 163.05,-330.59 131.74,-176.14 -94.57,-109.63 454.26,-102.23 117.81,1.59 293.79,-25.4 394.67,-15.2 35.84,51.7 17.25,84.5 107.93,171.07 78.54,74.96 120.48,32.3 121.14,164.02z"/>
+          <path class="fil12" d="M3871.95 6651.2c167.98,54.11 175.06,75 387.67,110.5 364.67,60.9 772.35,55.41 1128.33,-42.73 78.84,-21.74 120.22,-44.94 187.55,-70.62 -3.55,115.54 -21.98,112.58 -126.34,150.16 -66.93,24.1 -142.35,39.03 -214.5,55.32 -359.87,81.25 -877.51,57.72 -1230.32,-56.74 -95.17,-30.88 -139.35,-33.08 -132.39,-145.89zm290.13 -164.58c14.67,-14.46 35.06,-22.86 55.96,-39.76 77.9,-63 86.1,-114 127.13,-179.19 97.3,-7.39 262.99,12.71 372.53,14.11 127.08,1.62 247.8,-11.12 372.53,-16.43l19.53 36.12c57.08,130.26 98,133.16 158.32,188.08 60.12,15.83 50.47,65.05 35.97,160.91 -1.46,9.69 -3.08,20.75 -5.91,29.1 -9.1,26.85 -6.45,15.85 -12.48,24.31 -109.88,41.88 -440.52,66.41 -576.46,65.21 -99.92,-0.89 -201.39,-9.22 -299.87,-21.68 -49.17,-6.22 -92.05,-12.93 -139.66,-21.27 -22.44,-3.94 -41.12,-7.6 -64.17,-11.93 -74.16,-13.92 -80.93,-9.73 -84.42,-131.83 -1.71,-59.86 -5.51,-77.74 41,-95.75zm326.99 -444.25c-39.12,1.81 -40.07,-11.65 -43.92,-41.23l79.35 -3.6c-0.61,30.67 -2.38,43.3 -35.43,44.83zm414.42 -44.97c182.35,-11.77 8.2,112.56 0,0zm12.7 -240.67c-6.15,-55.4 -30.23,-156.86 -15.61,-200.59 36.89,7.56 27.1,-7.79 41.04,83.47 17.82,116.61 26.08,213.13 25.87,334.43l-38.12 -2.8c-12.18,-31.42 -7.69,-165.06 -13.18,-214.51zm-444.02 219.94c-24.16,-37.93 -10.09,-29.08 -10.11,-29.17l0.36 -93.21c1.22,-37.38 4.33,-74.53 8.02,-110.92 3.69,-36.27 7.97,-69.42 13.83,-105.85 16.91,-105.07 5.14,-77.53 41.82,-80.33 19.76,44.51 -11.96,157.75 -17.33,217.52 -12.99,144.67 18.77,193.51 -36.59,201.96zm1024.17 -384.79c-6.1,-32.28 -0.27,-106.93 19.17,-132.99 40.03,-53.64 175.03,-17.07 157.16,-273.05 101.17,29.87 191.83,165.77 127.54,302.74 -38.17,81.33 -180.17,182.88 -303.87,103.3zm-1554.25 2.9c-393.89,109.48 -418.02,-350.48 -187.9,-408.42 -9.39,101.49 14.34,179.74 72.03,221.72 64.75,47.11 115.8,0.45 115.87,186.7zm1532.54 134.73c27.8,68.41 62.44,207.3 82.44,285.48 40.68,159.03 136.68,466.54 26.95,578.54 -41.88,42.76 -178.85,91.25 -258.08,102.17l15.5 -121.45c-0.66,-131.72 -42.6,-89.06 -121.14,-164.02 -90.68,-86.57 -72.09,-119.37 -107.93,-171.07 -100.88,-10.2 -276.86,16.79 -394.67,15.2 -548.83,-7.4 -322.52,-73.91 -454.26,102.23 -140.81,188.29 -194.41,10.32 -163.05,330.59 -115.97,-16.39 -254.53,-71.53 -283.15,-168.73 -42.99,-146 95.15,-590.55 135.13,-752.86 36.2,-146.95 49.42,-232.46 -11.75,-367.73 37.44,9.78 89.66,37.21 130.31,53.63 112.16,45.3 282.55,121.78 388.7,144.24 6.69,74.68 -25.21,226.14 -24.35,326.78 1.01,117.43 -39.25,44.45 4.39,141.7 10.46,23.3 12.5,127.2 73.67,77.9l38.83 -132.61c-5.99,-45.7 -16.2,-7.87 -22.69,-61.62 -9.73,-80.66 42.49,-376.82 31.74,-394.98 -38.89,-33.49 -67.07,-37.18 -95.46,14.1 -91.04,-31.2 -534.86,-224.6 -581.23,-226.2l20.58 57.43c-113.26,-23.54 -136.34,-150.82 -87.78,-257.57 44.13,-97.01 105.1,-124.04 219.94,-162.1 215.02,-71.25 436.78,-90.6 671.96,-92.6 231.15,-1.96 789.87,19.56 901.4,253.58 55.42,116.28 21.75,216.78 -80.89,259.17l15.11 -58.35c-35.98,-1.72 -496.96,196.7 -573.15,226.3 -1.71,-1.14 -3.82,-3.06 -4.78,-3.9 -0.96,-0.84 -3.55,-2.93 -4.72,-3.97 -25.51,-22.89 -30.85,-37.1 -61.82,-29.17 -70.24,18.01 -15.64,143.88 -5.99,274.64 2.81,38.06 4.77,80.2 4.81,118.32 0.11,106.23 -49.57,33.39 -8.7,131.87l9.52 52.13c5.61,43.68 17.65,48.43 61.25,41.03 18.86,-26.07 13.22,-23.24 22.91,-62.83 11.67,-47.72 11.6,-5.69 24.48,-49.11 10.25,-34.55 -4,-35.34 -11.54,-60.61 -6.05,-20.29 -4.69,-46.79 -5.13,-69.69 -1.6,-83.23 -27.55,-240.82 -20.33,-305.03 88.06,-39.4 184.6,-60.33 272.93,-99.24 80.59,-35.49 170.01,-81.05 250.68,-110.41 -56.51,138.46 -48.88,186.07 -20.64,338.82zm-1537.46 -87.87c-34.56,222.66 -135.32,448.15 -167.56,738.19 -5.41,48.67 -6.55,100.48 6.42,145.37 13.29,45.98 44.36,74.03 51.79,101.46 28.61,105.52 -42.57,136.22 106.53,189.03 254.21,90.04 515.81,125.28 791.82,126.2 253.68,0.85 551.7,-34.33 785.52,-124.13 149.88,-57.56 75.24,-82.77 109.95,-195.87 16.86,-54.93 74.24,-75.89 53.65,-242.84 -30.48,-247.13 -126.29,-501.85 -175.42,-734.34 89.39,10.97 151.08,30.11 231,-21.6 55.45,-35.89 106.5,-86.86 124.44,-171.22 19.6,-92.16 -7.19,-166.29 -52.89,-224.93 -21.48,-27.57 -42.62,-47.67 -77.9,-66.46 -54.22,-28.89 -58.66,-7.58 -89.25,-62.81 -168.03,-303.38 -1120.9,-276.46 -1459.71,-200.3 -74.5,16.75 -154.13,39.53 -219.75,67.78 -81.72,35.19 -124.28,65.28 -162.52,134.36 -32.36,58.48 -26.1,28.82 -84.49,58.73 -179.85,92.11 -201.08,349.73 -12.36,464.42 86.08,52.31 146.43,35.39 240.73,18.96z"/>
+          <path class="fil17" d="M4162.08 6486.62c-6.24,98.56 -69.27,117.47 184.79,163.43 251.74,45.54 623.98,50.59 868.41,-26.89 80.09,-25.38 49.96,-61.72 52.8,-133.61 -60.32,-54.92 -101.24,-57.82 -158.32,-188.08l-19.53 -36.12c-124.73,5.31 -245.45,18.05 -372.53,16.43 -109.54,-1.4 -275.23,-21.5 -372.53,-14.11 -41.03,65.19 -49.23,116.19 -127.13,179.19 -20.9,16.9 -41.29,25.3 -55.96,39.76z"/>
+          <path class="fil18" d="M5387.95 6718.97c-355.98,98.14 -763.66,103.63 -1128.33,42.73 -212.61,-35.5 -219.69,-56.39 -387.67,-110.5 -6.96,112.81 37.22,115.01 132.39,145.89 352.81,114.46 870.45,137.99 1230.32,56.74 72.15,-16.29 147.57,-31.22 214.5,-55.32 104.36,-37.58 122.79,-34.62 126.34,-150.16 -67.33,25.68 -108.71,48.88 -187.55,70.62z"/>
+          <path class="fil18" d="M5268.08 6489.55c-2.84,71.89 27.29,108.23 -52.8,133.61 -244.43,77.48 -616.67,72.43 -868.41,26.89 -254.06,-45.96 -191.03,-64.87 -184.79,-163.43 -46.51,18.01 -42.71,35.89 -41,95.75 3.49,122.1 10.26,117.91 84.42,131.83 23.05,4.33 41.73,7.99 64.17,11.93 47.61,8.34 90.49,15.05 139.66,21.27 98.48,12.46 199.95,20.79 299.87,21.68 135.94,1.2 466.58,-23.33 576.46,-65.21 6.03,-8.46 3.38,2.54 12.48,-24.31 2.83,-8.35 4.45,-19.41 5.91,-29.1 14.5,-95.86 24.15,-145.08 -35.97,-160.91z"/>
+          <path class="fil18" d="M5341.44 6574.25l-15.5 121.45c79.23,-10.92 216.2,-59.41 258.08,-102.17 109.73,-112 13.73,-419.51 -26.95,-578.54 -20,-78.18 -54.64,-217.07 -82.44,-285.48l-19.41 -15.95c21.14,310.15 167.15,731.9 -113.78,860.69z"/>
+          <path class="fil19" d="M3942.09 5594.78c-0.07,-186.25 -51.12,-139.59 -115.87,-186.7 -57.69,-41.98 -81.42,-120.23 -72.03,-221.72 -230.12,57.94 -205.99,517.9 187.9,408.42z"/>
+          <path class="fil19" d="M5496.34 5591.88c123.7,79.58 265.7,-21.97 303.87,-103.3 64.29,-136.97 -26.37,-272.87 -127.54,-302.74 17.87,255.98 -117.13,219.41 -157.16,273.05 -19.44,26.06 -25.27,100.71 -19.17,132.99z"/>
+
+          <!-- 4B. BAHU BODY KANAN (Kiri Layar) YANG DILEBARKAN (Tempat Menempel Lengan Kanan) -->
+          <!-- Ubah scale(1.16, 1.34) pada #bahu-body-kanan untuk mengatur lebar/tinggi bahu kiri layar -->
+          <g id="bahu-body-kanan" transform="translate(3880, 5186) scale(1.16, 1.34) translate(-3880, -5186)">
+            <path d="M3942.09 5594.78c-0.07,-186.25 -51.12,-139.59 -115.87,-186.7 -57.69,-41.98 -81.42,-120.23 -72.03,-221.72 -230.12,57.94 -205.99,517.9 187.9,408.42z" fill="none" stroke="#2C110D" stroke-width="78" stroke-linejoin="round" stroke-linecap="round"/>
+            <path class="fil19" d="M3942.09 5594.78c-0.07,-186.25 -51.12,-139.59 -115.87,-186.7 -57.69,-41.98 -81.42,-120.23 -72.03,-221.72 -230.12,57.94 -205.99,517.9 187.9,408.42z"/>
+          </g>
+
+          <!-- 4C. BAHU BODY KIRI (Kanan Layar) YANG DILEBARKAN (Tempat Menempel Lengan Kiri) -->
+          <!-- Ubah scale(1.16, 1.34) pada #bahu-body-kiri untuk mengatur lebar/tinggi bahu kanan layar -->
+          <g id="bahu-body-kiri" transform="translate(5550, 5186) scale(1.16, 1.34) translate(-5550, -5186)">
+            <path d="M5496.34 5591.88c123.7,79.58 265.7,-21.97 303.87,-103.3 64.29,-136.97 -26.37,-272.87 -127.54,-302.74 17.87,255.98 -117.13,219.41 -157.16,273.05 -19.44,26.06 -25.27,100.71 -19.17,132.99z" fill="none" stroke="#2C110D" stroke-width="78" stroke-linejoin="round" stroke-linecap="round"/>
+            <path class="fil19" d="M5496.34 5591.88c123.7,79.58 265.7,-21.97 303.87,-103.3 64.29,-136.97 -26.37,-272.87 -127.54,-302.74 17.87,255.98 -117.13,219.41 -157.16,273.05 -19.44,26.06 -25.27,100.71 -19.17,132.99z"/>
+          </g>
+
+          <!-- 4D. Kerah Hoodie Atas & Dada Tengah (di-clip agar berada DI ATAS bahu yang dilebarkan) -->
+          <g id="badan-kerah-dada-overlay" clip-path="url(#clip-kerah-dada-badan)">
+            <path class="fil17" d="M5101.81 5816.91c-4.32,-33.5 -5.94,-34.21 5.36,-60.72l25.69 29.44c13.31,-34.43 2.5,-15.96 33.14,-32.01l-7.67 64.88c-9.88,-9.23 -20.21,1.19 -10.51,-25.33 -13.71,19.88 -26.4,10.12 -26.66,10.16 -16.45,2.07 2.19,5.99 -19.35,13.58zm-74.52 -51.19c19.18,-16.93 -5.8,-11.26 32.5,-11.33 1.41,15.59 -5.22,16.28 -15.83,19.79 29.56,15.22 13.92,4.12 28.46,21.55l9.35 -38.43c17.01,18.32 11.59,25.63 9.33,54.71l-58.01 5.09c1.18,-26.48 -2.55,-8.32 19.76,-19.08 -33.94,-15.47 -26.84,3.62 -25.56,-32.3zm-959.7 -733.97c15.01,16.91 -16.54,18.45 70.32,-10.34 265.08,-87.85 665.49,-93.36 934.89,-55.07 53.37,7.59 107.24,18.45 154.24,32.54 26.32,7.88 45.78,14.57 71.39,22.17 73.34,21.77 54.25,26.15 54.31,10.76 -3.33,-12.07 -2.62,-13.21 -20.73,-20.26 44.83,5.91 100.65,42.77 114.33,71.61 73.14,154.12 -306.83,187.6 -543.07,380.85 -186.84,152.85 -160.3,253.88 -232.79,149.86 -177.46,-254.66 -496.85,-316.11 -632.51,-400.91 -104.47,-65.3 -91.07,-137.54 27.8,-193.97 7.64,6.42 20.4,-11.95 1.82,12.76zm1273.85 1542.5c280.93,-128.79 134.92,-550.54 113.78,-860.69l19.41 15.95c-28.24,-152.75 -35.87,-200.36 20.64,-338.82 -80.67,29.36 -170.09,74.92 -250.68,110.41 -88.33,38.91 -184.87,59.84 -272.93,99.24 -7.22,64.21 18.73,221.8 20.33,305.03 0.44,22.9 -0.92,49.4 5.13,69.69 7.54,25.27 21.79,26.06 11.54,60.61 -12.88,43.42 -12.81,1.39 -24.48,49.11 -9.69,39.59 -4.05,36.76 -22.91,62.83 -43.6,7.4 -55.64,2.65 -61.25,-41.03l-9.52 -52.13c-40.87,-98.48 8.81,-25.64 8.7,-131.87 -0.04,-38.12 -2,-80.26 -4.81,-118.32 -9.65,-130.76 -64.25,-256.63 5.99,-274.64 30.97,-7.93 36.31,6.28 61.82,29.17 1.17,1.04 3.76,3.13 4.72,3.97 0.96,0.84 3.07,2.76 4.78,3.9 76.19,-29.6 537.17,-228.02 573.15,-226.3l-15.11 58.35c102.64,-42.39 136.31,-142.89 80.89,-259.17 -111.53,-234.02 -670.25,-255.54 -901.4,-253.58 -235.18,2 -456.94,21.35 -671.96,92.6 -114.84,38.06 -175.81,65.09 -219.94,162.1 -48.56,106.75 -25.48,234.03 87.78,257.57l-20.58 -57.43c46.37,1.6 490.19,195 581.23,226.2 28.39,-51.28 56.57,-47.59 95.46,-14.1 10.75,18.16 -41.47,314.32 -31.74,394.98 6.49,53.75 16.7,15.92 22.69,61.62l-38.83 132.61c-61.17,49.3 -63.21,-54.6 -73.67,-77.9 -43.64,-97.25 -3.38,-24.27 -4.39,-141.7 -0.86,-100.64 31.04,-252.1 24.35,-326.78 -106.15,-22.46 -276.54,-98.94 -388.7,-144.24 -40.65,-16.42 -92.87,-43.85 -130.31,-53.63 61.17,135.27 47.95,220.78 11.75,367.73 -39.98,162.31 -178.12,606.86 -135.13,752.86 28.62,97.2 167.18,152.34 283.15,168.73 -31.36,-320.27 22.24,-142.3 163.05,-330.59 131.74,-176.14 -94.57,-109.63 454.26,-102.23 117.81,1.59 293.79,-25.4 394.67,-15.2 35.84,51.7 17.25,84.5 107.93,171.07 78.54,74.96 120.48,32.3 121.14,164.02z"/>
+            <path class="fil12" d="M3871.95 6651.2c167.98,54.11 175.06,75 387.67,110.5 364.67,60.9 772.35,55.41 1128.33,-42.73 78.84,-21.74 120.22,-44.94 187.55,-70.62 -3.55,115.54 -21.98,112.58 -126.34,150.16 -66.93,24.1 -142.35,39.03 -214.5,55.32 -359.87,81.25 -877.51,57.72 -1230.32,-56.74 -95.17,-30.88 -139.35,-33.08 -132.39,-145.89zm290.13 -164.58c14.67,-14.46 35.06,-22.86 55.96,-39.76 77.9,-63 86.1,-114 127.13,-179.19 97.3,-7.39 262.99,12.71 372.53,14.11 127.08,1.62 247.8,-11.12 372.53,-16.43l19.53 36.12c57.08,130.26 98,133.16 158.32,188.08 60.12,15.83 50.47,65.05 35.97,160.91 -1.46,9.69 -3.08,20.75 -5.91,29.1 -9.1,26.85 -6.45,15.85 -12.48,24.31 -109.88,41.88 -440.52,66.41 -576.46,65.21 -99.92,-0.89 -201.39,-9.22 -299.87,-21.68 -49.17,-6.22 -92.05,-12.93 -139.66,-21.27 -22.44,-3.94 -41.12,-7.6 -64.17,-11.93 -74.16,-13.92 -80.93,-9.73 -84.42,-131.83 -1.71,-59.86 -5.51,-77.74 41,-95.75zm326.99 -444.25c-39.12,1.81 -40.07,-11.65 -43.92,-41.23l79.35 -3.6c-0.61,30.67 -2.38,43.3 -35.43,44.83zm414.42 -44.97c182.35,-11.77 8.2,112.56 0,0zm12.7 -240.67c-6.15,-55.4 -30.23,-156.86 -15.61,-200.59 36.89,7.56 27.1,-7.79 41.04,83.47 17.82,116.61 26.08,213.13 25.87,334.43l-38.12 -2.8c-12.18,-31.42 -7.69,-165.06 -13.18,-214.51zm-444.02 219.94c-24.16,-37.93 -10.09,-29.08 -10.11,-29.17l0.36 -93.21c1.22,-37.38 4.33,-74.53 8.02,-110.92 3.69,-36.27 7.97,-69.42 13.83,-105.85 16.91,-105.07 5.14,-77.53 41.82,-80.33 19.76,44.51 -11.96,157.75 -17.33,217.52 -12.99,144.67 18.77,193.51 -36.59,201.96zm1024.17 -384.79c-6.1,-32.28 -0.27,-106.93 19.17,-132.99 40.03,-53.64 175.03,-17.07 157.16,-273.05 101.17,29.87 191.83,165.77 127.54,302.74 -38.17,81.33 -180.17,182.88 -303.87,103.3zm-1554.25 2.9c-393.89,109.48 -418.02,-350.48 -187.9,-408.42 -9.39,101.49 14.34,179.74 72.03,221.72 64.75,47.11 115.8,0.45 115.87,186.7zm1532.54 134.73c27.8,68.41 62.44,207.3 82.44,285.48 40.68,159.03 136.68,466.54 26.95,578.54 -41.88,42.76 -178.85,91.25 -258.08,102.17l15.5 -121.45c-0.66,-131.72 -42.6,-89.06 -121.14,-164.02 -90.68,-86.57 -72.09,-119.37 -107.93,-171.07 -100.88,-10.2 -276.86,16.79 -394.67,15.2 -548.83,-7.4 -322.52,-73.91 -454.26,102.23 -140.81,188.29 -194.41,10.32 -163.05,330.59 -115.97,-16.39 -254.53,-71.53 -283.15,-168.73 -42.99,-146 95.15,-590.55 135.13,-752.86 36.2,-146.95 49.42,-232.46 -11.75,-367.73 37.44,9.78 89.66,37.21 130.31,53.63 112.16,45.3 282.55,121.78 388.7,144.24 6.69,74.68 -25.21,226.14 -24.35,326.78 1.01,117.43 -39.25,44.45 4.39,141.7 10.46,23.3 12.5,127.2 73.67,77.9l38.83 -132.61c-5.99,-45.7 -16.2,-7.87 -22.69,-61.62 -9.73,-80.66 42.49,-376.82 31.74,-394.98 -38.89,-33.49 -67.07,-37.18 -95.46,14.1 -91.04,-31.2 -534.86,-224.6 -581.23,-226.2l20.58 57.43c-113.26,-23.54 -136.34,-150.82 -87.78,-257.57 44.13,-97.01 105.1,-124.04 219.94,-162.1 215.02,-71.25 436.78,-90.6 671.96,-92.6 231.15,-1.96 789.87,19.56 901.4,253.58 55.42,116.28 21.75,216.78 -80.89,259.17l15.11 -58.35c-35.98,-1.72 -496.96,196.7 -573.15,226.3 -1.71,-1.14 -3.82,-3.06 -4.78,-3.9 -0.96,-0.84 -3.55,-2.93 -4.72,-3.97 -25.51,-22.89 -30.85,-37.1 -61.82,-29.17 -70.24,18.01 -15.64,143.88 -5.99,274.64 2.81,38.06 4.77,80.2 4.81,118.32 0.11,106.23 -49.57,33.39 -8.7,131.87l9.52 52.13c5.61,43.68 17.65,48.43 61.25,41.03 18.86,-26.07 13.22,-23.24 22.91,-62.83 11.67,-47.72 11.6,-5.69 24.48,-49.11 10.25,-34.55 -4,-35.34 -11.54,-60.61 -6.05,-20.29 -4.69,-46.79 -5.13,-69.69 -1.6,-83.23 -27.55,-240.82 -20.33,-305.03 88.06,-39.4 184.6,-60.33 272.93,-99.24 80.59,-35.49 170.01,-81.05 250.68,-110.41 -56.51,138.46 -48.88,186.07 -20.64,338.82zm-1537.46 -87.87c-34.56,222.66 -135.32,448.15 -167.56,738.19 -5.41,48.67 -6.55,100.48 6.42,145.37 13.29,45.98 44.36,74.03 51.79,101.46 28.61,105.52 -42.57,136.22 106.53,189.03 254.21,90.04 515.81,125.28 791.82,126.2 253.68,0.85 551.7,-34.33 785.52,-124.13 149.88,-57.56 75.24,-82.77 109.95,-195.87 16.86,-54.93 74.24,-75.89 53.65,-242.84 -30.48,-247.13 -126.29,-501.85 -175.42,-734.34 89.39,10.97 151.08,30.11 231,-21.6 55.45,-35.89 106.5,-86.86 124.44,-171.22 19.6,-92.16 -7.19,-166.29 -52.89,-224.93 -21.48,-27.57 -42.62,-47.67 -77.9,-66.46 -54.22,-28.89 -58.66,-7.58 -89.25,-62.81 -168.03,-303.38 -1120.9,-276.46 -1459.71,-200.3 -74.5,16.75 -154.13,39.53 -219.75,67.78 -81.72,35.19 -124.28,65.28 -162.52,134.36 -32.36,58.48 -26.1,28.82 -84.49,58.73 -179.85,92.11 -201.08,349.73 -12.36,464.42 86.08,52.31 146.43,35.39 240.73,18.96z"/>
+            <path class="fil17" d="M4162.08 6486.62c-6.24,98.56 -69.27,117.47 184.79,163.43 251.74,45.54 623.98,50.59 868.41,-26.89 80.09,-25.38 49.96,-61.72 52.8,-133.61 -60.32,-54.92 -101.24,-57.82 -158.32,-188.08l-19.53 -36.12c-124.73,5.31 -245.45,18.05 -372.53,16.43 -109.54,-1.4 -275.23,-21.5 -372.53,-14.11 -41.03,65.19 -49.23,116.19 -127.13,179.19 -20.9,16.9 -41.29,25.3 -55.96,39.76z"/>
+            <path class="fil18" d="M5387.95 6718.97c-355.98,98.14 -763.66,103.63 -1128.33,42.73 -212.61,-35.5 -219.69,-56.39 -387.67,-110.5 -6.96,112.81 37.22,115.01 132.39,145.89 352.81,114.46 870.45,137.99 1230.32,56.74 72.15,-16.29 147.57,-31.22 214.5,-55.32 104.36,-37.58 122.79,-34.62 126.34,-150.16 -67.33,25.68 -108.71,48.88 -187.55,70.62z"/>
+            <path class="fil18" d="M5268.08 6489.55c-2.84,71.89 27.29,108.23 -52.8,133.61 -244.43,77.48 -616.67,72.43 -868.41,26.89 -254.06,-45.96 -191.03,-64.87 -184.79,-163.43 -46.51,18.01 -42.71,35.89 -41,95.75 3.49,122.1 10.26,117.91 84.42,131.83 23.05,4.33 41.73,7.99 64.17,11.93 47.61,8.34 90.49,15.05 139.66,21.27 98.48,12.46 199.95,20.79 299.87,21.68 135.94,1.2 466.58,-23.33 576.46,-65.21 6.03,-8.46 3.38,2.54 12.48,-24.31 2.83,-8.35 4.45,-19.41 5.91,-29.1 14.5,-95.86 24.15,-145.08 -35.97,-160.91z"/>
+            <path class="fil18" d="M5341.44 6574.25l-15.5 121.45c79.23,-10.92 216.2,-59.41 258.08,-102.17 109.73,-112 13.73,-419.51 -26.95,-578.54 -20,-78.18 -54.64,-217.07 -82.44,-285.48l-19.41 -15.95c21.14,310.15 167.15,731.9 -113.78,860.69z"/>
+          </g>
+
+          <!-- 4E. Detail Bayangan Kerah, Tali Hoodie, & Teks SIMANTAP -->
+          <path class="fil18" d="M4067.59 5031.75c-90.23,40.49 -98.53,118.38 25.21,177.69 77.18,37 160.21,63.36 238.75,100.32 125.04,58.84 254.01,149.54 342.98,248.88 22.21,24.8 14.61,30.3 45.26,50.18 133.18,-215.41 394.03,-302.73 600.27,-396.65 103.78,-47.27 157.64,-118.39 32.68,-180.36 -0.06,15.39 19.03,11.01 -54.31,-10.76 -25.61,-7.6 -45.07,-14.29 -71.39,-22.17 -47,-14.09 -100.87,-24.95 -154.24,-32.54 -269.4,-38.29 -669.81,-32.78 -934.89,55.07 -86.86,28.79 -55.31,27.25 -70.32,10.34z"/>
+          <path class="fil12" d="M5352.74 5031.81c124.96,61.97 71.1,133.09 -32.68,180.36 -206.24,93.92 -467.09,181.24 -600.27,396.65 -30.65,-19.88 -23.05,-25.38 -45.26,-50.18 -88.97,-99.34 -217.94,-190.04 -342.98,-248.88 -78.54,-36.96 -161.57,-63.32 -238.75,-100.32 -123.74,-59.31 -115.44,-137.2 -25.21,-177.69 18.58,-24.71 5.82,-6.34 -1.82,-12.76 -118.87,56.43 -132.27,128.67 -27.8,193.97 135.66,84.8 455.05,146.25 632.51,400.91 72.49,104.02 45.95,2.99 232.79,-149.86 236.24,-193.25 616.21,-226.73 543.07,-380.85 -13.68,-28.84 -69.5,-65.7 -114.33,-71.61 18.11,7.05 17.4,8.19 20.73,20.26z"/>
+          <path class="fil10" d="M4472.17 5976.67c55.36,-8.45 23.6,-57.29 36.59,-201.96 5.37,-59.77 37.09,-173.01 17.33,-217.52 -36.68,2.8 -24.91,-24.74 -41.82,80.33 -5.86,36.43 -10.14,69.58 -13.83,105.85 -3.69,36.39 -6.8,73.54 -8.02,110.92l-0.36 93.21c0.02,0.09 -14.05,-8.76 10.11,29.17z"/>
+          <path class="fil10" d="M4929.37 5971.24l38.12 2.8c0.21,-121.3 -8.05,-217.82 -25.87,-334.43 -13.94,-91.26 -4.15,-75.91 -41.04,-83.47 -14.62,43.73 9.46,145.19 15.61,200.59 5.49,49.45 1,183.09 13.18,214.51z"/>
+          <path class="fil10" d="M4903.49 5997.4c8.2,112.56 182.35,-11.77 0,0z"/>
+          <path class="fil10" d="M4445.15 6001.14c3.85,29.58 4.8,43.04 43.92,41.23 33.05,-1.53 34.82,-14.16 35.43,-44.83l-79.35 3.6z"/>
+          <text x="5020" y="5820" font-family="'Segoe UI', Arial, sans-serif" font-weight="800" font-size="95" fill="#2C110D" letter-spacing="2">SIMANTAP</text>
+        </g>
+
+        <!-- =============================================================== -->
+        <!-- 5. LAYER LENGAN BAWAH & TANGAN DI DEPAN BODY                    -->
+        <!--    (Khusus POSE 1 BERSILA/SIDAKEP dan POSE 4 MENJELASKAN)       -->
+        <!-- Urutan Layer:                                                   -->
+        <!--   1. Lengan Atas (#rig-upper-arms-under-body — DI BAWAH Body)   -->
+        <!--   2. Body dengan Bahu Dilebarkan (#rig-badan — DI ATAS Lengan Atas) -->
+        <!--   3. Lengan Bawah (DI ATAS Lengan Atas & Body)                  -->
+        <!--   4. Telapak / Kepalan Tangan (DI ATAS Lengan Bawah)            -->
+        <!-- =============================================================== -->
+        <g id="rig-arms-front-layer" style="display:none;">
+
+          <!-- LENGAN KANAN DEPAN (Kiri Layar) -->
+          <!-- Geser translate(-710, -360): X lebih besar (+) = geser ke kanan, X lebih kecil (-) = geser ke kiri -->
+          <g id="rig-front-shoulder-right" transform="translate(-710, -360) scale(0.95, 0.95)">
+            <g id="anim-front-upper-arm-right" class="rig-joint" data-pivot="Bahu Kanan (Depan)">
+              <!-- Lengan Bawah (DI ATAS Lengan Atas & Body) -->
+              <g id="rig-front-elbow-right" transform="translate(-590, 400)">
+                <g id="anim-front-lower-arm-right" class="rig-joint" data-pivot="Siku Kanan (Depan)">
+                  <!-- Segmen Lengan Kanan Bawah | Source: lengan_kanan[1,8,5,7] | Pivot Siku: (2560, 5400) -->
+<g transform="translate(-2560, -5400)" clip-path="url(#clip-lengan-kanan-bawah)">
+  <path d="M2674.88 5820.43c24.28,-23.85 48.62,16.16 92.08,-55.03 32.98,-54.01 -17.05,-168.67 -41.42,-221.85 -16.56,-36.16 -44.93,-63.54 -50.38,-94.68 39.79,0.32 70.84,7.48 95.25,24.43 0.98,9.97 -1.56,4.27 -8.55,16.73l49.61 41.97c-31.61,-182.28 -332.76,-327.14 -454.28,-141.29 -42.19,64.52 -61.21,216.78 -68.75,304.03 -11.31,130.8 -16.27,238.8 84,297.87 31.64,-17.31 121.77,-174.16 302.44,-172.18z" fill="none" stroke="#2C110D" stroke-width="96" stroke-linejoin="round" stroke-linecap="round"/>
+  <path d="M2674.88 5820.43c56.44,-5.4 111.67,-6.26 160.49,20.87 17.23,9.58 25.87,18.03 39.3,13.04 28.67,-67.67 -17.32,-165.1 -43.08,-221.83 -34.31,-75.58 -90.09,-111.08 -120.67,-160.32l50.94 17.84c6.99,-12.46 9.53,-6.76 8.55,-16.73 -24.41,-16.95 -55.46,-24.11 -95.25,-24.43 5.45,31.14 33.82,58.52 50.38,94.68 24.37,53.18 74.4,167.84 41.42,221.85 -43.46,71.19 -67.8,31.18 -92.08,55.03z" fill="none" stroke="#2C110D" stroke-width="96" stroke-linejoin="round" stroke-linecap="round"/>
+  <path d="M2470.8 6062.05c102.73,-101.45 243.49,-136.36 388,-113.97 -3.65,-81.14 -33.88,-89.71 -113.43,-95.37 -116.05,-8.26 -217.9,26.38 -294.72,105.32 -48.65,49.99 -32.22,60.31 -5.92,127.43l26.07 -23.41z" fill="none" stroke="#2C110D" stroke-width="96" stroke-linejoin="round" stroke-linecap="round"/>
+  <path d="M2484.94 6113.24c133.29,30.77 348.22,-41.82 374.85,-127.04 -94.02,-10.44 -143.69,-15.04 -234.15,19.6 -49.88,19.11 -139.08,59.55 -140.7,107.44z" fill="none" stroke="#2C110D" stroke-width="96" stroke-linejoin="round" stroke-linecap="round"/>
+  <path class="fil17" d="M2674.88 5820.43c24.28,-23.85 48.62,16.16 92.08,-55.03 32.98,-54.01 -17.05,-168.67 -41.42,-221.85 -16.56,-36.16 -44.93,-63.54 -50.38,-94.68 39.79,0.32 70.84,7.48 95.25,24.43 0.98,9.97 -1.56,4.27 -8.55,16.73l49.61 41.97c-31.61,-182.28 -332.76,-327.14 -454.28,-141.29 -42.19,64.52 -61.21,216.78 -68.75,304.03 -11.31,130.8 -16.27,238.8 84,297.87 31.64,-17.31 121.77,-174.16 302.44,-172.18z"/>
+  <path class="fil18" d="M2674.88 5820.43c56.44,-5.4 111.67,-6.26 160.49,20.87 17.23,9.58 25.87,18.03 39.3,13.04 28.67,-67.67 -17.32,-165.1 -43.08,-221.83 -34.31,-75.58 -90.09,-111.08 -120.67,-160.32l50.94 17.84c6.99,-12.46 9.53,-6.76 8.55,-16.73 -24.41,-16.95 -55.46,-24.11 -95.25,-24.43 5.45,31.14 33.82,58.52 50.38,94.68 24.37,53.18 74.4,167.84 41.42,221.85 -43.46,71.19 -67.8,31.18 -92.08,55.03z"/>
+  <path class="fil17" d="M2470.8 6062.05c102.73,-101.45 243.49,-136.36 388,-113.97 -3.65,-81.14 -33.88,-89.71 -113.43,-95.37 -116.05,-8.26 -217.9,26.38 -294.72,105.32 -48.65,49.99 -32.22,60.31 -5.92,127.43l26.07 -23.41z" stroke="#2C110D" stroke-width="56" stroke-linejoin="round"/>
+  <path class="fil18" d="M2484.94 6113.24c133.29,30.77 348.22,-41.82 374.85,-127.04 -94.02,-10.44 -143.69,-15.04 -234.15,19.6 -49.88,19.11 -139.08,59.55 -140.7,107.44z" stroke="#2C110D" stroke-width="56" stroke-linejoin="round"/>
+  
+</g>
+
+                  <!-- Tangan Kanan (DI ATAS Lengan Bawah) -->
+                  <!-- Tangan saat Sidakep (Pose 1): pakai tangan_kanan_mengepal_ke_belakang -->
+                  <g id="front-hand-right-sidakep" transform="translate(90, 640) rotate(110) scale(0.76, 0.76)">
+                    <!-- Source SVG: id="tangan_kanan_mengepal_ke_belakang" | Titik Putar (Pivot): (4130, 7465) -->
+<g transform="translate(-4130, -7465)">
+  <path class="fil14" d="M3797.48 7346.18c-4.39,103.07 39.88,178.81 92.42,225.34 53.46,47.35 105.34,104.63 193.43,112.81 298.86,27.78 217.19,-279.65 355.24,-247.94 12.18,22.74 9.28,35.15 25.09,53.86 12.77,-151.56 -79.17,-168.69 -195.93,-118.69 18.25,-57.78 47.27,-65.05 118.25,-63.06 -26.6,-130.44 -151.37,-129.03 -218.26,-92.59 -36,19.61 -41.64,40.67 -54.81,47.51 5.81,-48.54 47.49,-68.58 87.76,-86.85 59,-26.75 21.2,8.14 42.85,-35.25 -33.77,-22.62 -54,-44.32 -118.27,-38.37 -169.36,15.69 -183.9,168.85 -227.49,208.32 -5.08,-89.13 23.6,-72.77 35.69,-129.07 -86.83,13.77 -118.5,82.35 -135.97,163.98z"/>
+  <path class="fil12" d="M4463.66 7490.25c-5.95,44.24 -25.3,66.43 -63.46,78.33l13.99 -90.43c-63.6,37.13 -44.62,158.64 -105.23,236.84 -95.24,122.9 -320.06,113.9 -453.97,-83.84 -46.07,-68.02 -78.41,-192.56 -57.51,-284.97 17.47,-81.63 49.14,-150.21 135.97,-163.98 -12.09,56.3 -40.77,39.94 -35.69,129.07 43.59,-39.47 58.13,-192.63 227.49,-208.32 64.27,-5.95 84.5,15.75 118.27,38.37 -21.65,43.39 16.15,8.5 -42.85,35.25 -40.27,18.27 -81.95,38.31 -87.76,86.85 13.17,-6.84 18.81,-27.9 54.81,-47.51 66.89,-36.44 191.66,-37.85 218.26,92.59 -70.98,-1.99 -100,5.28 -118.25,63.06 116.76,-50 208.7,-32.87 195.93,118.69zm-357.84 -421.95c-79.06,12.19 -82.18,34.98 -127.17,61.84 -40.92,24.43 -92.78,8.61 -145.34,49.56 -66.4,51.74 -91.62,182.19 -77.42,295.44 14,111.73 57.26,185.14 127.77,254.77 146.94,145.12 407.74,153 495.51,-55.43 3.65,-8.68 7.66,-22.93 11.47,-31.19 24.05,-52.1 35.94,-13.84 79.1,-64.41 31.22,-36.59 47.8,-97.39 36.53,-157.22 -15.03,-79.77 -62.28,-95.68 -73.38,-114.08 -34.4,-56.98 -5.23,-69.09 -74.93,-120.03 -21.09,-15.42 -44.26,-18.09 -62.52,-30.15 -26.12,-17.25 -52.02,-110.31 -189.62,-89.1z"/>
+  <path class="fil15" d="M4463.66 7490.25c-15.81,-18.71 -12.91,-31.12 -25.09,-53.86 -138.05,-31.71 -56.38,275.72 -355.24,247.94 -88.09,-8.18 -139.97,-65.46 -193.43,-112.81 -52.54,-46.53 -96.81,-122.27 -92.42,-225.34 -20.9,92.41 11.44,216.95 57.51,284.97 133.91,197.74 358.73,206.74 453.97,83.84 60.61,-78.2 41.63,-199.71 105.23,-236.84l-13.99 90.43c38.16,-11.9 57.51,-34.09 63.46,-78.33z"/>
+</g>
+                  </g>
+                  <!-- Tangan saat Menjelaskan (Pose 4): telapak terbuka menghadap atas/depan -->
+                  <g id="front-hand-right-explain" transform="translate(80, 650) rotate(55) scale(0.78, 0.78)" style="display:none;">
+                    <!-- Source SVG: id="tangan_kanan_terbuka" | Titik Putar (Pivot): (5613, 8550) -->
+<g transform="translate(-5613, -8550)">
+  <path class="fil14" d="M5777.16 8316.66c-63.27,25.86 -104.18,48.51 -112.23,131.49 28.81,-27.56 23.36,-39.63 66.19,-71.26 42.28,-31.21 65.19,-17.33 91.05,-44.11 21.32,-22.07 27.76,-46.14 65.86,-70.1 37.66,-23.68 117.42,-35.37 114.78,31.91 -1.32,33.78 -34.63,58.53 -59.04,100.62 -46.39,79.97 -54.15,198.24 -179.86,242.21 -212.05,74.17 -258.25,86.44 -406.56,-134.71 -38.7,-57.7 -44.73,-47.58 -76.92,-75.78 -84.01,-73.6 -112.53,-100.13 -82.23,-168.49 72.22,-16.63 118.44,17.86 180.35,71.18 47.11,40.56 3.37,21.31 16.78,58.95 22.21,-13.87 52.13,-61.73 116.39,-95.72 34.97,-18.5 144.95,-46.93 159.25,-56.97l-53.75 -6.37c-24.14,-183.39 24.21,-324.05 92.01,-223.02 49.44,73.67 52.09,220.52 67.93,310.17z"/>
+  <path class="fil12" d="M5777.16 8316.66c-15.84,-89.65 -18.49,-236.5 -67.93,-310.17 -67.8,-101.03 -116.15,39.63 -92.01,223.02l53.75 6.37c-14.3,10.04 -124.28,38.47 -159.25,56.97 -64.26,33.99 -94.18,81.85 -116.39,95.72 -13.41,-37.64 30.33,-18.39 -16.78,-58.95 -61.91,-53.32 -108.13,-87.81 -180.35,-71.18 -30.3,68.36 -1.78,94.89 82.23,168.49 32.19,28.2 38.22,18.08 76.92,75.78 148.31,221.15 194.51,208.88 406.56,134.71 125.71,-43.97 133.47,-162.24 179.86,-242.21 24.41,-42.09 57.72,-66.84 59.04,-100.62 2.64,-67.28 -77.12,-55.59 -114.78,-31.91 -38.1,23.96 -44.54,48.03 -65.86,70.1 -25.86,26.78 -48.77,12.9 -91.05,44.11 -42.83,31.63 -37.38,43.7 -66.19,71.26 8.05,-82.98 48.96,-105.63 112.23,-131.49zm-219.64 -80.78c-29.8,-78.96 -98.72,-205.15 -202.57,-193.03 -32.43,135.73 49.91,181.43 66.64,277.42 10.28,-5.32 128.63,-77.51 135.93,-84.39zm250.32 36.74c31.39,-4.61 17.25,-29.24 81.38,-59.65 42.51,-20.16 98.74,-15.85 129.89,8.75 79.95,63.14 -19.73,165.62 -46.59,218.83 -44.76,88.65 -47.33,144.15 -115.85,197.66 -27.98,21.86 -186.43,87.48 -228.77,93.18 -103.88,13.97 -176.95,-32.88 -224.21,-80.6 -54.52,-55.06 -71.73,-126.03 -140.29,-181.27 -48.93,-39.43 -136.52,-123.4 -120.06,-196.97 29.32,-131.07 195.46,-20.26 206.31,-14.95 -5.1,-21.11 -108.7,-227.17 14.74,-256.61 104.2,-24.86 161.31,98.52 203.96,155.18 0.11,-56.2 1.24,-126.35 25.73,-169.94 24.13,-42.94 79.17,-69.32 128.29,-26.64 70.34,61.11 73.35,201.22 85.47,313.03z"/>
+  <path class="fil14" d="M5557.52 8235.88c-7.3,6.88 -125.65,79.07 -135.93,84.39 -16.73,-95.99 -99.07,-141.69 -66.64,-277.42 103.85,-12.12 172.77,114.07 202.57,193.03z"/>
+</g>
+                  </g>
+                </g>
+              </g>
+            </g>
+          </g>
+
+          <!-- LENGAN KIRI DEPAN (Kanan Layar) -->
+          <!-- Geser translate(780, -360): sudah digeser melebar & agak ke kanan agar pas dengan ukuran body -->
+          <g id="rig-front-shoulder-left" transform="translate(780, -360) scale(0.95, 0.95)">
+            <g id="anim-front-upper-arm-left" class="rig-joint" data-pivot="Bahu Kiri (Depan)">
+              <!-- Lengan Bawah (DI ATAS Lengan Atas & Body) -->
+              <g id="rig-front-elbow-left" transform="translate(690, 390)">
+                <g id="anim-front-lower-arm-left" class="rig-joint" data-pivot="Siku Kiri (Depan)">
+                  <!-- Segmen Lengan Kiri Bawah | Source: lengan_kiri[0,5,7] | Pivot Siku: (6910, 5440) -->
+<g transform="translate(-6910, -5440)" clip-path="url(#clip-lengan-kiri-bawah)">
+  <path d="M6671.98 5560.97c24.04,-14.41 27.82,-22.4 48.11,-41.43 18.72,-17.55 25.64,-23.93 53.23,-28.3 -42.42,51.28 -196.87,295.24 -125.22,403.71 81.6,-50.85 147.09,-79.76 281.44,-49.81 125.81,28.04 159.03,65.75 226.56,132.14 94.43,-64.26 76.97,-180.61 50.92,-300.07 -24.35,-111.63 -61.28,-351.85 -202.74,-368.04 -154.43,-17.66 -302.32,99.28 -332.3,251.8z" fill="none" stroke="#2C110D" stroke-width="96" stroke-linejoin="round" stroke-linecap="round"/>
+  <path d="M6668.28 5986.5c127.95,-48.42 354.61,-1.14 415.78,91.73 19.03,-17.69 32.76,-53.3 34.25,-74.78 4.2,-60.52 -191.34,-163.19 -361.29,-123.62 -73.12,17.02 -87.86,28.75 -88.74,106.67z" fill="none" stroke="#2C110D" stroke-width="96" stroke-linejoin="round" stroke-linecap="round"/>
+  <path d="M6677.2 6027.66c39.73,52.65 81.49,70.09 160.05,87.39 74.11,16.32 157.56,13.39 226.28,-4.69 -36.28,-91.7 -278.98,-136.67 -386.33,-82.7z" fill="none" stroke="#2C110D" stroke-width="96" stroke-linejoin="round" stroke-linecap="round"/>
+  <path class="fil17" d="M6671.98 5560.97c24.04,-14.41 27.82,-22.4 48.11,-41.43 18.72,-17.55 25.64,-23.93 53.23,-28.3 -42.42,51.28 -196.87,295.24 -125.22,403.71 81.6,-50.85 147.09,-79.76 281.44,-49.81 125.81,28.04 159.03,65.75 226.56,132.14 94.43,-64.26 76.97,-180.61 50.92,-300.07 -24.35,-111.63 -61.28,-351.85 -202.74,-368.04 -154.43,-17.66 -302.32,99.28 -332.3,251.8z"/>
+  <path class="fil17" d="M6668.28 5986.5c127.95,-48.42 354.61,-1.14 415.78,91.73 19.03,-17.69 32.76,-53.3 34.25,-74.78 4.2,-60.52 -191.34,-163.19 -361.29,-123.62 -73.12,17.02 -87.86,28.75 -88.74,106.67z" stroke="#2C110D" stroke-width="56" stroke-linejoin="round"/>
+  <path class="fil18" d="M6677.2 6027.66c39.73,52.65 81.49,70.09 160.05,87.39 74.11,16.32 157.56,13.39 226.28,-4.69 -36.28,-91.7 -278.98,-136.67 -386.33,-82.7z" stroke="#2C110D" stroke-width="56" stroke-linejoin="round"/>
+  
+</g>
+
+                  <!-- Tangan Kiri (DI ATAS Lengan Bawah) -->
+                  <!-- Tangan saat Sidakep (Pose 1): pakai tangan_kiri_mengepal_ke_belakang -->
+                  <g id="front-hand-left-sidakep" transform="translate(-90, 600) rotate(-110) scale(0.76, 0.76)">
+                    <!-- Source SVG: id="tangan_kiri_mengepal_ke_belakang" | Titik Putar (Pivot): (6906, 8365) -->
+<g transform="translate(-6906, -8365)">
+  <path class="fil14" d="M7238.42 8246.05c4.39,103.07 -39.88,178.81 -92.42,225.34 -53.46,47.35 -105.34,104.63 -193.43,112.81 -298.86,27.78 -217.19,-279.65 -355.24,-247.94 -12.18,22.74 -9.28,35.15 -25.09,53.86 -12.77,-151.56 79.17,-168.69 195.93,-118.69 -18.25,-57.78 -47.27,-65.05 -118.25,-63.06 26.6,-130.44 151.37,-129.03 218.26,-92.59 36,19.61 41.64,40.67 54.81,47.51 -5.81,-48.54 -47.49,-68.58 -87.76,-86.85 -59,-26.75 -21.2,8.14 -42.85,-35.25 33.77,-22.62 54,-44.32 118.27,-38.37 169.36,15.69 183.9,168.85 227.49,208.32 5.08,-89.13 -23.6,-72.77 -35.69,-129.07 86.83,13.77 118.5,82.35 135.97,163.98z"/>
+  <path class="fil12" d="M6572.24 8390.12c5.95,44.24 25.3,66.43 63.46,78.33l-13.99 -90.43c63.6,37.13 44.62,158.64 105.23,236.84 95.24,122.9 320.06,113.9 453.97,-83.84 46.07,-68.02 78.41,-192.56 57.51,-284.97 -17.47,-81.63 -49.14,-150.21 -135.97,-163.98 12.09,56.3 40.77,39.94 35.69,129.07 -43.59,-39.47 -58.13,-192.63 -227.49,-208.32 -64.27,-5.95 -84.5,15.75 -118.27,38.37 21.65,43.39 -16.15,8.5 42.85,35.25 40.27,18.27 81.95,38.31 87.76,86.85 -13.17,-6.84 -18.81,-27.9 -54.81,-47.51 -66.89,-36.44 -191.66,-37.85 -218.26,92.59 70.98,-1.99 100,5.28 118.25,63.06 -116.76,-50 -208.7,-32.87 -195.93,118.69zm357.84 -421.95c79.06,12.19 82.18,34.98 127.17,61.84 40.92,24.43 92.78,8.61 145.34,49.56 66.4,51.74 91.62,182.19 77.42,295.44 -14,111.73 -57.26,185.14 -127.77,254.77 -146.94,145.12 -407.74,153 -495.51,-55.43 -3.65,-8.68 -7.66,-22.93 -11.47,-31.19 -24.05,-52.1 -35.94,-13.84 -79.1,-64.41 -31.22,-36.59 -47.8,-97.39 -36.53,-157.22 15.03,-79.77 62.28,-95.68 73.38,-114.08 34.4,-56.98 5.23,-69.09 74.93,-120.03 21.09,-15.42 44.26,-18.09 62.52,-30.15 26.12,-17.25 52.02,-110.31 189.62,-89.1z"/>
+  <path class="fil15" d="M6572.24 8390.12c15.81,-18.71 12.91,-31.12 25.09,-53.86 138.05,-31.71 56.38,275.72 355.24,247.94 88.09,-8.18 139.97,-65.46 193.43,-112.81 52.54,-46.53 96.81,-122.27 92.42,-225.34 20.9,92.41 -11.44,216.95 -57.51,284.97 -133.91,197.74 -358.73,206.74 -453.97,83.84 -60.61,-78.2 -41.63,-199.71 -105.23,-236.84l13.99 90.43c-38.16,-11.9 -57.51,-34.09 -63.46,-78.33z"/>
+</g>
+                  </g>
+                  <!-- Tangan saat Menjelaskan (Pose 4): telapak terbuka menghadap atas/depan -->
+                  <g id="front-hand-left-explain" transform="translate(-70, 610) rotate(-45) scale(0.78, 0.78)" style="display:none;">
+                    <!-- Source SVG: id="tangan_kiri_terbuka" | Titik Putar (Pivot): (5422, 7650) -->
+<g transform="translate(-5422, -7650)">
+  <path class="fil14" d="M5258.74 7416.79c63.27,25.86 104.18,48.51 112.23,131.49 -28.81,-27.56 -23.36,-39.63 -66.19,-71.26 -42.28,-31.21 -65.19,-17.33 -91.05,-44.11 -21.32,-22.07 -27.76,-46.14 -65.86,-70.1 -37.66,-23.68 -117.42,-35.37 -114.78,31.91 1.32,33.78 34.63,58.53 59.04,100.62 46.39,79.97 54.15,198.24 179.86,242.21 212.05,74.17 258.25,86.44 406.56,-134.71 38.7,-57.7 44.73,-47.58 76.92,-75.78 84.01,-73.6 112.53,-100.13 82.23,-168.49 -72.22,-16.63 -118.44,17.86 -180.35,71.18 -47.11,40.56 -3.37,21.31 -16.78,58.95 -22.21,-13.87 -52.13,-61.73 -116.39,-95.72 -34.97,-18.5 -144.95,-46.93 -159.25,-56.97l53.75 -6.37c24.14,-183.39 -24.21,-324.05 -92.01,-223.02 -49.44,73.67 -52.09,220.52 -67.93,310.17z"/>
+  <path class="fil12" d="M5258.74 7416.79c15.84,-89.65 18.49,-236.5 67.93,-310.17 67.8,-101.03 116.15,39.63 92.01,223.02l-53.75 6.37c14.3,10.04 124.28,38.47 159.25,56.97 64.26,33.99 94.18,81.85 116.39,95.72 13.41,-37.64 -30.33,-18.39 16.78,-58.95 61.91,-53.32 108.13,-87.81 180.35,-71.18 30.3,68.36 1.78,94.89 -82.23,168.49 -32.19,28.2 -38.22,18.08 -76.92,75.78 -148.31,221.15 -194.51,208.88 -406.56,134.71 -125.71,-43.97 -133.47,-162.24 -179.86,-242.21 -24.41,-42.09 -57.72,-66.84 -59.04,-100.62 -2.64,-67.28 77.12,-55.59 114.78,-31.91 38.1,23.96 44.54,48.03 65.86,70.1 25.86,26.78 48.77,12.9 91.05,44.11 42.83,31.63 37.38,43.7 66.19,71.26 -8.05,-82.98 -48.96,-105.63 -112.23,-131.49zm219.64 -80.78c29.8,-78.96 98.72,-205.15 202.57,-193.03 32.43,135.73 -49.91,181.43 -66.64,277.42 -10.28,-5.32 -128.63,-77.51 -135.93,-84.39zm-250.32 36.74c-31.39,-4.61 -17.25,-29.24 -81.38,-59.65 -42.51,-20.16 -98.74,-15.85 -129.89,8.75 -79.95,63.14 19.73,165.62 46.59,218.83 44.76,88.65 47.33,144.15 115.85,197.66 27.98,21.86 186.43,87.48 228.77,93.18 103.88,13.97 176.95,-32.88 224.21,-80.6 54.52,-55.06 71.73,-126.03 140.29,-181.27 48.93,-39.43 136.52,-123.4 120.06,-196.97 -29.32,-131.07 -195.46,-20.26 -206.31,-14.95 5.1,-21.11 108.7,-227.17 -14.74,-256.61 -104.2,-24.86 -161.31,98.52 -203.96,155.18 -0.11,-56.2 -1.24,-126.35 -25.73,-169.94 -24.13,-42.94 -79.17,-69.32 -128.29,-26.64 -70.34,61.11 -73.35,201.22 -85.47,313.03z"/>
+  <path class="fil14" d="M5478.38 7336.01c7.3,6.88 125.65,79.07 135.93,84.39 16.73,-95.99 99.07,-141.69 66.64,-277.42 -103.85,-12.12 -172.77,114.07 -202.57,193.03z"/>
+</g>
+                  </g>
+                </g>
+              </g>
+            </g>
+          </g>
+
+        </g>
+
+        <!-- =============================================================== -->
+        <!-- 6. KEPALA & WAJAH CHIBI GROUP (Pivot Leher di X=0, Y=-820)      -->
+        <!-- =============================================================== -->
+        <g id="rig-neck" transform="translate(0, -820)">
+          <g id="anim-head" class="rig-joint" data-pivot="Leher / Kepala">
+            <!-- Telinga Kanan & Kiri (Source: id="telinga_kanan" & id="telinga_kiri") -->
+            <!-- Telinga kanan (kiri layar) digeser masuk ke (-865, -1095) rotate(4) agar menempel rapat ke kepala! -->
+            <g id="rig-ear-right" transform="translate(-865, -1095) rotate(4) scale(0.96, 0.96)">
+              <g id="anim-ear-right" class="rig-joint" data-pivot="Pangkal Telinga Kanan">
+                <!-- Source SVG: id="telinga_kanan" | Titik Putar (Pivot): (4350, 3150) -->
+<g transform="translate(-4350, -3150)">
+  <path class="fil12" d="M3565.85 3133.44l-4.02 14.47c110.56,-16.16 235.23,-114.99 372.82,-49.97 49.29,23.3 97.4,59.6 143.85,85.05 90.64,49.69 96.81,27.29 188.92,21.02l12.73 32.02c8.92,62.69 -192.96,198.4 -407.23,159.65 -109.12,-19.73 -329.71,-130.61 -356.39,-222.47 -15.37,-37.73 6.23,-57.78 33.9,-77.67 61.34,-44.09 186.41,-103.44 255.9,-124.91 222.34,-68.71 303.16,31.06 426.57,47.32 33.17,3.59 53.34,6.76 86.86,0.14 50.32,-9.94 35.53,-19.98 48.67,-2.16 36.51,54.92 -25.52,176.48 -51.91,211.87l-25.98 -68.46c-63.23,16.66 -120.19,53.66 -216.79,-13.81 -1.55,-1.08 -3.81,-2.77 -5.21,-3.78l-10.36 -8.27c-0.85,-2.91 -3.5,-2.84 -5.21,-4.31 -172.91,-110.1 -310.21,-109.77 -487.12,4.27zm323.41 -220.77c-103.19,13.66 -196.42,56.36 -276.68,100.55 -71.14,39.17 -194.02,97.97 -116.24,210 85.61,123.28 335.02,243.51 532.31,213.31 180.57,-27.63 376.06,-175.91 383.87,-359.35 8.56,-201.03 -65.36,-60.72 -214.32,-106.72 -111.92,-34.56 -171.84,-75.94 -308.94,-57.79z"/>
+  <path class="fil13" d="M3516.53 3173.21c26.68,91.86 247.27,202.74 356.39,222.47 214.27,38.75 416.15,-96.96 407.23,-159.65 -80.11,38.69 -161.72,131.76 -285.48,115.53 23.21,2.06 84.88,-46.85 103.01,-59.89 -290.82,-78.74 -219.37,-214.21 -474.32,-139.04 -22.98,6.78 -59.27,22.57 -61.53,-4.72l4.02 -14.47c-1.54,1.72 -3.44,4.14 -4.51,5.26 -29.56,31.1 -28.58,21.28 -44.81,34.51z"/>
+  <path class="fil10" d="M3516.53 3173.21c16.23,-13.23 15.25,-3.41 44.81,-34.51 1.07,-1.12 2.97,-3.54 4.51,-5.26 176.91,-114.04 314.21,-114.37 487.12,-4.27 58.32,5.26 118.22,5.75 167.27,-16.37 36.43,-16.42 81.87,-52.43 102.37,-77.85 -32.71,-2.49 -55.72,9.98 -89.71,-17 -123.41,-16.26 -204.23,-116.03 -426.57,-47.32 -69.49,21.47 -194.56,80.82 -255.9,124.91 -27.67,19.89 -49.27,39.94 -33.9,77.67z"/>
+  <path class="fil16" d="M3561.83 3147.91c2.26,27.29 38.55,11.5 61.53,4.72 254.95,-75.17 183.5,60.3 474.32,139.04 -18.13,13.04 -79.8,61.95 -103.01,59.89 123.76,16.23 205.37,-76.84 285.48,-115.53l-12.73 -32.02c-92.11,6.27 -98.28,28.67 -188.92,-21.02 -46.45,-25.45 -94.56,-61.75 -143.85,-85.05 -137.59,-65.02 -262.26,33.81 -372.82,49.97z"/>
+  <path class="fil11" d="M4232.9 3017.95c33.99,26.98 57,14.51 89.71,17 -20.5,25.42 -65.94,61.43 -102.37,77.85 -49.05,22.12 -108.95,21.63 -167.27,16.37 1.71,1.47 4.36,1.4 5.21,4.31l10.36 8.27c1.4,1.01 3.66,2.7 5.21,3.78 96.6,67.47 153.56,30.47 216.79,13.81l25.98 68.46c26.39,-35.39 88.42,-156.95 51.91,-211.87 -13.14,-17.82 1.65,-7.78 -48.67,2.16 -33.52,6.62 -53.69,3.45 -86.86,-0.14z"/>
+</g>
+              </g>
+            </g>
+            <g id="rig-ear-left" transform="translate(980, -1120) scale(0.95, 0.95)">
+              <g id="anim-ear-left" class="rig-joint" data-pivot="Pangkal Telinga Kiri">
+                <!-- Source SVG: id="telinga_kiri" | Titik Putar (Pivot): (5120, 3200) -->
+<g transform="translate(-5120, -3200)">
+  <path class="fil12" d="M5406.86 3137.85c-89.79,66.35 -124.12,48.98 -227.89,19.18l-33.65 68.72c-22.09,-78.95 -71.8,-106.45 -45.23,-222.77 75.52,19.19 97.05,30.87 183.26,4.56 160.28,-42.81 208.13,-95.33 399.45,-31.35 61.45,20.55 109.27,43.21 163.01,73.76 45.44,25.84 127.8,55.94 106.14,122.31 -34.13,108.21 -349,311.55 -609.09,194.2 -48.38,-21.82 -151.88,-64.71 -150.18,-125.41l8.03 -38.37c100.51,7.53 100.62,29.26 195.92,-22.24 49.44,-26.73 90.26,-61.36 145.67,-82.8 125.74,-48.66 258.84,9.98 361.09,52.53l1.15 -17.39c-75.52,-38.57 -146.04,-82.01 -255.37,-85.72 -110.58,-3.76 -173.88,47.69 -242.31,90.79zm58.09 -224.3c-103.72,13.55 -204.67,84.25 -302.93,66.31 -63.7,-11.63 -91.49,-51.36 -103.1,41.43 -7.16,57.29 3.95,109.22 24.17,156.06 108.32,250.96 456.52,356.78 758.48,160.54 250.77,-162.97 183.48,-256.87 -67.98,-368.52 -93.31,-41.44 -195.44,-70.6 -308.64,-55.82z"/>
+  <path class="fil13" d="M5192.68 3241.05c-1.7,60.7 101.8,103.59 150.18,125.41 260.09,117.35 574.96,-85.99 609.09,-194.2 -16.72,-27.18 -10.9,-29.24 -47.41,-39.48l-1.15 17.39c-10.7,11 14.5,22.51 -68.22,-4.44 -207.67,-67.64 -260.57,109.78 -459.66,149.56 16.7,5.3 69.95,54.08 126.3,65.91 -55.12,-0.48 -126.4,-17.98 -172.89,-40.29 -113.66,-54.56 -80.34,-92.95 -136.24,-79.86z"/>
+  <path class="fil10" d="M5283.35 3007.54c-25.86,97.59 98.62,112.84 123.51,130.31 68.43,-43.1 131.73,-94.55 242.31,-90.79 109.33,3.71 179.85,47.15 255.37,85.72 36.51,10.24 30.69,12.3 47.41,39.48 21.66,-66.37 -60.7,-96.47 -106.14,-122.31 -53.74,-30.55 -101.56,-53.21 -163.01,-73.76 -191.32,-63.98 -239.17,-11.46 -399.45,31.35z"/>
+  <path class="fil16" d="M5192.68 3241.05c55.9,-13.09 22.58,25.3 136.24,79.86 46.49,22.31 117.77,39.81 172.89,40.29 -56.35,-11.83 -109.6,-60.61 -126.3,-65.91 199.09,-39.78 251.99,-217.2 459.66,-149.56 82.72,26.95 57.52,15.44 68.22,4.44 -102.25,-42.55 -235.35,-101.19 -361.09,-52.53 -55.41,21.44 -96.23,56.07 -145.67,82.8 -95.3,51.5 -95.41,29.77 -195.92,22.24l-8.03 38.37z"/>
+  <path class="fil11" d="M5406.86 3137.85c-24.89,-17.47 -149.37,-32.72 -123.51,-130.31 -86.21,26.31 -107.74,14.63 -183.26,-4.56 -26.57,116.32 23.14,143.82 45.23,222.77l33.65 -68.72c103.77,29.8 138.1,47.17 227.89,-19.18z"/>
+</g>
+              </g>
+            </g><g id="rig-head-base" transform="translate(0, -900) scale(1.24, 1.22)">
+              <!-- Source SVG: id="kepala" | Titik Putar (Pivot): (1653, 2985) -->
+<g transform="translate(-1653, -2985)">
+  <path class="fil0" d="M1570.6 2038.13c19.5,137.86 30.63,92.24 66.53,154.31 -23.84,-2.66 -49.85,-4.48 -69.84,-17.54 -31.84,-6.75 -122.95,-44.47 -141.13,-24.84 62.22,46.42 62.74,109.95 221.01,140.57 -36.91,32.04 -119.81,24.23 -150.61,-6.11 -49.7,-4.27 -60.1,-33.45 -72.19,-35.14 -135.77,35.1 -234.2,96.65 -309.66,166.42 -58.97,54.53 -144.71,183.35 -181.36,292.27 -46.71,138.78 -49.35,256.06 -69.17,404.69 -19.37,145.19 -87.05,247.67 -33.8,401.21 30.84,22.87 42.07,62.98 103.13,115.93 137.09,118.86 252.32,167.26 454.98,204.43 341.27,62.59 796.76,17.2 1000.38,-255.52 76.28,-102.15 97.64,-190.09 74.21,-344.22 -31.97,-210.35 2,-350.47 -82.74,-577.27 -20.53,-54.95 -59.87,-111.68 -70.57,-153.79 -24.52,-59.68 -102.88,-124.12 -166.2,-166.74 -126.07,-84.86 -207.48,-74.97 -234.53,-95.67 -25.89,-25.78 -32.92,-61.38 -60.07,-84.03 -65.48,-54.62 -89.93,-6.76 -272.23,-134.38 -9.55,7.12 -11.7,-16.11 -6.14,15.42z"/>
+  <path class="fil1" d="M852.42 2113.77c3.79,-35.73 18.18,-42.89 38.66,-64.42 28.79,1.7 10.98,-4.78 24.72,16.07 18.04,14.76 20.27,63.34 30.55,88.49 53.2,130.24 134.91,146.26 188.82,191.86l-21.58 17.42c-12.71,23.37 -3.89,8.69 -23.24,28.07 -11.77,11.8 -13.88,13.73 -25.21,25.86 -15.21,16.29 -31.45,30.95 -44.3,45.72 -11.63,22.51 -0.47,3.72 -17.99,27.29l-44.87 56.11c-25.38,-30.55 -49.48,-44.44 -73.56,-76.83 -21.36,-28.72 -37.41,-62.13 -50.88,-100.7 -23.46,-67.16 -28.18,-204.43 18.88,-254.94zm1483.8 348.25c-14.73,-17.53 -30.06,-36.88 -44.26,-54.01 -18,-21.74 -31.32,-27.3 -46.34,-48.28 -18.06,-11.24 -8.11,-1.03 -17.72,-18.21 228.71,-88.96 183.2,-293.53 237.94,-294.98 27.85,11.67 34.54,22.99 37.46,56.5 61.36,41.62 62.83,239.66 -22.87,366.01 -19.47,28.71 -52.98,61.89 -82.59,77.97 -20.56,-19.09 -48.23,-60.78 -61.62,-85zm-765.62 -423.89c-5.56,-31.53 -3.41,-8.3 6.14,-15.42 182.3,127.62 206.75,79.76 272.23,134.38 27.15,22.65 34.18,58.25 60.07,84.03 27.05,20.7 108.46,10.81 234.53,95.67 63.32,42.62 141.68,107.06 166.2,166.74 40.31,28.75 75.95,103.05 95.47,146.44 24.32,54.04 42.48,119.27 55.91,180.04 30.67,138.8 28.53,273.67 62.63,412.27 38.29,155.66 40.51,257.38 -41.71,378.57 -257.64,379.75 -1029.36,404.68 -1433.39,164.57 -75.11,-44.64 -198.61,-160.75 -218.3,-271.45 -53.25,-153.54 14.43,-256.02 33.8,-401.21 19.82,-148.63 22.46,-265.91 69.17,-404.69 36.65,-108.92 122.39,-237.74 181.36,-292.27 75.46,-69.77 173.89,-131.32 309.66,-166.42 12.09,1.69 22.49,30.87 72.19,35.14 -6.56,-40.29 -58.01,-57.24 -70.4,-134.46 18.18,-19.63 109.29,18.09 141.13,24.84 12.19,-16.62 14.9,25.22 5.25,-27.68 -5.09,-27.89 -26.09,-70.68 -1.94,-109.09zm-45.99 -2.55l5.98 94.03c-30.97,-7.62 -14.56,0.54 -29.48,-15.58 -39.79,-1.58 -66.21,-19.33 -101.53,0.91 -32.01,24.64 -7.44,63.59 -0.72,100.99 -226.97,44.74 -175.56,151.46 -308.59,56.34 -170.4,-121.83 -92.93,-244.25 -177.17,-262.61 -118.03,-25.73 -249.23,372.07 28.64,569.04 -121.1,356.18 -63.6,143.82 -116.16,513.16 -27.52,193.35 -109.57,323.9 -3.38,513.57 232.87,415.96 965.83,447.89 1392.8,273.21 140.25,-57.38 275.72,-165.91 331.45,-286.5 96.28,-208.36 7.59,-308.01 -12.56,-512.66 -19.72,-200.18 -36.61,-332.28 -115.28,-496.11 50.99,-45 103.97,-85.79 135.45,-167.57 87.13,-226.38 -36.19,-462.42 -127.58,-398.32 -47.23,33.13 -6.61,174.65 -176.88,271.8 -90.16,51.45 -40.79,19.42 -197.55,-47.78 -119.39,-51.19 -83.52,4.94 -141.65,-78.05 -58,-82.81 -173.94,-79.62 -251.92,-128.99 -40.83,-25.86 -107.13,-117.85 -133.87,1.12z"/>
+  <path class="fil2" d="M830.38 3513.97c19.69,110.7 143.19,226.81 218.3,271.45 404.03,240.11 1175.75,215.18 1433.39,-164.57 82.22,-121.19 80,-222.91 41.71,-378.57 -34.1,-138.6 -31.96,-273.47 -62.63,-412.27 -13.43,-60.77 -31.59,-126 -55.91,-180.04 -19.52,-43.39 -55.16,-117.69 -95.47,-146.44 10.7,42.11 50.04,98.84 70.57,153.79 84.74,226.8 50.77,366.92 82.74,577.27 23.43,154.13 2.07,242.07 -74.21,344.22 -203.62,272.72 -659.11,318.11 -1000.38,255.52 -202.66,-37.17 -317.89,-85.57 -454.98,-204.43 -61.06,-52.95 -72.29,-93.06 -103.13,-115.93z"/>
+  <path class="fil3" d="M2245.62 2359.73c15.02,20.98 28.34,26.54 46.34,48.28 14.2,17.13 29.53,36.48 44.26,54.01 77.37,-46.06 61.36,-35.73 104.71,-91.32 54.88,-70.39 93,-200.59 62.37,-267.66 -2.92,-33.51 -9.61,-44.83 -37.46,-56.5 -17.28,64.92 -28.14,145.69 -65.56,199.17 -23.15,33.1 -99.67,105.08 -154.66,114.02z"/>
+  <path class="fil3" d="M852.42 2113.77c5.05,82.96 -3.15,147.01 39.49,213.53 38.45,59.99 74.75,103.75 128.93,135.54 12.85,-14.77 29.09,-29.43 44.3,-45.72 11.33,-12.13 13.44,-14.06 25.21,-25.86 19.35,-19.38 10.53,-4.7 23.24,-28.07l-23.94 -13.62c-55.68,-26.51 -72.5,-30.12 -125.49,-103.26 -11.69,-16.13 -87.11,-180.77 -48.36,-180.89 -13.74,-20.85 4.07,-14.37 -24.72,-16.07 -20.48,21.53 -34.87,28.69 -38.66,64.42z"/>
+  <path class="fil4" d="M2336.22 2462.02c13.39,24.22 41.06,65.91 61.62,85 29.61,-16.08 63.12,-49.26 82.59,-77.97 85.7,-126.35 84.23,-324.39 22.87,-366.01 30.63,67.07 -7.49,197.27 -62.37,267.66 -43.35,55.59 -27.34,45.26 -104.71,91.32z"/>
+  <path class="fil4" d="M1020.84 2462.84c-54.18,-31.79 -90.48,-75.55 -128.93,-135.54 -42.64,-66.52 -34.44,-130.57 -39.49,-213.53 -47.06,50.51 -42.34,187.78 -18.88,254.94 13.47,38.57 29.52,71.98 50.88,100.7 24.08,32.39 48.18,46.28 73.56,76.83l44.87 -56.11c17.52,-23.57 6.36,-4.78 17.99,-27.29z"/>
+  <path class="fil5" d="M1113.59 2363.19l21.58 -17.42c-53.91,-45.6 -135.62,-61.62 -188.82,-191.86 -10.28,-25.15 -12.51,-73.73 -30.55,-88.49 -38.75,0.12 36.67,164.76 48.36,180.89 52.99,73.14 69.81,76.75 125.49,103.26l23.94 13.62z"/>
+  <path class="fil5" d="M2245.62 2359.73c54.99,-8.94 131.51,-80.92 154.66,-114.02 37.42,-53.48 48.28,-134.25 65.56,-199.17 -54.74,1.45 -9.23,206.02 -237.94,294.98 9.61,17.18 -0.34,6.97 17.72,18.21z"/>
+  <path class="fil2" d="M1496.56 2284.52c30.8,30.34 113.7,38.15 150.61,6.11 -158.27,-30.62 -158.79,-94.15 -221.01,-140.57 12.39,77.22 63.84,94.17 70.4,134.46z"/>
+  <path class="fil2" d="M1567.29 2174.9c19.99,13.06 46,14.88 69.84,17.54 -35.9,-62.07 -47.03,-16.45 -66.53,-154.31 -24.15,38.41 -3.15,81.2 1.94,109.09 9.65,52.9 6.94,11.06 -5.25,27.68z"/>
+</g>
+            </g>
+
+            <!-- Siluet Kepala & Tanduk (Source: id="kepala") -->
+            
+
+            <!-- Rona Pipi Kanan & Kiri (Source: path fil13) -->
+            <g id="rig-blush" transform="translate(0, -460)">
+              <g id="rona_pipi_kanan" transform="translate(-690, 0) scale(0.72, 0.72)">
+                <!-- Source SVG: id="rona_pipi_kanan" | Titik Putar (Pivot): (3745, 4125) -->
+<g transform="translate(-3745, -4125)">
+  <path class="fil13" d="M3717.33 3995.07c-280.81,50.56 -153.73,277.5 129.58,235.7 80.67,-11.9 206.09,-82.04 135.2,-171.97 -45.57,-57.81 -170.53,-80.7 -264.78,-63.73z"/>
+</g>
+              </g>
+              <g id="rona_pipi_kiri" transform="translate(690, 0) scale(0.72, 0.72)">
+                <!-- Source SVG: id="rona_pipi_kiri" | Titik Putar (Pivot): (5651, 4132) -->
+<g transform="translate(-5651, -4132)">
+  <path class="fil13" d="M5617.53 3997.87c-283.62,60.88 -108.78,289.08 163.64,229.45 80.77,-17.68 186.83,-96.56 105.85,-177.26 -53.45,-53.25 -175.37,-72.4 -269.49,-52.19z"/>
+</g>
+              </g>
+            </g>
+
+            <!-- Mata Terbuka & Mata Berkedip -->
+            <g id="rig-eyes" transform="translate(0, -860)">
+              <g id="eyes-open-group" style="display: block;">
+                <g id="mata_terbuka_kanan" transform="translate(-460, 0) scale(0.82, 0.82)">
+                  <!-- Source SVG: id="mata_terbuka_kanan" | Titik Putar (Pivot): (4188, 9844) -->
+<g transform="translate(-4188, -9844)">
+  <path class="fil12" d="M4189.45 10022.69l5.05 46.3c-93.28,48.78 -87.8,-94.48 -5.05,-46.3zm105.3 -267.44c91.96,-33.94 140.05,102.13 51.02,129.73 -94.41,29.26 -146.23,-94.58 -51.02,-129.73zm-292.08 369.87c-48.12,-115.82 -92.36,-245.98 -2.97,-366.17 33.99,-45.68 72.8,-83.14 136.16,-100.93 65.1,-18.28 153.44,-8.31 191.63,31.76 -349.96,-56.46 -361.91,420.2 -113.73,478.93 171.96,40.7 274.51,-110.94 263.31,-291.7 -24.69,-398.74 -533.03,-372.65 -571.48,-26.32 -18.28,164.66 77.11,240.02 97.08,274.43z"/>
+  <path class="fil10" d="M4294.75 9755.25c-95.21,35.15 -43.39,158.99 51.02,129.73 89.03,-27.6 40.94,-163.67 -51.02,-129.73z"/>
+  <path class="fil22" d="M4189.45 10022.69c-82.75,-48.18 -88.23,95.08 5.05,46.3l-5.05 -46.3z"/>
+</g>
+                </g>
+                <g id="mata_terbuka_kiri" transform="translate(460, 0) scale(0.82, 0.82)">
+                  <!-- Source SVG: id="mata_terbuka_kiri" | Titik Putar (Pivot): (5468, 9872) -->
+<g transform="translate(-5468, -9872)">
+  <path class="fil12" d="M5522.87 10018.82c13.07,46.14 -21.86,81.62 -52.34,52.7 -32.24,-30.59 -4.08,-70.49 52.34,-52.7zm-212.12 -263.45c98.8,-34.35 137.03,99.1 51.28,129.98 -93.82,33.79 -142.02,-98.44 -51.28,-129.98zm1.78 -59.73c117.77,-68.62 224.27,-67.02 325.38,39.05 101.51,106.49 69.85,228.29 33.42,364.12l11.56 -8.83c8.72,-8.23 2.03,0.6 13.9,-14.2 51.5,-64.28 69.51,-184.97 46.85,-268.96 -86.42,-320.33 -574.76,-304.29 -566.64,111.59 5.32,272.11 283.98,338.25 392.16,156.91 117.62,-197.16 -16.59,-440.67 -256.63,-379.68z"/>
+  <path class="fil10" d="M5310.75 9755.37c-90.74,31.54 -42.54,163.77 51.28,129.98 85.75,-30.88 47.52,-164.33 -51.28,-129.98z"/>
+  <path class="fil22" d="M5522.87 10018.82c-56.42,-17.79 -84.58,22.11 -52.34,52.7 30.48,28.92 65.41,-6.56 52.34,-52.7z"/>
+</g>
+                </g>
+              </g>
+              <g id="eyes-blink-group" style="display:none;">
+                <g id="mata_berkedip_kanan" transform="translate(-460, 0) scale(0.82, 0.82)">
+                  <!-- Source SVG: id="mata_berkedip_kanan" | Titik Putar (Pivot): (6979, 9046) -->
+<g transform="translate(-6979, -9046)">
+  <path class="fil12" d="M6720.59 9000.08c10.26,72.42 26.22,55.53 48.91,95.84 -52.01,-3.78 -62.43,-16.31 -104.16,-25.47 17.78,62.41 62.3,100.46 135.16,106.73 20.59,-5.15 83.75,-112.93 245.84,-107.29 142.85,4.97 185.39,94.87 247.16,104.97 -10.85,-133.21 -224.47,-260.04 -412.16,-166.55 -97.13,48.38 -68.81,48.32 -160.75,-8.23z"/>
+</g>
+                </g>
+                <g id="mata_berkedip_kiri" transform="translate(460, 0) scale(0.82, 0.82)">
+                  <!-- Source SVG: id="mata_berkedip_kiri" | Titik Putar (Pivot): (8227, 9074) -->
+<g transform="translate(-8227, -9074)">
+  <path class="fil12" d="M7912.13 9170.72c50.36,-1.32 89.17,-92.3 242.73,-100.84 228.14,-12.68 200.07,176.37 335.64,74.86 27,-20.22 40.35,-30.87 51.58,-73.31 -34.52,4.95 -68.64,34.54 -104.47,17.18 31.81,-36.97 35.79,-27.36 44.09,-87.8 -28.99,12.48 -37.05,30.82 -70.86,38.61 -40.32,9.29 -45.09,-4.76 -74.02,-22.47 -189.37,-115.94 -425.31,32.29 -424.69,153.77z"/>
+</g>
+                </g>
+              </g>
+            </g>
+
+            <!-- Hidung / Moncong Sapi (Source: id="hidung") -->
+            <g id="rig-nose" transform="translate(0, -240) scale(1.42, 1.42)">
+              <!-- Source SVG: id="hidung" | Titik Putar (Pivot): (4728, 4084) -->
+<g transform="translate(-4728, -4084)">
+  <path class="fil6" d="M4837.09 4059.31c-14.28,-51.02 25.17,-88.31 68.45,-77.6 0.58,1.16 19.08,8.62 4.03,34.9 -0.89,1.54 -53.64,41.02 -72.48,42.7zm-241.95 -0.46c-21.55,-0.87 -67.98,-33.2 -79.52,-48.57l10.25 -28.72c50.47,-8.56 80.15,26.25 69.27,77.29zm13.56 -132.21c23.42,-30.89 64.09,-32.09 107.69,-30.61 76.63,2.6 87.07,-2.15 106.37,30.61 -12.96,26.4 -12.78,26.4 -48.91,32.25 -61.12,9.91 -140.99,15.44 -165.15,-32.25zm-145.35 308.98c112.31,37.82 317.11,50.41 440.82,15.74 62.51,-17.52 47.41,-12.86 62.61,0.34 126.06,-147.43 58.65,-378.1 -233.19,-384.48 -371.19,-8.11 -367.6,293.51 -270.24,368.4z"/>
+  <path class="fil7" d="M4966.78 4251.7c-15.2,-13.2 -0.1,-17.86 -62.61,-0.34 -123.71,34.67 -328.51,22.08 -440.82,-15.74 41.91,54.87 152.59,73.76 244.67,73.79 126.85,0.03 165.4,-11.06 258.76,-57.71z"/>
+  <path class="fil8" d="M4608.7 3926.64c24.16,47.69 104.03,42.16 165.15,32.25 36.13,-5.85 35.95,-5.85 48.91,-32.25 -19.3,-32.76 -29.74,-28.01 -106.37,-30.61 -43.6,-1.48 -84.27,-0.28 -107.69,30.61z"/>
+  <path class="fil9" d="M4515.62 4010.28c11.54,15.37 57.97,47.7 79.52,48.57 10.88,-51.04 -18.8,-85.85 -69.27,-77.29l-10.25 28.72z"/>
+  <path class="fil9" d="M4837.09 4059.31c18.84,-1.68 71.59,-41.16 72.48,-42.7 15.05,-26.28 -3.45,-33.74 -4.03,-34.9 -43.28,-10.71 -82.73,26.58 -68.45,77.6z"/>
+</g>
+            </g>
+
+            <!-- Mulut di dalam bagian bawah moncong (Source: mulut_tersenyum & id="mulut_terbuka") -->
+            <g id="rig-mouth" transform="translate(0, -135)">
+              <g id="mouth-smile-group" transform="scale(0.68, 0.68)" style="display: block;">
+                <!-- Source SVG: id="mulut_tersenyum" | Titik Putar (Pivot): (8217, 9939) -->
+<g transform="translate(-8217, -9939)">
+  <path class="fil12" d="M8426.84 9859.07c4.49,44.62 -3.33,4.32 11.34,21.73 1.54,1.82 7.28,6.77 9.01,8.48 13.53,13.38 0.57,-9.42 14.06,13.15 -76.44,56.54 -132.25,108.86 -280.52,105.54 -56.13,-1.25 -109.67,-10.67 -157.2,-34.21 -3.65,-1.81 -165.05,-108.36 -127.08,-18.39 19.41,45.97 199.33,103 292.58,102.13 68.14,-0.64 129.25,-13.99 184.89,-38.9 22.72,-10.18 53.77,-30.21 68.82,-41.35 25.07,-18.55 42.4,-44.69 59.56,-57.09 22.46,31.53 1.77,22.75 33.86,33.45 39.35,-54.26 -48.15,-134.76 -109.32,-94.54z"/>
+</g>
+              </g>
+              <g id="mouth-open-group" transform="scale(0.70, 0.70)" style="display:none;">
+                <g id="anim-mouth-talk">
+                  <!-- Source SVG: id="mulut_terbuka" | Titik Putar (Pivot): (7005, 9963) -->
+<g transform="translate(-7005, -9963)">
+  <path class="fil12" d="M6739.57 10087.67c61.16,-93.39 332.31,-73.99 373.82,42.34 -84.53,85.61 -332.72,52.24 -373.82,-42.34zm104.27 -234.98c26.89,-34.42 98.76,-55.9 152.46,-57.96 66.54,-2.56 114.49,21.08 147.29,55.88 -57.57,56.36 -237.62,38.32 -299.75,2.08zm122.13 -92.71c-124.93,19.56 -257.43,114.65 -279.1,222.49 -31.18,155.18 122.06,235.68 266.16,233.37 402.16,-6.45 343.97,-507.68 12.94,-455.86z"/>
+  <path class="fil16" d="M6739.57 10087.67c41.1,94.58 289.29,127.95 373.82,42.34 -41.51,-116.33 -312.66,-135.73 -373.82,-42.34z"/>
+  <path class="fil10" d="M6843.84 9852.69c62.13,36.24 242.18,54.28 299.75,-2.08 -32.8,-34.8 -80.75,-58.44 -147.29,-55.88 -53.7,2.06 -125.57,23.54 -152.46,57.96z"/>
+</g>
+                </g>
+              </g>
+            </g>
+
+          </g>
+        </g>
+
+      </g>
+    </g>
+  </g>
+<script type="application/ecmascript"><![CDATA[
+(function(){
+  var root=document.documentElement, st='idle', tOpen=null, tTalk=null, tBlink=null;
+  var TS={"collapsed":{"rig-ekor-pos":"translate(685, 855) scale(0.85, 0.85)"},"opening":{"rig-elbow-right":"translate(-436, 591.1) rotate(120.5)","rig-shoulder-right":"translate(-795, -295) rotate(-66) scale(0.97, 0.97)","hand-right-open":"translate(128.1, 711.6) rotate(200) scale(0.85, 0.85)","rig-elbow-left":"translate(503.7, 298) rotate(-40)"},"idle":{"rig-elbow-right":"translate(-436, 317) rotate(22)","rig-shoulder-right":"translate(-903.1, -273.7) rotate(-16) scale(0.97, 0.97)","rig-ear-left":"translate(905.9, -1002.6) scale(0.95, 0.95)","rig-ear-right":"translate(-773.4, -1107.2) rotate(4) scale(0.96, 0.96)"},"explaining":{},"pose1":{"rig-elbow-right":"translate(162.7, -267) rotate(33)","badan-kerah-dada-overlay":"translate(1847.7, 2533.5) scale(0.6, 0.6)","rig-badan":"translate(-1373, -1825.1) scale(0.31, 0.31)","rig-head-base":"translate(10.7, -932.5) scale(1.24, 1.22)","rig-shoulder-left":"translate(37.7, 205.3) rotate(28.5) scale(0.54, 0.54)","rig-shoulder-right":"translate(155.2, -47.3) rotate(-24) scale(0.97, 0.97)","rig-hip-bridge-stand":"translate(108.6, -77.9)","rig-calf-right-stand":"translate(-114.9, -33.9) scale(0.47, 0.47)","rig-calf-left-stand":"translate(266.1, 436.9) scale(0.47, 0.47)","rig-ekor-pos":"translate(974.1, 954.2) scale(0.85, 0.85)","rig-neck":"translate(49.9, 1176.9)","hand-right-fist-back":"translate(64.5, 720.9) rotate(133) scale(0.78, 0.78)","hand-left-fist-back":"translate(-67, 343) rotate(-140) scale(0.78, 0.78)","rig-elbow-left":"translate(-284.4, 453.5) rotate(-40)","rig-ear-left":"translate(857.3, -902.9) scale(0.95, 0.95)","rig-ear-right":"translate(-723, -880.7) rotate(4) scale(0.96, 0.96)","rig-nose":"translate(-218.7, -231.3) scale(1.42, 1.42)","rig-mouth":"translate(-288.3, -118.9)","rig-eyes":"translate(-114.1, -1029.9)","rona_pipi_kanan":"translate(-929.9, 27.9) scale(0.72, 0.72)","rona_pipi_kiri":"translate(550.1, 158.1) scale(0.72, 0.72)"}}, BASE={"rig-calf-right-stand":"translate(-445, 1255) scale(0.9, 0.9)","rig-calf-left-stand":"translate(485, 1225) scale(0.9, 0.9)","rig-hip-bridge-stand":"translate(0, 845)","rig-shoulder-right":"translate(-795, -295) rotate(-24) scale(0.97, 0.97)","rig-elbow-right":"translate(-416.9, 193.1) rotate(33)","hand-right-fist-back":"translate(63.9, 717.2) rotate(133) scale(0.78, 0.78)","hand-right-open":"translate(129.2, 769.7) rotate(200) scale(0.85, 0.85)","rig-shoulder-left":"translate(760, -340) rotate(28.5) scale(0.95, 0.95)","rig-elbow-left":"translate(561.7, 217.2) rotate(-40)","hand-left-fist-back":"translate(-4, 737.7) rotate(-140) scale(0.78, 0.78)","rig-ekor-pos":"translate(680, 860) scale(0.85, 0.85)","rig-ear-left":"translate(980, -1120) scale(0.95, 0.95)","rig-ear-right":"translate(-865, -1095) rotate(4) scale(0.96, 0.96)","badan-kerah-dada-overlay":"","rig-badan":"translate(-4691, -5868)","rig-head-base":"translate(0, -900) scale(1.24, 1.22)","rig-neck":"translate(0, -820)","rig-nose":"translate(0, -240) scale(1.42, 1.42)","rig-mouth":"translate(0, -135)","rig-eyes":"translate(0, -860)","rona_pipi_kanan":"translate(-690, 0) scale(0.72, 0.72)","rona_pipi_kiri":"translate(690, 0) scale(0.72, 0.72)"}, STATES=["collapsed","opening","idle","explaining","pose1"], PB={"collapsed":null,"opening":null,"idle":null,"explaining":null,"pose1":""}, VIS={"collapsed":{"mouth-open-group":false},"opening":{},"idle":{"mouth-open-group":false},"explaining":{},"pose1":{}};
+  function applyPose(s){
+    var seen={};
+    Object.keys(BASE).forEach(function(i){seen[i]=1;});
+    Object.keys(TS).forEach(function(k){Object.keys(TS[k]).forEach(function(i){seen[i]=1;});});
+    Object.keys(seen).forEach(function(i){
+      var el=q(i); if(!el)return;
+      var v=(TS[s]&&TS[s][i]!==undefined)?TS[s][i]:BASE[i];
+      if(v)el.setAttribute('transform',v); else el.removeAttribute('transform');
+      if(VIS[s]&&VIS[s][i]===false){ el.style.display='none'; } else { el.style.display=''; }
+    });
+  }
+  function q(i){return document.getElementById(i);}
+  function mouth(o){ if(o) root.classList.add('mascot-mouth-open'); else root.classList.remove('mascot-mouth-open'); }
+  function blink(){ root.classList.add('mascot-blinking'); setTimeout(function(){ root.classList.remove('mascot-blinking'); }, 130); }
+  function talk(on){ if(tTalk){clearInterval(tTalk); tTalk=null;} if(on){var o=true; mouth(true); tTalk=setInterval(function(){o=!o; mouth(o);},165);} else mouth(false); }
+  function setState(s){
+    if(STATES.indexOf(s)<0) return;
+    if(tOpen){clearTimeout(tOpen); tOpen=null;} talk(false); st=s;
+    root.setAttribute('class','mascot-state-'+s); applyPose(s);
+    var b=PB[s]||s;
+    if(b==='opening'){ mouth(true); setTimeout(function(){mouth(false);},800); if(!PB[s]) tOpen=setTimeout(function(){setState('idle');},1250); }
+    if(b==='explaining') talk(true);
+  }
+  function loopBlink(){ tBlink=setTimeout(function(){ blink(); loopBlink(); }, 2600+Math.random()*2800); }
+  window.Mascot={setState:setState,getState:function(){return st;},blink:blink,talk:talk,states:STATES};
+  window.addEventListener('message',function(e){var d=e.data||{}; if(d.mascotState)setState(d.mascotState); if(typeof d.mascotTalk==='boolean')talk(d.mascotTalk);});
+  var defaultState = 'pose1';
+  try {
+    var params = new URLSearchParams(window.location.search);
+    var qState = params.get('state');
+    if(qState && STATES.indexOf(qState) >= 0) defaultState = qState;
+  } catch(e){}
+  loopBlink();
+  setState(defaultState);
+})();]]></script></svg>

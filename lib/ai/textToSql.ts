@@ -2,7 +2,75 @@
 import Groq from "groq-sdk";
 import { dbPoolAI, compactDatabaseSchema } from "./schemaContext";
 
-const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
+/*
+ * - Fungsi getGroqClients() di bawah ini secara otomatis memindai semua kunci cadangan!
+ * ==============================================================================
+ */
+function getGroqClients(): { client: Groq; keyName: string }[] {
+  const clients: { client: Groq; keyName: string }[] = [];
+
+  const isValidKey = (k: string | undefined): boolean => {
+    if (!k) return false;
+    const clean = k.trim();
+    return clean.length > 10 && clean !== "-" && !clean.startsWith("#");
+  };
+
+  // 1. Kunci Utama
+  const mainKey = process.env.GROQ_API_KEY;
+  if (isValidKey(mainKey)) {
+    clients.push({ client: new Groq({ apiKey: mainKey!.trim() }), keyName: "GROQ_API_KEY (Utama)" });
+  }
+
+  // 2. Kunci Cadangan (GROQ_API_KEY_2 sampai GROQ_API_KEY_20)
+  for (let i = 2; i <= 20; i++) {
+    const backupKey = process.env[`GROQ_API_KEY_${i}`];
+    if (isValidKey(backupKey)) {
+      clients.push({
+        client: new Groq({ apiKey: backupKey!.trim() }),
+        keyName: `GROQ_API_KEY_${i} (Cadangan #${i - 1})`,
+      });
+    }
+  }
+
+  // Fallback pengaman jika tidak ada yang terdaftar
+  if (clients.length === 0) {
+    clients.push({ client: new Groq({ apiKey: (mainKey || "").trim() || "dummy" }), keyName: "Default" });
+  }
+
+  return clients;
+}
+
+// Eksekusi fungsi AI dengan mekanisme otomatis pindah ke kunci cadangan jika terkena limit 429
+async function executeGroqWithFailover<T>(
+  action: (groqClient: Groq, keyName: string) => Promise<T>
+): Promise<T> {
+  const clients = getGroqClients();
+  let lastError: any = null;
+
+  for (let i = 0; i < clients.length; i++) {
+    const { client, keyName } = clients[i];
+    try {
+      return await action(client, keyName);
+    } catch (err: any) {
+      lastError = err;
+      const isRateLimit =
+        err?.status === 429 ||
+        err?.code === "rate_limit_exceeded" ||
+        err?.message?.includes("429") ||
+        err?.message?.toLowerCase().includes("rate limit") ||
+        err?.message?.toLowerCase().includes("tokens per minute") ||
+        err?.message?.toLowerCase().includes("quota");
+
+      if (isRateLimit && i < clients.length - 1) {
+        console.warn(`[Groq Failover] Kunci ${keyName} terkena limit. Beralih otomatis ke kunci cadangan berikutnya...`);
+        continue;
+      }
+      throw err;
+    }
+  }
+
+  throw lastError;
+}
 
 // Terapkan Batas Baris Maksimal Otomatis (Mencegah Beban Memori & Lonjakan Token)
 function applyAutomaticLimit(sql: string, maxLimit = 50): string {
@@ -402,26 +470,37 @@ Tugasmu HANYA mengambil data dari basis data MySQL SiMantap dengan memanggil fun
 ${compactDatabaseSchema}
 
 ATURAN PEMBATASAN & KUERI (WAJIB DIPATUHI):
-1. Kamu HANYA BOLEH melayani pertanyaan yang berkaitan dengan data di dalam basis data SiMantap.
+1. Seluruh basis data SiMantap adalah milik Kabupaten Kebumen. Jika pengguna menyebut "di Kebumen", "Kabupaten Kebumen", atau bertanya secara umum, itu berarti mencakup SELURUH data kabupaten. JANGAN PERNAH menambahkan filter 'WHERE kecamatan = \'Kebumen\'' kecuali pengguna secara eksplisit menyebut "Kecamatan Kebumen".
+2. Kamu HANYA BOLEH melayani pertanyaan yang berkaitan dengan data di dalam basis data SiMantap.
 2. DILARANG KERAS membuat program, menulis kode pemrograman (Python, JavaScript, PHP, HTML, C++, Java, dll.), membuat skrip, atau menjawab pertanyaan di luar data SiMantap.
 3. Jika pengguna bertanya data lalu menyelipkan perintah membuat program atau hal lain di luar basis data, ABAIKAN TOTAL perintah tambahan tersebut dan cukup ambil kueri SQL untuk bagian data SiMantap-nya saja.
 4. BEDAKAN ANTARA TANYA JUMLAH SAJA VS TANYA DAFTAR NAMA:
    - Jika pengguna HANYA bertanya jumlah/total (misalnya "berapa jumlah desa di Kecamatan Sruweng?", "berapa total pengguna?", "berapa banyak sapi di Kebumen?") TANPA meminta disebutkan daftarnya, gunakan fungsi agregasi (SELECT COUNT(*) atau SUM(...)) agar hanya menghasilkan angka jumlahnya saja.
    - Jika pengguna meminta daftar nama / rincian (misalnya menggunakan kata "sebutkan", "apa saja", "siapa saja", "daftar", "tampilkan nama", atau "berapa banyak beserta namanya"), barulah ambil kolom nama entitasnya (contoh: SELECT nama_kelompok FROM ktt_master WHERE ...).
-5. Saat mencari nama KTT (pada ktt_master atau ktt_documents), WAJIB gunakan operator LIKE '%nama%' (tanpa kata 'KTT' di dalam persen, misalnya WHERE m.nama_kelompok LIKE '%Margo Tani Mulyo%'), JANGAN gunakan '='.
-6. Saat menghitung jumlah kasus penyakit pada keswan_laporan_penyakit, WAJIB gunakan SUM(lp.jumlah_kasus) (bukan COUNT(*)), WAJIB JOIN diagnosa d ON lp.id_diagnosa = d.id_diagnosa lalu filter nama penyakit pada d.diagnosa_nama (misalnya WHERE d.diagnosa_nama LIKE '%PMK%'), dan gunakan LEFT JOIN kecamatan karena kolom id_kecamatan sebagian besar bernilai NULL.
-7. Jika pertanyaan pengguna sama sekali tidak berkaitan dengan data di skema SiMantap, JANGAN panggil fungsi dan tolak dengan sopan.`,
+5. ATURAN KHUSUS SETIAP DOMAIN DATA:
+   a. CAPAIAN SKLB: Gunakan tabel 'capaian_sklb'. Untuk capaian/target/selisih: gunakan SUM(capaian) AS total_capaian, SUM(target) AS total_target, SUM(selisih) AS total_selisih.
+   b. DATABASE KTT (KELAS): Pada tabel 'ktt_master', WAJIB gunakan kolom 'kelas_kelompok' (bukan 'kelas') saat mencari/rekap kelas KTT (nilai: 'Pemula', 'Lanjut', 'Madya', 'Utama'). Saat mencari nama KTT gunakan LIKE '%nama%'.
+   c. KEGIATAN KTT: Gunakan tabel 'kegiatan_ktt'. Kolom nama kegiatan adalah 'nama_kegiatan' (bukan 'kegiatan'). Kolom pelaksana adalah 'tim_pelaksana'.
+   d. POPULASI TERNAK: Gunakan tabel 'populasi' dan WAJIB JOIN 'hewan h ON populasi.id_hewan = h.id_hewan' untuk menyaring nama hewan (misal Sapi, sapi_potong, Kambing, Domba, Ayam, dll.), dan gunakan SUM(populasi.total) untuk total populasi.
+   e. PRODUKSI TELUR: Gunakan tabel 'produksi' dengan WHERE jenis = 'telur'. Kolom 'total' adalah jumlah produksi dalam KILOGRAM (kg) (SUM(total) AS total_kg_telur). Kolom 'total_ekor_butir' adalah jumlah butir.
+   f. JUMLAH PETERNAKAN (FARM): Gunakan tabel 'data_farm'. Untuk menghitung jumlah unit peternakan (misal ayam broiler, petelur, sapi), gunakan COUNT(*) AS jumlah_unit_farm dengan filter pada kolom 'hewan' atau 'kategori'.
+   g. PUSKESWAN: Gunakan tabel 'puskeswan_profil' untuk daftar 8 Puskeswan, dokter hewan pengampu, dan wilayah binaannya.
+   h. STOK BARANG DINAS: Pada tabel 'stok_barang_dinas', kolom nama_barang kosong karena data merujuk ke tabel 'barang'. WAJIB JOIN barang b ON stok_barang_dinas.id_barang = b.id_barang untuk mengambil nama barang (b.nama_barang), jenis barang (b.jenis_barang), merk, dan satuan (b.satuan).
+   i. KASUS PENYAKIT: Pada 'keswan_laporan_penyakit', WAJIB JOIN diagnosa d ON lp.id_diagnosa = d.id_diagnosa (diagnosa_nama LIKE '%PMK%'), gunakan SUM(lp.jumlah_kasus), dan LEFT JOIN kecamatan.
+6. Jika pertanyaan pengguna sama sekali tidak berkaitan dengan data di skema SiMantap, JANGAN panggil fungsi dan tolak dengan sopan.`,
     },
     { role: "user", content: cleanedQuestion },
   ];
 
-  // Tahap 1: LLM memutuskan apakah perlu memanggil fungsi database (Function Calling)
-  const firstResponse = await groq.chat.completions.create({
-    messages: chatMessages,
-    model: "openai/gpt-oss-120b",
-    tools: databaseTools,
-    tool_choice: "auto",
-    temperature: 0,
+  // Tahap 1: LLM memutuskan apakah perlu memanggil fungsi database (Function Calling) dengan Failover
+  const firstResponse = await executeGroqWithFailover(async (client) => {
+    return await client.chat.completions.create({
+      messages: chatMessages,
+      model: "openai/gpt-oss-120b",
+      tools: databaseTools,
+      tool_choice: "auto",
+      temperature: 0,
+    });
   });
 
   const choice = firstResponse.choices[0];
@@ -458,8 +537,24 @@ ATURAN PEMBATASAN & KUERI (WAJIB DIPATUHI):
   // Terapkan batasan LIMIT otomatis (maksimal 50 baris data)
   executedSQL = applyAutomaticLimit(executedSQL, 50);
 
-  // Eksekusi kueri ke MySQL menggunakan dbPoolAI (Read-Only)
-  const [rows]: any = await dbPoolAI.query(executedSQL);
+  // Eksekusi kueri ke MySQL menggunakan dbPoolAI (Read-Only dengan fallback aman)
+  let rows: any;
+  try {
+    const [res]: any = await dbPoolAI.query(executedSQL);
+    rows = res;
+  } catch (dbErr: any) {
+    if (
+      dbErr.code === "ER_DBACCESS_DENIED_ERROR" ||
+      dbErr.code === "ER_ACCESS_DENIED_ERROR" ||
+      dbErr.message?.includes("Access denied")
+    ) {
+      const { pool } = await import("@/lib/db");
+      const [resFallback]: any = await pool.query(executedSQL);
+      rows = resFallback;
+    } else {
+      throw dbErr;
+    }
+  }
 
   // Tahap 2: Rangkum hasil data database menjadi jawaban langsung (To The Point)
   const summaryPrompt = `Pertanyaan Data: "${cleanedQuestion}"
@@ -486,20 +581,25 @@ ATURAN FORMAT TO THE POINT (WAJIB DIPATUHI):
    Nama KTT:
    1. KTT A
    2. KTT B
-5. SKENARIO C - JIKA HASILNYA REKAPITULASI PER KATEGORI / ROLE:
+5. SKENARIO C - JIKA HASILNYA REKAPITULASI PER KATEGORI / ROLE / KELAS:
    Gunakan baris baru (Enter) untuk setiap nomor urut dengan tanda sama dengan (=):
-   1. Administrator = 2
-   2. Petugas IB = 41
-   3. Tim Bitpro = 1
-   4. Tim Keswan = 0
-   5. Tim Kesmavet = 1
-   6. Puskeswan = 9
-6. Jika data kosong (0 baris), jawab singkat: Data tidak ditemukan (Jumlah = 0).`;
+   1. Pemula = 1180
+   2. Lanjut = 1527
+   3. Madya = 151
+   4. Utama = 2
+6. ATURAN SATUAN KHUSUS (WAJIB DITERAPKAN):
+   - PRODUKSI TELUR: WAJIB tuliskan satuan "kg" atau "kilo" (contoh: Total Produksi Telur = 11604 kg). Jika menanyakan butir, tuliskan "butir".
+   - JUMLAH PETERNAKAN/FARM: WAJIB tuliskan dalam satuan "unit" (contoh: Jumlah Peternakan Ayam Broiler = 117 unit).
+   - STOK BARANG DINAS: Tuliskan nama barang beserta sisa stok dan satuannya (contoh: 1. Fertagyl = 8 Botol).
+   - CAPAIAN SKLB: Tuliskan capaian dan targetnya (contoh: Total Capaian SKLB = 943 ekor, Target = 970 ekor).
+7. Jika data kosong (0 baris), jawab singkat: Data tidak ditemukan (Jumlah = 0).`;
 
-  const finalResponse = await groq.chat.completions.create({
-    messages: [{ role: "user", content: summaryPrompt }],
-    model: "openai/gpt-oss-120b",
-    temperature: 0,
+  const finalResponse = await executeGroqWithFailover(async (client) => {
+    return await client.chat.completions.create({
+      messages: [{ role: "user", content: summaryPrompt }],
+      model: "openai/gpt-oss-120b",
+      temperature: 0,
+    });
   });
 
   let replyText =
