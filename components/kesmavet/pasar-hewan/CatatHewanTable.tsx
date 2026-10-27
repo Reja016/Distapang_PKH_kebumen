@@ -178,81 +178,53 @@ export default function CatatHewanTable({
         <div className="flex flex-wrap items-center gap-2 w-full md:w-auto">
           {/* Info Periode untuk Petugas */}
           {!isAdmin && (
-            <div className="px-3 py-2 rounded-xl bg-purple-50 dark:bg-purple-950/50 border border-purple-200 dark:border-purple-800 text-purple-900 dark:text-purple-300 text-xs font-bold flex items-center gap-1.5">
+            <div className="h-10 px-3 rounded-xl bg-purple-50 dark:bg-purple-950/50 border border-purple-200 dark:border-purple-800 text-purple-900 dark:text-purple-300 text-xs font-bold flex items-center gap-1.5">
               <Calendar size={14} className="text-purple-600" />
               <span>
-                Periode Aktif: {BULAN_NAMES[selectedBulan - 1]} {selectedTahun}
+                {BULAN_NAMES[selectedBulan - 1]} {selectedTahun}
               </span>
             </div>
           )}
 
-          {/* Filter Khusus Administrator */}
+          {/* Filter Khusus Administrator: Bulan & Tahun Dropdown */}
           {isAdmin && (
-            <div className="flex flex-wrap items-center gap-2">
-              <div className="flex items-center gap-1.5 px-2.5 py-1.5 bg-slate-100 dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700">
-                <Filter size={14} className="text-slate-500" />
-                <select
-                  value={selectedBulan}
-                  onChange={(e) => setSelectedBulan(Number(e.target.value))}
-                  className="bg-transparent text-xs font-bold text-slate-800 dark:text-slate-200 outline-none cursor-pointer"
-                >
-                  {BULAN_NAMES.map((name, idx) => (
-                    <option key={idx} value={idx + 1} className="bg-white dark:bg-slate-800">
-                      {name}
-                    </option>
-                  ))}
-                </select>
-              </div>
+            <div className="flex items-center gap-2">
+              <select
+                value={selectedBulan}
+                onChange={(e) => setSelectedBulan(Number(e.target.value))}
+                className="h-10 px-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-xs font-bold text-slate-800 dark:text-slate-200 outline-none focus:border-purple-600 cursor-pointer"
+              >
+                {BULAN_NAMES.map((name, idx) => (
+                  <option key={idx} value={idx + 1} className="bg-white dark:bg-slate-800">
+                    {name}
+                  </option>
+                ))}
+              </select>
 
-              <div className="flex items-center gap-1.5 px-2.5 py-1.5 bg-slate-100 dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700">
-                <select
-                  value={selectedTahun}
-                  onChange={(e) => setSelectedTahun(Number(e.target.value))}
-                  className="bg-transparent text-xs font-bold text-slate-800 dark:text-slate-200 outline-none cursor-pointer"
-                >
-                  {[selectedTahun - 1, selectedTahun, selectedTahun + 1].map((yr) => (
-                    <option key={yr} value={yr} className="bg-white dark:bg-slate-800">
-                      {yr}
-                    </option>
-                  ))}
-                </select>
-              </div>
+              <select
+                value={selectedTahun}
+                onChange={(e) => setSelectedTahun(Number(e.target.value))}
+                className="h-10 px-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-xs font-bold text-slate-800 dark:text-slate-200 outline-none focus:border-purple-600 cursor-pointer"
+              >
+                {[selectedTahun - 1, selectedTahun, selectedTahun + 1].map((yr) => (
+                  <option key={yr} value={yr} className="bg-white dark:bg-slate-800">
+                    {yr}
+                  </option>
+                ))}
+              </select>
             </div>
           )}
 
-          {/* Filter Pasar (Semua / Kebumen / Gombong) */}
-          <div className="flex items-center gap-1 p-1 bg-slate-100 dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700">
-            <button
-              onClick={() => setSelectedPasarFilter('all')}
-              className={`px-2.5 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer ${
-                selectedPasarFilter === 'all'
-                  ? 'bg-white dark:bg-slate-700 text-purple-700 dark:text-purple-300 shadow-2xs'
-                  : 'text-slate-600 dark:text-slate-400'
-              }`}
-            >
-              Semua Pasar
-            </button>
-            <button
-              onClick={() => setSelectedPasarFilter('Kebumen')}
-              className={`px-2.5 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer ${
-                selectedPasarFilter === 'Kebumen'
-                  ? 'bg-blue-600 text-white shadow-2xs'
-                  : 'text-slate-600 dark:text-slate-400'
-              }`}
-            >
-              Kebumen
-            </button>
-            <button
-              onClick={() => setSelectedPasarFilter('Gombong')}
-              className={`px-2.5 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer ${
-                selectedPasarFilter === 'Gombong'
-                  ? 'bg-indigo-600 text-white shadow-2xs'
-                  : 'text-slate-600 dark:text-slate-400'
-              }`}
-            >
-              Gombong
-            </button>
-          </div>
+          {/* Filter Pasar Dropdown */}
+          <select
+            value={selectedPasarFilter}
+            onChange={(e) => setSelectedPasarFilter(e.target.value as any)}
+            className="h-10 px-3.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-xs font-bold text-slate-800 dark:text-slate-200 outline-none focus:border-purple-600 cursor-pointer"
+          >
+            <option value="all" className="bg-white dark:bg-slate-800">Semua Pasar</option>
+            <option value="Kebumen" className="bg-white dark:bg-slate-800">Pasar Kebumen</option>
+            <option value="Gombong" className="bg-white dark:bg-slate-800">Pasar Gombong</option>
+          </select>
         </div>
 
         {/* Pencarian & Tombol Aksi */}

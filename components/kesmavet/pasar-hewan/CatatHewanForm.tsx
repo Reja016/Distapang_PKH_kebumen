@@ -212,69 +212,64 @@ export default function CatatHewanForm({
           </div>
         </div>
 
-        {/* Baris 2: Pilihan Jenis Ternak (Tanpa Emoticon) */}
+        {/* Baris 2: Pilihan Jenis Ternak (Dropdown Rapi) */}
         <div>
-          <label className="block mb-1.5 text-xs font-bold text-slate-700 dark:text-slate-300">
+          <label className="block mb-1 text-xs font-bold text-slate-700 dark:text-slate-300">
             Jenis Ternak
           </label>
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+          <select
+            value={formJenisTernak}
+            onChange={(e) => setFormJenisTernak(e.target.value)}
+            className="w-full h-10 px-3.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 font-bold text-slate-900 dark:text-white outline-none focus:border-purple-600 text-xs sm:text-sm cursor-pointer"
+          >
             {JENIS_TERNAK_OPTIONS.map((j) => (
-              <button
-                key={j}
-                type="button"
-                onClick={() => setFormJenisTernak(j)}
-                className={`h-10 rounded-xl font-bold text-xs sm:text-sm transition-all border cursor-pointer ${
-                  formJenisTernak === j
-                    ? 'bg-purple-600 border-purple-600 text-white shadow-xs font-black'
-                    : 'bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700'
-                }`}
-              >
+              <option key={j} value={j} className="bg-white dark:bg-slate-900 text-slate-900 dark:text-white">
                 {j}
-              </button>
+              </option>
             ))}
-          </div>
+          </select>
         </div>
 
-        {/* Baris 3: Pilihan Layanan (Timbang, Timbang + PKB, PKB) */}
+        {/* Baris 3: Pilihan Layanan (Timbang, Timbang + PKB, PKB - Ramping & Tidak Gemuk) */}
         <div>
-          <label className="block mb-1.5 text-xs font-bold text-slate-700 dark:text-slate-300">
+          <label className="block mb-1 text-xs font-bold text-slate-700 dark:text-slate-300">
             Layanan yang Dipilih
           </label>
-          <div className="grid grid-cols-3 gap-2">
+          <div className="grid grid-cols-3 gap-1.5 p-1 bg-slate-100 dark:bg-slate-800/80 rounded-2xl border border-slate-200 dark:border-slate-700">
             <button
               type="button"
               onClick={() => setFormLayanan('Timbang')}
-              className={`h-11 rounded-xl text-xs sm:text-sm font-bold border transition-all cursor-pointer flex items-center justify-center gap-1.5 ${
+              className={`h-9 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center justify-center gap-1.5 ${
                 formLayanan === 'Timbang'
-                  ? 'bg-blue-600 border-blue-600 text-white shadow-xs font-black'
-                  : 'bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-100'
+                  ? 'bg-blue-600 text-white shadow-xs font-black'
+                  : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200'
               }`}
             >
-              <Scale size={15} />
+              <Scale size={14} />
               <span>Timbang</span>
             </button>
             <button
               type="button"
               onClick={() => setFormLayanan('Timbang + PKB')}
-              className={`h-11 rounded-xl text-xs sm:text-sm font-bold border transition-all cursor-pointer flex items-center justify-center gap-1.5 ${
+              className={`h-9 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center justify-center gap-1.5 ${
                 formLayanan === 'Timbang + PKB'
-                  ? 'bg-purple-600 border-purple-600 text-white shadow-xs font-black'
-                  : 'bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-100'
+                  ? 'bg-purple-600 text-white shadow-xs font-black'
+                  : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200'
               }`}
             >
-              <Activity size={15} />
+              <Activity size={14} />
               <span>Timbang + PKB</span>
             </button>
             <button
               type="button"
               onClick={() => setFormLayanan('PKB')}
-              className={`h-11 rounded-xl text-xs sm:text-sm font-bold border transition-all cursor-pointer flex items-center justify-center gap-1.5 ${
+              className={`h-9 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center justify-center gap-1.5 ${
                 formLayanan === 'PKB'
-                  ? 'bg-emerald-600 border-emerald-600 text-white shadow-xs font-black'
-                  : 'bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-100'
+                  ? 'bg-emerald-600 text-white shadow-xs font-black'
+                  : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200'
               }`}
             >
-              <Activity size={15} />
+              <Activity size={14} />
               <span>PKB</span>
             </button>
           </div>

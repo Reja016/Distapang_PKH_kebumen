@@ -298,10 +298,11 @@ export default function StokGudangKeswanPage() {
                   setEditingBarang(null);
                   setIsModalBarangOpen(true);
                 }}
-                className="min-h-touch min-w-touch h-10 sm:h-11 px-4 sm:px-5 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl text-xs sm:text-sm shadow-md transition-all cursor-pointer flex items-center gap-1.5"
+                className="min-h-touch min-w-touch h-10 sm:h-11 px-3 sm:px-5 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl text-xs sm:text-sm shadow-md transition-all cursor-pointer flex items-center justify-center gap-1.5"
+                title="Tambah Barang Baru"
               >
                 <Plus className="w-4 h-4" />
-                <span>Barang</span>
+                <span className="hidden sm:inline">Barang</span>
               </button>
             )}
           </div>
@@ -315,12 +316,12 @@ export default function StokGudangKeswanPage() {
         {[
           ...(isAdmin
             ? [
-                { key: 'dashboard', label: 'Dashboard & Stok Dinas', icon: Layers },
-                { key: 'pemasukan', label: `Pemasukan Dropping Dinas (${droppingDinas.length})`, icon: ArrowDownLeft },
+                { key: 'dashboard', label: 'Dashboard & Stok', icon: Layers },
+                { key: 'pemasukan', label: 'Pemasukan Dropping', icon: ArrowDownLeft },
               ]
             : []),
-          { key: 'distribusi', label: `Distribusi & Berita Acara BA (${distribusi.length})`, icon: ArrowUpRight },
-          { key: 'puskeswan', label: `Apotek Puskeswan & Rekam Penggunaan (${penggunaan.length})`, icon: Building2 },
+          { key: 'distribusi', label: 'Distribusi & Berita Acara', icon: ArrowUpRight },
+          { key: 'puskeswan', label: 'Apotek Puskeswan', icon: Building2 },
         ].map((tab) => {
           const Icon = tab.icon;
           const active = activeTab === tab.key;

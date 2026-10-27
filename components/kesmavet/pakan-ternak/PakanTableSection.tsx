@@ -40,7 +40,7 @@ export default function PakanTableSection({
   return (
     <div
       className={`bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-sm p-4 sm:p-8 space-y-6 ${
-        mobileTab !== 'table' ? 'hidden sm:block' : 'block'
+        mobileTab !== 'table' ? 'hidden' : 'block'
       }`}
     >
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-4 border-b border-slate-100 dark:border-slate-800">
@@ -56,11 +56,11 @@ export default function PakanTableSection({
           </h3>
         </div>
 
-        <div className="flex flex-wrap items-center gap-3">
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
           <select
             value={filterStatus}
             onChange={(e) => setFilterStatus(e.target.value)}
-            className="min-h-touch h-10 px-3.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-xs font-bold text-slate-800 dark:text-slate-200 focus:outline-none focus:border-purple-600 shadow-2xs cursor-pointer"
+            className="w-full sm:w-64 min-h-touch h-10 px-3.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-xs font-bold text-slate-800 dark:text-slate-200 focus:outline-none focus:border-purple-600 shadow-2xs cursor-pointer"
           >
             <option value="Semua">Semua Status (Surplus &amp; Defisit)</option>
             <option value="Surplus">Hanya Surplus (Hijau)</option>

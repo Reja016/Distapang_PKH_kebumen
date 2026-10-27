@@ -321,7 +321,7 @@ export default function LaporanPuskeswanPage() {
             }`}
           >
             <Stethoscope size={16} />
-            <span>1. Pelayanan Jasa Medik Veteriner</span>
+            <span>Pelayanan Medik</span>
           </button>
 
           <button
@@ -333,7 +333,7 @@ export default function LaporanPuskeswanPage() {
             }`}
           >
             <Truck size={16} />
-            <span>2. Puskeswan Keliling (Puskeswanling)</span>
+            <span>Puskeswan Keliling</span>
           </button>
 
           <button
@@ -345,7 +345,7 @@ export default function LaporanPuskeswanPage() {
             }`}
           >
             <Building2 size={16} />
-            <span>3. Profil Puskeswan Kebumen</span>
+            <span>Profil Puskeswan</span>
           </button>
         </div>
 

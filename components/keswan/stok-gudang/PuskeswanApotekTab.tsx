@@ -133,46 +133,52 @@ export default function PuskeswanApotekTab({
 
       {/* ── 2. SUB-TAB SWITCHER (STOK AKTIF vs LAPORAN PENGGUNAAN) ── */}
       <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
-        <div className="flex items-center gap-1.5 p-1 bg-slate-100 dark:bg-slate-800/80 rounded-2xl w-fit">
+        <div className="flex items-center gap-1 p-1 bg-slate-100 dark:bg-slate-800/80 rounded-2xl w-full sm:w-fit overflow-x-auto">
           <button
             onClick={() => setActiveSubTab('stok')}
-            className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+            className={`flex-1 sm:flex-none flex items-center justify-center gap-2 px-3.5 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer whitespace-nowrap ${
               activeSubTab === 'stok'
                 ? 'bg-white dark:bg-slate-900 text-blue-600 dark:text-blue-400 shadow-sm'
                 : 'text-slate-600 dark:text-slate-400 hover:text-slate-900'
             }`}
           >
             <Pill className="w-4 h-4" />
-            Tabel Saldo Stok Puskeswan ({currentPuskStockList.length})
+            <span>Saldo Stok</span>
+            <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300 font-semibold">
+              {currentPuskStockList.length}
+            </span>
           </button>
           <button
             onClick={() => setActiveSubTab('penggunaan')}
-            className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+            className={`flex-1 sm:flex-none flex items-center justify-center gap-2 px-3.5 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer whitespace-nowrap ${
               activeSubTab === 'penggunaan'
                 ? 'bg-white dark:bg-slate-900 text-blue-600 dark:text-blue-400 shadow-sm'
                 : 'text-slate-600 dark:text-slate-400 hover:text-slate-900'
             }`}
           >
             <History className="w-4 h-4" />
-            Laporan Rekam Penggunaan (7 Kolom) ({currentPuskPenggunaanList.length})
+            <span>Rekam Penggunaan</span>
+            <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300 font-semibold">
+              {currentPuskPenggunaanList.length}
+            </span>
           </button>
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 shrink-0">
           {activeSubTab === 'penggunaan' && (
             <button
               onClick={handleExportLaporanPenggunaan}
-              className="flex items-center gap-1.5 px-3.5 py-2 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 text-slate-700 dark:text-slate-200 text-xs font-semibold rounded-xl transition-all cursor-pointer"
+              className="flex-1 sm:flex-none flex items-center justify-center gap-1.5 px-3.5 py-2 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 text-slate-700 dark:text-slate-200 text-xs font-semibold rounded-xl transition-all cursor-pointer whitespace-nowrap"
             >
               <FileSpreadsheet className="w-4 h-4 text-emerald-600" />
-              Unduh Rekap Excel
+              Unduh Excel
             </button>
           )}
 
           {(canCreate || canEdit) && (
             <button
               onClick={() => onOpenCatatPenggunaan()}
-              className="flex items-center gap-1.5 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold rounded-xl shadow-md transition-all cursor-pointer"
+              className="flex-1 sm:flex-none flex items-center justify-center gap-1.5 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold rounded-xl shadow-md transition-all cursor-pointer whitespace-nowrap"
             >
               <Plus className="w-4 h-4" />
               Catat Pemakaian Obat

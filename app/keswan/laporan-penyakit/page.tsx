@@ -412,50 +412,56 @@ export default function LaporanPenyakitPage() {
         </div>
 
         {/* KPI Metrik Ringkasan */}
-        <div className="grid grid-cols-1 sm:grid-cols-4 gap-4 print:hidden">
-          <div className="bg-white dark:bg-slate-900 p-4.5 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-xs flex items-center gap-3.5">
-            <div className="w-11 h-11 rounded-2xl bg-blue-600 text-white flex items-center justify-center font-bold shadow-xs shrink-0">
-              <Activity size={22} />
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-4 print:hidden">
+          <div className="bg-white dark:bg-slate-900 p-3.5 sm:p-4.5 rounded-2xl border border-slate-300 dark:border-slate-800 shadow-xs flex items-center gap-2.5 sm:gap-3.5">
+            <div className="w-8 h-8 sm:w-11 sm:h-11 rounded-xl sm:rounded-2xl bg-blue-600 text-white flex items-center justify-center font-bold shadow-xs shrink-0">
+              <Activity size={18} className="sm:hidden" />
+              <Activity size={22} className="hidden sm:block" />
             </div>
             <div className="min-w-0">
-              <p className="text-[11px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 truncate">Total Kasus Penyakit</p>
-              <p className="text-xl font-black text-slate-900 dark:text-white">{totalKasus.toLocaleString('id-ID')} <span className="text-xs text-slate-500 dark:text-slate-400 font-semibold">Kasus</span></p>
-            </div>
-          </div>
-
-          <div className="bg-white dark:bg-slate-900 p-4.5 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-xs flex items-center gap-3.5">
-            <div className="w-11 h-11 rounded-2xl bg-rose-600 text-white flex items-center justify-center font-bold shadow-xs shrink-0">
-              <AlertTriangle size={22} />
-            </div>
-            <div className="min-w-0">
-              <p className="text-[11px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 truncate">Diagnosa Tertinggi</p>
-              <p className="text-base font-extrabold text-slate-900 dark:text-white truncate">
-                {topDiagnosa.nama} <span className="text-xs text-rose-600 dark:text-rose-400 font-bold">({topDiagnosa.count})</span>
+              <p className="text-[10px] sm:text-[11px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 truncate">Total Kasus Penyakit</p>
+              <p className="text-base sm:text-xl font-black text-slate-900 dark:text-white truncate">
+                {totalKasus.toLocaleString('id-ID')} <span className="text-[10px] sm:text-xs text-slate-500 dark:text-slate-400 font-semibold">Kasus</span>
               </p>
             </div>
           </div>
 
-          <div className="bg-white dark:bg-slate-900 p-4.5 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-xs flex items-center gap-3.5">
-            <div className="w-11 h-11 rounded-2xl bg-amber-600 text-white flex items-center justify-center font-bold shadow-xs shrink-0">
-              <MapPin size={22} />
+          <div className="bg-white dark:bg-slate-900 p-3.5 sm:p-4.5 rounded-2xl border border-slate-300 dark:border-slate-800 shadow-xs flex items-center gap-2.5 sm:gap-3.5">
+            <div className="w-8 h-8 sm:w-11 sm:h-11 rounded-xl sm:rounded-2xl bg-rose-600 text-white flex items-center justify-center font-bold shadow-xs shrink-0">
+              <AlertTriangle size={18} className="sm:hidden" />
+              <AlertTriangle size={22} className="hidden sm:block" />
             </div>
             <div className="min-w-0">
-              <p className="text-[11px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 truncate">Wilayah Kasus Terbanyak</p>
-              <p className="text-base font-extrabold text-slate-900 dark:text-white truncate">
-                Kec. {topKecamatan.nama} <span className="text-xs text-amber-600 dark:text-amber-400 font-bold">({topKecamatan.count})</span>
+              <p className="text-[10px] sm:text-[11px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 truncate">Diagnosa Tertinggi</p>
+              <p className="text-xs sm:text-base font-extrabold text-slate-900 dark:text-white truncate">
+                {topDiagnosa.nama} <span className="text-[10px] sm:text-xs text-rose-600 dark:text-rose-400 font-bold">({topDiagnosa.count})</span>
               </p>
             </div>
           </div>
 
-          <div className="bg-white dark:bg-slate-900 p-4.5 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-xs flex items-center gap-3.5">
-            <div className="w-11 h-11 rounded-2xl bg-indigo-600 text-white flex items-center justify-center font-bold shadow-xs shrink-0">
-              <ShieldCheck size={22} />
+          <div className="bg-white dark:bg-slate-900 p-3.5 sm:p-4.5 rounded-2xl border border-slate-300 dark:border-slate-800 shadow-xs flex items-center gap-2.5 sm:gap-3.5">
+            <div className="w-8 h-8 sm:w-11 sm:h-11 rounded-xl sm:rounded-2xl bg-amber-600 text-white flex items-center justify-center font-bold shadow-xs shrink-0">
+              <MapPin size={18} className="sm:hidden" />
+              <MapPin size={22} className="hidden sm:block" />
             </div>
             <div className="min-w-0">
-              <p className="text-[11px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 truncate">Status Hak Akses</p>
-              <p className="text-xs font-black text-slate-900 dark:text-white flex items-center gap-1.5 truncate">
+              <p className="text-[10px] sm:text-[11px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 truncate">Wilayah Terbanyak</p>
+              <p className="text-xs sm:text-base font-extrabold text-slate-900 dark:text-white truncate">
+                Kec. {topKecamatan.nama} <span className="text-[10px] sm:text-xs text-amber-600 dark:text-amber-400 font-bold">({topKecamatan.count})</span>
+              </p>
+            </div>
+          </div>
+
+          <div className="bg-white dark:bg-slate-900 p-3.5 sm:p-4.5 rounded-2xl border border-slate-300 dark:border-slate-800 shadow-xs flex items-center gap-2.5 sm:gap-3.5">
+            <div className="w-8 h-8 sm:w-11 sm:h-11 rounded-xl sm:rounded-2xl bg-indigo-600 text-white flex items-center justify-center font-bold shadow-xs shrink-0">
+              <ShieldCheck size={18} className="sm:hidden" />
+              <ShieldCheck size={22} className="hidden sm:block" />
+            </div>
+            <div className="min-w-0">
+              <p className="text-[10px] sm:text-[11px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 truncate">Status Hak Akses</p>
+              <p className="text-[11px] sm:text-xs font-black text-slate-900 dark:text-white flex items-center gap-1.5 truncate">
                 <span className={`w-2 h-2 rounded-full ${isAdmin ? 'bg-blue-600' : 'bg-emerald-500'}`} />
-                <span>{isAdmin ? 'Administrator (Full CRUD)' : canEdit ? 'Operator (Bisa Edit)' : 'Pengunjung (View-Only)'}</span>
+                <span>{isAdmin ? 'Administrator' : canEdit ? 'Operator' : 'Viewer'}</span>
               </p>
             </div>
           </div>
@@ -472,7 +478,7 @@ export default function LaporanPenyakitPage() {
             }`}
           >
             <MapIcon size={16} strokeWidth={2.5} />
-            <span>Peta Sebaran Spasial &amp; Legenda Diagnosa</span>
+            <span>Peta Sebaran Kasus</span>
           </button>
 
           <button
@@ -484,7 +490,7 @@ export default function LaporanPenyakitPage() {
             }`}
           >
             <FileSpreadsheet size={16} strokeWidth={2.5} />
-            <span>Tabel Rekapitulasi Data Kasus ({filteredCases.length} Baris)</span>
+            <span>Tabel Rekapitulasi</span>
           </button>
         </div>
 

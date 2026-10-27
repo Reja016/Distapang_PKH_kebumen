@@ -63,63 +63,67 @@ export default function DistribusiBatab({
   return (
     <div className="space-y-6">
       {/* ── 1. TOOLBAR PENCARIAN & TOMBOL AKSI ── */}
-      <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 bg-white dark:bg-slate-900 p-4 rounded-2xl border border-slate-200/80 dark:border-slate-800 shadow-xs">
-        <div className="relative flex-1">
+      <div className="flex flex-col gap-3 bg-white dark:bg-slate-900 p-4 rounded-2xl border border-slate-200/80 dark:border-slate-800 shadow-xs">
+        <div className="relative w-full">
           <Search className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
           <input
             type="text"
             placeholder="Cari nomor BA, nama obat, atau puskeswan..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full pl-10 pr-4 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs focus:ring-2 focus:ring-blue-500 outline-none text-slate-800 dark:text-slate-100"
+            className="w-full pl-10 pr-4 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs focus:ring-2 focus:ring-blue-500 outline-none text-slate-800 dark:text-slate-100"
           />
         </div>
 
-        <div className="flex items-center gap-2 overflow-x-auto pb-1 sm:pb-0">
-          <select
-            value={filterPusk}
-            onChange={(e) => setFilterPusk(e.target.value)}
-            className="px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-semibold text-slate-700 dark:text-slate-200 outline-none cursor-pointer"
-          >
-            <option value="ALL">Semua 8 Puskeswan</option>
-            <option value="MIRIT">Puskeswan Mirit</option>
-            <option value="KLIRONG">Puskeswan Klirong</option>
-            <option value="GOMBONG">Puskeswan Gombong</option>
-            <option value="BUAYAN">Puskeswan Buayan</option>
-            <option value="ALIAN">Puskeswan Alian</option>
-            <option value="PREMBUN">Puskeswan Prembun</option>
-            <option value="KEBUMEN">Puskeswan Kebumen</option>
-            <option value="KARANGANYAR">Puskeswan Karanganyar</option>
-          </select>
+        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-2.5">
+          {/* Dropdown filter di bawah pencarian */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 flex-1">
+            <select
+              value={filterPusk}
+              onChange={(e) => setFilterPusk(e.target.value)}
+              className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-semibold text-slate-700 dark:text-slate-200 outline-none cursor-pointer"
+            >
+              <option value="ALL">Semua 8 Puskeswan</option>
+              <option value="MIRIT">Puskeswan Mirit</option>
+              <option value="KLIRONG">Puskeswan Klirong</option>
+              <option value="GOMBONG">Puskeswan Gombong</option>
+              <option value="BUAYAN">Puskeswan Buayan</option>
+              <option value="ALIAN">Puskeswan Alian</option>
+              <option value="PREMBUN">Puskeswan Prembun</option>
+              <option value="KEBUMEN">Puskeswan Kebumen</option>
+              <option value="KARANGANYAR">Puskeswan Karanganyar</option>
+            </select>
 
-          <select
-            value={filterJenis}
-            onChange={(e) => setFilterJenis(e.target.value)}
-            className="px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-semibold text-slate-700 dark:text-slate-200 outline-none cursor-pointer"
-          >
-            <option value="ALL">Semua Jenis Distribusi</option>
-            <option value="DROPING_TERENCANA">Dropping Terencana</option>
-            <option value="AMPRAHAN_INSIDENTAL">Amprahan Insidental</option>
-            <option value="DARURAT">Khusus Status Darurat</option>
-          </select>
+            <select
+              value={filterJenis}
+              onChange={(e) => setFilterJenis(e.target.value)}
+              className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-semibold text-slate-700 dark:text-slate-200 outline-none cursor-pointer"
+            >
+              <option value="ALL">Semua Jenis Distribusi</option>
+              <option value="DROPING_TERENCANA">Dropping Terencana</option>
+              <option value="AMPRAHAN_INSIDENTAL">Amprahan Insidental</option>
+              <option value="DARURAT">Khusus Status Darurat</option>
+            </select>
+          </div>
 
+          {/* Tombol Aksi */}
           {(canCreate || canEdit) && (
-            <>
+            <div className="flex items-center gap-2 shrink-0">
               <button
                 onClick={() => onOpenCreateDistribusi(false)}
-                className="flex items-center gap-1.5 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold rounded-xl shadow-md transition-all cursor-pointer shrink-0"
+                className="flex-1 sm:flex-none flex items-center justify-center gap-1.5 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold rounded-xl shadow-md transition-all cursor-pointer whitespace-nowrap"
               >
                 <Plus className="w-4 h-4" />
                 Dropping Terencana
               </button>
               <button
                 onClick={() => onOpenCreateDistribusi(true)}
-                className="flex items-center gap-1.5 px-4 py-2 bg-amber-600 hover:bg-amber-700 text-white text-xs font-bold rounded-xl shadow-md transition-all cursor-pointer shrink-0"
+                className="flex-1 sm:flex-none flex items-center justify-center gap-1.5 px-4 py-2 bg-amber-600 hover:bg-amber-700 text-white text-xs font-bold rounded-xl shadow-md transition-all cursor-pointer whitespace-nowrap"
               >
                 <AlertTriangle className="w-4 h-4" />
                 Ambil Darurat
               </button>
-            </>
+            </div>
           )}
         </div>
       </div>

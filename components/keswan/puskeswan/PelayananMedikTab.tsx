@@ -465,7 +465,7 @@ export function PelayananMedikTab({
               <div className="flex items-center justify-between">
                 <label className="text-xs font-bold text-amber-900 dark:text-amber-300 flex items-center gap-1.5">
                   <Stethoscope className="w-4 h-4 text-amber-600 dark:text-amber-400" />
-                  Nama Penyakit / Diagnosa (Bisa Pilih Lebih dari 1)
+                  Diagnosa Penyakit (Bisa Multi-Penyakit)
                 </label>
                 {selectedDiagnosas.length > 0 && (
                   <button
@@ -489,7 +489,7 @@ export function PelayananMedikTab({
                 }}
                 className="w-full px-3 py-2 text-sm bg-white dark:bg-slate-800 border border-amber-300 dark:border-amber-700 rounded-lg focus:ring-2 focus:ring-amber-500 outline-none font-medium"
               >
-                <option value="">-- Pilih Nama Penyakit dari Dropdown (Klik untuk Menambah) --</option>
+                <option value="">-- Pilih Nama Penyakit --</option>
                 {diagnosaList.map((d) => (
                   <option key={d} value={d} disabled={selectedDiagnosas.includes(d)}>
                     {d} {selectedDiagnosas.includes(d) ? '✓ (Sudah Dipilih)' : ''}
@@ -498,7 +498,7 @@ export function PelayananMedikTab({
               </select>
 
               {/* List Badges Penyakit Terpilih */}
-              {selectedDiagnosas.length > 0 ? (
+              {selectedDiagnosas.length > 0 && (
                 <div className="flex flex-wrap gap-2 pt-1">
                   {selectedDiagnosas.map((diag) => (
                     <span
@@ -517,10 +517,6 @@ export function PelayananMedikTab({
                     </span>
                   ))}
                 </div>
-              ) : (
-                <p className="text-xs text-slate-500 italic">
-                  Belum ada penyakit yang dipilih. Silakan pilih dari dropdown di atas (bisa lebih dari 1, misal: Cacingan, Bloat, BEF).
-                </p>
               )}
             </div>
 
@@ -528,12 +524,11 @@ export function PelayananMedikTab({
             <div className="space-y-4">
               <div className="flex items-center justify-between border-b pb-2 border-slate-200 dark:border-slate-800">
                 <div>
-                  <h4 className="text-sm font-bold text-slate-800 dark:text-slate-200 flex items-center gap-2">
-                    <DollarSign className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
+                  <h4 className="text-sm font-bold text-slate-800 dark:text-slate-200">
                     Karcis Retribusi Layanan Semi Aktif (Perda No. 10 Th. 2025)
                   </h4>
                   <p className="text-xs text-slate-500 dark:text-slate-400">
-                    Centang tindakan layanan medis yang dilakukan untuk menghitung tarif retribusi
+                    Centang tindakan layanan yang dilakukan
                   </p>
                 </div>
                 <div className="text-right">
@@ -612,7 +607,7 @@ export function PelayananMedikTab({
                 type="button"
                 onClick={handleResetForm}
                 disabled={isSaving}
-                className="px-4 py-2.5 text-xs font-semibold text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl transition cursor-pointer flex items-center gap-1.5"
+                className="px-4 py-2.5 text-xs font-bold text-slate-700 dark:text-slate-300 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 border border-slate-300 dark:border-slate-700 rounded-xl transition shadow-2xs cursor-pointer flex items-center gap-1.5"
               >
                 <RotateCcw className="w-3.5 h-3.5" /> Reset Form
               </button>
@@ -629,53 +624,56 @@ export function PelayananMedikTab({
       )}
 
       {/* KPI Stats Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <div className="p-5 bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-950/40 dark:to-indigo-950/30 rounded-2xl border border-blue-200/80 dark:border-blue-800/50 shadow-sm flex items-center justify-between">
-          <div>
-            <p className="text-xs font-semibold uppercase tracking-wider text-blue-600 dark:text-blue-400">
-              Total Pelayanan Pasien
+      <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 sm:gap-4">
+        {/* Card 1: Total Pelayanan Pasien (Top-Left on Mobile) */}
+        <div className="p-3.5 sm:p-5 bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-950/40 dark:to-indigo-950/30 rounded-2xl border border-blue-200/80 dark:border-blue-800/50 shadow-2xs flex items-center justify-between gap-2">
+          <div className="min-w-0">
+            <p className="text-[10px] sm:text-xs font-bold uppercase tracking-wider text-blue-600 dark:text-blue-400 truncate">
+              Total Pelayanan
             </p>
-            <h3 className="text-2xl font-black text-slate-800 dark:text-slate-100 mt-1">
-              {stats.totalPasien} <span className="text-sm font-medium text-slate-500">Pasien</span>
+            <h3 className="text-lg sm:text-2xl font-black text-slate-800 dark:text-slate-100 mt-0.5 truncate">
+              {stats.totalPasien} <span className="text-[10px] sm:text-xs font-medium text-slate-500">Pasien</span>
             </h3>
           </div>
-          <div className="p-3 bg-blue-600 text-white rounded-xl shadow-md shadow-blue-500/20">
-            <Users className="w-6 h-6" />
+          <div className="p-2 sm:p-3 bg-blue-600 text-white rounded-xl shadow-xs shrink-0">
+            <Users className="w-4 h-4 sm:w-6 sm:h-6" />
           </div>
         </div>
 
-        <div className="p-5 bg-gradient-to-br from-emerald-50 to-teal-50 dark:from-emerald-950/40 dark:to-teal-950/30 rounded-2xl border border-emerald-200/80 dark:border-emerald-800/50 shadow-sm flex items-center justify-between">
-          <div>
-            <p className="text-xs font-semibold uppercase tracking-wider text-emerald-600 dark:text-emerald-400">
+        {/* Card 2: Diagnosa Penyakit Tercatat (Top-Right on Mobile) */}
+        <div className="p-3.5 sm:p-5 bg-gradient-to-br from-amber-50 to-orange-50 dark:from-amber-950/40 dark:to-orange-950/30 rounded-2xl border border-amber-200/80 dark:border-amber-800/50 shadow-2xs flex items-center justify-between gap-2">
+          <div className="min-w-0">
+            <p className="text-[10px] sm:text-xs font-bold uppercase tracking-wider text-amber-600 dark:text-amber-400 truncate">
+              Diagnosa Penyakit
+            </p>
+            <h3 className="text-lg sm:text-2xl font-black text-slate-800 dark:text-slate-100 mt-0.5 truncate">
+              {stats.diagnosaCount} <span className="text-[10px] sm:text-xs font-medium text-slate-500">Kasus</span>
+            </h3>
+          </div>
+          <div className="p-2 sm:p-3 bg-amber-600 text-white rounded-xl shadow-xs shrink-0">
+            <Stethoscope className="w-4 h-4 sm:w-6 sm:h-6" />
+          </div>
+        </div>
+
+        {/* Card 3: Total Retribusi Layanan (Bottom on Mobile - col-span-2) */}
+        <div className="col-span-2 sm:col-span-1 p-3.5 sm:p-5 bg-gradient-to-br from-emerald-50 to-teal-50 dark:from-emerald-950/40 dark:to-teal-950/30 rounded-2xl border border-emerald-200/80 dark:border-emerald-800/50 shadow-2xs flex items-center justify-between gap-2">
+          <div className="min-w-0">
+            <p className="text-[10px] sm:text-xs font-bold uppercase tracking-wider text-emerald-600 dark:text-emerald-400 truncate">
               Total Retribusi Layanan
             </p>
-            <h3 className="text-2xl font-black text-slate-800 dark:text-slate-100 mt-1">
+            <h3 className="text-lg sm:text-2xl font-black text-slate-800 dark:text-slate-100 mt-0.5 truncate font-mono">
               {formatRupiah(stats.totalRetribusi)}
             </h3>
           </div>
-          <div className="p-3 bg-emerald-600 text-white rounded-xl shadow-md shadow-emerald-500/20">
-            <DollarSign className="w-6 h-6" />
-          </div>
-        </div>
-
-        <div className="p-5 bg-gradient-to-br from-amber-50 to-orange-50 dark:from-amber-950/40 dark:to-orange-950/30 rounded-2xl border border-amber-200/80 dark:border-amber-800/50 shadow-sm flex items-center justify-between">
-          <div>
-            <p className="text-xs font-semibold uppercase tracking-wider text-amber-600 dark:text-amber-400">
-              Diagnosa Penyakit Tercatat
-            </p>
-            <h3 className="text-2xl font-black text-slate-800 dark:text-slate-100 mt-1">
-              {stats.diagnosaCount} <span className="text-sm font-medium text-slate-500">Kasus</span>
-            </h3>
-          </div>
-          <div className="p-3 bg-amber-600 text-white rounded-xl shadow-md shadow-amber-500/20">
-            <Stethoscope className="w-6 h-6" />
+          <div className="p-2 sm:p-3 bg-emerald-600 text-white rounded-xl shadow-xs shrink-0">
+            <DollarSign className="w-4 h-4 sm:w-6 sm:h-6" />
           </div>
         </div>
       </div>
 
       {/* Control Bar: Filter, Pencarian, & Aksi */}
-      <div className="p-4 bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm space-y-4">
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+      <div className="p-4 sm:p-5 bg-white dark:bg-slate-900 rounded-2xl border border-slate-300 dark:border-slate-800 shadow-sm space-y-3.5">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-3">
           {/* Search Box */}
           <div className="relative flex-1">
             <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
@@ -684,78 +682,81 @@ export function PelayananMedikTab({
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Cari pemilik, alamat, jenis hewan, diagnosa..."
-              className="w-full pl-10 pr-4 py-2.5 text-sm bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none"
+              className="w-full min-h-touch h-10 pl-10 pr-4 text-xs bg-slate-50 dark:bg-slate-800/80 border border-slate-300 dark:border-slate-700 rounded-xl focus:bg-white dark:focus:bg-slate-900 focus:ring-2 focus:ring-blue-500 outline-none"
             />
           </div>
 
           {/* Action Buttons */}
-          <div className="flex flex-wrap items-center gap-2.5">
+          <div className="flex flex-wrap items-center gap-2">
             <button
               onClick={() => setShowAuditModal(true)}
-              className="px-3.5 py-2 text-xs font-semibold text-slate-700 dark:text-slate-300 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-xl transition flex items-center gap-1.5 cursor-pointer"
+              className="min-h-touch h-10 px-3.5 text-xs font-bold text-slate-700 dark:text-slate-300 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 border border-slate-300 dark:border-slate-700 rounded-xl transition flex items-center gap-1.5 cursor-pointer shadow-2xs"
             >
               <Clock className="w-4 h-4 text-slate-500" />
-              Audit Log
+              <span>Audit Log</span>
             </button>
 
             <button
               onClick={handleExportExcel}
-              className="px-3.5 py-2 text-xs font-semibold text-emerald-700 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800 hover:bg-emerald-100 rounded-xl transition flex items-center gap-1.5 cursor-pointer"
+              className="min-h-touch h-10 px-3.5 text-xs font-bold text-emerald-700 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-300 dark:border-emerald-800 hover:bg-emerald-100 rounded-xl transition flex items-center gap-1.5 cursor-pointer shadow-2xs"
             >
               <FileSpreadsheet className="w-4 h-4 text-emerald-600" />
-              Export Excel
+              <span>Export Excel</span>
             </button>
           </div>
         </div>
 
         {/* Filter Dropdowns */}
-        <div className="flex flex-wrap items-center gap-3 pt-3 border-t border-slate-100 dark:border-slate-800 text-xs">
-          <div className="flex items-center gap-1.5 text-slate-500 dark:text-slate-400">
+        <div className="flex flex-col sm:flex-row sm:items-center gap-2.5 pt-3 border-t border-slate-200 dark:border-slate-800 text-xs">
+          <div className="flex items-center gap-1.5 text-slate-600 dark:text-slate-300 font-bold shrink-0">
             <Filter className="w-3.5 h-3.5" />
-            <span>Filter:</span>
+            <span>Filter Data:</span>
           </div>
 
-          <select
-            value={selectedPuskeswan}
-            onChange={(e) => setSelectedPuskeswan(e.target.value)}
-            className="px-2.5 py-1.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg outline-none font-medium text-slate-700 dark:text-slate-300"
-          >
-            <option value="all">Semua Puskeswan</option>
-            {DAFTAR_PUSKESWAN.map((p) => (
-              <option key={p} value={p}>
-                Puskeswan {p}
-              </option>
-            ))}
-          </select>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 flex-1 w-full">
+            <select
+              value={selectedPuskeswan}
+              onChange={(e) => setSelectedPuskeswan(e.target.value)}
+              className="w-full min-h-touch h-10 px-3 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-xl outline-none font-bold text-slate-700 dark:text-slate-200 focus:border-blue-600 cursor-pointer truncate"
+            >
+              <option value="all">Semua Puskeswan</option>
+              {DAFTAR_PUSKESWAN.map((p) => (
+                <option key={p} value={p}>
+                  Puskeswan {p}
+                </option>
+              ))}
+            </select>
 
-          <select
-            value={selectedTahun}
-            onChange={(e) => setSelectedTahun(e.target.value)}
-            className="px-2.5 py-1.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg outline-none font-medium text-slate-700 dark:text-slate-300"
-          >
-            <option value="all">Semua Tahun</option>
-            <option value="2025">2025</option>
-            <option value="2026">2026</option>
-            <option value="2027">2027</option>
-          </select>
+            <select
+              value={selectedTahun}
+              onChange={(e) => setSelectedTahun(e.target.value)}
+              className="w-full min-h-touch h-10 px-3 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-xl outline-none font-bold text-slate-700 dark:text-slate-200 focus:border-blue-600 cursor-pointer"
+            >
+              <option value="all">Semua Tahun</option>
+              <option value="2025">Tahun 2025</option>
+              <option value="2026">Tahun 2026</option>
+              <option value="2027">Tahun 2027</option>
+            </select>
 
-          <select
-            value={selectedBulan}
-            onChange={(e) => setSelectedBulan(e.target.value)}
-            className="px-2.5 py-1.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg outline-none font-medium text-slate-700 dark:text-slate-300"
-          >
-            <option value="all">Semua Bulan</option>
-            {DAFTAR_BULAN.map((b, idx) => (
-              <option key={b} value={idx + 1}>
-                {b}
-              </option>
-            ))}
-          </select>
+            <select
+              value={selectedBulan}
+              onChange={(e) => setSelectedBulan(e.target.value)}
+              className="w-full min-h-touch h-10 px-3 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-xl outline-none font-bold text-slate-700 dark:text-slate-200 focus:border-blue-600 cursor-pointer"
+            >
+              <option value="all">Semua Bulan</option>
+              {DAFTAR_BULAN.map((b, idx) => (
+                <option key={b} value={idx + 1}>
+                  {b}
+                </option>
+              ))}
+            </select>
+          </div>
 
           <button
             onClick={fetchData}
-            className="ml-auto p-1.5 text-slate-500 hover:text-blue-600 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition cursor-pointer"
+            className="h-10 px-3 bg-white dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 border border-slate-300 dark:border-slate-700 rounded-xl transition flex items-center justify-center cursor-pointer shrink-0"
             title="Refresh Data"
+            aria-label="Refresh Data"
           >
             <RefreshCw className={`w-4 h-4 ${isLoading ? 'animate-spin text-blue-600' : ''}`} />
           </button>

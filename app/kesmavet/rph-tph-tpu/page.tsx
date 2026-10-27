@@ -224,7 +224,7 @@ export default function RphTphTpuPage() {
     <div className="min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 font-sans selection:bg-purple-600 selection:text-white pb-24">
       {/* ── TOP HEADER (Tema Ungu Khas Kesmavet) ── */}
       <header className="border-b border-purple-100 dark:border-slate-800 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md sticky top-0 z-30 shadow-xs">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-5 min-h-[80px] sm:min-h-[88px] flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-5 min-h-[80px] sm:min-h-[88px] flex items-center justify-between gap-3">
           <div className="flex items-center gap-3 min-w-0 flex-1">
             <Link
               href="/kesmavet"
@@ -248,16 +248,17 @@ export default function RphTphTpuPage() {
             </div>
           </div>
 
-          <div className="flex flex-wrap items-center gap-2 shrink-0">
+          <div className="flex items-center justify-end gap-2 shrink-0 ml-auto">
             {activeTab === 'rumah_potong' && (
               <>
                 <button
                   type="button"
                   onClick={exportRphToExcel}
-                  className="h-10 px-4 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 text-xs font-bold flex items-center gap-1.5 transition-all shadow-xs cursor-pointer"
+                  className="min-h-touch min-w-touch h-10 px-3 sm:px-4 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 text-xs font-bold flex items-center justify-center gap-1.5 transition-all shadow-xs cursor-pointer"
+                  title="Export Excel"
                 >
                   <Download size={15} strokeWidth={2.5} />
-                  <span>Export Excel</span>
+                  <span className="hidden sm:inline">Export Excel</span>
                 </button>
 
                 <button
@@ -267,10 +268,11 @@ export default function RphTphTpuPage() {
                     setFormRph(INITIAL_RPH_FORM);
                     setShowAddModal(true);
                   }}
-                  className="h-10 px-4 rounded-xl bg-purple-600 hover:bg-purple-700 text-white text-xs font-bold flex items-center gap-1.5 shadow-xs transition-colors cursor-pointer"
+                  className="min-h-touch min-w-touch h-10 px-3 sm:px-4 rounded-xl bg-purple-600 hover:bg-purple-700 text-white text-xs font-bold flex items-center justify-center gap-1.5 shadow-xs transition-colors cursor-pointer"
+                  title="Tambah Rumah Potong Hewan"
                 >
                   <Plus size={15} strokeWidth={2.5} />
-                  <span>Tambah Rumah Potong</span>
+                  <span className="hidden sm:inline">Tambah Rumah Potong</span>
                 </button>
               </>
             )}
@@ -285,28 +287,28 @@ export default function RphTphTpuPage() {
           <button
             type="button"
             onClick={() => setActiveTab('pencatatan_pemotongan')}
-            className={`min-h-touch h-11 px-4 sm:px-6 rounded-t-xl text-xs sm:text-sm font-bold flex items-center gap-2 border-t border-x transition-all shrink-0 whitespace-nowrap cursor-pointer ${
+            className={`flex-1 sm:flex-none min-h-touch h-11 px-3 sm:px-6 rounded-t-xl text-xs sm:text-sm font-bold flex items-center justify-center gap-2 border-t border-x transition-all shrink-0 whitespace-nowrap cursor-pointer ${
               activeTab === 'pencatatan_pemotongan'
                 ? 'bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 text-purple-700 dark:text-purple-400 border-b-white dark:border-b-slate-900 translate-y-px shadow-xs'
                 : 'border-transparent text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white bg-slate-100/60 dark:bg-slate-800/40'
             }`}
           >
             <FileText size={16} strokeWidth={2.5} />
-            <span>1. Pencatatan Pemotongan Hewan</span>
+            <span>Pencatatan Pemotongan</span>
           </button>
 
           <button
             type="button"
             onClick={() => setActiveTab('rumah_potong')}
-            className={`min-h-touch h-11 px-4 sm:px-6 rounded-t-xl text-xs sm:text-sm font-bold flex items-center gap-2 border-t border-x transition-all shrink-0 whitespace-nowrap cursor-pointer ${
+            className={`flex-1 sm:flex-none min-h-touch h-11 px-3 sm:px-6 rounded-t-xl text-xs sm:text-sm font-bold flex items-center justify-center gap-2 border-t border-x transition-all shrink-0 whitespace-nowrap cursor-pointer ${
               activeTab === 'rumah_potong'
                 ? 'bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 text-purple-700 dark:text-purple-400 border-b-white dark:border-b-slate-900 translate-y-px shadow-xs'
                 : 'border-transparent text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white bg-slate-100/60 dark:bg-slate-800/40'
             }`}
           >
             <Building2 size={16} strokeWidth={2.5} />
-            <span>2. Data Rumah Potong (RPH / TPH / TPU)</span>
-            <span className="px-2 py-0.5 rounded-full text-[10px] bg-purple-100 text-purple-800 dark:bg-purple-950 dark:text-purple-300 font-extrabold">
+            <span>Data Rumah Potong</span>
+            <span className="hidden sm:inline-block px-2 py-0.5 rounded-full text-[10px] bg-purple-100 text-purple-800 dark:bg-purple-950 dark:text-purple-300 font-extrabold">
               {rphList.length}
             </span>
           </button>

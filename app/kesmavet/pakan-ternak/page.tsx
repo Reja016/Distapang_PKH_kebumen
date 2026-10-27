@@ -360,25 +360,32 @@ export default function PakanTernakPage() {
           )}
         </div>
 
-        {/* Tab Switcher Khusus Mobile */}
-        <div className="sm:hidden flex items-center bg-slate-200/80 dark:bg-slate-800 p-1 rounded-2xl shadow-inner">
+        {/* ── TAB UTAMA SUBMENU (Folder Tab Model) ── */}
+        <div className="flex gap-2 border-b border-slate-200 dark:border-slate-800 pb-px overflow-x-auto no-scrollbar scroll-smooth -mx-4 px-4 sm:mx-0 sm:px-0">
           <button
+            type="button"
             onClick={() => setMobileTab('map')}
-            className={`flex-1 min-h-touch py-2.5 px-4 rounded-xl text-xs font-black flex items-center justify-center gap-2 transition-all cursor-pointer ${
-              mobileTab === 'map' ? 'bg-purple-700 text-white shadow-sm' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100'
+            className={`flex-1 sm:flex-none min-h-touch h-11 px-4 sm:px-6 rounded-t-xl text-xs sm:text-sm font-bold flex items-center justify-center gap-2 border-t border-x transition-all shrink-0 whitespace-nowrap cursor-pointer ${
+              mobileTab === 'map'
+                ? 'bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 text-purple-700 dark:text-purple-400 border-b-white dark:border-b-slate-900 translate-y-px shadow-xs'
+                : 'border-transparent text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white bg-slate-100/60 dark:bg-slate-800/40'
             }`}
           >
-            <MapIcon size={15} />
+            <MapIcon size={16} strokeWidth={2.5} />
             <span>Peta Sebaran</span>
           </button>
+
           <button
+            type="button"
             onClick={() => setMobileTab('table')}
-            className={`flex-1 min-h-touch py-2.5 px-4 rounded-xl text-xs font-black flex items-center justify-center gap-2 transition-all cursor-pointer ${
-              mobileTab === 'table' ? 'bg-purple-700 text-white shadow-sm' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100'
+            className={`flex-1 sm:flex-none min-h-touch h-11 px-4 sm:px-6 rounded-t-xl text-xs sm:text-sm font-bold flex items-center justify-center gap-2 border-t border-x transition-all shrink-0 whitespace-nowrap cursor-pointer ${
+              mobileTab === 'table'
+                ? 'bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 text-purple-700 dark:text-purple-400 border-b-white dark:border-b-slate-900 translate-y-px shadow-xs'
+                : 'border-transparent text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white bg-slate-100/60 dark:bg-slate-800/40'
             }`}
           >
-            <TableIcon size={15} />
-            <span>Tabel Data {selectedYear}</span>
+            <TableIcon size={16} strokeWidth={2.5} />
+            <span>Tabel Data</span>
           </button>
         </div>
 

@@ -30,7 +30,7 @@ export default function NkvTableSection({
   return (
     <div className="space-y-6">
       {/* Filter & Search Toolbar */}
-      <div className="bg-white dark:bg-slate-900 p-4 sm:p-5 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-sm flex flex-col md:flex-row items-center gap-3">
+      <div className="bg-white dark:bg-slate-900 p-4 sm:p-5 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-sm flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
         <div className="relative flex-1 w-full">
           <Search size={16} strokeWidth={2.5} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
           <input
@@ -38,15 +38,15 @@ export default function NkvTableSection({
             placeholder="Cari nama usaha, jenis, proses audit, atau keterangan..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full min-h-touch h-11 pl-10 pr-4 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-xs font-bold text-slate-900 dark:text-slate-100 focus:outline-none focus:border-purple-600 focus:bg-white dark:focus:bg-slate-800 transition-colors"
+            className="w-full min-h-touch h-11 pl-10 pr-4 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-xs font-semibold text-slate-900 dark:text-slate-100 focus:outline-none focus:border-purple-600 focus:bg-white dark:focus:bg-slate-800 transition-colors"
           />
         </div>
 
-        <div className="flex flex-wrap items-center gap-2 w-full md:w-auto">
+        <div className="flex items-center gap-2 w-full sm:w-auto">
           <select
             value={filterJenis}
             onChange={(e) => setFilterJenis(e.target.value)}
-            className="min-h-touch h-11 px-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-xs font-bold text-slate-700 dark:text-slate-200 focus:outline-none focus:border-purple-600 focus:bg-white dark:focus:bg-slate-800"
+            className="flex-1 sm:flex-none sm:w-64 min-h-touch h-11 px-3.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-xs font-semibold text-slate-700 dark:text-slate-200 focus:outline-none focus:border-purple-600 focus:bg-white dark:focus:bg-slate-800 cursor-pointer"
           >
             <option value="">Semua Jenis Usaha</option>
             {uniqueJenis.map((jenis) => (
@@ -62,9 +62,9 @@ export default function NkvTableSection({
                 setSearchTerm('');
                 setFilterJenis('');
               }}
-              className="min-h-touch h-11 px-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-xs font-bold text-slate-700 dark:text-slate-200 transition-colors cursor-pointer"
+              className="min-h-touch h-11 px-3.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-xs font-bold text-slate-700 dark:text-slate-200 transition-colors cursor-pointer shrink-0"
             >
-              Reset Filter
+              Reset
             </button>
           )}
         </div>
@@ -72,21 +72,11 @@ export default function NkvTableSection({
 
       {/* ── TABEL DATA NOMOR KONTROL VETERINER (11 KOLOM) ── */}
       <div className="bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden">
-        <div className="p-5 border-b border-slate-100 dark:border-slate-800 flex flex-wrap items-center justify-between gap-3 bg-purple-50/50 dark:bg-slate-800/60">
-          <div className="flex items-center gap-2.5">
-            <span className="text-xl">📋</span>
-            <div>
-              <h3 className="font-extrabold text-base text-slate-900 dark:text-slate-100">
-                Rekapitulasi Usaha &amp; Pembinaan Sertifikasi NKV
-              </h3>
-              <p className="text-xs text-slate-500 dark:text-slate-400">
-                Daftar pembinaan higiene sanitasi, proses audit, dan status pengeluaran rekomendasi
-              </p>
-            </div>
-          </div>
-          <span className="text-xs font-bold px-3 py-1 rounded-full bg-purple-100 dark:bg-purple-950/50 text-purple-800 dark:text-purple-300 border border-purple-200 dark:border-purple-800">
-            {filteredData.length} Data Ditampilkan
-          </span>
+        <div className="p-4 sm:p-5 border-b border-slate-100 dark:border-slate-800 flex items-center gap-2.5 bg-purple-50/50 dark:bg-slate-800/60">
+          <span className="text-xl">📋</span>
+          <h3 className="font-extrabold text-sm sm:text-base text-slate-900 dark:text-slate-100">
+            Rekapitulasi Usaha &amp; Pembinaan Sertifikasi NKV
+          </h3>
         </div>
 
         <div className="overflow-x-auto">
@@ -104,7 +94,7 @@ export default function NkvTableSection({
                 <th className="p-3.5 border-r border-slate-200 dark:border-slate-800">Pelatihan Higiene Sanitasi</th>
                 <th className="p-3.5 border-r border-slate-200 dark:border-slate-800">Pengeluaran Rekomendasi</th>
                 <th className="p-3.5 border-r border-slate-200 dark:border-slate-800">Keterangan</th>
-                {canEdit && <th className="p-3.5 text-center sticky right-0 bg-slate-100 dark:bg-slate-800 z-10 border-l border-slate-200 dark:border-slate-800">Aksi</th>}
+                {canEdit && <th className="p-3.5 text-center w-24">Aksi</th>}
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-200 dark:divide-slate-800 text-slate-800 dark:text-slate-200 font-medium">
@@ -170,29 +160,25 @@ export default function NkvTableSection({
                         {row.keterangan || '-'}
                       </td>
                       {canEdit && (
-                        <td className={`p-3.5 text-center sticky right-0 z-10 border-l border-slate-200 dark:border-slate-800 ${
-                          isEven
-                            ? 'bg-white dark:bg-slate-900 group-hover:bg-purple-50/40 dark:group-hover:bg-purple-950/20'
-                            : 'bg-slate-50 dark:bg-slate-800 group-hover:bg-purple-50/60 dark:group-hover:bg-purple-950/30'
-                        }`}>
-                        <div className="flex items-center justify-center gap-1.5">
-                          <button
-                            onClick={() => onEdit(row)}
-                            title="Edit Data"
-                            className="w-8 h-8 rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-purple-100 dark:hover:bg-purple-950/40 hover:text-purple-800 dark:hover:text-purple-300 text-slate-600 dark:text-slate-300 flex items-center justify-center transition-colors cursor-pointer"
-                          >
-                            <Edit2 size={13} strokeWidth={2.5} />
-                          </button>
-                          <button
-                            onClick={() => onDelete(row.id)}
-                            title="Hapus Data"
-                            className="w-8 h-8 rounded-lg bg-red-50 dark:bg-red-950/40 hover:bg-red-100 dark:hover:bg-red-900/60 text-red-600 dark:text-red-400 flex items-center justify-center transition-colors cursor-pointer"
-                          >
-                            <Trash2 size={13} strokeWidth={2.5} />
-                          </button>
-                        </div>
-                      </td>
-                    )}
+                        <td className="p-3.5 text-center">
+                          <div className="flex items-center justify-center gap-1.5">
+                            <button
+                              onClick={() => onEdit(row)}
+                              title="Edit Data"
+                              className="w-8 h-8 rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-purple-100 dark:hover:bg-purple-950/40 hover:text-purple-800 dark:hover:text-purple-300 text-slate-600 dark:text-slate-300 flex items-center justify-center transition-colors cursor-pointer"
+                            >
+                              <Edit2 size={13} strokeWidth={2.5} />
+                            </button>
+                            <button
+                              onClick={() => onDelete(row.id)}
+                              title="Hapus Data"
+                              className="w-8 h-8 rounded-lg bg-red-50 dark:bg-red-950/40 hover:bg-red-100 dark:hover:bg-red-900/60 text-red-600 dark:text-red-400 flex items-center justify-center transition-colors cursor-pointer"
+                            >
+                              <Trash2 size={13} strokeWidth={2.5} />
+                            </button>
+                          </div>
+                        </td>
+                      )}
                   </tr>
                 );
               })

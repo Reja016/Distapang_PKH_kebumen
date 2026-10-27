@@ -75,75 +75,75 @@ export default function GudangDashboardTab({
   return (
     <div className="space-y-6">
       {/* ── 1. KPI CARDS RINGKASAN STOK DINAS ── */}
-      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 sm:gap-4">
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2.5 sm:gap-4">
         {/* Total Barang */}
-        <div className="bg-white dark:bg-slate-900 p-4 rounded-2xl border border-slate-200/80 dark:border-slate-800 shadow-xs flex flex-col justify-between">
+        <div className="bg-white dark:bg-slate-900 p-3 sm:p-4 rounded-2xl border border-slate-200/80 dark:border-slate-800 shadow-xs flex flex-col justify-between">
           <div className="flex items-center justify-between text-slate-500">
-            <span className="text-xs font-semibold uppercase tracking-wider">Total Item</span>
-            <Boxes className="w-5 h-5 text-blue-500" />
+            <span className="text-[11px] sm:text-xs font-semibold uppercase tracking-wider">Total Item</span>
+            <Boxes className="w-4 h-4 sm:w-5 sm:h-5 text-blue-500" />
           </div>
-          <div className="mt-2">
-            <span className="text-2xl font-black text-slate-800 dark:text-slate-100">{totalMacam}</span>
+          <div className="mt-1.5 sm:mt-2">
+            <span className="text-xl sm:text-2xl font-black text-slate-800 dark:text-slate-100">{totalMacam}</span>
             <span className="text-xs text-slate-400 ml-1">jenis</span>
           </div>
         </div>
 
         {/* Stok Aman */}
-        <div className="bg-white dark:bg-slate-900 p-4 rounded-2xl border border-emerald-200/80 dark:border-emerald-900/40 shadow-xs flex flex-col justify-between">
+        <div className="bg-white dark:bg-slate-900 p-3 sm:p-4 rounded-2xl border border-emerald-200/80 dark:border-emerald-900/40 shadow-xs flex flex-col justify-between">
           <div className="flex items-center justify-between text-emerald-600 dark:text-emerald-400">
-            <span className="text-xs font-semibold uppercase tracking-wider">Stok Aman</span>
-            <CheckCircle2 className="w-5 h-5" />
+            <span className="text-[11px] sm:text-xs font-semibold uppercase tracking-wider">Stok Aman</span>
+            <CheckCircle2 className="w-4 h-4 sm:w-5 sm:h-5" />
           </div>
-          <div className="mt-2">
-            <span className="text-2xl font-black text-emerald-600 dark:text-emerald-400">{totalAman}</span>
+          <div className="mt-1.5 sm:mt-2">
+            <span className="text-xl sm:text-2xl font-black text-emerald-600 dark:text-emerald-400">{totalAman}</span>
             <span className="text-xs text-slate-400 ml-1">produk</span>
           </div>
         </div>
 
         {/* Buffer / Kritis */}
-        <div className="bg-white dark:bg-slate-900 p-4 rounded-2xl border border-amber-200/80 dark:border-amber-900/40 shadow-xs flex flex-col justify-between">
+        <div className="bg-white dark:bg-slate-900 p-3 sm:p-4 rounded-2xl border border-amber-200/80 dark:border-amber-900/40 shadow-xs flex flex-col justify-between">
           <div className="flex items-center justify-between text-amber-600 dark:text-amber-400">
-            <span className="text-xs font-semibold uppercase tracking-wider">Kritis / Buffer</span>
-            <ShieldAlert className="w-5 h-5" />
+            <span className="text-[11px] sm:text-xs font-semibold uppercase tracking-wider">Kritis/Buffer</span>
+            <ShieldAlert className="w-4 h-4 sm:w-5 sm:h-5" />
           </div>
-          <div className="mt-2">
-            <span className="text-2xl font-black text-amber-600 dark:text-amber-400">{totalKritis}</span>
+          <div className="mt-1.5 sm:mt-2">
+            <span className="text-xl sm:text-2xl font-black text-amber-600 dark:text-amber-400">{totalKritis}</span>
             <span className="text-xs text-slate-400 ml-1">produk</span>
           </div>
         </div>
 
         {/* Habis */}
-        <div className="bg-white dark:bg-slate-900 p-4 rounded-2xl border border-rose-200/80 dark:border-rose-900/40 shadow-xs flex flex-col justify-between">
+        <div className="bg-white dark:bg-slate-900 p-3 sm:p-4 rounded-2xl border border-rose-200/80 dark:border-rose-900/40 shadow-xs flex flex-col justify-between">
           <div className="flex items-center justify-between text-rose-600 dark:text-rose-400">
-            <span className="text-xs font-semibold uppercase tracking-wider">Habis (0)</span>
-            <XCircle className="w-5 h-5" />
+            <span className="text-[11px] sm:text-xs font-semibold uppercase tracking-wider">Habis (0)</span>
+            <XCircle className="w-4 h-4 sm:w-5 sm:h-5" />
           </div>
-          <div className="mt-2">
-            <span className="text-2xl font-black text-rose-600 dark:text-rose-400">{totalHabis}</span>
+          <div className="mt-1.5 sm:mt-2">
+            <span className="text-xl sm:text-2xl font-black text-rose-600 dark:text-rose-400">{totalHabis}</span>
             <span className="text-xs text-slate-400 ml-1">produk</span>
           </div>
         </div>
 
         {/* Mendekati Expired (<90 Hari) */}
-        <div className="bg-white dark:bg-slate-900 p-4 rounded-2xl border border-orange-200/80 dark:border-orange-900/40 shadow-xs flex flex-col justify-between">
+        <div className="bg-white dark:bg-slate-900 p-3 sm:p-4 rounded-2xl border border-orange-200/80 dark:border-orange-900/40 shadow-xs flex flex-col justify-between">
           <div className="flex items-center justify-between text-orange-600 dark:text-orange-400">
-            <span className="text-xs font-semibold uppercase tracking-wider">&lt; 3 Bulan Exp</span>
-            <Clock className="w-5 h-5" />
+            <span className="text-[11px] sm:text-xs font-semibold uppercase tracking-wider">&lt; 3 Bln Exp</span>
+            <Clock className="w-4 h-4 sm:w-5 sm:h-5" />
           </div>
-          <div className="mt-2">
-            <span className="text-2xl font-black text-orange-600 dark:text-orange-400">{countNearExpired}</span>
+          <div className="mt-1.5 sm:mt-2">
+            <span className="text-xl sm:text-2xl font-black text-orange-600 dark:text-orange-400">{countNearExpired}</span>
             <span className="text-xs text-slate-400 ml-1">batch</span>
           </div>
         </div>
 
         {/* Expired / Kadaluarsa */}
-        <div className="bg-white dark:bg-slate-900 p-4 rounded-2xl border border-red-200/80 dark:border-red-900/40 shadow-xs flex flex-col justify-between">
+        <div className="bg-white dark:bg-slate-900 p-3 sm:p-4 rounded-2xl border border-red-200/80 dark:border-red-900/40 shadow-xs flex flex-col justify-between">
           <div className="flex items-center justify-between text-red-600 dark:text-red-400">
-            <span className="text-xs font-semibold uppercase tracking-wider">Kadaluarsa</span>
-            <AlertTriangle className="w-5 h-5" />
+            <span className="text-[11px] sm:text-xs font-semibold uppercase tracking-wider">Kadaluarsa</span>
+            <AlertTriangle className="w-4 h-4 sm:w-5 sm:h-5" />
           </div>
-          <div className="mt-2">
-            <span className="text-2xl font-black text-red-600 dark:text-red-400">{countExpired}</span>
+          <div className="mt-1.5 sm:mt-2">
+            <span className="text-xl sm:text-2xl font-black text-red-600 dark:text-red-400">{countExpired}</span>
             <span className="text-xs text-slate-400 ml-1">batch</span>
           </div>
         </div>

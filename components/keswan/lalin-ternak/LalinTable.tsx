@@ -120,43 +120,22 @@ export default function LalinTable({
   };
 
   return (
-    <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden flex flex-col">
+    <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-300 dark:border-slate-800 shadow-sm overflow-hidden flex flex-col">
       {/* ── TOOLBAR ATAS: Filter Pasar, Pencarian, Tombol Aksi ── */}
-      <div className="p-5 border-b border-slate-100 dark:border-slate-800 flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-4">
-        {/* Filter Wilayah Pasar Hewan */}
-        <div className="flex items-center gap-1.5 p-1 bg-slate-100 dark:bg-slate-800/80 rounded-2xl border border-slate-200/80 dark:border-slate-700 overflow-x-auto shrink-0">
-          <button
-            onClick={() => setActiveWilayah('ALL')}
-            className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
-              activeWilayah === 'ALL'
-                ? 'bg-white dark:bg-slate-900 text-slate-900 dark:text-white shadow-xs'
-                : 'text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white'
-            }`}
+      <div className="p-4 sm:p-5 border-b border-slate-200 dark:border-slate-800 flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-3 sm:gap-4">
+        {/* Filter Wilayah Pasar Hewan (Dropdown) */}
+        <div className="w-full lg:w-auto flex items-center gap-2 px-3 py-2 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 shrink-0">
+          <Store size={15} className="text-slate-500 dark:text-slate-400 shrink-0" />
+          <span className="text-xs font-bold text-slate-600 dark:text-slate-300 shrink-0">Pasar:</span>
+          <select
+            value={activeWilayah}
+            onChange={(e) => setActiveWilayah(e.target.value as WilayahPasar | 'ALL')}
+            className="w-full lg:w-auto bg-transparent text-xs font-bold text-blue-700 dark:text-blue-400 outline-none cursor-pointer"
           >
-            Semua Pasar
-          </button>
-          <button
-            onClick={() => setActiveWilayah('Kebumen')}
-            className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1 cursor-pointer ${
-              activeWilayah === 'Kebumen'
-                ? 'bg-purple-600 text-white shadow-xs'
-                : 'text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white'
-            }`}
-          >
-            <Store size={13} />
-            <span>Pasar Kebumen</span>
-          </button>
-          <button
-            onClick={() => setActiveWilayah('Gombong')}
-            className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1 cursor-pointer ${
-              activeWilayah === 'Gombong'
-                ? 'bg-amber-600 text-white shadow-xs'
-                : 'text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white'
-            }`}
-          >
-            <Store size={13} />
-            <span>Pasar Gombong</span>
-          </button>
+            <option value="ALL">Semua Pasar Hewan</option>
+            <option value="Kebumen">Pasar Hewan Kebumen</option>
+            <option value="Gombong">Pasar Hewan Gombong</option>
+          </select>
         </div>
 
         {/* Pencarian & Tombol Aksi */}
@@ -169,14 +148,14 @@ export default function LalinTable({
               placeholder="Cari pemilik, SKKH, asal, tujuan..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full min-h-touch h-10 pl-10 pr-3.5 border border-slate-200 dark:border-slate-700 rounded-xl bg-slate-50 dark:bg-slate-800 focus:bg-white dark:focus:bg-slate-900 focus:outline-none focus:border-blue-600 text-xs text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-500"
+              className="w-full min-h-touch h-10 pl-10 pr-3.5 border border-slate-300 dark:border-slate-700 rounded-xl bg-slate-50 dark:bg-slate-800 focus:bg-white dark:focus:bg-slate-900 focus:outline-none focus:border-blue-600 text-xs text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-500"
             />
           </div>
 
           {/* Tombol Export Excel */}
           <button
             onClick={handleExportExcel}
-            className="w-full sm:w-auto min-h-touch h-10 px-3.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 text-xs font-bold flex items-center justify-center gap-1.5 transition-colors shadow-2xs cursor-pointer"
+            className="w-full sm:w-auto min-h-touch h-10 px-3.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 text-xs font-bold flex items-center justify-center gap-1.5 transition-colors shadow-2xs cursor-pointer"
             title="Download file Excel"
           >
             <FileSpreadsheet size={15} className="text-blue-600 dark:text-blue-400" />

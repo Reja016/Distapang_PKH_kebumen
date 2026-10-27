@@ -117,21 +117,28 @@ export default function PasarHewanPage() {
 
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 font-sans pb-24">
-      {/* ── HEADER TOP APP BAR (Ringkas & Bersih) ── */}
-      <header className="border-b border-purple-200/80 dark:border-purple-900/50 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md sticky top-0 z-30 shadow-xs">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3.5 flex items-center justify-between gap-3">
-          <div className="flex items-center gap-3 min-w-0">
+      {/* ── TOP HEADER (Tema Ungu Khas Kesmavet) ── */}
+      <header className="border-b border-purple-100 dark:border-slate-800 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md sticky top-0 z-30 shadow-xs">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-5 min-h-[80px] sm:min-h-[88px] flex items-center justify-between gap-3">
+          <div className="flex items-center gap-3 min-w-0 flex-1">
             <Link
               href="/kesmavet"
-              className="w-10 h-10 rounded-xl bg-purple-600 hover:bg-purple-700 text-white flex items-center justify-center transition-all shadow-xs shrink-0 cursor-pointer"
+              className="min-h-touch min-w-touch w-11 h-11 rounded-2xl bg-purple-600 hover:bg-purple-700 text-white flex items-center justify-center transition-all shadow-xs shrink-0"
               aria-label="Kembali ke Modul Kesmavet"
             >
-              <ArrowLeft size={18} />
+              <ArrowLeft size={18} strokeWidth={2.5} />
             </Link>
+
             <div className="min-w-0">
-              <h1 className="text-base sm:text-xl font-black text-slate-900 dark:text-white truncate flex items-center gap-2">
-                <Store size={20} className="text-purple-600 dark:text-purple-400 shrink-0" />
-                <span>Pasar Hewan Kebumen &amp; Gombong</span>
+              <div className="flex items-center gap-2 mb-0.5">
+                <Link href="/kesmavet" className="text-xs font-semibold text-slate-500 hover:text-purple-700 transition-colors truncate">
+                  Kesmavet
+                </Link>
+                <span className="text-slate-300">/</span>
+                <span className="text-xs font-bold text-purple-700 whitespace-nowrap">Pasar Hewan</span>
+              </div>
+              <h1 className="text-base sm:text-xl font-extrabold text-slate-900 dark:text-white tracking-tight leading-tight truncate">
+                Pasar Hewan Kebumen &amp; Gombong
               </h1>
             </div>
           </div>
@@ -139,12 +146,12 @@ export default function PasarHewanPage() {
       </header>
 
       {/* ── KONTEN UTAMA ── */}
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6 space-y-6">
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 space-y-6">
         {/* ── SUBMENU TABS: CATAT HEWAN & INPUT HARGA (Folder-Style Tab) ── */}
         <div className="flex gap-2 border-b border-slate-200 dark:border-slate-800 pb-px overflow-x-auto no-scrollbar scroll-smooth -mx-4 px-4 sm:mx-0 sm:px-0">
           <button
             onClick={() => setActiveTab('catat')}
-            className={`min-h-touch h-11 px-5 sm:px-6 rounded-t-xl text-xs sm:text-sm font-bold flex items-center gap-2 border-t border-x transition-all shrink-0 whitespace-nowrap cursor-pointer ${
+            className={`flex-1 sm:flex-none min-h-touch h-11 px-4 sm:px-6 rounded-t-xl text-xs sm:text-sm font-bold flex items-center justify-center gap-2 border-t border-x transition-all shrink-0 whitespace-nowrap cursor-pointer ${
               activeTab === 'catat'
                 ? 'bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 text-purple-700 dark:text-purple-400 border-b-white dark:border-b-slate-900 translate-y-px shadow-xs'
                 : 'border-transparent text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white bg-slate-100/60 dark:bg-slate-800/40'
@@ -155,7 +162,7 @@ export default function PasarHewanPage() {
           </button>
           <button
             onClick={() => setActiveTab('harga')}
-            className={`min-h-touch h-11 px-5 sm:px-6 rounded-t-xl text-xs sm:text-sm font-bold flex items-center gap-2 border-t border-x transition-all shrink-0 whitespace-nowrap cursor-pointer ${
+            className={`flex-1 sm:flex-none min-h-touch h-11 px-4 sm:px-6 rounded-t-xl text-xs sm:text-sm font-bold flex items-center justify-center gap-2 border-t border-x transition-all shrink-0 whitespace-nowrap cursor-pointer ${
               activeTab === 'harga'
                 ? 'bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 text-purple-700 dark:text-purple-400 border-b-white dark:border-b-slate-900 translate-y-px shadow-xs'
                 : 'border-transparent text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white bg-slate-100/60 dark:bg-slate-800/40'

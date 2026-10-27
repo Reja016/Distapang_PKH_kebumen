@@ -403,16 +403,11 @@ export default function HewanKurbanForm({
 
         {/* BAGIAN 2: RINCIAN HEWAN KURBAN (4 KOMODITAS FLEKSIBEL) */}
         <div>
-          <div className="flex items-center justify-between mb-3">
-            <div className="flex items-center gap-2">
-              <span className="w-2 h-2 rounded-full bg-emerald-500" />
-              <h4 className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
-                2. Rincian Jumlah Hewan Kurban (Ekor)
-              </h4>
-            </div>
-            <span className="text-[11px] text-slate-400 dark:text-slate-500">
-              *Jika tidak ada pemisahan jenis kelamin, Anda dapat mengisi langsung kolom Total
-            </span>
+          <div className="flex items-center gap-2 mb-3">
+            <span className="w-2 h-2 rounded-full bg-emerald-500" />
+            <h4 className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
+              2. Rincian Jumlah Hewan Kurban (Ekor)
+            </h4>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4">

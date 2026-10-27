@@ -83,77 +83,83 @@ export default function PemasukanDinasTab({
   return (
     <div className="space-y-6">
       {/* ── 1. RINGKASAN PEMASUKAN ── */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <div className="bg-white dark:bg-slate-900 p-4 rounded-2xl border border-slate-200/80 dark:border-slate-800 shadow-xs">
-          <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider block">
-            Total Transaksi Dropping Masuk
+      <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 sm:gap-4">
+        <div className="bg-white dark:bg-slate-900 p-3.5 sm:p-4 rounded-2xl border border-slate-200/80 dark:border-slate-800 shadow-xs">
+          <span className="text-[11px] sm:text-xs font-semibold text-slate-400 uppercase tracking-wider block">
+            Total Transaksi
           </span>
-          <span className="text-2xl font-black text-slate-800 dark:text-slate-100 mt-1 block">
+          <span className="text-xl sm:text-2xl font-black text-slate-800 dark:text-slate-100 mt-1 block">
             {filteredList.length} <span className="text-xs font-normal text-slate-400">transaksi</span>
           </span>
         </div>
 
-        <div className="bg-white dark:bg-slate-900 p-4 rounded-2xl border border-emerald-200/80 dark:border-emerald-900/40 shadow-xs">
-          <span className="text-xs font-semibold text-emerald-600 dark:text-emerald-400 uppercase tracking-wider block">
-            Total Volume Masuk
+        <div className="bg-white dark:bg-slate-900 p-3.5 sm:p-4 rounded-2xl border border-emerald-200/80 dark:border-emerald-900/40 shadow-xs">
+          <span className="text-[11px] sm:text-xs font-semibold text-emerald-600 dark:text-emerald-400 uppercase tracking-wider block">
+            Volume Masuk
           </span>
-          <span className="text-2xl font-black text-emerald-600 dark:text-emerald-400 mt-1 block">
-            {totalVolumeBarang.toLocaleString('id-ID')} <span className="text-xs font-normal text-slate-400">unit / dosis</span>
+          <span className="text-xl sm:text-2xl font-black text-emerald-600 dark:text-emerald-400 mt-1 block">
+            {totalVolumeBarang.toLocaleString('id-ID')} <span className="text-xs font-normal text-slate-400">unit/dosis</span>
           </span>
         </div>
 
-        <div className="bg-white dark:bg-slate-900 p-4 rounded-2xl border border-blue-200/80 dark:border-blue-900/40 shadow-xs">
-          <span className="text-xs font-semibold text-blue-600 dark:text-blue-400 uppercase tracking-wider block">
+        <div className="col-span-2 sm:col-span-1 bg-white dark:bg-slate-900 p-3.5 sm:p-4 rounded-2xl border border-blue-200/80 dark:border-blue-900/40 shadow-xs">
+          <span className="text-[11px] sm:text-xs font-semibold text-blue-600 dark:text-blue-400 uppercase tracking-wider block">
             Total Nilai Pengadaan
           </span>
-          <span className="text-2xl font-black text-blue-600 dark:text-blue-400 mt-1 block">
+          <span className="text-xl sm:text-2xl font-black text-blue-600 dark:text-blue-400 mt-1 block">
             Rp {totalNilaiAnggaran.toLocaleString('id-ID')}
           </span>
         </div>
       </div>
 
       {/* ── 2. TOOLBAR PENCARIAN & TOMBOL AKSI ── */}
-      <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 bg-white dark:bg-slate-900 p-4 rounded-2xl border border-slate-200/80 dark:border-slate-800 shadow-xs">
-        <div className="relative flex-1">
+      <div className="flex flex-col gap-3 bg-white dark:bg-slate-900 p-4 rounded-2xl border border-slate-200/80 dark:border-slate-800 shadow-xs">
+        <div className="relative w-full">
           <Search className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
           <input
             type="text"
             placeholder="Cari obat, no. batch, atau bulan..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full pl-10 pr-4 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs focus:ring-2 focus:ring-blue-500 outline-none text-slate-800 dark:text-slate-100"
+            className="w-full pl-10 pr-4 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs focus:ring-2 focus:ring-blue-500 outline-none text-slate-800 dark:text-slate-100"
           />
         </div>
 
-        <div className="flex items-center gap-2 overflow-x-auto pb-1 sm:pb-0">
-          <select
-            value={filterSumber}
-            onChange={(e) => setFilterSumber(e.target.value)}
-            className="px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-semibold text-slate-700 dark:text-slate-200 outline-none cursor-pointer"
-          >
-            <option value="ALL">Semua Sumber Anggaran</option>
-            <option value="APBD Kabupaten">APBD Kabupaten</option>
-            <option value="Provinsi Jawa Tengah">Provinsi Jawa Tengah</option>
-            <option value="APBN Pusat">APBN Pusat</option>
-          </select>
-
-          <button
-            onClick={handleExportExcel}
-            className="flex items-center gap-1.5 px-3.5 py-2 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 text-slate-700 dark:text-slate-200 text-xs font-semibold rounded-xl transition-all cursor-pointer shrink-0"
-          >
-            <FileSpreadsheet className="w-4 h-4 text-emerald-600" />
-            Excel
-          </button>
-
-          {(canCreate || canEdit) && (
-            <button
-              onClick={onOpenTambahDropping}
-              className="flex items-center gap-1.5 px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-xl shadow-md transition-all cursor-pointer shrink-0"
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
+          {/* Atas di mobile / Kiri di desktop: Dropdown Sumber Anggaran */}
+          <div className="w-full sm:w-64">
+            <select
+              value={filterSumber}
+              onChange={(e) => setFilterSumber(e.target.value)}
+              className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-semibold text-slate-700 dark:text-slate-200 outline-none cursor-pointer"
             >
-              <Plus className="w-4 h-4" />
-              Catat Dropping Masuk
+              <option value="ALL">Semua Sumber Anggaran</option>
+              <option value="APBD Kabupaten">APBD Kabupaten</option>
+              <option value="Provinsi Jawa Tengah">Provinsi Jawa Tengah</option>
+              <option value="APBN Pusat">APBN Pusat</option>
+            </select>
+          </div>
+
+          {/* Bawah di mobile / Kanan di desktop: Button Excel dan Catat Dropping jadi 1 baris ke samping */}
+          <div className="flex items-center gap-2 w-full sm:w-auto">
+            <button
+              onClick={handleExportExcel}
+              className="flex-1 sm:flex-none flex items-center justify-center gap-1.5 px-3.5 py-2 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 text-slate-700 dark:text-slate-200 text-xs font-semibold rounded-xl transition-all cursor-pointer shrink-0"
+            >
+              <FileSpreadsheet className="w-4 h-4 text-emerald-600" />
+              Excel
             </button>
-          )}
+
+            {(canCreate || canEdit) && (
+              <button
+                onClick={onOpenTambahDropping}
+                className="flex-1 sm:flex-none flex items-center justify-center gap-1.5 px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-xl shadow-md transition-all cursor-pointer shrink-0 whitespace-nowrap"
+              >
+                <Plus className="w-4 h-4" />
+                Catat Dropping Masuk
+              </button>
+            )}
+          </div>
         </div>
       </div>
 

@@ -34,7 +34,7 @@ export function RumahPotongTab({
     <div className="space-y-4">
       {/* Toolbar */}
       <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 bg-white dark:bg-slate-900 p-4 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-xs">
-        <div className="flex items-center gap-2 flex-1 max-w-md">
+        <div className="flex items-center gap-2 flex-1 max-w-md w-full">
           <div className="relative w-full">
             <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
             <input
@@ -47,27 +47,28 @@ export function RumahPotongTab({
           </div>
         </div>
 
-        <div className="flex items-center gap-2 flex-wrap">
+        {/* Filter dropdown sejajar ke samping */}
+        <div className="grid grid-cols-2 gap-2 w-full sm:w-auto sm:flex sm:items-center">
           <select
             value={filterJenis}
             onChange={(e) => setFilterJenis(e.target.value)}
-            className="h-10 px-3.5 text-xs rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 font-bold text-slate-700 dark:text-slate-200 focus:outline-none focus:border-purple-600"
+            className="w-full sm:w-auto h-10 px-3 text-xs rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 font-bold text-slate-700 dark:text-slate-200 focus:outline-none focus:border-purple-600 cursor-pointer"
           >
             <option value="ALL">Semua Jenis Unit</option>
-            <option value="RPH">RPH (Rumah Potong Hewan)</option>
-            <option value="TPU">TPU (Tempat Pemotongan Unggas)</option>
-            <option value="RPU">RPU (Rumah Potong Unggas)</option>
-            <option value="TPH">TPH (Tempat Pemotongan Hewan)</option>
+            <option value="RPH">RPH</option>
+            <option value="TPU">TPU</option>
+            <option value="RPU">RPU</option>
+            <option value="TPH">TPH</option>
           </select>
 
           <select
             value={filterHalal}
             onChange={(e) => setFilterHalal(e.target.value)}
-            className="h-10 px-3.5 text-xs rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 font-bold text-slate-700 dark:text-slate-200 focus:outline-none focus:border-purple-600"
+            className="w-full sm:w-auto h-10 px-3 text-xs rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 font-bold text-slate-700 dark:text-slate-200 focus:outline-none focus:border-purple-600 cursor-pointer"
           >
-            <option value="ALL">Semua Status Halal</option>
-            <option value="Sudah">Sudah Bersertifikat</option>
-            <option value="Belum">Belum Bersertifikat</option>
+            <option value="ALL">Semua Halal</option>
+            <option value="Sudah">Bersertifikat</option>
+            <option value="Belum">Belum Halal</option>
           </select>
         </div>
       </div>

@@ -856,7 +856,7 @@ export default function PencatatanPemotonganForm({
         </div>
 
         {/* ── TOMBOL AKSI SIMPAN ── */}
-        <div className="flex flex-wrap items-center justify-end gap-3 pt-2 border-t border-purple-100 dark:border-slate-800">
+        <div className="flex flex-wrap items-center justify-center gap-3 pt-2 border-t border-purple-100 dark:border-slate-800">
           {editingItem && (
             <button
               type="button"
@@ -870,7 +870,7 @@ export default function PencatatanPemotonganForm({
           <button
             type="submit"
             disabled={isSubmitting || isCompressingAntemortem || isCompressingPostmortem}
-            className="h-11 px-6 rounded-2xl bg-purple-600 hover:bg-purple-700 disabled:opacity-50 text-white font-extrabold text-xs sm:text-sm flex items-center gap-2 shadow-xs transition-all cursor-pointer"
+            className="h-11 px-8 rounded-2xl bg-purple-600 hover:bg-purple-700 disabled:opacity-50 text-white font-extrabold text-xs sm:text-sm flex items-center justify-center gap-2 shadow-xs transition-all cursor-pointer"
           >
             {isSubmitting ? (
               <RotateCcw size={16} className="animate-spin" />

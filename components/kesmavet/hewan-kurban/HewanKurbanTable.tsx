@@ -250,127 +250,121 @@ export default function HewanKurbanTable({
   return (
     <div className="space-y-4">
       {/* ── KARTU STATISTIK (Responsive Grid) ── */}
-      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2.5 sm:gap-3">
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2 sm:gap-3">
         {/* Titik Lokasi */}
-        <div className="p-3 sm:p-3.5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-2xs">
-          <span className="text-[10px] uppercase font-bold text-slate-500 dark:text-slate-400 block truncate">
+        <div className="p-3 sm:p-3.5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 shadow-2xs">
+          <span className="text-[10px] sm:text-[11px] uppercase font-bold text-slate-400 block truncate">
             Titik Lokasi
           </span>
-          <span className="text-lg sm:text-2xl font-black text-slate-900 dark:text-white">
+          <span className="text-lg sm:text-2xl font-black text-slate-800 dark:text-slate-100 mt-0.5 block">
             {stats.totalLokasi.toLocaleString('id-ID')}{' '}
-            <span className="text-[11px] font-semibold text-slate-400">titik</span>
+            <span className="text-[10px] sm:text-xs font-semibold text-slate-400">titik</span>
           </span>
         </div>
 
         {/* Sapi */}
-        <div className="p-3 sm:p-3.5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-2xs">
-          <span className="text-[10px] uppercase font-bold text-blue-600 dark:text-blue-400 block truncate">
+        <div className="p-3 sm:p-3.5 rounded-2xl bg-white dark:bg-slate-900 border border-blue-200/80 dark:border-blue-900/40 shadow-2xs">
+          <span className="text-[10px] sm:text-[11px] uppercase font-bold text-blue-600 dark:text-blue-400 block truncate">
             Total Sapi
           </span>
-          <span className="text-lg sm:text-2xl font-black text-blue-600 dark:text-blue-400">
+          <span className="text-lg sm:text-2xl font-black text-blue-600 dark:text-blue-400 mt-0.5 block">
             {stats.totalSapi.toLocaleString('id-ID')}{' '}
-            <span className="text-[11px] font-semibold text-blue-400">ekor</span>
+            <span className="text-[10px] sm:text-xs font-semibold text-blue-400">ekor</span>
           </span>
         </div>
 
         {/* Kambing */}
-        <div className="p-3 sm:p-3.5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-2xs">
-          <span className="text-[10px] uppercase font-bold text-emerald-600 dark:text-emerald-400 block truncate">
+        <div className="p-3 sm:p-3.5 rounded-2xl bg-white dark:bg-slate-900 border border-emerald-200/80 dark:border-emerald-900/40 shadow-2xs">
+          <span className="text-[10px] sm:text-[11px] uppercase font-bold text-emerald-600 dark:text-emerald-400 block truncate">
             Total Kambing
           </span>
-          <span className="text-lg sm:text-2xl font-black text-emerald-600 dark:text-emerald-400">
+          <span className="text-lg sm:text-2xl font-black text-emerald-600 dark:text-emerald-400 mt-0.5 block">
             {stats.totalKambing.toLocaleString('id-ID')}{' '}
-            <span className="text-[11px] font-semibold text-emerald-400">ekor</span>
+            <span className="text-[10px] sm:text-xs font-semibold text-emerald-400">ekor</span>
           </span>
         </div>
 
         {/* Domba */}
-        <div className="p-3 sm:p-3.5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-2xs">
-          <span className="text-[10px] uppercase font-bold text-amber-600 dark:text-amber-400 block truncate">
+        <div className="p-3 sm:p-3.5 rounded-2xl bg-white dark:bg-slate-900 border border-amber-200/80 dark:border-amber-900/40 shadow-2xs">
+          <span className="text-[10px] sm:text-[11px] uppercase font-bold text-amber-600 dark:text-amber-400 block truncate">
             Total Domba
           </span>
-          <span className="text-lg sm:text-2xl font-black text-amber-600 dark:text-amber-400">
+          <span className="text-lg sm:text-2xl font-black text-amber-600 dark:text-amber-400 mt-0.5 block">
             {stats.totalDomba.toLocaleString('id-ID')}{' '}
-            <span className="text-[11px] font-semibold text-amber-400">ekor</span>
+            <span className="text-[10px] sm:text-xs font-semibold text-amber-400">ekor</span>
           </span>
         </div>
 
         {/* Kerbau */}
-        <div className="p-3 sm:p-3.5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-2xs">
-          <span className="text-[10px] uppercase font-bold text-rose-600 dark:text-rose-400 block truncate">
+        <div className="p-3 sm:p-3.5 rounded-2xl bg-white dark:bg-slate-900 border border-rose-200/80 dark:border-rose-900/40 shadow-2xs">
+          <span className="text-[10px] sm:text-[11px] uppercase font-bold text-rose-600 dark:text-rose-400 block truncate">
             Total Kerbau
           </span>
-          <span className="text-lg sm:text-2xl font-black text-rose-600 dark:text-rose-400">
+          <span className="text-lg sm:text-2xl font-black text-rose-600 dark:text-rose-400 mt-0.5 block">
             {stats.totalKerbau.toLocaleString('id-ID')}{' '}
-            <span className="text-[11px] font-semibold text-rose-400">ekor</span>
+            <span className="text-[10px] sm:text-xs font-semibold text-rose-400">ekor</span>
           </span>
         </div>
 
         {/* Grand Total */}
-        <div className="p-3 sm:p-3.5 rounded-2xl bg-purple-50 dark:bg-purple-950/40 border border-purple-200 dark:border-purple-800/80 shadow-2xs col-span-2 sm:col-span-1">
-          <span className="text-[10px] uppercase font-bold text-purple-700 dark:text-purple-300 block truncate">
+        <div className="p-3 sm:p-3.5 rounded-2xl bg-purple-50/70 dark:bg-purple-950/40 border border-purple-200 dark:border-purple-800/80 shadow-2xs">
+          <span className="text-[10px] sm:text-[11px] uppercase font-bold text-purple-700 dark:text-purple-300 block truncate">
             Grand Total
           </span>
-          <span className="text-lg sm:text-2xl font-black text-purple-700 dark:text-purple-300">
+          <span className="text-lg sm:text-2xl font-black text-purple-700 dark:text-purple-300 mt-0.5 block">
             {stats.totalAll.toLocaleString('id-ID')}{' '}
-            <span className="text-[11px] font-semibold text-purple-500">ekor</span>
+            <span className="text-[10px] sm:text-xs font-semibold text-purple-500">ekor</span>
           </span>
         </div>
       </div>
 
       {/* ── TOOLBAR FILTER & SEARCH ── */}
-      <div className="p-3.5 sm:p-4 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-2xs flex flex-col md:flex-row md:items-center justify-between gap-3">
-        <div className="flex flex-col sm:flex-row flex-wrap items-stretch sm:items-center gap-2.5 flex-1">
+      <div className="p-3.5 sm:p-4 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-2xs flex flex-col gap-3">
+        {/* Baris 1: Search & Filter Dropdowns */}
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5">
           {/* Search Box */}
-          <div className="relative w-full sm:w-auto sm:min-w-[220px] flex-1">
+          <div className="relative flex-1">
             <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
             <input
               type="text"
               placeholder="Cari lokasi, desa, masjid..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-9 pr-3 py-2 text-base sm:text-xs min-h-[40px] sm:min-h-0 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-100 focus:outline-hidden focus:ring-2 focus:ring-purple-500/30 focus:border-purple-500 transition-all"
+              className="w-full pl-9 pr-3 h-10 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-xs font-medium text-slate-800 dark:text-slate-100 outline-none focus:border-purple-600 transition-all"
             />
           </div>
 
-          <div className="flex items-center gap-2 w-full sm:w-auto">
-            {/* Filter Tahun */}
-            <div className="flex items-center gap-1.5 flex-1 sm:flex-initial">
-              <span className="text-xs font-medium text-slate-500 dark:text-slate-400 shrink-0">Tahun:</span>
-              <select
-                value={selectedTahun}
-                onChange={(e) => setSelectedTahun(Number(e.target.value))}
-                className="w-full sm:w-auto px-2.5 py-2 sm:py-1.5 text-xs font-semibold min-h-[40px] sm:min-h-0 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-100 focus:outline-hidden focus:ring-2 focus:ring-purple-500/30"
-              >
-                {[2027, 2026, 2025, 2024, 2023].map((yr) => (
-                  <option key={yr} value={yr}>
-                    {yr}
-                  </option>
-                ))}
-              </select>
-            </div>
+          {/* Filter Dropdown: Tahun & Kecamatan */}
+          <div className="grid grid-cols-2 gap-2 w-full sm:w-auto">
+            <select
+              value={selectedTahun}
+              onChange={(e) => setSelectedTahun(Number(e.target.value))}
+              className="w-full sm:w-32 h-10 px-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-xs font-bold text-slate-800 dark:text-slate-200 outline-none focus:border-purple-600 cursor-pointer"
+            >
+              {[2027, 2026, 2025, 2024, 2023].map((yr) => (
+                <option key={yr} value={yr}>
+                  Tahun {yr}
+                </option>
+              ))}
+            </select>
 
-            {/* Filter Kecamatan */}
-            <div className="flex items-center gap-1.5 flex-1 sm:flex-initial">
-              <span className="text-xs font-medium text-slate-500 dark:text-slate-400 shrink-0">Kec:</span>
-              <select
-                value={selectedKecamatan}
-                onChange={(e) => setSelectedKecamatan(e.target.value)}
-                className="w-full sm:w-auto px-2.5 py-2 sm:py-1.5 text-xs font-semibold min-h-[40px] sm:min-h-0 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-100 focus:outline-hidden focus:ring-2 focus:ring-purple-500/30"
-              >
-                <option value="all">Semua Kecamatan</option>
-                {KECAMATAN_KEBUMEN.map((kec) => (
-                  <option key={kec} value={kec}>
-                    {kec}
-                  </option>
-                ))}
-              </select>
-            </div>
+            <select
+              value={selectedKecamatan}
+              onChange={(e) => setSelectedKecamatan(e.target.value)}
+              className="w-full sm:w-44 h-10 px-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-xs font-bold text-slate-800 dark:text-slate-200 outline-none focus:border-purple-600 cursor-pointer"
+            >
+              <option value="all">Semua Kecamatan</option>
+              {KECAMATAN_KEBUMEN.map((kec) => (
+                <option key={kec} value={kec}>
+                  Kec. {kec}
+                </option>
+              ))}
+            </select>
           </div>
         </div>
 
-        {/* Tombol Aksi Kanan */}
-        <div className="flex flex-wrap items-center gap-2 justify-end">
+        {/* Baris 2: Tombol Aksi (Refresh, Template, Upload, Unduh Excel) */}
+        <div className="flex items-center gap-2 w-full justify-between pt-2.5 border-t border-slate-100 dark:border-slate-800">
           {/* Input File Tersembunyi untuk Impor Excel */}
           <input
             type="file"
@@ -384,47 +378,51 @@ export default function HewanKurbanTable({
             type="button"
             onClick={onRefresh}
             title="Muat ulang data"
-            className="p-2.5 sm:p-2 rounded-xl border border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-300 transition-colors min-h-[40px] min-w-[40px] flex items-center justify-center cursor-pointer"
+            className="w-10 h-10 rounded-xl border border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-300 transition-colors flex items-center justify-center cursor-pointer shrink-0"
           >
-            <RefreshCw size={14} className={isLoading ? 'animate-spin' : ''} />
+            <RefreshCw size={15} className={isLoading ? 'animate-spin' : ''} />
           </button>
 
-          {/* Unduh Template Excel */}
-          <button
-            type="button"
-            onClick={handleDownloadTemplate}
-            title="Unduh Format Template Excel untuk Pengisian Data"
-            className="px-3 py-2 text-xs font-bold rounded-xl border border-purple-200 dark:border-purple-800 bg-purple-50 hover:bg-purple-100 dark:bg-purple-950/40 dark:hover:bg-purple-900/50 text-purple-700 dark:text-purple-300 transition-all flex items-center justify-center gap-1.5 min-h-[40px] cursor-pointer"
-          >
-            <Download size={14} />
-            <span className="hidden sm:inline">Unduh Template</span>
-            <span className="sm:hidden">Template</span>
-          </button>
-
-          {/* Unggah / Impor Excel (Khusus Akun dengan Hak Akses Edit) */}
-          {canEdit && (
+          <div className="flex items-center gap-2 flex-1 justify-end">
+            {/* Unduh Template Excel */}
             <button
               type="button"
-              disabled={isUploading}
-              onClick={() => fileInputRef.current?.click()}
-              title="Unggah file Excel untuk menambah data pemotongan kurban"
-              className="px-3.5 py-2 text-xs font-bold rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white shadow-xs transition-all flex items-center justify-center gap-1.5 min-h-[40px] cursor-pointer disabled:opacity-50"
+              onClick={handleDownloadTemplate}
+              title="Unduh Format Template Excel untuk Pengisian Data"
+              className="flex-1 sm:flex-none h-10 px-3 rounded-xl border border-purple-200 dark:border-purple-800 bg-purple-50 hover:bg-purple-100 dark:bg-purple-950/40 dark:hover:bg-purple-900/50 text-purple-700 dark:text-purple-300 text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer whitespace-nowrap"
             >
-              <Upload size={14} className={isUploading ? 'animate-bounce' : ''} />
-              <span>{isUploading ? 'Mengimpor...' : 'Upload Excel'}</span>
+              <Download size={14} />
+              <span className="hidden sm:inline">Unduh Template</span>
+              <span className="sm:hidden">Template</span>
             </button>
-          )}
 
-          {/* Unduh / Export Rekap Excel */}
-          <button
-            type="button"
-            onClick={handleExportExcel}
-            title="Unduh Rekap Data Kurban ke Excel"
-            className="flex-1 sm:flex-initial px-3.5 py-2 text-xs font-bold rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white shadow-xs transition-all flex items-center justify-center gap-1.5 min-h-[40px] cursor-pointer"
-          >
-            <FileSpreadsheet size={14} />
-            <span>Unduh Excel</span>
-          </button>
+            {/* Unggah / Impor Excel (Khusus Akun dengan Hak Akses Edit) */}
+            {canEdit && (
+              <button
+                type="button"
+                disabled={isUploading}
+                onClick={() => fileInputRef.current?.click()}
+                title="Unggah file Excel untuk menambah data pemotongan kurban"
+                className="flex-1 sm:flex-none h-10 px-3.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold shadow-xs transition-all flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-50 whitespace-nowrap"
+              >
+                <Upload size={14} className={isUploading ? 'animate-bounce' : ''} />
+                <span className="hidden sm:inline">{isUploading ? 'Mengimpor...' : 'Upload Excel'}</span>
+                <span className="sm:hidden">Upload</span>
+              </button>
+            )}
+
+            {/* Unduh / Export Rekap Excel */}
+            <button
+              type="button"
+              onClick={handleExportExcel}
+              title="Unduh Rekap Data Kurban ke Excel"
+              className="flex-1 sm:flex-none h-10 px-3.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold shadow-xs transition-all flex items-center justify-center gap-1.5 cursor-pointer whitespace-nowrap"
+            >
+              <FileSpreadsheet size={14} />
+              <span className="hidden sm:inline">Unduh Excel</span>
+              <span className="sm:hidden">Excel</span>
+            </button>
+          </div>
         </div>
       </div>
 

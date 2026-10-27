@@ -80,21 +80,28 @@ export default function HewanKurbanPage() {
 
   return (
     <div className="min-h-screen bg-slate-50/50 dark:bg-slate-950 pb-16">
-      {/* ── HEADER TOP APP BAR ── */}
-      <header className="border-b border-purple-200/80 dark:border-purple-900/50 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md sticky top-0 z-30 shadow-xs">
-        <div className="max-w-7xl mx-auto px-3.5 sm:px-6 lg:px-8 py-3 sm:py-3.5 flex items-center justify-between gap-2.5">
-          <div className="flex items-center gap-2.5 sm:gap-3 min-w-0">
+      {/* ── TOP HEADER (Tema Ungu Khas Kesmavet) ── */}
+      <header className="border-b border-purple-100 dark:border-slate-800 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md sticky top-0 z-30 shadow-xs">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-5 min-h-[80px] sm:min-h-[88px] flex items-center justify-between gap-3">
+          <div className="flex items-center gap-3 min-w-0 flex-1">
             <Link
               href="/kesmavet"
-              className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-purple-600 hover:bg-purple-700 text-white flex items-center justify-center transition-all shadow-xs shrink-0 cursor-pointer"
+              className="min-h-touch min-w-touch w-11 h-11 rounded-2xl bg-purple-600 hover:bg-purple-700 text-white flex items-center justify-center transition-all shadow-xs shrink-0"
               aria-label="Kembali ke Modul Kesmavet"
             >
-              <ArrowLeft size={18} />
+              <ArrowLeft size={18} strokeWidth={2.5} />
             </Link>
+
             <div className="min-w-0">
-              <h1 className="text-sm sm:text-xl font-black text-slate-900 dark:text-white truncate flex items-center gap-1.5 sm:gap-2">
-                <Beef size={18} className="text-purple-600 dark:text-purple-400 shrink-0" />
-                <span className="truncate">Pemotongan Hewan Kurban</span>
+              <div className="flex items-center gap-2 mb-0.5">
+                <Link href="/kesmavet" className="text-xs font-semibold text-slate-500 hover:text-purple-700 transition-colors truncate">
+                  Kesmavet
+                </Link>
+                <span className="text-slate-300">/</span>
+                <span className="text-xs font-bold text-purple-700 whitespace-nowrap">Hewan Kurban</span>
+              </div>
+              <h1 className="text-base sm:text-xl font-extrabold text-slate-900 dark:text-white tracking-tight leading-tight truncate">
+                Pemotongan Hewan Kurban
               </h1>
             </div>
           </div>

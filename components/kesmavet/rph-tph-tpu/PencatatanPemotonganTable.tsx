@@ -247,26 +247,21 @@ export default function PencatatanPemotonganTable({
               type="button"
               onClick={handleExportExcel}
               className="h-10 px-4 rounded-xl border border-purple-200 dark:border-purple-800 bg-purple-50 hover:bg-purple-100 dark:bg-purple-950/40 text-purple-900 dark:text-purple-300 text-xs font-bold flex items-center gap-1.5 transition-all shadow-xs cursor-pointer"
-              title="Download Data ke Format Tabel Excel Rapi"
+              title="Download Data ke Format Tabel Excel"
             >
               <Download size={15} strokeWidth={2.5} />
-              <span>Export Excel Rapi</span>
+              <span>Export Excel</span>
             </button>
           </div>
         </div>
 
         {/* Baris Filter Dropdown */}
-        <div className="flex flex-wrap items-center gap-2.5 pt-2 border-t border-slate-100 dark:border-slate-800">
-          <div className="flex items-center gap-1.5 text-xs font-bold text-slate-500">
-            <Filter size={14} />
-            <span>Filter:</span>
-          </div>
-
+        <div className="grid grid-cols-2 sm:flex sm:flex-wrap sm:items-center gap-2 pt-2.5 border-t border-slate-100 dark:border-slate-800">
           {/* Tahun */}
           <select
             value={selectedTahun}
             onChange={(e) => setSelectedTahun(e.target.value)}
-            className="h-9 px-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs font-bold text-slate-700 dark:text-slate-300 outline-none focus:border-purple-600"
+            className="w-full sm:w-auto h-10 px-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-xs font-bold text-slate-700 dark:text-slate-300 outline-none focus:border-purple-600 cursor-pointer"
           >
             <option value="ALL">Semua Tahun</option>
             {yearOptions.map((y) => (
@@ -280,7 +275,7 @@ export default function PencatatanPemotonganTable({
           <select
             value={selectedBulan}
             onChange={(e) => setSelectedBulan(e.target.value)}
-            className="h-9 px-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs font-bold text-slate-700 dark:text-slate-300 outline-none focus:border-purple-600"
+            className="w-full sm:w-auto h-10 px-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-xs font-bold text-slate-700 dark:text-slate-300 outline-none focus:border-purple-600 cursor-pointer"
           >
             <option value="ALL">Semua Bulan</option>
             {BULAN_NAMES.map((b, idx) => (
@@ -294,7 +289,7 @@ export default function PencatatanPemotonganTable({
           <select
             value={selectedTempat}
             onChange={(e) => setSelectedTempat(e.target.value)}
-            className="h-9 px-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs font-bold text-slate-700 dark:text-slate-300 outline-none focus:border-purple-600"
+            className="col-span-2 sm:col-span-1 w-full sm:w-auto h-10 px-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-xs font-bold text-slate-700 dark:text-slate-300 outline-none focus:border-purple-600 cursor-pointer"
           >
             <option value="ALL">Semua Tempat Pemotongan</option>
             {TEMPAT_PEMOTONGAN_OPTIONS.map((t) => (
@@ -313,7 +308,7 @@ export default function PencatatanPemotonganTable({
                 setSelectedTempat('ALL');
                 setSearchQuery('');
               }}
-              className="h-9 px-2.5 rounded-xl text-xs font-bold text-purple-700 hover:bg-purple-50 transition-colors cursor-pointer"
+              className="col-span-2 sm:col-span-1 h-10 px-3 rounded-xl text-xs font-bold text-purple-700 hover:bg-purple-50 dark:hover:bg-purple-950/40 transition-colors cursor-pointer flex items-center justify-center sm:justify-start"
             >
               Reset Filter
             </button>
