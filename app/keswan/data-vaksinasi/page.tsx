@@ -33,11 +33,13 @@ import VaksinasiApbdTab from '@/components/keswan/data-vaksinasi/VaksinasiApbdTa
 import VaksinasiModals from '@/components/keswan/data-vaksinasi/VaksinasiModals';
 import { UniversalAuditModal } from '@/components/common/UniversalAuditModal';
 import { useUserAreaRestriction } from '@/hooks/useUserAreaRestriction';
+import { useMasterSystemLock } from '@/hooks/useMasterSystemLock';
 import { checkDailyDeadline } from '@/lib/deadlineCheck';
 
 export default function DataVaksinasiPMKPage() {
   const { isReady, canCreate, canEdit } = usePageAuth('keswan', 'data-vaksinasi');
   const { isAdmin, isPuskeswanAllowed } = useUserAreaRestriction();
+  const { isMasterUnlocked } = useMasterSystemLock();
 
   // Posisi default: Matriks Input Harian (Otomatis bulan dan tahun saat ini)
   const [activeTab, setActiveTab] = useState<'harian' | 'bulanan' | 'apbd'>('harian');
@@ -203,7 +205,7 @@ export default function DataVaksinasiPMKPage() {
         showToast('error', `Akses Ditolak: Anda tidak memiliki wewenang untuk ${puskeswan}`);
         return;
       }
-      const deadline = checkDailyDeadline(tanggal, false);
+      const deadline = checkDailyDeadline(tanggal, false, isMasterUnlocked);
       if (deadline.isLocked) {
         showToast('error', deadline.reason || `Pengisian tanggal ${tanggal} telah dikunci (Batas waktu 3 hari berakhir). Hubungi Administrator.`);
         return;
@@ -224,7 +226,7 @@ export default function DataVaksinasiPMKPage() {
         setEditingHarian(null);
         return;
       }
-      const deadline = checkDailyDeadline(tanggal, false);
+      const deadline = checkDailyDeadline(tanggal, false, isMasterUnlocked);
       if (deadline.isLocked) {
         showToast('error', deadline.reason || `Pengisian tanggal ${tanggal} telah dikunci.`);
         setEditingHarian(null);
@@ -724,6 +726,7 @@ export default function DataVaksinasiPMKPage() {
             setFormHarianManual={setFormHarianManual}
             setModalHarianManual={setModalHarianManual}
             fetchAll={fetchAll}
+            isMasterUnlocked={isMasterUnlocked}
             onShowHistory={(row) => {
               setAuditTarget(row);
               setShowAuditModal(true);

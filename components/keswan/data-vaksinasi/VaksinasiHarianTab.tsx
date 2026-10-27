@@ -26,6 +26,7 @@ interface VaksinasiHarianTabProps {
   setModalHarianManual?: (show: boolean) => void;
   fetchAll: (yr: number) => void;
   onShowHistory?: (row: any) => void;
+  isMasterUnlocked?: boolean;
 }
 
 export default function VaksinasiHarianTab({
@@ -47,6 +48,7 @@ export default function VaksinasiHarianTab({
   harianInputRef,
   fetchAll,
   onShowHistory,
+  isMasterUnlocked = false,
 }: VaksinasiHarianTabProps) {
   const { isAdmin, isPuskeswanAllowed } = useUserAreaRestriction();
   const currentYear = useMemo(() => new Date().getFullYear(), []);
@@ -106,6 +108,16 @@ export default function VaksinasiHarianTab({
           );
         })}
       </div>
+
+      {/* Banner Notifikasi Buka Gembok Darurat */}
+      {isMasterUnlocked && (
+        <div className="flex items-center gap-2.5 px-4 py-3 rounded-2xl bg-amber-500/10 border border-amber-300 dark:border-amber-800 text-amber-900 dark:text-amber-200 text-xs font-bold animate-in fade-in duration-200 shadow-xs">
+          <span className="text-base shrink-0">🔓</span>
+          <span>
+            <strong>Mode Buka Gembok Darurat Aktif:</strong> Seluruh batas waktu tanggal lampau sedang dibuka oleh Administrator. Petugas dapat mengedit tanggal-tanggal lampau.
+          </span>
+        </div>
+      )}
 
       {/* Matrix Table with Click-to-Edit */}
       <div className="border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm rounded-2xl overflow-hidden -mx-4 sm:mx-0">
@@ -203,7 +215,7 @@ export default function VaksinasiHarianTab({
                       }
 
                       const isAllowed = isAdmin || isPuskeswanAllowed(row.puskeswan);
-                      const deadline = checkDailyDeadline(dateStr, isAdmin);
+                      const deadline = checkDailyDeadline(dateStr, isAdmin, isMasterUnlocked);
                       const isLocked = !isAdmin && deadline.isLocked;
                       const isCellEditable = isAllowed && !isLocked;
 
