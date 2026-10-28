@@ -18,7 +18,7 @@ import { getAuthSession } from '@/lib/auth';
 interface LandingHeaderProps {
   isDark: boolean;
   onToggleTheme: () => void;
-  onOpenLogin: () => void;
+  onOpenLogin?: () => void;
   mobileMenuOpen: boolean;
   setMobileMenuOpen: (open: boolean) => void;
 }
@@ -41,7 +41,7 @@ export default function LandingHeader({
     if (current) {
       window.location.href = '/beranda';
     } else {
-      onOpenLogin();
+      window.location.href = '/login';
     }
   };
 

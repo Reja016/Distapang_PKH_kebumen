@@ -1,9 +1,7 @@
 'use client';
 
-import { useState, useEffect, useMemo, useRef } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
-import { saveAuthSession, getAuthSession } from '@/lib/auth';
-import { CloudflareTurnstileRef } from '@/components/common/CloudflareTurnstile';
 
 import {
   PopulasiItem,
@@ -21,7 +19,6 @@ import LandingFacilitiesSection from '@/components/landing/LandingFacilitiesSect
 import LandingChartsSection from '@/components/landing/LandingChartsSection';
 import LandingServicesSection from '@/components/landing/LandingServicesSection';
 import { LandingFooter } from '@/components/landing/LandingFooter';
-import { LandingLoginModal } from '@/components/landing/LandingLoginModal';
 import { BeritaItem } from '@/app/admin/berita/page';
 
 export default function LandingPage() {
@@ -42,8 +39,7 @@ export default function LandingPage() {
   const [periodePopulasi, setPeriodePopulasi] = useState<any>(null);
   const [isDataLoading, setIsDataLoading] = useState(true);
 
-  // State Auth Modal & Navigation
-  const [showLoginModal, setShowLoginModal] = useState(false);
+  // State Navigation
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [showBackToTop, setShowBackToTop] = useState(false);
 
@@ -94,15 +90,6 @@ export default function LandingPage() {
   const [newsList, setNewsList] = useState<BeritaItem[]>([]);
   const [isNewsLoading, setIsNewsLoading] = useState(true);
   const [selectedDetailNews, setSelectedDetailNews] = useState<BeritaItem | null>(null);
-
-  // Form login
-  const [loginId, setLoginId] = useState('');
-  const [password, setPassword] = useState('');
-  const [error, setError] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
-  const [showPassword, setShowPassword] = useState(false);
-  const [captchaToken, setCaptchaToken] = useState<string | null>(null);
-  const turnstileRef = useRef<CloudflareTurnstileRef>(null);
 
   // ── FETCH LANGSUNG 100% DATA REAL DARI DATABASE MYSQL ──
   useEffect(() => {
@@ -158,43 +145,6 @@ export default function LandingPage() {
     loadNewsData();
   }, []);
 
-  // Handler Login Petugas
-  const handleLogin = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setError('');
-
-    if (!captchaToken) {
-      setError('Silakan selesaikan verifikasi keamanan Turnstile terlebih dahulu.');
-      return;
-    }
-
-    setIsLoading(true);
-
-    try {
-      const res = await fetch('/api/auth/login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ nip_username: loginId, password, captcha_token: captchaToken }),
-      });
-
-      const json = await res.json();
-
-      if (res.ok && json.success && json.user) {
-        saveAuthSession(json.user);
-        window.location.href = '/beranda';
-        return;
-      }
-
-      setError(json?.error || 'Akses ditolak. Periksa kembali ID Petugas/NIP atau kata sandi Anda.');
-      turnstileRef.current?.reset();
-      setIsLoading(false);
-    } catch {
-      setError('Terjadi kendala jaringan. Silakan coba kembali.');
-      turnstileRef.current?.reset();
-      setIsLoading(false);
-    }
-  };
-
   // ── KALKULASI TOTAL STATISTIK DARI DATABASE SECARA OTOMATIS ──
   const totalFarm = useMemo(() => sebaranFarmList.reduce((sum, d) => sum + d.jumlah_farm, 0), [sebaranFarmList]);
 
@@ -234,7 +184,6 @@ export default function LandingPage() {
       <LandingHeader
         isDark={isDark}
         onToggleTheme={toggleTheme}
-        onOpenLogin={() => setShowLoginModal(true)}
         mobileMenuOpen={mobileMenuOpen}
         setMobileMenuOpen={setMobileMenuOpen}
       />
@@ -324,26 +273,7 @@ export default function LandingPage() {
       {/* 3. FOOTER */}
       <LandingFooter />
 
-      {/* 4. MODAL LOGIN PETUGAS */}
-      <LandingLoginModal
-        showLoginModal={showLoginModal}
-        setShowLoginModal={setShowLoginModal}
-        loginId={loginId}
-        setLoginId={setLoginId}
-        password={password}
-        setPassword={setPassword}
-        showPassword={showPassword}
-        setShowPassword={setShowPassword}
-        error={error}
-        isLoading={isLoading}
-        captchaToken={captchaToken}
-        setCaptchaToken={setCaptchaToken}
-        turnstileRef={turnstileRef}
-        isDark={isDark}
-        handleLogin={handleLogin}
-      />
-
-      {/* 5. FLOATING BACK TO TOP BUTTON (Mobile & Desktop) */}
+      {/* 4. FLOATING BACK TO TOP BUTTON (Mobile & Desktop) */}
       {showBackToTop && (
         <button
           onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}

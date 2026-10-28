@@ -403,10 +403,39 @@ html.dark div[style*="background-color: rgb(243, 244, 246)"] {
 }
 
 /* Headers & App Bar */
-html.dark header,
-body.dark header {
+html.dark:not(:has(.login-isolated-clean)) header,
+body.dark:not(:has(.login-isolated-clean)) header {
   background-color: #0f172a !important;
   border-color: #1e293b !important;
+}
+
+/* ── ISOLASI HALAMAN LOGIN AGAR SELALU BERSIH & SERAGAM ── */
+.login-isolated-clean header {
+  background-color: transparent !important;
+  border-color: transparent !important;
+}
+.login-isolated-clean .login-card {
+  background-color: rgba(255, 255, 255, 0.95) !important;
+  color: #0f172a !important;
+  border-color: rgba(255, 255, 255, 0.7) !important;
+}
+.login-isolated-clean .login-card h1,
+.login-isolated-clean .login-card h2,
+.login-isolated-clean .login-card label {
+  color: #0f172a !important;
+}
+.login-isolated-clean .login-card p {
+  color: #64748b !important;
+}
+.login-isolated-clean .login-card input {
+  background-color: rgba(248, 250, 252, 0.95) !important;
+  color: #0f172a !important;
+  border-color: #e2e8f0 !important;
+}
+.login-isolated-clean .login-back-btn {
+  background-color: rgba(255, 255, 255, 0.92) !important;
+  color: #1e293b !important;
+  border-color: rgba(255, 255, 255, 0.8) !important;
 }
 
 /* Tables, Thead, Tfoot, Td, Tr */
