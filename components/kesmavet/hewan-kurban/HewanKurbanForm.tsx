@@ -33,6 +33,29 @@ export default function HewanKurbanForm({
 }: HewanKurbanFormProps) {
   const [formData, setFormData] = useState<HewanKurbanFormData>(INITIAL_HEWAN_KURBAN_FORM);
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
+  const [kecamatanList, setKecamatanList] = useState<string[]>(KECAMATAN_KEBUMEN);
+  const [desaMap, setDesaMap] = useState<Record<string, string[]>>(DESA_KEBUMEN_MAP);
+
+  // Ambil master wilayah dari database (tabel desa/kecamatan)
+  useEffect(() => {
+    const fetchMasterWilayah = async () => {
+      try {
+        const res = await fetch('/api/master-wilayah');
+        const json = await res.json();
+        if (json.success) {
+          if (Array.isArray(json.kecamatan) && json.kecamatan.length > 0) {
+            setKecamatanList(json.kecamatan);
+          }
+          if (json.desaMap && Object.keys(json.desaMap).length > 0) {
+            setDesaMap(json.desaMap);
+          }
+        }
+      } catch (err) {
+        console.error('Gagal mengambil master wilayah dari database:', err);
+      }
+    };
+    fetchMasterWilayah();
+  }, []);
 
   // Mode pengisian per komoditas: 'detail' (Jantan & Betina) atau 'total_only' (Langsung Total)
   const [sapiMode, setSapiMode] = useState<'detail' | 'total_only'>('detail');
@@ -103,8 +126,8 @@ export default function HewanKurbanForm({
   // Options desa sesuai kecamatan terpilih
   const availableDesa = useMemo(() => {
     if (!formData.kecamatan) return [];
-    return DESA_KEBUMEN_MAP[formData.kecamatan] || [];
-  }, [formData.kecamatan]);
+    return desaMap[formData.kecamatan] || DESA_KEBUMEN_MAP[formData.kecamatan] || [];
+  }, [formData.kecamatan, desaMap]);
 
   // Handler perubahan angka
   const handleAnimalChange = (
@@ -328,7 +351,7 @@ export default function HewanKurbanForm({
                 className="w-full px-3 py-2 text-base sm:text-sm min-h-[42px] sm:min-h-0 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-100 focus:outline-hidden focus:ring-2 focus:ring-purple-500/30 focus:border-purple-500 transition-all"
               >
                 <option value="">Pilih Kecamatan...</option>
-                {KECAMATAN_KEBUMEN.map((kec) => (
+                {kecamatanList.map((kec) => (
                   <option key={kec} value={kec}>
                     {kec}
                   </option>
@@ -341,22 +364,22 @@ export default function HewanKurbanForm({
               <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5">
                 Desa / Kelurahan
               </label>
-              <div className="relative">
-                <input
-                  type="text"
-                  list="desa-list"
-                  placeholder={formData.kecamatan ? 'Pilih atau ketik desa...' : 'Pilih kecamatan dulu...'}
-                  value={formData.desa}
-                  onChange={(e) => setFormData({ ...formData, desa: e.target.value })}
-                  required
-                  className="w-full px-3 py-2 text-base sm:text-sm min-h-[42px] sm:min-h-0 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-100 focus:outline-hidden focus:ring-2 focus:ring-purple-500/30 focus:border-purple-500 transition-all"
-                />
-                <datalist id="desa-list">
-                  {availableDesa.map((d) => (
-                    <option key={d} value={d} />
-                  ))}
-                </datalist>
-              </div>
+              <select
+                value={formData.desa}
+                onChange={(e) => setFormData({ ...formData, desa: e.target.value })}
+                required
+                disabled={!formData.kecamatan}
+                className="w-full px-3 py-2 text-base sm:text-sm min-h-[42px] sm:min-h-0 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-100 focus:outline-hidden focus:ring-2 focus:ring-purple-500/30 focus:border-purple-500 transition-all disabled:opacity-50 disabled:bg-slate-100 dark:disabled:bg-slate-900 cursor-pointer disabled:cursor-not-allowed"
+              >
+                <option value="">
+                  {formData.kecamatan ? '-- Pilih Desa / Kelurahan --' : 'Pilih kecamatan dulu...'}
+                </option>
+                {availableDesa.map((d) => (
+                  <option key={d} value={d}>
+                    {d}
+                  </option>
+                ))}
+              </select>
             </div>
 
             {/* Jenis Tempat (Default: Masjid) */}

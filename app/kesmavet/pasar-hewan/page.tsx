@@ -238,6 +238,7 @@ export default function PasarHewanPage() {
         onClose={() => setShowAuditModal(false)}
         tableName="pasar_hewan_catat"
         recordId={auditTarget?.id}
+        recordData={auditTarget}
         recordName={
           auditTarget
             ? `${auditTarget.nama_pemilik} (${auditTarget.jenis_ternak}, Pasar ${auditTarget.pasar})`

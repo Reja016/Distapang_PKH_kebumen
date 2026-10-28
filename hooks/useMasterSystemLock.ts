@@ -9,7 +9,7 @@ export function useMasterSystemLock() {
   const fetchStatus = useCallback(async () => {
     try {
       setIsLoading(true);
-      const res = await fetch('/api/admin/system-lock', { cache: 'no-store' });
+      const res = await fetch('/api/system-lock', { cache: 'no-store' });
       const json = await res.json();
       if (json.success) {
         setIsMasterUnlocked(Boolean(json.isMasterUnlocked));

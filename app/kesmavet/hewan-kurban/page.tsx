@@ -151,6 +151,7 @@ export default function HewanKurbanPage() {
         submenuKey="hewan-kurban"
         tableName="hewan_kurban"
         recordId={auditTarget?.id || ''}
+        recordData={auditTarget}
         recordTitle={`Hewan Kurban: ${auditTarget?.nama_lokasi || ''} (${auditTarget?.desa || ''}, ${auditTarget?.kecamatan || ''})`}
         availableFields={AVAILABLE_FIELDS_HEWAN_KURBAN}
       />

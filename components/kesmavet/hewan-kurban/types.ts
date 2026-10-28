@@ -51,28 +51,6 @@ export const INITIAL_HEWAN_KURBAN_FORM: HewanKurbanFormData = {
   petugas_nama: '',
 };
 
-export const AVAILABLE_FIELDS_HEWAN_KURBAN = [
-  { key: 'tanggal', label: 'Tanggal Pemotongan' },
-  { key: 'kecamatan', label: 'Kecamatan' },
-  { key: 'desa', label: 'Desa / Kelurahan' },
-  { key: 'nama_lokasi', label: 'Nama Lokasi' },
-  { key: 'jenis_tempat', label: 'Jenis Tempat' },
-  { key: 'sapi_jantan', label: 'Sapi Jantan' },
-  { key: 'sapi_betina', label: 'Sapi Betina' },
-  { key: 'sapi_total', label: 'Total Sapi' },
-  { key: 'kambing_jantan', label: 'Kambing Jantan' },
-  { key: 'kambing_betina', label: 'Kambing Betina' },
-  { key: 'kambing_total', label: 'Total Kambing' },
-  { key: 'domba_jantan', label: 'Domba Jantan' },
-  { key: 'domba_betina', label: 'Domba Betina' },
-  { key: 'domba_total', label: 'Total Domba' },
-  { key: 'kerbau_jantan', label: 'Kerbau Jantan' },
-  { key: 'kerbau_betina', label: 'Kerbau Betina' },
-  { key: 'kerbau_total', label: 'Total Kerbau' },
-  { key: 'total_hewan', label: 'Grand Total Hewan' },
-  { key: 'keterangan', label: 'Keterangan' },
-];
-
 export const KECAMATAN_KEBUMEN = [
   'Adimulyo',
   'Alian',
@@ -100,6 +78,37 @@ export const KECAMATAN_KEBUMEN = [
   'Sadang',
   'Sempor',
   'Sruweng',
+];
+
+export const JENIS_TEMPAT_KURBAN_OPTIONS = [
+  'Masjid',
+  'Musholla',
+  'Lapangan',
+  'Sekolah / Pesantren',
+  'Instansi / Kantor',
+  'Halaman Warga / RPH',
+];
+
+export const AVAILABLE_FIELDS_HEWAN_KURBAN = [
+  { key: 'tanggal', label: 'Tanggal Pemotongan', type: 'date' },
+  { key: 'kecamatan', label: 'Kecamatan', options: KECAMATAN_KEBUMEN },
+  { key: 'desa', label: 'Desa / Kelurahan' },
+  { key: 'nama_lokasi', label: 'Nama Lokasi' },
+  { key: 'jenis_tempat', label: 'Jenis Tempat', options: JENIS_TEMPAT_KURBAN_OPTIONS },
+  { key: 'sapi_jantan', label: 'Sapi Jantan', type: 'number' },
+  { key: 'sapi_betina', label: 'Sapi Betina', type: 'number' },
+  { key: 'sapi_total', label: 'Total Sapi', type: 'number' },
+  { key: 'kambing_jantan', label: 'Kambing Jantan', type: 'number' },
+  { key: 'kambing_betina', label: 'Kambing Betina', type: 'number' },
+  { key: 'kambing_total', label: 'Total Kambing', type: 'number' },
+  { key: 'domba_jantan', label: 'Domba Jantan', type: 'number' },
+  { key: 'domba_betina', label: 'Domba Betina', type: 'number' },
+  { key: 'domba_total', label: 'Total Domba', type: 'number' },
+  { key: 'kerbau_jantan', label: 'Kerbau Jantan', type: 'number' },
+  { key: 'kerbau_betina', label: 'Kerbau Betina', type: 'number' },
+  { key: 'kerbau_total', label: 'Total Kerbau', type: 'number' },
+  { key: 'total_hewan', label: 'Grand Total Hewan', type: 'number' },
+  { key: 'keterangan', label: 'Keterangan' },
 ];
 
 export const DESA_KEBUMEN_MAP: Record<string, string[]> = {

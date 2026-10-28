@@ -64,13 +64,13 @@ export function parseRibuan(val: string | null | undefined): number {
 
 export const AVAILABLE_FIELDS_PASAR_HEWAN = [
   { key: 'tanggal', label: 'Tanggal Pelayanan', type: 'date' },
-  { key: 'pasar', label: 'Pasar Hewan (Kebumen / Gombong)' },
+  { key: 'pasar', label: 'Lokasi Pasar Hewan', options: ['Kebumen', 'Gombong'] },
   { key: 'nama_pemilik', label: 'Nama Pemilik' },
-  { key: 'jenis_ternak', label: 'Jenis Ternak' },
-  { key: 'layanan', label: 'Layanan (Timbang / Timbang + PKB / PKB)' },
-  { key: 'bb', label: 'Berat Badan (BB) dalam KG' },
+  { key: 'jenis_ternak', label: 'Jenis Ternak', options: ['Sapi', 'Kambing', 'Domba', 'Kerbau'] },
+  { key: 'layanan', label: 'Form Layanan', options: ['Timbang', 'Timbang + PKB', 'PKB'] },
+  { key: 'bb', label: 'Berat Badan (BB) dalam KG', type: 'number' },
   { key: 'warna', label: 'Warna Ternak' },
-  { key: 'hasil_pkb', label: 'Hasil PKB (Bunting / Tidak Bunting)' },
-  { key: 'sudah_bayar', label: 'Status Retribusi (1: Lunas, 0: Belum)' },
+  { key: 'hasil_pkb', label: 'Hasil Pemeriksaan PKB', options: ['Bunting', 'Tidak Bunting'] },
+  { key: 'sudah_bayar', label: 'Status Retribusi (1: Lunas, 0: Belum)', options: ['1', '0'] },
   { key: 'keterangan', label: 'Keterangan Tambahan' },
 ];
