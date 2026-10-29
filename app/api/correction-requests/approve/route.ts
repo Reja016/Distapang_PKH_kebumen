@@ -71,7 +71,16 @@ export async function POST(request: NextRequest) {
 
       let pkCol = 'id';
       if (targetTable === 'vaksinasi') pkCol = 'id_vaksinasi';
-      if (targetTable === 'kegiatan_ktt') pkCol = 'id_kegiatan';
+      if (targetTable === 'kegiatan_ktt') {
+        try {
+          const [descRows]: any = await pool.query('DESCRIBE kegiatan_ktt');
+          const fields = (descRows || []).map((f: any) => f.Field);
+          if (fields.includes('id')) pkCol = 'id';
+          else if (fields.includes('id_kegiatan')) pkCol = 'id_kegiatan';
+        } catch {
+          pkCol = 'id';
+        }
+      }
       if (targetTable === 'dropping_dinas') pkCol = 'id_dropping_dinas';
       if (targetTable === 'distribusi_obat') pkCol = 'id_distribusi';
       if (targetTable === 'penggunaan_obat_puskeswan') pkCol = 'id_penggunaan';
