@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { pool } from '@/lib/db';
 import { getSessionFromRequest } from '@/lib/session';
 import { logActivity } from '@/lib/auditLog';
+import { ensureVaksinasiSchema } from '@/lib/vaksinasiDb';
 
 const BULAN_NAMES = [
   '',
@@ -59,6 +60,7 @@ const PUSKESWAN_ID_TO_NAME: Record<number, string> = {
 // GET → ambil data harian dari tabel `vaksinasi`, difilter tahun & bulan
 export async function GET(request: Request) {
   try {
+    await ensureVaksinasiSchema();
     const { searchParams } = new URL(request.url);
     const bulan = searchParams.get('bulan');
     const tahun = searchParams.get('tahun') || String(new Date().getFullYear());
@@ -124,6 +126,7 @@ export async function GET(request: Request) {
 // POST → tambah/update input harian langsung ke tabel `vaksinasi`
 export async function POST(request: Request) {
   try {
+    await ensureVaksinasiSchema();
     const { puskeswan, tanggal, jumlah } = await request.json();
 
     if (!puskeswan || !tanggal) {

@@ -70,6 +70,7 @@ export async function POST(request: NextRequest) {
       if (targetTable === 'laporan_penyakit') targetTable = 'keswan_laporan_penyakit';
 
       let pkCol = 'id';
+      if (targetTable === 'vaksinasi') pkCol = 'id_vaksinasi';
       if (targetTable === 'kegiatan_ktt') pkCol = 'id_kegiatan';
       if (targetTable === 'dropping_dinas') pkCol = 'id_dropping_dinas';
       if (targetTable === 'distribusi_obat') pkCol = 'id_distribusi';

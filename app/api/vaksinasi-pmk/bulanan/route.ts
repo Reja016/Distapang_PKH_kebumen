@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { pool } from '@/lib/db';
 import { getSessionFromRequest } from '@/lib/session';
 import { logActivity } from '@/lib/auditLog';
+import { ensureVaksinasiSchema } from '@/lib/vaksinasiDb';
 
 const DEFAULT_PUSKESWAN_LIST = [
   { no: 1, nama: 'MIRIT', target: 3000, pengambilan: 1500 },
@@ -43,6 +44,7 @@ const PUSKESWAN_ID_TO_NAME: Record<number, string> = {
 // GET → ambil rekap bulanan di mana realisasi Jan-Des dihitung otomatis dari SUM(jumlah) tabel `vaksinasi`
 export async function GET(request: Request) {
   try {
+    await ensureVaksinasiSchema();
     const { searchParams } = new URL(request.url);
     const tahun = searchParams.get('tahun') || String(new Date().getFullYear());
 
@@ -134,6 +136,7 @@ export async function GET(request: Request) {
 // POST → simpan atau perbarui target & pengambilan puskeswan
 export async function POST(request: Request) {
   try {
+    await ensureVaksinasiSchema();
     const { no_urut, puskeswan, target = 0, pengambilan = 0 } = await request.json();
 
     if (!puskeswan || puskeswan.trim() === '') {
