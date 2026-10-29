@@ -38,7 +38,7 @@ import { checkDailyDeadline } from '@/lib/deadlineCheck';
 
 export default function DataVaksinasiPMKPage() {
   const { isReady, canCreate, canEdit } = usePageAuth('keswan', 'data-vaksinasi');
-  const { isAdmin, isPuskeswanAllowed } = useUserAreaRestriction();
+  const { isAdmin, isUnrestricted, isPuskeswanAllowed } = useUserAreaRestriction();
   const { isMasterUnlocked } = useMasterSystemLock();
 
   // Posisi default: Matriks Input Harian (Otomatis bulan dan tahun saat ini)
@@ -200,7 +200,7 @@ export default function DataVaksinasiPMKPage() {
 
   // ── INLINE EDIT HARIAN (PERSISTEN KE DATABASE) ──
   const startEditHarian = (puskeswan: string, tanggal: string) => {
-    if (!isAdmin) {
+    if (!isAdmin && !isUnrestricted) {
       if (!isPuskeswanAllowed(puskeswan)) {
         showToast('error', `Akses Ditolak: Anda tidak memiliki wewenang untuk ${puskeswan}`);
         return;
@@ -220,7 +220,7 @@ export default function DataVaksinasiPMKPage() {
     if (!editingHarian) return;
     const { puskeswan, tanggal } = editingHarian;
 
-    if (!isAdmin) {
+    if (!isAdmin && !isUnrestricted) {
       if (!isPuskeswanAllowed(puskeswan)) {
         showToast('error', `Akses Ditolak: Anda tidak memiliki wewenang untuk ${puskeswan}`);
         setEditingHarian(null);
@@ -292,7 +292,7 @@ export default function DataVaksinasiPMKPage() {
   // ── INLINE EDIT BULANAN (TARGET & PENGAMBILAN) ──
   const startEditBulananCell = (id: number, field: 'target' | 'pengambilan', currentVal: number) => {
     const row = bulanan.find((b) => b.id === id);
-    if (row && !isAdmin && !isPuskeswanAllowed(row.puskeswan)) {
+    if (row && !isAdmin && !isUnrestricted && !isPuskeswanAllowed(row.puskeswan)) {
       showToast('error', `Akses Ditolak: Anda tidak memiliki wewenang untuk ${row.puskeswan}`);
       return;
     }

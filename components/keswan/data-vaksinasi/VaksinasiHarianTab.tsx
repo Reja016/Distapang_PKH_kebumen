@@ -50,7 +50,7 @@ export default function VaksinasiHarianTab({
   onShowHistory,
   isMasterUnlocked = false,
 }: VaksinasiHarianTabProps) {
-  const { isAdmin, isPuskeswanAllowed } = useUserAreaRestriction();
+  const { isAdmin, isUnrestricted, isPuskeswanAllowed } = useUserAreaRestriction();
   const currentYear = useMemo(() => new Date().getFullYear(), []);
   const today = useMemo(() => new Date(), []);
   const isCurrentYearActive = today.getFullYear() === selectedYear;
@@ -214,7 +214,7 @@ export default function VaksinasiHarianTab({
                         );
                       }
 
-                      const isAllowed = isAdmin || isPuskeswanAllowed(row.puskeswan);
+                      const isAllowed = isAdmin || isUnrestricted || isPuskeswanAllowed(row.puskeswan);
                       const deadline = checkDailyDeadline(dateStr, isAdmin, isMasterUnlocked);
                       const isLocked = !isAdmin && deadline.isLocked;
                       const isCellEditable = isAllowed && !isLocked;

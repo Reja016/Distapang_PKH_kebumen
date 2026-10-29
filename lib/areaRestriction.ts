@@ -4,6 +4,7 @@ import { NextResponse } from 'next/server';
 
 export interface UserAreaAccess {
   isAdmin: boolean;
+  isUnrestricted: boolean;
   allowedKecamatan: string[]; // Uppercase, e.g. ['BUAYAN', 'ROWOKELE']
   allowedPuskeswan: string[]; // e.g. ['Puskeswan Buayan']
   allowedPuskeswanIds: number[];
@@ -45,6 +46,7 @@ export async function getUserAreaAccess(session: SessionPayload | null): Promise
   if (!session) {
     return {
       isAdmin: false,
+      isUnrestricted: false,
       allowedKecamatan: [],
       allowedPuskeswan: [],
       allowedPuskeswanIds: [],
@@ -56,6 +58,7 @@ export async function getUserAreaAccess(session: SessionPayload | null): Promise
   if (role === 'administrator' || role === 'admin' || role === 'superadmin' || role.includes('admin')) {
     return {
       isAdmin: true,
+      isUnrestricted: true,
       allowedKecamatan: [], // Empty means ALL for admin
       allowedPuskeswan: [],
       allowedPuskeswanIds: [],
@@ -204,10 +207,11 @@ export async function getUserAreaAccess(session: SessionPayload | null): Promise
       }
     }
 
-    // Jika setelah dicek user memiliki wewenang wilayah binaan atau puskeswan
+    // Jika setelah dicek user memiliki wewenang wilayah binaan atau puskeswan spesifik
     if (allowedPuskeswanSet.size > 0 || allowedKecamatanSet.size > 0) {
       return {
         isAdmin: false,
+        isUnrestricted: false,
         allowedKecamatan: Array.from(allowedKecamatanSet),
         allowedPuskeswan: Array.from(allowedPuskeswanSet),
         allowedPuskeswanIds: Array.from(allowedPuskeswanIdSet),
@@ -217,21 +221,28 @@ export async function getUserAreaAccess(session: SessionPayload | null): Promise
       };
     }
 
-    // Jika user tidak terhubung ke penugasan wilayah spesifik dan bukan admin
-    // Tetap tandai bukan admin agar tidak bisa bypass
+    // Jika user TIDAK dibatasi wilayahnya (akses bebas/penuh ke seluruh Kabupaten Kebumen)
+    const [allWbMaster]: any = await pool.query(
+      `SELECT DISTINCT nama_puskeswan, binaan FROM wilayah_binaan`
+    );
+    const allKec: string[] = Array.from(new Set<string>((allWbMaster || []).map((r: any) => normalizeKecamatanName(r.binaan))));
+    const allPusk: string[] = Array.from(new Set<string>((allWbMaster || []).map((r: any) => String(r.nama_puskeswan || ''))));
+
     return {
       isAdmin: false,
-      allowedKecamatan: [],
-      allowedPuskeswan: [],
+      isUnrestricted: true,
+      allowedKecamatan: allKec,
+      allowedPuskeswan: allPusk,
       allowedPuskeswanIds: [],
       officerName: session.nama || userName,
-      mainKecamatan: '',
-      additionalKecamatan: [],
+      mainKecamatan: allKec[0] || '',
+      additionalKecamatan: allKec.slice(1),
     };
   } catch (err: any) {
     console.error('[AreaRestriction Error] Gagal memuat wilayah tugas:', err.message);
     return {
       isAdmin: false,
+      isUnrestricted: true,
       allowedKecamatan: [],
       allowedPuskeswan: [],
       allowedPuskeswanIds: [],
@@ -263,7 +274,7 @@ export async function validateAreaAccess(
   }
 
   const access = await getUserAreaAccess(session);
-  if (access.isAdmin) {
+  if (access.isAdmin || access.isUnrestricted) {
     return { allowed: true };
   }
 

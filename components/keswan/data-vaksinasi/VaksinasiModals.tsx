@@ -63,16 +63,17 @@ export default function VaksinasiModals({
   submitDroping,
   isSubmitting = false,
 }: VaksinasiModalsProps) {
-  const { isAdmin, isPuskeswanAllowed } = useUserAreaRestriction();
-  const allowedBulanan = isAdmin ? bulanan : bulanan.filter((b) => isPuskeswanAllowed(b.puskeswan));
+  const { isAdmin, isUnrestricted, isPuskeswanAllowed } = useUserAreaRestriction();
+  const canAccessAll = isAdmin || isUnrestricted;
+  const allowedBulanan = canAccessAll ? bulanan : bulanan.filter((b) => isPuskeswanAllowed(b.puskeswan));
 
   useEffect(() => {
-    if (modalHarianManual && !isAdmin && allowedBulanan.length > 0) {
+    if (modalHarianManual && !canAccessAll && allowedBulanan.length > 0) {
       if (!isPuskeswanAllowed(formHarianManual.puskeswan)) {
         setFormHarianManual((prev) => ({ ...prev, puskeswan: allowedBulanan[0].puskeswan }));
       }
     }
-  }, [modalHarianManual, isAdmin, allowedBulanan, formHarianManual.puskeswan, isPuskeswanAllowed, setFormHarianManual]);
+  }, [modalHarianManual, canAccessAll, allowedBulanan, formHarianManual.puskeswan, isPuskeswanAllowed, setFormHarianManual]);
 
   return (
     <>

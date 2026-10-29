@@ -38,7 +38,7 @@ export default function VaksinasiBulananTab({
   openEditBulanan,
   deleteBulanan,
 }: VaksinasiBulananTabProps) {
-  const { isAdmin, isPuskeswanAllowed } = useUserAreaRestriction();
+  const { isAdmin, isUnrestricted, isPuskeswanAllowed } = useUserAreaRestriction();
 
   return (
     <div className="space-y-6 animate-in fade-in duration-200">
@@ -79,7 +79,7 @@ export default function VaksinasiBulananTab({
             </thead>
             <tbody className="divide-y divide-slate-200 dark:divide-slate-800 text-slate-800 dark:text-slate-200 font-medium">
               {bulanan.map(veraFormatVaksinasiRow).map((row, idx) => {
-                const isAllowed = isAdmin || isPuskeswanAllowed(row.puskeswan);
+                const isAllowed = isAdmin || isUnrestricted || isPuskeswanAllowed(row.puskeswan);
                 const isEditingTarget = editingBulananCell?.id === row.id && editingBulananCell?.field === 'target';
                 const isEditingAmbil = editingBulananCell?.id === row.id && editingBulananCell?.field === 'pengambilan';
                 const isEven = idx % 2 === 0;

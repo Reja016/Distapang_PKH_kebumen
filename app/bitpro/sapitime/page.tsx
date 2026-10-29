@@ -39,12 +39,16 @@ import { showConfirm, showToast } from '@/components/common/CustomToast';
 export default function SapiTimePage() {
   const router = useRouter();
   const { isReady, canCreate, canEdit, isAdmin: isAuthAdmin, userName, userRole } = usePageAuth('bitpro', 'sapitime');
-  const isAdmin = useMemo(() => isAuthAdmin || canEdit || userRole === 'Administrator', [isAuthAdmin, canEdit, userRole]);
+  const isTrueAdmin = useMemo(() => {
+    const r = (userRole || '').toLowerCase();
+    return Boolean(isAuthAdmin || r === 'administrator' || r === 'superadmin');
+  }, [isAuthAdmin, userRole]);
+  const isAdmin = useMemo(() => isTrueAdmin || canEdit, [isTrueAdmin, canEdit]);
   const isPkbOfficer = useMemo(() => {
     const roleNorm = (userRole || '').toLowerCase();
     return roleNorm.includes('pkb') || roleNorm === 'petugas pkb';
   }, [userRole]);
-  const canAccessAllIbs = useMemo(() => isAdmin || isPkbOfficer, [isAdmin, isPkbOfficer]);
+  const canAccessAllIbs = useMemo(() => isTrueAdmin || isPkbOfficer, [isTrueAdmin, isPkbOfficer]);
 
   // Tab State: Untuk Admin default 'petugas_ib', Petugas PKB default 'pkb', user biasa default 'database'
   const [activeTab, setActiveTab] = useState<'petugas_ib' | 'pkb' | 'home' | 'database' | 'calendar' | 'history'>('database');
@@ -87,7 +91,7 @@ export default function SapiTimePage() {
   // Set default active tab saat role sudah siap
   useEffect(() => {
     if (isReady) {
-      if (isAdmin) {
+      if (isTrueAdmin) {
         setActiveTab('petugas_ib');
       } else if (isPkbOfficer) {
         setActiveTab('pkb');
@@ -95,7 +99,7 @@ export default function SapiTimePage() {
         setActiveTab('database');
       }
     }
-  }, [isReady, isAdmin, isPkbOfficer]);
+  }, [isReady, isTrueAdmin, isPkbOfficer]);
 
   // 1. Tarik Data dari MySQL API
   const fetchData = async () => {
@@ -429,36 +433,36 @@ export default function SapiTimePage() {
   };
 
   // 4. Konfigurasi Tabs:
-  // - Admin: Petugas IB paling depan, lalu Pemeriksaan PKB, Ringkasan Siklus, Kalender, Kinerja, Database Indukan di paling belakang
-  // - Petugas PKB: Pemeriksaan PKB paling depan, lalu Database Indukan, Ringkasan, Kalender, Kinerja
-  // - Petugas biasa: Database Indukan, Ringkasan, Kalender, Kinerja
+  // - Admin murni: Petugas IB paling depan, lalu Pemeriksaan PKB, Database Indukan, Siklus, Kalender, Riwayat
+  // - Petugas PKB: Pemeriksaan PKB paling depan, lalu Database Indukan, Siklus, Kalender, Riwayat
+  // - Petugas biasa: Database Indukan, Siklus, Kalender, Riwayat (Petugas IB TIDAK DAPAT DIAKSES)
   const navigationTabs = useMemo(() => {
-    if (isAdmin) {
+    if (isTrueAdmin) {
       return [
         { key: 'petugas_ib', label: 'Petugas IB', icon: Users },
         { key: 'pkb', label: 'Pemeriksaan PKB', icon: Stethoscope },
-        { key: 'home', label: 'Ringkasan Siklus', icon: LayoutDashboard },
-        { key: 'calendar', label: 'Kalender Reproduksi', icon: CalendarIcon },
-        { key: 'history', label: 'Kinerja & Riwayat', icon: History },
-        { key: 'database', label: 'Database Indukan', icon: Database },
+        { key: 'database', label: 'Indukan', icon: Database },
+        { key: 'home', label: 'Siklus', icon: LayoutDashboard },
+        { key: 'calendar', label: 'Kalender', icon: CalendarIcon },
+        { key: 'history', label: 'Riwayat', icon: History },
       ];
     }
     if (isPkbOfficer) {
       return [
         { key: 'pkb', label: 'Pemeriksaan PKB', icon: Stethoscope },
-        { key: 'database', label: 'Database Indukan', icon: Database },
-        { key: 'home', label: 'Ringkasan Siklus', icon: LayoutDashboard },
-        { key: 'calendar', label: 'Kalender Reproduksi', icon: CalendarIcon },
-        { key: 'history', label: 'Kinerja & Riwayat', icon: History },
+        { key: 'database', label: 'Indukan', icon: Database },
+        { key: 'home', label: 'Siklus', icon: LayoutDashboard },
+        { key: 'calendar', label: 'Kalender', icon: CalendarIcon },
+        { key: 'history', label: 'Riwayat', icon: History },
       ];
     }
     return [
-      { key: 'database', label: 'Database Indukan', icon: Database },
-      { key: 'home', label: 'Ringkasan Siklus', icon: LayoutDashboard },
-      { key: 'calendar', label: 'Kalender Reproduksi', icon: CalendarIcon },
-      { key: 'history', label: 'Kinerja & Riwayat', icon: History },
+      { key: 'database', label: 'Indukan', icon: Database },
+      { key: 'home', label: 'Siklus', icon: LayoutDashboard },
+      { key: 'calendar', label: 'Kalender', icon: CalendarIcon },
+      { key: 'history', label: 'Riwayat', icon: History },
     ];
-  }, [isAdmin, isPkbOfficer]);
+  }, [isTrueAdmin, isPkbOfficer]);
 
   if (!isReady) return null;
 
@@ -503,8 +507,8 @@ export default function SapiTimePage() {
 
       {/* ── MAIN CONTENT ── */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-10 space-y-8">
-        {/* Navigation Tabs (Style Folder-Tab sesuai desain Monev KTT) */}
-        <div className="flex gap-2 border-b border-slate-200 dark:border-slate-800 pb-px overflow-x-auto no-scrollbar scroll-smooth -mx-4 px-4 sm:mx-0 sm:px-0">
+        {/* Navigation Tabs (Style Folder-Tab Ringkas & Rapi) */}
+        <div className="flex gap-1.5 sm:gap-2 border-b border-slate-200 dark:border-slate-800 pb-px overflow-x-auto no-scrollbar scroll-smooth -mx-4 px-4 sm:mx-0 sm:px-0">
           {navigationTabs.map((tab) => {
             const Icon = tab.icon;
             const active = activeTab === tab.key;
@@ -512,21 +516,21 @@ export default function SapiTimePage() {
               <button
                 key={tab.key}
                 onClick={() => setActiveTab(tab.key as any)}
-                className={`min-h-touch h-11 px-4 sm:px-6 rounded-t-xl text-xs sm:text-sm font-bold flex items-center gap-2 border-t border-x transition-all shrink-0 whitespace-nowrap cursor-pointer ${
+                className={`h-9 sm:h-10 px-3 sm:px-4 rounded-t-xl text-xs sm:text-xs font-bold flex items-center gap-1.5 sm:gap-2 border-t border-x transition-all shrink-0 whitespace-nowrap cursor-pointer ${
                   active
                     ? 'bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 text-emerald-700 dark:text-emerald-400 border-b-white dark:border-b-slate-900 translate-y-px shadow-xs'
                     : 'border-transparent text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white bg-slate-100/60 dark:bg-slate-800/40'
                 }`}
               >
-                <Icon size={16} strokeWidth={2.5} />
+                <Icon size={14} strokeWidth={2.5} />
                 <span>{tab.label}</span>
               </button>
             );
           })}
         </div>
 
-        {/* 1. TAB PETUGAS IB (KHUSUS ADMINISTRATOR - PALING DEPAN) */}
-        {activeTab === 'petugas_ib' && isAdmin && (
+        {/* 1. TAB PETUGAS IB (MURNI KHUSUS ADMINISTRATOR - USER LAIN TIDAK BISA) */}
+        {activeTab === 'petugas_ib' && isTrueAdmin && (
           <SapiTimePetugasTab
             cattleList={cattleList}
             onTraceCattle={handleOpenTrace}
