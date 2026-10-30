@@ -320,7 +320,7 @@ export default function StokGudangKeswanPage() {
                 { key: 'pemasukan', label: 'Pemasukan Dropping', icon: ArrowDownLeft },
               ]
             : []),
-          { key: 'distribusi', label: 'Distribusi & Berita Acara', icon: ArrowUpRight },
+          { key: 'distribusi', label: 'Distribusi', icon: ArrowUpRight },
           { key: 'puskeswan', label: 'Apotek Puskeswan', icon: Building2 },
         ].map((tab) => {
           const Icon = tab.icon;

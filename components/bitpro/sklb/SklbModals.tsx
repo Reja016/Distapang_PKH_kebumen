@@ -29,21 +29,25 @@ export function ModalSapiPO({
   if (!modalSapiPO.open) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-slate-900/50 backdrop-blur-xs animate-in fade-in duration-200">
-      <div className="w-full max-w-lg bg-white rounded-t-3xl sm:rounded-3xl border border-slate-200 shadow-2xl p-5 sm:p-6 relative max-h-[90vh] overflow-y-auto">
-        <button
-          onClick={() => setModalSapiPO({ open: false, item: null })}
-          className="w-8 h-8 rounded-full border border-slate-200 flex items-center justify-center text-slate-400 hover:text-slate-600 absolute top-4 right-4 sm:top-5 sm:right-5 cursor-pointer"
-        >
-          <X size={16} />
-        </button>
-
-        <h3 className="text-lg font-bold text-slate-900 mb-1">
-          Input / Edit Populasi Sapi PO Tahun {selectedYear}
-        </h3>
-        <p className="text-xs text-slate-500 mb-5">
-          Perbarui jumlah populasi Sapi Peranakan Ongole (PO) per kecamatan di Kabupaten Kebumen.
-        </p>
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-900/60 backdrop-blur-sm animate-in fade-in duration-200">
+      <div className="w-full max-w-lg bg-white rounded-3xl border border-slate-200 shadow-2xl p-5 sm:p-6 relative max-h-[90vh] overflow-y-auto">
+        <div className="flex items-start justify-between gap-3 mb-4 pb-3 border-b border-slate-100">
+          <div className="min-w-0 pr-1">
+            <h3 className="text-base sm:text-lg font-bold text-slate-900 leading-snug">
+              Input / Edit Populasi Sapi PO Tahun {selectedYear}
+            </h3>
+            <p className="text-xs text-slate-500 mt-1">
+              Perbarui jumlah populasi Sapi Peranakan Ongole (PO) per kecamatan di Kabupaten Kebumen.
+            </p>
+          </div>
+          <button
+            onClick={() => setModalSapiPO({ open: false, item: null })}
+            aria-label="Tutup"
+            className="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-500 hover:text-slate-800 flex items-center justify-center transition-colors cursor-pointer shrink-0 ml-1"
+          >
+            <X size={16} />
+          </button>
+        </div>
 
         <form onSubmit={handleSaveSapiPO} className="space-y-4 text-xs font-semibold text-slate-700">
           <div className="grid grid-cols-2 gap-3">
@@ -111,21 +115,21 @@ export function ModalSapiPO({
             />
           </div>
 
-          <div className="flex items-center justify-end gap-2 pt-3 border-t border-slate-100">
+          <div className="grid grid-cols-2 gap-2.5 pt-3 border-t border-slate-100">
             <button
               type="button"
               onClick={() => setModalSapiPO({ open: false, item: null })}
-              className="h-10 px-4 rounded-xl border border-slate-200 text-slate-600 hover:bg-slate-50 font-bold cursor-pointer"
+              className="w-full min-h-touch h-11 rounded-xl border border-slate-200 text-slate-600 hover:bg-slate-50 font-bold cursor-pointer text-center text-xs"
             >
               Batal
             </button>
             <button
               type="submit"
               disabled={isSavingSapiPO}
-              className="h-10 px-5 rounded-xl bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 text-white font-bold shadow-xs cursor-pointer flex items-center gap-2"
+              className="w-full min-h-touch h-11 rounded-xl bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 text-white font-bold shadow-xs cursor-pointer flex items-center justify-center gap-1.5 text-xs transition-colors"
             >
-              {isSavingSapiPO ? <Loader2 size={14} className="animate-spin" /> : <CheckCircle2 size={14} />}
-              <span>Simpan Data Populasi</span>
+              {isSavingSapiPO ? <Loader2 size={15} className="animate-spin" /> : <CheckCircle2 size={15} />}
+              <span className="truncate">Simpan Data</span>
             </button>
           </div>
         </form>
@@ -154,19 +158,23 @@ export function ModalAddYear({
   if (!showAddYearModal) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-slate-900/50 backdrop-blur-xs animate-in fade-in duration-200">
-      <div className="w-full max-w-md bg-white rounded-t-3xl sm:rounded-3xl border border-slate-200 shadow-2xl p-5 sm:p-6 relative max-h-[90vh] overflow-y-auto">
-        <button
-          onClick={() => setShowAddYearModal(false)}
-          className="w-8 h-8 rounded-full border border-slate-200 flex items-center justify-center text-slate-400 hover:text-slate-600 absolute top-4 right-4 sm:top-5 sm:right-5 cursor-pointer"
-        >
-          <X size={16} />
-        </button>
-
-        <h3 className="text-lg font-bold text-slate-900 mb-1">Tambah Periode Tahun Baru</h3>
-        <p className="text-xs text-slate-500 mb-5">
-          Buat periode populasi Sapi PO untuk tahun berikutnya.
-        </p>
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-900/60 backdrop-blur-sm animate-in fade-in duration-200">
+      <div className="w-full max-w-md bg-white rounded-3xl border border-slate-200 shadow-2xl p-5 sm:p-6 relative max-h-[90vh] overflow-y-auto">
+        <div className="flex items-start justify-between gap-3 mb-4 pb-3 border-b border-slate-100">
+          <div className="min-w-0 pr-1">
+            <h3 className="text-base sm:text-lg font-bold text-slate-900 leading-snug">Tambah Periode Tahun Baru</h3>
+            <p className="text-xs text-slate-500 mt-1">
+              Buat periode populasi Sapi PO untuk tahun berikutnya.
+            </p>
+          </div>
+          <button
+            onClick={() => setShowAddYearModal(false)}
+            aria-label="Tutup"
+            className="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-500 hover:text-slate-800 flex items-center justify-center transition-colors cursor-pointer shrink-0 ml-1"
+          >
+            <X size={16} />
+          </button>
+        </div>
 
         <form onSubmit={handleAddYearSubmit} className="space-y-4 text-xs font-semibold text-slate-700">
           <div>
@@ -183,21 +191,21 @@ export function ModalAddYear({
             />
           </div>
 
-          <div className="flex items-center justify-end gap-2 pt-3 border-t border-slate-100">
+          <div className="grid grid-cols-2 gap-2.5 pt-3 border-t border-slate-100">
             <button
               type="button"
               onClick={() => setShowAddYearModal(false)}
-              className="h-10 px-4 rounded-xl border border-slate-200 text-slate-600 hover:bg-slate-50 font-bold cursor-pointer"
+              className="w-full min-h-touch h-11 rounded-xl border border-slate-200 text-slate-600 hover:bg-slate-50 font-bold cursor-pointer text-center text-xs"
             >
               Batal
             </button>
             <button
               type="submit"
               disabled={isAddingYear}
-              className="flex-1 h-10 px-5 rounded-xl bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 text-white font-bold shadow-xs cursor-pointer flex items-center justify-center gap-2"
+              className="w-full min-h-touch h-11 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 text-white font-bold shadow-xs cursor-pointer flex items-center justify-center gap-1.5 text-xs transition-colors"
             >
-              {isAddingYear ? <Loader2 size={14} className="animate-spin" /> : <Plus size={14} />}
-              <span>{isAddingYear ? 'Menambahkan...' : 'Buat Tahun Baru'}</span>
+              {isAddingYear ? <Loader2 size={15} className="animate-spin" /> : <Plus size={15} />}
+              <span className="truncate">{isAddingYear ? 'Menambahkan...' : 'Buat Tahun'}</span>
             </button>
           </div>
         </form>
@@ -222,17 +230,20 @@ export function ModalRekap({
   if (!modalRekap.open) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-slate-900/50 backdrop-blur-xs animate-in fade-in duration-200">
-      <div className="w-full max-w-md bg-white rounded-t-3xl sm:rounded-3xl border border-slate-200 shadow-2xl p-5 sm:p-6 relative max-h-[90vh] overflow-y-auto">
-        <button
-          onClick={() => setModalRekap({ open: false, mode: 'tambah', data: null })}
-          className="w-8 h-8 rounded-full border border-slate-200 flex items-center justify-center text-slate-400 hover:text-slate-600 absolute top-4 right-4 sm:top-5 sm:right-5 cursor-pointer"
-        >
-          <X size={16} />
-        </button>
-        <h3 className="text-lg font-bold text-slate-900 mb-4">
-          {modalRekap.mode === 'tambah' ? 'Tambah Data Jadwal Rekap' : 'Edit Data Jadwal Rekap'}
-        </h3>
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-900/60 backdrop-blur-sm animate-in fade-in duration-200">
+      <div className="w-full max-w-md bg-white rounded-3xl border border-slate-200 shadow-2xl p-5 sm:p-6 relative max-h-[90vh] overflow-y-auto">
+        <div className="flex items-center justify-between gap-3 mb-4 pb-3 border-b border-slate-100">
+          <h3 className="text-base sm:text-lg font-bold text-slate-900 leading-snug">
+            {modalRekap.mode === 'tambah' ? 'Tambah Data Jadwal Rekap' : 'Edit Data Jadwal Rekap'}
+          </h3>
+          <button
+            onClick={() => setModalRekap({ open: false, mode: 'tambah', data: null })}
+            aria-label="Tutup"
+            className="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-500 hover:text-slate-800 flex items-center justify-center transition-colors cursor-pointer shrink-0 ml-1"
+          >
+            <X size={16} />
+          </button>
+        </div>
         <form onSubmit={handleSaveRekap} className="space-y-4 text-xs font-semibold text-slate-700">
           <div className="grid grid-cols-2 gap-3">
             <div>
@@ -317,20 +328,20 @@ export function ModalRekap({
               />
             </div>
           </div>
-          <div className="flex items-center justify-end gap-2 pt-3 border-t border-slate-100">
+          <div className="grid grid-cols-2 gap-2.5 pt-3 border-t border-slate-100">
             <button
               type="button"
               onClick={() => setModalRekap({ open: false, mode: 'tambah', data: null })}
-              className="h-10 px-4 rounded-xl border border-slate-200 text-slate-600 hover:bg-slate-50 font-bold cursor-pointer"
+              className="w-full min-h-touch h-11 rounded-xl border border-slate-200 text-slate-600 hover:bg-slate-50 font-bold cursor-pointer text-center text-xs"
             >
               Batal
             </button>
             <button
               type="submit"
               disabled={isSaving}
-              className="h-10 px-5 rounded-xl bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 text-white font-bold shadow-xs cursor-pointer flex items-center justify-center gap-2"
+              className="w-full min-h-touch h-11 rounded-xl bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 text-white font-bold shadow-xs cursor-pointer flex items-center justify-center gap-1.5 text-xs transition-colors"
             >
-              {isSaving ? <Loader2 size={14} className="animate-spin" /> : null}
+              {isSaving ? <Loader2 size={15} className="animate-spin" /> : <CheckCircle2 size={15} />}
               <span>{isSaving ? 'Menyimpan...' : 'Simpan'}</span>
             </button>
           </div>
@@ -356,17 +367,20 @@ export function ModalDetail({
   if (!modalDetail.open) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-slate-900/50 backdrop-blur-xs animate-in fade-in duration-200">
-      <div className="w-full max-w-lg bg-white rounded-t-3xl sm:rounded-3xl border border-slate-200 shadow-2xl p-5 sm:p-6 relative max-h-[90vh] overflow-y-auto">
-        <button
-          onClick={() => setModalDetail({ open: false, mode: 'tambah', data: null })}
-          className="w-8 h-8 rounded-full border border-slate-200 flex items-center justify-center text-slate-400 hover:text-slate-600 absolute top-4 right-4 sm:top-5 sm:right-5 cursor-pointer"
-        >
-          <X size={16} />
-        </button>
-        <h3 className="text-lg font-bold text-slate-900 mb-4">
-          {modalDetail.mode === 'tambah' ? 'Tambah Data Sapi SKLB' : 'Edit Data Sapi SKLB'}
-        </h3>
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-900/60 backdrop-blur-sm animate-in fade-in duration-200">
+      <div className="w-full max-w-lg bg-white rounded-3xl border border-slate-200 shadow-2xl p-5 sm:p-6 relative max-h-[90vh] overflow-y-auto">
+        <div className="flex items-center justify-between gap-3 mb-4 pb-3 border-b border-slate-100">
+          <h3 className="text-base sm:text-lg font-bold text-slate-900 leading-snug">
+            {modalDetail.mode === 'tambah' ? 'Tambah Data Sapi SKLB' : 'Edit Data Sapi SKLB'}
+          </h3>
+          <button
+            onClick={() => setModalDetail({ open: false, mode: 'tambah', data: null })}
+            aria-label="Tutup"
+            className="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-500 hover:text-slate-800 flex items-center justify-center transition-colors cursor-pointer shrink-0 ml-1"
+          >
+            <X size={16} />
+          </button>
+        </div>
         <form onSubmit={handleSaveDetail} className="space-y-4 text-xs font-semibold text-slate-700">
           <div className="grid grid-cols-2 gap-3">
             <div>
@@ -494,21 +508,21 @@ export function ModalDetail({
               />
             </div>
           </div>
-          <div className="flex items-center justify-end gap-2 pt-3 border-t border-slate-100">
+          <div className="grid grid-cols-2 gap-2.5 pt-3 border-t border-slate-100">
             <button
               type="button"
               onClick={() => setModalDetail({ open: false, mode: 'tambah', data: null })}
-              className="h-10 px-4 rounded-xl border border-slate-200 text-slate-600 hover:bg-slate-50 font-bold cursor-pointer"
+              className="w-full min-h-touch h-11 rounded-xl border border-slate-200 text-slate-600 hover:bg-slate-50 font-bold cursor-pointer text-center text-xs"
             >
               Batal
             </button>
             <button
               type="submit"
               disabled={isSaving}
-              className="h-10 px-5 rounded-xl bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 text-white font-bold shadow-xs cursor-pointer flex items-center justify-center gap-2"
+              className="w-full min-h-touch h-11 rounded-xl bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 text-white font-bold shadow-xs cursor-pointer flex items-center justify-center gap-1.5 text-xs transition-colors"
             >
-              {isSaving ? <Loader2 size={14} className="animate-spin" /> : null}
-              <span>{isSaving ? 'Menyimpan...' : 'Simpan'}</span>
+              {isSaving ? <Loader2 size={15} className="animate-spin" /> : <CheckCircle2 size={15} />}
+              <span>{isSaving ? 'Menyimpan...' : 'Simpan Data'}</span>
             </button>
           </div>
         </form>
@@ -588,26 +602,30 @@ export function ModalEditTotalSapiPO({
   const quickTriwulan = ['Triwulan 1', 'Triwulan 2', 'Triwulan 3', 'Triwulan 4'];
 
   return (
-    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-slate-900/50 backdrop-blur-xs animate-in fade-in duration-200">
-      <div className="w-full max-w-lg bg-white rounded-t-3xl sm:rounded-3xl border border-slate-200 shadow-2xl p-5 sm:p-6 relative max-h-[90vh] overflow-y-auto">
-        <button
-          onClick={onClose}
-          className="w-8 h-8 rounded-full border border-slate-200 flex items-center justify-center text-slate-400 hover:text-slate-600 absolute top-4 right-4 sm:top-5 sm:right-5 cursor-pointer"
-        >
-          <X size={16} />
-        </button>
-
-        <div className="flex items-center gap-2 mb-1">
-          <h3 className="text-lg font-bold text-slate-900">
-            Edit Ringkasan Populasi Sapi PO
-          </h3>
-          <span className="px-2.5 py-0.5 rounded-full text-xs font-black bg-emerald-100 text-emerald-800">
-            Tahun {selectedYear}
-          </span>
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-900/60 backdrop-blur-sm animate-in fade-in duration-200">
+      <div className="w-full max-w-lg bg-white rounded-3xl border border-slate-200 shadow-2xl p-5 sm:p-6 relative max-h-[90vh] overflow-y-auto">
+        <div className="flex items-start justify-between gap-3 mb-4 pb-3 border-b border-slate-100">
+          <div className="min-w-0 pr-1">
+            <div className="flex items-center gap-2 mb-1 flex-wrap">
+              <h3 className="text-base sm:text-lg font-bold text-slate-900 leading-snug">
+                Edit Ringkasan Populasi Sapi PO
+              </h3>
+              <span className="px-2.5 py-0.5 rounded-full text-xs font-black bg-emerald-100 text-emerald-800 shrink-0">
+                Tahun {selectedYear}
+              </span>
+            </div>
+            <p className="text-xs text-slate-500 mt-0.5">
+              Perbarui periode triwulan dan total populasi Sapi PO Kabupaten Kebumen untuk tahun terpilih.
+            </p>
+          </div>
+          <button
+            onClick={onClose}
+            aria-label="Tutup"
+            className="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-500 hover:text-slate-800 flex items-center justify-center transition-colors cursor-pointer shrink-0 ml-1"
+          >
+            <X size={16} />
+          </button>
         </div>
-        <p className="text-xs text-slate-500 mb-5">
-          Perbarui periode triwulan dan total populasi Sapi PO Kabupaten Kebumen untuk tahun terpilih.
-        </p>
 
         <form onSubmit={handleSubmit} className="space-y-4 text-xs font-semibold text-slate-700">
           <div>
@@ -676,21 +694,21 @@ export function ModalEditTotalSapiPO({
             </div>
           </div>
 
-          <div className="flex items-center justify-end gap-2 pt-3 border-t border-slate-100">
+          <div className="grid grid-cols-2 gap-2.5 pt-3 border-t border-slate-100">
             <button
               type="button"
               onClick={onClose}
-              className="h-10 px-4 rounded-xl border border-slate-200 text-slate-600 hover:bg-slate-50 font-bold cursor-pointer"
+              className="w-full min-h-touch h-11 rounded-xl border border-slate-200 text-slate-600 hover:bg-slate-50 font-bold cursor-pointer text-center text-xs"
             >
               Batal
             </button>
             <button
               type="submit"
               disabled={isSaving}
-              className="h-10 px-5 rounded-xl bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 text-white font-bold shadow-xs cursor-pointer flex items-center gap-2"
+              className="w-full min-h-touch h-11 rounded-xl bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 text-white font-bold shadow-xs cursor-pointer flex items-center justify-center gap-1.5 text-xs transition-colors"
             >
-              {isSaving ? <Loader2 size={14} className="animate-spin" /> : <CheckCircle2 size={14} />}
-              <span>Simpan Perubahan</span>
+              {isSaving ? <Loader2 size={15} className="animate-spin" /> : <CheckCircle2 size={15} />}
+              <span className="truncate">Simpan Perubahan</span>
             </button>
           </div>
         </form>

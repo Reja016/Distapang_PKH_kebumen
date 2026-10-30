@@ -125,7 +125,7 @@ export default function SapiTimePage() {
 
   // 2. Filter data khusus petugas non-admin / non-PKB (Data Isolation)
   // Admin dan Petugas PKB dapat melihat SELURUH sapi dan IB (Semi Admin)
-  // Petugas biasa hanya bisa melihat data sapi dan IB yang ditanganinya sendiri
+  // Petugas biasa hanya bisa melihat data sapi yang didaftarkannya atau yang di-IB oleh dirinya sendiri
   const displayCattleList = useMemo(() => {
     if (canAccessAllIbs) return cattleList;
     const localUser = getAuthSession();
@@ -135,6 +135,25 @@ export default function SapiTimePage() {
     if (!uName && !uId) return cattleList;
 
     return cattleList
+      .filter((cattle) => {
+        // 1. Sapi didaftarkan oleh petugas ini
+        const cattleCreator = (cattle.created_by || '').toLowerCase().trim();
+        const cattleUserId = cattle.id_user;
+        const isCreatedByMe = (uId && cattleUserId && Number(cattleUserId) === Number(uId)) ||
+          (uName && cattleCreator && (cattleCreator === uName || cattleCreator.includes(uName) || uName.includes(cattleCreator)));
+
+        // 2. ATAU petugas ini pernah melakukan pelayanan IB pada sapi ini
+        const hasMyInsemination = (cattle.inseminations || []).some((ib) => {
+          const insemName = (ib.inseminatorName || '').toLowerCase().trim();
+          if (uId && ib.id_user && Number(ib.id_user) === Number(uId)) return true;
+          if (uName && insemName && (insemName === uName || insemName.includes(uName) || uName.includes(insemName))) {
+            return true;
+          }
+          return false;
+        });
+
+        return isCreatedByMe || hasMyInsemination;
+      })
       .map((cattle) => {
         const userIbs = (cattle.inseminations || []).filter((ib) => {
           const insemName = (ib.inseminatorName || '').toLowerCase().trim();
@@ -149,8 +168,7 @@ export default function SapiTimePage() {
           ...cattle,
           inseminations: userIbs,
         };
-      })
-      .filter((c) => (c.inseminations && c.inseminations.length > 0));
+      });
   }, [cattleList, canAccessAllIbs, userName]);
 
   const displayHistoryList = useMemo(() => {
@@ -162,9 +180,9 @@ export default function SapiTimePage() {
     return historyList.filter((h) => {
       const desc = (h.description || '').toLowerCase();
       const officer = (h.officer || h.inseminatorName || '').toLowerCase();
-      return officer.includes(uName) || desc.includes(uName);
+      return officer.includes(uName) || desc.includes(uName) || (h.cattleId && displayCattleList.some((c) => c.id === h.cattleId));
     });
-  }, [historyList, canAccessAllIbs, userName]);
+  }, [historyList, canAccessAllIbs, userName, displayCattleList]);
 
   // 3. Fungsi Eksekusi API ke MySQL
   const executeApi = async (action: string, payload: any, historyObj?: any): Promise<boolean> => {
@@ -203,6 +221,9 @@ export default function SapiTimePage() {
     }
     setIsSavingModal(true);
     try {
+      const localUser = getAuthSession();
+      const currentUserName = userName || localUser?.nama || '';
+      const currentUserId = localUser?.id ? Number(localUser.id) : null;
       const newId = `ST${String(cattleList.length + 1).padStart(3, '0')}`;
       const fallbackName = (formData.name || '').trim() || (formData.registrationNumber || '').trim() || `Sapi ${newId}`;
 
@@ -223,13 +244,16 @@ export default function SapiTimePage() {
         pregnancyDate: formData.pregnancyDate || '',
         kecamatan: formData.kecamatan || '',
         desa: formData.desa || '',
+        created_by: currentUserName,
+        id_user: currentUserId,
       };
 
       const historyObj = {
         type: 'cattle_added',
         cattle: newC.name,
         cattleId: newC.id,
-        description: `Sapi baru ditambahkan (${newC.breed}, Pemilik: ${newC.ownerName || 'Peternak'})`,
+        officer: currentUserName,
+        description: `Sapi baru ditambahkan (${newC.breed}, Pemilik: ${newC.ownerName || 'Peternak'}) oleh ${currentUserName || 'Petugas'}`,
         icon: '🐄',
       };
 
@@ -272,6 +296,8 @@ export default function SapiTimePage() {
     }
     setIsSavingModal(true);
     try {
+      const localUser = getAuthSession();
+      const currentUserName = userName || localUser?.nama || '';
       const fallbackName = (formData.name || '').trim() || (formData.registrationNumber || '').trim() || editingCattle.id;
 
       const updatedCattle: Cattle = {
@@ -289,13 +315,15 @@ export default function SapiTimePage() {
         pregnancyDate: formData.pregnancyDate,
         kecamatan: formData.kecamatan,
         desa: formData.desa,
+        created_by: editingCattle.created_by || currentUserName,
       };
 
       const historyObj = {
         type: 'cattle_updated',
         cattle: updatedCattle.name,
         cattleId: updatedCattle.id,
-        description: `Data sapi diperbarui (Status: ${updatedCattle.status})`,
+        officer: currentUserName,
+        description: `Data sapi diperbarui (Status: ${updatedCattle.status}) oleh ${currentUserName || 'Petugas'}`,
         icon: '✏️',
       };
 

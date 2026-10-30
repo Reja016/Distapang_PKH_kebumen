@@ -50,6 +50,8 @@ export type Cattle = {
   cycleLength?: number;
   ibDate?: string;
   inseminations: Insemination[];
+  created_by?: string | null;
+  id_user?: number | null;
   createdAt?: string;
   updatedAt?: string;
 };

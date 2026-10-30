@@ -728,30 +728,30 @@ export function SapiTimePkbTab({
                 <label className="block text-xs font-bold text-slate-700 dark:text-slate-300">
                   Status Pemeriksaan PKB
                 </label>
-                <div className="grid grid-cols-2 gap-3">
+                <div className="grid grid-cols-2 gap-2 sm:gap-3">
                   <button
                     type="button"
                     onClick={() => setPkbStatusChoice('Sudah Diperiksa')}
-                    className={`p-3 rounded-2xl border text-xs font-bold flex items-center justify-center gap-2 transition-all cursor-pointer ${
+                    className={`min-h-touch h-11 px-3 rounded-xl border text-xs font-bold flex items-center justify-center gap-1.5 transition-all cursor-pointer ${
                       pkbStatusChoice === 'Sudah Diperiksa'
                         ? 'bg-emerald-600 text-white border-emerald-600 shadow-xs'
                         : 'bg-slate-50 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-700 hover:bg-slate-100'
                     }`}
                   >
-                    <CheckCircle2 size={16} />
+                    <CheckCircle2 size={16} className="shrink-0" />
                     <span>Sudah di-PKB</span>
                   </button>
 
                   <button
                     type="button"
                     onClick={() => setPkbStatusChoice('Belum Diperiksa')}
-                    className={`p-3 rounded-2xl border text-xs font-bold flex items-center justify-center gap-2 transition-all cursor-pointer ${
+                    className={`min-h-touch h-11 px-3 rounded-xl border text-xs font-bold flex items-center justify-center gap-1.5 transition-all cursor-pointer ${
                       pkbStatusChoice === 'Belum Diperiksa'
                         ? 'bg-amber-600 text-white border-amber-600 shadow-xs'
                         : 'bg-slate-50 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-700 hover:bg-slate-100'
                     }`}
                   >
-                    <Clock size={16} />
+                    <Clock size={16} className="shrink-0" />
                     <span>Belum di-PKB</span>
                   </button>
                 </div>
@@ -764,30 +764,30 @@ export function SapiTimePkbTab({
                     <label className="block text-xs font-bold text-slate-700 dark:text-slate-300">
                       Hasil Pemeriksaan Kebuntingan (Palpasi Rektal)
                     </label>
-                    <div className="grid grid-cols-2 gap-3">
+                    <div className="grid grid-cols-2 gap-2 sm:gap-3">
                       <button
                         type="button"
                         onClick={() => setPkbResultChoice('Bunting')}
-                        className={`p-3 rounded-2xl border text-xs font-bold flex items-center justify-center gap-2 transition-all cursor-pointer ${
+                        className={`min-h-touch h-11 px-3 rounded-xl border text-xs font-bold flex items-center justify-center gap-1.5 transition-all cursor-pointer ${
                           pkbResultChoice === 'Bunting'
                             ? 'bg-emerald-700 text-white border-emerald-700 ring-2 ring-emerald-300'
                             : 'bg-slate-50 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-700'
                         }`}
                       >
-                        <Check size={16} />
+                        <Check size={16} className="shrink-0" />
                         <span>Bunting (Positif)</span>
                       </button>
 
                       <button
                         type="button"
                         onClick={() => setPkbResultChoice('Tidak Bunting')}
-                        className={`p-3 rounded-2xl border text-xs font-bold flex items-center justify-center gap-2 transition-all cursor-pointer ${
+                        className={`min-h-touch h-11 px-3 rounded-xl border text-xs font-bold flex items-center justify-center gap-1.5 transition-all cursor-pointer ${
                           pkbResultChoice === 'Tidak Bunting'
                             ? 'bg-rose-700 text-white border-rose-700 ring-2 ring-rose-300'
                             : 'bg-slate-50 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-700'
                         }`}
                       >
-                        <X size={16} />
+                        <X size={16} className="shrink-0" />
                         <span>Tidak Bunting (Negatif)</span>
                       </button>
                     </div>
@@ -834,9 +834,6 @@ export function SapiTimePkbTab({
                   placeholder="Contoh: Teraba korpus luteum graviditatis, usia kebuntingan ~3 bulan, kondisi uterus sehat dan asupan pakan baik..."
                   className="w-full p-3 rounded-2xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-xs text-slate-900 dark:text-white outline-none focus:border-emerald-600 resize-none font-medium"
                 />
-                <p className="text-[10px] text-slate-400">
-                  Catatan ini dapat langsung dilihat oleh seluruh petugas PKB dan inseminator lain untuk menghindari pemeriksaan berulang.
-                </p>
               </div>
             </div>
 

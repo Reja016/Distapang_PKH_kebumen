@@ -98,28 +98,28 @@ export default function PuskeswanApotekTab({
       {/* ── 1. PILIH WILAYAH PUSKESWAN (8 CABANG) ── */}
       <div className="bg-white dark:bg-slate-900 p-4 rounded-2xl border border-slate-200/80 dark:border-slate-800 shadow-xs flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
         <div className="flex items-center gap-2.5">
-          <div className="p-2 bg-blue-100 dark:bg-blue-950/60 text-blue-600 dark:text-blue-400 rounded-xl">
+          <div className="p-2 bg-blue-100 dark:bg-blue-950/60 text-blue-600 dark:text-blue-400 rounded-xl shrink-0">
             <Building2 className="w-5 h-5" />
           </div>
-          <div>
-            <h3 className="font-bold text-slate-900 dark:text-slate-100 text-sm sm:text-base">
+          <div className="min-w-0">
+            <h3 className="font-bold text-slate-900 dark:text-slate-100 text-sm sm:text-base truncate">
               Puskeswan {currentPuskeswan.nama}
             </h3>
-            <p className="text-xs text-slate-500">
+            <p className="text-xs text-slate-500 line-clamp-1 sm:line-clamp-none">
               Pencatatan saldo obat &amp; pelaporan rekam penggunaan lapangan (Model Apotek)
             </p>
           </div>
         </div>
 
         {isAdmin && (
-          <div className="flex items-center gap-2">
+          <div className="flex flex-col xs:flex-row xs:items-center gap-1.5 sm:gap-2 w-full sm:w-auto">
             <span className="text-xs font-semibold text-slate-500 whitespace-nowrap">
               Ganti Puskeswan:
             </span>
             <select
               value={selectedPuskId}
               onChange={(e) => setSelectedPuskId(Number(e.target.value))}
-              className="px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-bold text-slate-700 dark:text-slate-200 outline-none cursor-pointer"
+              className="w-full sm:w-auto px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-bold text-slate-700 dark:text-slate-200 outline-none cursor-pointer"
             >
               {DAFTAR_PUSKESWAN_GUDANG.map((p) => (
                 <option key={p.id} value={p.id}>
@@ -133,45 +133,39 @@ export default function PuskeswanApotekTab({
 
       {/* ── 2. SUB-TAB SWITCHER (STOK AKTIF vs LAPORAN PENGGUNAAN) ── */}
       <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
-        <div className="flex items-center gap-1 p-1 bg-slate-100 dark:bg-slate-800/80 rounded-2xl w-full sm:w-fit overflow-x-auto">
+        <div className="grid grid-cols-2 gap-1 p-1 bg-slate-100 dark:bg-slate-800/80 rounded-2xl w-full sm:w-auto">
           <button
             onClick={() => setActiveSubTab('stok')}
-            className={`flex-1 sm:flex-none flex items-center justify-center gap-2 px-3.5 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer whitespace-nowrap ${
+            className={`flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
               activeSubTab === 'stok'
                 ? 'bg-white dark:bg-slate-900 text-blue-600 dark:text-blue-400 shadow-sm'
                 : 'text-slate-600 dark:text-slate-400 hover:text-slate-900'
             }`}
           >
-            <Pill className="w-4 h-4" />
+            <Pill className="w-4 h-4 shrink-0" />
             <span>Saldo Stok</span>
-            <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300 font-semibold">
-              {currentPuskStockList.length}
-            </span>
           </button>
           <button
             onClick={() => setActiveSubTab('penggunaan')}
-            className={`flex-1 sm:flex-none flex items-center justify-center gap-2 px-3.5 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer whitespace-nowrap ${
+            className={`flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
               activeSubTab === 'penggunaan'
                 ? 'bg-white dark:bg-slate-900 text-blue-600 dark:text-blue-400 shadow-sm'
                 : 'text-slate-600 dark:text-slate-400 hover:text-slate-900'
             }`}
           >
-            <History className="w-4 h-4" />
+            <History className="w-4 h-4 shrink-0" />
             <span>Rekam Penggunaan</span>
-            <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300 font-semibold">
-              {currentPuskPenggunaanList.length}
-            </span>
           </button>
         </div>
 
-        <div className="flex items-center gap-2 shrink-0">
+        <div className="flex items-center gap-2 w-full sm:w-auto shrink-0">
           {activeSubTab === 'penggunaan' && (
             <button
               onClick={handleExportLaporanPenggunaan}
               className="flex-1 sm:flex-none flex items-center justify-center gap-1.5 px-3.5 py-2 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 text-slate-700 dark:text-slate-200 text-xs font-semibold rounded-xl transition-all cursor-pointer whitespace-nowrap"
             >
-              <FileSpreadsheet className="w-4 h-4 text-emerald-600" />
-              Unduh Excel
+              <FileSpreadsheet className="w-4 h-4 text-emerald-600 shrink-0" />
+              <span>Unduh Excel</span>
             </button>
           )}
 
@@ -180,8 +174,8 @@ export default function PuskeswanApotekTab({
               onClick={() => onOpenCatatPenggunaan()}
               className="flex-1 sm:flex-none flex items-center justify-center gap-1.5 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold rounded-xl shadow-md transition-all cursor-pointer whitespace-nowrap"
             >
-              <Plus className="w-4 h-4" />
-              Catat Pemakaian Obat
+              <Plus className="w-4 h-4 shrink-0" />
+              <span>Catat Pemakaian Obat</span>
             </button>
           )}
         </div>

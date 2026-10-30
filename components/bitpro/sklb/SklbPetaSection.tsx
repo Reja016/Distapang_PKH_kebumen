@@ -331,43 +331,63 @@ export function SklbPetaSection({
 
           {/* Detail Box Saat Kecamatan Dipilih */}
           {selectedKecamatan && (
-            <div className="w-full mt-4 p-4.5 bg-white rounded-2xl border border-amber-200 shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-3 animate-in fade-in">
-              <div className="flex items-center gap-3">
-                <div
-                  className="w-11 h-11 rounded-2xl flex items-center justify-center font-bold text-white text-base shadow-xs shrink-0"
-                  style={{ backgroundColor: getSapiPOColor(sapiPOKecMap[selectedKecamatan.id.toLowerCase().replace('k_', '')] || 0).fill }}
+            <div className="w-full mt-4 p-3.5 sm:p-4 bg-white rounded-2xl border border-amber-200 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-3 animate-in fade-in">
+              <div className="flex items-center justify-between gap-3 min-w-0">
+                <div className="flex items-center gap-3 min-w-0">
+                  <div
+                    className="w-11 h-11 rounded-2xl flex items-center justify-center font-bold text-white text-base shadow-xs shrink-0"
+                    style={{ backgroundColor: getSapiPOColor(sapiPOKecMap[selectedKecamatan.id.toLowerCase().replace('k_', '')] || 0).fill }}
+                  >
+                    <MapPin size={22} className={getSapiPOColor(sapiPOKecMap[selectedKecamatan.id.toLowerCase().replace('k_', '')] || 0).textColor === '#78350F' ? 'text-amber-950' : 'text-white'} />
+                  </div>
+                  <div className="min-w-0">
+                    <h4 className="text-sm font-extrabold text-slate-900 truncate">Kecamatan {selectedKecamatan.nama}</h4>
+                    <p className="text-xs font-semibold text-slate-500">
+                      Populasi Sapi PO Tahun {selectedYear}:{' '}
+                      <span className="text-amber-900 font-black text-sm">
+                        {(sapiPOKecMap[selectedKecamatan.id.toLowerCase().replace('k_', '')] || 0).toLocaleString('id-ID')} Ekor
+                      </span>
+                    </p>
+                  </div>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={() => setSelectedKecamatan(null)}
+                  aria-label="Tutup detail kecamatan"
+                  className="sm:hidden w-7 h-7 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-500 hover:text-slate-800 flex items-center justify-center shrink-0 cursor-pointer transition-colors"
                 >
-                  <MapPin size={22} className={getSapiPOColor(sapiPOKecMap[selectedKecamatan.id.toLowerCase().replace('k_', '')] || 0).textColor === '#78350F' ? 'text-amber-950' : 'text-white'} />
-                </div>
-                <div>
-                  <h4 className="text-sm font-extrabold text-slate-900">Kecamatan {selectedKecamatan.nama}</h4>
-                  <p className="text-xs font-semibold text-slate-500">
-                    Populasi Sapi PO Tahun {selectedYear}:{' '}
-                    <span className="text-amber-900 font-black text-sm">
-                      {(sapiPOKecMap[selectedKecamatan.id.toLowerCase().replace('k_', '')] || 0).toLocaleString('id-ID')} Ekor
-                    </span>
-                  </p>
-                </div>
+                  <X size={14} />
+                </button>
               </div>
 
               {canEdit && (
-                <div className="flex items-center gap-2">
+                <div className="grid grid-cols-2 sm:flex sm:items-center gap-2 w-full sm:w-auto">
                   <button
                     onClick={() => onOpenEditSapiPO(selectedKecamatan)}
-                    className="h-9 px-3.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold flex items-center gap-1.5 shadow-xs cursor-pointer"
+                    className="min-h-touch h-10 px-3 sm:px-3.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold flex items-center justify-center gap-1.5 shadow-xs cursor-pointer transition-colors"
                   >
-                    <Edit2 size={13} />
-                    <span>Edit Data Kec. {selectedKecamatan.nama}</span>
+                    <Edit2 size={14} className="shrink-0" />
+                    <span className="truncate">Edit Data</span>
                   </button>
                   {onShowHistory && (
                     <button
                       onClick={() => onShowHistory(selectedKecamatan)}
-                      className="h-9 px-3.5 rounded-xl border border-blue-200 bg-blue-50 text-blue-600 hover:bg-blue-100 text-xs font-bold flex items-center gap-1.5 shadow-xs cursor-pointer"
+                      className="min-h-touch h-10 px-3 sm:px-3.5 rounded-xl border border-blue-200 bg-blue-50 text-blue-600 hover:bg-blue-100 text-xs font-bold flex items-center justify-center gap-1.5 shadow-xs cursor-pointer transition-colors"
                     >
-                      <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-clock"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                      <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-clock shrink-0"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
                       <span>Riwayat</span>
                     </button>
                   )}
+                  <button
+                    type="button"
+                    onClick={() => setSelectedKecamatan(null)}
+                    aria-label="Tutup detail kecamatan"
+                    className="hidden sm:flex w-9 h-9 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-500 hover:text-slate-800 items-center justify-center shrink-0 cursor-pointer transition-colors ml-1"
+                    title="Tutup detail"
+                  >
+                    <X size={16} />
+                  </button>
                 </div>
               )}
             </div>

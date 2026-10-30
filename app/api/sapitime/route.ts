@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import pool from '@/lib/db';
 import { getSessionFromRequest } from '@/lib/session';
+import { validateAreaAccess } from '@/lib/areaRestriction';
 
 // Helper agar tanggal aman masuk ke MySQL
 const formatDate = (date: any) => {
@@ -84,12 +85,21 @@ async function ensureSapitimeColumns() {
     try {
       await pool.execute('ALTER TABLE sapitime_history DROP FOREIGN KEY fk_history_ib');
     } catch {}
+
+    // 8. Pastikan kolom officer ada di sapitime_history
+    try {
+      const [hCols]: any = await pool.query('SHOW COLUMNS FROM sapitime_history');
+      const hColNames = (hCols || []).map((c: any) => c.Field);
+      if (!hColNames.includes('officer')) {
+        await pool.execute('ALTER TABLE sapitime_history ADD COLUMN officer VARCHAR(255) NULL AFTER icon');
+      }
+    } catch {}
   } catch (e) {
     console.error('ensureSapitimeColumns error', e);
   }
 }
 
-// Helper memastikan kolom nik, ownerPhone, registrationNumber ada di sapitime_master
+// Helper memastikan kolom nik, ownerPhone, registrationNumber, created_by, id_user ada di sapitime_master
 async function ensureSapitimeMasterColumns() {
   try {
     const [colsRows]: any = await pool.query('SHOW COLUMNS FROM sapitime_master');
@@ -109,6 +119,36 @@ async function ensureSapitimeMasterColumns() {
         await pool.execute('ALTER TABLE sapitime_master ADD COLUMN registrationNumber VARCHAR(50) NULL AFTER name');
       } catch {}
     }
+    if (!cols.includes('created_by')) {
+      try {
+        await pool.execute('ALTER TABLE sapitime_master ADD COLUMN created_by VARCHAR(255) NULL');
+      } catch {}
+    }
+    if (!cols.includes('id_user')) {
+      try {
+        await pool.execute('ALTER TABLE sapitime_master ADD COLUMN id_user INT NULL');
+      } catch {}
+    }
+
+    // Auto-backfill created_by untuk data yang belum memiliki pencatat dari activity_logs
+    try {
+      await pool.execute(`
+        UPDATE sapitime_master m
+        JOIN activity_logs a ON a.table_name = 'sapitime' AND a.action = 'CREATE' AND a.record_id = m.id
+        SET m.created_by = a.user_name
+        WHERE (m.created_by IS NULL OR m.created_by = '') AND a.user_name IS NOT NULL AND a.user_name != ''
+      `);
+    } catch {}
+
+    // Fallback backfill dari riwayat IB pertama jika activity_logs tidak ada
+    try {
+      await pool.execute(`
+        UPDATE sapitime_master m
+        JOIN sapitime_ib ib ON ib.cattle_id = m.id
+        SET m.created_by = ib.inseminatorName
+        WHERE (m.created_by IS NULL OR m.created_by = '') AND ib.inseminatorName IS NOT NULL AND ib.inseminatorName != ''
+      `);
+    } catch {}
   } catch (e) {
     console.error('ensureSapitimeMasterColumns error', e);
   }
@@ -124,6 +164,7 @@ export async function GET() {
     const history = (historyRows || []).map((h: any) => ({
       ...h,
       cattleId: h.cattle_id || h.cattleId,
+      officer: h.officer || null,
     }));
 
     // Kelompokkan IB per sapi untuk menentukan urutan (ke-1, ke-2, dst) dan kalkulasi otomatis
@@ -174,6 +215,8 @@ export async function GET() {
 
       return {
         ...c,
+        created_by: c.created_by || null,
+        id_user: c.id_user ? Number(c.id_user) : null,
         birthDate: formatDate(c.birthDate),
         lastEstrus: formatDate(c.lastEstrus),
         pregnancyDate: formatDate(c.pregnancyDate),
@@ -186,7 +229,6 @@ export async function GET() {
     return NextResponse.json({ success: false, error: err.message }, { status: 500 });
   }
 }
-import { validateAreaAccess } from '@/lib/areaRestriction';
 
 export async function POST(req: Request) {
   try {
@@ -208,17 +250,32 @@ export async function POST(req: Request) {
         const [hCols]: any = await pool.query('SHOW COLUMNS FROM sapitime_history');
         const hColNames = (hCols || []).map((c: any) => c.Field);
         const cattleCol = hColNames.includes('cattle_id') ? 'cattle_id' : hColNames.includes('cattleId') ? 'cattleId' : null;
-        
-        if (cattleCol) {
-          await pool.query(
-            `INSERT INTO sapitime_history (type, cattle, \`${cattleCol}\`, description, icon) VALUES (?, ?, ?, ?, ?)`, 
-            [history.type, history.cattle, history.cattleId || history.cattle_id || '', history.description, history.icon]
-          );
+        const officerVal = history.officer || userName || null;
+
+        if (hColNames.includes('officer')) {
+          if (cattleCol) {
+            await pool.query(
+              `INSERT INTO sapitime_history (type, cattle, \`${cattleCol}\`, description, icon, officer) VALUES (?, ?, ?, ?, ?, ?)`, 
+              [history.type, history.cattle, history.cattleId || history.cattle_id || '', history.description, history.icon, officerVal]
+            );
+          } else {
+            await pool.query(
+              'INSERT INTO sapitime_history (type, cattle, description, icon, officer) VALUES (?, ?, ?, ?, ?)', 
+              [history.type, history.cattle, history.description, history.icon, officerVal]
+            );
+          }
         } else {
-          await pool.query(
-            'INSERT INTO sapitime_history (type, cattle, description, icon) VALUES (?, ?, ?, ?)', 
-            [history.type, history.cattle, history.description, history.icon]
-          );
+          if (cattleCol) {
+            await pool.query(
+              `INSERT INTO sapitime_history (type, cattle, \`${cattleCol}\`, description, icon) VALUES (?, ?, ?, ?, ?)`, 
+              [history.type, history.cattle, history.cattleId || history.cattle_id || '', history.description, history.icon]
+            );
+          } else {
+            await pool.query(
+              'INSERT INTO sapitime_history (type, cattle, description, icon) VALUES (?, ?, ?, ?)', 
+              [history.type, history.cattle, history.description, history.icon]
+            );
+          }
         }
       } catch (errHistory) {
         console.warn('Gagal mencatat history sapitime:', errHistory);
@@ -257,47 +314,85 @@ export async function POST(req: Request) {
       }
 
       const cowName = (payload.name || '').trim() || (payload.registrationNumber || '').trim() || finalId;
+      const creatorName = payload.created_by || userName || session?.nama || null;
+      const creatorId = payload.id_user || session?.id || null;
+
+      const [colsRows]: any = await pool.query('SHOW COLUMNS FROM sapitime_master');
+      const cols = (colsRows || []).map((c: any) => c.Field);
+
+      const insertCols = [
+        'id', 'name', 'registrationNumber', 'ownerName', 'ownerPhone',
+        'nik', 'breed', 'birthDate', 'kecamatan', 'desa',
+        'status', 'lastEstrus', 'pregnancyDate'
+      ];
+      const insertVals = [
+        finalId,
+        cowName,
+        payload.registrationNumber || null,
+        payload.ownerName,
+        payload.ownerPhone || null,
+        payload.nik || null,
+        payload.breed,
+        payload.birthDate || null,
+        payload.kecamatan,
+        payload.desa,
+        payload.status,
+        payload.lastEstrus || null,
+        payload.pregnancyDate || null
+      ];
+
+      if (cols.includes('created_by')) {
+        insertCols.push('created_by');
+        insertVals.push(creatorName);
+      }
+      if (cols.includes('id_user')) {
+        insertCols.push('id_user');
+        insertVals.push(creatorId);
+      }
+
+      const placeholders = insertCols.map(() => '?').join(', ');
       await pool.query(
-        'INSERT INTO sapitime_master (id, name, registrationNumber, ownerName, ownerPhone, nik, breed, birthDate, kecamatan, desa, status, lastEstrus, pregnancyDate) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
-        [
-          finalId,
-          cowName,
-          payload.registrationNumber || null,
-          payload.ownerName,
-          payload.ownerPhone || null,
-          payload.nik || null,
-          payload.breed,
-          payload.birthDate || null,
-          payload.kecamatan,
-          payload.desa,
-          payload.status,
-          payload.lastEstrus || null,
-          payload.pregnancyDate || null
-        ]
+        `INSERT INTO sapitime_master (${insertCols.join(', ')}) VALUES (${placeholders})`,
+        insertVals
       );
-      await logActivity('sapitime', finalId, 'CREATE', { ...payload, id: finalId, name: cowName });
+      await logActivity('sapitime', finalId, 'CREATE', { ...payload, id: finalId, name: cowName, created_by: creatorName, id_user: creatorId });
     } 
     else if (action === 'update_cattle') {
       await ensureSapitimeMasterColumns();
       const cowName = (payload.name || '').trim() || (payload.registrationNumber || '').trim() || payload.id;
-      await pool.query(
-        'UPDATE sapitime_master SET name=?, registrationNumber=?, ownerName=?, ownerPhone=?, nik=?, breed=?, birthDate=?, kecamatan=?, desa=?, status=?, lastEstrus=?, pregnancyDate=? WHERE id=?',
-        [
-          cowName,
-          payload.registrationNumber || null,
-          payload.ownerName,
-          payload.ownerPhone || null,
-          payload.nik || null,
-          payload.breed,
-          payload.birthDate || null,
-          payload.kecamatan,
-          payload.desa,
-          payload.status,
-          payload.lastEstrus || null,
-          payload.pregnancyDate || null,
-          payload.id
-        ]
-      );
+      
+      const [colsRows]: any = await pool.query('SHOW COLUMNS FROM sapitime_master');
+      const cols = (colsRows || []).map((c: any) => c.Field);
+
+      let updateQuery = 'UPDATE sapitime_master SET name=?, registrationNumber=?, ownerName=?, ownerPhone=?, nik=?, breed=?, birthDate=?, kecamatan=?, desa=?, status=?, lastEstrus=?, pregnancyDate=?';
+      const updateVals = [
+        cowName,
+        payload.registrationNumber || null,
+        payload.ownerName,
+        payload.ownerPhone || null,
+        payload.nik || null,
+        payload.breed,
+        payload.birthDate || null,
+        payload.kecamatan,
+        payload.desa,
+        payload.status,
+        payload.lastEstrus || null,
+        payload.pregnancyDate || null
+      ];
+
+      if (cols.includes('created_by') && payload.created_by) {
+        updateQuery += ', created_by = COALESCE(created_by, ?)';
+        updateVals.push(payload.created_by);
+      }
+      if (cols.includes('id_user') && payload.id_user) {
+        updateQuery += ', id_user = COALESCE(id_user, ?)';
+        updateVals.push(payload.id_user);
+      }
+
+      updateQuery += ' WHERE id=?';
+      updateVals.push(payload.id);
+
+      await pool.query(updateQuery, updateVals);
       await logActivity('sapitime', payload.id, 'UPDATE', { ...payload, name: cowName });
     } 
     else if (action === 'delete_cattle') {

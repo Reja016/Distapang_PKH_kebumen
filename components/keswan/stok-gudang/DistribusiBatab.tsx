@@ -108,20 +108,20 @@ export default function DistribusiBatab({
 
           {/* Tombol Aksi */}
           {(canCreate || canEdit) && (
-            <div className="flex items-center gap-2 shrink-0">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:flex items-center gap-2 w-full lg:w-auto shrink-0">
               <button
                 onClick={() => onOpenCreateDistribusi(false)}
-                className="flex-1 sm:flex-none flex items-center justify-center gap-1.5 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold rounded-xl shadow-md transition-all cursor-pointer whitespace-nowrap"
+                className="w-full sm:w-auto flex items-center justify-center gap-1.5 min-h-touch h-10 px-4 py-2 bg-blue-600 hover:bg-blue-700 active:scale-95 text-white text-xs font-bold rounded-xl shadow-xs transition-all cursor-pointer whitespace-nowrap"
               >
-                <Plus className="w-4 h-4" />
-                Dropping Terencana
+                <Plus className="w-4 h-4 shrink-0" />
+                <span>Dropping Terencana</span>
               </button>
               <button
                 onClick={() => onOpenCreateDistribusi(true)}
-                className="flex-1 sm:flex-none flex items-center justify-center gap-1.5 px-4 py-2 bg-amber-600 hover:bg-amber-700 text-white text-xs font-bold rounded-xl shadow-md transition-all cursor-pointer whitespace-nowrap"
+                className="w-full sm:w-auto flex items-center justify-center gap-1.5 min-h-touch h-10 px-4 py-2 bg-amber-600 hover:bg-amber-700 active:scale-95 text-white text-xs font-bold rounded-xl shadow-xs transition-all cursor-pointer whitespace-nowrap"
               >
-                <AlertTriangle className="w-4 h-4" />
-                Ambil Darurat
+                <AlertTriangle className="w-4 h-4 shrink-0" />
+                <span>Ambil Darurat</span>
               </button>
             </div>
           )}

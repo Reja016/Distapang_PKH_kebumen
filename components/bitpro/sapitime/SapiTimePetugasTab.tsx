@@ -106,58 +106,58 @@ function PetugasDetailModal({
     <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-5 bg-slate-950/70 backdrop-blur-sm animate-in fade-in duration-200">
       <div className="bg-white dark:bg-slate-900 w-full max-w-5xl rounded-3xl border border-slate-200 dark:border-slate-800 shadow-2xl flex flex-col max-h-[92vh] overflow-hidden">
         {/* Header Modal dengan Background Hijau Emerald Bitpro */}
-        <div className="p-5 sm:p-6 border-b border-emerald-900 flex items-start justify-between gap-4 bg-gradient-to-r from-emerald-800 via-teal-800 to-emerald-900 text-white">
-          <div className="flex items-center gap-3">
-            <div className="w-12 h-12 rounded-2xl bg-white/20 backdrop-blur-sm text-white font-black text-lg flex items-center justify-center border border-white/30 shadow-xs">
+        <div className="p-4 sm:p-6 border-b border-emerald-900 flex items-center justify-between gap-3 bg-gradient-to-r from-emerald-800 via-teal-800 to-emerald-900 text-white">
+          <div className="flex items-center gap-3 min-w-0">
+            <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl sm:rounded-2xl bg-white/20 backdrop-blur-sm text-white font-black text-base sm:text-lg flex items-center justify-center border border-white/30 shadow-xs shrink-0">
               {petugasName.charAt(0).toUpperCase()}
             </div>
-            <div>
-              <div className="flex items-center gap-2">
-                <h3 className="text-lg font-black text-white">{petugasName}</h3>
-                <span className="px-2.5 py-0.5 rounded-full bg-white/20 text-emerald-100 text-[11px] font-bold">
+            <div className="min-w-0">
+              <div className="flex items-center gap-2 flex-wrap">
+                <h3 className="text-base sm:text-lg font-black text-white truncate">{petugasName}</h3>
+                <span className="px-2 py-0.5 rounded-full bg-white/20 text-emerald-100 text-[10px] sm:text-[11px] font-bold shrink-0">
                   Inseminator
                 </span>
               </div>
-              <p className="text-xs text-emerald-100/90 mt-0.5">
-                Trace pencapaian pelayanan IB &bull; Periode {BULAN_NAMES[selectedMonth - 1]} {selectedYear}
+              <p className="text-[11px] sm:text-xs text-emerald-100/90 mt-0.5 truncate">
+                Trace pencapaian IB &bull; {BULAN_NAMES[selectedMonth - 1]} {selectedYear}
               </p>
             </div>
           </div>
 
           <button
             onClick={onClose}
-            className="w-9 h-9 rounded-full bg-white/10 hover:bg-white/20 border border-white/25 flex items-center justify-center text-white transition-colors cursor-pointer shrink-0"
+            className="w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-white/10 hover:bg-white/20 border border-white/25 flex items-center justify-center text-white transition-colors cursor-pointer shrink-0"
           >
-            <X size={18} />
+            <X size={16} />
           </button>
         </div>
 
-        {/* Ringkasan Angka Petugas */}
-        <div className="p-5 sm:p-6 grid grid-cols-2 sm:grid-cols-4 gap-3 bg-slate-50/50 dark:bg-slate-900/40 border-b border-slate-100 dark:border-slate-800">
-          <div className="bg-white dark:bg-slate-800/80 p-3.5 rounded-2xl border border-slate-200 dark:border-slate-700">
-            <span className="text-[10px] uppercase font-bold text-slate-400 block">Total Tindakan IB</span>
-            <span className="text-xl font-black text-slate-900 dark:text-white mt-1 block">{stats.total} kali</span>
-            <span className="text-[11px] text-slate-500 dark:text-slate-400">{stats.totalSapi} ekor sapi</span>
+        {/* Ringkasan Angka Petugas (Rapi di Mobile 2 Kolom, Desktop 4 Kolom) */}
+        <div className="p-3.5 sm:p-5 grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-3 bg-slate-50/50 dark:bg-slate-900/40 border-b border-slate-100 dark:border-slate-800">
+          <div className="bg-white dark:bg-slate-800/80 p-3 rounded-xl sm:rounded-2xl border border-slate-200 dark:border-slate-700 shadow-2xs">
+            <span className="text-[10px] uppercase font-bold text-slate-400 block tracking-wider">Total Tindakan</span>
+            <span className="text-lg sm:text-xl font-black text-slate-900 dark:text-white mt-0.5 block">{stats.total} kali</span>
+            <span className="text-[10px] sm:text-[11px] text-slate-500 dark:text-slate-400 block">{stats.totalSapi} ekor sapi</span>
           </div>
-          <div className="bg-white dark:bg-slate-800/80 p-3.5 rounded-2xl border border-slate-200 dark:border-slate-700">
-            <span className="text-[10px] uppercase font-bold text-emerald-600 block">Jadi (Bunting)</span>
-            <span className="text-xl font-black text-emerald-700 dark:text-emerald-400 mt-1 block">{stats.berhasil}</span>
-            <span className="text-[11px] text-emerald-600/80 font-semibold">Tercatat konsepsi</span>
+          <div className="bg-white dark:bg-slate-800/80 p-3 rounded-xl sm:rounded-2xl border border-emerald-200/80 dark:border-emerald-900/40 shadow-2xs">
+            <span className="text-[10px] uppercase font-bold text-emerald-600 block tracking-wider">Jadi (Bunting)</span>
+            <span className="text-lg sm:text-xl font-black text-emerald-700 dark:text-emerald-400 mt-0.5 block">{stats.berhasil}</span>
+            <span className="text-[10px] sm:text-[11px] text-emerald-600/90 font-semibold block">Tercatat konsepsi</span>
           </div>
-          <div className="bg-white dark:bg-slate-800/80 p-3.5 rounded-2xl border border-slate-200 dark:border-slate-700">
-            <span className="text-[10px] uppercase font-bold text-amber-600 block">Menunggu PKB</span>
-            <span className="text-xl font-black text-amber-600 mt-1 block">{stats.menunggu}</span>
-            <span className="text-[11px] text-amber-600/80">Proses kebuntingan</span>
+          <div className="bg-white dark:bg-slate-800/80 p-3 rounded-xl sm:rounded-2xl border border-amber-200/80 dark:border-amber-900/40 shadow-2xs">
+            <span className="text-[10px] uppercase font-bold text-amber-600 block tracking-wider">Menunggu PKB</span>
+            <span className="text-lg sm:text-xl font-black text-amber-600 mt-0.5 block">{stats.menunggu}</span>
+            <span className="text-[10px] sm:text-[11px] text-amber-600/90 block">Proses kebuntingan</span>
           </div>
-          <div className="bg-white dark:bg-slate-800/80 p-3.5 rounded-2xl border border-slate-200 dark:border-slate-700">
-            <span className="text-[10px] uppercase font-bold text-purple-600 block">Sebaran Wilayah</span>
-            <span className="text-xl font-black text-purple-700 dark:text-purple-400 mt-1 block">{stats.totalKecamatan} Kec</span>
-            <span className="text-[11px] text-slate-500">Area kerja</span>
+          <div className="bg-white dark:bg-slate-800/80 p-3 rounded-xl sm:rounded-2xl border border-purple-200/80 dark:border-purple-900/40 shadow-2xs">
+            <span className="text-[10px] uppercase font-bold text-purple-600 block tracking-wider">Sebaran Wilayah</span>
+            <span className="text-lg sm:text-xl font-black text-purple-700 dark:text-purple-400 mt-0.5 block">{stats.totalKecamatan} Kec</span>
+            <span className="text-[10px] sm:text-[11px] text-slate-500 block">Area kerja</span>
           </div>
         </div>
 
         {/* Toolbar Pencarian & Filter Periode Modal */}
-        <div className="p-4 sm:p-5 border-b border-slate-100 dark:border-slate-800 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
+        <div className="p-3.5 sm:p-5 border-b border-slate-100 dark:border-slate-800 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2.5">
           <div className="relative flex-1 max-w-md">
             <Search size={14} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
             <input
@@ -165,30 +165,30 @@ function PetugasDetailModal({
               placeholder="Cari nama sapi, pemilik, desa, kecamatan, straw..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full h-9 pl-9 pr-3 text-xs bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none focus:border-emerald-600 font-medium text-slate-900 dark:text-slate-100"
+              className="w-full h-9.5 pl-9 pr-3 text-xs bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl outline-none focus:border-emerald-600 font-medium text-slate-900 dark:text-slate-100"
             />
           </div>
 
-          <div className="flex items-center gap-1.5 self-end sm:self-auto">
+          <div className="flex items-center gap-1.5 w-full sm:w-auto">
             <button
               onClick={() => setFilterMode('bulan_ini')}
-              className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+              className={`flex-1 sm:flex-none px-3 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer text-center ${
                 filterMode === 'bulan_ini'
                   ? 'bg-emerald-600 text-white shadow-xs'
                   : 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-200'
               }`}
             >
-              Bulan Ini ({BULAN_NAMES[selectedMonth - 1]})
+              Bulan Ini
             </button>
             <button
               onClick={() => setFilterMode('semua')}
-              className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+              className={`flex-1 sm:flex-none px-3 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer text-center ${
                 filterMode === 'semua'
                   ? 'bg-emerald-600 text-white shadow-xs'
                   : 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-200'
               }`}
             >
-              Semua Riwayat Sapi ({records.length})
+              Semua ({records.length})
             </button>
           </div>
         </div>
