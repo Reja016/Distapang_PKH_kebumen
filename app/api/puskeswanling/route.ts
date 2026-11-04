@@ -127,46 +127,63 @@ export async function POST(req: Request) {
     const tgl = tanggal || new Date().toISOString().split('T')[0];
     const petugasNama = session?.nama || 'Petugas Keswan';
 
-    const [res]: any = await pool.query(
-      `INSERT INTO puskeswanling (
-        tanggal, puskeswan, nama, alamat, jenis, jumlah_pad, setara_sapi_kerbau,
-        keterangan, petugas_nama
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-      [
-        tgl,
-        puskeswan,
-        nama,
-        alamat || '',
-        jenis || 'Sapi',
-        Number(jumlah_pad) || 0,
-        Number(setara_sapi_kerbau) || 0,
-        keterangan || '',
-        petugasNama,
-      ]
-    );
+    // Mendukung multi-hewan dalam 1 kali input atau single hewan (legacy)
+    const listToInsert = Array.isArray(body.hewanList) && body.hewanList.length > 0
+      ? body.hewanList
+      : [
+          {
+            jenis: jenis || 'Sapi',
+            jumlah_pad: jumlah_pad || 0,
+            setara_sapi_kerbau: setara_sapi_kerbau || 0,
+            keterangan: keterangan || '',
+          },
+        ];
 
-    const insertedId = res.insertId;
+    const insertedIds: number[] = [];
 
-    await logActivity({
-      module: 'keswan',
-      submenu: 'puskeswanling',
-      tableName: 'puskeswanling',
-      recordId: insertedId,
-      action: 'CREATE',
-      userName: petugasNama,
-      details: {
-        nama,
-        puskeswan,
-        jenis,
-        jumlah_pad,
-        setara_sapi_kerbau,
-      },
-    });
+    for (const item of listToInsert) {
+      const [res]: any = await pool.query(
+        `INSERT INTO puskeswanling (
+          tanggal, puskeswan, nama, alamat, jenis, jumlah_pad, setara_sapi_kerbau,
+          keterangan, petugas_nama
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+        [
+          tgl,
+          puskeswan,
+          nama,
+          alamat || '',
+          item.jenis || 'Sapi',
+          Number(item.jumlah_pad) || 0,
+          Number(item.setara_sapi_kerbau) || 0,
+          item.keterangan || '',
+          petugasNama,
+        ]
+      );
+
+      const insertedId = res.insertId;
+      insertedIds.push(insertedId);
+
+      await logActivity({
+        module: 'keswan',
+        submenu: 'puskeswanling',
+        tableName: 'puskeswanling',
+        recordId: insertedId,
+        action: 'CREATE',
+        userName: petugasNama,
+        details: {
+          nama,
+          puskeswan,
+          jenis: item.jenis,
+          jumlah_pad: item.jumlah_pad,
+          setara_sapi_kerbau: item.setara_sapi_kerbau,
+        },
+      });
+    }
 
     return NextResponse.json({
       success: true,
-      message: 'Data Puskeswanling berhasil disimpan!',
-      id: insertedId,
+      message: `${insertedIds.length} data hewan Puskeswanling berhasil disimpan!`,
+      ids: insertedIds,
     });
   } catch (err: any) {
     console.error('Error POST puskeswanling:', err);

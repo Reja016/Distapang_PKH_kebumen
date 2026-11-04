@@ -34,7 +34,6 @@ import VaksinasiModals from '@/components/keswan/data-vaksinasi/VaksinasiModals'
 import { UniversalAuditModal } from '@/components/common/UniversalAuditModal';
 import { useUserAreaRestriction } from '@/hooks/useUserAreaRestriction';
 import { useMasterSystemLock } from '@/hooks/useMasterSystemLock';
-import { checkDailyDeadline } from '@/lib/deadlineCheck';
 
 export default function DataVaksinasiPMKPage() {
   const { isReady, canCreate, canEdit } = usePageAuth('keswan', 'data-vaksinasi');
@@ -205,11 +204,6 @@ export default function DataVaksinasiPMKPage() {
         showToast('error', `Akses Ditolak: Anda tidak memiliki wewenang untuk ${puskeswan}`);
         return;
       }
-      const deadline = checkDailyDeadline(tanggal, false, isMasterUnlocked);
-      if (deadline.isLocked) {
-        showToast('error', deadline.reason || `Pengisian tanggal ${tanggal} telah dikunci (Batas waktu 3 hari berakhir). Hubungi Administrator.`);
-        return;
-      }
     }
     const existing = harianMap[puskeswan]?.[tanggal];
     setEditingHarian({ puskeswan, tanggal });
@@ -223,12 +217,6 @@ export default function DataVaksinasiPMKPage() {
     if (!isAdmin && !isUnrestricted) {
       if (!isPuskeswanAllowed(puskeswan)) {
         showToast('error', `Akses Ditolak: Anda tidak memiliki wewenang untuk ${puskeswan}`);
-        setEditingHarian(null);
-        return;
-      }
-      const deadline = checkDailyDeadline(tanggal, false, isMasterUnlocked);
-      if (deadline.isLocked) {
-        showToast('error', deadline.reason || `Pengisian tanggal ${tanggal} telah dikunci.`);
         setEditingHarian(null);
         return;
       }

@@ -276,202 +276,257 @@ export function SapiTimeDatabaseTab({
             placeholder="Cari nama peternak, NIK, atau sapi..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full min-h-touch h-11 pl-11 pr-4 bg-white border border-slate-200 rounded-xl text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-emerald-600 text-sm shadow-xs transition-colors"
+            className="w-full min-h-touch h-11 pl-11 pr-4 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:border-emerald-600 text-sm shadow-xs transition-colors"
           />
         </div>
-        <div className="flex items-center gap-2 w-full sm:w-auto">
+        <div className="flex items-center justify-between sm:justify-end gap-2 w-full sm:w-auto">
+          <span className="text-xs text-slate-500 dark:text-slate-400 font-medium sm:hidden">
+            Total: <strong className="text-slate-800 dark:text-slate-200">{cattleList.length}</strong> Sapi
+          </span>
           <button
             onClick={() => router.push('/bitpro/database-ib')}
-            className="min-h-touch h-11 px-4 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 font-bold text-xs sm:text-sm flex items-center justify-center gap-2 transition-colors shadow-xs"
+            className="min-h-touch h-11 px-4 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-200 font-bold text-xs sm:text-sm flex items-center justify-center gap-2 transition-colors shadow-xs"
           >
-            <Syringe size={16} className="text-emerald-700" />
+            <Syringe size={16} className="text-emerald-700 dark:text-emerald-400" />
             <span>Database IB ↗</span>
           </button>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-        {cattleList
-          .filter(
-            (c) =>
-              c.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-              (c.ownerName || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
-              (c.nik || '').includes(searchTerm) ||
-              (c.registrationNumber || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
-              (c.ownerPhone || '').includes(searchTerm)
-          )
-          .map((cattle) => {
-            const latestIb = cattle.inseminations && cattle.inseminations.length > 0
-              ? [...cattle.inseminations].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())[0]
-              : null;
-            let daysSinceIB: number | null = null;
-            if (latestIb && latestIb.date) {
-              const diff = Math.floor((new Date().getTime() - new Date(latestIb.date).getTime()) / (1000 * 3600 * 24));
-              if (diff >= 0) daysSinceIB = diff;
-            }
-            const isEstrusWindow = daysSinceIB !== null && daysSinceIB >= 18 && daysSinceIB <= 24;
+      {/* ── TABEL DATA INDUKAN SAPI (STICKY TABLE CONTAINER & RESPONSIVE MOBILE) ── */}
+      <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-xs overflow-hidden flex flex-col">
+        {/* Subheader info jumlah & petunjuk scroll */}
+        <div className="px-4 py-2.5 bg-slate-50/80 dark:bg-slate-800/50 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between text-[11px] text-slate-500 dark:text-slate-400">
+          <span className="font-semibold text-slate-700 dark:text-slate-300">
+            Daftar Indukan Terdaftar: <span className="text-emerald-700 dark:text-emerald-400 font-bold">{cattleList.length}</span> ekor
+          </span>
+          <span className="text-[10px] italic hidden sm:inline">
+            ↕ Scroll ke bawah untuk melihat sapi lainnya (header tetap menempel)
+          </span>
+        </div>
 
-            return (
-              <div
-                key={cattle.id}
-                className={`bg-white border rounded-2xl p-5 shadow-xs transition-all flex flex-col justify-between ${
-                  isEstrusWindow ? 'border-amber-400 ring-2 ring-amber-400/20' : 'border-slate-200 hover:border-emerald-300'
-                }`}
-              >
-                <div>
-                  {/* Banner Peringatan Periode Cek Birahi Hari 18-24 Post-IB */}
-                  {isEstrusWindow && (
-                    <div className="mb-3 px-3 py-2 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-900 flex items-center justify-between text-xs font-bold">
-                      <div className="flex items-center gap-1.5 min-w-0">
-                        <span className="w-2 h-2 rounded-full bg-amber-500 animate-ping shrink-0" />
-                        <span className="truncate">H+{daysSinceIB} Post-IB: Cek Birahi</span>
-                      </div>
-                      {onLaporKondisi && (
-                        <button
-                          type="button"
-                          onClick={() => onLaporKondisi(cattle)}
-                          className="px-2 py-1 rounded-lg bg-amber-600 hover:bg-amber-700 text-white text-[10px] font-bold shadow-xs cursor-pointer shrink-0"
-                        >
-                          Lapor
-                        </button>
-                      )}
-                    </div>
-                  )}
+        {/* Scrollable Container dengan max-height & sticky thead */}
+        <div className="overflow-x-auto overflow-y-auto max-h-[65vh] sm:max-h-[580px] scrollbar-thin">
+          <table className="w-full text-left border-collapse text-xs">
+            <thead className="sticky top-0 z-10 shadow-2xs">
+              <tr className="bg-slate-100 dark:bg-slate-800 text-[11px] font-extrabold text-slate-700 dark:text-slate-200 uppercase tracking-wider border-b border-slate-200 dark:border-slate-700">
+                <th className="py-3 px-3.5 whitespace-nowrap text-center w-12 bg-slate-100 dark:bg-slate-800">No</th>
+                <th className="py-3 px-3.5 whitespace-nowrap min-w-[190px] bg-slate-100 dark:bg-slate-800">Peternak & Kontak</th>
+                <th className="py-3 px-3.5 whitespace-nowrap min-w-[160px] bg-slate-100 dark:bg-slate-800">Identitas Sapi</th>
+                <th className="py-3 px-3.5 whitespace-nowrap min-w-[130px] bg-slate-100 dark:bg-slate-800">Ras & Umur</th>
+                <th className="py-3 px-3.5 whitespace-nowrap min-w-[150px] bg-slate-100 dark:bg-slate-800">Lokasi</th>
+                <th className="py-3 px-3.5 whitespace-nowrap min-w-[120px] text-center bg-slate-100 dark:bg-slate-800">Status</th>
+                <th className="py-3 px-3.5 whitespace-nowrap min-w-[110px] text-center bg-slate-100 dark:bg-slate-800">Riwayat IB</th>
+                <th className="py-3 px-3.5 whitespace-nowrap text-center min-w-[170px] bg-slate-100 dark:bg-slate-800">Aksi</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-slate-100 dark:divide-slate-800/60">
+              {cattleList
+                .filter(
+                  (c) =>
+                    c.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                    (c.ownerName || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+                    (c.nik || '').includes(searchTerm) ||
+                    (c.registrationNumber || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+                    (c.ownerPhone || '').includes(searchTerm)
+                )
+                .map((cattle, idx) => {
+                  const latestIb = cattle.inseminations && cattle.inseminations.length > 0
+                    ? [...cattle.inseminations].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())[0]
+                    : null;
+                  let daysSinceIB: number | null = null;
+                  if (latestIb && latestIb.date) {
+                    const diff = Math.floor((new Date().getTime() - new Date(latestIb.date).getTime()) / (1000 * 3600 * 24));
+                    if (diff >= 0) daysSinceIB = diff;
+                  }
+                  const isEstrusWindow = daysSinceIB !== null && daysSinceIB >= 18 && daysSinceIB <= 24;
 
-                  <div className="flex justify-between items-start mb-4 gap-2">
-                    <div className="min-w-0">
-                      <h3 className="font-bold text-base text-slate-900 dark:text-white truncate flex items-center gap-1.5">
-                        <User size={16} className="text-slate-400 shrink-0" />
-                        <span>{cattle.ownerName || 'Tanpa Nama'}</span>
-                      </h3>
-                      <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5 mt-0.5 text-[11px] text-slate-500 dark:text-slate-400 font-medium">
-                        {cattle.ownerPhone && (
-                          <span className="text-emerald-700 dark:text-emerald-400 font-bold">📞 {cattle.ownerPhone}</span>
-                        )}
-                        {cattle.nik && (
-                          <span>NIK: <span className="font-mono text-slate-700 dark:text-slate-300 font-semibold">{cattle.nik}</span></span>
-                        )}
-                      </div>
-                      <div className="mt-1 flex items-center gap-1.5 flex-wrap">
-                        <span className="font-bold text-sm text-emerald-800 dark:text-emerald-300">
-                          {cattle.name || (cattle.registrationNumber ? `Sapi (${cattle.registrationNumber})` : `Sapi ${cattle.id}`)}
-                        </span>
-                        {cattle.registrationNumber && (
-                          <span className="px-2.5 py-0.5 rounded-full bg-emerald-50 dark:bg-emerald-950/50 text-emerald-800 dark:text-emerald-300 text-[10px] font-mono font-bold border border-emerald-200 dark:border-emerald-800">
-                            Reg: {cattle.registrationNumber}
-                          </span>
-                        )}
-                      </div>
-                      <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5 truncate">
-                        {cattle.id} • {cattle.kecamatan || '-'}, {cattle.desa || '-'}
-                      </p>
-                    </div>
-                    <span
-                      className={`shrink-0 inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-bold border uppercase tracking-wider transition-colors ${
-                        cattle.status === 'Bunting'
-                          ? 'bg-emerald-50 dark:bg-emerald-950/50 text-emerald-700 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800'
-                          : 'bg-amber-50 dark:bg-amber-950/50 text-amber-700 dark:text-amber-300 border-amber-200 dark:border-amber-800'
+                  return (
+                    <tr
+                      key={cattle.id}
+                      className={`hover:bg-slate-50/80 dark:hover:bg-slate-800/50 transition-colors group ${
+                        isEstrusWindow ? 'bg-amber-50/40 dark:bg-amber-950/20' : 'odd:bg-white even:bg-slate-50/30 dark:odd:bg-slate-900 dark:even:bg-slate-850'
                       }`}
                     >
-                      {cattle.status}
-                    </span>
-                  </div>
+                      {/* 1. No */}
+                      <td className="py-3 px-3.5 text-center text-slate-400 font-mono font-medium">
+                        {idx + 1}
+                      </td>
 
-                  <div className="grid grid-cols-2 gap-2 text-xs text-slate-700 dark:text-slate-300 mb-5 bg-slate-50 dark:bg-slate-800/60 p-3.5 rounded-xl border border-slate-100 dark:border-slate-800">
-                    <div>
-                      <span className="text-slate-400 block text-[10px] uppercase font-bold tracking-wider mb-0.5">Ras</span>
-                      <span className="font-semibold text-slate-800">{cattle.breed}</span>
-                    </div>
-                    <div>
-                      <span className="text-slate-400 block text-[10px] uppercase font-bold tracking-wider mb-0.5">Umur</span>
-                      <span className="font-semibold text-slate-800">{calculateAge(cattle.birthDate)}</span>
-                    </div>
-                    <div>
-                      <span className="text-slate-400 block text-[10px] uppercase font-bold tracking-wider mb-0.5">Estrus Terakhir</span>
-                      <span className="font-semibold text-slate-800">
-                        {cattle.lastEstrus ? new Date(cattle.lastEstrus).toLocaleDateString('id-ID') : '-'}
-                      </span>
-                    </div>
-                    <div>
-                      <span className="text-slate-400 block text-[10px] uppercase font-bold tracking-wider mb-0.5">Total IB</span>
-                      <span className="font-semibold text-slate-800">{cattle.inseminations?.length || 0} Kali</span>
-                    </div>
-                  </div>
+                      {/* 2. Peternak & Kontak */}
+                      <td className="py-3 px-3.5 align-top">
+                        <div className="font-bold text-slate-900 dark:text-white flex items-center gap-1.5">
+                          <User size={13} className="text-slate-400 shrink-0" />
+                          <span className="truncate max-w-[170px]">{cattle.ownerName || 'Tanpa Nama'}</span>
+                        </div>
+                        <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5 mt-0.5 text-[11px] text-slate-500 dark:text-slate-400">
+                          {cattle.ownerPhone && (
+                            <span className="text-emerald-700 dark:text-emerald-400 font-semibold">📞 {cattle.ownerPhone}</span>
+                          )}
+                          {cattle.nik && (
+                            <span>NIK: <span className="font-mono text-slate-700 dark:text-slate-300">{cattle.nik}</span></span>
+                          )}
+                        </div>
+                      </td>
 
-                  {/* Tombol Trace Riwayat IB Sapi */}
-                  <button
-                    type="button"
-                    onClick={() => onTraceCattle?.(cattle)}
-                    className="w-full mb-2 py-2 px-3 rounded-xl bg-emerald-50 dark:bg-emerald-950/50 hover:bg-emerald-100/90 dark:hover:bg-emerald-900/60 text-emerald-900 dark:text-emerald-300 border border-emerald-200/90 dark:border-emerald-800 font-bold text-xs flex items-center justify-between transition-all cursor-pointer"
-                  >
-                    <span className="flex items-center gap-1.5">
-                      <Syringe size={13} className="text-emerald-700 dark:text-emerald-400" />
-                      <span>Trace Riwayat IB Sapi</span>
-                    </span>
-                    <span className="bg-white dark:bg-slate-900 px-2 py-0.5 rounded-lg text-[10px] font-black text-emerald-700 dark:text-emerald-400 shadow-2xs border border-emerald-100 dark:border-emerald-800">
-                      {cattle.inseminations?.length || 0}x IB
-                    </span>
-                  </button>
+                      {/* 3. Identitas Sapi */}
+                      <td className="py-3 px-3.5 align-top">
+                        <div className="font-bold text-emerald-800 dark:text-emerald-300 truncate max-w-[160px]">
+                          {cattle.name || `Sapi ${cattle.id}`}
+                        </div>
+                        <div className="flex items-center gap-1.5 mt-0.5 flex-wrap">
+                          <span className="text-[10px] font-mono text-slate-500 dark:text-slate-400">
+                            {cattle.id}
+                          </span>
+                          {cattle.registrationNumber && (
+                            <span className="px-1.5 py-0.2 rounded bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 text-[9px] font-mono font-bold border border-emerald-200 dark:border-emerald-800">
+                              Reg: {cattle.registrationNumber}
+                            </span>
+                          )}
+                        </div>
+                      </td>
 
-                  {/* Tombol Lapor Kondisi Fisik Sapi */}
-                  {onLaporKondisi && (
-                    <button
-                      type="button"
-                      onClick={() => onLaporKondisi(cattle)}
-                      className="w-full mb-3.5 py-2 px-3 rounded-xl bg-blue-50 dark:bg-blue-950/50 hover:bg-blue-100/90 dark:hover:bg-blue-900/60 text-blue-900 dark:text-blue-300 border border-blue-200/90 dark:border-blue-800 font-bold text-xs flex items-center justify-between transition-all cursor-pointer"
-                    >
-                      <span className="flex items-center gap-1.5">
-                        <Activity size={13} className="text-blue-700 dark:text-blue-400" />
-                        <span>Lapor Kondisi Fisik Sapi</span>
-                      </span>
-                      <span className="bg-white dark:bg-slate-900 px-2 py-0.5 rounded-lg text-[10px] font-black text-blue-700 dark:text-blue-400 shadow-2xs border border-blue-100 dark:border-blue-800">
-                        {daysSinceIB !== null ? `H+${daysSinceIB} IB` : 'Cek Fisik'}
-                      </span>
-                    </button>
-                  )}
-                </div>
+                      {/* 4. Ras & Umur */}
+                      <td className="py-3 px-3.5 align-top">
+                        <div className="font-semibold text-slate-800 dark:text-slate-200">
+                          {cattle.breed}
+                        </div>
+                        <div className="text-[11px] text-slate-400">
+                          Umur: {calculateAge(cattle.birthDate)}
+                        </div>
+                      </td>
 
-              <div className="flex gap-2">
-                {canEdit && (
-                  <button
-                    onClick={() => handleEditCattle(cattle)}
-                    className="flex-1 min-h-touch h-10 bg-slate-50 dark:bg-slate-800 text-slate-700 dark:text-slate-200 rounded-xl border border-slate-200 dark:border-slate-700 font-bold hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors flex items-center justify-center gap-1.5 text-xs cursor-pointer"
-                  >
-                    <Edit2 size={13} />
-                    <span>Edit</span>
-                  </button>
-                )}
-                {(canCreate ?? canEdit) && (
-                  <button
-                    onClick={() => onOpenIBModal(cattle)}
-                    className="flex-1 min-h-touch h-10 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-bold transition-colors flex items-center justify-center gap-1.5 text-xs shadow-xs cursor-pointer"
-                  >
-                    <Syringe size={13} />
-                    <span>Catat IB</span>
-                  </button>
-                )}
-                {onShowHistory && (
-                  <button
-                    onClick={() => onShowHistory(cattle)}
-                    title="Riwayat"
-                    className="min-h-touch h-10 w-10 bg-blue-50 dark:bg-blue-950/50 text-blue-600 dark:text-blue-400 rounded-xl border border-blue-200 dark:border-blue-800 hover:bg-blue-100 dark:hover:bg-blue-900 transition-colors flex items-center justify-center shrink-0 cursor-pointer"
-                  >
-                    <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-clock"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-                  </button>
-                )}
-                {canEdit && (
-                  <button
-                    onClick={() => handleDeleteCattle(cattle.id)}
-                    title="Hapus Sapi"
-                    className="min-h-touch h-10 w-10 bg-red-50 dark:bg-red-950/40 text-red-600 dark:text-red-400 rounded-xl border border-red-200 dark:border-red-800 hover:bg-red-100 dark:hover:bg-red-900/60 transition-colors flex items-center justify-center shrink-0 cursor-pointer"
-                  >
-                    <Trash2 size={14} />
-                  </button>
-                )}
-              </div>
-            </div>
-          );
-        })}
+                      {/* 5. Lokasi */}
+                      <td className="py-3 px-3.5 align-top text-slate-600 dark:text-slate-300">
+                        <div className="font-medium truncate max-w-[150px]">
+                          {cattle.kecamatan || '-'}
+                        </div>
+                        <div className="text-[11px] text-slate-400 truncate max-w-[150px]">
+                          {cattle.desa || '-'}
+                        </div>
+                      </td>
+
+                      {/* 6. Status Reproduksi */}
+                      <td className="py-3 px-3.5 align-top text-center">
+                        <span
+                          className={`inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold border uppercase tracking-wider ${
+                            cattle.status === 'Bunting'
+                              ? 'bg-emerald-50 dark:bg-emerald-950/50 text-emerald-700 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800'
+                              : cattle.status === 'Laktasi'
+                              ? 'bg-blue-50 dark:bg-blue-950/50 text-blue-700 dark:text-blue-300 border-blue-200 dark:border-blue-800'
+                              : 'bg-amber-50 dark:bg-amber-950/50 text-amber-700 dark:text-amber-300 border-amber-200 dark:border-amber-800'
+                          }`}
+                        >
+                          {cattle.status}
+                        </span>
+                        {isEstrusWindow && (
+                          <div className="mt-1">
+                            <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md bg-amber-500/10 text-amber-800 dark:text-amber-300 text-[9px] font-bold border border-amber-500/30">
+                              <span className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-ping" />
+                              H+{daysSinceIB} Cek Birahi
+                            </span>
+                          </div>
+                        )}
+                      </td>
+
+                      {/* 7. Riwayat IB */}
+                      <td className="py-3 px-3.5 align-top text-center">
+                        <button
+                          type="button"
+                          onClick={() => onTraceCattle?.(cattle)}
+                          className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-emerald-50 dark:bg-emerald-950/50 hover:bg-emerald-100 text-emerald-800 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800 font-bold text-[11px] transition-colors cursor-pointer"
+                          title="Klik untuk melihat riwayat inseminasi lengkap"
+                        >
+                          <Syringe size={11} className="text-emerald-700 dark:text-emerald-400" />
+                          <span>{cattle.inseminations?.length || 0}x IB</span>
+                        </button>
+                      </td>
+
+                      {/* 8. Aksi (Normal Column di ujung tabel) */}
+                      <td className="py-3 px-3.5 align-top text-center">
+                        <div className="flex items-center justify-center gap-1.5 flex-nowrap">
+                          {/* Catat IB */}
+                          {(canCreate ?? canEdit) && (
+                            <button
+                              type="button"
+                              onClick={() => onOpenIBModal(cattle)}
+                              className="h-8 px-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg font-bold transition-colors flex items-center gap-1 text-[11px] shadow-2xs cursor-pointer shrink-0"
+                              title="Catat Pelayanan Inseminasi Buatan"
+                            >
+                              <Syringe size={11} />
+                              <span>IB</span>
+                            </button>
+                          )}
+
+                          {/* Lapor Kondisi Fisik */}
+                          {onLaporKondisi && (
+                            <button
+                              type="button"
+                              onClick={() => onLaporKondisi(cattle)}
+                              className="h-8 w-8 bg-blue-50 dark:bg-blue-950/50 hover:bg-blue-100 dark:hover:bg-blue-900/60 text-blue-700 dark:text-blue-300 rounded-lg border border-blue-200 dark:border-blue-800 flex items-center justify-center transition-colors cursor-pointer shrink-0"
+                              title="Lapor Kondisi Fisik Sapi"
+                            >
+                              <Activity size={12} />
+                            </button>
+                          )}
+
+                          {/* Edit Sapi */}
+                          {canEdit && (
+                            <button
+                              type="button"
+                              onClick={() => handleEditCattle(cattle)}
+                              className="h-8 w-8 bg-slate-50 dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 rounded-lg border border-slate-200 dark:border-slate-700 flex items-center justify-center transition-colors cursor-pointer shrink-0"
+                              title="Edit Data Sapi"
+                            >
+                              <Edit2 size={12} />
+                            </button>
+                          )}
+
+                          {/* Riwayat Audit Log */}
+                          {onShowHistory && (
+                            <button
+                              type="button"
+                              onClick={() => onShowHistory(cattle)}
+                              className="h-8 w-8 bg-slate-50 dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 rounded-lg border border-slate-200 dark:border-slate-700 flex items-center justify-center transition-colors cursor-pointer shrink-0"
+                              title="Riwayat Perubahan Data"
+                            >
+                              <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-clock"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                            </button>
+                          )}
+
+                          {/* Hapus Sapi */}
+                          {canEdit && (
+                            <button
+                              type="button"
+                              onClick={() => handleDeleteCattle(cattle.id)}
+                              className="h-8 w-8 bg-red-50 dark:bg-red-950/40 hover:bg-red-100 dark:hover:bg-red-900/60 text-red-600 dark:text-red-400 rounded-lg border border-red-200 dark:border-red-800 flex items-center justify-center transition-colors cursor-pointer shrink-0"
+                              title="Hapus Sapi"
+                            >
+                              <Trash2 size={12} />
+                            </button>
+                          )}
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })}
+            </tbody>
+          </table>
+        </div>
+
+        {/* Kondisi Data Kosong */}
+        {cattleList.filter(
+          (c) =>
+            c.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            (c.ownerName || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+            (c.nik || '').includes(searchTerm) ||
+            (c.registrationNumber || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+            (c.ownerPhone || '').includes(searchTerm)
+        ).length === 0 && (
+          <div className="p-10 text-center text-slate-400 dark:text-slate-500">
+            <p className="text-xs font-semibold">Tidak ada data sapi indukan yang cocok.</p>
+          </div>
+        )}
       </div>
     </div>
   );

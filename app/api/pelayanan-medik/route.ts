@@ -51,6 +51,14 @@ async function ensureTable() {
   try {
     await pool.query('ALTER TABLE pelayanan_medik_veteriner DROP COLUMN nomor_seri');
   } catch {}
+
+  // Tambah kolom is_luar_jam_kerja dan catatan_harga_luar_jam jika belum ada
+  try {
+    await pool.query('ALTER TABLE pelayanan_medik_veteriner ADD COLUMN is_luar_jam_kerja TINYINT(1) DEFAULT 0');
+  } catch {}
+  try {
+    await pool.query('ALTER TABLE pelayanan_medik_veteriner ADD COLUMN catatan_harga_luar_jam TEXT NULL');
+  } catch {}
 }
 
 export async function GET(req: Request) {
@@ -119,6 +127,8 @@ export async function GET(req: Request) {
         tanggal: r.tanggal ? new Date(r.tanggal).toISOString().split('T')[0] : '',
         layanan_terpilih: parsedLayanan,
         total_retribusi: Number(r.total_retribusi) || 0,
+        is_luar_jam_kerja: Boolean(r.is_luar_jam_kerja),
+        catatan_harga_luar_jam: r.catatan_harga_luar_jam || '',
       };
     });
 
@@ -155,6 +165,8 @@ export async function POST(req: Request) {
       jenis_hewan,
       jenis_kelamin,
       umur,
+      is_luar_jam_kerja,
+      catatan_harga_luar_jam,
       layanan_terpilih,
       total_retribusi,
       diagnosa_nama,
@@ -197,13 +209,17 @@ export async function POST(req: Request) {
       }
     }
 
-    const jsonLayanan = JSON.stringify(Array.isArray(layanan_terpilih) ? layanan_terpilih : []);
+    const isLuarJam = Boolean(is_luar_jam_kerja);
+    const jsonLayanan = JSON.stringify(isLuarJam ? [] : (Array.isArray(layanan_terpilih) ? layanan_terpilih : []));
+    const finalRetribusi = isLuarJam ? 0 : (Number(total_retribusi) || 0);
+    const finalCatatanHarga = isLuarJam ? (catatan_harga_luar_jam || '') : null;
 
     const [res]: any = await pool.query(
       `INSERT INTO pelayanan_medik_veteriner (
         tanggal, puskeswan, nama_pemilik, alamat, jenis_hewan, jenis_kelamin,
-        umur, layanan_terpilih, total_retribusi, diagnosa_nama, id_laporan_penyakit, catatan, petugas_nama
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+        umur, is_luar_jam_kerja, catatan_harga_luar_jam, layanan_terpilih, total_retribusi,
+        diagnosa_nama, id_laporan_penyakit, catatan, petugas_nama
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       [
         tgl,
         puskeswan,
@@ -212,8 +228,10 @@ export async function POST(req: Request) {
         jenis_hewan || 'Sapi',
         jenis_kelamin || 'Jantan',
         umur || '',
+        isLuarJam ? 1 : 0,
+        finalCatatanHarga,
         jsonLayanan,
-        Number(total_retribusi) || 0,
+        finalRetribusi,
         finalDiagnosaStr,
         idLaporansStr,
         catatan || '',
@@ -268,6 +286,8 @@ export async function PUT(req: Request) {
       jenis_hewan,
       jenis_kelamin,
       umur,
+      is_luar_jam_kerja,
+      catatan_harga_luar_jam,
       layanan_terpilih,
       total_retribusi,
       diagnosa_nama,
@@ -313,13 +333,16 @@ export async function PUT(req: Request) {
       }
     }
 
-    const jsonLayanan = JSON.stringify(Array.isArray(layanan_terpilih) ? layanan_terpilih : []);
+    const isLuarJam = Boolean(is_luar_jam_kerja);
+    const jsonLayanan = JSON.stringify(isLuarJam ? [] : (Array.isArray(layanan_terpilih) ? layanan_terpilih : []));
+    const finalRetribusi = isLuarJam ? 0 : (Number(total_retribusi) || 0);
+    const finalCatatanHarga = isLuarJam ? (catatan_harga_luar_jam || '') : null;
 
     await pool.query(
       `UPDATE pelayanan_medik_veteriner SET
         tanggal = ?, puskeswan = ?, nama_pemilik = ?, alamat = ?,
-        jenis_hewan = ?, jenis_kelamin = ?, umur = ?, layanan_terpilih = ?,
-        total_retribusi = ?, diagnosa_nama = ?, id_laporan_penyakit = ?, catatan = ?
+        jenis_hewan = ?, jenis_kelamin = ?, umur = ?, is_luar_jam_kerja = ?, catatan_harga_luar_jam = ?,
+        layanan_terpilih = ?, total_retribusi = ?, diagnosa_nama = ?, id_laporan_penyakit = ?, catatan = ?
        WHERE id = ?`,
       [
         tgl,
@@ -329,8 +352,10 @@ export async function PUT(req: Request) {
         jenis_hewan || 'Sapi',
         jenis_kelamin || 'Jantan',
         umur || '',
+        isLuarJam ? 1 : 0,
+        finalCatatanHarga,
         jsonLayanan,
-        Number(total_retribusi) || 0,
+        finalRetribusi,
         finalDiagnosaStr,
         updatedIdLaporansStr,
         catatan || '',

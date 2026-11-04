@@ -162,6 +162,8 @@ export function PelayananMedikTab({
       jenis_hewan: item.jenis_hewan,
       jenis_kelamin: item.jenis_kelamin,
       umur: item.umur,
+      is_luar_jam_kerja: Boolean(item.is_luar_jam_kerja),
+      catatan_harga_luar_jam: item.catatan_harga_luar_jam || '',
       layanan_terpilih: Array.isArray(item.layanan_terpilih) ? item.layanan_terpilih : [],
       total_retribusi: item.total_retribusi,
       diagnosa_nama: item.diagnosa_nama || '',
@@ -271,7 +273,9 @@ export function PelayananMedikTab({
       'Jenis Kelamin': r.jenis_kelamin,
       Umur: r.umur,
       Diagnosa: r.diagnosa_nama || '-',
-      'Total Retribusi (Rp)': r.total_retribusi,
+      'Luar Jam Kerja': r.is_luar_jam_kerja ? 'Ya' : 'Tidak',
+      'Catatan Harga Luar Jam': r.catatan_harga_luar_jam || '-',
+      'Total Retribusi (Rp)': r.is_luar_jam_kerja ? 0 : r.total_retribusi,
       'Petugas Medis': r.petugas_nama || '-',
       Catatan: r.catatan || '-',
     }));
@@ -350,8 +354,12 @@ export function PelayananMedikTab({
                 <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
                   Total Retribusi (Auto)
                 </label>
-                <div className="w-full px-3 py-2 text-sm bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800 rounded-lg font-mono font-bold text-emerald-700 dark:text-emerald-400">
-                  {formatRupiah(formData.total_retribusi)}
+                <div className={`w-full px-3 py-2 text-sm border rounded-lg font-mono font-bold ${
+                  formData.is_luar_jam_kerja
+                    ? 'bg-amber-50 dark:bg-amber-950/40 border-amber-200 dark:border-amber-800 text-amber-700 dark:text-amber-400'
+                    : 'bg-emerald-50 dark:bg-emerald-950/40 border-emerald-200 dark:border-emerald-800 text-emerald-700 dark:text-emerald-400'
+                }`}>
+                  {formData.is_luar_jam_kerja ? 'Luar Jam Kerja (Rp 0)' : formatRupiah(formData.total_retribusi)}
                 </div>
               </div>
             </div>
@@ -520,71 +528,133 @@ export function PelayananMedikTab({
               )}
             </div>
 
-            {/* Bagian 4: Checklist Karcis Retribusi (Perda No. 10 Th. 2025) */}
-            <div className="space-y-4">
-              <div className="flex items-center justify-between border-b pb-2 border-slate-200 dark:border-slate-800">
-                <div>
-                  <h4 className="text-sm font-bold text-slate-800 dark:text-slate-200">
-                    Karcis Retribusi Layanan Semi Aktif (Perda No. 10 Th. 2025)
-                  </h4>
-                  <p className="text-xs text-slate-500 dark:text-slate-400">
-                    Centang tindakan layanan yang dilakukan
-                  </p>
+            {/* Bagian 4: Karcis Retribusi (Perda No. 10 Th. 2025) / Pelayanan Luar Jam Kerja */}
+            <div className="space-y-4 pt-2 border-t border-slate-200 dark:border-slate-800">
+              {/* Toggle Opsi Pelayanan di Luar Jam Kerja */}
+              <div className="p-3.5 rounded-xl border border-amber-300 dark:border-amber-800/70 bg-amber-50/80 dark:bg-amber-950/30 flex items-start justify-between gap-3 shadow-2xs">
+                <div className="flex items-start gap-3">
+                  <input
+                    type="checkbox"
+                    id="checkbox_luar_jam_kerja"
+                    checked={formData.is_luar_jam_kerja}
+                    onChange={(e) => {
+                      const isChecked = e.target.checked;
+                      setFormData((prev) => ({
+                        ...prev,
+                        is_luar_jam_kerja: isChecked,
+                        layanan_terpilih: isChecked ? [] : prev.layanan_terpilih,
+                        total_retribusi: isChecked ? 0 : calculateTotalTarif(prev.layanan_terpilih),
+                      }));
+                    }}
+                    className="w-4 h-4 mt-0.5 text-amber-600 rounded border-amber-300 focus:ring-amber-500 cursor-pointer"
+                  />
+                  <label htmlFor="checkbox_luar_jam_kerja" className="cursor-pointer">
+                    <span className="text-xs font-bold text-amber-950 dark:text-amber-200 block">
+                      Pelayanan di Luar Jam Kerja
+                    </span>
+                    <span className="text-[11px] text-amber-800 dark:text-amber-400 block mt-0.5">
+                      Centang jika pelayanan dilakukan di luar jam dinas / panggilan darurat.
+                    </span>
+                  </label>
                 </div>
-                <div className="text-right">
-                  <span className="text-[11px] text-slate-500 block">Total Retribusi:</span>
-                  <span className="text-base font-extrabold text-emerald-600 dark:text-emerald-400 font-mono">
-                    {formatRupiah(formData.total_retribusi)}
+
+                {formData.is_luar_jam_kerja && (
+                  <span className="px-2 py-0.5 rounded-md text-[10px] font-black uppercase tracking-wider bg-amber-200 dark:bg-amber-900 text-amber-900 dark:text-amber-100 shrink-0">
+                    Bebas Karcis Perda
                   </span>
-                </div>
+                )}
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {KARCIS_RETRIBUSI_GROUPS.map((group) => (
-                  <div
-                    key={group.id}
-                    className="p-3.5 bg-slate-50/80 dark:bg-slate-800/40 border border-slate-200 dark:border-slate-700/60 rounded-xl space-y-2.5"
-                  >
-                    <h5 className="text-xs font-bold text-slate-800 dark:text-slate-200 pb-1 border-b border-slate-200 dark:border-slate-700">
-                      {group.judul}
-                    </h5>
-                    <div className="space-y-1.5">
-                      {group.items.map((item) => {
-                        const isChecked = formData.layanan_terpilih.includes(item.id);
-                        return (
-                          <label
-                            key={item.id}
-                            className={`flex items-center justify-between p-2 rounded-lg cursor-pointer transition text-xs border ${
-                              isChecked
-                                ? 'bg-blue-50/90 dark:bg-blue-950/40 border-blue-300 dark:border-blue-700 text-blue-900 dark:text-blue-200 font-medium'
-                                : 'bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700/60 text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700/50'
-                            }`}
-                          >
-                            <div className="flex items-center gap-2">
-                              <input
-                                type="checkbox"
-                                checked={isChecked}
-                                onChange={() => toggleLayanan(item.id)}
-                                className="w-4 h-4 text-blue-600 rounded border-slate-300 focus:ring-blue-500"
-                              />
-                              <span>{item.label}</span>
-                            </div>
-                            <span
-                              className={`px-2 py-0.5 rounded text-[11px] font-mono font-bold ${
-                                isChecked
-                                  ? 'bg-blue-200 dark:bg-blue-800 text-blue-900 dark:text-blue-100'
-                                  : 'bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300'
-                              }`}
-                            >
-                              {formatRupiah(item.tarif)}
-                            </span>
-                          </label>
-                        );
-                      })}
+              {/* JIKA DI LUAR JAM KERJA: Sembunyikan Karcis, Tampilkan Kotak Catatan / Nominal Harga */}
+              {formData.is_luar_jam_kerja ? (
+                <div className="p-4 rounded-xl border border-amber-200 dark:border-amber-800 bg-amber-50/40 dark:bg-amber-950/20 space-y-2.5">
+                  <div>
+                    <h4 className="text-xs font-extrabold text-amber-900 dark:text-amber-200">
+                      Catatan Tarif / Harga Pelayanan di Luar Jam Kerja <span className="text-rose-500">*</span>
+                    </h4>
+                    <p className="text-[11px] text-slate-500 dark:text-slate-400">
+                      Isikan nominal tarif kesepakatan atau catatan rincian biaya penanganan luar jam dinas
+                    </p>
+                  </div>
+
+                  <div>
+                    <input
+                      type="text"
+                      value={formData.catatan_harga_luar_jam}
+                      onChange={(e) => setFormData({ ...formData, catatan_harga_luar_jam: e.target.value })}
+                      placeholder="Contoh: Rp 150.000 (Jasa panggilan malam hari / tindakan darurat)"
+                      className="w-full px-3 py-2 text-xs sm:text-sm bg-white dark:bg-slate-800 border border-amber-300 dark:border-amber-700 rounded-lg focus:ring-2 focus:ring-amber-500 outline-none font-medium text-slate-900 dark:text-white"
+                    />
+                  </div>
+                </div>
+              ) : (
+                /* JIKA JAM KERJA NORMAL: Tampilkan Checklist Karcis Retribusi Perda */
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between border-b pb-2 border-slate-200 dark:border-slate-800">
+                    <div>
+                      <h4 className="text-sm font-bold text-slate-800 dark:text-slate-200">
+                        Karcis Retribusi Layanan Semi Aktif (Perda No. 10 Th. 2025)
+                      </h4>
+                      <p className="text-xs text-slate-500 dark:text-slate-400">
+                        Centang tindakan layanan yang dilakukan (opsional, dapat dikosongkan jika tidak ada karcis)
+                      </p>
+                    </div>
+                    <div className="text-right">
+                      <span className="text-[11px] text-slate-500 block">Total Retribusi:</span>
+                      <span className="text-base font-extrabold text-emerald-600 dark:text-emerald-400 font-mono">
+                        {formatRupiah(formData.total_retribusi)}
+                      </span>
                     </div>
                   </div>
-                ))}
-              </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {KARCIS_RETRIBUSI_GROUPS.map((group) => (
+                      <div
+                        key={group.id}
+                        className="p-3.5 bg-slate-50/80 dark:bg-slate-800/40 border border-slate-200 dark:border-slate-700/60 rounded-xl space-y-2.5"
+                      >
+                        <h5 className="text-xs font-bold text-slate-800 dark:text-slate-200 pb-1 border-b border-slate-200 dark:border-slate-700">
+                          {group.judul}
+                        </h5>
+                        <div className="space-y-1.5">
+                          {group.items.map((item) => {
+                            const isChecked = formData.layanan_terpilih.includes(item.id);
+                            return (
+                              <label
+                                key={item.id}
+                                className={`flex items-center justify-between p-2 rounded-lg cursor-pointer transition text-xs border ${
+                                  isChecked
+                                    ? 'bg-blue-50/90 dark:bg-blue-950/40 border-blue-300 dark:border-blue-700 text-blue-900 dark:text-blue-200 font-medium'
+                                    : 'bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700/60 text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700/50'
+                                }`}
+                              >
+                                <div className="flex items-center gap-2">
+                                  <input
+                                    type="checkbox"
+                                    checked={isChecked}
+                                    onChange={() => toggleLayanan(item.id)}
+                                    className="w-4 h-4 text-blue-600 rounded border-slate-300 focus:ring-blue-500"
+                                  />
+                                  <span>{item.label}</span>
+                                </div>
+                                <span
+                                  className={`px-2 py-0.5 rounded text-[11px] font-mono font-bold ${
+                                    isChecked
+                                      ? 'bg-blue-200 dark:bg-blue-800 text-blue-900 dark:text-blue-100'
+                                      : 'bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300'
+                                  }`}
+                                >
+                                  {formatRupiah(item.tarif)}
+                                </span>
+                              </label>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
 
             {/* Bagian 5: Catatan Tambahan */}
@@ -841,18 +911,42 @@ export function PelayananMedikTab({
                         <span className="text-slate-400 italic">-</span>
                       )}
                     </td>
-                    <td className="py-3 px-3 text-right font-mono font-bold text-emerald-600 dark:text-emerald-400">
-                      {formatRupiah(item.total_retribusi)}
+                    <td className="py-3 px-3 text-right">
+                      {item.is_luar_jam_kerja ? (
+                        <div className="text-right">
+                          <span className="inline-block px-2 py-0.5 rounded text-[10px] font-bold bg-amber-100 dark:bg-amber-950/60 text-amber-800 dark:text-amber-300 border border-amber-300 dark:border-amber-800">
+                            🌙 Luar Jam Kerja
+                          </span>
+                          {item.catatan_harga_luar_jam && (
+                            <p className="text-[10px] text-slate-500 font-medium truncate max-w-[150px] ml-auto mt-0.5" title={item.catatan_harga_luar_jam}>
+                              {item.catatan_harga_luar_jam}
+                            </p>
+                          )}
+                        </div>
+                      ) : (
+                        <span className="font-mono font-bold text-emerald-600 dark:text-emerald-400">
+                          {formatRupiah(item.total_retribusi)}
+                        </span>
+                      )}
                     </td>
                     <td className="py-3 px-3 text-center">
                       <div className="flex items-center justify-center gap-1">
-                        <button
-                          onClick={() => setViewKarcisRecord(item)}
-                          className="p-1.5 text-indigo-600 hover:text-indigo-800 hover:bg-indigo-50 dark:hover:bg-indigo-950/50 rounded-lg transition cursor-pointer"
-                          title="Lihat Bukti Retribusi"
-                        >
-                          <FileText className="w-4 h-4" />
-                        </button>
+                        {!item.is_luar_jam_kerja ? (
+                          <button
+                            onClick={() => setViewKarcisRecord(item)}
+                            className="p-1.5 text-indigo-600 hover:text-indigo-800 hover:bg-indigo-50 dark:hover:bg-indigo-950/50 rounded-lg transition cursor-pointer"
+                            title="Lihat Bukti Karcis Retribusi"
+                          >
+                            <FileText className="w-4 h-4" />
+                          </button>
+                        ) : (
+                          <span
+                            className="p-1.5 text-amber-500 hover:text-amber-700 cursor-help"
+                            title={`Pelayanan di luar jam kerja: ${item.catatan_harga_luar_jam || 'Bebas Karcis Perda'}`}
+                          >
+                            <AlertCircle className="w-4 h-4" />
+                          </span>
+                        )}
                         {canEdit && (
                           <>
                             <button

@@ -100,54 +100,14 @@ export function checkMonthlyDeadline(
 
 /**
  * Validasi batas waktu laporan harian (format: YYYY-MM-DD)
+ * CATATAN REVISI: Pembatasan toleransi 3 hari telah dicabut agar petugas lapangan
+ * dapat melakukan input atau perbaikan data harian kapan saja tanpa terkunci.
  */
 export function checkDailyDeadline(
-  dateStr: string,
-  isAdmin: boolean = false,
-  isMasterUnlocked: boolean = false
+  _dateStr: string,
+  _isAdmin: boolean = false,
+  _isMasterUnlocked: boolean = false
 ): { isLocked: boolean; reason?: string } {
-  if (isAdmin || isMasterUnlocked) {
-    return { isLocked: false };
-  }
-
-  if (!dateStr || typeof dateStr !== 'string') {
-    return { isLocked: false };
-  }
-
-  const parts = dateStr.slice(0, 10).split('-');
-  if (parts.length !== 3) {
-    return { isLocked: false };
-  }
-
-  const y = parseInt(parts[0], 10);
-  const m = parseInt(parts[1], 10) - 1; // 0-indexed
-  const d = parseInt(parts[2], 10);
-
-  if (isNaN(y) || isNaN(m) || isNaN(d)) {
-    return { isLocked: false };
-  }
-
-  const targetDate = new Date(y, m, d);
-  const now = new Date();
-
-  // Tanggal di masa depan (besok ke atas)
-  const todayEnd = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59, 999);
-  if (targetDate.getTime() > todayEnd.getTime()) {
-    return {
-      isLocked: true,
-      reason: `Tanggal ${dateStr} belum berlangsung. Petugas hanya dapat menginput data hingga tanggal hari ini.`,
-    };
-  }
-
-  // Batas toleransi 3 hari kalender: Tanggal target + 3 hari pada pukul 23:59:59.999
-  const lockDate = new Date(y, m, d + 3, 23, 59, 59, 999);
-
-  if (now.getTime() > lockDate.getTime()) {
-    return {
-      isLocked: true,
-      reason: `Pengisian data tanggal ${dateStr} telah dikunci (Batas waktu toleransi 3 hari telah berakhir). Silakan hubungi Administrator jika ada data yang perlu diperbaiki.`,
-    };
-  }
-
+  // Selalu buka kunci pengisian harian (tanpa batasan 3 hari)
   return { isLocked: false };
 }

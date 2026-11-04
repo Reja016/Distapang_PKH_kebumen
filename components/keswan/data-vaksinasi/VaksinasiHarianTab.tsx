@@ -2,7 +2,6 @@ import React, { useMemo } from 'react';
 import { Calendar } from 'lucide-react';
 import { Bulanan, BULAN_LABEL, BULAN_LONG, daysInMonth } from './types';
 import { useUserAreaRestriction } from '@/hooks/useUserAreaRestriction';
-import { checkDailyDeadline } from '@/lib/deadlineCheck';
 
 interface VaksinasiHarianTabProps {
   selectedYear: number;
@@ -215,10 +214,6 @@ export default function VaksinasiHarianTab({
                       }
 
                       const isAllowed = isAdmin || isUnrestricted || isPuskeswanAllowed(row.puskeswan);
-                      const deadline = checkDailyDeadline(dateStr, isAdmin, isMasterUnlocked);
-                      const isLocked = !isAdmin && deadline.isLocked;
-                      const isCellEditable = isAllowed && !isLocked;
-
                       const isToday = isCurrentMonthActive && todayDay === d;
                       let cellTitle = `Klik untuk ubah dosis ${row.puskeswan} tgl ${d}`;
                       let cellClass = 'cursor-pointer ' + (val && val > 0 ? 'bg-blue-50 dark:bg-blue-950/40 text-blue-900 dark:text-blue-200 font-bold hover:bg-blue-100 dark:hover:bg-blue-900/50' : 'bg-white dark:bg-slate-900 hover:bg-blue-50/50 dark:hover:bg-slate-800 text-slate-400 hover:text-blue-900 dark:hover:text-blue-300 font-medium');
@@ -230,9 +225,6 @@ export default function VaksinasiHarianTab({
                       if (!isAllowed) {
                         cellTitle = `Akses Ditolak: Wilayah ${row.puskeswan} di luar wewenang tugas Anda`;
                         cellClass = 'bg-slate-100/80 dark:bg-slate-800/60 text-slate-400 dark:text-slate-600 cursor-not-allowed';
-                      } else if (isLocked) {
-                        cellTitle = deadline.reason || `Tanggal ${dateStr} telah dikunci (Batas waktu 3 hari berakhir). Hubungi Administrator.`;
-                        cellClass = 'bg-slate-100/90 dark:bg-slate-800/80 text-slate-400 dark:text-slate-500 cursor-not-allowed';
                       }
 
                       return (
@@ -241,10 +233,6 @@ export default function VaksinasiHarianTab({
                           onClick={() => {
                             if (!isAllowed) {
                               alert(`Akses Ditolak: Anda tidak memiliki wewenang untuk mengisi/mengubah data ${row.puskeswan}`);
-                              return;
-                            }
-                            if (isLocked) {
-                              alert(deadline.reason || `Pengisian tanggal ${dateStr} telah dikunci (Batas toleransi 3 hari berakhir). Hubungi Administrator jika ada perbaikan data.`);
                               return;
                             }
                             startEditHarian(row.puskeswan, dateStr);

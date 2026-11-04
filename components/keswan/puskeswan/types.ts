@@ -37,6 +37,8 @@ export interface PelayananMedikRecord {
   umur: string;
   layanan_terpilih: string[];
   total_retribusi: number;
+  is_luar_jam_kerja?: boolean | number;
+  catatan_harga_luar_jam?: string;
   diagnosa_nama: string | null;
   id_laporan_penyakit?: number | string | null;
   catatan?: string;
@@ -53,6 +55,8 @@ export interface PelayananMedikFormData {
   jenis_hewan: string;
   jenis_kelamin: string;
   umur: string;
+  is_luar_jam_kerja: boolean;
+  catatan_harga_luar_jam: string;
   layanan_terpilih: string[];
   total_retribusi: number;
   diagnosa_nama: string;
@@ -67,6 +71,8 @@ export const INITIAL_PELAYANAN_FORM: PelayananMedikFormData = {
   jenis_hewan: 'Sapi',
   jenis_kelamin: 'Jantan',
   umur: '',
+  is_luar_jam_kerja: false,
+  catatan_harga_luar_jam: '',
   layanan_terpilih: [],
   total_retribusi: 0,
   diagnosa_nama: '',

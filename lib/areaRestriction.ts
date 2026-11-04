@@ -290,22 +290,7 @@ export async function validateAreaAccess(
       }
     } catch {}
 
-    const { checkMonthlyDeadline, checkDailyDeadline } = await import('@/lib/deadlineCheck');
-    if (deadlineOptions.tanggal) {
-      const check = checkDailyDeadline(deadlineOptions.tanggal, false, isMasterUnlocked);
-      if (check.isLocked) {
-        return {
-          allowed: false,
-          errorResponse: NextResponse.json(
-            {
-              success: false,
-              error: check.reason || 'Pengisian data tanggal ini telah dikunci (Batas waktu 3 hari berakhir). Silakan hubungi Administrator.',
-            },
-            { status: 403 }
-          ),
-        };
-      }
-    }
+    const { checkMonthlyDeadline } = await import('@/lib/deadlineCheck');
     if (deadlineOptions.bulan && deadlineOptions.tahun) {
       const check = checkMonthlyDeadline(deadlineOptions.bulan, deadlineOptions.tahun, false, isMasterUnlocked);
       if (check.isLocked) {

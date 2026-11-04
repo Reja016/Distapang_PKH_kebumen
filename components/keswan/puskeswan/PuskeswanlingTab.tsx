@@ -57,6 +57,29 @@ interface PuskeswanlingFormData {
   keterangan: string;
 }
 
+export interface HewanEntry {
+  id_temp?: string;
+  jenis: string;
+  jumlah_pad: number | string;
+  setara_sapi_kerbau: number | string;
+  keterangan: string;
+}
+
+const DEFAULT_HEWAN_ITEM: HewanEntry = {
+  jenis: 'Sapi',
+  jumlah_pad: 0,
+  setara_sapi_kerbau: 1,
+  keterangan: '',
+};
+
+const getPresetSetara = (chip: string): number => {
+  const lower = chip.toLowerCase();
+  if (lower.includes('sapi') || lower.includes('kerbau') || lower.includes('kuda')) return 1;
+  if (lower.includes('kambing') || lower.includes('domba')) return 0.2;
+  if (lower.includes('kucing') || lower.includes('anjing') || lower.includes('unggas') || lower.includes('kelinci')) return 0.05;
+  return 1;
+};
+
 const INITIAL_FORM: PuskeswanlingFormData = {
   tanggal: new Date().toISOString().split('T')[0],
   puskeswan: 'KEBUMEN',
@@ -90,6 +113,9 @@ export function PuskeswanlingTab({
     ...INITIAL_FORM,
     puskeswan: defaultPuskeswan,
   });
+  const [hewanList, setHewanList] = useState<HewanEntry[]>([
+    { ...DEFAULT_HEWAN_ITEM, id_temp: '1' },
+  ]);
   const [editingId, setEditingId] = useState<number | null>(null);
   const [isSaving, setIsSaving] = useState(false);
 
@@ -139,6 +165,31 @@ export function PuskeswanlingTab({
     return { totalKegiatan, totalPAD, totalSetaraTernak };
   }, [data]);
 
+  const handleAddHewan = () => {
+    setHewanList((prev) => [
+      ...prev,
+      {
+        ...DEFAULT_HEWAN_ITEM,
+        id_temp: String(Date.now() + Math.random()),
+        jenis: 'Kambing',
+        setara_sapi_kerbau: 0.2,
+      },
+    ]);
+  };
+
+  const handleRemoveHewan = (idx: number) => {
+    if (hewanList.length <= 1) return;
+    setHewanList((prev) => prev.filter((_, i) => i !== idx));
+  };
+
+  const handleUpdateHewan = (idx: number, field: keyof HewanEntry, value: any) => {
+    setHewanList((prev) => {
+      const next = [...prev];
+      next[idx] = { ...next[idx], [field]: value };
+      return next;
+    });
+  };
+
   const handleResetForm = () => {
     setEditingId(null);
     setFormData({
@@ -149,6 +200,7 @@ export function PuskeswanlingTab({
     setFormKecamatan('');
     setFormDesa('');
     setFormDetailAlamat('');
+    setHewanList([{ ...DEFAULT_HEWAN_ITEM, id_temp: '1' }]);
   };
 
   const handleOpenEdit = (item: PuskeswanlingRecord) => {
@@ -163,6 +215,15 @@ export function PuskeswanlingTab({
       setara_sapi_kerbau: item.setara_sapi_kerbau,
       keterangan: item.keterangan || '',
     });
+    setHewanList([
+      {
+        id_temp: 'edit-' + item.id,
+        jenis: item.jenis,
+        jumlah_pad: item.jumlah_pad,
+        setara_sapi_kerbau: item.setara_sapi_kerbau,
+        keterangan: item.keterangan || '',
+      },
+    ]);
 
     // Parse alamat kecamatan & desa dari master wilayah database
     getMasterWilayah().then((wil) => {
@@ -191,30 +252,76 @@ export function PuskeswanlingTab({
 
     const finalAlamat = formatAlamatString(formKecamatan, formDesa, formDetailAlamat);
 
+    // Validasi setiap jenis hewan yang diinput
+    for (let i = 0; i < hewanList.length; i++) {
+      if (!hewanList[i].jenis || !hewanList[i].jenis.trim()) {
+        alert(`Jenis ternak pada Hewan #${i + 1} wajib diisi!`);
+        return;
+      }
+    }
+
     setIsSaving(true);
     try {
-      const payload = {
-        ...formData,
-        kecamatan: formKecamatan,
-        desa: formDesa,
-        alamat: finalAlamat,
-        jumlah_pad: Number(formData.jumlah_pad) || 0,
-        setara_sapi_kerbau: Number(formData.setara_sapi_kerbau) || 0,
-        ...(editingId ? { id: editingId } : {}),
-      };
+      if (editingId) {
+        // Mode Edit: Update 1 record terpilih
+        const single = hewanList[0] || DEFAULT_HEWAN_ITEM;
+        const payload = {
+          id: editingId,
+          tanggal: formData.tanggal,
+          puskeswan: formData.puskeswan,
+          nama: formData.nama,
+          kecamatan: formKecamatan,
+          desa: formDesa,
+          alamat: finalAlamat,
+          jenis: single.jenis,
+          jumlah_pad: Number(single.jumlah_pad) || 0,
+          setara_sapi_kerbau: Number(single.setara_sapi_kerbau) || 0,
+          keterangan: single.keterangan || '',
+        };
 
-      const res = await fetch('/api/puskeswanling', {
-        method: editingId ? 'PUT' : 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload),
-      });
-      const json = await res.json();
+        const res = await fetch('/api/puskeswanling', {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload),
+        });
+        const json = await res.json();
 
-      if (json.success) {
-        handleResetForm();
-        await fetchData();
+        if (json.success) {
+          handleResetForm();
+          await fetchData();
+        } else {
+          alert(json.error || 'Gagal memperbarui data.');
+        }
       } else {
-        alert(json.error || 'Gagal menyimpan data.');
+        // Mode Tambah Baru: Multi-hewan dalam 1 peternak sekaligus
+        const payload = {
+          tanggal: formData.tanggal,
+          puskeswan: formData.puskeswan,
+          nama: formData.nama,
+          kecamatan: formKecamatan,
+          desa: formDesa,
+          alamat: finalAlamat,
+          hewanList: hewanList.map((h) => ({
+            jenis: h.jenis.trim(),
+            jumlah_pad: Number(h.jumlah_pad) || 0,
+            setara_sapi_kerbau: Number(h.setara_sapi_kerbau) || 0,
+            keterangan: h.keterangan || '',
+          })),
+        };
+
+        const res = await fetch('/api/puskeswanling', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload),
+        });
+        const json = await res.json();
+
+        if (json.success) {
+          handleResetForm();
+          await fetchData();
+        } else {
+          alert(json.error || 'Gagal menyimpan data.');
+        }
       }
     } catch (err: any) {
       alert(err.message || 'Terjadi kesalahan sistem.');
@@ -373,86 +480,175 @@ export function PuskeswanlingTab({
               />
             </div>
 
-            <div>
-              <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
-                Jenis Ternak / Layanan (Manual) <span className="text-rose-500">*</span>
-              </label>
-              <input
-                type="text"
-                required
-                value={formData.jenis}
-                onChange={(e) => setFormData({ ...formData, jenis: e.target.value })}
-                placeholder="Input manual: Sapi PO, Sapi Limousin, Kambing PE, Domba, dll"
-                className="w-full px-3 py-2 text-sm bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
-              />
-              <div className="flex flex-wrap gap-1 mt-1.5">
-                {['Sapi PO', 'Sapi Limousin', 'Kambing PE', 'Domba', 'Kerbau'].map((chip) => (
-                  <button
-                    key={chip}
-                    type="button"
-                    onClick={() => setFormData({ ...formData, jenis: chip })}
-                    className="px-2 py-0.5 text-[10px] rounded bg-slate-100 hover:bg-blue-100 dark:bg-slate-800 dark:hover:bg-blue-900/50 text-slate-600 dark:text-slate-400 hover:text-blue-700 transition cursor-pointer"
+            {/* ── RINCIAN HEWAN / TERNAK YANG DILAYANI (MULTI-HEWAN DALAM 1 KALI PENGISIAN) ── */}
+            <div className="pt-3 border-t border-slate-200 dark:border-slate-800 space-y-4">
+              <div className="flex items-center justify-between flex-wrap gap-2">
+                <div>
+                  <h4 className="text-sm font-extrabold text-slate-900 dark:text-white flex items-center gap-2">
+                    <Beef className="w-4 h-4 text-blue-600" />
+                    Rincian Hewan / Ternak yang Dilayani
+                    {!editingId && (
+                      <span className="px-2 py-0.5 text-[10px] rounded-full bg-blue-100 dark:bg-blue-950/60 text-blue-700 dark:text-blue-300 font-bold border border-blue-200 dark:border-blue-800">
+                        {hewanList.length} Jenis Hewan
+                      </span>
+                    )}
+                  </h4>
+                  <p className="text-[11px] text-slate-500 mt-0.5">
+                    {editingId
+                      ? 'Mengedit data rincian layanan hewan terpilih'
+                      : 'Petugas dapat menambahkan beberapa jenis hewan sekaligus untuk peternak ini dalam 1 kali simpan'}
+                  </p>
+                </div>
+              </div>
+
+              <div className="space-y-3.5">
+                {hewanList.map((hewan, idx) => (
+                  <div
+                    key={hewan.id_temp || idx}
+                    className="p-4 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50/70 dark:bg-slate-850/60 space-y-3 relative group transition hover:border-blue-300 dark:hover:border-blue-800 shadow-2xs"
                   >
-                    {chip}
-                  </button>
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <span className="w-6 h-6 rounded-lg bg-blue-600 text-white font-bold text-xs flex items-center justify-center shadow-xs">
+                          {idx + 1}
+                        </span>
+                        <span className="text-xs font-bold text-slate-800 dark:text-slate-200">
+                          {hewan.jenis ? `Data Hewan: ${hewan.jenis}` : `Data Hewan #${idx + 1}`}
+                        </span>
+                      </div>
+
+                      {!editingId && hewanList.length > 1 && (
+                        <button
+                          type="button"
+                          onClick={() => handleRemoveHewan(idx)}
+                          className="px-2 py-1 text-red-600 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-950/40 rounded-lg text-xs font-semibold flex items-center gap-1 transition cursor-pointer"
+                          title="Hapus baris hewan ini"
+                        >
+                          <Trash2 className="w-3.5 h-3.5" /> Hapus
+                        </button>
+                      )}
+                    </div>
+
+                    {/* Input Jenis Hewan & Chips */}
+                    <div>
+                      <label className="block text-[11px] font-semibold text-slate-700 dark:text-slate-300 mb-1">
+                        Jenis Ternak / Layanan <span className="text-rose-500">*</span>
+                      </label>
+                      <input
+                        type="text"
+                        required
+                        value={hewan.jenis}
+                        onChange={(e) => handleUpdateHewan(idx, 'jenis', e.target.value)}
+                        placeholder="Contoh: Sapi PO, Sapi Limousin, Kambing PE, Domba, dll"
+                        className="w-full px-3 py-1.5 text-xs bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+                      />
+                      <div className="flex flex-wrap gap-1 mt-1.5">
+                        {['Sapi PO', 'Sapi Limousin', 'Kambing PE', 'Domba', 'Kerbau'].map((chip) => (
+                          <button
+                            key={chip}
+                            type="button"
+                            onClick={() => {
+                              handleUpdateHewan(idx, 'jenis', chip);
+                              if (Number(hewan.setara_sapi_kerbau) === 1 || Number(hewan.setara_sapi_kerbau) === 0) {
+                                handleUpdateHewan(idx, 'setara_sapi_kerbau', getPresetSetara(chip));
+                              }
+                            }}
+                            className="px-2 py-0.5 text-[10px] rounded bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:bg-blue-50 dark:hover:bg-blue-900/50 text-slate-600 dark:text-slate-400 hover:text-blue-700 transition cursor-pointer shadow-2xs"
+                          >
+                            {chip}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* Grid PAD & Setara Sapi */}
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                      <div>
+                        <label className="block text-[11px] font-semibold text-slate-700 dark:text-slate-300 mb-1">
+                          Jumlah PAD (Nominal Rupiah)
+                        </label>
+                        <div className="relative">
+                          <span className="absolute left-2.5 top-1/2 -translate-y-1/2 text-[11px] font-bold text-slate-500">
+                            Rp
+                          </span>
+                          <input
+                            type="number"
+                            min="0"
+                            step="1000"
+                            value={hewan.jumlah_pad}
+                            onChange={(e) => handleUpdateHewan(idx, 'jumlah_pad', e.target.value)}
+                            placeholder="Contoh: 150000"
+                            className="w-full pl-8 pr-3 py-1.5 text-xs bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none font-mono font-bold text-emerald-600 dark:text-emerald-400"
+                          />
+                        </div>
+                        <p className="text-[10px] text-slate-500 mt-0.5 font-mono">
+                          Format: {formatRupiah(Number(hewan.jumlah_pad) || 0)}
+                        </p>
+                      </div>
+
+                      <div>
+                        <label className="block text-[11px] font-semibold text-slate-700 dark:text-slate-300 mb-1">
+                          Jumlah Setara Sapi/Kerbau (Ekor)
+                        </label>
+                        <input
+                          type="number"
+                          min="0"
+                          step="0.1"
+                          value={hewan.setara_sapi_kerbau}
+                          onChange={(e) => handleUpdateHewan(idx, 'setara_sapi_kerbau', e.target.value)}
+                          placeholder="Contoh: 1 / 0.2"
+                          className="w-full px-3 py-1.5 text-xs bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none font-mono font-bold"
+                        />
+                        <p className="text-[10px] text-slate-500 mt-0.5">
+                          Konversi ekor (Sapi/Kerbau: 1, Kambing/Domba: 0.2)
+                        </p>
+                      </div>
+                    </div>
+
+                    {/* Keterangan Per Hewan */}
+                    <div>
+                      <label className="block text-[11px] font-semibold text-slate-700 dark:text-slate-300 mb-1">
+                        Keterangan Tambahan / Penanganan (Opsional)
+                      </label>
+                      <input
+                        type="text"
+                        value={hewan.keterangan}
+                        onChange={(e) => handleUpdateHewan(idx, 'keterangan', e.target.value)}
+                        placeholder="Catatan penanganan, obat, atau kondisi hewan ini..."
+                        className="w-full px-3 py-1.5 text-xs bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+                      />
+                    </div>
+                  </div>
                 ))}
               </div>
-            </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
-                  Jumlah PAD (Nominal Rupiah)
-                </label>
-                <div className="relative">
-                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-xs font-bold text-slate-500">
-                    Rp
-                  </span>
-                  <input
-                    type="number"
-                    min="0"
-                    step="1000"
-                    value={formData.jumlah_pad}
-                    onChange={(e) => setFormData({ ...formData, jumlah_pad: e.target.value })}
-                    placeholder="Contoh: 150000"
-                    className="w-full pl-9 pr-3 py-2 text-sm bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none font-mono font-bold text-emerald-600 dark:text-emerald-400"
-                  />
+              {/* Total Live Ringkasan Form & Tombol Tambah Bawah */}
+              {!editingId && (
+                <div className="flex items-center justify-between gap-3 p-3 bg-blue-50/70 dark:bg-blue-950/40 rounded-xl border border-blue-200 dark:border-blue-900/60 flex-wrap">
+                  <button
+                    type="button"
+                    onClick={handleAddHewan}
+                    className="px-3.5 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-xs font-bold transition flex items-center gap-1.5 shadow-xs cursor-pointer"
+                  >
+                    <Plus className="w-3.5 h-3.5" /> Tambah Hewan Lainnya
+                  </button>
+
+                  <div className="flex items-center gap-4 text-xs font-semibold text-slate-700 dark:text-slate-300 flex-wrap">
+                    <div>
+                      Total PAD Form:{' '}
+                      <span className="font-extrabold text-emerald-600 dark:text-emerald-400 font-mono">
+                        {formatRupiah(hewanList.reduce((sum, h) => sum + (Number(h.jumlah_pad) || 0), 0))}
+                      </span>
+                    </div>
+                    <div className="border-l border-slate-300 dark:border-slate-700 pl-4">
+                      Total Setara:{' '}
+                      <span className="font-extrabold text-blue-600 dark:text-blue-400 font-mono">
+                        {Number(hewanList.reduce((sum, h) => sum + (Number(h.setara_sapi_kerbau) || 0), 0).toFixed(2))} Ekor
+                      </span>
+                    </div>
+                  </div>
                 </div>
-                <p className="text-[11px] text-slate-500 mt-1 font-mono">
-                  Format: {formatRupiah(Number(formData.jumlah_pad) || 0)}
-                </p>
-              </div>
-
-              <div>
-                <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
-                  Jumlah Setara Sapi/Kerbau (Ekor)
-                </label>
-                <input
-                  type="number"
-                  min="0"
-                  step="0.1"
-                  value={formData.setara_sapi_kerbau}
-                  onChange={(e) => setFormData({ ...formData, setara_sapi_kerbau: e.target.value })}
-                  placeholder="Contoh: 1 / 2"
-                  className="w-full px-3 py-2 text-sm bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none font-mono font-bold"
-                />
-                <p className="text-[11px] text-slate-500 mt-1">
-                  Satuan konversi populasi setara ekor sapi/kerbau
-                </p>
-              </div>
-            </div>
-
-            <div>
-              <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
-                Keterangan Tambahan (Opsional)
-              </label>
-              <textarea
-                rows={2}
-                value={formData.keterangan}
-                onChange={(e) => setFormData({ ...formData, keterangan: e.target.value })}
-                placeholder="Catatan penanganan, obat, atau kondisi hewan..."
-                className="w-full px-3 py-2 text-sm bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
-              />
+              )}
             </div>
 
             <div className="pt-2 flex items-center justify-end gap-3">
