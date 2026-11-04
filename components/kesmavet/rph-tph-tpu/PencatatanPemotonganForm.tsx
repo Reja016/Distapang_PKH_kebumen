@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import {
   Calendar,
   Building2,
@@ -17,6 +17,9 @@ import {
   RotateCcw,
   Sparkles,
   Info,
+  Scale,
+  Ruler,
+  Calculator,
 } from 'lucide-react';
 import {
   PencatatanFormData,
@@ -102,12 +105,18 @@ export default function PencatatanPemotonganForm({
         tempat_pemotongan: editingItem.tempat_pemotongan || 'RPH Kebumen',
         nama_tempat_lain: editingItem.nama_tempat_lain || '',
         nama_pemilik: editingItem.nama_pemilik || '',
+        nama_jagal: editingItem.nama_jagal || '',
         kecamatan: editingItem.kecamatan || '',
         desa: editingItem.desa || '',
         rumpun_hewan: editingItem.rumpun_hewan || 'Sapi PO',
         kategori_hewan: editingItem.kategori_hewan || 'Jantan',
         jumlah_ekor: editingItem.jumlah_ekor || 1,
         status_potong: editingItem.status_potong || 'Boleh Dipotong',
+        metode_ukur: (editingItem.metode_ukur as any) || 'timbangan',
+        lingkar_dada: editingItem.lingkar_dada ? Number(editingItem.lingkar_dada) : '',
+        bobot_hidup: editingItem.bobot_hidup ? Number(editingItem.bobot_hidup) : '',
+        estimasi_karkas: editingItem.estimasi_karkas ? Number(editingItem.estimasi_karkas) : '',
+        estimasi_daging: editingItem.estimasi_daging ? Number(editingItem.estimasi_daging) : '',
         pemeriksaan_antemortem: editingItem.pemeriksaan_antemortem || '',
         pemeriksaan_postmortem: editingItem.pemeriksaan_postmortem || '',
         status_kelayakan: editingItem.status_kelayakan || 'Layak Konsumsi',
@@ -162,6 +171,67 @@ export default function PencatatanPemotonganForm({
     formData.rumpun_hewan === 'Babi'
       ? KATEGORI_BABI_OPTIONS
       : KATEGORI_SAPI_OPTIONS;
+
+  // ── KALKULASI PREDIKSI HASIL DAGING (SNI 3932:2008 & DITJEN PKH KEMENTAN) ──
+  const getCarcassPercentage = (rumpun: string) => {
+    if (rumpun === 'Babi') return 0.72; // Rata-rata karkas babi 70-75%
+    if (rumpun === 'Sapi Simmental' || rumpun === 'Sapi Limousine') return 0.53; // Sapi silangan 52-54% (SNI)
+    // Sapi PO, Sapi SO, atau sapi lokal Kebumen lainnya: 50.5% (Standar Kementan Ditjen PKH)
+    return 0.505;
+  };
+
+  const karkasRatio = getCarcassPercentage(formData.rumpun_hewan);
+  const currentBobotHidup = Number(formData.bobot_hidup) || 0;
+  const calculatedKarkas = currentBobotHidup > 0 ? Math.round(currentBobotHidup * karkasRatio * 10) / 10 : 0;
+  const calculatedDagingMurni = calculatedKarkas > 0 ? Math.round(calculatedKarkas * 0.72 * 10) / 10 : 0;
+  const calculatedTulang = calculatedKarkas > 0 ? Math.round(calculatedKarkas * 0.17 * 10) / 10 : 0;
+  const calculatedLemak = calculatedKarkas > 0 ? Math.max(0, Math.round((calculatedKarkas - calculatedDagingMurni - calculatedTulang) * 10) / 10) : 0;
+
+  // Handler saat Lingkar Dada diinput: otomatis hitung Bobot Hidup (Schoorl)
+  const handleLingkarDadaChange = (valStr: string) => {
+    const ldNum = valStr === '' ? '' : Number(valStr);
+    if (ldNum !== '' && !isNaN(ldNum) && ldNum > 0) {
+      // Rumus Schoorl resmi Indonesia: ((LD + 22)^2) / 100
+      const bh = Math.round((Math.pow(ldNum + 22, 2) / 100) * 10) / 10;
+      setFormData((prev) => ({
+        ...prev,
+        lingkar_dada: ldNum,
+        bobot_hidup: bh,
+        metode_ukur: 'lingkar_dada',
+      }));
+    } else {
+      setFormData((prev) => ({
+        ...prev,
+        lingkar_dada: ldNum,
+      }));
+    }
+  };
+
+  // Handler saat Bobot Hidup diinput / diedit langsung dari timbangan
+  const handleBobotHidupChange = (valStr: string) => {
+    const bhNum = valStr === '' ? '' : Number(valStr);
+    setFormData((prev) => ({
+      ...prev,
+      bobot_hidup: bhNum,
+      metode_ukur: 'timbangan',
+    }));
+  };
+
+  // Sinkronkan hasil estimasi ke formData saat bobot atau rumpun berubah
+  useEffect(() => {
+    setFormData((prev) => {
+      const newKarkas = calculatedKarkas > 0 ? calculatedKarkas : '';
+      const newDaging = calculatedDagingMurni > 0 ? calculatedDagingMurni : '';
+      if (prev.estimasi_karkas !== newKarkas || prev.estimasi_daging !== newDaging) {
+        return {
+          ...prev,
+          estimasi_karkas: newKarkas,
+          estimasi_daging: newDaging,
+        };
+      }
+      return prev;
+    });
+  }, [calculatedKarkas, calculatedDagingMurni]);
 
   // 3. Upload & Kompresi Foto Antemortem (Max 2 MB)
   const handleUploadFotoAntemortem = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -259,6 +329,17 @@ export default function PencatatanPemotonganForm({
     ) {
       showToast.error('Nama tempat pemotongan / jagal di luar RPH wajib diisi.');
       return;
+    }
+
+    if (formData.status_potong === 'Boleh Dipotong') {
+      if (!formData.lingkar_dada || Number(formData.lingkar_dada) <= 0) {
+        showToast.error('Lingkar dada ternak (cm) wajib diisi untuk prediksi hasil daging.');
+        return;
+      }
+      if (!formData.bobot_hidup || Number(formData.bobot_hidup) <= 0) {
+        showToast.error('Bobot hidup ternak (kg) wajib diisi.');
+        return;
+      }
     }
 
     try {
@@ -390,8 +471,8 @@ export default function PencatatanPemotonganForm({
           </div>
         )}
 
-        {/* ── BARIS 2: IDENTITAS PEMILIK & ALAMAT ── */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        {/* ── BARIS 2: IDENTITAS PEMILIK, JAGAL & ALAMAT ── */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           {/* Nama Pemilik */}
           <div>
             <label className="block mb-1.5 text-xs font-bold text-slate-700 dark:text-slate-300">
@@ -400,9 +481,24 @@ export default function PencatatanPemotonganForm({
             <input
               type="text"
               required
-              placeholder="Nama lengkap peternak / pedagang..."
+              placeholder="Nama lengkap pemilik / peternak..."
               value={formData.nama_pemilik}
               onChange={(e) => setFormData({ ...formData, nama_pemilik: e.target.value })}
+              className="w-full h-11 px-3.5 rounded-2xl border border-slate-200 dark:border-slate-700 bg-slate-50/70 dark:bg-slate-800 font-semibold text-slate-900 dark:text-white outline-none focus:border-purple-600 text-xs sm:text-sm"
+            />
+          </div>
+
+          {/* Nama Jagal */}
+          <div>
+            <label className="block mb-1.5 text-xs font-bold text-slate-700 dark:text-slate-300 flex items-center justify-between">
+              <span>Nama Jagal / Penyembelih</span>
+              <span className="text-[10px] text-purple-600 dark:text-purple-400 font-bold bg-purple-50 dark:bg-purple-950/60 px-1.5 py-0.5 rounded">Opsional</span>
+            </label>
+            <input
+              type="text"
+              placeholder="Nama jagal yang memotong..."
+              value={formData.nama_jagal}
+              onChange={(e) => setFormData({ ...formData, nama_jagal: e.target.value })}
               className="w-full h-11 px-3.5 rounded-2xl border border-slate-200 dark:border-slate-700 bg-slate-50/70 dark:bg-slate-800 font-semibold text-slate-900 dark:text-white outline-none focus:border-purple-600 text-xs sm:text-sm"
             />
           </div>
@@ -567,7 +663,184 @@ export default function PencatatanPemotonganForm({
           </div>
         )}
 
-        {/* ── BARIS 4: PEMERIKSAAN ANTEMORTEM & POSTMORTEM ── */}
+        {/* ── FITUR PREDIKSI HASIL DAGING (KARKAS & DAGING MURNI BERDASARKAN SNI & KEMENTAN) ── */}
+        {formData.status_potong === 'Boleh Dipotong' && (
+          <div className="p-4 sm:p-5 rounded-3xl border border-purple-200 dark:border-purple-900/50 bg-gradient-to-br from-purple-50/60 via-white to-pink-50/40 dark:from-slate-900 dark:via-slate-900 dark:to-purple-950/20 shadow-xs space-y-4 animate-in fade-in duration-200">
+            {/* Header Prediksi */}
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-3 border-b border-purple-100 dark:border-slate-800">
+              <div className="flex items-center gap-2">
+                <span className="p-1.5 rounded-xl bg-purple-600 text-white shadow-2xs">
+                  <Calculator size={16} />
+                </span>
+                <div>
+                  <h4 className="text-xs sm:text-sm font-extrabold text-slate-900 dark:text-white flex items-center gap-1.5">
+                    <span>Prediksi Hasil Daging &amp; Karkas</span>
+                    <span className="text-[10px] font-bold text-purple-700 dark:text-purple-300 bg-purple-100 dark:bg-purple-950/60 px-2 py-0.5 rounded-full">
+                      SNI 3932:2008 &amp; Ditjen PKH
+                    </span>
+                  </h4>
+                  <p className="text-[11px] text-slate-500 dark:text-slate-400">
+                    Masukkan ukuran lingkar dada &amp; bobot hidup untuk kalkulasi otomatis estimasi karkas dan daging murni.
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* Input Pengukuran: Lingkar Dada & Bobot Hidup Langsung Berdampingan */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3.5 items-start">
+              {/* Kolom 1: Lingkar Dada */}
+              <div>
+                <label className="block mb-1 text-xs font-bold text-slate-700 dark:text-slate-300 flex items-center gap-1.5">
+                  <Ruler size={13} className="text-purple-600" />
+                  <span>Lingkar Dada (cm)</span>
+                </label>
+                <div className="relative">
+                  <input
+                    type="number"
+                    step="0.1"
+                    min="1"
+                    required
+                    placeholder="Contoh: 178"
+                    value={formData.lingkar_dada}
+                    onChange={(e) => handleLingkarDadaChange(e.target.value)}
+                    className="w-full h-11 px-3.5 pr-10 rounded-2xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 font-black text-slate-900 dark:text-white outline-none focus:border-purple-600 text-sm"
+                  />
+                  <span className="absolute right-3.5 top-3 text-xs font-bold text-slate-400 pointer-events-none">
+                    cm
+                  </span>
+                </div>
+                <span className="text-[10px] text-slate-500 mt-1 block">
+                  Ukur melingkar di belakang kaki depan (Rumus Schoorl)
+                </span>
+              </div>
+
+              {/* Kolom 2: Bobot Hidup Timbangan */}
+              <div>
+                <label className="block mb-1 text-xs font-bold text-slate-700 dark:text-slate-300 flex items-center gap-1.5">
+                  <Scale size={13} className="text-purple-600" />
+                  <span>Bobot Hidup / Timbangan (kg)</span>
+                </label>
+                <div className="relative">
+                  <input
+                    type="number"
+                    step="0.1"
+                    min="1"
+                    required
+                    placeholder="Contoh: 420.5"
+                    value={formData.bobot_hidup}
+                    onChange={(e) => handleBobotHidupChange(e.target.value)}
+                    className="w-full h-11 px-3.5 pr-10 rounded-2xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 font-black text-slate-900 dark:text-white outline-none focus:border-purple-600 text-sm"
+                  />
+                  <span className="absolute right-3.5 top-3 text-xs font-bold text-slate-400 pointer-events-none">
+                    kg
+                  </span>
+                </div>
+                <span className="text-[10px] text-slate-500 mt-1 block">
+                  Otomatis terisi dari rumus Schoorl atau ketik manual jika ditimbang
+                </span>
+              </div>
+
+              {/* Kolom 3: Info Acuan Rumus Rumpun */}
+              <div className="p-3 rounded-2xl bg-purple-50/60 dark:bg-slate-800/60 border border-purple-100 dark:border-slate-700 text-[11px] text-slate-600 dark:text-slate-300 h-full flex flex-col justify-center">
+                <span className="font-bold block text-purple-900 dark:text-purple-200">
+                  Rasio {formData.rumpun_hewan}: {(karkasRatio * 100).toFixed(1)}% Karkas
+                </span>
+                <span className="mt-0.5 text-slate-500 dark:text-slate-400">
+                  Daging murni est. 72% dari bobot karkas (bebas tulang).
+                </span>
+              </div>
+            </div>
+
+            {/* Kartu Ringkasan Hasil Prediksi */}
+            {currentBobotHidup > 0 ? (
+              <div className="space-y-2 pt-1 animate-in fade-in duration-200">
+                <span className="text-[11px] uppercase font-extrabold text-slate-500 tracking-wider block">
+                  Ringkasan Estimasi Hasil Potong {formData.jumlah_ekor > 1 ? `(Per Ekor & Total ${formData.jumlah_ekor} Ekor)` : '(Per Ekor)'}:
+                </span>
+                
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
+                  {/* Estimasi Karkas */}
+                  <div className="p-3 rounded-2xl bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800/60">
+                    <span className="text-[10px] font-bold uppercase text-emerald-700 dark:text-emerald-300 block">
+                      🥩 Estimasi Karkas
+                    </span>
+                    <span className="text-base sm:text-lg font-black text-emerald-900 dark:text-emerald-100 font-mono block mt-0.5">
+                      {calculatedKarkas.toLocaleString('id-ID')} kg
+                    </span>
+                    {formData.jumlah_ekor > 1 && (
+                      <span className="text-[10px] font-semibold text-emerald-700 dark:text-emerald-400 block mt-0.5">
+                        Total: {(calculatedKarkas * formData.jumlah_ekor).toFixed(1)} kg
+                      </span>
+                    )}
+                    <span className="text-[10px] text-emerald-600/80 block mt-1">
+                      {(karkasRatio * 100).toFixed(1)}% bobot hidup
+                    </span>
+                  </div>
+
+                  {/* Daging Murni */}
+                  <div className="p-3 rounded-2xl bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-800/60">
+                    <span className="text-[10px] font-bold uppercase text-rose-700 dark:text-rose-300 block">
+                      🍖 Daging Murni
+                    </span>
+                    <span className="text-base sm:text-lg font-black text-rose-900 dark:text-rose-100 font-mono block mt-0.5">
+                      {calculatedDagingMurni.toLocaleString('id-ID')} kg
+                    </span>
+                    {formData.jumlah_ekor > 1 && (
+                      <span className="text-[10px] font-semibold text-rose-700 dark:text-rose-400 block mt-0.5">
+                        Total: {(calculatedDagingMurni * formData.jumlah_ekor).toFixed(1)} kg
+                      </span>
+                    )}
+                    <span className="text-[10px] text-rose-600/80 block mt-1">
+                      72% dari karkas (boneless)
+                    </span>
+                  </div>
+
+                  {/* Estimasi Tulang */}
+                  <div className="p-3 rounded-2xl bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800/60">
+                    <span className="text-[10px] font-bold uppercase text-amber-700 dark:text-amber-300 block">
+                      🦴 Estimasi Tulang
+                    </span>
+                    <span className="text-base sm:text-lg font-black text-amber-900 dark:text-amber-100 font-mono block mt-0.5">
+                      {calculatedTulang.toLocaleString('id-ID')} kg
+                    </span>
+                    {formData.jumlah_ekor > 1 && (
+                      <span className="text-[10px] font-semibold text-amber-700 dark:text-amber-400 block mt-0.5">
+                        Total: {(calculatedTulang * formData.jumlah_ekor).toFixed(1)} kg
+                      </span>
+                    )}
+                    <span className="text-[10px] text-amber-600/80 block mt-1">
+                      ~17% karkas
+                    </span>
+                  </div>
+
+                  {/* Lemak / Trim */}
+                  <div className="p-3 rounded-2xl bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700">
+                    <span className="text-[10px] font-bold uppercase text-slate-600 dark:text-slate-300 block">
+                      🧈 Lemak / Trim
+                    </span>
+                    <span className="text-base sm:text-lg font-black text-slate-800 dark:text-slate-200 font-mono block mt-0.5">
+                      {calculatedLemak.toLocaleString('id-ID')} kg
+                    </span>
+                    {formData.jumlah_ekor > 1 && (
+                      <span className="text-[10px] font-semibold text-slate-600 dark:text-slate-400 block mt-0.5">
+                        Total: {(calculatedLemak * formData.jumlah_ekor).toFixed(1)} kg
+                      </span>
+                    )}
+                    <span className="text-[10px] text-slate-500 block mt-1">
+                      ~11% karkas &amp; sisa
+                    </span>
+                  </div>
+                </div>
+              </div>
+            ) : (
+              <div className="p-3 rounded-2xl bg-slate-50/80 dark:bg-slate-800/40 border border-dashed border-slate-200 dark:border-slate-700 flex items-center justify-between text-xs text-slate-500">
+                <span>💡 Masukkan <b>Bobot Hidup</b> atau <b>Lingkar Dada</b> di atas untuk melihat prediksi hasil daging otomatis.</span>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* ── BARIS 5: PEMERIKSAAN ANTEMORTEM & POSTMORTEM ── */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {/* Antemortem */}
           <div className="space-y-2 p-4 rounded-2xl border border-purple-100 dark:border-slate-800 bg-purple-50/30 dark:bg-purple-950/20">

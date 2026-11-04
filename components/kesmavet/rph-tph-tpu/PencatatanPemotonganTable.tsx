@@ -72,13 +72,14 @@ export default function PencatatanPemotonganTable({
       if (!q) return true;
 
       const matchPemilik = (item.nama_pemilik || '').toLowerCase().includes(q);
+      const matchJagal = (item.nama_jagal || '').toLowerCase().includes(q);
       const matchTempatLain = (item.nama_tempat_lain || '').toLowerCase().includes(q);
       const matchTempat = (item.tempat_pemotongan || '').toLowerCase().includes(q);
       const matchKec = (item.kecamatan || '').toLowerCase().includes(q);
       const matchDesa = (item.desa || '').toLowerCase().includes(q);
       const matchRumpun = (item.rumpun_hewan || '').toLowerCase().includes(q);
 
-      return matchPemilik || matchTempatLain || matchTempat || matchKec || matchDesa || matchRumpun;
+      return matchPemilik || matchJagal || matchTempatLain || matchTempat || matchKec || matchDesa || matchRumpun;
     });
   }, [dataList, searchQuery]);
 
@@ -120,13 +121,19 @@ export default function PencatatanPemotonganTable({
         No: idx + 1,
         'Tanggal Pemotongan': d.tanggal ? String(d.tanggal).split('T')[0] : '',
         'Tempat Pemotongan': d.tempat_pemotongan || '',
-        'Nama Jagal / Tempat Luar RPH': d.nama_tempat_lain || '-',
+        'Nama Tempat Luar RPH': d.nama_tempat_lain || '-',
         'Nama Pemilik': d.nama_pemilik || '',
+        'Nama Jagal': d.nama_jagal || '-',
         Kecamatan: d.kecamatan || '',
         'Desa / Kelurahan': d.desa || '',
         'Rumpun Hewan': d.rumpun_hewan || '',
         Kategori: d.kategori_hewan || '',
         'Jumlah (Ekor)': Number(d.jumlah_ekor) || 1,
+        'Metode Ukur': d.metode_ukur === 'lingkar_dada' ? 'Pita Ukur Lingkar Dada' : (d.bobot_hidup ? 'Timbangan' : '-'),
+        'Lingkar Dada (cm)': d.lingkar_dada ? Number(d.lingkar_dada) : '-',
+        'Bobot Hidup (kg)': d.bobot_hidup ? Number(d.bobot_hidup) : '-',
+        'Est. Karkas (kg)': d.estimasi_karkas ? Number(d.estimasi_karkas) : '-',
+        'Est. Daging Murni (kg)': d.estimasi_daging ? Number(d.estimasi_daging) : '-',
         'Izin Pemotongan': d.status_potong || 'Boleh Dipotong',
         'Pemeriksaan Antemortem': d.pemeriksaan_antemortem || '-',
         'Pemeriksaan Postmortem': (d.status_potong || 'Boleh Dipotong') === 'Tidak Boleh Dipotong' ? 'Tidak Dilakukan (Hewan Ditolak Potong)' : (d.pemeriksaan_postmortem || '-'),
@@ -380,6 +387,11 @@ export default function PencatatanPemotonganTable({
                         <span className="font-extrabold text-slate-900 dark:text-white block">
                           {row.nama_pemilik}
                         </span>
+                        {row.nama_jagal && (
+                          <span className="text-[11px] font-semibold text-purple-700 dark:text-purple-300 block">
+                            Jagal: {row.nama_jagal}
+                          </span>
+                        )}
                         <span className="text-[11px] text-slate-500 block">
                           Desa {row.desa}, Kec. {row.kecamatan}
                         </span>
@@ -390,9 +402,21 @@ export default function PencatatanPemotonganTable({
                         <span className="font-bold text-slate-900 dark:text-white block">
                           {row.rumpun_hewan}
                         </span>
-                        <span className="text-[11px] text-purple-700 dark:text-purple-400 font-semibold">
+                        <span className="text-[11px] text-purple-700 dark:text-purple-400 font-semibold block">
                           {row.kategori_hewan}
                         </span>
+                        {row.bobot_hidup && Number(row.bobot_hidup) > 0 ? (
+                          <div className="flex items-center gap-1 flex-wrap mt-1">
+                            <span className="px-1.5 py-0.5 rounded text-[10px] font-mono font-bold bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300" title="Bobot Hidup">
+                              BH: {Number(row.bobot_hidup).toLocaleString('id-ID')} kg
+                            </span>
+                            {row.estimasi_daging && Number(row.estimasi_daging) > 0 && (
+                              <span className="px-1.5 py-0.5 rounded text-[10px] font-mono font-bold bg-rose-50 dark:bg-rose-950/60 text-rose-800 dark:text-rose-300 border border-rose-200 dark:border-rose-900/40" title="Estimasi Daging Murni">
+                                🥩 {Number(row.estimasi_daging).toLocaleString('id-ID')} kg
+                              </span>
+                            )}
+                          </div>
+                        ) : null}
                       </td>
 
                       {/* Jumlah Ekor */}
@@ -598,10 +622,15 @@ export default function PencatatanPemotonganTable({
               </div>
 
               <div className="p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-800/40 space-y-1">
-                <span className="text-slate-400 font-bold block">Pemilik &amp; Alamat</span>
+                <span className="text-slate-400 font-bold block">Pemilik, Jagal &amp; Alamat</span>
                 <span className="text-sm font-extrabold text-slate-900 dark:text-white block">
                   {detailItem.nama_pemilik}
                 </span>
+                {detailItem.nama_jagal && (
+                  <span className="text-xs text-purple-700 dark:text-purple-300 block font-bold">
+                    Jagal: {detailItem.nama_jagal}
+                  </span>
+                )}
                 <span className="text-xs text-slate-600 dark:text-slate-400 block font-medium">
                   Desa {detailItem.desa}, Kec. {detailItem.kecamatan}
                 </span>
@@ -645,6 +674,44 @@ export default function PencatatanPemotonganTable({
                 </div>
               </div>
             </div>
+
+            {/* Prediksi Hasil Daging (Jika Tersedia) */}
+            {detailItem.bobot_hidup && Number(detailItem.bobot_hidup) > 0 && (
+              <div className="p-4 rounded-2xl bg-purple-50/60 dark:bg-purple-950/30 border border-purple-200 dark:border-purple-900/50 space-y-2.5">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-black text-purple-900 dark:text-purple-200 flex items-center gap-1.5">
+                    <span>🥩 Prediksi Hasil Daging &amp; Karkas</span>
+                    <span className="text-[10px] font-bold text-purple-700 dark:text-purple-300 bg-purple-100 dark:bg-purple-900/60 px-2 py-0.5 rounded-full">
+                      SNI 3932:2008 &amp; Ditjen PKH
+                    </span>
+                  </span>
+                  <span className="text-[11px] text-slate-500 font-mono">
+                    Metode: {detailItem.metode_ukur === 'lingkar_dada' ? `Pita Ukur (${detailItem.lingkar_dada} cm)` : 'Timbangan'}
+                  </span>
+                </div>
+
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5 pt-1">
+                  <div className="p-2.5 rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700">
+                    <span className="text-[10px] text-slate-500 font-bold block uppercase">Bobot Hidup</span>
+                    <span className="text-sm font-black text-slate-900 dark:text-white font-mono block">
+                      {Number(detailItem.bobot_hidup).toLocaleString('id-ID')} kg
+                    </span>
+                  </div>
+                  <div className="p-2.5 rounded-xl bg-emerald-50 dark:bg-emerald-950/50 border border-emerald-200 dark:border-emerald-800/60">
+                    <span className="text-[10px] text-emerald-700 dark:text-emerald-300 font-bold block uppercase">Est. Karkas</span>
+                    <span className="text-sm font-black text-emerald-900 dark:text-emerald-100 font-mono block">
+                      {detailItem.estimasi_karkas ? `${Number(detailItem.estimasi_karkas).toLocaleString('id-ID')} kg` : '-'}
+                    </span>
+                  </div>
+                  <div className="p-2.5 rounded-xl bg-rose-50 dark:bg-rose-950/50 border border-rose-200 dark:border-rose-800/60 col-span-2 sm:col-span-1">
+                    <span className="text-[10px] text-rose-700 dark:text-rose-300 font-bold block uppercase">Est. Daging Murni</span>
+                    <span className="text-sm font-black text-rose-900 dark:text-rose-100 font-mono block">
+                      {detailItem.estimasi_daging ? `${Number(detailItem.estimasi_daging).toLocaleString('id-ID')} kg` : '-'}
+                    </span>
+                  </div>
+                </div>
+              </div>
+            )}
 
             {/* Hasil Pemeriksaan Antemortem & Postmortem */}
             <div className="space-y-3">

@@ -17,12 +17,18 @@ async function ensureTable() {
         tempat_pemotongan VARCHAR(100) NOT NULL,
         nama_tempat_lain VARCHAR(255) NULL,
         nama_pemilik VARCHAR(150) NOT NULL,
+        nama_jagal VARCHAR(150) NULL,
         kecamatan VARCHAR(100) NOT NULL,
         desa VARCHAR(100) NOT NULL,
         rumpun_hewan VARCHAR(100) NOT NULL,
         kategori_hewan VARCHAR(50) NOT NULL,
         jumlah_ekor INT NOT NULL DEFAULT 1,
         status_potong VARCHAR(50) NOT NULL DEFAULT 'Boleh Dipotong',
+        metode_ukur VARCHAR(30) DEFAULT 'timbangan',
+        lingkar_dada DECIMAL(8,2) NULL,
+        bobot_hidup DECIMAL(8,2) NULL,
+        estimasi_karkas DECIMAL(8,2) NULL,
+        estimasi_daging DECIMAL(8,2) NULL,
         pemeriksaan_antemortem TEXT NULL,
         pemeriksaan_postmortem TEXT NULL,
         status_kelayakan VARCHAR(50) NOT NULL DEFAULT 'Layak Konsumsi',
@@ -39,14 +45,22 @@ async function ensureTable() {
       ) ENGINE=InnoDB;
     `);
 
-    // Tambah kolom status_potong jika tabel sudah ada sebelumnya
-    try {
-      await pool.query(`
-        ALTER TABLE pencatatan_pemotongan 
-        ADD COLUMN status_potong VARCHAR(50) NOT NULL DEFAULT 'Boleh Dipotong' AFTER jumlah_ekor
-      `);
-    } catch {
-      // Abaikan jika kolom sudah ada
+    // Tambah kolom baru jika tabel sudah ada sebelumnya
+    const alterQueries = [
+      `ALTER TABLE pencatatan_pemotongan ADD COLUMN status_potong VARCHAR(50) NOT NULL DEFAULT 'Boleh Dipotong' AFTER jumlah_ekor`,
+      `ALTER TABLE pencatatan_pemotongan ADD COLUMN nama_jagal VARCHAR(150) NULL AFTER nama_pemilik`,
+      `ALTER TABLE pencatatan_pemotongan ADD COLUMN metode_ukur VARCHAR(30) DEFAULT 'timbangan' AFTER status_potong`,
+      `ALTER TABLE pencatatan_pemotongan ADD COLUMN lingkar_dada DECIMAL(8,2) NULL AFTER metode_ukur`,
+      `ALTER TABLE pencatatan_pemotongan ADD COLUMN bobot_hidup DECIMAL(8,2) NULL AFTER lingkar_dada`,
+      `ALTER TABLE pencatatan_pemotongan ADD COLUMN estimasi_karkas DECIMAL(8,2) NULL AFTER bobot_hidup`,
+      `ALTER TABLE pencatatan_pemotongan ADD COLUMN estimasi_daging DECIMAL(8,2) NULL AFTER estimasi_karkas`,
+    ];
+    for (const q of alterQueries) {
+      try {
+        await pool.query(q);
+      } catch {
+        // Abaikan jika kolom sudah ada
+      }
     }
 
     hasEnsuredTable = true;
@@ -85,8 +99,8 @@ export async function GET(request: Request) {
 
     if (q && q.trim()) {
       const term = `%${q.trim()}%`;
-      query += ' AND (nama_pemilik LIKE ? OR nama_tempat_lain LIKE ? OR kecamatan LIKE ? OR desa LIKE ? OR rumpun_hewan LIKE ?)';
-      params.push(term, term, term, term, term);
+      query += ' AND (nama_pemilik LIKE ? OR nama_jagal LIKE ? OR nama_tempat_lain LIKE ? OR kecamatan LIKE ? OR desa LIKE ? OR rumpun_hewan LIKE ?)';
+      params.push(term, term, term, term, term, term);
     }
 
     query += ' ORDER BY tanggal DESC, id DESC';
@@ -115,12 +129,18 @@ export async function POST(request: Request) {
       tempat_pemotongan,
       nama_tempat_lain,
       nama_pemilik,
+      nama_jagal,
       kecamatan,
       desa,
       rumpun_hewan,
       kategori_hewan,
       jumlah_ekor,
       status_potong,
+      metode_ukur,
+      lingkar_dada,
+      bobot_hidup,
+      estimasi_karkas,
+      estimasi_daging,
       pemeriksaan_antemortem,
       pemeriksaan_postmortem,
       status_kelayakan,
@@ -146,21 +166,28 @@ export async function POST(request: Request) {
 
     const [result]: any = await pool.query(
       `INSERT INTO pencatatan_pemotongan (
-        tanggal, tempat_pemotongan, nama_tempat_lain, nama_pemilik, kecamatan, desa,
-        rumpun_hewan, kategori_hewan, jumlah_ekor, status_potong, pemeriksaan_antemortem, pemeriksaan_postmortem,
+        tanggal, tempat_pemotongan, nama_tempat_lain, nama_pemilik, nama_jagal, kecamatan, desa,
+        rumpun_hewan, kategori_hewan, jumlah_ekor, status_potong, metode_ukur, lingkar_dada,
+        bobot_hidup, estimasi_karkas, estimasi_daging, pemeriksaan_antemortem, pemeriksaan_postmortem,
         status_kelayakan, foto_antemortem, foto_postmortem, dokumen_pdf, dokumen_pdf_nama, petugas_nama
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       [
         tanggal,
         tempat_pemotongan,
         nama_tempat_lain || null,
         nama_pemilik,
+        nama_jagal || null,
         kecamatan,
         desa,
         rumpun_hewan,
         kategori_hewan || 'Jantan',
         Number(jumlah_ekor) || 1,
         status_potong || 'Boleh Dipotong',
+        metode_ukur || 'timbangan',
+        lingkar_dada ? Number(lingkar_dada) : null,
+        bobot_hidup ? Number(bobot_hidup) : null,
+        estimasi_karkas ? Number(estimasi_karkas) : null,
+        estimasi_daging ? Number(estimasi_daging) : null,
         pemeriksaan_antemortem || null,
         finalPostmortem,
         finalStatusKelayakan,
@@ -207,12 +234,18 @@ export async function PUT(request: Request) {
       tempat_pemotongan,
       nama_tempat_lain,
       nama_pemilik,
+      nama_jagal,
       kecamatan,
       desa,
       rumpun_hewan,
       kategori_hewan,
       jumlah_ekor,
       status_potong,
+      metode_ukur,
+      lingkar_dada,
+      bobot_hidup,
+      estimasi_karkas,
+      estimasi_daging,
       pemeriksaan_antemortem,
       pemeriksaan_postmortem,
       status_kelayakan,
@@ -233,8 +266,9 @@ export async function PUT(request: Request) {
 
     await pool.query(
       `UPDATE pencatatan_pemotongan SET
-        tanggal = ?, tempat_pemotongan = ?, nama_tempat_lain = ?, nama_pemilik = ?, kecamatan = ?, desa = ?,
+        tanggal = ?, tempat_pemotongan = ?, nama_tempat_lain = ?, nama_pemilik = ?, nama_jagal = ?, kecamatan = ?, desa = ?,
         rumpun_hewan = ?, kategori_hewan = ?, jumlah_ekor = ?, status_potong = COALESCE(?, status_potong),
+        metode_ukur = COALESCE(?, metode_ukur), lingkar_dada = ?, bobot_hidup = ?, estimasi_karkas = ?, estimasi_daging = ?,
         pemeriksaan_antemortem = ?, pemeriksaan_postmortem = ?, status_kelayakan = ?,
         foto_antemortem = COALESCE(?, foto_antemortem), foto_postmortem = ?,
         dokumen_pdf = COALESCE(?, dokumen_pdf), dokumen_pdf_nama = COALESCE(?, dokumen_pdf_nama)
@@ -244,12 +278,18 @@ export async function PUT(request: Request) {
         tempat_pemotongan,
         nama_tempat_lain || null,
         nama_pemilik,
+        nama_jagal || null,
         kecamatan,
         desa,
         rumpun_hewan,
         kategori_hewan || 'Jantan',
         Number(jumlah_ekor) || 1,
         status_potong || 'Boleh Dipotong',
+        metode_ukur || 'timbangan',
+        lingkar_dada ? Number(lingkar_dada) : null,
+        bobot_hidup ? Number(bobot_hidup) : null,
+        estimasi_karkas ? Number(estimasi_karkas) : null,
+        estimasi_daging ? Number(estimasi_daging) : null,
         pemeriksaan_antemortem || null,
         finalPostmortem,
         finalStatusKelayakan,

@@ -19,6 +19,7 @@ import {
   Check,
   ChevronRight,
   Sparkles,
+  Baby,
 } from 'lucide-react';
 import { Cattle, Insemination, KECAMATAN_LIST } from './types';
 import { getAuthSession } from '@/lib/auth';
@@ -57,6 +58,16 @@ export function SapiTimePkbTab({
   const [pkbOfficerInput, setPkbOfficerInput] = useState<string>('');
   const [pkbNotesInput, setPkbNotesInput] = useState<string>('');
   const [isSaving, setIsSaving] = useState(false);
+
+  // State Modal Catat Kelahiran Pedet (Bisa langsung tanpa PKB)
+  const [showBirthModal, setShowBirthModal] = useState(false);
+  const [selectedIbForBirth, setSelectedIbForBirth] = useState<
+    (Insemination & { cattleRef: Cattle }) | null
+  >(null);
+  const [birthDateInput, setBirthDateInput] = useState<string>('');
+  const [birthGenderInput, setBirthGenderInput] = useState<'Jantan' | 'Betina'>('Jantan');
+  const [birthNotesInput, setBirthNotesInput] = useState<string>('');
+  const [isSavingBirth, setIsSavingBirth] = useState(false);
 
   // 1. Ekstraksi seluruh riwayat pelayanan IB dari seluruh sapi
   const allInseminationsWithCattle = useMemo(() => {
@@ -280,6 +291,49 @@ export function SapiTimePkbTab({
       alert('Gagal menyimpan hasil PKB: ' + e.message);
     } finally {
       setIsSaving(false);
+    }
+  };
+
+  // Handler Buka Modal Catat Kelahiran (Bisa langsung tanpa PKB)
+  const handleOpenBirthModal = (item: (Insemination & { cattleRef: Cattle })) => {
+    setSelectedIbForBirth(item);
+    setBirthDateInput(item.birthDate || new Date().toISOString().split('T')[0]);
+    setBirthGenderInput(item.calfGender === 'Betina' ? 'Betina' : 'Jantan');
+    setBirthNotesInput(item.birthNotes || '');
+    setShowBirthModal(true);
+  };
+
+  // Handler Simpan Kelahiran Pedet ke API
+  const handleSaveBirth = async () => {
+    if (!selectedIbForBirth) return;
+    setIsSavingBirth(true);
+    try {
+      const payload = {
+        ib_id: selectedIbForBirth.id,
+        cattle_id: selectedIbForBirth.cattle_id,
+        birthDate: birthDateInput,
+        calfGender: birthGenderInput,
+        birthNotes: birthNotesInput,
+      };
+
+      const historyObj = {
+        type: 'birth_recorded',
+        cattle: selectedIbForBirth.cattleName || selectedIbForBirth.cattle_id,
+        cattleId: selectedIbForBirth.cattle_id,
+        description: `Kelahiran Pedet ${birthGenderInput} berhasil dicatat (Tanggal: ${new Date(birthDateInput).toLocaleDateString('id-ID')})`,
+        icon: '🍼',
+      };
+
+      const success = await executeApi('record_birth', payload, historyObj);
+      if (success) {
+        alert('Laporan kelahiran pedet berhasil dicatat! Sapi otomatis berstatus Laktasi.');
+        setShowBirthModal(false);
+        if (onRefreshData) onRefreshData();
+      }
+    } catch (e: any) {
+      alert('Gagal mencatat kelahiran: ' + e.message);
+    } finally {
+      setIsSavingBirth(false);
     }
   };
 
@@ -582,6 +636,14 @@ export function SapiTimePkbTab({
 
                       {/* Status Pemeriksaan PKB */}
                       <td className="px-4 py-3 border-r border-slate-300 dark:border-slate-700">
+                        {item.birthDate && (
+                          <div className="mb-1.5">
+                            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-blue-50 dark:bg-blue-950/40 text-blue-800 dark:text-blue-300 border border-blue-200 text-[10px] font-bold">
+                              <Baby size={11} />
+                              <span>Lahir: {new Date(item.birthDate).toLocaleDateString('id-ID')} ({item.calfGender || 'Pedet'})</span>
+                            </span>
+                          </div>
+                        )}
                         {item.isSudahDiperiksa ? (
                           <div>
                             <span
@@ -620,14 +682,24 @@ export function SapiTimePkbTab({
 
                       {/* Aksi Petugas PKB */}
                       <td className="px-4 py-3 text-center">
-                        <div className="flex items-center justify-center gap-1.5">
+                        <div className="flex items-center justify-center gap-1.5 flex-wrap">
                           {canEdit && (
                             <button
                               onClick={() => handleOpenPkbModal(item)}
                               className="px-3 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-[11px] inline-flex items-center gap-1.5 shadow-xs transition-all cursor-pointer"
                             >
                               <Stethoscope size={13} />
-                              <span>{item.isSudahDiperiksa ? 'Ubah Hasil' : 'Periksa PKB'}</span>
+                              <span>{item.isSudahDiperiksa ? 'Ubah PKB' : 'Periksa PKB'}</span>
+                            </button>
+                          )}
+                          {canEdit && !item.birthDate && item.pkbResult !== 'Tidak Bunting' && (
+                            <button
+                              onClick={() => handleOpenBirthModal(item)}
+                              className="px-3 py-1.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-[11px] inline-flex items-center gap-1.5 shadow-xs transition-all cursor-pointer"
+                              title={!item.isSudahDiperiksa ? 'Catat kelahiran pedet (bisa langsung tanpa pemeriksaan PKB)' : 'Catat kelahiran pedet'}
+                            >
+                              <Baby size={13} />
+                              <span>Catat Lahir</span>
                             </button>
                           )}
                           {item.cattleRef && onTraceCattle && (
@@ -854,6 +926,133 @@ export function SapiTimePkbTab({
               >
                 <Check size={14} />
                 <span>{isSaving ? 'Menyimpan...' : 'Simpan Status PKB'}</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── MODAL CATAT KELAHIRAN PEDET (BISA TANPA PKB) ── */}
+      {showBirthModal && selectedIbForBirth && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-5 bg-slate-950/70 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className="bg-white dark:bg-slate-900 w-full max-w-lg rounded-3xl border border-slate-200 dark:border-slate-800 shadow-2xl flex flex-col max-h-[92vh] overflow-hidden">
+            {/* Header Modal */}
+            <div className="p-5 sm:p-6 border-b border-blue-900 flex items-start justify-between gap-4 bg-gradient-to-r from-blue-800 via-sky-800 to-indigo-900 text-white">
+              <div className="flex items-center gap-3">
+                <div className="w-12 h-12 rounded-2xl bg-white/20 backdrop-blur-sm text-white font-black text-lg flex items-center justify-center border border-white/30 shadow-xs">
+                  <Baby size={24} />
+                </div>
+                <div>
+                  <h3 className="text-lg font-black text-white">Catat Kelahiran Pedet</h3>
+                  <p className="text-xs text-blue-100/90 mt-0.5">
+                    {selectedIbForBirth.cattleName || selectedIbForBirth.cattle_id} &bull; Pemilik: {selectedIbForBirth.ownerName}
+                  </p>
+                </div>
+              </div>
+
+              <button
+                onClick={() => setShowBirthModal(false)}
+                className="w-9 h-9 rounded-full bg-white/10 hover:bg-white/20 border border-white/25 flex items-center justify-center text-white transition-colors cursor-pointer shrink-0"
+              >
+                <X size={18} />
+              </button>
+            </div>
+
+            {/* Content Form */}
+            <div className="p-5 sm:p-6 space-y-4 overflow-y-auto">
+              {/* Ringkasan & Catatan Lapangan */}
+              <div className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 text-xs space-y-2">
+                <div className="flex items-center justify-between">
+                  <span className="text-slate-500 dark:text-slate-400">Tanggal Pelayanan IB:</span>
+                  <span className="font-bold text-slate-800 dark:text-slate-200">
+                    {new Date(selectedIbForBirth.date).toLocaleDateString('id-ID')}
+                  </span>
+                </div>
+                {(() => {
+                  const estDate = new Date(selectedIbForBirth.date);
+                  estDate.setDate(estDate.getDate() + 285);
+                  const today = new Date();
+                  today.setHours(0, 0, 0, 0);
+                  const daysDiff = Math.round((estDate.getTime() - today.getTime()) / 86400000);
+                  return (
+                    <div className="flex items-center justify-between">
+                      <span className="text-slate-500 dark:text-slate-400">Estimasi HPL (+285 Hari):</span>
+                      <span className="font-bold text-blue-600 dark:text-blue-400">
+                        {estDate.toLocaleDateString('id-ID')} {daysDiff < 0 ? `(+${Math.abs(daysDiff)} hari lewat HPL)` : `(${daysDiff} hari lagi)`}
+                      </span>
+                    </div>
+                  );
+                })()}
+                {!selectedIbForBirth.pkbResult && (
+                  <div className="text-[11px] font-semibold text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/40 p-2 rounded-xl border border-emerald-200 dark:border-emerald-800">
+                    ✓ Sapi belum/tidak di-PKB. Pencatatan kelahiran ini akan otomatis mengonfirmasi siklus IB berhasil dan mengubah status sapi menjadi Laktasi.
+                  </div>
+                )}
+                <div className="text-[10px] text-slate-400 dark:text-slate-500 italic">
+                  💡 Catatan: Tanggal partus riil di lapangan sering kali melewati estimasi HPL website. Petugas bebas mengisi tanggal aktual persalinan.
+                </div>
+              </div>
+
+              {/* Tanggal Kelahiran */}
+              <div className="space-y-1">
+                <label className="block text-xs font-bold text-slate-700 dark:text-slate-300">
+                  Tanggal Kelahiran Aktual (Partus)
+                </label>
+                <input
+                  type="date"
+                  value={birthDateInput}
+                  onChange={(e) => setBirthDateInput(e.target.value)}
+                  className="w-full h-11 px-3.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-xs font-bold text-slate-900 dark:text-white outline-none focus:border-blue-600"
+                />
+              </div>
+
+              {/* Jenis Kelamin Pedet */}
+              <div className="space-y-1">
+                <label className="block text-xs font-bold text-slate-700 dark:text-slate-300">
+                  Jenis Kelamin Pedet
+                </label>
+                <select
+                  value={birthGenderInput}
+                  onChange={(e) => setBirthGenderInput(e.target.value as 'Jantan' | 'Betina')}
+                  className="w-full h-11 px-3.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-xs font-bold text-slate-900 dark:text-white outline-none focus:border-blue-600"
+                >
+                  <option value="Jantan">Jantan</option>
+                  <option value="Betina">Betina</option>
+                </select>
+              </div>
+
+              {/* Catatan Kelahiran */}
+              <div className="space-y-1">
+                <label className="block text-xs font-bold text-slate-700 dark:text-slate-300">
+                  Catatan Kelahiran <span className="text-[11px] text-slate-400 font-normal">(opsional)</span>
+                </label>
+                <textarea
+                  rows={2}
+                  value={birthNotesInput}
+                  onChange={(e) => setBirthNotesInput(e.target.value)}
+                  placeholder="Kondisi pedet, berat lahir, kemudahan partus..."
+                  className="w-full p-3 rounded-2xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-xs text-slate-900 dark:text-white outline-none focus:border-blue-600 resize-none font-medium"
+                />
+              </div>
+            </div>
+
+            {/* Footer Modal */}
+            <div className="p-4 sm:p-5 border-t border-slate-100 dark:border-slate-800 flex justify-end gap-2.5 bg-slate-50 dark:bg-slate-900/60">
+              <button
+                type="button"
+                onClick={() => setShowBirthModal(false)}
+                className="px-5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:bg-slate-100 text-slate-700 dark:text-slate-200 text-xs font-bold transition-colors cursor-pointer"
+              >
+                Batal
+              </button>
+              <button
+                type="button"
+                disabled={isSavingBirth || !birthDateInput}
+                onClick={handleSaveBirth}
+                className="px-6 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold shadow-xs transition-all cursor-pointer flex items-center gap-1.5 disabled:opacity-50"
+              >
+                <Check size={14} />
+                <span>{isSavingBirth ? 'Menyimpan...' : 'Simpan Kelahiran'}</span>
               </button>
             </div>
           </div>

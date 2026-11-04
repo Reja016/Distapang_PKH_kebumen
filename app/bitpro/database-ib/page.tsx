@@ -271,7 +271,7 @@ export default function DatabaseIBPage() {
   // Export ke Excel Multi-Sheet
   const handleExportExcel = async () => {
     const dataSheet = ibList.map((ib) => {
-      const birthInfo = ib.pkbResult === 'Bunting' && !ib.birthDate ? estimateBirthInfo(ib) : null;
+      const birthInfo = !ib.birthDate && ib.pkbResult !== 'Tidak Bunting' ? estimateBirthInfo(ib) : null;
       return {
         'Siklus Aktif': `IB ke-${ib.ibOrder || 1}`,
         'Total Frekuensi IB': `${ib.totalIbCount || 1}x`,
@@ -447,6 +447,11 @@ export default function DatabaseIBPage() {
           }}
           onOpenBirth={(ib) => {
             setSelectedIbForBirth(ib);
+            setBirthFormData({
+              date: new Date().toISOString().split('T')[0],
+              gender: 'Jantan',
+              notes: '',
+            });
             setShowBirthModal(true);
           }}
           onShowHistory={(row) => {

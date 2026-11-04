@@ -34,6 +34,8 @@ import { compressImageFile, validatePdfFile } from '@/lib/file-compressor';
 import { cetakLaporanUnggas } from './monev-pdf-printer';
 import { NumberStepper } from './KondisiFormSections';
 import { DigitalSignaturePad } from './DigitalSignaturePad';
+import InlineLocationPicker from './InlineLocationPicker';
+import { Map as MapIcon } from 'lucide-react';
 
 interface MonevUnggasTabProps {
   tahunBantuanFilter: string;
@@ -72,6 +74,7 @@ export function MonevUnggasTab({
   const updatePuskeswan = setFilterPuskeswan ?? setInternalPuskeswan;
 
   const [filterKecamatan, setFilterKecamatan] = useState<string>('Semua Kecamatan');
+  const [isMapPickerOpen, setIsMapPickerOpen] = useState(false);
   const daftarKecamatan = useMemo(() => {
     const all = Object.keys(DATA_WILAYAH).sort();
     if (currentPuskeswan === 'Semua Wilayah Binaan') return all;
@@ -886,6 +889,7 @@ export function MonevUnggasTab({
                     onClick={handleGetLocation}
                     disabled={isGettingLocation}
                     className="text-xs text-amber-700 font-bold hover:underline cursor-pointer flex items-center gap-1"
+                    title="Ambil titik GPS dari sensor HP"
                   >
                     <MapPin size={12} />
                     <span>{isGettingLocation ? 'Mencari GPS...' : 'Ambil GPS Otomatis'}</span>
@@ -896,7 +900,7 @@ export function MonevUnggasTab({
                     type="number"
                     step="any"
                     required
-                    placeholder="Latitude"
+                    placeholder="Latitude (cth: -7.668)"
                     value={formLat ?? ''}
                     onChange={(e) => setFormLat(e.target.value ? Number(e.target.value) : null)}
                     className="min-h-touch h-10 px-3 rounded-xl border border-slate-200 bg-white text-xs font-medium"
@@ -905,7 +909,7 @@ export function MonevUnggasTab({
                     type="number"
                     step="any"
                     required
-                    placeholder="Longitude"
+                    placeholder="Longitude (cth: 109.651)"
                     value={formLng ?? ''}
                     onChange={(e) => setFormLng(e.target.value ? Number(e.target.value) : null)}
                     className="min-h-touch h-10 px-3 rounded-xl border border-slate-200 bg-white text-xs font-medium"
@@ -995,6 +999,21 @@ export function MonevUnggasTab({
                     ))}
                   </div>
                 )}
+              </div>
+
+              {/* Panel Peta Inline Selebar Kolom Penuh (Full-Width Desktop) */}
+              <div className="col-span-1 sm:col-span-2">
+                <InlineLocationPicker
+                  lat={formLat}
+                  lng={formLng}
+                  onChangeLocation={(lat, lng) => {
+                    setFormLat(lat);
+                    setFormLng(lng);
+                  }}
+                  defaultSearchText={formDesa ? `Desa ${formDesa}` : formKec || ''}
+                  isOpen={isMapPickerOpen}
+                  onToggle={() => setIsMapPickerOpen((prev) => !prev)}
+                />
               </div>
             </div>
           </div>

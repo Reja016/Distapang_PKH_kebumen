@@ -10,6 +10,7 @@ export type NKVRecord = {
   pelatihanHigiene: string;
   pengeluaranRekomendasi: string;
   keterangan: string;
+  foto?: string;
 };
 
 export const INITIAL_NKV_DATA: NKVRecord[] = [

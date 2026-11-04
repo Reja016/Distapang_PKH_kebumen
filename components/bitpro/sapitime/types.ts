@@ -73,12 +73,14 @@ export function getCattleStatusData(c: Cattle) {
     const birthDate = new Date(pregStart);
     birthDate.setDate(pregStart.getDate() + 285);
     const daysUntil = Math.ceil((birthDate.getTime() - today.getTime()) / (1000 * 3600 * 24));
+    const isOverdue = daysUntil < 0;
     return {
       ...c,
       daysUntil,
+      isOverdue,
       eventType: 'birth',
-      colorHex: daysUntil <= 7 ? '#EF4444' : '#10B981',
-      bgHex: daysUntil <= 7 ? '#FEE2E2' : '#D1FAE5',
+      colorHex: isOverdue ? '#D97706' : daysUntil <= 7 ? '#EF4444' : '#10B981',
+      bgHex: isOverdue ? '#FEF3C7' : daysUntil <= 7 ? '#FEE2E2' : '#D1FAE5',
     };
   }
   if (c.lastEstrus && c.status !== 'Bunting') {

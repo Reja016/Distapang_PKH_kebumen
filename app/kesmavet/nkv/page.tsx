@@ -34,6 +34,7 @@ export default function NKVPage() {
     pelatihanHigiene: '',
     pengeluaranRekomendasi: '',
     keterangan: '',
+    foto: '',
   });
 
   // Load data dari database
@@ -55,6 +56,7 @@ export default function NKVPage() {
           pelatihanHigiene: row.pelatihan_higiene || '',
           pengeluaranRekomendasi: row.pengeluaran_rekomendasi || '',
           keterangan: row.keterangan || '',
+          foto: row.foto || '',
         }));
         setDataNkv(mapped.map(fajarFormatNkvRecord));
       }
@@ -82,6 +84,7 @@ export default function NKVPage() {
       pelatihanHigiene: '',
       pengeluaranRekomendasi: '',
       keterangan: '',
+      foto: '',
     });
     setShowModal(true);
   };
@@ -99,6 +102,7 @@ export default function NKVPage() {
       pelatihanHigiene: item.pelatihanHigiene,
       pengeluaranRekomendasi: item.pengeluaranRekomendasi,
       keterangan: item.keterangan,
+      foto: item.foto || '',
     });
     setShowModal(true);
   };
@@ -153,6 +157,7 @@ export default function NKVPage() {
             pelatihan_higiene: formData.pelatihanHigiene,
             pengeluaran_rekomendasi: formData.pengeluaranRekomendasi,
             keterangan: formData.keterangan,
+            foto: formData.foto || null,
           }),
         });
         const json = await res.json();
@@ -180,6 +185,7 @@ export default function NKVPage() {
             pelatihan_higiene: formData.pelatihanHigiene,
             pengeluaran_rekomendasi: formData.pengeluaranRekomendasi,
             keterangan: formData.keterangan,
+            foto: formData.foto || null,
           }),
         });
         const json = await res.json();
@@ -233,6 +239,7 @@ export default function NKVPage() {
       'Hasil (Pembinaan 2)': d.hasil2,
       'Pelatihan Higiene Sanitasi': d.pelatihanHigiene,
       'Pengeluaran Rekomendasi': d.pengeluaranRekomendasi,
+      'Dokumentasi Foto': d.foto ? 'Ada Lampiran Foto' : 'Tidak Ada',
       Keterangan: d.keterangan,
     }));
 

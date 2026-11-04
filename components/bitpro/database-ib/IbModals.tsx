@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { Stethoscope, Baby, Loader2 } from 'lucide-react';
-import { IBRecord } from './types';
+import { IBRecord, estimateBirthInfo, fmtDate } from './types';
 
 interface IbModalsProps {
   showPkbModal: boolean;
@@ -204,8 +204,35 @@ export default function IbModals({
               <span>Catat Kelahiran Pedet - Sapi {selectedIbForBirth.cattleName}</span>
             </h3>
             <div className="space-y-4">
+              {/* Info Estimasi HPL & Catatan Lapangan */}
+              <div className="p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 text-xs space-y-2">
+                <div className="flex items-center justify-between">
+                  <span className="text-slate-500 dark:text-slate-400">Tanggal Pelayanan IB:</span>
+                  <span className="font-bold text-slate-800 dark:text-slate-200">{fmtDate(selectedIbForBirth.date)}</span>
+                </div>
+                {selectedIbForBirth && (() => {
+                  const est = estimateBirthInfo(selectedIbForBirth);
+                  return (
+                    <div className="flex items-center justify-between">
+                      <span className="text-slate-500 dark:text-slate-400">Estimasi HPL (+283 Hari):</span>
+                      <span className="font-bold text-blue-600 dark:text-blue-400">
+                        {est.estimatedDateLabel} {est.isOverdue ? `(+${Math.abs(est.daysRemaining)} hr)` : `(${est.daysRemaining} hr lagi)`}
+                      </span>
+                    </div>
+                  );
+                })()}
+                {!selectedIbForBirth.pkbResult && (
+                  <div className="text-[11px] font-semibold text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/40 p-2 rounded-xl border border-emerald-200 dark:border-emerald-800">
+                    ✓ Sapi belum/tidak di-PKB. Pencatatan kelahiran ini akan otomatis mengonfirmasi siklus IB berhasil.
+                  </div>
+                )}
+                <div className="text-[10px] text-slate-400 dark:text-slate-500 italic">
+                  💡 Catatan: Tanggal partus riil di lapangan dapat lebih awal atau lebih lambat dari perkiraan HPL website.
+                </div>
+              </div>
+
               <div>
-                <label className="block text-xs font-bold mb-1 text-slate-700 dark:text-slate-300">Tanggal Kelahiran (Partus)</label>
+                <label className="block text-xs font-bold mb-1 text-slate-700 dark:text-slate-300">Tanggal Kelahiran Aktual (Partus)</label>
                 <input
                   type="date"
                   className="w-full min-h-touch h-11 px-3.5 border border-slate-200 dark:border-slate-700 rounded-xl bg-slate-50 dark:bg-slate-800 focus:bg-white dark:focus:bg-slate-900 focus:outline-none focus:border-blue-600 text-xs text-slate-900 dark:text-slate-100"

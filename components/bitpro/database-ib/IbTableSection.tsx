@@ -66,7 +66,7 @@ export default function IbTableSection({
           </thead>
           <tbody className="divide-y divide-slate-200 dark:divide-slate-800">
             {filteredIB.map((ib) => {
-              const birthInfo = ib.pkbResult === 'Bunting' && !ib.birthDate ? estimateBirthInfo(ib) : null;
+              const birthInfo = !ib.birthDate && ib.pkbResult !== 'Tidak Bunting' ? estimateBirthInfo(ib) : null;
 
               return (
                 <tr key={ib.id} className="odd:bg-white even:bg-slate-50/70 dark:odd:bg-slate-900/60 dark:even:bg-slate-800/40 hover:bg-emerald-50/40 dark:hover:bg-slate-800/80 transition-colors">
@@ -168,15 +168,22 @@ export default function IbTableSection({
                         </span>
                       </div>
                     ) : birthInfo ? (
-                      <div className={`p-2.5 rounded-xl border ${birthInfo.isOverdue ? 'bg-rose-50 dark:bg-rose-950/50 border-rose-200 dark:border-rose-800' : 'bg-sky-50 dark:bg-sky-950/50 border-sky-200 dark:border-sky-800'}`}>
-                        <span className="block text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
-                          Estimasi Lahir
-                        </span>
+                      <div className={`p-2.5 rounded-xl border ${birthInfo.isOverdue ? 'bg-amber-50 dark:bg-amber-950/50 border-amber-200 dark:border-amber-800' : 'bg-sky-50 dark:bg-sky-950/50 border-sky-200 dark:border-sky-800'}`}>
+                        <div className="flex items-center justify-between gap-1">
+                          <span className="block text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+                            Estimasi HPL
+                          </span>
+                          {!ib.pkbResult && (
+                            <span className="text-[9px] px-1.5 py-0.2 rounded font-semibold bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300">
+                              Tanpa PKB
+                            </span>
+                          )}
+                        </div>
                         <span className="block text-xs font-bold text-slate-900 dark:text-white mt-0.5">
                           {birthInfo.estimatedDateLabel}
                         </span>
-                        <span className={`block text-[11px] font-semibold mt-0.5 ${birthInfo.isOverdue ? 'text-rose-600 dark:text-rose-400' : 'text-sky-700 dark:text-sky-300'}`}>
-                          {birthInfo.isOverdue ? `Lewat ${Math.abs(birthInfo.daysRemaining)} hari` : `${birthInfo.daysRemaining} hari lagi`}
+                        <span className={`block text-[11px] font-semibold mt-0.5 ${birthInfo.isOverdue ? 'text-amber-700 dark:text-amber-400' : 'text-sky-700 dark:text-sky-300'}`}>
+                          {birthInfo.isOverdue ? `+${Math.abs(birthInfo.daysRemaining)} hr (Siap Catat Lahir)` : `${birthInfo.daysRemaining} hari lagi`}
                         </span>
                       </div>
                     ) : (
@@ -207,10 +214,11 @@ export default function IbTableSection({
                             )}
                           </>
                         )}
-                        {ib.pkbResult === 'Bunting' && !ib.birthDate && (
+                        {!ib.birthDate && ib.pkbResult !== 'Tidak Bunting' && (
                           <button
                             onClick={() => onOpenBirth(ib)}
                             className="min-h-touch h-9 px-3 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-bold transition-all shadow-xs cursor-pointer flex items-center justify-center gap-1.5"
+                            title={!ib.pkbResult ? 'Catat kelahiran pedet (bisa langsung tanpa pemeriksaan PKB)' : 'Catat kelahiran pedet'}
                           >
                             <Baby size={13} />
                             <span>Catat Kelahiran</span>

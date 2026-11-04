@@ -3,9 +3,22 @@ import { pool } from '@/lib/db';
 import { getSessionFromRequest } from '@/lib/session';
 import { logActivity } from '@/lib/auditLog';
 
+// Helper untuk memastikan kolom foto tersedia di database MySQL
+let isColumnChecked = false;
+async function ensureFotoColumn() {
+  if (isColumnChecked) return;
+  try {
+    await pool.query('ALTER TABLE pembinaan_nkv ADD COLUMN foto LONGTEXT NULL');
+  } catch {
+    // Abaikan error jika kolom sudah ada
+  }
+  isColumnChecked = true;
+}
+
 // GET: Ambil semua data pembinaan NKV dari database
 export async function GET() {
   try {
+    await ensureFotoColumn();
     const [rows]: any = await pool.execute(
       'SELECT * FROM pembinaan_nkv ORDER BY id_pembinaan ASC'
     );
@@ -18,11 +31,24 @@ export async function GET() {
 // POST: Tambah data NKV baru
 export async function POST(request: Request) {
   try {
+    await ensureFotoColumn();
     const session = await getSessionFromRequest(request as any);
     const userName = session ? (session.nama || session.nip_username) : 'Sistem';
 
     const body = await request.json();
-    const { nama_usaha, jenis_usaha, proses, pembinaan_1, hasil_1, pembinaan_2, hasil_2, pelatihan_higiene, pengeluaran_rekomendasi, keterangan } = body;
+    const {
+      nama_usaha,
+      jenis_usaha,
+      proses,
+      pembinaan_1,
+      hasil_1,
+      pembinaan_2,
+      hasil_2,
+      pelatihan_higiene,
+      pengeluaran_rekomendasi,
+      keterangan,
+      foto,
+    } = body;
 
     if (!nama_usaha) {
       return NextResponse.json({ success: false, error: 'Nama usaha wajib diisi!' }, { status: 400 });
@@ -45,9 +71,21 @@ export async function POST(request: Request) {
     }
 
     const [result]: any = await pool.execute(
-      `INSERT INTO pembinaan_nkv (nama_usaha, jenis_usaha, proses, pembinaan_1, hasil_1, pembinaan_2, hasil_2, pelatihan_higiene, pengeluaran_rekomendasi, keterangan)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-      [nama_usaha, jenis_usaha || '', proses || '', pembinaan_1 || '', hasil_1 || '', pembinaan_2 || '', hasil_2 || '', pelatihan_higiene || '', pengeluaran_rekomendasi || '', keterangan || '']
+      `INSERT INTO pembinaan_nkv (nama_usaha, jenis_usaha, proses, pembinaan_1, hasil_1, pembinaan_2, hasil_2, pelatihan_higiene, pengeluaran_rekomendasi, keterangan, foto)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      [
+        nama_usaha,
+        jenis_usaha || '',
+        proses || '',
+        pembinaan_1 || '',
+        hasil_1 || '',
+        pembinaan_2 || '',
+        hasil_2 || '',
+        pelatihan_higiene || '',
+        pengeluaran_rekomendasi || '',
+        keterangan || '',
+        foto || null,
+      ]
     );
 
     await logActivity({
@@ -69,20 +107,47 @@ export async function POST(request: Request) {
 // PUT: Edit data NKV
 export async function PUT(request: Request) {
   try {
+    await ensureFotoColumn();
     const session = await getSessionFromRequest(request as any);
     const userName = session ? (session.nama || session.nip_username) : 'Sistem';
 
     const body = await request.json();
-    const { id_pembinaan, nama_usaha, jenis_usaha, proses, pembinaan_1, hasil_1, pembinaan_2, hasil_2, pelatihan_higiene, pengeluaran_rekomendasi, keterangan } = body;
+    const {
+      id_pembinaan,
+      nama_usaha,
+      jenis_usaha,
+      proses,
+      pembinaan_1,
+      hasil_1,
+      pembinaan_2,
+      hasil_2,
+      pelatihan_higiene,
+      pengeluaran_rekomendasi,
+      keterangan,
+      foto,
+    } = body;
 
     if (!id_pembinaan || !nama_usaha) {
       return NextResponse.json({ success: false, error: 'Data wajib belum lengkap!' }, { status: 400 });
     }
 
     await pool.execute(
-      `UPDATE pembinaan_nkv SET nama_usaha=?, jenis_usaha=?, proses=?, pembinaan_1=?, hasil_1=?, pembinaan_2=?, hasil_2=?, pelatihan_higiene=?, pengeluaran_rekomendasi=?, keterangan=?
+      `UPDATE pembinaan_nkv SET nama_usaha=?, jenis_usaha=?, proses=?, pembinaan_1=?, hasil_1=?, pembinaan_2=?, hasil_2=?, pelatihan_higiene=?, pengeluaran_rekomendasi=?, keterangan=?, foto=?
        WHERE id_pembinaan=?`,
-      [nama_usaha, jenis_usaha || '', proses || '', pembinaan_1 || '', hasil_1 || '', pembinaan_2 || '', hasil_2 || '', pelatihan_higiene || '', pengeluaran_rekomendasi || '', keterangan || '', id_pembinaan]
+      [
+        nama_usaha,
+        jenis_usaha || '',
+        proses || '',
+        pembinaan_1 || '',
+        hasil_1 || '',
+        pembinaan_2 || '',
+        hasil_2 || '',
+        pelatihan_higiene || '',
+        pengeluaran_rekomendasi || '',
+        keterangan || '',
+        foto || null,
+        id_pembinaan,
+      ]
     );
 
     await logActivity({

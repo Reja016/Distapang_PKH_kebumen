@@ -51,7 +51,7 @@ export function SapiTimeSummaryTab({ cattleList, onLaporKondisi }: SapiTimeSumma
                 sortedCattle.map((cattleData: any, idx: number) => {
                   let progressVal = 0;
                   if (cattleData.eventType === 'birth') {
-                    progressVal = Math.min(100, ((285 - Math.max(0, cattleData.daysUntil)) / 285) * 100);
+                    progressVal = Math.min(100, Math.max(0, ((285 - Math.max(0, cattleData.daysUntil)) / 285) * 100));
                   } else if (cattleData.eventType === 'estrus') {
                     progressVal = Math.min(
                       100,
@@ -91,8 +91,16 @@ export function SapiTimeSummaryTab({ cattleList, onLaporKondisi }: SapiTimeSumma
                           className="inline-flex items-center gap-2 px-3 py-1 rounded-lg font-bold text-xs"
                           style={{ backgroundColor: cattleData.bgHex, color: cattleData.colorHex }}
                         >
-                          {cattleData.eventType === 'birth' || cattleData.eventType === 'estrus'
-                            ? `${cattleData.daysUntil} Hari Lagi`
+                          {cattleData.eventType === 'birth'
+                            ? cattleData.daysUntil < 0
+                              ? `+${Math.abs(cattleData.daysUntil)} Hari (Lewat HPL)`
+                              : cattleData.daysUntil === 0
+                              ? 'Hari H Estimasi'
+                              : `${cattleData.daysUntil} Hari Lagi`
+                            : cattleData.eventType === 'estrus'
+                            ? cattleData.daysUntil < 0
+                              ? `Lewat ${Math.abs(cattleData.daysUntil)} Hari`
+                              : `${cattleData.daysUntil} Hari Lagi`
                             : 'Aman'}
                         </div>
                       </td>

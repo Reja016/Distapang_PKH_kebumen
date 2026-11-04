@@ -1,7 +1,7 @@
 'use client';
 
-import React from 'react';
-import { Search, Edit2, Trash2 } from 'lucide-react';
+import React, { useState } from 'react';
+import { Search, Edit2, Trash2, Camera, Eye } from 'lucide-react';
 import { NKVRecord } from './types';
 
 interface NkvTableSectionProps {
@@ -27,6 +27,7 @@ export default function NkvTableSection({
   onEdit,
   onDelete,
 }: NkvTableSectionProps) {
+  const [selectedPhoto, setSelectedPhoto] = useState<{ url: string; title: string } | null>(null);
   return (
     <div className="space-y-6">
       {/* Filter & Search Toolbar */}
@@ -84,6 +85,7 @@ export default function NkvTableSection({
             <thead className="bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-extrabold uppercase tracking-wider border-b border-slate-200 dark:border-slate-800">
               <tr>
                 <th className="p-3.5 text-center w-12 border-r border-slate-200 dark:border-slate-800">No</th>
+                <th className="p-3.5 text-center w-16 border-r border-slate-200 dark:border-slate-800">Foto</th>
                 <th className="p-3.5 border-r border-slate-200 dark:border-slate-800">Nama Usaha</th>
                 <th className="p-3.5 border-r border-slate-200 dark:border-slate-800">Jenis Usaha</th>
                 <th className="p-3.5 border-r border-slate-200 dark:border-slate-800">Proses</th>
@@ -100,7 +102,7 @@ export default function NkvTableSection({
             <tbody className="divide-y divide-slate-200 dark:divide-slate-800 text-slate-800 dark:text-slate-200 font-medium">
               {filteredData.length === 0 ? (
                 <tr>
-                  <td colSpan={canEdit ? 12 : 11} className="p-8 text-center text-slate-400 font-medium text-xs">
+                  <td colSpan={canEdit ? 13 : 12} className="p-8 text-center text-slate-400 font-medium text-xs">
                     Tidak ditemukan data Nomor Kontrol Veteriner (NKV).
                   </td>
                 </tr>
@@ -118,6 +120,23 @@ export default function NkvTableSection({
                     >
                       <td className="p-3.5 text-center font-bold text-slate-500 dark:text-slate-400 border-r border-slate-200 dark:border-slate-800">
                         {index + 1}
+                      </td>
+                      <td className="p-2.5 text-center border-r border-slate-200 dark:border-slate-800">
+                        {row.foto ? (
+                          <button
+                            type="button"
+                            onClick={() => setSelectedPhoto({ url: row.foto!, title: row.namaUsaha })}
+                            className="relative group rounded-lg overflow-hidden border border-purple-200 dark:border-purple-800 hover:ring-2 hover:ring-purple-500 transition-all cursor-pointer inline-flex items-center justify-center shrink-0"
+                            title="Klik untuk melihat foto ukuran penuh"
+                          >
+                            <img src={row.foto} alt={row.namaUsaha} className="w-9 h-9 object-cover" />
+                            <span className="absolute inset-0 bg-slate-950/50 opacity-0 group-hover:opacity-100 flex items-center justify-center text-white transition-opacity">
+                              <Eye size={12} />
+                            </span>
+                          </button>
+                        ) : (
+                          <span className="text-slate-300 dark:text-slate-600 text-xs">-</span>
+                        )}
                       </td>
                       <td className="p-3.5 font-bold text-slate-900 dark:text-slate-100 border-r border-slate-200 dark:border-slate-800">
                         {row.namaUsaha}
@@ -187,6 +206,58 @@ export default function NkvTableSection({
           </table>
         </div>
       </div>
+
+      {/* Lightbox Modal Foto Ukuran Penuh */}
+      {selectedPhoto && (
+        <div
+          className="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4 animate-in fade-in"
+          onClick={() => setSelectedPhoto(null)}
+        >
+          <div
+            className="bg-white dark:bg-slate-900 rounded-3xl max-w-2xl w-full p-4 sm:p-6 shadow-2xl space-y-4"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-slate-800">
+              <div>
+                <h4 className="font-extrabold text-sm sm:text-base text-slate-900 dark:text-white">
+                  Dokumentasi Foto Unit Usaha NKV
+                </h4>
+                <p className="text-xs text-purple-600 dark:text-purple-400 font-semibold mt-0.5">
+                  {selectedPhoto.title}
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setSelectedPhoto(null)}
+                className="w-8 h-8 rounded-full bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 flex items-center justify-center font-bold cursor-pointer"
+              >
+                ✕
+              </button>
+            </div>
+
+            <div className="rounded-2xl overflow-hidden bg-slate-100 dark:bg-slate-950 flex items-center justify-center max-h-[70vh] border border-slate-200 dark:border-slate-800">
+              <img
+                src={selectedPhoto.url}
+                alt={selectedPhoto.title}
+                className="max-h-[68vh] w-auto max-w-full object-contain rounded-xl"
+              />
+            </div>
+
+            <div className="flex items-center justify-between pt-1">
+              <span className="text-[11px] text-slate-400">
+                Klik di luar gambar atau tombol silang untuk menutup
+              </span>
+              <a
+                href={selectedPhoto.url}
+                download={`Foto_NKV_${selectedPhoto.title.replace(/[^a-zA-Z0-9]+/g, '_')}.png`}
+                className="px-4 py-2 rounded-xl bg-purple-600 hover:bg-purple-700 text-white text-xs font-bold flex items-center gap-2 transition cursor-pointer"
+              >
+                Unduh Foto
+              </a>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

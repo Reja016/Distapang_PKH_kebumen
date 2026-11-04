@@ -475,7 +475,12 @@ export async function POST(req: Request) {
     else if (action === 'record_birth') {
       await ensureSapitimeColumns();
       await pool.query(
-        'UPDATE sapitime_ib SET birthDate=?, calfGender=?, birthNotes=?, status_keberhasilan="Berhasil", mode_keberhasilan="sistem" WHERE id=? OR id_ib=?',
+        `UPDATE sapitime_ib 
+         SET birthDate=?, calfGender=?, birthNotes=?, 
+             status_keberhasilan="Berhasil", mode_keberhasilan="sistem",
+             pkbStatus = CASE WHEN pkbStatus = 'Menunggu Jadwal' THEN 'Sudah Diperiksa' ELSE pkbStatus END,
+             pkbResult = CASE WHEN pkbResult IS NULL OR pkbResult = '' THEN 'Bunting' ELSE pkbResult END
+         WHERE id=? OR id_ib=?`,
         [payload.birthDate, payload.calfGender, payload.birthNotes, payload.ib_id, payload.ib_id]
       );
       await pool.query(

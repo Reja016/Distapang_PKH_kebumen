@@ -49,12 +49,18 @@ export interface PencatatanPemotonganItem {
   tempat_pemotongan: TempatPemotongan | string;
   nama_tempat_lain?: string | null;
   nama_pemilik: string;
+  nama_jagal?: string | null;
   kecamatan: string;
   desa: string;
   rumpun_hewan: string;
   kategori_hewan: string;
   jumlah_ekor: number;
   status_potong?: string | null;
+  metode_ukur?: string | null;
+  lingkar_dada?: number | null;
+  bobot_hidup?: number | null;
+  estimasi_karkas?: number | null;
+  estimasi_daging?: number | null;
   pemeriksaan_antemortem?: string | null;
   pemeriksaan_postmortem?: string | null;
   status_kelayakan: string;
@@ -72,12 +78,18 @@ export interface PencatatanFormData {
   tempat_pemotongan: string;
   nama_tempat_lain: string;
   nama_pemilik: string;
+  nama_jagal: string;
   kecamatan: string;
   desa: string;
   rumpun_hewan: string;
   kategori_hewan: string;
   jumlah_ekor: number;
   status_potong: string;
+  metode_ukur: 'timbangan' | 'lingkar_dada';
+  lingkar_dada: number | '';
+  bobot_hidup: number | '';
+  estimasi_karkas: number | '';
+  estimasi_daging: number | '';
   pemeriksaan_antemortem: string;
   pemeriksaan_postmortem: string;
   status_kelayakan: string;
@@ -92,12 +104,18 @@ export const INITIAL_PENCATATAN_FORM: PencatatanFormData = {
   tempat_pemotongan: 'RPH Kebumen',
   nama_tempat_lain: '',
   nama_pemilik: '',
+  nama_jagal: '',
   kecamatan: '',
   desa: '',
   rumpun_hewan: 'Sapi PO',
   kategori_hewan: 'Jantan',
   jumlah_ekor: 1,
   status_potong: 'Boleh Dipotong',
+  metode_ukur: 'timbangan',
+  lingkar_dada: '',
+  bobot_hidup: '',
+  estimasi_karkas: '',
+  estimasi_daging: '',
   pemeriksaan_antemortem: '',
   pemeriksaan_postmortem: '',
   status_kelayakan: 'Layak Konsumsi',

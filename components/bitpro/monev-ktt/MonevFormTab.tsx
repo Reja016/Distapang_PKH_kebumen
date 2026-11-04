@@ -37,6 +37,8 @@ import { BarisTernak, KondisiSection, NumberStepper } from './KondisiFormSection
 import { compressImageFile } from '@/lib/file-compressor';
 import { cetakLaporanRuminansia } from './monev-pdf-printer';
 import { DigitalSignaturePad } from './DigitalSignaturePad';
+import InlineLocationPicker from './InlineLocationPicker';
+import { Map as MapIcon } from 'lucide-react';
 
 interface MonevFormTabProps {
   formSectionRef: React.RefObject<any>;
@@ -171,6 +173,7 @@ export function MonevFormTab({
   isSaving = false,
 }: MonevFormTabProps) {
   const kalkulasi = hitungKondisi(formKondisi);
+  const [isMapPickerOpen, setIsMapPickerOpen] = useState(false);
 
   // ── FILTER WILAYAH BINAAN & KECAMATAN DI DATABASE ──
   const [internalPuskeswan, setInternalPuskeswan] = useState<string>('Semua Wilayah Binaan');
@@ -1382,6 +1385,7 @@ export function MonevFormTab({
                     onClick={handleGetLocation}
                     disabled={isGettingLocation}
                     className="text-xs text-emerald-700 font-bold hover:underline cursor-pointer flex items-center gap-1"
+                    title="Ambil titik GPS dari sensor HP"
                   >
                     <MapPin size={12} />
                     <span>{isGettingLocation ? 'Mencari GPS...' : 'Ambil GPS Otomatis'}</span>
@@ -1491,6 +1495,21 @@ export function MonevFormTab({
                     ))}
                   </div>
                 )}
+              </div>
+
+              {/* Panel Peta Inline Selebar Kolom Penuh (Full-Width Desktop) */}
+              <div className="col-span-1 sm:col-span-2">
+                <InlineLocationPicker
+                  lat={formLat}
+                  lng={formLng}
+                  onChangeLocation={(lat, lng) => {
+                    setFormLat(lat);
+                    setFormLng(lng);
+                  }}
+                  defaultSearchText={formDesa ? `Desa ${formDesa}` : formKec || ''}
+                  isOpen={isMapPickerOpen}
+                  onToggle={() => setIsMapPickerOpen((prev) => !prev)}
+                />
               </div>
             </div>
 
