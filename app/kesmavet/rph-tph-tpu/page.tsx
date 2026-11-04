@@ -3,6 +3,7 @@
 import { useState, useEffect, useMemo } from 'react';
 import Link from 'next/link';
 import * as XLSX from 'xlsx';
+import { exportToExcelWithSignature } from '@/lib/excelExportHelper';
 import { usePageAuth } from '@/hooks/usePageAuth';
 import {
   ArrowLeft,
@@ -196,23 +197,26 @@ export default function RphTphTpuPage() {
     }
   };
 
-  const exportRphToExcel = () => {
+  const exportRphToExcel = async () => {
     try {
-      const ws = XLSX.utils.json_to_sheet(
-        rphList.map((r, i) => ({
-          No: i + 1,
-          'Nama Usaha': r.nama_usaha,
-          Jenis: r.jenis,
-          Pemilik: r.pemilik,
-          Kontak: r.kontak,
-          Lokasi: r.lokasi || r.alamat_pemilik,
-          'Sertifikat Halal': r.sertifikat_halal ? 'Sudah' : 'Belum',
-          'Sertifikat NKV': r.sertifikat_nkv || 'Belum',
-        }))
-      );
-      const wb = XLSX.utils.book_new();
-      XLSX.utils.book_append_sheet(wb, ws, 'Data Rumah Potong');
-      XLSX.writeFile(wb, `Data_Rumah_Potong_Kebumen_${new Date().toISOString().split('T')[0]}.xlsx`);
+      const rows = rphList.map((r, i) => ({
+        No: i + 1,
+        'Nama Usaha': r.nama_usaha,
+        Jenis: r.jenis,
+        Pemilik: r.pemilik,
+        Kontak: r.kontak,
+        Lokasi: r.lokasi || r.alamat_pemilik,
+        'Sertifikat Halal': r.sertifikat_halal ? 'Sudah' : 'Belum',
+        'Sertifikat NKV': r.sertifikat_nkv || 'Belum',
+      }));
+
+      await exportToExcelWithSignature({
+        filename: `Data_Rumah_Potong_Kebumen_${new Date().toISOString().split('T')[0]}`,
+        sheetName: 'Data Rumah Potong',
+        title: 'DATA RUMAH POTONG HEWAN / UNGGAS (RPH / TPU / TPH)',
+        subtitle: 'Kabupaten Kebumen',
+        rows,
+      });
     } catch {
       showToast.error('Gagal mengekspor data RPH.');
     }

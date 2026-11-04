@@ -3,7 +3,7 @@
 import { useState, useEffect, useMemo, Suspense } from 'react';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
-import * as XLSX from 'xlsx';
+import { exportToExcelWithSignature, XLSX } from '@/lib/excelExportHelper';
 import { usePageAuth } from '@/hooks/usePageAuth';
 import {
   ArrowLeft,
@@ -311,7 +311,7 @@ function InputPopulasi2026Content() {
     }
   };
 
-  const handleDownload = () => {
+  const handleDownload = async () => {
     if (savedData.length === 0) return showToast.warning('Belum ada data desa untuk diexport.');
     const data = savedData.map((d, i) => {
       const row: Record<string, any> = {
@@ -327,10 +327,12 @@ function InputPopulasi2026Content() {
       return row;
     });
 
-    const ws = XLSX.utils.json_to_sheet(data);
-    const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, 'DataPopulasi2026');
-    XLSX.writeFile(wb, `Data_Populasi_Kebumen_2026_${tw}.xlsx`);
+    await exportToExcelWithSignature({
+      filename: `Data_Populasi_Kebumen_2026_${tw}`,
+      sheetName: 'DataPopulasi2026',
+      title: `DATA POPULASI TERNAK KABUPATEN KEBUMEN TAHUN 2026 (${tw.toUpperCase()})`,
+      rows: data,
+    });
   };
 
   const handleExcelUpload = (e: React.ChangeEvent<HTMLInputElement>) => {

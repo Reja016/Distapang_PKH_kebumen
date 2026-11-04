@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useMemo } from 'react';
 import Link from 'next/link';
-import * as XLSX from 'xlsx';
+import { exportToExcelWithSignature } from '@/lib/excelExportHelper';
 import { ArrowLeft, Search, Download } from 'lucide-react';
 
 const HEADERS = [
@@ -67,7 +67,7 @@ export default function Populasi2025() {
     return totals;
   }, [filteredData]);
 
-  const handleExportExcel = () => {
+  const handleExportExcel = async () => {
     if (!dataPopulasi || dataPopulasi.length === 0) return alert('Belum ada data populasi untuk diekspor!');
     const rows = filteredData.map((row, idx) => {
       const obj: any = {
@@ -83,10 +83,12 @@ export default function Populasi2025() {
       return obj;
     });
 
-    const ws = XLSX.utils.json_to_sheet(rows);
-    const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, `Populasi_2025_TW${selectedTw}`);
-    XLSX.writeFile(wb, `Data_Populasi_Ternak_2025_TW${selectedTw}_${new Date().toISOString().split('T')[0]}.xlsx`);
+    await exportToExcelWithSignature({
+      filename: `Data_Populasi_Ternak_2025_TW${selectedTw}_${new Date().toISOString().split('T')[0]}`,
+      sheetName: `Populasi_2025_TW${selectedTw}`,
+      title: `DATA POPULASI TERNAK KABUPATEN KEBUMEN TAHUN 2025 (TRIWULAN ${selectedTw})`,
+      rows,
+    });
   };
 
   return (

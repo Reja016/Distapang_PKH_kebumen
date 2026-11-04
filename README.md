@@ -5,10 +5,10 @@
 **Dinas Pertanian dan Pangan (Distapang) Kabupaten Kebumen**
 
 [![Website Status](https://img.shields.io/badge/Status-Production%20Live-22c55e?style=for-the-badge&logo=google-chrome&logoColor=white)](https://simantap.cloud)
-[![Next.js](https://img.shields.io/badge/Next.js%2014-App%20Router-black?style=for-the-badge&logo=next.js&logoColor=white)](https://nextjs.org/)
-[![TypeScript](https://img.shields.io/badge/TypeScript-5.2-blue?style=for-the-badge&logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
-[![Tailwind CSS](https://img.shields.io/badge/Tailwind-3.3-38bdf8?style=for-the-badge&logo=tailwindcss&logoColor=white)](https://tailwindcss.com/)
-[![MySQL](https://img.shields.io/badge/Database-MySQL%208-4479A1?style=for-the-badge&logo=mysql&logoColor=white)](https://www.mysql.com/)
+[![Next.js](https://img.shields.io/badge/Next.js-App%20Router-black?style=for-the-badge&logo=next.js&logoColor=white)](https://nextjs.org/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-blue?style=for-the-badge&logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
+[![Tailwind CSS](https://img.shields.io/badge/Tailwind%20CSS-38bdf8?style=for-the-badge&logo=tailwindcss&logoColor=white)](https://tailwindcss.com/)
+[![MySQL](https://img.shields.io/badge/Database-MySQL-4479A1?style=for-the-badge&logo=mysql&logoColor=white)](https://www.mysql.com/)
 [![Groq AI](https://img.shields.io/badge/AI-Groq%20Text--to--SQL-f97316?style=for-the-badge&logo=openai&logoColor=white)](https://groq.com/)
 
 <p align="center">
@@ -76,16 +76,16 @@ Aplikasi SiMantap terbagi dalam modul operasional sesuai tata kelola bidang di D
 
 | Lapisan | Teknologi | Deskripsi |
 | :--- | :--- | :--- |
-| **Frontend Framework** | [Next.js 14](https://nextjs.org/) (App Router) | Server-Side Rendering (SSR) & Client Component modern |
+| **Frontend Framework** | [Next.js](https://nextjs.org/) (App Router) | Server-Side Rendering (SSR) & Client Component modern |
 | **Bahasa Pemrograman** | [TypeScript](https://www.typescriptlang.org/) | *Type-safety* ketat untuk keandalan data lintas modul |
 | **Styling & UI** | [Tailwind CSS](https://tailwindcss.com/) & [Lucide React](https://lucide.dev/) | Tampilan responsif, bersih, mendukung **Light / Dark Mode** |
 | **Visual 3D & Grafis** | [Spline React](https://spline.design/) | Elemen interaktif visual modern di halaman beranda |
 | **Backend & Routing** | Next.js API Routes (Serverless Handlers) | *Restful endpoints* terstruktur di folder `app/api/` |
-| **Basis Data** | [MySQL](https://www.mysql.com/) via `mysql2` | Relasional database dengan manajemen koneksi pool |
+| **Basis Data** | [MySQL](https://www.mysql.com/) | Relasional database dengan manajemen koneksi pool |
 | **Kecerdasan Buatan (AI)** | [Groq SDK](https://groq.com/) / [Google GenAI](https://ai.google.dev/) | Asisten data Text-to-SQL berkecepatan tinggi |
 | **Pengolahan Berkas** | `xlsx` (SheetJS) & `jszip` | Ekspor-impor data Excel rekapitulasi lapangan |
 | **Notifikasi** | Web Push API | Pengiriman peringatan dan pengumuman kepada petugas |
-| **Deployment Server** | Node.js 22 + PM2 + LiteSpeed (cPanel) | Pengelolaan proses produksi dengan monitoring otomatis |
+| **Deployment Server** | Node.js + PM2 + LiteSpeed (cPanel) | Pengelolaan proses produksi dengan monitoring otomatis |
 
 ---
 
@@ -95,13 +95,12 @@ Sistem ini dirancang dan dikembangkan sebagai wujud komitmen modernisasi data pe
 
 * **Instansi:** Dinas Pertanian dan Pangan (Distapang) Kabupaten Kebumen — Bidang Peternakan dan Kesehatan Hewan (PKH)
 * **Lead Developer / Author:** [Reza (Reja016)](https://github.com/Reja016) & Tim Magang Distapang PKH Kebumen
-* **Proyek:** RDN Project
 
 ---
 
 ## 📄 Lisensi & Hak Cipta
 
-Hak Cipta © 2025–2026 **Dinas Pertanian dan Pangan Kabupaten Kebumen**.  
+Hak Cipta © **Dinas Pertanian dan Pangan Kabupaten Kebumen**.  
 Seluruh hak cipta dilindungi undang-undang. Sistem dikembangkan untuk keperluan kedinasan dan pelayanan masyarakat Kabupaten Kebumen.
 
 <div align="center">

@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useMemo, useRef } from 'react';
 import * as XLSX from 'xlsx';
+import { exportToExcelWithSignature } from '@/lib/excelExportHelper';
 import {
   Search,
   Filter,
@@ -257,7 +258,7 @@ export function PelayananMedikTab({
     }
   };
 
-  const handleExportExcel = () => {
+  const handleExportExcel = async () => {
     if (data.length === 0) {
       alert('Tidak ada data untuk diexport.');
       return;
@@ -280,10 +281,13 @@ export function PelayananMedikTab({
       Catatan: r.catatan || '-',
     }));
 
-    const ws = XLSX.utils.json_to_sheet(rows);
-    const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, 'Pelayanan Medik');
-    XLSX.writeFile(wb, `Pelayanan_Medik_Veteriner_${Date.now()}.xlsx`);
+    await exportToExcelWithSignature({
+      filename: `Pelayanan_Medik_Veteriner_${Date.now()}`,
+      sheetName: 'Pelayanan Medik',
+      title: 'LAPORAN PELAYANAN MEDIK VETERINER',
+      subtitle: `Kabupaten Kebumen | Periode ${selectedTahun}`,
+      rows,
+    });
   };
 
   return (

@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useMemo, useRef } from 'react';
 import * as XLSX from 'xlsx';
+import { exportToExcelWithSignature } from '@/lib/excelExportHelper';
 import {
   Search,
   Filter,
@@ -350,7 +351,7 @@ export function PuskeswanlingTab({
     }
   };
 
-  const handleExportExcel = () => {
+  const handleExportExcel = async () => {
     if (data.length === 0) {
       alert('Tidak ada data untuk diexport.');
       return;
@@ -369,10 +370,13 @@ export function PuskeswanlingTab({
       'Petugas Pencatat': r.petugas_nama || '-',
     }));
 
-    const ws = XLSX.utils.json_to_sheet(rows);
-    const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, 'Puskeswanling');
-    XLSX.writeFile(wb, `Puskeswanling_${Date.now()}.xlsx`);
+    await exportToExcelWithSignature({
+      filename: `Puskeswanling_${Date.now()}`,
+      sheetName: 'Puskeswanling',
+      title: 'LAPORAN PELAYANAN PUSKESWAN KELILING (PUSKESWANLING)',
+      subtitle: `Kabupaten Kebumen | Periode ${selectedTahun}`,
+      rows,
+    });
   };
 
   return (

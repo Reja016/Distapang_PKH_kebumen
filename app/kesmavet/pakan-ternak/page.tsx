@@ -3,6 +3,7 @@
 import { useState, useEffect, useMemo } from 'react';
 import Link from 'next/link';
 import * as XLSX from 'xlsx';
+import { exportToExcelWithSignature } from '@/lib/excelExportHelper';
 import { usePageAuth } from '@/hooks/usePageAuth';
 import {
   ArrowLeft,
@@ -253,7 +254,7 @@ export default function PakanTernakPage() {
   };
 
   // Export Excel
-  const handleExportExcel = () => {
+  const handleExportExcel = async () => {
     const rows = dataPakan.map((k, index) => ({
       No: index + 1,
       Tahun: selectedYear,
@@ -277,10 +278,13 @@ export default function PakanTernakPage() {
       Status: totalPotensiPenambahan >= 0 ? 'Surplus' : 'Defisit',
     });
 
-    const ws = XLSX.utils.json_to_sheet(rows);
-    const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, `Kapasitas_Pakan_${selectedYear}`);
-    XLSX.writeFile(wb, `Data_Kapasitas_Pakan_Kebumen_${selectedYear}_${new Date().toISOString().split('T')[0]}.xlsx`);
+    await exportToExcelWithSignature({
+      filename: `Data_Kapasitas_Pakan_Kebumen_${selectedYear}_${new Date().toISOString().split('T')[0]}`,
+      sheetName: `Kapasitas_Pakan_${selectedYear}`,
+      title: 'LAPORAN DAYA DUKUNG & KAPASITAS PAKAN TERNAK',
+      subtitle: `Kabupaten Kebumen | Periode Tahun ${selectedYear}`,
+      rows,
+    });
   };
 
   if (!isReady) return null;

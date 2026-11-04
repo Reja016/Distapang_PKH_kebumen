@@ -5,6 +5,7 @@ import { usePageAuth } from '@/hooks/usePageAuth';
 import { getAuthSession } from '@/lib/auth';
 import Link from 'next/link';
 import * as XLSX from 'xlsx';
+import { exportToExcelWithSignature } from '@/lib/excelExportHelper';
 import {
   ArrowLeft,
   Download,
@@ -289,7 +290,7 @@ export default function LaporanPenyakitPage() {
   }, [casesList]);
 
   // Export to Excel
-  const handleExportExcel = () => {
+  const handleExportExcel = async () => {
     try {
       const wsData = casesList.map((c, i) => {
         const zone = getZoneByKecamatanId(c.kecamatan_id);
@@ -303,10 +304,14 @@ export default function LaporanPenyakitPage() {
           Keterangan: c.keterangan || '-',
         };
       });
-      const ws = XLSX.utils.json_to_sheet(wsData);
-      const wb = XLSX.utils.book_new();
-      XLSX.utils.book_append_sheet(wb, ws, `Kasus_Penyakit_${selectedYear}`);
-      XLSX.writeFile(wb, `Laporan_Penyakit_Hewan_Kebumen_${selectedYear}.xlsx`);
+
+      await exportToExcelWithSignature({
+        filename: `Laporan_Penyakit_Hewan_Kebumen_${selectedYear}`,
+        sheetName: `Kasus_Penyakit_${selectedYear}`,
+        title: 'LAPORAN REKAPITULASI KASUS PENYAKIT HEWAN',
+        subtitle: `Kabupaten Kebumen | Periode Tahun ${selectedYear}`,
+        rows: wsData,
+      });
     } catch {
       showToast('Gagal mengekspor file Excel.', 'error');
     }

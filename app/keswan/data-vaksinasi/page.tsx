@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState, useCallback, useMemo, useRef } from 'react';
 import Link from 'next/link';
-import * as XLSX from 'xlsx';
+import { appendSignatureToWorksheet, autoFitWorksheetColumns, XLSX } from '@/lib/excelExportHelper';
 import { usePageAuth } from '@/hooks/usePageAuth';
 import { showConfirm } from '@/components/common/CustomToast';
 import {
@@ -525,7 +525,7 @@ export default function DataVaksinasiPMKPage() {
   };
 
   // ── EXPORT EXCEL SESUAI TAHUN TERPILIH ──
-  const handleExportExcel = () => {
+  const handleExportExcel = async () => {
     try {
       const wsBulananData = bulanan.map((b) => ({
         'No Urut': b.no_urut,
@@ -576,6 +576,11 @@ export default function DataVaksinasiPMKPage() {
         Catatan: a.catatan || '-',
       }));
       const wsApbd = XLSX.utils.json_to_sheet(wsApbdData);
+
+      await appendSignatureToWorksheet(wsBulanan);
+      await appendSignatureToWorksheet(wsHarian);
+      await appendSignatureToWorksheet(wsDroping);
+      await appendSignatureToWorksheet(wsApbd);
 
       const wb = XLSX.utils.book_new();
       XLSX.utils.book_append_sheet(wb, wsBulanan, `Rekap_Bulanan_${selectedYear}`);

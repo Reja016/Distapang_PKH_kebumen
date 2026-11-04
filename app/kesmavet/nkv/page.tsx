@@ -3,6 +3,7 @@
 import { useState, useEffect, useMemo } from 'react';
 import Link from 'next/link';
 import * as XLSX from 'xlsx';
+import { exportToExcelWithSignature } from '@/lib/excelExportHelper';
 import { usePageAuth } from '@/hooks/usePageAuth';
 import { ArrowLeft, Plus, Download } from 'lucide-react';
 
@@ -219,7 +220,7 @@ export default function NKVPage() {
   }, [dataNkv]);
 
   // Export to Excel
-  const handleExportExcel = () => {
+  const handleExportExcel = async () => {
     const wb = XLSX.utils.book_new();
     const wsData = filteredData.map((d, index) => ({
       No: index + 1,
@@ -235,9 +236,13 @@ export default function NKVPage() {
       Keterangan: d.keterangan,
     }));
 
-    const ws = XLSX.utils.json_to_sheet(wsData);
-    XLSX.utils.book_append_sheet(wb, ws, 'Data_NKV');
-    XLSX.writeFile(wb, `Data_Nomor_Kontrol_Veteriner_NKV_${new Date().toISOString().split('T')[0]}.xlsx`);
+    await exportToExcelWithSignature({
+      filename: `Data_Nomor_Kontrol_Veteriner_NKV_${new Date().toISOString().split('T')[0]}`,
+      sheetName: 'Data_NKV',
+      title: 'DATA REGISTER NOMOR KONTROL VETERINER (NKV)',
+      subtitle: 'Kabupaten Kebumen',
+      rows: wsData,
+    });
   };
 
   if (loading || !isReady) return null;

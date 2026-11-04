@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useMemo } from 'react';
 import Link from 'next/link';
-import * as XLSX from 'xlsx';
+import { appendSignatureToWorksheet, XLSX } from '@/lib/excelExportHelper';
 import { usePageAuth } from '@/hooks/usePageAuth';
 import {
   ArrowLeft,
@@ -332,22 +332,25 @@ export default function DataFarmPage() {
     }
   };
 
-  const handleExportExcel = () => {
+  const handleExportExcel = async () => {
     const wb = XLSX.utils.book_new();
 
     // 1. Broiler
     if (dataBroiler.length > 0) {
       const wsBroiler = XLSX.utils.json_to_sheet(dataBroiler);
+      await appendSignatureToWorksheet(wsBroiler);
       XLSX.utils.book_append_sheet(wb, wsBroiler, 'Ayam_Broiler');
     }
     // 2. Petelur
     if (dataPetelur.length > 0) {
       const wsPetelur = XLSX.utils.json_to_sheet(dataPetelur);
+      await appendSignatureToWorksheet(wsPetelur);
       XLSX.utils.book_append_sheet(wb, wsPetelur, 'Ayam_Petelur');
     }
     // 3. General (Babi, Sapi, Domba)
     if (dataGeneral.length > 0) {
       const wsGeneral = XLSX.utils.json_to_sheet(dataGeneral);
+      await appendSignatureToWorksheet(wsGeneral);
       XLSX.utils.book_append_sheet(wb, wsGeneral, 'Ternak_Lainnya');
     }
 

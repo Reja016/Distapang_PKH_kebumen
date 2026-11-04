@@ -3,7 +3,7 @@
 import { useState, useEffect, useMemo } from 'react';
 import { usePageAuth } from '@/hooks/usePageAuth';
 import Link from 'next/link';
-import * as XLSX from 'xlsx';
+import { appendSignatureToWorksheet, XLSX } from '@/lib/excelExportHelper';
 import {
   ArrowLeft,
   Download,
@@ -264,7 +264,7 @@ export default function UnifiedSKLBPage() {
     }
   };
 
-  const handleExportExcel = () => {
+  const handleExportExcel = async () => {
     try {
       const wsSapiPO = XLSX.utils.json_to_sheet(
         KECAMATAN_ITEMS.map((k, i) => {
@@ -312,6 +312,10 @@ export default function UnifiedSKLBPage() {
       );
 
       const wb = XLSX.utils.book_new();
+      await appendSignatureToWorksheet(wsSapiPO);
+      await appendSignatureToWorksheet(wsRekap);
+      await appendSignatureToWorksheet(wsDetail);
+
       XLSX.utils.book_append_sheet(wb, wsSapiPO, `Populasi_Sapi_PO_${selectedYear}`);
       XLSX.utils.book_append_sheet(wb, wsRekap, `Rekap_SKLB_${selectedYear}`);
       XLSX.utils.book_append_sheet(wb, wsDetail, `Master_Detail_${selectedYear}`);

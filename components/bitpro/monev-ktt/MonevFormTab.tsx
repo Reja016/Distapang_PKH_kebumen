@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useMemo, useRef } from 'react';
-import * as XLSX from 'xlsx';
+import { appendSignatureToWorksheet, XLSX } from '@/lib/excelExportHelper';
 import { showToast, showConfirm } from '@/components/common/CustomToast';
 import {
   Filter,
@@ -239,7 +239,7 @@ export function MonevFormTab({
   }, [dbLapanganTabel]);
 
   // Export Excel Khusus Tabel Rekapitulasi Kondisi Terkini Ternak
-  const downloadExcelKondisiTerkini = () => {
+  const downloadExcelKondisiTerkini = async () => {
     if (dbLapanganTabel.length === 0) {
       alert('Belum ada data untuk diekspor!');
       return;
@@ -323,6 +323,7 @@ export function MonevFormTab({
     ];
 
     const wb = XLSX.utils.book_new();
+    await appendSignatureToWorksheet(ws);
     XLSX.utils.book_append_sheet(wb, ws, 'Kondisi_Terkini_Ternak');
     const safeTh = (tahunBantuanFilter || 'Semua').replace(/[^a-zA-Z0-9]+/g, '_');
     const safePusk = (currentPuskeswan || 'Semua').replace(/[^a-zA-Z0-9]+/g, '_');

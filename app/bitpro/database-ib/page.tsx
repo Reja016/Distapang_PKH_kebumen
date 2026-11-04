@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useMemo } from 'react';
 import Link from 'next/link';
-import * as XLSX from 'xlsx';
+import { appendSignatureToWorksheet, XLSX } from '@/lib/excelExportHelper';
 import { usePageAuth } from '@/hooks/usePageAuth';
 import { getAuthSession } from '@/lib/auth';
 import {
@@ -269,7 +269,7 @@ export default function DatabaseIBPage() {
   }, [calvingIntervals]);
 
   // Export ke Excel Multi-Sheet
-  const handleExportExcel = () => {
+  const handleExportExcel = async () => {
     const dataSheet = ibList.map((ib) => {
       const birthInfo = ib.pkbResult === 'Bunting' && !ib.birthDate ? estimateBirthInfo(ib) : null;
       return {
@@ -342,15 +342,18 @@ export default function DatabaseIBPage() {
 
     const wb = XLSX.utils.book_new();
     const ws1 = XLSX.utils.json_to_sheet(dataSheet);
+    await appendSignatureToWorksheet(ws1);
     XLSX.utils.book_append_sheet(wb, ws1, 'Data Siklus Aktif');
 
     if (historySheet.length > 0) {
       const wsHist = XLSX.utils.json_to_sheet(historySheet);
+      await appendSignatureToWorksheet(wsHist);
       XLSX.utils.book_append_sheet(wb, wsHist, 'Riwayat Log Semua IB');
     }
 
     if (calvingSheet.length > 0) {
       const ws2 = XLSX.utils.json_to_sheet(calvingSheet);
+      await appendSignatureToWorksheet(ws2);
       XLSX.utils.book_append_sheet(wb, ws2, 'Calving Interval');
     }
 

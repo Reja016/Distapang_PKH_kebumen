@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useMemo } from 'react';
-import * as XLSX from 'xlsx';
+import { appendSignatureToWorksheet, XLSX } from '@/lib/excelExportHelper';
 import {
   Search,
   Download,
@@ -109,7 +109,7 @@ export default function PencatatanPemotonganTable({
   }, [filteredData]);
 
   // Export Excel dalam format tabel yang rapi dan terstruktur
-  const handleExportExcel = () => {
+  const handleExportExcel = async () => {
     try {
       if (filteredData.length === 0) {
         showToast.error('Tidak ada data pemotongan untuk diekspor.');
@@ -138,29 +138,7 @@ export default function PencatatanPemotonganTable({
       }));
 
       const ws = XLSX.utils.json_to_sheet(rows);
-
-      // Set kolom lebar otomatis agar rapi
-      const colWidths = [
-        { wch: 6 },  // No
-        { wch: 14 }, // Tanggal
-        { wch: 22 }, // Tempat
-        { wch: 26 }, // Jagal / Luar
-        { wch: 22 }, // Nama Pemilik
-        { wch: 16 }, // Kecamatan
-        { wch: 18 }, // Desa
-        { wch: 18 }, // Rumpun
-        { wch: 20 }, // Kategori
-        { wch: 14 }, // Jumlah
-        { wch: 20 }, // Izin Pemotongan
-        { wch: 32 }, // Antemortem
-        { wch: 32 }, // Postmortem
-        { wch: 22 }, // Status
-        { wch: 16 }, // Foto AM
-        { wch: 16 }, // Foto PM
-        { wch: 24 }, // Dokumen PDF
-        { wch: 20 }, // Petugas
-      ];
-      ws['!cols'] = colWidths;
+      await appendSignatureToWorksheet(ws);
 
       const wb = XLSX.utils.book_new();
       XLSX.utils.book_append_sheet(wb, ws, 'Pencatatan Pemotongan');

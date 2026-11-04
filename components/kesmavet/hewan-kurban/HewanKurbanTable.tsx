@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useMemo, useState, useRef } from 'react';
-import * as XLSX from 'xlsx';
+import { exportToExcelWithSignature, XLSX } from '@/lib/excelExportHelper';
 import {
   Search,
   Filter,
@@ -208,7 +208,7 @@ export default function HewanKurbanTable({
   };
 
   // Export Excel (.xlsx)
-  const handleExportExcel = () => {
+  const handleExportExcel = async () => {
     if (items.length === 0) {
       showToast.warning('Tidak ada data hewan kurban untuk diekspor.');
       return;
@@ -239,11 +239,13 @@ export default function HewanKurbanTable({
       'Petugas Pencatat': it.petugas_nama || '-',
     }));
 
-    const ws = XLSX.utils.json_to_sheet(dataRows);
-    const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, 'Pemotongan Hewan Kurban');
-    const fileName = `Rekap_Pemotongan_Hewan_Kurban_${selectedKecamatan !== 'all' ? selectedKecamatan : 'Semua_Kecamatan'}_${selectedTahun}.xlsx`;
-    XLSX.writeFile(wb, fileName);
+    const fileName = `Rekap_Pemotongan_Hewan_Kurban_${selectedKecamatan !== 'all' ? selectedKecamatan : 'Semua_Kecamatan'}_${selectedTahun}`;
+    await exportToExcelWithSignature({
+      filename: fileName,
+      sheetName: 'Hewan_Kurban',
+      title: `REKAPITULASI PEMOTONGAN HEWAN KURBAN TAHUN ${selectedTahun}`,
+      rows: dataRows,
+    });
     showToast.success('Data berhasil diekspor ke Excel!');
   };
 

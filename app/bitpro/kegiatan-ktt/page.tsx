@@ -3,6 +3,7 @@
 import { useState, useEffect, useMemo, useRef } from 'react';
 import Link from 'next/link';
 import * as XLSX from 'xlsx';
+import { exportToExcelWithSignature } from '@/lib/excelExportHelper';
 import { usePageAuth } from '@/hooks/usePageAuth';
 import { compressImageFile, compressCanvas } from '@/lib/file-compressor';
 import {
@@ -488,7 +489,7 @@ export default function KegiatanKTTPage() {
   };
 
   // Export to Excel
-  const handleExportExcel = () => {
+  const handleExportExcel = async () => {
     if (listKegiatan.length === 0) return showToast.warning('Belum ada data kegiatan untuk diekspor!');
     const rows = filteredKegiatan.map((item, idx) => ({
       No: idx + 1,
@@ -504,10 +505,13 @@ export default function KegiatanKTTPage() {
       'Dokumentasi Foto': item.photo ? 'Ada Foto Kegiatan (Tersimpan di SIMANTAP)' : 'Tidak Ada',
     }));
 
-    const ws = XLSX.utils.json_to_sheet(rows);
-    const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, 'Log_Kegiatan_KTT');
-    XLSX.writeFile(wb, `Log_Kegiatan_KTT_${new Date().toISOString().split('T')[0]}.xlsx`);
+    await exportToExcelWithSignature({
+      filename: `Log_Kegiatan_KTT_${new Date().toISOString().split('T')[0]}`,
+      sheetName: 'Log_Kegiatan_KTT',
+      title: 'LAPORAN REKAPITULASI KEGIATAN KELOMPOK TANI TERNAK (KTT)',
+      subtitle: 'Dinas Pertanian dan Ketahanan Pangan Kabupaten Kebumen',
+      rows,
+    });
   };
 
   // Calendar Calculation

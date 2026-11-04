@@ -3,6 +3,7 @@
 import { useState, useEffect, useMemo } from 'react';
 import Link from 'next/link';
 import * as XLSX from 'xlsx';
+import { exportToExcelWithSignature } from '@/lib/excelExportHelper';
 import { usePageAuth } from '@/hooks/usePageAuth';
 import { ArrowLeft, Plus, Download } from 'lucide-react';
 import { KendaraanRecord, KendaraanFormData } from '@/components/aset/types';
@@ -206,7 +207,7 @@ export default function InventarisKendaraanPage() {
   }, [dataKendaraan, searchTerm]);
 
   // Export to Excel
-  const handleExportExcel = () => {
+  const handleExportExcel = async () => {
     const wb = XLSX.utils.book_new();
     const wsData = filteredData.map((d, index) => ({
       No: index + 1,
@@ -220,9 +221,13 @@ export default function InventarisKendaraanPage() {
       Keterangan: d.keterangan || '-',
     }));
 
-    const ws = XLSX.utils.json_to_sheet(wsData);
-    XLSX.utils.book_append_sheet(wb, ws, 'Inventaris_Kendaraan');
-    XLSX.writeFile(wb, `Inventaris_Kendaraan_Dinas_Distapang_${new Date().toISOString().split('T')[0]}.xlsx`);
+    await exportToExcelWithSignature({
+      filename: `Inventaris_Kendaraan_Dinas_Distapang_${new Date().toISOString().split('T')[0]}`,
+      sheetName: 'Inventaris_Kendaraan',
+      title: 'BUKU INVENTARIS KENDARAAN DINAS OPERASIONAL',
+      subtitle: 'Dinas Pertanian dan Ketahanan Pangan Kabupaten Kebumen',
+      rows: wsData,
+    });
   };
 
   if (loading || !isReady) return null;

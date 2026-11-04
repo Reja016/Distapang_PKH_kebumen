@@ -13,7 +13,7 @@ import {
   ArrowDownLeft,
   ArrowUpRight,
 } from 'lucide-react';
-import * as XLSX from 'xlsx';
+import { exportToExcelWithSignature } from '@/lib/excelExportHelper';
 import { LalinTernakItem, KategoriLalin, WilayahPasar } from './types';
 
 interface LalinTableProps {
@@ -68,7 +68,7 @@ export default function LalinTable({
   const totalBetina = filteredData.reduce((sum, item) => sum + Number(item.jumlah_betina || 0), 0);
 
   // Fungsi Export ke file Excel (.xlsx)
-  const handleExportExcel = () => {
+  const handleExportExcel = async () => {
     if (filteredData.length === 0) {
       alert('Tidak ada data yang dapat diekspor.');
       return;
@@ -94,29 +94,30 @@ export default function LalinTable({
 
     // Baris jumlah total di akhir
     exportRows.push({
-      'NO.': '' as any,
-      'KATEGORI': '',
-      'PASAR HEWAN': '',
-      'TANGGAL PENGIRIMAN': '',
-      'NO. SKKH': '',
-      'NAMA PEMILIK': '',
-      'ALAMAT PEMILIK': '',
-      'JENIS TERNAK': 'TOTAL',
-      'UMUR': '',
+      'NO.': 'TOTAL' as any,
+      'KATEGORI': '-',
+      'PASAR HEWAN': '-',
+      'TANGGAL PENGIRIMAN': '-',
+      'NO. SKKH': '-',
+      'NAMA PEMILIK': '-',
+      'ALAMAT PEMILIK': '-',
+      'JENIS TERNAK': 'TOTAL KESELURUHAN',
+      'UMUR': '-',
       'JUMLAH (EKOR)': totalEkor,
       'JANTAN': totalJantan,
       'BETINA': totalBetina,
-      'ASAL TERNAK': '',
-      'TUJUAN TERNAK': '',
+      'ASAL TERNAK': '-',
+      'TUJUAN TERNAK': '-',
       'KETERANGAN': `Rekap ${kategori}`,
     });
 
-    const worksheet = XLSX.utils.json_to_sheet(exportRows);
-    const workbook = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(workbook, worksheet, `Lalin ${kategori}`);
-
-    const fileName = `Lalu_Lintas_Ternak_${kategori}_${activeWilayah}_${new Date().toISOString().split('T')[0]}.xlsx`;
-    XLSX.writeFile(workbook, fileName);
+    const fileName = `Lalu_Lintas_Ternak_${kategori}_${activeWilayah}_${new Date().toISOString().split('T')[0]}`;
+    await exportToExcelWithSignature({
+      filename: fileName,
+      sheetName: `Lalin ${kategori}`,
+      title: `REKAPITULASI LALU LINTAS TERNAK (${kategori.toUpperCase()}) - PASAR ${activeWilayah.toUpperCase()}`,
+      rows: exportRows,
+    });
   };
 
   return (

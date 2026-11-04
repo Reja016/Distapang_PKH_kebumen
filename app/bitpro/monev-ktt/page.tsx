@@ -2,7 +2,7 @@
 
 import { useState, useRef, useEffect, useMemo } from 'react';
 import Link from 'next/link';
-import * as XLSX from 'xlsx';
+import { appendSignatureToWorksheet, XLSX } from '@/lib/excelExportHelper';
 import { usePageAuth } from '@/hooks/usePageAuth';
 import { compressImageFile, compressCanvas, validatePdfFile } from '@/lib/file-compressor';
 import {
@@ -401,7 +401,7 @@ export default function MonevKTT() {
     }
   }, [dbLapanganUntukPeta, leafletLoaded, activeTab]);
 
-  const handleDownloadDashboard = (targetPuskeswan?: string) => {
+  const handleDownloadDashboard = async (targetPuskeswan?: string) => {
     const selectedPusk = targetPuskeswan !== undefined ? targetPuskeswan : filterPuskeswan;
 
     let dataToExport = (tahunBantuanFilter && tahunBantuanFilter !== 'Semua Tahun')
@@ -547,6 +547,8 @@ export default function MonevKTT() {
     ];
 
     const wb = XLSX.utils.book_new();
+    await appendSignatureToWorksheet(ws);
+    await appendSignatureToWorksheet(ws2);
     XLSX.utils.book_append_sheet(wb, ws, 'Monev_KTT');
     XLSX.utils.book_append_sheet(wb, ws2, 'Kondisi_Terkini_Ternak');
 

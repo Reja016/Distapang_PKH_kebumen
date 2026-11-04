@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import * as XLSX from 'xlsx';
+import { exportToExcelWithSignature } from '@/lib/excelExportHelper';
 import {
   FileSpreadsheet,
   Search,
@@ -95,7 +95,7 @@ export default function CatatHewanTable({
   };
 
   // Export Excel
-  const handleExportExcel = () => {
+  const handleExportExcel = async () => {
     if (catatList.length === 0) {
       showToast.warning('Tidak ada data catatan hewan untuk diekspor.');
       return;
@@ -116,11 +116,13 @@ export default function CatatHewanTable({
       Petugas: item.petugas_nama || '-',
     }));
 
-    const ws = XLSX.utils.json_to_sheet(dataRows);
-    const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, 'Catatan Hewan');
-    const fileName = `Rekap_Pasar_Hewan_${selectedPasarFilter}_${BULAN_NAMES[selectedBulan - 1]}_${selectedTahun}.xlsx`;
-    XLSX.writeFile(wb, fileName);
+    const fileName = `Rekap_Pasar_Hewan_${selectedPasarFilter}_${BULAN_NAMES[selectedBulan - 1]}_${selectedTahun}`;
+    await exportToExcelWithSignature({
+      filename: fileName,
+      sheetName: 'Catatan Hewan',
+      title: `REKAPITULASI PELAYANAN PASAR HEWAN ${selectedPasarFilter.toUpperCase()}`,
+      rows: dataRows,
+    });
     showToast.success('File Excel berhasil diunduh!');
   };
 

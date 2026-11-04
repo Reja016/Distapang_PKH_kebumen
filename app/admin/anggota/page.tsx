@@ -32,7 +32,9 @@ import {
   Briefcase,
   FileSpreadsheet,
   RefreshCw,
+  FileText,
 } from 'lucide-react';
+import CustomSignatureTab from '@/components/admin/CustomSignatureTab';
 import {
   UserPermissions,
   DEFAULT_FULL_PERMISSIONS,
@@ -118,7 +120,7 @@ export default function AdminAnggotaPage() {
   const { isMasterUnlocked, isLoading: isLockLoading, toggleMasterLock } = useMasterSystemLock();
 
   // Active Tab: 'users' (Kelola Akun & Hak Akses) atau 'territory' (Wilayah Kerja Petugas)
-  const [activeTab, setActiveTab] = useState<'users' | 'territory'>('users');
+  const [activeTab, setActiveTab] = useState<'users' | 'territory' | 'signature'>('users');
 
   // State Tab 1: Akun & Hak Akses
   const [members, setMembers] = useState<AnggotaUser[]>([]);
@@ -624,6 +626,18 @@ export default function AdminAnggotaPage() {
               {petugasList.length}
             </span>
           </button>
+
+          <button
+            onClick={() => setActiveTab('signature')}
+            className={`px-3.5 py-1.5 rounded-xl text-xs font-bold flex items-center gap-2 transition-all cursor-pointer ${
+              activeTab === 'signature'
+                ? 'bg-white dark:bg-slate-900 text-indigo-700 dark:text-indigo-400 shadow-xs'
+                : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
+            }`}
+          >
+            <FileText size={14} />
+            <span>Kustom Tanda Tangan</span>
+          </button>
         </div>
       </header>
 
@@ -1089,6 +1103,11 @@ export default function AdminAnggotaPage() {
               )}
             </div>
           </div>
+        )}
+
+        {/* TAB 3: KUSTOM TANDA TANGAN DINAS LAPORAN EXCEL */}
+        {activeTab === 'signature' && (
+          <CustomSignatureTab />
         )}
 
       </main>

@@ -3,6 +3,7 @@
 import { useMemo, useState, useEffect } from 'react';
 import Link from 'next/link';
 import * as XLSX from 'xlsx';
+import { exportToExcelWithSignature } from '@/lib/excelExportHelper';
 import { ArrowLeft, Plus, Download, Archive } from 'lucide-react';
 import { usePageAuth } from '@/hooks/usePageAuth';
 
@@ -201,7 +202,7 @@ export default function DatabaseKTTPage() {
   }
 
 
-  const handleExportExcel = () => {
+  const handleExportExcel = async () => {
     if (data.length === 0) return alert('Belum ada data KTT untuk diekspor!');
     const exportData = filtered.map((row, idx) => ({
       No: idx + 1,
@@ -218,10 +219,13 @@ export default function DatabaseKTTPage() {
       'Total Anggota': (Number(row.anggotaLaki) || 0) + (Number(row.anggotaPerempuan) || 0),
     }));
 
-    const ws = XLSX.utils.json_to_sheet(exportData);
-    const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, 'Master_KTT');
-    XLSX.writeFile(wb, `Database_Master_KTT_${new Date().toISOString().split('T')[0]}.xlsx`);
+    await exportToExcelWithSignature({
+      filename: `Database_Master_KTT_${new Date().toISOString().split('T')[0]}`,
+      sheetName: 'Master_KTT',
+      title: 'BUKU REGISTER INDUK KELOMPOK TANI TERNAK (KTT)',
+      subtitle: 'Kabupaten Kebumen',
+      rows: exportData,
+    });
   };
 
   if (isLoading || !isReady) {

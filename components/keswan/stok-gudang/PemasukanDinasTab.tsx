@@ -12,7 +12,7 @@ import {
   Building,
   Clock,
 } from 'lucide-react';
-import * as XLSX from 'xlsx';
+import { exportToExcelWithSignature } from '@/lib/excelExportHelper';
 import { DroppingDinasItem, MasterBarang } from './types';
 
 interface PemasukanDinasTabProps {
@@ -52,7 +52,7 @@ export default function PemasukanDinasTab({
   });
 
   // Ekspor Excel
-  const handleExportExcel = () => {
+  const handleExportExcel = async () => {
     const exportData = filteredList.map((d, idx) => ({
       No: idx + 1,
       'Tahun Anggaran': d.tahun,
@@ -71,10 +71,12 @@ export default function PemasukanDinasTab({
       'NIP Penerima': d.nip_penerima || '-',
     }));
 
-    const ws = XLSX.utils.json_to_sheet(exportData);
-    const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, 'Pemasukan_Dropping_Dinas');
-    XLSX.writeFile(wb, `Dropping_Masuk_Dinas_Keswan_${Date.now()}.xlsx`);
+    await exportToExcelWithSignature({
+      filename: `Dropping_Masuk_Dinas_Keswan_${Date.now()}`,
+      sheetName: 'Dropping_Dinas',
+      title: 'LAPORAN DROPING MASUK GUDANG DINAS KESWAN',
+      rows: exportData,
+    });
   };
 
   const totalNilaiAnggaran = filteredList.reduce((acc, curr) => acc + (Number(curr.harga_total) || 0), 0);

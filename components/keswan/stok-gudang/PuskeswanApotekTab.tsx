@@ -14,7 +14,7 @@ import {
   Clock,
   Layers,
 } from 'lucide-react';
-import * as XLSX from 'xlsx';
+import { exportToExcelWithSignature } from '@/lib/excelExportHelper';
 import { StokPuskeswanItem, PenggunaanObatItem, DAFTAR_PUSKESWAN_GUDANG } from './types';
 
 interface PuskeswanApotekTabProps {
@@ -68,7 +68,7 @@ export default function PuskeswanApotekTab({
   });
 
   // Ekspor Excel 7 Kolom Sesuai Catatan Atasan
-  const handleExportLaporanPenggunaan = () => {
+  const handleExportLaporanPenggunaan = async () => {
     const exportData = currentPuskPenggunaanList.map((p, idx) => ({
       No: idx + 1,
       Tanggal: p.tanggal ? String(p.tanggal).slice(0, 10) : '-',
@@ -84,13 +84,12 @@ export default function PuskeswanApotekTab({
       Petugas: p.petugas || '-',
     }));
 
-    const ws = XLSX.utils.json_to_sheet(exportData);
-    const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, 'Laporan_Penggunaan_Obat');
-    XLSX.writeFile(
-      wb,
-      `Laporan_Penggunaan_Obat_${currentPuskeswan.nama}_${Date.now()}.xlsx`
-    );
+    await exportToExcelWithSignature({
+      filename: `Laporan_Penggunaan_Obat_${currentPuskeswan.nama}_${Date.now()}`,
+      sheetName: 'Penggunaan_Obat',
+      title: `LAPORAN PENGGUNAAN OBAT PUSKESWAN - ${currentPuskeswan.nama.toUpperCase()}`,
+      rows: exportData,
+    });
   };
 
   return (

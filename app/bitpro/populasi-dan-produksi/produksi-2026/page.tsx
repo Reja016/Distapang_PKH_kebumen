@@ -3,7 +3,7 @@
 import { useState, useEffect, useMemo, Suspense } from 'react';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
-import * as XLSX from 'xlsx';
+import { saveWorkbookWithSignature, XLSX } from '@/lib/excelExportHelper';
 import {
   ArrowLeft,
   Download,
@@ -63,7 +63,7 @@ function Produksi2026Content() {
   }, [dataTelur]);
 
   // Export to Excel
-  const handleExportExcel = () => {
+  const handleExportExcel = async () => {
     const wb = XLSX.utils.book_new();
 
     if (dataDaging.length > 0) {
@@ -112,7 +112,7 @@ function Produksi2026Content() {
       XLSX.utils.book_append_sheet(wb, wsTelur, 'Produksi_Telur_2026');
     }
 
-    XLSX.writeFile(wb, `Laporan_Produksi_Daging_Telur_2026_${new Date().toISOString().split('T')[0]}.xlsx`);
+    await saveWorkbookWithSignature(wb, `Laporan_Produksi_Daging_Telur_2026_${new Date().toISOString().split('T')[0]}.xlsx`);
   };
 
   return (
