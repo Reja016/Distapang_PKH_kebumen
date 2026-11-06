@@ -22,6 +22,55 @@ export async function POST(request: Request) {
     const userName = session ? (session.nama || session.nip_username) : 'Sistem';
 
     const body = await request.json();
+
+    // ── 0. BATCH INSERT / IMPORT GELONDONGAN EXCEL ──
+    const items = Array.isArray(body) ? body : Array.isArray(body?.items) ? body.items : null;
+    if (items && items.length > 0) {
+      let successCount = 0;
+      let skippedCount = 0;
+
+      for (let idx = 0; idx < items.length; idx++) {
+        const item = items[idx];
+        const namaPemegang = String(item.nama_pemegang || item.namaPemegang || item['Nama Pemegang / Penanggung Jawab'] || item['Nama Pemegang'] || '').trim();
+        const merkType = String(item.merk_type || item.merkType || item['Merk / Type Kendaraan'] || item['Merk / Type'] || item['Merk'] || '').trim();
+        const nopolBaru = String(item.nopol_baru || item.nopolBaru || item['Nomor Polisi Baru (Plat Aktif)'] || item['Nomor Polisi (Baru)'] || item['Nopol Baru'] || '').trim();
+
+        if (!namaPemegang || !nopolBaru) {
+          skippedCount++;
+          continue;
+        }
+
+        const tahun = item.tahun || item['Tahun Pembuatan / Perolehan'] || item['Tahun'] || null;
+        const nopolLama = String(item.nopol_lama || item.nopolLama || item['Nomor Polisi Lama'] || item['Nomor Polisi (Lama)'] || item['Nopol Lama'] || '').trim() || null;
+        const nomorMesin = String(item.nomor_mesin || item.nomorMesin || item['Nomor Mesin'] || '').trim();
+        const nomorRangka = String(item.nomor_rangka || item.nomorRangka || item['Nomor Rangka'] || '').trim();
+
+        await pool.execute(
+          `INSERT INTO aset_kendaraan (nama_pemegang, merk_type, tahun, nopol_lama, nopol_baru, nomor_mesin, nomor_rangka)
+           VALUES (?, ?, ?, ?, ?, ?, ?)`,
+          [namaPemegang, merkType || '-', tahun, nopolLama, nopolBaru, nomorMesin, nomorRangka]
+        );
+        successCount++;
+      }
+
+      await logActivity({
+        module: 'aset',
+        submenu: 'inventaris-kendaraan',
+        tableName: 'aset_kendaraan',
+        recordId: 0,
+        action: 'IMPORT_EXCEL',
+        userName,
+        details: { totalItems: items.length, successCount, skippedCount },
+      });
+
+      return NextResponse.json({
+        success: true,
+        count: successCount,
+        skipped: skippedCount,
+        message: `Berhasil mengimpor ${successCount} data kendaraan dinas operasional!`,
+      });
+    }
+
     const { nama_pemegang, merk_type, tahun, nopol_lama, nopol_baru, nomor_mesin, nomor_rangka, keterangan } = body;
 
     if (!nama_pemegang || !merk_type || !nopol_baru) {

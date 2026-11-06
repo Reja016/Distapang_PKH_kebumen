@@ -7,6 +7,7 @@ import { saveWorkbookWithSignature, XLSX } from '@/lib/excelExportHelper';
 import {
   ArrowLeft,
   Download,
+  UploadCloud,
   Plus,
   PieChart as PieChartIcon,
 } from 'lucide-react';
@@ -15,6 +16,8 @@ import { PALETTE, ProduksiItem } from '@/components/bitpro/produksi/types';
 import DonutChart from '@/components/bitpro/produksi/DonutChart';
 import ProduksiTable from '@/components/bitpro/produksi/ProduksiTable';
 import AddProduksiModal from '@/components/bitpro/produksi/AddProduksiModal';
+import ProduksiImportModal from '@/components/bitpro/produksi/ProduksiImportModal';
+import { downloadProduksiTernakTemplate } from '@/lib/excelTemplateHelper';
 import { usePageAuth } from '@/hooks/usePageAuth';
 
 function Produksi2026Content() {
@@ -27,6 +30,7 @@ function Produksi2026Content() {
 
   // Modal Tambah Data Produksi
   const [showAddModal, setShowAddModal] = useState(false);
+  const [showImportModal, setShowImportModal] = useState(false);
 
   const fetchData = async () => {
     try {
@@ -145,7 +149,33 @@ function Produksi2026Content() {
             </div>
           </div>
 
-          <div className="flex items-center gap-2 shrink-0">
+          <div className="flex items-center gap-2 flex-wrap shrink-0">
+            {/* Unduh Template Excel */}
+            <button
+              type="button"
+              onClick={() => downloadProduksiTernakTemplate(year)}
+              title="Unduh Template Excel Produksi Ternak"
+              className="min-h-touch h-11 px-3 sm:px-3.5 rounded-xl border border-emerald-200 dark:border-emerald-800 bg-emerald-50 dark:bg-emerald-950/40 hover:bg-emerald-100 dark:hover:bg-emerald-900/50 text-emerald-700 dark:text-emerald-300 text-xs sm:text-sm font-bold flex items-center justify-center gap-1.5 transition-all shadow-xs cursor-pointer"
+            >
+              <Download size={15} strokeWidth={2.5} />
+              <span className="hidden sm:inline">Unduh Template</span>
+              <span className="sm:hidden">Template</span>
+            </button>
+
+            {/* Upload Excel */}
+            {canCreate && (
+              <button
+                type="button"
+                onClick={() => setShowImportModal(true)}
+                title="Upload Excel Produksi Ternak"
+                className="min-h-touch h-11 px-3 sm:px-4 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs sm:text-sm font-bold flex items-center justify-center gap-1.5 transition-all shadow-xs cursor-pointer"
+              >
+                <UploadCloud size={15} strokeWidth={2.5} />
+                <span className="hidden sm:inline">Upload Excel</span>
+                <span className="sm:hidden">Upload</span>
+              </button>
+            )}
+
             <button
               onClick={handleExportExcel}
               title="Export Excel"
@@ -161,10 +191,10 @@ function Produksi2026Content() {
                 onClick={() => setShowAddModal(true)}
                 title="Tambah Data Produksi"
                 aria-label="Tambah Data Produksi"
-                className="min-h-touch min-w-touch h-11 w-11 sm:w-auto sm:px-5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs sm:text-sm font-bold flex items-center justify-center sm:gap-2 transition-all active:scale-95 shadow-xs cursor-pointer"
+                className="min-h-touch min-w-touch h-11 w-11 sm:w-auto sm:px-5 rounded-xl bg-slate-800 hover:bg-slate-900 dark:bg-slate-700 dark:hover:bg-slate-600 text-white text-xs sm:text-sm font-bold flex items-center justify-center sm:gap-2 transition-all active:scale-95 shadow-xs cursor-pointer"
               >
                 <Plus size={16} strokeWidth={2.5} />
-                <span className="hidden sm:inline">Tambah Data Produksi</span>
+                <span className="hidden sm:inline">Tambah Manual</span>
               </button>
             )}
           </div>
@@ -248,6 +278,14 @@ function Produksi2026Content() {
         onClose={() => setShowAddModal(false)}
         year={year}
         onSuccess={fetchData}
+      />
+
+      {/* ── MODAL IMPORT EXCEL PRODUKSI ── */}
+      <ProduksiImportModal
+        isOpen={showImportModal}
+        onClose={() => setShowImportModal(false)}
+        onSuccess={fetchData}
+        year={year}
       />
 
     </div>

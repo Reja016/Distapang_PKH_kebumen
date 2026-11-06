@@ -94,7 +94,7 @@ Aplikasi SiMantap terbagi dalam modul operasional sesuai tata kelola bidang di D
 Sistem ini dirancang dan dikembangkan sebagai wujud komitmen modernisasi data pertanian dan peternakan di Kabupaten Kebumen:
 
 * **Instansi:** Dinas Pertanian dan Pangan (Distapang) Kabupaten Kebumen — Bidang Peternakan dan Kesehatan Hewan (PKH)
-* **Lead Developer / Author:** [Reza (Reja016)](https://github.com/Reja016) & Tim Magang Distapang PKH Kebumen
+* **Author:** Mahasiswa Magang dari Universitas Putra Bangsa <small>Reza, Fajar, & Vera</small>
 
 ---
 

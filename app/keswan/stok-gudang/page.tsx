@@ -14,7 +14,11 @@ import {
   AlertCircle,
   CheckCircle2,
   AlertTriangle,
+  Download,
+  UploadCloud,
 } from 'lucide-react';
+import { downloadStokGudangDroppingTemplate } from '@/lib/excelTemplateHelper';
+import GudangDroppingImportModal from '@/components/keswan/stok-gudang/GudangDroppingImportModal';
 import { usePageAuth } from '@/hooks/usePageAuth';
 import { useUserAreaRestriction } from '@/hooks/useUserAreaRestriction';
 import {
@@ -59,6 +63,7 @@ export default function StokGudangKeswanPage() {
   const [penggunaan, setPenggunaan] = useState<PenggunaanObatItem[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [toast, setToast] = useState<{ type: 'success' | 'error'; msg: string } | null>(null);
+  const [showImportModal, setShowImportModal] = useState(false);
 
   // State Universal Audit Modal / Pusat Koreksi
   const [showAuditModal, setShowAuditModal] = useState(false);
@@ -281,11 +286,37 @@ export default function StokGudangKeswanPage() {
             </div>
           </div>
 
-          <div className="flex items-center gap-2 shrink-0">
+          <div className="flex items-center gap-2 flex-wrap shrink-0">
+            {/* Unduh Template Excel Dropping */}
+            <button
+              type="button"
+              onClick={downloadStokGudangDroppingTemplate}
+              title="Unduh Template Excel Dropping Gudang Logistik"
+              className="min-h-touch h-10 sm:h-11 px-3 sm:px-3.5 rounded-xl border border-blue-200 dark:border-blue-800 bg-blue-50 dark:bg-blue-950/40 hover:bg-blue-100 dark:hover:bg-blue-900/50 text-blue-700 dark:text-blue-300 text-xs sm:text-sm font-bold flex items-center justify-center gap-1.5 transition-all shadow-xs cursor-pointer"
+            >
+              <Download size={15} strokeWidth={2.5} />
+              <span className="hidden sm:inline">Unduh Template</span>
+              <span className="sm:hidden">Template</span>
+            </button>
+
+            {/* Upload Excel Dropping */}
+            {(canCreate || canEdit || isAdmin) && (
+              <button
+                type="button"
+                onClick={() => setShowImportModal(true)}
+                title="Upload Excel Dropping Logistik Masuk"
+                className="min-h-touch h-10 sm:h-11 px-3 sm:px-4 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs sm:text-sm font-bold flex items-center justify-center gap-1.5 transition-all shadow-xs cursor-pointer"
+              >
+                <UploadCloud size={15} strokeWidth={2.5} />
+                <span className="hidden sm:inline">Upload Excel</span>
+                <span className="sm:hidden">Upload</span>
+              </button>
+            )}
+
             <button
               onClick={loadGudangData}
               disabled={isLoading}
-              className="min-h-touch min-w-touch h-10 sm:h-11 px-3.5 sm:px-4 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 text-xs sm:text-sm font-semibold flex items-center justify-center gap-1.5 transition-colors shadow-xs cursor-pointer"
+              className="min-h-touch min-w-touch h-10 sm:h-11 px-3 sm:px-3.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 text-xs sm:text-sm font-semibold flex items-center justify-center gap-1.5 transition-colors shadow-xs cursor-pointer"
               title="Refresh Data"
             >
               <RefreshCw className={`w-3.5 h-3.5 ${isLoading ? 'animate-spin text-blue-600' : ''}`} />
@@ -298,7 +329,7 @@ export default function StokGudangKeswanPage() {
                   setEditingBarang(null);
                   setIsModalBarangOpen(true);
                 }}
-                className="min-h-touch min-w-touch h-10 sm:h-11 px-3 sm:px-5 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl text-xs sm:text-sm shadow-md transition-all cursor-pointer flex items-center justify-center gap-1.5"
+                className="min-h-touch min-w-touch h-10 sm:h-11 px-3 sm:px-4 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl text-xs sm:text-sm shadow-md transition-all cursor-pointer flex items-center justify-center gap-1.5"
                 title="Tambah Barang Baru"
               >
                 <Plus className="w-4 h-4" />
@@ -369,6 +400,7 @@ export default function StokGudangKeswanPage() {
           canCreate={canCreate}
           canEdit={canEdit}
           onOpenAudit={handleOpenAudit}
+          onOpenImport={() => setShowImportModal(true)}
         />
       )}
 
@@ -490,6 +522,13 @@ export default function StokGudangKeswanPage() {
           availableFields={auditTarget.fields as any}
         />
       )}
+
+      {/* ── MODAL IMPORT EXCEL DROPPING LOGISTIK ── */}
+      <GudangDroppingImportModal
+        isOpen={showImportModal}
+        onClose={() => setShowImportModal(false)}
+        onSuccess={loadGudangData}
+      />
     </div>
   );
 }

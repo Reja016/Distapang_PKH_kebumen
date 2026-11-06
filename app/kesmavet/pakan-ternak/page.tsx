@@ -4,10 +4,12 @@ import { useState, useEffect, useMemo } from 'react';
 import Link from 'next/link';
 import * as XLSX from 'xlsx';
 import { exportToExcelWithSignature } from '@/lib/excelExportHelper';
+import { downloadPakanTernakTemplate } from '@/lib/excelTemplateHelper';
 import { usePageAuth } from '@/hooks/usePageAuth';
 import {
   ArrowLeft,
   Download,
+  Upload,
   Check,
   AlertCircle,
   Map as MapIcon,
@@ -21,6 +23,7 @@ import { PakanFormValues, fajarFormatPakanKecamatan } from '@/components/kesmave
 import PakanPetaSection from '@/components/kesmavet/pakan-ternak/PakanPetaSection';
 import PakanTableSection from '@/components/kesmavet/pakan-ternak/PakanTableSection';
 import PakanModals from '@/components/kesmavet/pakan-ternak/PakanModals';
+import PakanImportModal from '@/components/kesmavet/pakan-ternak/PakanImportModal';
 
 export default function PakanTernakPage() {
   const { isReady, canEdit } = usePageAuth('kesmavet', 'pakan-ternak');
@@ -28,6 +31,7 @@ export default function PakanTernakPage() {
   // State Multi-Tahun (Otomatis Tahun Berjalan)
   const currentYear = useMemo(() => new Date().getFullYear(), []);
   const [selectedYear, setSelectedYear] = useState<number>(new Date().getFullYear());
+  const [showImportModal, setShowImportModal] = useState<boolean>(false);
   const [availableYears, setAvailableYears] = useState<number[]>([
     new Date().getFullYear() + 1,
     new Date().getFullYear(),
@@ -330,6 +334,33 @@ export default function PakanTernakPage() {
           </div>
 
           <div className="flex items-center gap-2.5 flex-wrap shrink-0">
+            {/* Unduh Template Excel */}
+            <button
+              type="button"
+              onClick={() => downloadPakanTernakTemplate(selectedYear)}
+              title={`Unduh Template Excel Kapasitas Pakan Tahun ${selectedYear}`}
+              className="h-10 px-3.5 rounded-xl border border-purple-200 dark:border-purple-800 bg-purple-50 dark:bg-purple-950/40 hover:bg-purple-100 dark:hover:bg-purple-900/50 text-purple-700 dark:text-purple-300 text-xs font-bold flex items-center gap-1.5 transition-all shadow-xs cursor-pointer"
+            >
+              <Download size={14} strokeWidth={2.5} />
+              <span className="hidden sm:inline">Unduh Template</span>
+              <span className="sm:hidden">Template</span>
+            </button>
+
+            {/* Upload Excel */}
+            {canEdit && (
+              <button
+                type="button"
+                onClick={() => setShowImportModal(true)}
+                title={`Upload Excel Kapasitas Pakan Tahun ${selectedYear}`}
+                className="h-10 px-4 rounded-xl bg-purple-600 hover:bg-purple-700 text-white text-xs font-bold flex items-center gap-1.5 transition-all shadow-xs cursor-pointer"
+              >
+                <Upload size={14} strokeWidth={2.5} />
+                <span className="hidden sm:inline">Upload Excel</span>
+                <span className="sm:hidden">Upload</span>
+              </button>
+            )}
+
+            {/* Export Excel */}
             <button
               onClick={handleExportExcel}
               title="Export Excel"
@@ -447,6 +478,17 @@ export default function PakanTernakPage() {
         setCopyFromYearInput={setCopyFromYearInput}
         isAddingYear={isAddingYear}
         handleAddYearSubmit={handleAddYearSubmit}
+      />
+
+      {/* Modal Impor Excel Resmi Kapasitas Pakan */}
+      <PakanImportModal
+        isOpen={showImportModal}
+        onClose={() => setShowImportModal(false)}
+        onSuccess={() => {
+          setShowImportModal(false);
+          loadData(selectedYear);
+        }}
+        selectedYear={selectedYear}
       />
     </div>
   );

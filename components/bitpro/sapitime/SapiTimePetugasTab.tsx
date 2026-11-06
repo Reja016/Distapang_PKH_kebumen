@@ -27,6 +27,9 @@ const BULAN_NAMES = [
 interface SapiTimePetugasTabProps {
   cattleList: Cattle[];
   onTraceCattle?: (cattle: Cattle) => void;
+  isPuskeswanUser?: boolean;
+  allowedPuskeswan?: string[];
+  allowedKecamatan?: string[];
 }
 
 interface PetugasDetailModalProps {
@@ -322,6 +325,9 @@ function PetugasDetailModal({
 export function SapiTimePetugasTab({
   cattleList,
   onTraceCattle,
+  isPuskeswanUser = false,
+  allowedPuskeswan = [],
+  allowedKecamatan = [],
 }: SapiTimePetugasTabProps) {
   const currentNow = new Date();
   const [selectedYear, setSelectedYear] = useState<number>(currentNow.getFullYear());
@@ -330,17 +336,46 @@ export function SapiTimePetugasTab({
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedPetugasForModal, setSelectedPetugasForModal] = useState<string | null>(null);
 
-  // 1. Ekstraksi semua pelayanan IB dari cattleList
+  // Normalisasi nama kecamatan untuk pencocokan wilayah binaan
+  const normalizeKec = (val: string) =>
+    (val || '')
+      .toUpperCase()
+      .replace(/^KECAMATAN\s+/i, '')
+      .replace(/^KEC\.\s+/i, '')
+      .replace(/^KEC\s+/i, '')
+      .trim();
+
+  const isKecamatanInArea = (kec: string) => {
+    if (!isPuskeswanUser || !allowedKecamatan || allowedKecamatan.length === 0) return true;
+    const target = normalizeKec(kec);
+    if (!target) return false;
+    return allowedKecamatan.some((ak) => normalizeKec(ak) === target);
+  };
+
+  const availableKecamatanList = useMemo(() => {
+    if (!isPuskeswanUser || !allowedKecamatan || allowedKecamatan.length === 0) {
+      return KECAMATAN_LIST;
+    }
+    return KECAMATAN_LIST.filter((k) => isKecamatanInArea(k));
+  }, [isPuskeswanUser, allowedKecamatan]);
+
+  // 1. Ekstraksi semua pelayanan IB dari cattleList (terfilter wilayah binaan jika user adalah Puskeswan)
   const allInseminations = useMemo(() => {
     const list: Array<Insemination & { cattleRef: Cattle }> = [];
     cattleList.forEach((cattle) => {
       (cattle.inseminations || []).forEach((ib) => {
+        const kec = ib.kecamatan || cattle.kecamatan || '';
+        // Jika user adalah Puskeswan, hanya ambil pelayanan IB di wilayah binaannya
+        if (isPuskeswanUser && allowedKecamatan && allowedKecamatan.length > 0) {
+          if (!isKecamatanInArea(kec)) return;
+        }
+
         list.push({
           ...ib,
           cattle_id: ib.cattle_id || cattle.id,
           cattleName: ib.cattleName || cattle.name,
           ownerName: ib.ownerName || cattle.ownerName,
-          kecamatan: ib.kecamatan || cattle.kecamatan,
+          kecamatan: kec,
           desa: ib.desa || cattle.desa,
           cattleRef: cattle,
         });
@@ -349,7 +384,7 @@ export function SapiTimePetugasTab({
 
     list.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
     return list;
-  }, [cattleList]);
+  }, [cattleList, isPuskeswanUser, allowedKecamatan]);
 
   // 2. Agregasi per Inseminator untuk Bulan Terpilih
   const monthlyStats = useMemo(() => {
@@ -467,15 +502,22 @@ export function SapiTimePetugasTab({
       {/* ── HEADER TOOLBAR: FILTER BULAN, TAHUN & KECAMATAN (Tema Hijau Bitpro) ── */}
       <div className="bg-gradient-to-r from-emerald-800 via-teal-800 to-emerald-900 text-white p-6 sm:p-7 rounded-3xl shadow-sm flex flex-col md:flex-row items-start md:items-center justify-between gap-5">
         <div>
-          <div className="flex items-center gap-2 mb-1.5">
+          <div className="flex items-center gap-2 mb-1.5 flex-wrap">
             <span className="text-xs text-emerald-200/90 font-semibold">Monitoring Capaian Bulanan</span>
+            {isPuskeswanUser && allowedPuskeswan && allowedPuskeswan.length > 0 && (
+              <span className="px-2.5 py-0.5 rounded-full bg-emerald-700/60 text-emerald-100 text-[11px] font-bold border border-emerald-500/50 flex items-center gap-1 shadow-2xs">
+                <span>Wilayah Binaan: {allowedPuskeswan.join(', ')}</span>
+              </span>
+            )}
           </div>
           <h2 className="text-xl sm:text-2xl font-black tracking-tight flex items-center gap-2.5 text-white">
             <Award className="text-amber-300" size={24} />
             <span>Trace Pencapaian Kinerja Petugas Inseminasi Buatan</span>
           </h2>
           <p className="text-xs sm:text-sm text-emerald-100/90 mt-1 max-w-2xl">
-            Monitoring performa harian &amp; bulanan petugas inseminator lapangan, total sapi di-IB, dan sebaran wilayah kerja.
+            {isPuskeswanUser && allowedPuskeswan && allowedPuskeswan.length > 0
+              ? `Monitoring performa petugas inseminator lapangan yang bertugas di wilayah binaan ${allowedPuskeswan.join(', ')}.`
+              : 'Monitoring performa harian & bulanan petugas inseminator lapangan, total sapi di-IB, dan sebaran wilayah kerja se-Kabupaten Kebumen.'}
           </p>
         </div>
 
@@ -491,9 +533,9 @@ export function SapiTimePetugasTab({
               className="bg-transparent text-xs font-black text-white focus:outline-none cursor-pointer max-w-[150px]"
             >
               <option value="Semua" className="bg-slate-900 text-white">
-                Semua Kecamatan
+                {isPuskeswanUser ? 'Semua Wilayah Binaan' : 'Semua Kecamatan'}
               </option>
-              {KECAMATAN_LIST.map((kec) => (
+              {availableKecamatanList.map((kec) => (
                 <option key={kec} value={kec} className="bg-slate-900 text-white">
                   {kec}
                 </option>
@@ -612,7 +654,9 @@ export function SapiTimePetugasTab({
               <span>Daftar Capaian Petugas Inseminator ({BULAN_NAMES[selectedMonth - 1]} {selectedYear})</span>
             </h3>
             <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-              Klik nama petugas atau tombol &quot;Trace Detail&quot; untuk melihat rincian sapi yang di-IB dan lokasinya.
+              {isPuskeswanUser && allowedPuskeswan && allowedPuskeswan.length > 0
+                ? `Menampilkan petugas yang melayani di wilayah binaan ${allowedPuskeswan.join(', ')}. Klik nama petugas atau "Trace Detail" untuk melihat rincian sapi.`
+                : 'Klik nama petugas atau tombol "Trace Detail" untuk melihat rincian sapi yang di-IB dan lokasinya.'}
             </p>
           </div>
 
@@ -728,7 +772,9 @@ export function SapiTimePetugasTab({
               ) : (
                 <tr>
                   <td colSpan={9} className="px-5 py-10 text-center text-slate-400">
-                    Tidak ditemukan data pencapaian petugas pada periode ini.
+                    {isPuskeswanUser
+                      ? `Tidak ditemukan data pencapaian petugas di wilayah binaan ${allowedPuskeswan.join(', ') || 'ini'} pada periode ini.`
+                      : 'Tidak ditemukan data pencapaian petugas pada periode ini.'}
                   </td>
                 </tr>
               )}

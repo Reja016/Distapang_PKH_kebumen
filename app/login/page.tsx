@@ -15,6 +15,8 @@ import {
   Loader2,
   AlertCircle,
   Landmark,
+  X,
+  KeyRound,
 } from 'lucide-react';
 
 export default function LoginPage() {
@@ -24,6 +26,7 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
   const [idleLogoutNotice, setIdleLogoutNotice] = useState(false);
+  const [showForgotModal, setShowForgotModal] = useState(false);
   const [captchaToken, setCaptchaToken] = useState<string | null>(null);
   const turnstileRef = useRef<CloudflareTurnstileRef>(null);
   const router = useRouter();
@@ -257,6 +260,15 @@ export default function LoginPage() {
                   {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
                 </button>
               </div>
+              <div className="flex justify-end pt-1">
+                <button
+                  type="button"
+                  onClick={() => setShowForgotModal(true)}
+                  className="text-[11px] text-emerald-700 hover:text-emerald-800 hover:underline font-bold transition-colors cursor-pointer"
+                >
+                  Lupa Kata Sandi?
+                </button>
+              </div>
             </div>
 
             {/* Cloudflare Turnstile Verification (Tema Bersih / Light) */}
@@ -299,6 +311,44 @@ export default function LoginPage() {
 
         </div>
       </main>
+
+      {/* ── MODAL BANTUAN LUPA KATA SANDI ── */}
+      {showForgotModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/70 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className="bg-white rounded-2xl sm:rounded-3xl border border-slate-200 shadow-2xl p-5 sm:p-6 w-full max-w-sm text-center space-y-4 animate-in zoom-in-95 duration-200">
+            <div className="w-12 h-12 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-700 mx-auto flex items-center justify-center shadow-xs">
+              <KeyRound size={22} />
+            </div>
+            <div>
+              <h3 className="text-base font-bold text-slate-900">
+                Lupa Kata Sandi Akun?
+              </h3>
+              <p className="text-xs text-slate-500 mt-1 leading-relaxed text-justify">
+                Demi keamanan data dinas, reset kata sandi hanya dapat diproses oleh <strong>Administrator IT / Pengelola Sistem Distapang Kebumen</strong>.
+              </p>
+            </div>
+            <div className="bg-slate-50 border border-slate-200 p-3 rounded-xl text-xs text-left space-y-1">
+              <span className="font-bold text-slate-700 block">Langkah Reset Kata Sandi:</span>
+              <p className="text-slate-600 text-[11px]">
+                1. Hubungi Admin IT Distapang Kebumen.
+              </p>
+              <p className="text-slate-600 text-[11px]">
+                2. Sebutkan NIP atau Nama Lengkap Anda untuk verifikasi.
+              </p>
+              <p className="text-slate-600 text-[11px]">
+                3. Admin akan memberikan kata sandi baru yang memenuhi kombinasi aman.
+              </p>
+            </div>
+            <button
+              type="button"
+              onClick={() => setShowForgotModal(false)}
+              className="w-full h-10 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs shadow-xs transition-colors cursor-pointer"
+            >
+              Saya Mengerti
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* ── FOOTER RAMPING ── */}
       <footer className="relative z-10 w-full py-3 px-4 text-center text-[10px] sm:text-[11px] text-white/80 drop-shadow-xs shrink-0">

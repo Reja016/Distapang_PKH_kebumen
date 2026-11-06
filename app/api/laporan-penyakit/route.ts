@@ -304,6 +304,123 @@ export async function POST(req: Request) {
   try {
     await ensureTables();
     const body = await req.json();
+
+    // ── 0. BATCH INSERT / IMPORT GELONDONGAN EXCEL ──
+    const items = Array.isArray(body) ? body : Array.isArray(body?.items) ? body.items : null;
+    if (items && items.length > 0) {
+      const session = await getSessionFromRequest(req as any);
+      const userName = session?.nama || session?.nip_username || 'Petugas Keswan';
+
+      const { validateAreaAccess } = await import('@/lib/areaRestriction');
+
+      // Cek kolom yang tersedia di tabel database
+      let hasDiagNama = false;
+      let hasKecId = false;
+      try {
+        const [descRows]: any = await pool.query('DESCRIBE keswan_laporan_penyakit');
+        const fields = (descRows || []).map((f: any) => f.Field);
+        hasDiagNama = fields.includes('diagnosa_nama');
+        hasKecId = fields.includes('kecamatan_id');
+      } catch {}
+
+      let successCount = 0;
+      let skippedCount = 0;
+      const errors: string[] = [];
+
+      for (let idx = 0; idx < items.length; idx++) {
+        const item = items[idx];
+        const rawKec = item.kecamatan_nama || item.kecamatan || item.Kecamatan || item.kecamatan_id;
+        const rawDiag = item.diagnosa_nama || item.diagnosa || item.Diagnosa || item['Diagnosa Penyakit'];
+        const rawJumlah = item.jumlah_kasus !== undefined ? item.jumlah_kasus : (item['Jumlah Kasus (Ekor)'] !== undefined ? item['Jumlah Kasus (Ekor)'] : (item['Jumlah Kasus'] !== undefined ? item['Jumlah Kasus'] : item.jumlah));
+        const rawTahun = item.tahun || item.Tahun || body.tahun || new Date().getFullYear();
+        const rawKet = item.keterangan || item.Keterangan || item.catatan || '';
+
+        if (!rawKec || !rawDiag) {
+          skippedCount++;
+          continue;
+        }
+
+        const cleanKec = String(rawKec).replace(/^k_/, '').trim();
+        const kecCode = `k_${cleanKec.toLowerCase()}`;
+        const kecIdNum = KECAMATAN_CODE_TO_ID[kecCode] || 1;
+        const zone = getZoneByKecamatanId(kecCode);
+        const puskeswanId = zone ? zone.id : 'kebumen';
+        const idPuskeswan = PUSKESWAN_ID_MAP[puskeswanId] || 7;
+
+        // Area access restriction check
+        const areaCheck = await validateAreaAccess(req, cleanKec, puskeswanId);
+        if (!areaCheck.allowed) {
+          errors.push(`Baris ${idx + 1}: Wilayah Kecamatan ${cleanKec} di luar kewenangan tugas Anda.`);
+          continue;
+        }
+
+        const jumlahKasusVal = Math.max(1, parseInt(String(rawJumlah), 10) || 1);
+        const tahunVal = parseInt(String(rawTahun), 10) || new Date().getFullYear();
+
+        // Cari kategori diagnosa
+        const diagObj = DIAGNOSA_LIST.find((d) => d.nama.toLowerCase() === String(rawDiag).trim().toLowerCase());
+        const kategoriPenyakit = diagObj?.kategori || item.kategori_penyakit || 'Umum';
+        const finalDiagNama = diagObj?.nama || String(rawDiag).trim();
+
+        if (hasDiagNama && hasKecId) {
+          await pool.query(
+            `INSERT INTO keswan_laporan_penyakit (
+              tahun, kecamatan_id, kecamatan_nama, puskeswan_id, diagnosa_nama, kategori_penyakit, jumlah_kasus, keterangan
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+            [
+              tahunVal,
+              kecCode,
+              cleanKec,
+              puskeswanId,
+              finalDiagNama,
+              kategoriPenyakit,
+              jumlahKasusVal,
+              rawKet || null,
+            ]
+          );
+        } else {
+          let idDiagnosa = 1;
+          try {
+            const [dRows]: any = await pool.query('SELECT id_diagnosa FROM diagnosa WHERE LOWER(diagnosa_nama) = LOWER(?) LIMIT 1', [finalDiagNama]);
+            if (dRows && dRows.length > 0) idDiagnosa = dRows[0].id_diagnosa;
+          } catch {}
+
+          await pool.query(
+            `INSERT INTO keswan_laporan_penyakit (
+              tahun, id_puskeswan, id_kecamatan, id_diagnosa, kategori_penyakit, jumlah_kasus, keterangan
+            ) VALUES (?, ?, ?, ?, ?, ?, ?)`,
+            [
+              tahunVal,
+              idPuskeswan,
+              kecIdNum,
+              idDiagnosa,
+              kategoriPenyakit,
+              jumlahKasusVal,
+              rawKet || null,
+            ]
+          );
+        }
+        successCount++;
+      }
+
+      await logActivity({
+        module: 'keswan',
+        submenu: 'laporan-penyakit',
+        tableName: 'keswan_laporan_penyakit',
+        recordId: 0,
+        action: 'BULK_IMPORT',
+        userName,
+        details: { totalItems: items.length, successCount, skippedCount, errorsCount: errors.length },
+      });
+
+      return NextResponse.json({
+        success: true,
+        message: `Berhasil mengimpor ${successCount} data kasus penyakit.${errors.length > 0 ? ` Catatan: ${errors.length} baris di luar kewenangan wilayah.` : ''}`,
+        importedCount: successCount,
+        errors: errors.length > 0 ? errors : undefined,
+      });
+    }
+
     const { action, tahun, kecamatan_id, kecamatan_nama, puskeswan_id, diagnosa_nama, kategori_penyakit, jumlah_kasus, keterangan } = body;
 
     // 1. Action Tambah Tahun Baru

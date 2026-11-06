@@ -3,7 +3,9 @@
 import { useState, useEffect, useMemo } from 'react';
 import Link from 'next/link';
 import { exportToExcelWithSignature } from '@/lib/excelExportHelper';
-import { ArrowLeft, Search, Download } from 'lucide-react';
+import { downloadPopulasiTernakTemplate } from '@/lib/excelTemplateHelper';
+import BulkUploadModal from '@/components/bitpro/populasi/BulkUploadModal';
+import { ArrowLeft, Search, Download, UploadCloud } from 'lucide-react';
 
 const HEADERS = [
   'AJ Sapi', 'AB Sapi', 'MJ Sapi', 'MB Sapi', 'DJ Sapi', 'DB Sapi', 'Total Sapi Potong',
@@ -22,21 +24,23 @@ export default function Populasi2025() {
   const [selectedTw, setSelectedTw] = useState('4');
   const [dataPopulasi, setDataPopulasi] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [showBulkUpload, setShowBulkUpload] = useState(false);
+
+  const fetchData = async () => {
+    try {
+      setIsLoading(true);
+      const response = await fetch(`/api/get-populasi?tw=${selectedTw}`);
+      const data = await response.json();
+      setDataPopulasi(Array.isArray(data) ? data : []);
+    } catch (error) {
+      console.error('Gagal menyedot data populasi 2025:', error);
+      setDataPopulasi([]);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        setIsLoading(true);
-        const response = await fetch(`/api/get-populasi?tw=${selectedTw}`);
-        const data = await response.json();
-        setDataPopulasi(Array.isArray(data) ? data : []);
-      } catch (error) {
-        console.error('Gagal menyedot data populasi 2025:', error);
-        setDataPopulasi([]);
-      } finally {
-        setIsLoading(false);
-      }
-    };
     fetchData();
   }, [selectedTw]);
 
@@ -132,6 +136,30 @@ export default function Populasi2025() {
               <option value="3">Triwulan 3 (TW 3)</option>
               <option value="4">Triwulan 4 (TW 4)</option>
             </select>
+
+            {/* Unduh Template Excel */}
+            <button
+              type="button"
+              onClick={downloadPopulasiTernakTemplate}
+              title="Unduh Template Excel Populasi Ternak"
+              className="min-h-touch h-11 px-3 sm:px-3.5 rounded-xl border border-emerald-200 dark:border-emerald-800 bg-emerald-50 dark:bg-emerald-950/40 hover:bg-emerald-100 dark:hover:bg-emerald-900/50 text-emerald-700 dark:text-emerald-300 text-xs sm:text-sm font-bold flex items-center justify-center gap-1.5 transition-all shadow-xs cursor-pointer"
+            >
+              <Download size={15} strokeWidth={2.5} />
+              <span className="hidden sm:inline">Unduh Template</span>
+              <span className="sm:hidden">Template</span>
+            </button>
+
+            {/* Upload Excel */}
+            <button
+              type="button"
+              onClick={() => setShowBulkUpload(true)}
+              title="Upload Excel Populasi Ternak"
+              className="min-h-touch h-11 px-3 sm:px-4 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs sm:text-sm font-bold flex items-center justify-center gap-1.5 transition-all shadow-xs cursor-pointer"
+            >
+              <UploadCloud size={15} strokeWidth={2.5} />
+              <span className="hidden sm:inline">Upload Excel</span>
+              <span className="sm:hidden">Upload</span>
+            </button>
 
             <button
               onClick={handleExportExcel}
@@ -244,6 +272,15 @@ export default function Populasi2025() {
         </div>
 
       </main>
+
+      {/* ── MODAL IMPORT EXCEL BULK UPLOAD ── */}
+      <BulkUploadModal
+        showBulkUpload={showBulkUpload}
+        setShowBulkUpload={setShowBulkUpload}
+        onSuccess={fetchData}
+        defaultYear={2025}
+        defaultTw={`TW ${selectedTw}`}
+      />
 
     </div>
   );

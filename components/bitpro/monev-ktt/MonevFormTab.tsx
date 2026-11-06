@@ -22,7 +22,9 @@ import {
   Printer,
   Clock,
   Loader2,
+  UploadCloud,
 } from 'lucide-react';
+import { downloadMonevKttTemplate } from '@/lib/excelTemplateHelper';
 import {
   DATA_WILAYAH,
   DAFTAR_JENIS_TERNAK,
@@ -110,6 +112,7 @@ interface MonevFormTabProps {
   kttMasterList?: Array<{ id: any; namaKelompok: string; kecamatan: string; desa: string; ketua?: string }>;
   onShowHistory?: (data: FieldData) => void;
   isSaving?: boolean;
+  onOpenImport?: () => void;
 }
 
 export function MonevFormTab({
@@ -171,6 +174,7 @@ export function MonevFormTab({
   kttMasterList = [],
   onShowHistory,
   isSaving = false,
+  onOpenImport,
 }: MonevFormTabProps) {
   const kalkulasi = hitungKondisi(formKondisi);
   const [isMapPickerOpen, setIsMapPickerOpen] = useState(false);
@@ -671,37 +675,51 @@ export function MonevFormTab({
             </h3>
           </div>
 
-          <div className="flex items-center gap-2 w-full sm:w-auto">
+          <div className="flex items-center gap-2 w-full sm:w-auto flex-wrap">
             <button
               type="button"
-              onClick={downloadTemplateExcel}
-              className="flex-1 sm:flex-none min-h-touch h-9 px-3.5 rounded-xl border border-slate-300 bg-slate-50 hover:bg-slate-100 text-slate-700 text-xs font-bold flex items-center justify-center gap-1.5 transition-colors cursor-pointer shadow-2xs"
-              title="Unduh format template Excel untuk pengisian data massal"
+              onClick={() => downloadMonevKttTemplate(tahunBantuanFilter)}
+              className="flex-1 sm:flex-none min-h-touch h-9 px-3.5 rounded-xl border border-emerald-200 dark:border-emerald-800 bg-emerald-50 dark:bg-emerald-950/40 hover:bg-emerald-100 dark:hover:bg-emerald-900/50 text-emerald-700 dark:text-emerald-300 text-xs font-bold flex items-center justify-center gap-1.5 transition-all cursor-pointer shadow-2xs"
+              title="Unduh format template Excel resmi SiMantap untuk pengisian data massal"
             >
-              <Download size={14} strokeWidth={2.5} className="text-emerald-700" />
+              <Download size={14} strokeWidth={2.5} className="text-emerald-700 dark:text-emerald-300" />
               <span>Unduh Template</span>
             </button>
 
-            {isAdmin && (
-              <>
-                <input
-                  type="file"
-                  ref={excelFileInputRef}
-                  onChange={handleImportExcel}
-                  accept=".xlsx, .xls"
-                  className="hidden"
-                />
+            {onOpenImport ? (
+              (canEdit || isAdmin) && (
                 <button
                   type="button"
-                  disabled={isImporting}
-                  onClick={() => excelFileInputRef.current?.click()}
-                  className="flex-1 sm:flex-none min-h-touch h-9 px-3.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold flex items-center justify-center gap-1.5 transition-colors cursor-pointer shadow-xs disabled:opacity-50"
-                  title="Unggah file Excel untuk mengisi data KTT secara otomatis (Khusus Administrator)"
+                  onClick={onOpenImport}
+                  className="flex-1 sm:flex-none min-h-touch h-9 px-3.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold flex items-center justify-center gap-1.5 transition-all cursor-pointer shadow-xs"
+                  title="Unggah file Excel untuk mengisi data KTT secara otomatis"
                 >
-                  <FileSpreadsheet size={14} strokeWidth={2.5} />
-                  <span>{isImporting ? 'Mengimpor...' : 'Import Excel'}</span>
+                  <UploadCloud size={14} strokeWidth={2.5} />
+                  <span>Upload Excel</span>
                 </button>
-              </>
+              )
+            ) : (
+              isAdmin && (
+                <>
+                  <input
+                    type="file"
+                    ref={excelFileInputRef}
+                    onChange={handleImportExcel}
+                    accept=".xlsx, .xls"
+                    className="hidden"
+                  />
+                  <button
+                    type="button"
+                    disabled={isImporting}
+                    onClick={() => excelFileInputRef.current?.click()}
+                    className="flex-1 sm:flex-none min-h-touch h-9 px-3.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold flex items-center justify-center gap-1.5 transition-colors cursor-pointer shadow-xs disabled:opacity-50"
+                    title="Unggah file Excel untuk mengisi data KTT secara otomatis (Khusus Administrator)"
+                  >
+                    <FileSpreadsheet size={14} strokeWidth={2.5} />
+                    <span>{isImporting ? 'Mengimpor...' : 'Import Excel'}</span>
+                  </button>
+                </>
+              )
             )}
           </div>
         </div>

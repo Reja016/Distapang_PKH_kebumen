@@ -35,6 +35,8 @@ import {
   FileText,
 } from 'lucide-react';
 import CustomSignatureTab from '@/components/admin/CustomSignatureTab';
+import PasswordRequirementsChecklist from '@/components/common/PasswordRequirementsChecklist';
+import { validatePasswordCriteria } from '@/lib/password';
 import {
   UserPermissions,
   DEFAULT_FULL_PERMISSIONS,
@@ -325,6 +327,16 @@ export default function AdminAnggotaPage() {
 
     if (!isEditingUser && !formPassword.trim()) {
       setFormError('Kata sandi awal wajib diisi untuk akun baru!');
+      return;
+    }
+
+    if (!isEditingUser && !validatePasswordCriteria(formPassword.trim()).isValid) {
+      setFormError('Kata sandi belum memenuhi syarat keamanan: minimal 8 karakter, serta harus mengandung kombinasi huruf, angka, dan simbol khusus (!@#$% dll).');
+      return;
+    }
+
+    if (isEditingUser && formPassword.trim() && !validatePasswordCriteria(formPassword.trim()).isValid) {
+      setFormError('Kata sandi baru belum memenuhi syarat keamanan: minimal 8 karakter, serta harus mengandung kombinasi huruf, angka, dan simbol khusus (!@#$% dll).');
       return;
     }
 
@@ -1197,7 +1209,7 @@ export default function AdminAnggotaPage() {
                   <div className="relative">
                     <input
                       type={showPassword ? 'text' : 'password'}
-                      placeholder={isEditingUser ? 'Kosongkan jika tidak diubah' : 'Minimal 6 karakter'}
+                      placeholder={isEditingUser ? 'Kosongkan jika tidak diubah' : 'Kombinasi huruf, angka & simbol'}
                       value={formPassword}
                       onChange={(e) => setFormPassword(e.target.value)}
                       className="w-full h-10 pl-3.5 pr-10 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-xs text-slate-900 dark:text-white focus:bg-white dark:focus:bg-slate-950 focus:border-emerald-600 outline-none"
@@ -1210,6 +1222,13 @@ export default function AdminAnggotaPage() {
                       {showPassword ? <EyeOff size={15} /> : <Eye size={15} />}
                     </button>
                   </div>
+                  {(!isEditingUser || formPassword.length > 0) && (
+                    <PasswordRequirementsChecklist
+                      password={formPassword}
+                      showAlways={!isEditingUser}
+                      className="mt-2"
+                    />
+                  )}
                 </div>
 
                 <div className="space-y-1">

@@ -19,7 +19,9 @@ import {
   MapPin,
   X,
   ExternalLink,
+  UploadCloud,
 } from 'lucide-react';
+import PencatatanPemotonganImportModal from './PencatatanPemotonganImportModal';
 import {
   PencatatanPemotonganItem,
   BULAN_NAMES,
@@ -64,6 +66,7 @@ export default function PencatatanPemotonganTable({
 }: PencatatanPemotonganTableProps) {
   // Modal Preview Detail
   const [detailItem, setDetailItem] = useState<PencatatanPemotonganItem | null>(null);
+  const [showImportModal, setShowImportModal] = useState<boolean>(false);
 
   // Filter Data di sisi klien (jika ada pencarian lokal tambahan)
   const filteredData = useMemo(() => {
@@ -226,7 +229,7 @@ export default function PencatatanPemotonganTable({
             />
           </div>
 
-          {/* Tombol Export Excel */}
+          {/* Tombol Export & Import Excel */}
           <div className="flex items-center gap-2">
             <button
               type="button"
@@ -237,6 +240,18 @@ export default function PencatatanPemotonganTable({
               <Download size={15} strokeWidth={2.5} />
               <span>Export Excel</span>
             </button>
+
+            {canEdit && (
+              <button
+                type="button"
+                onClick={() => setShowImportModal(true)}
+                className="h-10 px-4 rounded-xl bg-purple-700 hover:bg-purple-800 text-white text-xs font-bold flex items-center gap-1.5 transition-all shadow-xs cursor-pointer"
+                title="Upload data pemotongan gelondongan via Excel"
+              >
+                <UploadCloud size={15} strokeWidth={2.5} />
+                <span>Import Excel</span>
+              </button>
+            )}
           </div>
         </div>
 
@@ -804,6 +819,13 @@ export default function PencatatanPemotonganTable({
           </div>
         </div>
       )}
+
+      {/* Modal Import Excel */}
+      <PencatatanPemotonganImportModal
+        isOpen={showImportModal}
+        onClose={() => setShowImportModal(false)}
+        onSuccess={() => onRefresh()}
+      />
     </div>
   );
 }

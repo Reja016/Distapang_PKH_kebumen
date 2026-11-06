@@ -127,7 +127,121 @@ export async function GET(request: Request) {
 export async function POST(request: Request) {
   try {
     await ensureVaksinasiSchema();
-    const { puskeswan, tanggal, jumlah } = await request.json();
+    const session = await getSessionFromRequest(request as any);
+    const userName = session?.nama || session?.nip_username || 'Petugas Keswan';
+    const body = await request.json();
+
+    // ── 1. BATCH INSERT / IMPORT GELONDONGAN EXCEL ──
+    const items = Array.isArray(body) ? body : Array.isArray(body?.items) ? body.items : null;
+    if (items && items.length > 0) {
+      const { validateAreaAccess } = await import('@/lib/areaRestriction');
+
+      let successCount = 0;
+      let skippedCount = 0;
+      const errors: string[] = [];
+
+      for (let idx = 0; idx < items.length; idx++) {
+        const item = items[idx];
+        const rawPusk = item.puskeswan || item.Puskeswan;
+        const rawTgl = item.tanggal || item.Tanggal;
+        const rawJml = item.jumlah !== undefined ? item.jumlah : (item['Jumlah Dosis'] !== undefined ? item['Jumlah Dosis'] : item.Jumlah);
+
+        if (!rawPusk || !rawTgl) {
+          skippedCount++;
+          continue;
+        }
+
+        const areaCheck = await validateAreaAccess(request, null, String(rawPusk));
+        if (!areaCheck.allowed) {
+          errors.push(`Baris ${idx + 1}: Wilayah ${rawPusk} di luar kewenangan tugas Anda.`);
+          continue;
+        }
+
+        let parsedDateStr = '';
+        const dateStrTrim = String(rawTgl).trim();
+        if (/^\d{4}-\d{1,2}-\d{1,2}$/.test(dateStrTrim)) {
+          const [y, m, d] = dateStrTrim.split('-');
+          parsedDateStr = `${y}-${m.padStart(2, '0')}-${d.padStart(2, '0')}`;
+        } else if (/^\d{1,2}[\/\-]\d{1,2}[\/\-]\d{4}$/.test(dateStrTrim)) {
+          const parts = dateStrTrim.split(/[\/\-]/);
+          parsedDateStr = `${parts[2]}-${parts[1].padStart(2, '0')}-${parts[0].padStart(2, '0')}`;
+        } else {
+          const d = new Date(dateStrTrim);
+          if (!isNaN(d.getTime())) {
+            parsedDateStr = d.toISOString().slice(0, 10);
+          }
+        }
+
+        if (!parsedDateStr) {
+          skippedCount++;
+          continue;
+        }
+
+        const jumlahVal = Math.max(0, parseInt(String(rawJml), 10) || 0);
+        const parts = parsedDateStr.split('-');
+        const tahunStr = parts[0];
+        const bulanIndex = parseInt(parts[1], 10);
+        const bulanName = BULAN_NAMES[bulanIndex] || '';
+        const dayStr = parseInt(parts[2], 10).toString();
+        const cleanPusk = String(rawPusk).toUpperCase().replace(/^PUSKESWAN\s+/i, '').trim();
+        const standardPuskName = `Puskeswan ${cleanPusk.charAt(0).toUpperCase() + cleanPusk.slice(1).toLowerCase()}`;
+
+        let idPuskeswan = PUSKESWAN_ID_MAP[cleanPusk.toLowerCase()] || null;
+        if (!idPuskeswan) {
+          const [puskWb]: any = await pool.query(
+            `SELECT DISTINCT id_puskeswan FROM wilayah_binaan WHERE LOWER(nama_puskeswan) LIKE LOWER(?) LIMIT 1`,
+            [`%${cleanPusk}%`]
+          );
+          if (puskWb && puskWb.length > 0) {
+            idPuskeswan = puskWb[0].id_puskeswan;
+          }
+        }
+
+        const [existingRows]: any = await pool.query(
+          `SELECT id_vaksinasi FROM vaksinasi 
+           WHERE (id_puskeswan = ? OR nama = ?)
+             AND tahun = ? 
+             AND (LOWER(bulan) = LOWER(?) OR bulan = ?)
+             AND (tanggal = ? OR tanggal = ?)
+           LIMIT 1`,
+          [idPuskeswan, standardPuskName, tahunStr, bulanName, String(bulanIndex), dayStr, parsedDateStr]
+        );
+
+        if (existingRows && existingRows.length > 0) {
+          await pool.execute(
+            `UPDATE vaksinasi SET jumlah = ?, updated_at = NOW() WHERE id_vaksinasi = ?`,
+            [jumlahVal, existingRows[0].id_vaksinasi]
+          );
+        } else if (jumlahVal > 0) {
+          await pool.execute(
+            `INSERT INTO vaksinasi (id_puskeswan, nama, tanggal, bulan, tahun, id_vaksin, jumlah)
+             VALUES (?, ?, ?, ?, ?, 1, ?)`,
+            [idPuskeswan, standardPuskName, dayStr, bulanName, tahunStr, jumlahVal]
+          );
+        }
+        successCount++;
+      }
+
+      await logActivity({
+        module: 'keswan',
+        submenu: 'data-vaksinasi',
+        tableName: 'vaksinasi',
+        recordId: 0,
+        action: 'BULK_IMPORT',
+        userName,
+        details: { totalItems: items.length, successCount, skippedCount, errorsCount: errors.length },
+      });
+
+      return NextResponse.json({
+        success: true,
+        message: `Berhasil mengimpor ${successCount} data vaksinasi harian.${errors.length > 0 ? ` Catatan: ${errors.length} baris di luar kewenangan wilayah.` : ''}`,
+        importedCount: successCount,
+        errors: errors.length > 0 ? errors : undefined,
+      });
+    }
+
+    // ── 2. SINGLE RECORD INSERT / UPDATE (EKSISTING) ──
+    const { puskeswan, tanggal, jumlah } = body;
 
     if (!puskeswan || !tanggal) {
       return NextResponse.json({ success: false, error: 'Puskeswan dan tanggal wajib diisi.' }, { status: 400 });
@@ -171,9 +285,6 @@ export async function POST(request: Request) {
        LIMIT 1`,
       [idPuskeswan, standardPuskName, tahunStr, bulanName, String(bulanIndex), dayStr, tanggal]
     );
-
-    const session = await getSessionFromRequest(request as any);
-    const userName = session?.nama || session?.nip_username || 'System';
 
     if (jumlahVal <= 0) {
       if (existingRows && existingRows.length > 0) {

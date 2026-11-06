@@ -9,6 +9,7 @@ import {
   Download,
   LayoutGrid,
   RefreshCw,
+  UploadCloud,
 } from 'lucide-react';
 import {
   CommodityKey,
@@ -21,6 +22,7 @@ import {
 import FarmOverviewTab from '@/components/bitpro/data-farm/FarmOverviewTab';
 import FarmTableTab from '@/components/bitpro/data-farm/FarmTableTab';
 import FarmModal from '@/components/bitpro/data-farm/FarmModal';
+import FarmImportModal from '@/components/bitpro/data-farm/FarmImportModal';
 import { UniversalAuditModal } from '@/components/common/UniversalAuditModal';
 import { showToast, showConfirm } from '@/components/common/CustomToast';
 
@@ -44,6 +46,9 @@ export default function DataFarmPage() {
   // Audit Logs State
   const [showAuditModal, setShowAuditModal] = useState(false);
   const [auditTarget, setAuditTarget] = useState<any | null>(null);
+
+  // Import Excel State
+  const [showImportModal, setShowImportModal] = useState(false);
 
   // GPS Geolocation state
   const [gpsLoading, setGpsLoading] = useState(false);
@@ -406,6 +411,17 @@ export default function DataFarmPage() {
           </div>
 
           <div className="flex items-center gap-2 shrink-0">
+            {canCreate && (
+              <button
+                onClick={() => setShowImportModal(true)}
+                title="Import Excel Gelondongan"
+                aria-label="Import Excel Gelondongan"
+                className="min-h-touch min-w-touch h-11 w-11 sm:w-auto sm:px-4 rounded-xl border border-emerald-200 dark:border-emerald-800 bg-emerald-50 dark:bg-emerald-950/40 hover:bg-emerald-100 dark:hover:bg-emerald-900/60 text-emerald-800 dark:text-emerald-300 text-xs sm:text-sm font-bold flex items-center justify-center sm:gap-2 transition-all shadow-xs cursor-pointer"
+              >
+                <UploadCloud size={16} strokeWidth={2.5} />
+                <span className="hidden sm:inline">Import Excel</span>
+              </button>
+            )}
             <button
               onClick={handleExportExcel}
               title="Export Excel"
@@ -527,6 +543,13 @@ export default function DataFarmPage() {
         currentDesaList={currentDesaList}
         handleSubmit={handleSubmit}
         isSubmitting={isSubmitting}
+      />
+
+      {/* ── MODAL IMPORT EXCEL DATA FARM ── */}
+      <FarmImportModal
+        isOpen={showImportModal}
+        onClose={() => setShowImportModal(false)}
+        onSuccess={fetchData}
       />
 
       {/* ── MODAL AUDIT LOGS ── */}

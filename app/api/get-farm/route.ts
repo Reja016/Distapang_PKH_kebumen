@@ -100,9 +100,111 @@ export async function POST(request: Request) {
   try {
     await ensureTable();
     const body = await request.json();
-    const { kategori = 'general', data } = body;
+    const session = await getSessionFromRequest(request as any);
+    const userName = session ? (session.nama || session.nip_username || 'Sistem') : 'Sistem';
 
-    const userName = await getSessionFromRequest(request);
+    // ── 0. BATCH INSERT / IMPORT GELONDONGAN EXCEL ──
+    const items = Array.isArray(body) ? body : Array.isArray(body?.items) ? body.items : null;
+    if (items && items.length > 0) {
+      const { validateAreaAccess } = await import('@/lib/areaRestriction');
+
+      let successCount = 0;
+      let skippedCount = 0;
+      const errors: string[] = [];
+
+      for (let idx = 0; idx < items.length; idx++) {
+        const item = items[idx];
+        const rawKategori = (item.kategori || item['Kategori Farm'] || item['Kategori'] || 'general').toLowerCase();
+        let kategori = 'general';
+        if (rawKategori.includes('broiler')) kategori = 'broiler';
+        else if (rawKategori.includes('petelur')) kategori = 'petelur';
+
+        const rawHewan = String(item.hewan || item.jenis_ternak || item['Jenis Ternak'] || '').trim();
+        let hewan = rawHewan || (kategori === 'broiler' ? 'Ayam Broiler' : kategori === 'petelur' ? 'Ayam Petelur' : 'Sapi Potong');
+
+        if (kategori === 'general' && hewan.toLowerCase().includes('broiler')) kategori = 'broiler';
+        if (kategori === 'general' && hewan.toLowerCase().includes('petelur')) kategori = 'petelur';
+
+        const rawKec = String(item.kecamatan || item.Kecamatan || '').trim();
+        const rawDesa = String(item.desa || item.kelurahan_desa || item['Desa / Kelurahan'] || item['Desa'] || '').trim();
+        const rawNamaUnit = String(item.nama_unit_farm || item.nama_peternak || item['Nama Unit Farm'] || item['Nama Farm'] || '').trim();
+        const rawBadanUsaha = String(item.nama_badan_usaha || item['Nama Badan Usaha / PT / CV'] || item['Nama Badan Usaha'] || '').trim();
+        const rawKemitraan = String(item.mandiri_kemitraan || item.status_kemitraan || item['Status Kemitraan'] || 'Mandiri').trim();
+        const rawAlamat = String(item.alamat || item['Alamat Lengkap'] || item['Alamat'] || '').trim();
+        const rawTelp = String(item.telp_hp || item['No Telp / HP'] || item['Telp'] || '').trim();
+        const rawKapasitas = String(item.kapasitas_gudang || item.kapasitas_kandang || item['Kapasitas Kandang (Ekor)'] || item['Kapasitas Kandang'] || '0').trim();
+        const rawPopulasi = String(item.jumlah_populasi || item.populasi_total || item['Jumlah Populasi Aktif (Ekor)'] || item['Jumlah Populasi'] || '0').trim();
+        const rawBobot = String(item.bobot_rata2_panen || item['Bobot Panen Rata-rata (Kg)'] || item['Bobot Rata-rata Panen'] || '').trim();
+        const rawFcr = String(item.konsumsi_pakan_fcr || item.fcr || item['FCR / Konsumsi Pakan'] || item['FCR'] || '').trim();
+        const rawCatatan = String(item.catatan || item['Catatan'] || '').trim();
+        const rawStatus = String(item.status || item.status_aktif || item['Status Aktif'] || 'Aktif').trim();
+        const rawLintang = String(item.lintang || item['Lintang (Latitude)'] || item['Lintang'] || '').trim();
+        const rawBujur = String(item.bujur || item['Bujur (Longitude)'] || item['Bujur'] || '').trim();
+        const rawTujuan = String(item.tujuan || '').trim();
+
+        if (!rawNamaUnit && !rawBadanUsaha) {
+          skippedCount++;
+          continue;
+        }
+
+        // Area restriction check
+        if (rawKec) {
+          const areaCheck = await validateAreaAccess(request as any, rawKec, null);
+          if (!areaCheck.allowed) {
+            errors.push(`Baris ${idx + 1}: Wilayah Kecamatan ${rawKec} di luar kewenangan tugas Anda.`);
+            continue;
+          }
+        }
+
+        await pool.query(
+          `INSERT INTO data_farm 
+           (kategori, hewan, kecamatan, desa, nama_badan_usaha, nama_unit_farm, mandiri_kemitraan, alamat, lintang, bujur, telp_hp, kapasitas_gudang, jumlah_populasi, bobot_rata2_panen, konsumsi_pakan_fcr, catatan, status, tujuan)
+           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+          [
+            kategori,
+            hewan,
+            rawKec,
+            rawDesa,
+            rawBadanUsaha,
+            rawNamaUnit || rawBadanUsaha,
+            rawKemitraan,
+            rawAlamat,
+            rawLintang,
+            rawBujur,
+            rawTelp,
+            rawKapasitas,
+            rawPopulasi,
+            rawBobot,
+            rawFcr,
+            rawCatatan,
+            rawStatus,
+            rawTujuan,
+          ]
+        );
+        successCount++;
+      }
+
+      await logActivity({
+        module: 'bitpro',
+        submenu: 'data-farm',
+        tableName: 'data_farm',
+        recordId: 0,
+        action: 'IMPORT_EXCEL',
+        userName,
+        details: { totalItems: items.length, successCount, skippedCount, errorsCount: errors.length },
+      });
+
+      return NextResponse.json({
+        success: true,
+        count: successCount,
+        skipped: skippedCount,
+        errors,
+        message: `Berhasil mengimpor ${successCount} data farm peternakan!` +
+          (errors.length > 0 ? ` (${errors.length} baris dilewati karena validasi wilayah)` : ''),
+      });
+    }
+
+    const { kategori = 'general', data } = body;
 
     if (!data) {
       return NextResponse.json({ success: false, error: 'Data farm tidak boleh kosong!' }, { status: 400 });
@@ -143,7 +245,7 @@ export async function POST(request: Request) {
       tableName: 'data_farm',
       recordId: insertId,
       action: 'CREATE',
-      userName: typeof userName === 'string' ? userName : (userName?.nama || userName?.nip_username || 'Sistem'),
+      userName,
       details: data,
     });
 

@@ -51,7 +51,7 @@ export async function POST(req: NextRequest) {
     const session = await getSessionFromRequest(req);
     const body = await req.json();
 
-    const rows = Array.isArray(body.rows) ? body.rows : [];
+    const rows = Array.isArray(body.rows) ? body.rows : Array.isArray(body.items) ? body.items : Array.isArray(body) ? body : [];
     if (rows.length === 0) {
       return NextResponse.json(
         { success: false, error: 'Tidak ada baris data valid dalam file Excel yang diunggah.' },

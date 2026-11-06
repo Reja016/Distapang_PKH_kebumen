@@ -2,6 +2,8 @@
 
 import React from 'react';
 import { exportToExcelWithSignature } from '@/lib/excelExportHelper';
+import { downloadPasarHewanTemplate } from '@/lib/excelTemplateHelper';
+import PasarHewanImportModal from './PasarHewanImportModal';
 import {
   FileSpreadsheet,
   Search,
@@ -14,6 +16,8 @@ import {
   Calendar,
   Layers,
   Clock,
+  Download,
+  Upload,
 } from 'lucide-react';
 import { CatatHewanItem, BULAN_NAMES } from './types';
 import { showConfirm, showToast } from '@/components/common/CustomToast';
@@ -53,6 +57,7 @@ export default function CatatHewanTable({
   searchQuery,
   setSearchQuery,
 }: CatatHewanTableProps) {
+  const [showImportModal, setShowImportModal] = React.useState(false);
   // Hitung ringkasan statistik
   const stats = React.useMemo(() => {
     const total = catatList.length;
@@ -250,13 +255,40 @@ export default function CatatHewanTable({
             <RefreshCw size={15} className={isLoading ? 'animate-spin' : ''} />
           </button>
 
+          {/* Unduh Template Excel */}
+          <button
+            type="button"
+            onClick={() => downloadPasarHewanTemplate()}
+            className="h-10 px-3 rounded-xl border border-purple-200 dark:border-purple-800 bg-purple-50 hover:bg-purple-100 dark:bg-purple-950/40 dark:hover:bg-purple-900/50 text-purple-700 dark:text-purple-300 text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer whitespace-nowrap shrink-0"
+            title="Unduh Format Template Excel untuk Pengisian Data"
+          >
+            <Download size={14} />
+            <span className="hidden sm:inline">Unduh Template</span>
+            <span className="sm:hidden">Template</span>
+          </button>
+
+          {/* Upload Excel */}
+          {canEdit && (
+            <button
+              type="button"
+              onClick={() => setShowImportModal(true)}
+              className="h-10 px-3.5 rounded-xl bg-purple-600 hover:bg-purple-700 text-white font-bold text-xs flex items-center gap-1.5 shadow-2xs transition-all cursor-pointer shrink-0 whitespace-nowrap"
+              title="Upload file Excel untuk menambah data sekaligus"
+            >
+              <Upload size={14} />
+              <span className="hidden sm:inline">Upload Excel</span>
+              <span className="sm:hidden">Upload</span>
+            </button>
+          )}
+
           <button
             onClick={handleExportExcel}
-            className="h-10 px-3.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs flex items-center gap-1.5 shadow-2xs transition-all cursor-pointer shrink-0"
+            className="h-10 px-3.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs flex items-center gap-1.5 shadow-2xs transition-all cursor-pointer shrink-0 whitespace-nowrap"
             title="Download Excel (.xlsx)"
           >
             <FileSpreadsheet size={15} />
             <span className="hidden sm:inline">Download Excel</span>
+            <span className="sm:hidden">Excel</span>
           </button>
         </div>
       </div>
@@ -411,6 +443,17 @@ export default function CatatHewanTable({
           </table>
         </div>
       </div>
+
+      {/* ── MODAL IMPOR EXCEL RESMI ── */}
+      <PasarHewanImportModal
+        isOpen={showImportModal}
+        onClose={() => setShowImportModal(false)}
+        onSuccess={() => {
+          setShowImportModal(false);
+          onRefresh();
+        }}
+        defaultPasar={selectedPasarFilter === 'all' ? 'Kebumen' : selectedPasarFilter}
+      />
     </div>
   );
 }

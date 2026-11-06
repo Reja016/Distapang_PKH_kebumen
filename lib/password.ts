@@ -50,3 +50,42 @@ export function verifyPassword(plainPassword: string, storedPassword: string): b
   // 2. Fallback untuk akun lama yang masih plain text
   return plainPassword === storedPassword;
 }
+
+/**
+ * Struktur status validasi kriteria kata sandi
+ */
+export interface PasswordValidation {
+  hasMinLength: boolean;
+  hasNumber: boolean;
+  hasSymbol: boolean;
+  hasLetter: boolean;
+  isValid: boolean;
+  score: number;
+}
+
+/**
+ * Validasi kata sandi baru (minimal 8 karakter, ada angka, ada simbol, ada huruf)
+ */
+export function validatePasswordCriteria(password: string): PasswordValidation {
+  const p = password || '';
+  const hasMinLength = p.length >= 8;
+  const hasNumber = /\d/.test(p);
+  const hasSymbol = /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?`~]/.test(p);
+  const hasLetter = /[a-zA-Z]/.test(p);
+
+  const isValid = hasMinLength && hasNumber && hasSymbol && hasLetter;
+  let score = 0;
+  if (hasMinLength) score++;
+  if (hasNumber) score++;
+  if (hasSymbol) score++;
+  if (hasLetter) score++;
+
+  return {
+    hasMinLength,
+    hasNumber,
+    hasSymbol,
+    hasLetter,
+    isValid,
+    score,
+  };
+}

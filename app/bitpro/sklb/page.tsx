@@ -12,6 +12,7 @@ import {
   Calendar,
   FileSpreadsheet,
   Layers,
+  UploadCloud,
 } from 'lucide-react';
 import { KECAMATAN_ITEMS } from '@/lib/sklbPetaData';
 import {
@@ -29,6 +30,7 @@ import {
   ModalDetail,
   ModalEditTotalSapiPO,
 } from '@/components/bitpro/sklb/SklbModals';
+import SklbImportModal from '@/components/bitpro/sklb/SklbImportModal';
 import { UniversalAuditModal } from '@/components/common/UniversalAuditModal';
 import { showToast, showConfirm } from '@/components/common/CustomToast';
 
@@ -68,6 +70,9 @@ export default function UnifiedSKLBPage() {
   // ── AUDIT MODAL STATE ──
   const [showAuditModal, setShowAuditModal] = useState(false);
   const [auditTarget, setAuditTarget] = useState<any | null>(null);
+
+  // ── IMPORT EXCEL STATE ──
+  const [showImportModal, setShowImportModal] = useState(false);
 
   // ── EXISTING SKLB TABS & DATA STATE ──
   const [activeTab, setActiveTab] = useState<'rekap' | 'detail'>('rekap');
@@ -533,6 +538,17 @@ export default function UnifiedSKLBPage() {
 
           {/* Action Toolbar */}
           <div className="flex items-center gap-2.5 shrink-0 flex-wrap">
+            {(canCreate ?? canEdit) && (
+              <button
+                onClick={() => setShowImportModal(true)}
+                title="Import Excel Gelondongan"
+                className="h-10 px-3.5 rounded-xl border border-emerald-200 dark:border-emerald-800 bg-emerald-50 dark:bg-emerald-950/40 text-emerald-800 dark:text-emerald-300 text-xs font-bold flex items-center gap-1.5 hover:bg-emerald-100 dark:hover:bg-emerald-900/60 shadow-xs transition-colors cursor-pointer"
+              >
+                <UploadCloud size={15} strokeWidth={2.5} />
+                <span>Import Excel</span>
+              </button>
+            )}
+
             {canEdit && (
               <button
                 onClick={() => {
@@ -624,8 +640,19 @@ export default function UnifiedSKLBPage() {
               <p className="text-xs text-slate-500 dark:text-slate-400">Rekapitulasi jadwal lapangan dan daftar ternak layak bibit</p>
             </div>
 
-            {/* Sync Buttons */}
+            {/* Action & Sync Buttons */}
             <div className="flex items-center gap-2 self-start sm:self-auto w-full sm:w-auto">
+              {(canCreate ?? canEdit) && (
+                <button
+                  onClick={() => setShowImportModal(true)}
+                  title="Import Excel Gelondongan"
+                  className="h-9 px-4 rounded-xl border border-emerald-300 dark:border-emerald-700 bg-emerald-50 dark:bg-emerald-950/40 text-emerald-800 dark:text-emerald-300 text-xs font-bold flex items-center justify-center gap-1.5 hover:bg-emerald-100 dark:hover:bg-emerald-900/60 transition-all shadow-xs cursor-pointer w-full sm:w-auto"
+                >
+                  <UploadCloud size={14} strokeWidth={2.5} />
+                  <span>Import Excel</span>
+                </button>
+              )}
+
               {activeTab === 'rekap' ? (
                 <button
                   onClick={handleSyncRekap}
@@ -746,6 +773,15 @@ export default function UnifiedSKLBPage() {
         setModalDetail={setModalDetail}
         handleSaveDetail={handleSaveDetail}
         isSaving={isSavingDetail}
+      />
+
+      {/* MODAL: IMPORT EXCEL SKLB */}
+      <SklbImportModal
+        isOpen={showImportModal}
+        onClose={() => setShowImportModal(false)}
+        onSuccess={() => loadTablesData(selectedYear)}
+        initialTab={activeTab}
+        selectedYear={selectedYear}
       />
 
       <UniversalAuditModal

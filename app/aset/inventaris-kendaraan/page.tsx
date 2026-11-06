@@ -5,10 +5,11 @@ import Link from 'next/link';
 import * as XLSX from 'xlsx';
 import { exportToExcelWithSignature } from '@/lib/excelExportHelper';
 import { usePageAuth } from '@/hooks/usePageAuth';
-import { ArrowLeft, Plus, Download } from 'lucide-react';
+import { ArrowLeft, Plus, Download, UploadCloud } from 'lucide-react';
 import { KendaraanRecord, KendaraanFormData } from '@/components/aset/types';
 import { KendaraanModalForm } from '@/components/aset/KendaraanModalForm';
 import { KendaraanTable } from '@/components/aset/KendaraanTable';
+import KendaraanImportModal from '@/components/aset/KendaraanImportModal';
 import { showToast, showConfirm } from '@/components/common/CustomToast';
 
 const initialFormData: KendaraanFormData = {
@@ -29,36 +30,38 @@ export default function InventarisKendaraanPage() {
   const [saving, setSaving] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [showModal, setShowModal] = useState(false);
+  const [showImportModal, setShowImportModal] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [formData, setFormData] = useState<KendaraanFormData>(initialFormData);
 
   // Load data dari database
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        setLoading(true);
-        const res = await fetch('/api/aset-kendaraan');
-        const json = await res.json();
-        if (json.success) {
-          const mapped: KendaraanRecord[] = json.data.map((row: any) => ({
-            id: String(row.id_aset),
-            namaPemegang: row.nama_pemegang,
-            merkType: row.merk_type,
-            tahun: String(row.tahun),
-            nopolLama: row.nopol_lama || '',
-            nopolBaru: row.nopol_baru,
-            nomorMesin: row.nomor_mesin,
-            nomorRangka: row.nomor_rangka,
-            keterangan: '',
-          }));
-          setDataKendaraan(mapped);
-        }
-      } catch (err) {
-        console.error('Gagal memuat data kendaraan:', err);
-      } finally {
-        setLoading(false);
+  const fetchData = async () => {
+    try {
+      setLoading(true);
+      const res = await fetch('/api/aset-kendaraan');
+      const json = await res.json();
+      if (json.success) {
+        const mapped: KendaraanRecord[] = json.data.map((row: any) => ({
+          id: String(row.id_aset),
+          namaPemegang: row.nama_pemegang,
+          merkType: row.merk_type,
+          tahun: String(row.tahun),
+          nopolLama: row.nopol_lama || '',
+          nopolBaru: row.nopol_baru,
+          nomorMesin: row.nomor_mesin,
+          nomorRangka: row.nomor_rangka,
+          keterangan: '',
+        }));
+        setDataKendaraan(mapped);
       }
-    };
+    } catch (err) {
+      console.error('Gagal memuat data kendaraan:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
     fetchData();
   }, []);
 
@@ -261,6 +264,16 @@ export default function InventarisKendaraanPage() {
           </div>
 
           <div className="flex items-center gap-2 shrink-0">
+            {(canCreate ?? canEdit) && (
+              <button
+                onClick={() => setShowImportModal(true)}
+                title="Import Excel Gelondongan"
+                className="min-h-touch min-w-touch h-11 px-4 rounded-xl border border-amber-200 dark:border-amber-800 bg-amber-50 dark:bg-amber-950/40 text-amber-800 dark:text-amber-300 text-xs sm:text-sm font-bold flex items-center gap-2 hover:bg-amber-100 dark:hover:bg-amber-900/60 transition-all shadow-xs cursor-pointer"
+              >
+                <UploadCloud size={16} strokeWidth={2.5} />
+                <span className="hidden sm:inline">Import Excel</span>
+              </button>
+            )}
             <button
               onClick={handleExportExcel}
               className="min-h-touch min-w-touch h-11 px-4 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 text-xs sm:text-sm font-bold flex items-center gap-2 transition-all shadow-xs cursor-pointer"
@@ -304,6 +317,13 @@ export default function InventarisKendaraanPage() {
         onClose={() => setShowModal(false)}
         onSubmit={handleSubmit}
         isSubmitting={saving}
+      />
+
+      {/* ── MODAL IMPORT EXCEL KENDARAAN ── */}
+      <KendaraanImportModal
+        isOpen={showImportModal}
+        onClose={() => setShowImportModal(false)}
+        onSuccess={fetchData}
       />
     </div>
   );

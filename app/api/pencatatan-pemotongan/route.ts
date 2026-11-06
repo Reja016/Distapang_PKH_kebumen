@@ -117,13 +117,116 @@ export async function GET(request: Request) {
   }
 }
 
-// POST: Tambah pencatatan pemotongan baru
+// POST: Tambah pencatatan pemotongan baru (mendukung single insert & import massal)
 export async function POST(request: Request) {
   try {
     await ensureTable();
     const session = await getSessionFromRequest(request);
     const body = await request.json();
+    const petugasNama = session?.nama || 'Petugas Kesmavet';
 
+    // ── 1. JIKA REQUEST ADALAH BATCH INSERT (IMPORT EXCEL GELONDONGAN) ──
+    const items = Array.isArray(body) ? body : Array.isArray(body?.items) ? body.items : null;
+
+    if (items && items.length > 0) {
+      const valuesToInsert: any[] = [];
+
+      for (const item of items) {
+        if (!item.tanggal || !item.tempat_pemotongan || !item.nama_pemilik) continue;
+
+        // Hitung estimasi karkas & daging jika bobot/lingkar dada ada
+        let bobot = item.bobot_hidup ? Number(item.bobot_hidup) : null;
+        let lingkar = item.lingkar_dada ? Number(item.lingkar_dada) : null;
+        if (!bobot && lingkar) {
+          bobot = Math.round((Math.pow(lingkar + 22, 2) / 100) * 10) / 10;
+        }
+
+        let karkas = item.estimasi_karkas ? Number(item.estimasi_karkas) : null;
+        let daging = item.estimasi_daging ? Number(item.estimasi_daging) : null;
+        if (bobot && !karkas) {
+          const rumpunLower = (item.rumpun_hewan || '').toLowerCase();
+          const persentaseKarkas =
+            rumpunLower.includes('simmental') ||
+            rumpunLower.includes('limousin') ||
+            rumpunLower.includes('brahman')
+              ? 0.53
+              : 0.505;
+          karkas = Math.round(bobot * persentaseKarkas * 10) / 10;
+          daging = Math.round(karkas * 0.72 * 10) / 10;
+        }
+
+        const isBolehPotong = (item.status_potong || 'Boleh Dipotong') === 'Boleh Dipotong';
+        const finalStatusKelayakan = isBolehPotong
+          ? (item.status_kelayakan || 'Layak Konsumsi')
+          : 'Tidak Dipotong';
+        const finalPostmortem = isBolehPotong ? (item.pemeriksaan_postmortem || null) : null;
+
+        valuesToInsert.push([
+          item.tanggal,
+          item.tempat_pemotongan,
+          item.nama_tempat_lain || null,
+          item.nama_pemilik,
+          item.nama_jagal || null,
+          item.kecamatan || '-',
+          item.desa || '-',
+          item.rumpun_hewan || 'Sapi PO',
+          item.kategori_hewan || 'Jantan',
+          Number(item.jumlah_ekor) || 1,
+          item.status_potong || 'Boleh Dipotong',
+          item.metode_ukur || (item.bobot_hidup ? 'timbangan' : 'lingkar_dada'),
+          lingkar,
+          bobot,
+          karkas,
+          daging,
+          item.pemeriksaan_antemortem || null,
+          finalPostmortem,
+          finalStatusKelayakan,
+          null, // foto_antemortem
+          null, // foto_postmortem
+          null, // dokumen_pdf
+          null, // dokumen_pdf_nama
+          petugasNama,
+        ]);
+      }
+
+      if (valuesToInsert.length === 0) {
+        return NextResponse.json(
+          { success: false, error: 'Tidak ada baris data pemotongan valid yang dapat diimpor.' },
+          { status: 400 }
+        );
+      }
+
+      await pool.query(
+        `INSERT INTO pencatatan_pemotongan (
+          tanggal, tempat_pemotongan, nama_tempat_lain, nama_pemilik, nama_jagal, kecamatan, desa,
+          rumpun_hewan, kategori_hewan, jumlah_ekor, status_potong, metode_ukur, lingkar_dada,
+          bobot_hidup, estimasi_karkas, estimasi_daging, pemeriksaan_antemortem, pemeriksaan_postmortem,
+          status_kelayakan, foto_antemortem, foto_postmortem, dokumen_pdf, dokumen_pdf_nama, petugas_nama
+        ) VALUES ?`,
+        [valuesToInsert]
+      );
+
+      const insertedCount = valuesToInsert.length;
+
+      // Audit log batch import
+      await logActivity({
+        userName: petugasNama,
+        action: 'CREATE',
+        module: 'kesmavet',
+        submenu: 'rph-tph-tpu',
+        tableName: 'pencatatan_pemotongan',
+        recordId: 'BATCH',
+        details: { description: `Impor massal ${insertedCount} data pemotongan hewan via Excel oleh ${petugasNama}` },
+      }).catch(() => {});
+
+      return NextResponse.json({
+        success: true,
+        message: `Berhasil mengimpor ${insertedCount} data pemotongan hewan secara massal!`,
+        count: insertedCount,
+      });
+    }
+
+    // ── 2. JIKA SINGLE RECORD INSERT (LOGIKA ASLI SEBELUMNYA TETAP UTUH) ──
     const {
       tanggal,
       tempat_pemotongan,
@@ -161,8 +264,6 @@ export async function POST(request: Request) {
     const finalStatusKelayakan = isBolehPotong ? (status_kelayakan || 'Layak Konsumsi') : 'Tidak Dipotong';
     const finalPostmortem = isBolehPotong ? (pemeriksaan_postmortem || null) : null;
     const finalFotoPostmortem = isBolehPotong ? (foto_postmortem || null) : null;
-
-    const petugasNama = session?.nama || 'Petugas Kesmavet';
 
     const [result]: any = await pool.query(
       `INSERT INTO pencatatan_pemotongan (

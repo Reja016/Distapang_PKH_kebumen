@@ -5,7 +5,7 @@ import {
   DEFAULT_VIEW_ONLY_PERMISSIONS,
   getDefaultPermissionsForRole,
 } from '@/lib/permissions';
-import { hashPassword } from '@/lib/password';
+import { hashPassword, validatePasswordCriteria } from '@/lib/password';
 import { requireAdmin } from '@/lib/session';
 import { logActivity } from '@/lib/auditLog';
 import { ensurePetugasIbTable, syncPetugasIbRecord } from '@/lib/petugasSync';
@@ -311,6 +311,14 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'Nama, NIP/Username, dan Password wajib diisi!' }, { status: 400 });
     }
 
+    const passCheck = validatePasswordCriteria(password);
+    if (!passCheck.isValid) {
+      return NextResponse.json(
+        { error: 'Kata sandi belum memenuhi syarat keamanan: minimal 8 karakter, serta harus mengandung kombinasi huruf, angka, dan simbol khusus (!@#$% dll).' },
+        { status: 400 }
+      );
+    }
+
     const hashedPassword = hashPassword(password);
     const userRole = role || 'Petugas Lapangan';
     const permStr =
@@ -412,7 +420,14 @@ export async function PUT(req: Request) {
     try {
       await ensureTable();
       if (password && password.trim() !== '') {
-        const hashedPassword = hashPassword(password);
+        const passCheck = validatePasswordCriteria(password.trim());
+        if (!passCheck.isValid) {
+          return NextResponse.json(
+            { error: 'Kata sandi baru belum memenuhi syarat keamanan: minimal 8 karakter, serta harus mengandung kombinasi huruf, angka, dan simbol khusus (!@#$% dll).' },
+            { status: 400 }
+          );
+        }
+        const hashedPassword = hashPassword(password.trim());
         if (permStr) {
           await pool.execute(
             `UPDATE anggota_users SET nama = ?, nip_username = ?, password = ?, role = ?, status = ?, permissions = ? WHERE id = ?`,

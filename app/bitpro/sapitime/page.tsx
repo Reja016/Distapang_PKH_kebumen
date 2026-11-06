@@ -4,6 +4,7 @@ import { useState, useEffect, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { usePageAuth } from '@/hooks/usePageAuth';
+import { useUserAreaRestriction } from '@/hooks/useUserAreaRestriction';
 import { getAuthSession } from '@/lib/auth';
 import {
   ArrowLeft,
@@ -39,6 +40,7 @@ import { showConfirm, showToast } from '@/components/common/CustomToast';
 export default function SapiTimePage() {
   const router = useRouter();
   const { isReady, canCreate, canEdit, isAdmin: isAuthAdmin, userName, userRole } = usePageAuth('bitpro', 'sapitime');
+  const { allowedPuskeswan, allowedKecamatan } = useUserAreaRestriction();
   const isTrueAdmin = useMemo(() => {
     const r = (userRole || '').toLowerCase();
     return Boolean(isAuthAdmin || r === 'administrator' || r === 'superadmin');
@@ -48,6 +50,10 @@ export default function SapiTimePage() {
     const roleNorm = (userRole || '').toLowerCase();
     return roleNorm.includes('pkb') || roleNorm === 'petugas pkb';
   }, [userRole]);
+  const isPuskeswanUser = useMemo(() => {
+    const r = (userRole || '').toLowerCase();
+    return r.includes('puskeswan') || (!isTrueAdmin && Boolean(allowedPuskeswan && allowedPuskeswan.length > 0));
+  }, [userRole, isTrueAdmin, allowedPuskeswan]);
   const canAccessAllIbs = useMemo(() => isTrueAdmin || isPkbOfficer, [isTrueAdmin, isPkbOfficer]);
 
   // Tab State: Untuk Admin default 'petugas_ib', Petugas PKB default 'pkb', user biasa default 'database'
@@ -91,7 +97,7 @@ export default function SapiTimePage() {
   // Set default active tab saat role sudah siap
   useEffect(() => {
     if (isReady) {
-      if (isTrueAdmin) {
+      if (isTrueAdmin || isPuskeswanUser) {
         setActiveTab('petugas_ib');
       } else if (isPkbOfficer) {
         setActiveTab('pkb');
@@ -99,7 +105,7 @@ export default function SapiTimePage() {
         setActiveTab('database');
       }
     }
-  }, [isReady, isTrueAdmin, isPkbOfficer]);
+  }, [isReady, isTrueAdmin, isPuskeswanUser, isPkbOfficer]);
 
   // 1. Tarik Data dari MySQL API
   const fetchData = async () => {
@@ -462,8 +468,9 @@ export default function SapiTimePage() {
 
   // 4. Konfigurasi Tabs:
   // - Admin murni: Petugas IB paling depan, lalu Pemeriksaan PKB, Database Indukan, Siklus, Kalender, Riwayat
+  // - Role Puskeswan: Petugas IB (terfilter wilayah binaan), lalu Indukan, Siklus, Kalender, Riwayat
   // - Petugas PKB: Pemeriksaan PKB paling depan, lalu Database Indukan, Siklus, Kalender, Riwayat
-  // - Petugas biasa: Database Indukan, Siklus, Kalender, Riwayat (Petugas IB TIDAK DAPAT DIAKSES)
+  // - Petugas biasa: Database Indukan, Siklus, Kalender, Riwayat
   const navigationTabs = useMemo(() => {
     if (isTrueAdmin) {
       return [
@@ -474,6 +481,21 @@ export default function SapiTimePage() {
         { key: 'calendar', label: 'Kalender', icon: CalendarIcon },
         { key: 'history', label: 'Riwayat', icon: History },
       ];
+    }
+    if (isPuskeswanUser) {
+      const tabs: Array<{ key: 'petugas_ib' | 'pkb' | 'home' | 'database' | 'calendar' | 'history'; label: string; icon: any }> = [
+        { key: 'petugas_ib', label: 'Petugas IB', icon: Users },
+      ];
+      if (isPkbOfficer) {
+        tabs.push({ key: 'pkb', label: 'Pemeriksaan PKB', icon: Stethoscope });
+      }
+      tabs.push(
+        { key: 'database', label: 'Indukan', icon: Database },
+        { key: 'home', label: 'Siklus', icon: LayoutDashboard },
+        { key: 'calendar', label: 'Kalender', icon: CalendarIcon },
+        { key: 'history', label: 'Riwayat', icon: History },
+      );
+      return tabs;
     }
     if (isPkbOfficer) {
       return [
@@ -490,7 +512,7 @@ export default function SapiTimePage() {
       { key: 'calendar', label: 'Kalender', icon: CalendarIcon },
       { key: 'history', label: 'Riwayat', icon: History },
     ];
-  }, [isTrueAdmin, isPkbOfficer]);
+  }, [isTrueAdmin, isPuskeswanUser, isPkbOfficer]);
 
   if (!isReady) return null;
 
@@ -557,11 +579,14 @@ export default function SapiTimePage() {
           })}
         </div>
 
-        {/* 1. TAB PETUGAS IB (MURNI KHUSUS ADMINISTRATOR - USER LAIN TIDAK BISA) */}
-        {activeTab === 'petugas_ib' && isTrueAdmin && (
+        {/* 1. TAB PETUGAS IB (ADMINISTRATOR & ROLE PUSKESWAN) */}
+        {activeTab === 'petugas_ib' && (isTrueAdmin || isPuskeswanUser) && (
           <SapiTimePetugasTab
             cattleList={cattleList}
             onTraceCattle={handleOpenTrace}
+            isPuskeswanUser={isPuskeswanUser}
+            allowedPuskeswan={allowedPuskeswan}
+            allowedKecamatan={allowedKecamatan}
           />
         )}
 

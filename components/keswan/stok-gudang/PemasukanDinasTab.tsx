@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import {
   Download,
+  UploadCloud,
   Plus,
   Trash2,
   Calendar,
@@ -13,6 +14,7 @@ import {
   Clock,
 } from 'lucide-react';
 import { exportToExcelWithSignature } from '@/lib/excelExportHelper';
+import { downloadStokGudangDroppingTemplate } from '@/lib/excelTemplateHelper';
 import { DroppingDinasItem, MasterBarang } from './types';
 
 interface PemasukanDinasTabProps {
@@ -23,6 +25,7 @@ interface PemasukanDinasTabProps {
   canCreate?: boolean;
   canEdit: boolean;
   onOpenAudit?: (recordId: any, tableName: string, fields: any[]) => void;
+  onOpenImport?: () => void;
 }
 
 export default function PemasukanDinasTab({
@@ -33,6 +36,7 @@ export default function PemasukanDinasTab({
   canCreate,
   canEdit,
   onOpenAudit,
+  onOpenImport,
 }: PemasukanDinasTabProps) {
   const [searchTerm, setSearchTerm] = useState('');
   const [filterSumber, setFilterSumber] = useState('ALL');
@@ -142,8 +146,30 @@ export default function PemasukanDinasTab({
             </select>
           </div>
 
-          {/* Bawah di mobile / Kanan di desktop: Button Excel dan Catat Dropping jadi 1 baris ke samping */}
-          <div className="flex items-center gap-2 w-full sm:w-auto">
+          {/* Bawah di mobile / Kanan di desktop: Button Excel, Template, Upload dan Catat Dropping */}
+          <div className="flex items-center gap-2 w-full sm:w-auto flex-wrap">
+            <button
+              type="button"
+              onClick={downloadStokGudangDroppingTemplate}
+              title="Unduh Template Excel Dropping Logistik"
+              className="flex-1 sm:flex-none flex items-center justify-center gap-1.5 px-3 py-2 bg-blue-50 dark:bg-blue-950/40 hover:bg-blue-100 dark:hover:bg-blue-900/50 text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-800 text-xs font-bold rounded-xl transition-all cursor-pointer shrink-0"
+            >
+              <Download className="w-3.5 h-3.5" />
+              <span>Template</span>
+            </button>
+
+            {onOpenImport && (canCreate || canEdit) && (
+              <button
+                type="button"
+                onClick={onOpenImport}
+                title="Upload Excel Dropping Logistik Masuk"
+                className="flex-1 sm:flex-none flex items-center justify-center gap-1.5 px-3 py-2 bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold rounded-xl shadow-xs transition-all cursor-pointer shrink-0"
+              >
+                <UploadCloud className="w-3.5 h-3.5" />
+                <span>Upload Excel</span>
+              </button>
+            )}
+
             <button
               onClick={handleExportExcel}
               className="flex-1 sm:flex-none flex items-center justify-center gap-1.5 px-3.5 py-2 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 text-slate-700 dark:text-slate-200 text-xs font-semibold rounded-xl transition-all cursor-pointer shrink-0"

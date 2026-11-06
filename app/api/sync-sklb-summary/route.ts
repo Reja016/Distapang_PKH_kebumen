@@ -1,5 +1,7 @@
 import { NextResponse } from 'next/server';
 import pool from '@/lib/db';
+import { getSessionFromRequest } from '@/lib/session';
+import { logActivity } from '@/lib/auditLog';
 
 export const dynamic = 'force-dynamic';
 
@@ -57,6 +59,59 @@ export async function POST(request: Request) {
 
     const { searchParams } = new URL(request.url);
     const queryTahun = Number(searchParams.get('tahun')) || Number(body.tahun) || 2026;
+
+    const session = await getSessionFromRequest(request as any);
+    const userName = session ? (session.nama || session.nip_username || 'Sistem') : 'Sistem';
+
+    // ── 0. BATCH INSERT / IMPORT GELONDONGAN EXCEL ──
+    const items = Array.isArray(body) ? body : Array.isArray(body?.items) ? body.items : null;
+    if (items && items.length > 0) {
+      let successCount = 0;
+      let skippedCount = 0;
+
+      for (let idx = 0; idx < items.length; idx++) {
+        const item = items[idx];
+        const desa = String(item.desa || item['Desa'] || '').trim();
+        const kec = String(item.kecamatan || item['Kecamatan'] || '').trim();
+
+        if (!desa && !kec) {
+          skippedCount++;
+          continue;
+        }
+
+        const noUrut = Number(item.no_urut || item['No Urut'] || item['No'] || idx + 1) || (idx + 1);
+        const grup = String(item.grup || item['Grup / Tim'] || item['Grup'] || 'Tabel Kiri').trim();
+        const tanggal = String(item.tanggal || item['Tanggal Pelaksanaan'] || item['Tanggal'] || '-').trim();
+        const target = Number(item.target || item['Target (Ekor)'] || item['Target']) || 0;
+        const capaian = Number(item.capaian || item['Capaian (Ekor)'] || item['Capaian']) || 0;
+        const selisih = capaian - target;
+        const tahun = Number(item.tahun || item['Tahun'] || queryTahun) || queryTahun;
+
+        await pool.query(
+          `INSERT INTO capaian_sklb (tahun, no_urut, grup, tanggal, desa, kecamatan, target, capaian, selisih)
+           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+          [tahun, noUrut, grup, tanggal, desa, kec, target, capaian, selisih]
+        );
+        successCount++;
+      }
+
+      await logActivity({
+        module: 'bitpro',
+        submenu: 'sklb',
+        tableName: 'capaian_sklb',
+        recordId: 0,
+        action: 'IMPORT_EXCEL',
+        userName,
+        details: { totalItems: items.length, successCount, skippedCount },
+      });
+
+      return NextResponse.json({
+        success: true,
+        count: successCount,
+        skipped: skippedCount,
+        message: `Berhasil mengimpor ${successCount} data rekapitulasi capaian SKLB!`,
+      });
+    }
 
     // Jika dipanggil tanpa body atau action=sync, return data
     if (!body || Object.keys(body).length === 0 || body.action === 'sync') {

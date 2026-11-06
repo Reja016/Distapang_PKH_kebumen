@@ -205,6 +205,7 @@ export default function LaluLintasTernakPage() {
           onEdit={handleOpenEdit}
           onDelete={handleDelete}
           onAudit={handleOpenAudit}
+          onRefresh={fetchData}
           isLoading={isLoading}
         />
       </main>

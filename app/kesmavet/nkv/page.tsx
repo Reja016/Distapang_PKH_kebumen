@@ -5,12 +5,13 @@ import Link from 'next/link';
 import * as XLSX from 'xlsx';
 import { exportToExcelWithSignature } from '@/lib/excelExportHelper';
 import { usePageAuth } from '@/hooks/usePageAuth';
-import { ArrowLeft, Plus, Download } from 'lucide-react';
+import { ArrowLeft, Plus, Download, UploadCloud } from 'lucide-react';
 
 import { NKVRecord, fajarFormatNkvRecord } from '@/components/kesmavet/nkv/types';
 import NkvKpiSection from '@/components/kesmavet/nkv/NkvKpiSection';
 import NkvTableSection from '@/components/kesmavet/nkv/NkvTableSection';
 import NkvModal from '@/components/kesmavet/nkv/NkvModal';
+import NkvImportModal from '@/components/kesmavet/nkv/NkvImportModal';
 import { showToast, showConfirm } from '@/components/common/CustomToast';
 
 export default function NKVPage() {
@@ -20,6 +21,7 @@ export default function NKVPage() {
   const [searchTerm, setSearchTerm] = useState('');
   const [filterJenis, setFilterJenis] = useState('');
   const [showModal, setShowModal] = useState(false);
+  const [showImportModal, setShowImportModal] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -283,6 +285,16 @@ export default function NKVPage() {
           </div>
 
           <div className="flex items-center gap-2 shrink-0">
+            {(canCreate ?? canEdit) && (
+              <button
+                onClick={() => setShowImportModal(true)}
+                title="Import Excel Gelondongan"
+                className="min-h-touch min-w-touch h-11 px-4 rounded-xl border border-purple-200 dark:border-purple-800 bg-purple-50 dark:bg-purple-950/40 text-purple-800 dark:text-purple-300 text-xs sm:text-sm font-bold flex items-center gap-2 hover:bg-purple-100 dark:hover:bg-purple-900/60 transition-all shadow-xs cursor-pointer"
+              >
+                <UploadCloud size={16} strokeWidth={2.5} />
+                <span className="hidden sm:inline">Import Excel</span>
+              </button>
+            )}
             <button
               onClick={handleExportExcel}
               className="min-h-touch min-w-touch h-11 px-4 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 text-xs sm:text-sm font-bold flex items-center gap-2 transition-all shadow-xs cursor-pointer"
@@ -332,6 +344,13 @@ export default function NKVPage() {
         onClose={() => setShowModal(false)}
         onSubmit={handleSubmit}
         isSubmitting={isSubmitting}
+      />
+
+      {/* ── MODAL IMPORT EXCEL NKV ── */}
+      <NkvImportModal
+        isOpen={showImportModal}
+        onClose={() => setShowImportModal(false)}
+        onSuccess={fetchData}
       />
     </div>
   );

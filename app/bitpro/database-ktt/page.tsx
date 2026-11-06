@@ -4,7 +4,7 @@ import { useMemo, useState, useEffect } from 'react';
 import Link from 'next/link';
 import * as XLSX from 'xlsx';
 import { exportToExcelWithSignature } from '@/lib/excelExportHelper';
-import { ArrowLeft, Plus, Download, Archive } from 'lucide-react';
+import { ArrowLeft, Plus, Download, Archive, UploadCloud } from 'lucide-react';
 import { usePageAuth } from '@/hooks/usePageAuth';
 
 import {
@@ -20,6 +20,7 @@ import KttTableSection from '@/components/bitpro/database-ktt/KttTableSection';
 import KttModals from '@/components/bitpro/database-ktt/KttModals';
 import KttDocumentModal from '@/components/bitpro/database-ktt/KttDocumentModal';
 import KttBulkZipModal from '@/components/bitpro/database-ktt/KttBulkZipModal';
+import KttImportModal from '@/components/bitpro/database-ktt/KttImportModal';
 import { UniversalAuditModal } from '@/components/common/UniversalAuditModal';
 
 export default function DatabaseKTTPage() {
@@ -43,6 +44,7 @@ export default function DatabaseKTTPage() {
   const [docCounts, setDocCounts] = useState<Record<number, number>>({});
   const [selectedKttForDocs, setSelectedKttForDocs] = useState<KelompokTani | null>(null);
   const [showBulkZipModal, setShowBulkZipModal] = useState(false);
+  const [showImportModal, setShowImportModal] = useState(false);
 
   // State Audit & Koreksi
   const [showAuditModal, setShowAuditModal] = useState(false);
@@ -300,6 +302,19 @@ export default function DatabaseKTTPage() {
 
             {canCreate && (
               <button
+                type="button"
+                onClick={() => setShowImportModal(true)}
+                title="Import Excel"
+                aria-label="Import Excel"
+                className="min-h-touch min-w-touch h-11 w-11 sm:w-auto sm:px-4 rounded-xl border border-emerald-200 dark:border-emerald-800 bg-emerald-50 dark:bg-emerald-950/50 hover:bg-emerald-100 dark:hover:bg-emerald-900 text-emerald-700 dark:text-emerald-300 text-xs sm:text-sm font-bold flex items-center justify-center sm:gap-2 transition-all shadow-xs cursor-pointer"
+              >
+                <UploadCloud size={16} strokeWidth={2.5} />
+                <span className="hidden sm:inline">Import Excel</span>
+              </button>
+            )}
+
+            {canCreate && (
+              <button
                 onClick={openAddModal}
                 title="Tambah KTT"
                 aria-label="Tambah KTT"
@@ -405,6 +420,15 @@ export default function DatabaseKTTPage() {
           'jenis_kelompok', 'kelas_kelompok', 'luas_lahan_ha', 
           'anggota_laki', 'anggota_perempuan', 'nama_ketua'
         ]}
+      />
+
+      {/* Modal Import Excel KTT */}
+      <KttImportModal
+        isOpen={showImportModal}
+        onClose={() => setShowImportModal(false)}
+        onSuccess={() => {
+          loadData();
+        }}
       />
     </div>
   );

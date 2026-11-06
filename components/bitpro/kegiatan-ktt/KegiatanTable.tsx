@@ -9,8 +9,11 @@ import {
   Edit2,
   Trash2,
   CheckCircle2,
+  Download,
+  UploadCloud,
 } from 'lucide-react';
 import { KegiatanKTT, DAFTAR_TIM_PELAKSANA } from './types';
+import { downloadKegiatanKttTemplate } from '@/lib/excelTemplateHelper';
 
 interface KegiatanTableProps {
   listKegiatan: KegiatanKTT[];
@@ -29,6 +32,7 @@ interface KegiatanTableProps {
   onDelete: (id: string) => void;
   setPreviewPhotoModal: (val: { url: string; title: string } | null) => void;
   onShowHistory?: (item: KegiatanKTT) => void;
+  onOpenImport?: () => void;
 }
 
 export function KegiatanTable({
@@ -48,6 +52,7 @@ export function KegiatanTable({
   onDelete,
   setPreviewPhotoModal,
   onShowHistory,
+  onOpenImport,
 }: KegiatanTableProps) {
   return (
     <section className="space-y-4">
@@ -58,6 +63,34 @@ export function KegiatanTable({
             <span>Riwayat Log Aktivitas &amp; Hasil Pendampingan</span>
           </h3>
         </div>
+
+        {onOpenImport && (
+          <div className="flex items-center gap-2 flex-wrap shrink-0">
+            <button
+              type="button"
+              onClick={downloadKegiatanKttTemplate}
+              title="Unduh Template Excel Log Kegiatan KTT"
+              className="min-h-touch h-9 px-3 rounded-xl border border-emerald-200 dark:border-emerald-800 bg-emerald-50 dark:bg-emerald-950/40 hover:bg-emerald-100 dark:hover:bg-emerald-900/50 text-emerald-700 dark:text-emerald-300 text-xs font-bold flex items-center gap-1.5 transition-all shadow-xs cursor-pointer"
+            >
+              <Download size={14} strokeWidth={2.5} />
+              <span className="hidden sm:inline">Unduh Template</span>
+              <span className="sm:hidden">Template</span>
+            </button>
+
+            {canEdit && (
+              <button
+                type="button"
+                onClick={onOpenImport}
+                title="Upload Excel Log Kegiatan KTT"
+                className="min-h-touch h-9 px-3.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold flex items-center gap-1.5 transition-all shadow-xs cursor-pointer"
+              >
+                <UploadCloud size={14} strokeWidth={2.5} />
+                <span className="hidden sm:inline">Upload Excel</span>
+                <span className="sm:hidden">Upload</span>
+              </button>
+            )}
+          </div>
+        )}
       </div>
 
       {/* Filter Bar */}

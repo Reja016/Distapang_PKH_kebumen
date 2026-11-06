@@ -1,6 +1,8 @@
 import { NextResponse } from 'next/server';
 import pool from '@/lib/db';
 import * as xlsx from 'xlsx';
+import { getSessionFromRequest } from '@/lib/session';
+import { logActivity } from '@/lib/auditLog';
 
 export const dynamic = 'force-dynamic';
 
@@ -104,6 +106,85 @@ export async function POST(request: Request) {
       try {
         body = JSON.parse(text);
       } catch {}
+    }
+
+    const session = await getSessionFromRequest(request as any);
+    const userName = session ? (session.nama || session.nip_username || 'Sistem') : 'Sistem';
+
+    // ── 0. BATCH INSERT / IMPORT GELONDONGAN EXCEL ──
+    const items = Array.isArray(body) ? body : Array.isArray(body?.items) ? body.items : null;
+    if (items && items.length > 0) {
+      let successCount = 0;
+      let skippedCount = 0;
+
+      for (let idx = 0; idx < items.length; idx++) {
+        const item = items[idx];
+        const desa = String(item.desa_lokasi || item.desa || item['Desa Lokasi'] || item['Desa'] || '').trim();
+        const namaPemilik = String(item.nama_pemilik || item.pemilik || item['Nama Pemilik / Peternak'] || item['Nama Pemilik'] || item['Peternak'] || '').trim();
+
+        if (!desa && !namaPemilik) {
+          skippedCount++;
+          continue;
+        }
+
+        const no = Number(item.no || item['No Urut'] || item['No'] || idx + 1) || (idx + 1);
+        const rt = String(item.rt || item['RT'] || '').trim();
+        const rw = String(item.rw || item['RW'] || '').trim();
+        const dusun = String(item.dusun || item['Dusun'] || '').trim();
+        const namaSapi = String(item.nama_sapi || item['Nama Sapi / Eartag'] || item['Nama Sapi'] || '-').trim();
+        const jenisKelamin = String(item.jenis_kelamin || item['Jenis Kelamin'] || 'Betina').trim();
+        const kodeBapak = String(item.kode_bapak || item['Kode Pejantan / Bapak'] || item['Kode Bapak'] || '-').trim();
+        const kodeInduk = String(item.kode_induk || item['Kode Induk'] || '-').trim();
+        const umurBulan = Number(item.umur_bulan || item['Umur (Bulan)'] || item['Umur']) || 0;
+        const tinggiPundak = Number(item.tinggi_pundak || item['Tinggi Pundak (cm)'] || item['Tinggi Pundak']) || 0;
+        const panjangBadan = Number(item.panjang_badan || item['Panjang Badan (cm)'] || item['Panjang Badan']) || 0;
+        const lingkarDada = Number(item.lingkar_dada || item['Lingkar Dada (cm)'] || item['Lingkar Dada']) || 0;
+        const beratBadan = Number(item.berat_badan || item['Berat Badan (kg)'] || item['Berat Badan']) || 0;
+
+        const id = item.id || `${desa || 'SKLB'}-${Date.now().toString(36)}-${idx + 1}`;
+
+        await pool.query(
+          `REPLACE INTO master_detail_ternak 
+           (id, desa_lokasi, no, nama_pemilik, rt, rw, dusun, nama_sapi, jenis_kelamin, kode_bapak, kode_induk, umur_bulan, tinggi_pundak, panjang_badan, lingkar_dada, berat_badan)
+           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+          [
+            id,
+            desa,
+            no,
+            namaPemilik || '-',
+            rt,
+            rw,
+            dusun,
+            namaSapi,
+            jenisKelamin,
+            kodeBapak,
+            kodeInduk,
+            umurBulan,
+            tinggiPundak,
+            panjangBadan,
+            lingkarDada,
+            beratBadan,
+          ]
+        );
+        successCount++;
+      }
+
+      await logActivity({
+        module: 'bitpro',
+        submenu: 'sklb',
+        tableName: 'master_detail_ternak',
+        recordId: 0,
+        action: 'IMPORT_EXCEL',
+        userName,
+        details: { totalItems: items.length, successCount, skippedCount },
+      });
+
+      return NextResponse.json({
+        success: true,
+        count: successCount,
+        skipped: skippedCount,
+        message: `Berhasil mengimpor ${successCount} data sapi calon bibit ke master detail SKLB!`,
+      });
     }
 
     // Jika ada body spesifik (tambah data manual)

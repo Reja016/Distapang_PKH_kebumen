@@ -8,6 +8,7 @@ import { compressImageFile, compressCanvas, validatePdfFile } from '@/lib/file-c
 import {
   ArrowLeft,
   Download,
+  UploadCloud,
   CheckCircle2,
   MapPin,
   Plus,
@@ -18,6 +19,8 @@ import {
   Egg,
   ChevronDown,
 } from 'lucide-react';
+import { downloadMonevKttTemplate } from '@/lib/excelTemplateHelper';
+import MonevImportModal from '@/components/bitpro/monev-ktt/MonevImportModal';
 import {
   DAFTAR_TAHUN,
   DATA_WILAYAH,
@@ -46,6 +49,7 @@ export default function MonevKTT() {
 
   const [showAuditModal, setShowAuditModal] = useState(false);
   const [auditTarget, setAuditTarget] = useState<any | null>(null);
+  const [showImportModal, setShowImportModal] = useState(false);
 
   // TABS: 'ruminansia' | 'unggas' | 'dashboard'
   const [activeTab, setActiveTab] = useState<'ruminansia' | 'unggas' | 'dashboard'>('ruminansia');
@@ -880,17 +884,44 @@ export default function MonevKTT() {
             </div>
           </div>
 
-          <div className="relative shrink-0" ref={exportMenuRef}>
+          <div className="flex items-center gap-2 flex-wrap shrink-0">
+            {/* Unduh Template Excel */}
             <button
-              onClick={() => setIsExportMenuOpen((prev) => !prev)}
-              title="Pilihan Export Excel"
-              aria-label="Pilihan Export Excel"
-              className="min-h-touch min-w-touch h-11 px-3 sm:px-4 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs sm:text-sm font-bold flex items-center justify-center gap-1.5 transition-all active:scale-95 shadow-xs cursor-pointer"
+              type="button"
+              onClick={() => downloadMonevKttTemplate(tahunBantuanFilter === 'Semua Tahun' ? '2026' : tahunBantuanFilter)}
+              title="Unduh Template Excel Monev KTT"
+              className="min-h-touch h-11 px-3 sm:px-3.5 rounded-xl border border-emerald-200 dark:border-emerald-800 bg-emerald-50 dark:bg-emerald-950/40 hover:bg-emerald-100 dark:hover:bg-emerald-900/50 text-emerald-700 dark:text-emerald-300 text-xs sm:text-sm font-bold flex items-center justify-center gap-1.5 transition-all shadow-xs cursor-pointer"
             >
-              <Download size={16} strokeWidth={2.5} />
-              <span className="hidden sm:inline">Export Excel</span>
-              <ChevronDown size={14} className={`transition-transform duration-200 ${isExportMenuOpen ? 'rotate-180' : ''}`} />
+              <Download size={15} strokeWidth={2.5} />
+              <span className="hidden sm:inline">Unduh Template</span>
+              <span className="sm:hidden">Template</span>
             </button>
+
+            {/* Upload Excel */}
+            {(canEdit || isAdmin) && (
+              <button
+                type="button"
+                onClick={() => setShowImportModal(true)}
+                title="Upload Excel Monev KTT"
+                className="min-h-touch h-11 px-3 sm:px-4 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs sm:text-sm font-bold flex items-center justify-center gap-1.5 transition-all shadow-xs cursor-pointer"
+              >
+                <UploadCloud size={15} strokeWidth={2.5} />
+                <span className="hidden sm:inline">Upload Excel</span>
+                <span className="sm:hidden">Upload</span>
+              </button>
+            )}
+
+            <div className="relative shrink-0" ref={exportMenuRef}>
+              <button
+                onClick={() => setIsExportMenuOpen((prev) => !prev)}
+                title="Pilihan Export Excel"
+                aria-label="Pilihan Export Excel"
+                className="min-h-touch min-w-touch h-11 px-3 sm:px-4 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 text-xs sm:text-sm font-bold flex items-center justify-center gap-1.5 transition-all active:scale-95 shadow-xs cursor-pointer"
+              >
+                <Download size={16} strokeWidth={2.5} />
+                <span className="hidden sm:inline">Export Excel</span>
+                <ChevronDown size={14} className={`transition-transform duration-200 ${isExportMenuOpen ? 'rotate-180' : ''}`} />
+              </button>
 
             {isExportMenuOpen && (
               <div className="absolute right-0 top-full mt-2 w-72 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xl z-50 p-2 space-y-1 animate-in fade-in zoom-in-95 duration-150">
@@ -956,7 +987,8 @@ export default function MonevKTT() {
             )}
           </div>
         </div>
-      </header>
+      </div>
+    </header>
 
       {/* ── MAIN WORKSPACE ── */}
       <main className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 pt-4 sm:pt-10 pb-28 sm:pb-12 space-y-6 sm:space-y-8">
@@ -1113,6 +1145,7 @@ export default function MonevKTT() {
             }}
             kttMasterList={kttMasterList}
             isSaving={isSaving}
+            onOpenImport={() => setShowImportModal(true)}
           />
         )}
 
@@ -1202,6 +1235,14 @@ export default function MonevKTT() {
           'lng',
           'catatan'
         ]}
+      />
+
+      {/* ── MODAL IMPORT EXCEL MONEV KTT ── */}
+      <MonevImportModal
+        isOpen={showImportModal}
+        onClose={() => setShowImportModal(false)}
+        onSuccess={fetchDatabase}
+        selectedYear={tahunBantuanFilter === 'Semua Tahun' ? '2026' : tahunBantuanFilter}
       />
     </div>
   );

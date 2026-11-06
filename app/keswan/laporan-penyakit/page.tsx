@@ -9,6 +9,7 @@ import { exportToExcelWithSignature } from '@/lib/excelExportHelper';
 import {
   ArrowLeft,
   Download,
+  UploadCloud,
   Plus,
   Calendar,
   Map as MapIcon,
@@ -27,6 +28,7 @@ import { PenyakitFormValues, veraFormatCaseItems } from '@/components/keswan/lap
 import PenyakitPetaTab from '@/components/keswan/laporan-penyakit/PenyakitPetaTab';
 import PenyakitTableTab from '@/components/keswan/laporan-penyakit/PenyakitTableTab';
 import PenyakitModals from '@/components/keswan/laporan-penyakit/PenyakitModals';
+import LaporanPenyakitImportModal from '@/components/keswan/laporan-penyakit/LaporanPenyakitImportModal';
 import { UniversalAuditModal } from '@/components/common/UniversalAuditModal';
 import { showConfirm, showToast } from '@/components/common/CustomToast';
 
@@ -80,6 +82,7 @@ export default function LaporanPenyakitPage() {
     keterangan: '',
   });
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
+  const [showImportModal, setShowImportModal] = useState<boolean>(false);
 
   // Audit State
   const [showAuditModal, setShowAuditModal] = useState(false);
@@ -368,6 +371,19 @@ export default function LaporanPenyakitPage() {
               <span className="hidden sm:inline">Export Excel</span>
             </button>
 
+            {(canCreate || canEdit) && (
+              <button
+                type="button"
+                onClick={() => setShowImportModal(true)}
+                title="Import Excel"
+                aria-label="Import Excel"
+                className="min-h-touch min-w-touch h-10 w-10 sm:w-auto sm:px-3.5 rounded-xl border border-blue-200 dark:border-blue-800 bg-blue-50/80 hover:bg-blue-100 dark:bg-blue-950/40 dark:hover:bg-blue-900/50 text-blue-700 dark:text-blue-300 text-xs font-bold flex items-center justify-center sm:gap-1.5 shadow-xs transition-colors cursor-pointer"
+              >
+                <UploadCloud size={15} />
+                <span className="hidden sm:inline">Import Excel</span>
+              </button>
+            )}
+
             {canCreate && (
               <button
                 onClick={() => {
@@ -572,6 +588,17 @@ export default function LaporanPenyakitPage() {
           ]}
         />
       )}
+
+      <LaporanPenyakitImportModal
+        isOpen={showImportModal}
+        onClose={() => setShowImportModal(false)}
+        onSuccess={() => {
+          loadCasesData(selectedYear);
+          loadAvailableYears();
+          showToast('Data kasus penyakit berhasil diimpor!', 'success');
+        }}
+        defaultYear={selectedYear}
+      />
     </div>
   );
 }

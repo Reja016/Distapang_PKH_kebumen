@@ -15,6 +15,7 @@ import {
   MapPin,
   Sparkles,
   Download,
+  UploadCloud,
   Map as MapIcon,
 } from 'lucide-react';
 import {
@@ -23,6 +24,7 @@ import {
   DAFTAR_TIM_PELAKSANA,
   rezaFormatKegiatanList,
 } from '@/components/bitpro/kegiatan-ktt/types';
+import { downloadKegiatanKttTemplate } from '@/lib/excelTemplateHelper';
 import { KegiatanForm } from '@/components/bitpro/kegiatan-ktt/KegiatanForm';
 import { showToast, showConfirm } from '@/components/common/CustomToast';
 import { KegiatanCalendar } from '@/components/bitpro/kegiatan-ktt/KegiatanCalendar';
@@ -33,6 +35,7 @@ import {
   KegiatanPreviewPhotoModal,
 } from '@/components/bitpro/kegiatan-ktt/KegiatanModals';
 import { AuditHistoryModal } from '@/components/bitpro/kegiatan-ktt/AuditHistoryModal';
+import KegiatanImportModal from '@/components/bitpro/kegiatan-ktt/KegiatanImportModal';
 
 export default function KegiatanKTTPage() {
   const { isReady, canCreate, canEdit } = usePageAuth('bitpro', 'kegiatan-ktt');
@@ -55,6 +58,7 @@ export default function KegiatanKTTPage() {
   const [isGettingLocation, setIsGettingLocation] = useState(false);
   const [showKttSuggestions, setShowKttSuggestions] = useState(false);
   const [historyTarget, setHistoryTarget] = useState<KegiatanKTT | null>(null);
+  const [showImportModal, setShowImportModal] = useState(false);
 
   // Tab State: Log & Kalender vs Peta Sebaran
   const [activeTab, setActiveTab] = useState<'log' | 'peta'>('log');
@@ -619,7 +623,34 @@ export default function KegiatanKTTPage() {
             </div>
           </div>
 
-          <div className="flex items-center gap-2 shrink-0">
+          <div className="flex items-center gap-2 flex-wrap shrink-0">
+            {/* Unduh Template Excel */}
+            <button
+              type="button"
+              onClick={downloadKegiatanKttTemplate}
+              title="Unduh Template Excel Log Kegiatan KTT"
+              className="min-h-touch h-11 px-3.5 rounded-xl border border-emerald-200 dark:border-emerald-800 bg-emerald-50 dark:bg-emerald-950/40 hover:bg-emerald-100 dark:hover:bg-emerald-900/50 text-emerald-700 dark:text-emerald-300 text-xs sm:text-sm font-bold flex items-center justify-center gap-1.5 transition-all shadow-xs cursor-pointer"
+            >
+              <Download size={15} strokeWidth={2.5} />
+              <span className="hidden sm:inline">Unduh Template</span>
+              <span className="sm:hidden">Template</span>
+            </button>
+
+            {/* Upload Excel */}
+            {canEdit && (
+              <button
+                type="button"
+                onClick={() => setShowImportModal(true)}
+                title="Upload Excel Log Kegiatan KTT"
+                className="min-h-touch h-11 px-3.5 sm:px-4 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs sm:text-sm font-bold flex items-center justify-center gap-1.5 transition-all shadow-xs cursor-pointer"
+              >
+                <UploadCloud size={15} strokeWidth={2.5} />
+                <span className="hidden sm:inline">Upload Excel</span>
+                <span className="sm:hidden">Upload</span>
+              </button>
+            )}
+
+            {/* Export Excel */}
             <button
               onClick={handleExportExcel}
               title="Export Excel"
@@ -778,6 +809,7 @@ export default function KegiatanKTTPage() {
               onDelete={handleDelete}
               setPreviewPhotoModal={setPreviewPhotoModal}
               onShowHistory={(item) => setHistoryTarget(item)}
+              onOpenImport={() => setShowImportModal(true)}
             />
           </div>
         )}
@@ -819,6 +851,13 @@ export default function KegiatanKTTPage() {
       <KegiatanPreviewPhotoModal
         previewPhotoModal={previewPhotoModal}
         onClose={() => setPreviewPhotoModal(null)}
+      />
+
+      {/* ── MODAL IMPORT EXCEL KEGIATAN KTT ── */}
+      <KegiatanImportModal
+        isOpen={showImportModal}
+        onClose={() => setShowImportModal(false)}
+        onSuccess={fetchData}
       />
     </div>
   );

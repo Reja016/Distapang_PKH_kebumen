@@ -1,7 +1,9 @@
 'use client';
 
-import React, { useMemo, useState, useRef } from 'react';
+import React, { useMemo, useState } from 'react';
 import { exportToExcelWithSignature, XLSX } from '@/lib/excelExportHelper';
+import { downloadHewanKurbanTemplate } from '@/lib/excelTemplateHelper';
+import HewanKurbanImportModal from './HewanKurbanImportModal';
 import {
   Search,
   Filter,
@@ -51,8 +53,7 @@ export default function HewanKurbanTable({
   searchQuery,
   setSearchQuery,
 }: HewanKurbanTableProps) {
-  const [isUploading, setIsUploading] = useState(false);
-  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [showImportModal, setShowImportModal] = useState(false);
   // Hitung ringkasan statistik
   const stats = useMemo(() => {
     const totalLokasi = items.length;
@@ -103,108 +104,9 @@ export default function HewanKurbanTable({
     }
   };
 
-  // Download Template Excel untuk Impor Data
+  // Download Template Excel untuk Impor Data (Official SiMantap Format)
   const handleDownloadTemplate = () => {
-    const templateRows = [
-      {
-        'Tanggal': '2026-06-17',
-        'Kecamatan': 'Kebumen',
-        'Desa': 'Panjer',
-        'Nama Lokasi': 'Masjid Agung Kebumen',
-        'Jenis Tempat': 'Masjid',
-        'Sapi Jantan': 5,
-        'Sapi Betina': 0,
-        'Kambing Jantan': 12,
-        'Kambing Betina': 0,
-        'Domba Jantan': 3,
-        'Domba Betina': 0,
-        'Kerbau Jantan': 0,
-        'Kerbau Betina': 0,
-        'Keterangan': 'Pemotongan berjalan tertib dan lancar',
-      },
-      {
-        'Tanggal': '2026-06-17',
-        'Kecamatan': 'Klirong',
-        'Desa': 'Klirong',
-        'Nama Lokasi': 'Musholla Al-Ikhlas',
-        'Jenis Tempat': 'Musholla',
-        'Sapi Jantan': 2,
-        'Sapi Betina': 0,
-        'Kambing Jantan': 6,
-        'Kambing Betina': 0,
-        'Domba Jantan': 1,
-        'Domba Betina': 0,
-        'Kerbau Jantan': 0,
-        'Kerbau Betina': 0,
-        'Keterangan': '-',
-      },
-      {
-        'Tanggal': '2026-06-17',
-        'Kecamatan': 'Gombong',
-        'Desa': 'Gombong',
-        'Nama Lokasi': 'Halaman RPH-R Gombong',
-        'Jenis Tempat': 'RPH-R',
-        'Sapi Jantan': 8,
-        'Sapi Betina': 0,
-        'Kambing Jantan': 15,
-        'Kambing Betina': 0,
-        'Domba Jantan': 4,
-        'Domba Betina': 0,
-        'Kerbau Jantan': 0,
-        'Kerbau Betina': 0,
-        'Keterangan': 'Kondisi antemortem sehat',
-      },
-    ];
-
-    const ws = XLSX.utils.json_to_sheet(templateRows);
-    const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, 'Template Kurban');
-    XLSX.writeFile(wb, 'Template_Pemotongan_Hewan_Kurban.xlsx');
-    showToast.success('Template Excel berhasil diunduh!');
-  };
-
-  // Upload & Import Excel
-  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-
-    setIsUploading(true);
-    try {
-      const buffer = await file.arrayBuffer();
-      const workbook = XLSX.read(buffer, { type: 'array' });
-      const firstSheetName = workbook.SheetNames[0];
-      const worksheet = workbook.Sheets[firstSheetName];
-      const jsonRows: any[] = XLSX.utils.sheet_to_json(worksheet);
-
-      if (jsonRows.length === 0) {
-        showToast.error('File Excel kosong atau format tidak sesuai.');
-        return;
-      }
-
-      const confirmed = await showConfirm(
-        `Terdeteksi ${jsonRows.length} baris data pada file "${file.name}". Lanjutkan impor data pemotongan hewan kurban?`
-      );
-      if (!confirmed) return;
-
-      const res = await fetch('/api/hewan-kurban/import', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ rows: jsonRows }),
-      });
-
-      const result = await res.json();
-      if (result.success) {
-        showToast.success(result.message || `Berhasil mengimpor ${result.insertedCount} data!`);
-        onRefresh();
-      } else {
-        showToast.error(result.error || 'Gagal mengimpor file Excel.');
-      }
-    } catch (err: any) {
-      showToast.error('Gagal membaca file Excel: ' + err.message);
-    } finally {
-      setIsUploading(false);
-      if (fileInputRef.current) fileInputRef.current.value = '';
-    }
+    downloadHewanKurbanTemplate();
   };
 
   // Export Excel (.xlsx)
@@ -367,15 +269,6 @@ export default function HewanKurbanTable({
 
         {/* Baris 2: Tombol Aksi (Refresh, Template, Upload, Unduh Excel) */}
         <div className="flex items-center gap-2 w-full justify-between pt-2.5 border-t border-slate-100 dark:border-slate-800">
-          {/* Input File Tersembunyi untuk Impor Excel */}
-          <input
-            type="file"
-            ref={fileInputRef}
-            onChange={handleFileUpload}
-            accept=".xlsx, .xls, .csv"
-            className="hidden"
-          />
-
           <button
             type="button"
             onClick={onRefresh}
@@ -402,13 +295,12 @@ export default function HewanKurbanTable({
             {canEdit && (
               <button
                 type="button"
-                disabled={isUploading}
-                onClick={() => fileInputRef.current?.click()}
+                onClick={() => setShowImportModal(true)}
                 title="Unggah file Excel untuk menambah data pemotongan kurban"
-                className="flex-1 sm:flex-none h-10 px-3.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold shadow-xs transition-all flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-50 whitespace-nowrap"
+                className="flex-1 sm:flex-none h-10 px-3.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold shadow-xs transition-all flex items-center justify-center gap-1.5 cursor-pointer whitespace-nowrap"
               >
-                <Upload size={14} className={isUploading ? 'animate-bounce' : ''} />
-                <span className="hidden sm:inline">{isUploading ? 'Mengimpor...' : 'Upload Excel'}</span>
+                <Upload size={14} />
+                <span className="hidden sm:inline">Upload Excel</span>
                 <span className="sm:hidden">Upload</span>
               </button>
             )}
@@ -779,6 +671,16 @@ export default function HewanKurbanTable({
           </div>
         </>
       )}
+
+      {/* Modal Import Excel Kurban */}
+      <HewanKurbanImportModal
+        isOpen={showImportModal}
+        onClose={() => setShowImportModal(false)}
+        onSuccess={() => {
+          setShowImportModal(false);
+          onRefresh();
+        }}
+      />
     </div>
   );
 }

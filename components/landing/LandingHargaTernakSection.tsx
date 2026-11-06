@@ -30,8 +30,8 @@ const DATA_HARGA_TERNAK: HargaTernakItem[] = [
     hargaGombongPerKg: 53000,
     rataRataPerKg: 52500,
     perTanggal: '05 Oktober 2026',
-    satuan: 'per kg',
-    keterangan: 'Harga timbang berat hidup ternak per kg',
+    satuan: 'kisaran berat per-kg',
+    keterangan: 'Harga timbang kisaran berat hidup ternak per kg',
     tren: 'Stabil',
     icon: '🐂',
   },
@@ -42,8 +42,8 @@ const DATA_HARGA_TERNAK: HargaTernakItem[] = [
     hargaGombongPerKg: 82000,
     rataRataPerKg: 81000,
     perTanggal: '05 Oktober 2026',
-    satuan: 'per kg',
-    keterangan: 'Harga timbang berat hidup ternak per kg',
+    satuan: 'kisaran berat per-kg',
+    keterangan: 'Harga timbang kisaran berat hidup ternak per kg',
     tren: 'Stabil',
     icon: '🐐',
   },
@@ -54,8 +54,8 @@ const DATA_HARGA_TERNAK: HargaTernakItem[] = [
     hargaGombongPerKg: 76000,
     rataRataPerKg: 75500,
     perTanggal: '05 Oktober 2026',
-    satuan: 'per kg',
-    keterangan: 'Harga timbang berat hidup ternak per kg',
+    satuan: 'kisaran berat per-kg',
+    keterangan: 'Harga timbang kisaran berat hidup ternak per kg',
     tren: 'Stabil',
     icon: '🐑',
   },
@@ -82,8 +82,8 @@ export default function LandingHargaTernakSection() {
               hargaGombongPerKg: Number(item.harga_gombong) || 0,
               rataRataPerKg: Number(item.rata_rata) || 0,
               perTanggal: item.per_tanggal || '',
-              satuan: item.satuan || 'per kg',
-              keterangan: item.keterangan || 'Harga timbang berat hidup ternak per kg',
+              satuan: item.satuan || 'kisaran berat per-kg',
+              keterangan: item.keterangan || 'Harga timbang kisaran berat hidup ternak per kg',
               tren: item.tren || 'Stabil',
               icon: item.icon || '🐂',
             }));
@@ -120,9 +120,12 @@ export default function LandingHargaTernakSection() {
           {hargaList.map((item, idx) => (
             <tr key={item.id} className="hover:bg-slate-50/70 dark:hover:bg-slate-700/40 transition-colors">
               <td className="p-3.5 sm:p-4 text-center text-slate-400 font-bold text-xs sm:text-sm">{idx + 1}</td>
-              <td className="p-3.5 sm:p-4 font-black text-slate-900 dark:text-white flex items-center gap-2.5 text-sm sm:text-lg">
-                <span className="text-xl sm:text-2xl">{item.icon}</span>
-                <span>{item.namaHewan}</span>
+              <td className="p-3.5 sm:p-4 font-black text-slate-900 dark:text-white flex items-center gap-2 text-sm sm:text-lg flex-wrap">
+                <span className="text-xl sm:text-2xl mr-0.5">{item.icon}</span>
+                <span>{item.namaHewan.replace(/\s*\(Siap Potong\)/i, '').trim()}</span>
+                <span className="text-xs sm:text-sm font-bold text-slate-500 dark:text-slate-400">
+                  (Siap Potong)
+                </span>
               </td>
               <td className="p-3.5 sm:p-4 text-right font-black text-blue-600 dark:text-blue-400 text-sm sm:text-lg">
                 Rp {item.hargaKebumenPerKg.toLocaleString('id-ID')} / kg
@@ -179,16 +182,17 @@ export default function LandingHargaTernakSection() {
                 {item.icon}
               </span>
               <div>
-                <h3 className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white tracking-tight group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
-                  {item.namaHewan}
+                <h3 className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white tracking-tight group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors flex items-center gap-2 flex-wrap">
+                  <span>{item.namaHewan.replace(/\s*\(Siap Potong\)/i, '').trim()}</span>
+                  <span className="text-sm sm:text-base font-bold text-slate-500 dark:text-slate-400">
+                    (Siap Potong)
+                  </span>
                 </h3>
-                <span className="inline-flex items-center gap-1.5 text-xs sm:text-sm font-bold text-slate-600 dark:text-slate-400 mt-0.5">
-                  <Scale size={13} className="text-blue-600 dark:text-blue-400" />
-                  <span>Harga Satuan: Per-Kg
-                    <span> </span>
-                    <span className="px-2.5 py-0.5 rounded-full text-xs font-extrabold bg-amber-100 text-amber-900 dark:bg-amber-950/70 dark:text-amber-300 border border-amber-300 dark:border-amber-700 uppercase tracking-wider">
-                      Estimasi
-                    </span>
+                <span className="inline-flex items-center gap-1.5 text-xs sm:text-sm font-bold text-slate-600 dark:text-slate-400 mt-1 flex-wrap">
+                  <Scale size={13} className="text-blue-600 dark:text-blue-400 shrink-0" />
+                  <span>Harga Satuan: kisaran berat per-kg</span>
+                  <span className="px-2 py-0.5 rounded-full text-[10px] sm:text-xs font-extrabold bg-amber-100 text-amber-900 dark:bg-amber-950/70 dark:text-amber-300 border border-amber-300 dark:border-amber-700 uppercase tracking-wider">
+                    Estimasi
                   </span>
                 </span>
               </div>
@@ -298,7 +302,12 @@ export default function LandingHargaTernakSection() {
           <p className="font-bold text-amber-950 dark:text-amber-100">
             Catatan Perkiraan Harga:
           </p>
-          <p className="text-amber-800 dark:text-amber-300">
+          {/* Ringkas di Mobile */}
+          <p className="text-amber-800 dark:text-amber-300 block sm:hidden">
+            Harga merupakan estimasi pantauan lapangan dan dapat berbeda tergantung bobot, kondisi ternak, serta kesepakatan pasar.
+          </p>
+          {/* Lengkap di Desktop/Tablet */}
+          <p className="text-amber-800 dark:text-amber-300 hidden sm:block">
             Data harga ternak yang tercantum merupakan estimasi pantauan lapangan. Harga dapat berubah sewaktu-waktu tanpa pemberitahuan sebelumnya dan dapat berbeda dengan transaksi di pasar atau di tingkat peternak tergantung bobot, kondisi kesehatan ternak, serta mekanisme tawar-menawar.
           </p>
         </div>

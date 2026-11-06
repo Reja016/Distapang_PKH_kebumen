@@ -523,7 +523,9 @@ function InputPopulasi2026Content() {
       <BulkUploadModal
         showBulkUpload={showBulkUpload}
         setShowBulkUpload={setShowBulkUpload}
-        handleExcelUpload={handleExcelUpload}
+        onSuccess={fetchDatabaseData}
+        defaultYear={Number(year) || 2026}
+        defaultTw={tw}
       />
     </div>
   );

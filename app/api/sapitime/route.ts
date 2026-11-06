@@ -232,9 +232,171 @@ export async function GET() {
 
 export async function POST(req: Request) {
   try {
-    const { action, payload, history } = await req.json();
+    const body = await req.json();
+    const { action, payload, history } = body;
     const session = await getSessionFromRequest(req as any);
     const userName = session?.nama || session?.nip_username || 'Unknown';
+
+    // ── 0. BATCH IMPORT GELONDONGAN EXCEL INSEMINASI BUATAN (IB) ──
+    if (action === 'bulk_import_ib' || Array.isArray(body?.items)) {
+      await ensureSapitimeColumns();
+      await ensureSapitimeMasterColumns();
+
+      const items = body.items || body;
+      const { validateAreaAccess } = await import('@/lib/areaRestriction');
+
+      // Fetch existing cattle to match
+      const [allCattle]: any = await pool.query('SELECT id, name, ownerName, kecamatan FROM sapitime_master');
+      const cattleList: any[] = allCattle || [];
+
+      // Calculate next available ST id
+      const numIds = cattleList.map((r: any) => {
+        const m = (r.id || '').match(/\d+/);
+        return m ? parseInt(m[0], 10) : 0;
+      });
+      let nextNum = Math.max(0, ...numIds) + 1;
+
+      let successCount = 0;
+      let skippedCount = 0;
+      const errors: string[] = [];
+
+      for (let idx = 0; idx < items.length; idx++) {
+        const item = items[idx];
+        const rawOwner = item.ownerName || item.nama_peternak || item['Nama Peternak'] || '';
+        const rawCow = item.cattleName || item.nama_sapi || item['Nama Sapi'] || '';
+        const rawKec = item.kecamatan || item.Kecamatan || '';
+        const rawDesa = item.desa || item.Desa || '';
+        const rawDate = item.date || item.tanggal_ib || item['Tanggal IB'] || item.tanggal || '';
+        const rawTime = item.time || item.jam_ib || item['Jam IB'] || '08:00';
+        const rawInseminator = item.inseminatorName || item.nama_inseminator || item['Nama Inseminator'] || item.inseminator || userName;
+        const rawStraw = item.strawCode || item.kode_straw || item['Kode Straw'] || '-';
+        const rawBull = item.bullName || item.nama_pejantan || item['Nama Pejantan'] || '-';
+        const rawBreed = item.bullBreed || item.ras_pejantan || item['Ras Pejantan'] || item.breed || 'Simmental';
+        const rawNotes = item.notes || item.catatan || item['Catatan IB'] || '';
+        const rawPkbResult = item.pkbResult || item.hasil_pkb || item['Hasil PKB'] || '';
+
+        if (!rawCow && !rawOwner) {
+          skippedCount++;
+          continue;
+        }
+
+        // Validate area access
+        if (rawKec) {
+          const areaCheck = await validateAreaAccess(req, String(rawKec));
+          if (!areaCheck.allowed) {
+            errors.push(`Baris ${idx + 1}: Wilayah Kecamatan ${rawKec} di luar kewenangan tugas Anda.`);
+            continue;
+          }
+        }
+
+        // Parse date
+        let parsedDateStr = '';
+        const dateStrTrim = String(rawDate).trim();
+        if (/^\d{4}-\d{1,2}-\d{1,2}$/.test(dateStrTrim)) {
+          const [y, m, d] = dateStrTrim.split('-');
+          parsedDateStr = `${y}-${m.padStart(2, '0')}-${d.padStart(2, '0')}`;
+        } else if (/^\d{1,2}[\/\-]\d{1,2}[\/\-]\d{4}$/.test(dateStrTrim)) {
+          const parts = dateStrTrim.split(/[\/\-]/);
+          parsedDateStr = `${parts[2]}-${parts[1].padStart(2, '0')}-${parts[0].padStart(2, '0')}`;
+        } else {
+          const d = new Date(dateStrTrim);
+          if (!isNaN(d.getTime())) {
+            parsedDateStr = d.toISOString().slice(0, 10);
+          }
+        }
+
+        if (!parsedDateStr) {
+          parsedDateStr = new Date().toISOString().slice(0, 10);
+        }
+
+        // Calculate rekomendasi PKB (+60 days from IB)
+        const dPkb = new Date(parsedDateStr);
+        dPkb.setDate(dPkb.getDate() + 60);
+        const rekomendasiPkbStr = dPkb.toISOString().slice(0, 10);
+
+        // Find or create cattle
+        let matchedCattle = cattleList.find(
+          c => (item.cattleId && c.id === item.cattleId) ||
+               (c.name.toLowerCase() === String(rawCow).toLowerCase() && c.ownerName.toLowerCase() === String(rawOwner).toLowerCase())
+        );
+
+        let cattleId = matchedCattle ? matchedCattle.id : null;
+        if (!cattleId) {
+          cattleId = `ST${String(nextNum).padStart(3, '0')}`;
+          nextNum++;
+
+          const cowStatus = rawPkbResult === 'Bunting' ? 'Bunting' : 'Inseminasi';
+
+          await pool.query(
+            `INSERT INTO sapitime_master (id, name, registrationNumber, ownerName, breed, kecamatan, desa, status, created_by)
+             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+            [
+              cattleId,
+              rawCow || `Sapi ${rawOwner}`,
+              item.registrationNumber || null,
+              rawOwner || '-',
+              rawBreed,
+              rawKec || 'Kebumen',
+              rawDesa || '-',
+              cowStatus,
+              userName
+            ]
+          );
+
+          cattleList.push({ id: cattleId, name: rawCow, ownerName: rawOwner, kecamatan: rawKec });
+        }
+
+        // Insert into sapitime_ib
+        const ibId = String(Date.now() + idx);
+        const isBunting = rawPkbResult === 'Bunting';
+        const isTidakBunting = rawPkbResult === 'Tidak Bunting';
+
+        await pool.query(
+          `INSERT INTO sapitime_ib (
+            id, id_ib, cattle_id, date, time, kecamatan, desa, inseminatorName,
+            strawCode, bullName, bullBreed, rekomendasiPkb, pkbStatus, pkbResult,
+            status_keberhasilan, mode_keberhasilan, notes
+          ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+          [
+            ibId,
+            ibId,
+            cattleId,
+            parsedDateStr,
+            rawTime || '08:00',
+            rawKec || null,
+            rawDesa || null,
+            rawInseminator,
+            rawStraw || '-',
+            rawBull || '-',
+            rawBreed || 'Simmental',
+            rekomendasiPkbStr,
+            isBunting || isTidakBunting ? 'Sudah Diperiksa' : 'Menunggu Jadwal',
+            rawPkbResult && (isBunting || isTidakBunting) ? rawPkbResult : null,
+            isBunting ? 'Berhasil' : (isTidakBunting ? 'Tidak Berhasil' : 'Menunggu PKB'),
+            rawPkbResult && (isBunting || isTidakBunting) ? 'manual' : 'sistem',
+            rawNotes || null
+          ]
+        );
+
+        successCount++;
+      }
+
+      // Audit log
+      try {
+        await pool.query(
+          `INSERT INTO activity_logs (module, submenu, table_name, record_id, action, user_name, details)
+           VALUES (?, ?, ?, ?, ?, ?, ?)`,
+          ['bitpro', 'database-ib', 'sapitime_ib', '0', 'BULK_IMPORT', userName, JSON.stringify({ totalItems: items.length, successCount, skippedCount, errorsCount: errors.length })]
+        );
+      } catch {}
+
+      return NextResponse.json({
+        success: true,
+        message: `Berhasil mengimpor ${successCount} data Inseminasi Buatan (IB).${errors.length > 0 ? ` Catatan: ${errors.length} baris di luar kewenangan wilayah.` : ''}`,
+        importedCount: successCount,
+        errors: errors.length > 0 ? errors : undefined,
+      });
+    }
 
     // Validasi Pembatasan Wilayah Kerja Petugas (Role-Based Area Restriction)
     if (payload?.kecamatan) {

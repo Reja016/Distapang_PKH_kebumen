@@ -41,10 +41,12 @@ export default function LandingHeroSection({ onSelectModule }: LandingHeroSectio
           </span>
         </h1>
 
-        {/* Deskripsi Rata Kanan-Kiri (Justify) */}
-        <p className="text-sm sm:text-base md:text-lg text-slate-900 dark:text-slate-100 leading-relaxed sm:leading-loose text-justify max-w-2xl font-semibold px-1 drop-shadow-[0_1px_3px_rgba(255,255,255,0.95)] dark:drop-shadow-[0_1px_8px_rgba(0,0,0,0.85)]">
-          Sistem Informasi Manajemen Terpadu yang mengintegrasikan data Perbibitan &amp; Produksi (Bitpro), Kesehatan Hewan (Keswan), dan Kesehatan Masyarakat Veteriner (Kesmavet) secara akurat, transparan, dan terbuka guna mendukung ketahanan pangan dan kesejahteraan peternak di seluruh wilayah Kabupaten Kebumen.
-        </p>
+        {/* Shape bergradasi halus + frosted glass di belakang deskripsi agar sangat kontras & jelas di mode terang */}
+        <div className="mt-1 p-4 sm:p-6 rounded-2xl sm:rounded-3xl bg-gradient-to-br from-white/90 via-white/80 to-blue-50/80 dark:from-slate-900/80 dark:via-slate-900/70 dark:to-slate-950/80 backdrop-blur-md border border-white/90 dark:border-slate-800/80 shadow-lg shadow-blue-900/5 dark:shadow-black/40 max-w-2xl">
+          <p className="text-sm sm:text-base md:text-lg text-slate-800 dark:text-slate-100 leading-relaxed sm:leading-loose text-justify font-semibold">
+            Sistem Informasi Manajemen Terpadu yang mengintegrasikan data Perbibitan &amp; Produksi (Bitpro), Kesehatan Hewan (Keswan), dan Kesehatan Masyarakat Veteriner (Kesmavet) secara akurat, transparan, dan terbuka guna mendukung ketahanan pangan dan kesejahteraan peternak di seluruh wilayah Kabupaten Kebumen.
+          </p>
+        </div>
       </div>
     </section>
   );

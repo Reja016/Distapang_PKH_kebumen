@@ -3,6 +3,7 @@
 import { useState, useEffect, useMemo } from 'react';
 import Link from 'next/link';
 import { saveWorkbookWithSignature, XLSX } from '@/lib/excelExportHelper';
+import { downloadProduksiTernakTemplate } from '@/lib/excelTemplateHelper';
 import {
   ArrowLeft,
   Download,
@@ -134,7 +135,19 @@ export default function Produksi2025() {
             </div>
           </div>
 
-          <div className="flex items-center gap-2 shrink-0">
+          <div className="flex items-center gap-2 flex-wrap shrink-0">
+            {/* Unduh Template Excel */}
+            <button
+              type="button"
+              onClick={() => downloadProduksiTernakTemplate('2025')}
+              title="Unduh Template Excel Produksi Ternak"
+              className="min-h-touch h-11 px-3 sm:px-3.5 rounded-xl border border-emerald-200 dark:border-emerald-800 bg-emerald-50 dark:bg-emerald-950/40 hover:bg-emerald-100 dark:hover:bg-emerald-900/50 text-emerald-700 dark:text-emerald-300 text-xs sm:text-sm font-bold flex items-center justify-center gap-1.5 transition-all shadow-xs cursor-pointer"
+            >
+              <Download size={15} strokeWidth={2.5} />
+              <span className="hidden sm:inline">Unduh Template</span>
+              <span className="sm:hidden">Template</span>
+            </button>
+
             <button
               onClick={handleExportExcel}
               title="Export Excel"

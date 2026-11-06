@@ -3,6 +3,8 @@
 import { useState, useEffect, useMemo, useRef } from 'react';
 import * as XLSX from 'xlsx';
 import { exportToExcelWithSignature } from '@/lib/excelExportHelper';
+import { downloadPelayananMedikTemplate } from '@/lib/excelTemplateHelper';
+import PelayananMedikImportModal from './PelayananMedikImportModal';
 import {
   Search,
   Filter,
@@ -21,6 +23,8 @@ import {
   AlertCircle,
   X,
   RotateCcw,
+  Download,
+  Upload,
 } from 'lucide-react';
 import {
   PelayananMedikRecord,
@@ -86,6 +90,7 @@ export function PelayananMedikTab({
   // Modals
   const [viewKarcisRecord, setViewKarcisRecord] = useState<PelayananMedikRecord | null>(null);
   const [showAuditModal, setShowAuditModal] = useState(false);
+  const [showImportModal, setShowImportModal] = useState(false);
 
   const fetchData = async () => {
     setIsLoading(true);
@@ -770,9 +775,35 @@ export function PelayananMedikTab({
               <span>Audit Log</span>
             </button>
 
+            {/* Unduh Template Excel */}
+            <button
+              type="button"
+              onClick={() => downloadPelayananMedikTemplate()}
+              className="min-h-touch h-10 px-3.5 text-xs font-bold text-blue-700 dark:text-blue-300 bg-blue-50 dark:bg-blue-950/40 border border-blue-200 dark:border-blue-800 hover:bg-blue-100 dark:hover:bg-blue-900/50 rounded-xl transition flex items-center gap-1.5 cursor-pointer shadow-2xs whitespace-nowrap"
+              title="Unduh Format Template Excel untuk Pengisian Data"
+            >
+              <Download className="w-4 h-4" />
+              <span className="hidden sm:inline">Unduh Template</span>
+              <span className="sm:hidden">Template</span>
+            </button>
+
+            {/* Upload Excel */}
+            {canEdit && (
+              <button
+                type="button"
+                onClick={() => setShowImportModal(true)}
+                className="min-h-touch h-10 px-3.5 text-xs font-bold text-white bg-blue-600 hover:bg-blue-700 rounded-xl transition flex items-center gap-1.5 cursor-pointer shadow-xs whitespace-nowrap"
+                title="Upload file Excel untuk menambah data sekaligus"
+              >
+                <Upload className="w-4 h-4" />
+                <span className="hidden sm:inline">Upload Excel</span>
+                <span className="sm:hidden">Upload</span>
+              </button>
+            )}
+
             <button
               onClick={handleExportExcel}
-              className="min-h-touch h-10 px-3.5 text-xs font-bold text-emerald-700 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-300 dark:border-emerald-800 hover:bg-emerald-100 rounded-xl transition flex items-center gap-1.5 cursor-pointer shadow-2xs"
+              className="min-h-touch h-10 px-3.5 text-xs font-bold text-emerald-700 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-300 dark:border-emerald-800 hover:bg-emerald-100 rounded-xl transition flex items-center gap-1.5 cursor-pointer shadow-2xs whitespace-nowrap"
             >
               <FileSpreadsheet className="w-4 h-4 text-emerald-600" />
               <span>Export Excel</span>
@@ -1005,6 +1036,17 @@ export function PelayananMedikTab({
           'diagnosa_nama',
           'catatan',
         ]}
+      />
+
+      {/* ── MODAL IMPOR EXCEL RESMI ── */}
+      <PelayananMedikImportModal
+        isOpen={showImportModal}
+        onClose={() => setShowImportModal(false)}
+        onSuccess={() => {
+          setShowImportModal(false);
+          fetchData();
+        }}
+        defaultPuskeswan={defaultPuskeswan}
       />
     </div>
   );

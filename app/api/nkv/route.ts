@@ -33,9 +33,73 @@ export async function POST(request: Request) {
   try {
     await ensureFotoColumn();
     const session = await getSessionFromRequest(request as any);
-    const userName = session ? (session.nama || session.nip_username) : 'Sistem';
+    const userName = session ? (session.nama || session.nip_username || 'Sistem') : 'Sistem';
 
     const body = await request.json();
+
+    // ── 0. BATCH INSERT / IMPORT GELONDONGAN EXCEL ──
+    const items = Array.isArray(body) ? body : Array.isArray(body?.items) ? body.items : null;
+    if (items && items.length > 0) {
+      let successCount = 0;
+      let skippedCount = 0;
+
+      for (let idx = 0; idx < items.length; idx++) {
+        const item = items[idx];
+        const namaUsaha = String(item.nama_usaha || item.namaUsaha || item['Nama Usaha / Unit Usaha'] || item['Nama Usaha'] || '').trim();
+
+        if (!namaUsaha) {
+          skippedCount++;
+          continue;
+        }
+
+        const jenisUsaha = String(item.jenis_usaha || item.jenisUsaha || item['Jenis Usaha'] || '').trim();
+        const proses = String(item.proses || item['Proses / Tahapan Sertifikasi'] || item['Proses'] || '').trim();
+        const pembinaan1 = String(item.pembinaan_1 || item.pembinaan1 || item['Tanggal Pembinaan 1'] || item['Pembinaan 1'] || '').trim();
+        const hasil1 = String(item.hasil_1 || item.hasil1 || item['Hasil Pembinaan 1'] || item['Hasil 1'] || '').trim();
+        const pembinaan2 = String(item.pembinaan_2 || item.pembinaan2 || item['Tanggal Pembinaan 2'] || item['Pembinaan 2'] || '').trim();
+        const hasil2 = String(item.hasil_2 || item.hasil2 || item['Hasil Pembinaan 2'] || item['Hasil 2'] || '').trim();
+        const pelatihanHigiene = String(item.pelatihan_higiene || item.pelatihanHigiene || item['Pelatihan Higiene Sanitasi'] || item['Pelatihan Higiene'] || '').trim();
+        const pengeluaranRekomendasi = String(item.pengeluaran_rekomendasi || item.pengeluaranRekomendasi || item['Pengeluaran Rekomendasi'] || '').trim();
+        const keterangan = String(item.keterangan || item['Keterangan'] || '').trim();
+
+        await pool.execute(
+          `INSERT INTO pembinaan_nkv 
+           (nama_usaha, jenis_usaha, proses, pembinaan_1, hasil_1, pembinaan_2, hasil_2, pelatihan_higiene, pengeluaran_rekomendasi, keterangan)
+           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+          [
+            namaUsaha,
+            jenisUsaha,
+            proses,
+            pembinaan1,
+            hasil1,
+            pembinaan2,
+            hasil2,
+            pelatihanHigiene,
+            pengeluaranRekomendasi,
+            keterangan,
+          ]
+        );
+        successCount++;
+      }
+
+      await logActivity({
+        module: 'kesmavet',
+        submenu: 'nkv',
+        tableName: 'pembinaan_nkv',
+        recordId: 0,
+        action: 'IMPORT_EXCEL',
+        userName,
+        details: { totalItems: items.length, successCount, skippedCount },
+      });
+
+      return NextResponse.json({
+        success: true,
+        count: successCount,
+        skipped: skippedCount,
+        message: `Berhasil mengimpor ${successCount} data unit usaha pembinaan NKV!`,
+      });
+    }
+
     const {
       nama_usaha,
       jenis_usaha,

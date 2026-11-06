@@ -8,6 +8,7 @@ import { getAuthSession } from '@/lib/auth';
 import {
   ArrowLeft,
   Download,
+  UploadCloud,
   Smartphone,
   ChevronRight,
 } from 'lucide-react';
@@ -22,6 +23,7 @@ import IbTableSection from '@/components/bitpro/database-ib/IbTableSection';
 import IbCalvingIntervalSection from '@/components/bitpro/database-ib/IbCalvingIntervalSection';
 import IbHistorySection from '@/components/bitpro/database-ib/IbHistorySection';
 import IbModals from '@/components/bitpro/database-ib/IbModals';
+import IbImportModal from '@/components/bitpro/database-ib/IbImportModal';
 import { UniversalAuditModal } from '@/components/common/UniversalAuditModal';
 
 export default function DatabaseIBPage() {
@@ -53,6 +55,7 @@ export default function DatabaseIBPage() {
   }>({ date: '', gender: 'Jantan', notes: '' });
 
   const [showAuditModal, setShowAuditModal] = useState(false);
+  const [showImportModal, setShowImportModal] = useState(false);
   const [auditTarget, setAuditTarget] = useState<any | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -414,6 +417,19 @@ export default function DatabaseIBPage() {
               <span className="hidden sm:inline">Export Excel</span>
             </button>
 
+            {canCreate && (
+              <button
+                type="button"
+                onClick={() => setShowImportModal(true)}
+                title="Import Excel"
+                aria-label="Import Excel"
+                className="min-h-touch min-w-touch h-11 w-11 sm:w-auto sm:px-4 rounded-xl border border-blue-200 dark:border-blue-800 bg-blue-50/80 hover:bg-blue-100 dark:bg-blue-950/40 dark:hover:bg-blue-900/50 text-blue-700 dark:text-blue-300 text-xs sm:text-sm font-bold flex items-center justify-center sm:gap-2 transition-colors shadow-xs cursor-pointer"
+              >
+                <UploadCloud size={16} />
+                <span className="hidden sm:inline">Import Excel</span>
+              </button>
+            )}
+
             <Link
               href="/bitpro/sapitime"
               title="Buka SapiTime"
@@ -516,6 +532,15 @@ export default function DatabaseIBPage() {
           ]}
         />
       )}
+
+      {/* Modal Import Excel Database IB */}
+      <IbImportModal
+        isOpen={showImportModal}
+        onClose={() => setShowImportModal(false)}
+        onSuccess={() => {
+          loadData();
+        }}
+      />
     </div>
   );
 }

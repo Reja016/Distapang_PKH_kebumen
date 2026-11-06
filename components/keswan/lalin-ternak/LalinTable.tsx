@@ -12,8 +12,11 @@ import {
   Store,
   ArrowDownLeft,
   ArrowUpRight,
+  Upload,
 } from 'lucide-react';
 import { exportToExcelWithSignature } from '@/lib/excelExportHelper';
+import { downloadLalinTernakTemplate } from '@/lib/excelTemplateHelper';
+import LalinImportModal from './LalinImportModal';
 import { LalinTernakItem, KategoriLalin, WilayahPasar } from './types';
 
 interface LalinTableProps {
@@ -26,6 +29,7 @@ interface LalinTableProps {
   onEdit: (item: LalinTernakItem) => void;
   onDelete: (id: number) => void;
   onAudit: (item: LalinTernakItem) => void;
+  onRefresh?: () => void;
   isLoading: boolean;
 }
 
@@ -39,9 +43,11 @@ export default function LalinTable({
   onEdit,
   onDelete,
   onAudit,
+  onRefresh,
   isLoading,
 }: LalinTableProps) {
   const [searchTerm, setSearchTerm] = useState('');
+  const [showImportModal, setShowImportModal] = useState(false);
 
   // Filter berdasarkan pencarian dan wilayah
   const filteredData = data.filter((item) => {
@@ -153,10 +159,36 @@ export default function LalinTable({
             />
           </div>
 
+          {/* Tombol Unduh Template Excel */}
+          <button
+            type="button"
+            onClick={() => downloadLalinTernakTemplate()}
+            className="w-full sm:w-auto min-h-touch h-10 px-3.5 rounded-xl border border-blue-200 dark:border-blue-800 bg-blue-50 dark:bg-blue-950/40 hover:bg-blue-100 dark:hover:bg-blue-900/50 text-blue-700 dark:text-blue-300 text-xs font-bold flex items-center justify-center gap-1.5 transition-colors shadow-2xs cursor-pointer whitespace-nowrap"
+            title="Download Template Excel Resmi Lalu Lintas Ternak"
+          >
+            <Download size={14} />
+            <span className="hidden sm:inline">Unduh Template</span>
+            <span className="sm:hidden">Template</span>
+          </button>
+
+          {/* Tombol Upload Excel */}
+          {canEdit && (
+            <button
+              type="button"
+              onClick={() => setShowImportModal(true)}
+              className="w-full sm:w-auto min-h-touch h-10 px-3.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold flex items-center justify-center gap-1.5 shadow-xs transition-colors cursor-pointer whitespace-nowrap"
+              title="Upload file Excel untuk menambah data sekaligus"
+            >
+              <Upload size={14} />
+              <span className="hidden sm:inline">Upload Excel</span>
+              <span className="sm:hidden">Upload</span>
+            </button>
+          )}
+
           {/* Tombol Export Excel */}
           <button
             onClick={handleExportExcel}
-            className="w-full sm:w-auto min-h-touch h-10 px-3.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 text-xs font-bold flex items-center justify-center gap-1.5 transition-colors shadow-2xs cursor-pointer"
+            className="w-full sm:w-auto min-h-touch h-10 px-3.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 text-xs font-bold flex items-center justify-center gap-1.5 transition-colors shadow-2xs cursor-pointer whitespace-nowrap"
             title="Download file Excel"
           >
             <FileSpreadsheet size={15} className="text-blue-600 dark:text-blue-400" />
@@ -343,6 +375,18 @@ export default function LalinTable({
           )}
         </table>
       </div>
+
+      {/* ── MODAL IMPOR EXCEL RESMI ── */}
+      <LalinImportModal
+        isOpen={showImportModal}
+        onClose={() => setShowImportModal(false)}
+        onSuccess={() => {
+          setShowImportModal(false);
+          if (onRefresh) onRefresh();
+        }}
+        defaultKategori={kategori}
+        defaultWilayah={activeWilayah === 'ALL' ? 'Kebumen' : activeWilayah}
+      />
     </div>
   );
 }

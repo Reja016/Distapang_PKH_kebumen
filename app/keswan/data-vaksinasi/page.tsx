@@ -8,6 +8,7 @@ import { showConfirm } from '@/components/common/CustomToast';
 import {
   ArrowLeft,
   Download,
+  UploadCloud,
   RefreshCw,
   Info,
   Check,
@@ -31,6 +32,7 @@ import VaksinasiHarianTab from '@/components/keswan/data-vaksinasi/VaksinasiHari
 import VaksinasiBulananTab from '@/components/keswan/data-vaksinasi/VaksinasiBulananTab';
 import VaksinasiApbdTab from '@/components/keswan/data-vaksinasi/VaksinasiApbdTab';
 import VaksinasiModals from '@/components/keswan/data-vaksinasi/VaksinasiModals';
+import VaksinasiHarianImportModal from '@/components/keswan/data-vaksinasi/VaksinasiHarianImportModal';
 import { UniversalAuditModal } from '@/components/common/UniversalAuditModal';
 import { useUserAreaRestriction } from '@/hooks/useUserAreaRestriction';
 import { useMasterSystemLock } from '@/hooks/useMasterSystemLock';
@@ -97,6 +99,7 @@ export default function DataVaksinasiPMKPage() {
   });
 
   const [showAuditModal, setShowAuditModal] = useState(false);
+  const [showImportModal, setShowImportModal] = useState(false);
   const [auditTarget, setAuditTarget] = useState<any | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -638,6 +641,18 @@ export default function DataVaksinasiPMKPage() {
           </div>
 
           <div className="flex items-center gap-2 shrink-0">
+            {(canEdit || canCreate) && (
+              <button
+                type="button"
+                onClick={() => setShowImportModal(true)}
+                title="Import Data Excel"
+                aria-label="Import Data Excel"
+                className="min-h-touch min-w-touch h-11 px-3 sm:px-4 rounded-xl border border-blue-200 dark:border-blue-800 bg-blue-50/80 hover:bg-blue-100 dark:bg-blue-950/40 dark:hover:bg-blue-900/50 text-blue-700 dark:text-blue-300 text-xs sm:text-sm font-bold flex items-center justify-center gap-1.5 sm:gap-2 transition-colors shadow-xs cursor-pointer"
+              >
+                <UploadCloud size={16} />
+                <span className="hidden sm:inline">Import Excel</span>
+              </button>
+            )}
             <button
               onClick={handleExportExcel}
               title="Export Excel"
@@ -801,6 +816,17 @@ export default function DataVaksinasiPMKPage() {
         moduleKey="keswan"
         submenuKey="data-vaksinasi"
         availableFields={['puskeswan', 'tanggal', 'jumlah']}
+      />
+
+      <VaksinasiHarianImportModal
+        isOpen={showImportModal}
+        onClose={() => setShowImportModal(false)}
+        onSuccess={() => {
+          fetchAll(selectedYear);
+          showToast('success', 'Data vaksinasi massal berhasil diimpor!');
+        }}
+        defaultYear={selectedYear}
+        defaultMonth={activeMonth}
       />
     </div>
   );
